@@ -9561,9 +9561,11 @@ class Layers extends Widget {
             container.style.width = `calc( 100% - ${ realNameWidth })`;
         };
 
-        var container = document.createElement( "div" );
+        const container = document.createElement( "div" );
         container.className = "lexlayers";
         this.root.appendChild( container );
+
+        const maxBits = options.maxBits ?? 16;
 
         this.setLayers = ( val ) =>  {
 
@@ -9573,19 +9575,19 @@ class Layers extends Widget {
             let nbits = binary.length;
 
             // fill zeros
-            for( let i = 0; i < ( 16 - nbits ); ++i )
+            for( let i = 0; i < ( maxBits - nbits ); ++i )
             {
                 binary = '0' + binary;
             }
 
-            for( let bit = 0; bit < 16; ++bit )
+            for( let bit = 0; bit < maxBits; ++bit )
             {
                 let layer = document.createElement( "div" );
                 layer.className = "lexlayer";
 
                 if( val != undefined )
                 {
-                    const valueBit = binary[ 16 - bit - 1 ];
+                    const valueBit = binary[ maxBits - bit - 1 ];
                     if( valueBit != undefined && valueBit == '1' )
                     {
                         layer.classList.add( "selected" );
@@ -9593,7 +9595,7 @@ class Layers extends Widget {
                 }
 
                 layer.innerText = bit + 1;
-                layer.title = "Bit " + bit + ", value " + (1 << bit);
+                layer.title = "Bit " + bit + ", value " + ( 1 << bit );
                 container.appendChild( layer );
 
                 layer.addEventListener( "click", e => {

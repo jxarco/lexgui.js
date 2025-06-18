@@ -197,7 +197,7 @@
         },
         {
             name: "Help", submenu: [
-                { name: "Search Help", icon: "Search", kbd: "F1", callback: () => { window.open("./docs/") } },
+                { name: "Search Help", icon: "Search", kbd: "F1", callback: () => { window.open("../docs/") } },
                 { name: "Support LexGUI", icon: "Heart" },
             ]
         },
@@ -729,6 +729,9 @@
         panel.addLayers("Layers", 10, (value, event) => {
             console.log(value);
         });
+        panel.addLayers("Layers (8 bits)", 10, (value, event) => {
+            console.log(value);
+        }, { maxBits: 8 });
         panel.addArray("An Item Array", ['GPTeam', 'Blat Panthers', 'Blat Bunny'], (value, event) => {
             console.log(value);
         });

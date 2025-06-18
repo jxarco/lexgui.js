@@ -3765,9 +3765,9 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 
 .lexlayers {
     display: grid;
-    grid-template-columns: 18px 18px 18px 18px 18px 18px 18px 18px;
+    grid-template-columns: repeat(auto-fit, minmax(18px, 1fr));
     grid-gap: 6px 8px;
-    justify-content: center;
+    max-width: calc(26px * 8); /* 8 layers max */
 }
 
 .lexlayer {
@@ -3775,6 +3775,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     background-color: var(--layer-color);
     color: var(--global-text-primary);
     text-align: center;
+    place-self: center;
     line-height: 19px;
     width: 18px;
     height: 18px;

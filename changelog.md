@@ -4,6 +4,7 @@
 
 Widgets:
 - All `Button` widgets have now `setState` method (not only those with `swap` feature).
+- Layers Widget allow `options.maxBits` to specify number of bit layers.
 
 New `AreaOverlayButtons` to improve management and support changing buttons state.
 Fixed Asset View custom title overflow.
