@@ -162,7 +162,7 @@ class Timeline {
         const playbtn = header.addButton("playBtn", '', (value, event) => {
            this.changeState();
         }, { buttonClass: "accept", title: "Play", hideName: true, icon: "Play@solid", swap: "Pause@solid" });
-        playbtn.root.setState(this.playing, true);
+        playbtn.setState(this.playing, true);
 
         header.addButton("stopBtn", '', (value, event) => {
             this.setState(false, true); // skip callback of set state
@@ -972,7 +972,7 @@ class Timeline {
     setState(state, skipCallback = false) {
         this.playing = state;
 
-        this.header.widgets.playBtn.root.setState(this.playing, true);
+        this.header.widgets.playBtn.setState(this.playing, true);
 
         if(this.onStateChange && !skipCallback) {
             this.onStateChange(this.playing);
