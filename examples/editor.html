@@ -225,7 +225,7 @@
         {
             icon: "RotateLeft",
             callback: (value, event) => {
-                const playButton = m.getButton("Play");
+                const playButton = menubar.getButton("Play");
                 playButton.swap();
             }
         },
@@ -418,7 +418,7 @@
     // add on resize event to control canvas size
     topTabs.area.onresize = resizeCanvas;
 
-    topTabs.area.addOverlayButtons([
+    const overlaybuttons = topTabs.area.addOverlayButtons([
         [
             {
                 name: "Select",
@@ -440,8 +440,9 @@
             }
         ],
         {
-            name: "Lit",
+            name: "Render Mode",
             options: ["Lit", "Unlit", "Wireframe"],
+            value: "Lit",
             callback: (value, event) => console.log(value)
         },
         [
@@ -452,11 +453,14 @@
                 selectable: true
             },
             {
-                name: 10,
+                name: "Snap Values",
+                value: 10,
                 options: [10, 100, 1000],
                 callback: value => console.log(value)
             }
-        ], {
+        ],
+        null, // Separator
+        {
             name: "Open Sidebar Sheet",
             icon: "PanelLeftDashed",
             callback: (value, event) => {
@@ -467,27 +471,27 @@
                 const sidebar = area.addSidebar(m => {
                     m.group("Projects", { icon: "Plus", callback: (groupName, event) => { console.log(groupName) } });
                     m.add("Getting Started", { icon: "Box" /*,collapsable: false*/ });
-                    m.add("Getting Started/Installation", { icon: "Box", callback: logParams });
-                    m.add("Getting Started/Project Structure", { icon: "Box", callback: logParams, action: { name: "ShowMenu", callback: actionLogParams, icon: null } });
-                    m.add("Building Your Application", { icon: "Code", callback: logParams, action: { name: "ShowMenu", callback: actionLogParams, icon: null } });
-                    m.add("Search Blocks", { icon: "Search", callback: logParams });
-                    m.add("Very loooooooooooooooooooooooong sun", { icon: "Sun", callback: logParams, action: { name: "ShowMenu", callback: actionLogParams, icon: null } });
+                    m.add("Getting Started/Installation", { icon: "Box" });
+                    m.add("Getting Started/Project Structure", { icon: "Box", action: { name: "ShowMenu", icon: null } });
+                    m.add("Building Your Application", { icon: "Code", action: { name: "ShowMenu", icon: null } });
+                    m.add("Search Blocks", { icon: "Search" });
+                    m.add("Very loooooooooooooooooooooooong sun", { icon: "Sun", action: { name: "ShowMenu", icon: null } });
                     m.separator();
                     m.group("API Reference");
-                    m.add("Components", { icon: "Box", callback: logParams });
-                    m.add("File Conventions", { icon: "Code", callback: logParams });
-                    m.add("Functions", { icon: "Search", callback: logParams });
-                    m.add("CLI", { icon: "Sun", callback: logParams });
+                    m.add("Components", { icon: "Box" });
+                    m.add("File Conventions", { icon: "Code" });
+                    m.add("Functions", { icon: "Search" });
+                    m.add("CLI", { icon: "Sun" });
                     m.separator();
                     m.group("Architecture");
-                    m.add("Accessibility ", { icon: "Box", callback: logParams });
-                    m.add("Fast Refresh", { icon: "Code", callback: logParams });
-                    m.add("Supported Browsers", { icon: "Search", callback: logParams });
+                    m.add("Accessibility ", { icon: "Box" });
+                    m.add("Fast Refresh", { icon: "Code" });
+                    m.add("Supported Browsers", { icon: "Search" });
                     m.separator();
                     m.add("Calendar ", { icon: "Calendar", collapsable: 3 });
-                    m.add("Personal ", { callback: logParams, type: "checkbox" });
-                    m.add("Work", { callback: logParams, type: "checkbox", value: true });
-                    m.add("Family", { callback: logParams, type: "checkbox" });
+                    m.add("Personal ", { type: "checkbox" });
+                    m.add("Work", { type: "checkbox", value: true });
+                    m.add("Family", { type: "checkbox" });
                 }, { /* collapseToIcons: false, */
                     skipHeader: true,
                     filter: true,

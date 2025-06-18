@@ -14,26 +14,31 @@
     MAKE_CODE_BULLET_LIST([
         ["name", "String", "Name of the tab (if icon, use as title)"],
         ["icon", "String", "Icon path to be used as the tab icon (optional)"],
-        ["onCreate", "Function", "Func to be called at tab creation"],
-        ["onSelect", "Function", "Func to be called on select tab (optional)"]
+        ["iconClass", "String", "Class to be added to the icon (optional)"],
+        ["svgClass", "String", "Class to be added to the inner SVG of the icon (optional)"],
+        ["onCreate", "Function", "Function to be called at tab creation"],
+        ["onSelect", "Function", "Function to be called on select tab (optional)"]
     ]);
+
+    MAKE_NOTE( `The parameters of the ${ INLINE_CODE("onCreate") } option are a ${ INLINE_CODE("Panel") } to construct widgets and a native ${ INLINE_CODE("HTMLDivElement") } to append any type of content. In the case of
+    ${ INLINE_CODE("onSelect") }, it receives only the div container.` )
 
     {
         window.__addInteractiveCodeExample( content, widgetName, panel => {
             panel.addTabSections("tabsName", [
                 {
                     name: "First tab", icon: "Discord",
-                    onCreate: p => {
+                    onCreate: ( p, c ) => {
                         p.addTitle("Discord tab");
                         p.addButton(null, "Connect");
                     },
-                    onSelect: p => {
-                        console.log(p);
+                    onSelect: c => {
+                        console.log(c);
                     }
                 },
                 {
                     name: "Second tab", icon: "Github",
-                    onCreate: p => {
+                    onCreate: ( p, c ) => {
                         p.addTitle("Github tab");
                         p.addButton(null, "Go", () => { window.open("https://github.com/jxarco/lexgui.js/") });
                     }

@@ -16,8 +16,8 @@ const area = await LX.init( { layoutMode: "document", rootClass: "wrapper" } );
 
     menubar.setButtonImage("lexgui.js", "images/icon.png", () => {window.open("https://jxarco.github.io/lexgui.js/")}, {float: "left"})
 
-    const commandButton = new LX.Button(null, "Search command...", () => { LX.setCommandbarState( true ) }, {
-        width: "256px", className: "right", buttonClass: "border left fg-tertiary bg-secondary" }
+    const commandButton = new LX.Button(null, `Search command...<span class="ml-auto">${ LX.makeKbd( ["Ctrl", "Space"], false, "bg-tertiary border px-1 rounded" ).innerHTML }</span>`, () => { LX.setCommandbarState( true ) }, {
+        width: "256px", className: "right", buttonClass: "border fg-tertiary bg-secondary" }
     );
     menubar.root.appendChild( commandButton.root );
 

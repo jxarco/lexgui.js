@@ -1889,7 +1889,7 @@ dialog .lexselect .lexselectoptions {
 
 .lexselect .lexselectlabel {
     width: 100%;
-    color: var(--global-text-secondary);
+    color: var(--global-text-tertiary);
     padding-inline: 0.6rem;
     padding-block: 0.2rem;
     min-height: 20px;
@@ -2966,6 +2966,10 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     font-size: var(--global-font-size-lg);
 }
 
+.lexmenubar .lexmenubuttons.left {
+    margin-left: unset;
+}
+
 .lexmenubar .lexmenubuttons.right {
     margin-left: unset;
     margin-right: 12px;
@@ -3565,6 +3569,20 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     margin-right: 0px;
 }
 
+.lexoverlayseparator {
+    background-color: var(--global-color-tertiary);
+    opacity: 0.9;
+    width: 2px;
+    height: calc(100% + 0.5em);
+    margin-top: -0.25em;
+}
+
+.lexoverlaybuttonscontainer.vertical .lexoverlayseparator {
+    width: calc(100% + 0.5em);
+    height: 2px;
+    margin-left: -0.25em;
+}
+
 /* Area Tabs */
 
 .lexareatabs {
@@ -3994,6 +4012,11 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     align-content: center;
 }
 
+.lextable td.empty-row {
+    text-align: center;
+    padding-block: 16px;
+}
+
 .lextable th {
     --th-color: var(--global-text-secondary);
     font-weight: 600;
@@ -4101,7 +4124,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     grid-column: span 2;
 }
 
-.lexcustomcontainer span {
+.lexcustomcontainer button.custom span {
     align-items: center;
     display: flex;
     justify-content: space-between;

@@ -19,6 +19,13 @@
             panel.addButton("A Button Label", "Print event", (value, event) => {
                 console.log(event);
             });
+
+            panel.sameLine( 3, "justify-center" );
+
+            panel.addButton(null, "Icon Button (Cover)", null, { icon: "Box" } );
+            panel.addButton(null, "Icon Button (Start)", null, { icon: "Box", iconPosition: "start" } );
+            panel.addButton(null, "Icon Button (End)", null, { icon: "Box", iconPosition: "end" } );
+
         });
     }
 
@@ -44,6 +51,7 @@
             body: [
                 ["disabled", "Boolean", "Make the widget disabled", "false"],
                 ["icon", "String", "Icon to be added before the input", "—"],
+                ["iconPosition", `<span class='cursor-pointer' title='cover | start | end'>Enum</span>`, "Icon position", `"cover"`],
                 ["fileInput", "Boolean", "Button click requests a file", "false"],
                 ["fileInputType", "String", "Type of the requested file", `"text"`],
                 ["img", "String", "Path to image to show as button value", "—"],

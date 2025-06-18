@@ -2,7 +2,35 @@
 
 ## dev
 
-## 0.6.8 (master)
+Widgets:
+- All `Button` widgets have now `setState` method (not only those with `swap` feature).
+
+New `AreaOverlayButtons` to improve management and support changing buttons state.
+Docs updated.
+
+## 0.6.9 (master)
+
+Timeline:
+- `addKeyframes` now returns new indices.
+- Fixed fadein/fadeout when one of them doesn't exist.
+- Fix fadeout draw
+- `setClip` now returns the Animation Clip.
+
+Widgets:
+- Added support for `options.iconPosition` in Button Widget (`cover` as default).
+- Fixed rowId in Table Widget.
+- Show "No results." row if no data in Table Widget.
+- Fixed disabled NumberInput slider.
+- TabSections icons can be modified using `iconClass` and `svgClass`.
+- TabSection's `onCreate` now receives also the tab content HTML Container (2nd parameter).
+- Fixed some Delete edge cases (key and ContextMenu) of Tree Widget.
+- Select Widget now allows creating new widgets as suboptions for each select value.
+
+Added support for Area Overlaybuttons separators.
+Fixed Menubar buttons using `float: left` alignment.
+Minor fixes CSS.
+
+## 0.6.8
 
 Widgets:
 - Support `options.onCreate` on register Custom Widget.

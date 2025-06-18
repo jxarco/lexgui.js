@@ -353,8 +353,7 @@ function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
             if( customWidgetsDom ) customWidgetsDom.remove();
 
             container = document.createElement('div');
-            container.className = "lexcustomcontainer";
-            container.style.width = "100%";
+            container.className = "lexcustomcontainer w-full";
             element.appendChild( container );
             element.dataset["opened"] = false;
 
@@ -548,9 +547,9 @@ class NodeTree {
 
         if( this.options.onlyFolders )
         {
-            let has_folders = false;
-            node.children.forEach( c => has_folders |= (c.type == 'folder') );
-            isParent = !!has_folders;
+            let hasFolders = false;
+            node.children.forEach( c => hasFolders |= (c.type == 'folder') );
+            isParent = !!hasFolders;
         }
 
         let item = document.createElement('li');
@@ -715,22 +714,14 @@ class NodeTree {
                 } );
 
                 event.panel.add( "Delete", { callback: () => {
-                    // It's the root node
-                    if( !node.parent )
-                    {
-                        return;
-                    }
 
-                    if( that.onevent )
+                    const ok = that.deleteNode( node );
+
+                    if( ok && that.onevent )
                     {
                         const event = new LX.TreeEvent( LX.TreeEvent.NODE_DELETED, node, e );
                         that.onevent( event );
                     }
-
-                    // Delete nodes now
-                    let childs = node.parent.children;
-                    const index = childs.indexOf( node );
-                    childs.splice( index, 1 );
 
                     this.refresh();
                 } } );
@@ -748,23 +739,26 @@ class NodeTree {
 
             if( e.key == "Delete" )
             {
-                // Send event now so we have the info in selected array..
-                if( that.onevent )
+                const nodesDeleted = [];
+
+                for( let _node of this.selected )
                 {
-                    const event = new LX.TreeEvent( LX.TreeEvent.NODE_DELETED, this.selected.length > 1 ? this.selected : node, e );
-                    event.multiple = this.selected.length > 1;
+                    if( that.deleteNode( _node ) )
+                    {
+                        nodesDeleted.push( _node );
+                    }
+                }
+
+                // Send event now so we have the info in selected array..
+                if( nodesDeleted.length && that.onevent )
+                {
+                    const event = new LX.TreeEvent( LX.TreeEvent.NODE_DELETED, nodesDeleted.length > 1 ? nodesDeleted : node, e );
+                    event.multiple = nodesDeleted.length > 1;
                     that.onevent( event );
                 }
 
-                // Delete nodes now
-                for( let _node of this.selected )
-                {
-                    let childs = _node.parent.children;
-                    const index = childs.indexOf( _node );
-                    childs.splice( index, 1 );
-                }
-
                 this.selected.length = 0;
+
                 this.refresh();
             }
             else if( e.key == "ArrowUp" || e.key == "ArrowDown" ) // Unique or zero selected
@@ -1032,6 +1026,35 @@ class NodeTree {
         el.classList.add( "selected" );
         this.selected = [ el.treeData ];
         el.focus();
+    }
+
+    deleteNode( node ) {
+
+        const dataAsArray = ( this.data.constructor === Array );
+
+        // Can be either Array or Object type data
+        if( node.parent )
+        {
+            let childs = node.parent.children;
+            const index = childs.indexOf( node );
+            childs.splice( index, 1 );
+        }
+        else
+        {
+            if( dataAsArray )
+            {
+                const index = this.data.indexOf( node );
+                console.assert( index > -1, "NodeTree: Can't delete root node " + node.id + " from data array!" );
+                this.data.splice( index, 1 );
+            }
+            else
+            {
+                console.warn( "NodeTree: Can't delete root node from object data!" );
+                return false;
+            }
+        }
+
+        return true;
     }
 }
 
@@ -1352,14 +1375,15 @@ class Button extends Widget {
         super( Widget.BUTTON, name, null, options );
 
         this.onGetValue = () => {
-            return wValue.querySelector( "input" )?.checked;
+            const swapInput = wValue.querySelector( "input" );
+            return swapInput ? swapInput.checked : value
         };
 
         this.onSetValue = ( newValue, skipCallback, event ) => {
 
             if( ( options.swap ?? false ) )
             {
-                this.root.setState( newValue, skipCallback );
+                this.setState( newValue, skipCallback );
                 return;
             }
 
@@ -1389,6 +1413,30 @@ class Button extends Widget {
             wValue.style.width = `calc( 100% - ${ realNameWidth })`;
         };
 
+        // In case of swap, set if a change has to be performed
+        this.setState = function( v, skipCallback ) {
+            const swapInput = wValue.querySelector( "input" );
+
+            if( swapInput )
+            {
+                swapInput.checked = v;
+            }
+            else if( options.selectable )
+            {
+                if( options.parent )
+                {
+                    options.parent.querySelectorAll(".lexbutton.selected").forEach( b => { if( b == wValue ) return; b.classList.remove( "selected" ) } );
+                }
+
+                wValue.classList.toggle( "selected", v );
+            }
+
+            if( !skipCallback )
+            {
+                this._trigger( new LX.IEvent( name, swapInput ? swapInput.checked : value, null ), callback );
+            }
+        };
+
         var wValue = document.createElement( 'button' );
         wValue.title = options.tooltip ? "" : ( options.title ?? "" );
         wValue.className = "lexbutton p-1 " + ( options.buttonClass ?? "" );
@@ -1400,17 +1448,37 @@ class Button extends Widget {
             wValue.classList.add( "selected" );
         }
 
-        if( options.icon )
-        {
-            const icon = LX.makeIcon( options.icon );
-            wValue.prepend( icon );
-            wValue.classList.add( "justify-center" );
-        }
-        else if( options.img )
+        if( options.img )
         {
             let img = document.createElement( 'img' );
             img.src = options.img;
             wValue.prepend( img );
+        }
+        else if( options.icon )
+        {
+            const icon = LX.makeIcon( options.icon, { iconClass: options.iconClass, svgClass: options.svgClass } );
+            const iconPosition = options.iconPosition ?? "cover";
+
+            // Default
+            if( iconPosition == "cover" || ( options.swap !== undefined ) )
+            {
+                wValue.prepend( icon );
+            }
+            else
+            {
+                wValue.innerHTML = `<span>${ ( value || "" ) }</span>`;
+
+                if( iconPosition == "start" )
+                {
+                    wValue.querySelector( "span" ).prepend( icon );
+                }
+                else // "end"
+                {
+                    wValue.querySelector( "span" ).appendChild( icon );
+                }
+            }
+
+            wValue.classList.add( "justify-center" );
         }
         else
         {
@@ -1459,19 +1527,9 @@ class Button extends Widget {
             const swapIcon = LX.makeIcon( options.swap, { iconClass: "swap-on" } );
             wValue.appendChild( swapIcon );
 
-            this.root.swap = function( skipCallback ) {
+            this.swap = function( skipCallback ) {
                 const swapInput = wValue.querySelector( "input" );
                 swapInput.checked = !swapInput.checked;
-                if( !skipCallback )
-                {
-                    trigger.click();
-                }
-            };
-
-            // Set if swap has to be performed
-            this.root.setState = function( v, skipCallback ) {
-                const swapInput = wValue.querySelector( "input" );
-                swapInput.checked = v;
                 if( !skipCallback )
                 {
                     trigger.click();
@@ -1867,8 +1925,8 @@ class Select extends Widget {
             value = newValue;
 
             let item = null;
-            const options = listOptions.childNodes;
-            options.forEach( e => {
+            const listOptionsNodes = listOptions.childNodes;
+            listOptionsNodes.forEach( e => {
                 e.classList.remove( "selected" );
                 if( e.getAttribute( "value" ) == newValue )
                 {
@@ -1887,6 +1945,22 @@ class Select extends Widget {
                 const filteredOptions = this._filterOptions( values, "" );
                 list.refresh( filteredOptions );
             }
+
+            // Update suboptions menu
+            const suboptions = this.root.querySelector( ".lexcustomcontainer" );
+            const suboptionsFunc = options[ `on_${ value }` ];
+            suboptions.toggleAttribute( "hidden", !suboptionsFunc );
+
+            if( suboptionsFunc )
+            {
+                suboptions.innerHTML = "";
+                const suboptionsPanel = new LX.Panel();
+                suboptionsPanel.queue( suboptions );
+                suboptionsFunc.call(this, suboptionsPanel);
+                suboptionsPanel.clearQueue();
+            }
+
+            this.root.dataset["opened"] = ( !!suboptionsFunc );
 
             if( !skipCallback )
             {
@@ -2183,6 +2257,25 @@ class Select extends Widget {
         list.refresh( values );
 
         container.appendChild( listDialog );
+
+        // Element suboptions
+        let suboptions = document.createElement( "div" );
+        suboptions.className = "lexcustomcontainer w-full";
+
+        const suboptionsFunc = options[ `on_${ value }` ];
+        suboptions.toggleAttribute( "hidden", !suboptionsFunc );
+
+        if( suboptionsFunc )
+        {
+            suboptions.innerHTML = "";
+            const suboptionsPanel = new LX.Panel();
+            suboptionsPanel.queue( suboptions );
+            suboptionsFunc.call( this, suboptionsPanel );
+            suboptionsPanel.clearQueue();
+        }
+
+        this.root.appendChild( suboptions );
+        this.root.dataset["opened"] = ( !!suboptionsFunc );
 
         LX.doAsync( this.onResize.bind( this ) );
     }
@@ -3287,6 +3380,7 @@ class NumberInput extends Widget {
             slider.step = options.step ?? 1;
             slider.type = "range";
             slider.value = value;
+            slider.disabled = this.disabled;
 
             slider.addEventListener( "input", ( e ) => {
                 this.set( slider.valueAsNumber, false, e );
@@ -4374,7 +4468,7 @@ class TabSections extends Widget {
             let tabEl = document.createElement( "div" );
             tabEl.className = "lextab " + (i == tabs.length - 1 ? "last" : "") + ( isSelected ? "selected" : "" );
             tabEl.innerHTML = ( showNames ? tab.name : "" );
-            tabEl.appendChild( LX.makeIcon( tab.icon ?? "Hash", { title: tab.name } ) );
+            tabEl.appendChild( LX.makeIcon( tab.icon ?? "Hash", { title: tab.name, iconClass: tab.iconClass, svgClass: tab.svgClass } ) );
 
             let infoContainer = document.createElement( "div" );
             infoContainer.id = tab.name.replace( /\s/g, '' );
@@ -4410,7 +4504,7 @@ class TabSections extends Widget {
                 // Push to tab space
                 const creationPanel = new LX.Panel();
                 creationPanel.queue( infoContainer );
-                tab.onCreate.call(this, creationPanel);
+                tab.onCreate.call( this, creationPanel, infoContainer );
                 creationPanel.clearQueue();
             }
         }
@@ -4729,7 +4823,9 @@ class Table extends Widget {
                         const body = table.querySelector( "tbody" );
                         for( const el of body.childNodes )
                         {
-                            data.checkMap[ el.getAttribute( "rowId" ) ] = this.checked;
+                            const rowId = el.getAttribute( "rowId" );
+                            if( !rowId ) continue;
+                            data.checkMap[ rowId ] = this.checked;
                             el.querySelector( "input[type='checkbox']" ).checked = this.checked;
                         }
                     });
@@ -5059,7 +5155,7 @@ class Table extends Widget {
                             }
                             else if( action == "menu" )
                             {
-                                button = LX.makeIcon( "Ellipsis", { title: "Menu" } );
+                                button = LX.makeIcon( "EllipsisVertical", { title: "Menu" } );
                                 button.addEventListener( 'click', function( event ) {
                                     if( !options.onMenuAction )
                                     {
@@ -5096,6 +5192,17 @@ class Table extends Widget {
                         row.appendChild( td );
                     }
 
+                    body.appendChild( row );
+                }
+
+                if( body.childNodes.length == 0 )
+                {
+                    const row = document.createElement( 'tr' );
+                    const td = document.createElement( 'td' );
+                    td.setAttribute( "colspan", data.head.length + this.rowOffsetCount + 1 ); // +1 for rowActions
+                    td.className = "empty-row";
+                    td.innerHTML = "No results.";
+                    row.appendChild( td );
                     body.appendChild( row );
                 }
             }

@@ -13,9 +13,13 @@
         const content = document.getElementById('content');
         const area = new LX.Area( { skipAppend: true, height: "auto" } );
 
+        let showMoreButton = null;
+        let forceSolid = false;
+        let nameFilter = params.get( "filter" ) ?? "";
+
         function copySVG( svg, event )
         {
-            navigator.clipboard.writeText( svg.dataset[ "name" ] );
+            navigator.clipboard.writeText( svg.dataset[ "name" ] + ( forceSolid ? "@solid" : "" ) );
             console.log("Copied!");
 
             svg.classList.add( "fg-success" );
@@ -24,10 +28,6 @@
                 svg.classList.remove( "fg-success" );
             }, 2000 );
         }
-
-        let showMoreButton = null;
-        let forceSolid = false;
-        let nameFilter = params.get( "filter" ) ?? "";
 
         const toolsContainer = LX.makeContainer( ["100%", "auto"], "flex flex-row mt-8 mb-4 gap-2", "", area );
         const filterContainer = LX.makeContainer( ["70%", "auto"], "", "", toolsContainer );

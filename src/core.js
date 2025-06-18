@@ -6,7 +6,7 @@
 */
 
 const LX = {
-    version: "0.6.8",
+    version: "0.6.9",
     ready: false,
     components: [], // Specific pre-build components
     signals: {}, // Events and triggers
@@ -1547,7 +1547,7 @@ class ColorPicker {
                 copyButtonWidget.root.querySelector( "input[type='checkbox']" ).style.pointerEvents = "none";
 
                 LX.doAsync( () => {
-                    copyButtonWidget.root.swap( true );
+                    copyButtonWidget.swap( true );
                     copyButtonWidget.root.querySelector( "input[type='checkbox']" ).style.pointerEvents = "auto";
                 }, 3000 );
 
