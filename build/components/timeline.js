@@ -3139,9 +3139,30 @@ class ClipsTimeline extends Timeline {
             track.hovered = (new Array(numClips)).fill(false);
         }
 
+        // sanity check. Also done in addClip
+        for( let i = 0; i < track.clips.length; ++i ){
+            track.clips[i].active = track.clips[i].active ?? true; 
+        }
         return track;
     }
 
+    // provides an base example of a proper clip
+    instantiateClip(options = {}){
+        return {
+            id: options.id ?? (options.name ?? "clip"),
+            
+            start: options.start ?? 0,
+            duration: options.duration ?? 1,
+            fadein: options.fadein ?? undefined,
+            fadeout: options.fadeout ?? undefined,
+
+            clipColor: options.clipColor ?? LX.getThemeColor("global-color-accent"),
+            fadeColor: options.fadeColor ?? null,
+            active: options.active ?? true,
+            trackIdx: -1, // filled by addClip
+        }
+        
+    }
     // use default updateleftpanel
     // generateSelectedItemsTreeData(){}
 
@@ -3302,9 +3323,12 @@ class ClipsTimeline extends Timeline {
             this.movingKeys = true;
         }
         else if( !track || track && this.getClipOnTime(track, time, 0.001) == -1) { // clicked on empty space
-            this.unSelectAllClips();
-            if(this.onSelectClip)
-                this.onSelectClip(null);
+            if ( this.lastClipsSelected.length ){
+                this.unSelectAllClips();
+                if(this.onSelectClip){
+                    this.onSelectClip(null);
+                }
+            }
         }
         else if (track && (this.dragClipMode == "duration" || this.dragClipMode == "fadein" || this.dragClipMode == "fadeout" )) { // clicked while mouse was over fadeIn, fadeOut, duration
             const clipIdx = this.getClipOnTime(track, this.xToTime(localX), 0.001);
@@ -3737,14 +3761,14 @@ class ClipsTimeline extends Timeline {
             // Overwrite clip color state depending on its state
             ctx.globalAlpha = 1;
             ctx.fillStyle = clip.clipColor || (track.hovered[j] ? Timeline.KEYFRAME_COLOR_HOVERED : (track.selected[j] ? Timeline.TRACK_SELECTED : Timeline.KEYFRAME_COLOR));
-            if(!this.active || !track.active) {
+            if(!this.active || !track.active || !clip.active) {
                 ctx.fillStyle = Timeline.KEYFRAME_COLOR_INACTIVE;
             }
 
             // Draw clip background
             ctx.roundRect( x, y + offset, w, trackHeight , 5, true);
                         
-            if(this.active && track.active) {
+            if(this.active && track.active && clip.active) {
                 
                 ctx.fillStyle = clip.fadeColor ?? "#0004";
 
@@ -3830,6 +3854,9 @@ class ClipsTimeline extends Timeline {
             clip.fadeout += (newStart - clip.start);
         clip.start = newStart;
 
+        // sanity check
+        clip.active = clip.active ?? true;
+
         // find appropriate track
         if ( trackIdx >= this.animationClip.tracks.length ){ // new track ad the end
             trackIdx = this.addNewTrack();
@@ -3855,6 +3882,8 @@ class ClipsTimeline extends Timeline {
             //     return -1;
             // }
         }
+
+        clip.trackIdx = trackIdx;
 
         const track = this.animationClip.tracks[trackIdx];
 

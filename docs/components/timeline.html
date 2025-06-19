@@ -535,7 +535,7 @@ panel.attach(kfTimeline.root);` );
             tracks: [
                 { id: "track0" },
                 { id: "track1", clips: [{id:"clip1", start: 0, duration:1, clipColor:"#800"}] },
-                { id: "track2", clips: [{id:"clip1", start: 1, fadein: 1.2, fadeout: 1.7, duration:1, clipColor:"#080"}] },
+                { id: "track2", clips: [{id:"inactive clip ", start: 1, fadein: 1.2, fadeout: 1.7, duration:1, clipColor:"#080", active: false}] },
                 { id: "My Track", clips: [{id:"clip1", start: 1, fadein: 1.2, fadeout: 1.7, duration:1, clipColor:"#008", fadeColor: "#003"}] },
             ]
         }
@@ -648,6 +648,9 @@ panel.attach(clipTimeline.root);` );
         [".fadeout", "Number", `If defined, sets the time at which the fadeout starts. Must be in global, not relative to start`],
         [".clipColor", "Color", `Defines the color of the clip. Must be a value accepted by ${INLINE_CODE("CanvasRenderingContext2D.fillStyle")}.`],
         [".fadeColor", "Color", `Color of the areas defined by the fade attributes. Must be a value accepted by ${INLINE_CODE("CanvasRenderingContext2D.fillStyle")}.`],
+        [".active", "Boolean", `Whether the clip is enabled or not. It only changes the color from clipColor to a default disabled color. Can be written directly. ${INLINE_CODE("Track.active")} has precedence over this.`],
+        [".trackIdx", "Number", `${INLINE_CODE("READ ONLY")} Track index where the clip is. This attribute is managed by the addClip function.`],
+
     ] );
 
     MAKE_PARAGRAPH( `Clips can contain any other attributes and will be accessible at all times.`);
