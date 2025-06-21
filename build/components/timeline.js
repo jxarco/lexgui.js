@@ -400,13 +400,9 @@ class Timeline {
      */
     setAnimationClip( animation, needsToProcess = true ) {
 
-        if ( this.unSelectAllKeyFrames ){
-            this.unSelectAllKeyFrames();    
-        }
-        if ( this.unHoverAll ){
-            this.unHoverAll();
-        }
+        this.unSelectAllElements();
         this.unSelectAllTracks();
+
         this.selectedItems = [];
 
         this.clearState();
@@ -1102,7 +1098,7 @@ class Timeline {
         }
     }
 
-    unselectAllElements(){
+    unSelectAllElements(){
 
     }
 
@@ -1149,7 +1145,7 @@ class Timeline {
         
         if (!toBeShown.length){ return false; }
         
-        this.unselectAllElements();
+        this.unSelectAllElements();
         
         const combinedState = toBeShown.pop();
         const combinedStateToStore = [];
@@ -1555,7 +1551,7 @@ class KeyFramesTimeline extends Timeline {
     }
 
     // OVERRIDE
-    unselectAllElements(){
+    unSelectAllElements(){
         this.unSelectAllKeyFrames();
         this.unHoverAll();
     }
@@ -3192,7 +3188,7 @@ class ClipsTimeline extends Timeline {
     }
 
     // OVERRIDE
-    unselectAllElements(){
+    unSelectAllElements(){
         this.unSelectAllClips();
         this.unHoverAll();
     }
@@ -3235,7 +3231,7 @@ class ClipsTimeline extends Timeline {
                     let clipIndex = this.getClipOnTime( track, this.xToTime( localX ), this.secondsPerPixel * 5 );
                     if ( clipIndex > -1 ){
                         track.selected[clipIndex] ? 
-                            this.unselectClip( track.trackIdx, clipIndex ) :
+                            this.unSelectClip( track.trackIdx, clipIndex ) :
                             this.selectClip( track.trackIdx, clipIndex, false );
                     }
                 }
@@ -4299,7 +4295,7 @@ class ClipsTimeline extends Timeline {
         return clipIndex;
     }
 
-    unselectClip( trackIdx, clipIndex ){
+    unSelectClip( trackIdx, clipIndex ){
 
         if(clipIndex == -1){
             return -1;
