@@ -3842,6 +3842,8 @@ class ClipsTimeline extends Timeline {
     addClip( clip, trackIdx = -1, offsetTime = 0, searchStartTrackIdx = 0 ) {
         if ( !this.animationClip ){ return -1; }
 
+        this.unSelectAllElements(); // TODO: consider adjusting values of hovered and selected instead of deselecting everything
+
         // Update clip information
         let newStart = clip.start + offsetTime;
         if(clip.fadein != undefined)
