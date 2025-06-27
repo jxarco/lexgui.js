@@ -4182,6 +4182,11 @@ class ClipsTimeline extends Timeline {
         const track = this.animationClip.tracks[trackIdx];
         const clips = this.cloneClips(track.clips, 0, ClipsTimeline.CLONEREASON_HISTORY);
 
+        // sanity check in case cloneClips misses this
+        for( let i = 0; i < clips.length; ++i ){
+            clips[i].trackIdx = trackIdx;
+        }
+
         const undoStep = {
             trackIdx: trackIdx, // already done by saveState
             clips: clips,
