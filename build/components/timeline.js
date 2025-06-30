@@ -196,6 +196,7 @@ class Timeline {
             signal: "@on_set_time_" + this.uniqueID,
             step: 0.01, min: 0, precision: 3,
             skipSlider: true,
+            skipReset: true,
             nameWidth: "auto"
         });
 
@@ -205,6 +206,7 @@ class Timeline {
             units: "s",
             step: 0.01, min: 0,
             signal: "@on_set_duration_" + this.uniqueID,
+            skipReset: true,
             nameWidth: "auto"
         });
            
@@ -2125,27 +2127,43 @@ class KeyFramesTimeline extends Timeline {
         //draw lines
         ctx.strokeStyle = "white";
         ctx.beginPath();
-        for(let j = 0; j < keyframes.length; ++j){
 
-            let time = keyframes[j];
-            let keyframePosX = this.timeToX( time );
-            let value = values[j];                
-            value = ((value - valueRange[0]) / (valueRange[1] - valueRange[0])) * (-displayRange) + (trackHeight - defaultPointSize); // normalize and offset
+        if ( keyframes.length > 1){
+            let startPosX = this.timeToX( keyframes[0] );
+            let startValue = values[0];                
+            startValue = ((startValue - valueRange[0]) / (valueRange[1] - valueRange[0])) * (-displayRange) + (trackHeight - defaultPointSize); // normalize and offset
+            ctx.moveTo( startPosX, startValue );
 
-            if( time < startTime ){
-                ctx.moveTo( keyframePosX, value ); 
-                continue;
+            for(let j = 1; j < keyframes.length; ++j){
+
+                let time = keyframes[j];
+                let keyframePosX = this.timeToX( time );
+                let value = values[j];                
+                value = ((value - valueRange[0]) / (valueRange[1] - valueRange[0])) * (-displayRange) + (trackHeight - defaultPointSize); // normalize and offset
+    
+                if( time < startTime ){
+                    ctx.moveTo( keyframePosX, value ); 
+                    continue;
+                }
+
+                if ( time > endTime ){
+                    let lastKeyframePosX = this.timeToX( keyframes[j-1] );
+                    let dt = keyframePosX - lastKeyframePosX;
+                    if ( dt > 0 ){
+                        let lastValue = values[j-1];
+                        lastValue = ((lastValue - valueRange[0]) / (valueRange[1] - valueRange[0])) * (-displayRange) + (trackHeight - defaultPointSize); // normalize and offset
+                        let f = (this.timeToX( endTime ) - lastKeyframePosX) / dt;
+                        ctx.lineTo( lastKeyframePosX + dt * f, lastValue * (1-f) + value * f ); 
+                    }
+                    break; //end loop, but print line
+                }
+    
+                //convert to timeline track range
+                ctx.lineTo( keyframePosX, value );             
             }
-
-            //convert to timeline track range
-            ctx.lineTo( keyframePosX, value );  
-            
-            if ( time > endTime ){
-                break; //end loop, but print line
-            }
+            ctx.stroke();
         }
-        ctx.stroke();
-
+        
         //draw points
         ctx.fillStyle = Timeline.KEYFRAME_COLOR;
         for(let j = 0; j < keyframes.length; ++j)
