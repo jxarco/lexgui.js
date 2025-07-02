@@ -402,8 +402,8 @@ class Timeline {
      */
     setAnimationClip( animation, needsToProcess = true ) {
 
-        this.unSelectAllElements();
-        this.unSelectAllTracks();
+        this.deselectAllElements();
+        this.deselectAllTracks();
 
         this.selectedItems = [];
 
@@ -830,11 +830,13 @@ class Timeline {
             this.movingKeys = false;
             this.timeBeforeMove = null;
             this.boxSelection = false; // after mouseup
-            this.unSelectAllTracks();
+            this.deselectAllTracks();
         }
     
 
         if( e.type == "mousedown")	{
+            window.getSelection().empty(); // if canvas DOM is selected, dragging does not work properly. Deselect it
+
             // e.preventDefault();
             
             this.clickTime = LX.getTime();
@@ -1077,7 +1079,7 @@ class Timeline {
             return;
         }
 
-        this.unSelectAllTracks();
+        this.deselectAllTracks();
         
         let track = this.animationClip.tracks[ trackIdx ];
         track.isSelected = true;
@@ -1088,7 +1090,7 @@ class Timeline {
     }
 
     // Only affects render visualisation
-    unSelectAllTracks() {
+    deselectAllTracks() {
 
         if( !this.animationClip ){
             return;
@@ -1100,7 +1102,7 @@ class Timeline {
         }
     }
 
-    unSelectAllElements(){
+    deselectAllElements(){
 
     }
 
@@ -1147,7 +1149,7 @@ class Timeline {
         
         if (!toBeShown.length){ return false; }
         
-        this.unSelectAllElements();
+        this.deselectAllElements();
         
         const combinedState = toBeShown.pop();
         const combinedStateToStore = [];
@@ -1553,8 +1555,8 @@ class KeyFramesTimeline extends Timeline {
     }
 
     // OVERRIDE
-    unSelectAllElements(){
-        this.unSelectAllKeyFrames();
+    deselectAllElements(){
+        this.deselectAllKeyFrames();
         this.unHoverAll();
     }
 
@@ -1566,7 +1568,7 @@ class KeyFramesTimeline extends Timeline {
     changeSelectedItems( itemsToAdd = null, itemsToRemove = null, skipCallback = false ) {
 
         // TODO: maybe make this un-functions more general
-        this.unSelectAllKeyFrames();
+        this.deselectAllKeyFrames();
         this.unHoverAll();
         
         const tracks = this.animationClip.tracks;
@@ -1715,7 +1717,7 @@ class KeyFramesTimeline extends Timeline {
                 const keyFrameIdx = this.getCurrentKeyFrame( track, this.xToTime( localX ), this.secondsPerPixel * 5 );   
                 if ( keyFrameIdx > -1 ){
                     track.selected[keyFrameIdx] ?
-                        this.unSelectKeyFrame(track.trackIdx, keyFrameIdx) :
+                        this.deselectKeyFrame(track.trackIdx, keyFrameIdx) :
                         this.processSelectionKeyFrame( track.trackIdx, keyFrameIdx, true ); 
                 }
             }
@@ -1740,10 +1742,10 @@ class KeyFramesTimeline extends Timeline {
         else if( !this.movingKeys && !discard ){ // if not moving timeline and not adding keyframes through e.shiftkey (just a click)
 
             if ( this.lastKeyFramesSelected.length ){
-                if (this.onUnselectKeyFrames){
-                    this.onUnselectKeyFrames( this.lastKeyFramesSelected );
+                if (this.onDeselectKeyFrames){
+                    this.onDeselectKeyFrames( this.lastKeyFramesSelected );
                 }
-                this.unSelectAllKeyFrames();         
+                this.deselectAllKeyFrames();         
             }
             if (track){
                 const keyFrameIndex = this.getCurrentKeyFrame( track, this.xToTime( localX ), this.secondsPerPixel * 5 );
@@ -2618,7 +2620,7 @@ class KeyFramesTimeline extends Timeline {
         if ( !this.clipboard.keyframes ){ return false; }
 
         this.unHoverAll();
-        this.unSelectAllKeyFrames();
+        this.deselectAllKeyFrames();
 
         let clipboardTracks = this.clipboard.keyframes;
         let globalStart = Infinity;
@@ -2947,16 +2949,16 @@ class KeyFramesTimeline extends Timeline {
         return h;
     }
 
-    unSelectAllKeyFrames() {
+    deselectAllKeyFrames() {
 
         for(let [trackIdx, keyIndex] of this.lastKeyFramesSelected) {
             this.animationClip.tracks[trackIdx].selected[keyIndex] = false;
         }
 
-        // Something has been unselected
-        const unselected = this.lastKeyFramesSelected.length > 0;
+        // Something has been deselected
+        const deselected = this.lastKeyFramesSelected.length > 0;
         this.lastKeyFramesSelected.length = 0;
-        return unselected;
+        return deselected;
     }
     
     isKeyFrameSelected( track, index ) {
@@ -2995,7 +2997,7 @@ class KeyFramesTimeline extends Timeline {
         return selection;
     }
 
-    unSelectKeyFrame( trackIdx, frameIdx ){
+    deselectKeyFrame( trackIdx, frameIdx ){
         const track = this.animationClip.tracks[trackIdx];
         if( track.locked || !track.active || !track.selected[frameIdx] )
             return false;
@@ -3031,7 +3033,7 @@ class KeyFramesTimeline extends Timeline {
             return;
 
         if(!multipleSelection) {
-            this.unSelectAllKeyFrames();
+            this.deselectAllKeyFrames();
         }
 
         this.selectKeyFrame(trackIdx, keyFrameIndex);
@@ -3053,7 +3055,7 @@ class KeyFramesTimeline extends Timeline {
         }
 
         this.unHoverAll();
-        this.unSelectAllKeyFrames();
+        this.deselectAllKeyFrames();
 
         this.saveState(track.trackIdx);
 
@@ -3206,8 +3208,8 @@ class ClipsTimeline extends Timeline {
     }
 
     // OVERRIDE
-    unSelectAllElements(){
-        this.unSelectAllClips();
+    deselectAllElements(){
+        this.deselectAllClips();
         this.unHoverAll();
     }
 
@@ -3218,7 +3220,7 @@ class ClipsTimeline extends Timeline {
     changeSelectedItems( ) {
 
         // TODO: maybe make this un-functions more general
-        this.unSelectAllClips();
+        this.deselectAllClips();
         this.unHoverAll();
 
         this.selectedItems = this.animationClip.tracks.slice();
@@ -3249,7 +3251,7 @@ class ClipsTimeline extends Timeline {
                     let clipIndex = this.getClipOnTime( track, this.xToTime( localX ), this.secondsPerPixel * 5 );
                     if ( clipIndex > -1 ){
                         track.selected[clipIndex] ? 
-                            this.unSelectClip( track.trackIdx, clipIndex ) :
+                            this.deselectClip( track.trackIdx, clipIndex ) :
                             this.selectClip( track.trackIdx, clipIndex, false );
                     }
                 }
@@ -3338,7 +3340,7 @@ class ClipsTimeline extends Timeline {
         }
         else if( !track || track && this.getClipOnTime(track, time, 0.001) == -1) { // clicked on empty space
             if ( this.lastClipsSelected.length ){
-                this.unSelectAllClips();
+                this.deselectAllClips();
                 if(this.onSelectClip){
                     this.onSelectClip(null);
                 }
@@ -3346,7 +3348,7 @@ class ClipsTimeline extends Timeline {
         }
         else if (track && (this.dragClipMode == "duration" || this.dragClipMode == "fadein" || this.dragClipMode == "fadeout" )) { // clicked while mouse was over fadeIn, fadeOut, duration
             const clipIdx = this.getClipOnTime(track, this.xToTime(localX), 0.001);
-            this.selectClip( track.trackIdx, clipIdx ); // select current clip if any (unselect others)
+            this.selectClip( track.trackIdx, clipIdx ); // select current clip if any (deselect others)
             if ( this.lastClipsSelected.length ){ 
                 this.saveState(track.trackIdx);
             }
@@ -3659,7 +3661,7 @@ class ClipsTimeline extends Timeline {
 
         if ( track ){
             const clipIdx = this.getClipOnTime(track, this.xToTime(localX), 0.001);
-            this.selectClip(track.trackIdx, clipIdx); // unselect and try to select clip in localX, if any
+            this.selectClip(track.trackIdx, clipIdx); // deselect and try to select clip in localX, if any
         }
     }
 
@@ -3860,7 +3862,7 @@ class ClipsTimeline extends Timeline {
     addClip( clip, trackIdx = -1, offsetTime = 0, searchStartTrackIdx = 0 ) {
         if ( !this.animationClip ){ return -1; }
 
-        this.unSelectAllElements(); // TODO: consider adjusting values of hovered and selected instead of deselecting everything
+        this.deselectAllElements(); // TODO: consider adjusting values of hovered and selected instead of deselecting everything
 
         // Update clip information
         let newStart = clip.start + offsetTime;
@@ -4142,7 +4144,7 @@ class ClipsTimeline extends Timeline {
     }
 
     pasteContent( time = this.currentTime ) {
-        this.unSelectAllClips();
+        this.deselectAllClips();
 
         if(!this.clipboard)
             return;
@@ -4262,20 +4264,20 @@ class ClipsTimeline extends Timeline {
         return -1;
     };
 
-    unSelectAllClips() {
+    deselectAllClips() {
 
         for(let [trackIdx, clipIdx] of this.lastClipsSelected) {
             this.animationClip.tracks[trackIdx].selected[clipIdx]= false;
         }
-        // Something has been unselected
-        const unselected = this.lastClipsSelected.length > 0;
+        // Something has been deselected
+        const deselected = this.lastClipsSelected.length > 0;
         this.lastClipsSelected.length = 0;
-        return unselected;
+        return deselected;
     }
 
     selectAll( skipCallback = false) {
 
-        this.unSelectAllClips();
+        this.deselectAllClips();
         for(let trackIdx = 0; trackIdx < this.animationClip.tracks.length; trackIdx++) {
             for(let clipIdx = 0; clipIdx < this.animationClip.tracks[trackIdx].clips.length; clipIdx++) {
                 this.animationClip.tracks[trackIdx].selected[clipIdx] = true;
@@ -4286,10 +4288,10 @@ class ClipsTimeline extends Timeline {
             this.onSelectClip(null);
     }
 
-    selectClip( trackIdx, clipIndex, unselect = true, skipCallback = false ) {
+    selectClip( trackIdx, clipIndex, deselect = true, skipCallback = false ) {
 
-        if(unselect){
-            this.unSelectAllClips();
+        if(deselect){
+            this.deselectAllClips();
         }
         
         if(clipIndex < 0){
@@ -4320,7 +4322,7 @@ class ClipsTimeline extends Timeline {
         return clipIndex;
     }
 
-    unSelectClip( trackIdx, clipIndex ){
+    deselectClip( trackIdx, clipIndex ){
 
         if(clipIndex == -1){
             return -1;
@@ -4333,7 +4335,7 @@ class ClipsTimeline extends Timeline {
 
         track.selected[clipIndex] = false;
 
-        // unselect 
+        // deselect 
         for( let i = 0; i < this.lastClipsSelected.length; ++i){
             let t = this.lastClipsSelected[i];
             if ( t[0] == trackIdx && t[1] == clipIndex ){

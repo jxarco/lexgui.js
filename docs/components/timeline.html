@@ -405,7 +405,7 @@ panel.attach(kfTimeline.root);` );
         ["currentSelection", "[trackIdx, keyframeIdx, time of keyframe]"],
     ] );
     
-    MAKE_CLASS_METHOD( "onUnselectKeyFrames", `Triggered before unselecting all keyframes.`, [
+    MAKE_CLASS_METHOD( "onDeselectKeyFrames", `Triggered before deselecting all keyframes.`, [
         ["selectedKeyframes", "Array of [trackIdx, keyframeIdx, timestamp of keyframe]"],
     ] );
 
@@ -493,11 +493,11 @@ panel.attach(kfTimeline.root);` );
         ["skipCallback", "Boolean"],
     ], "[trackIdx, frameIdx, frameTime]" );
            
-    MAKE_CLASS_METHOD( ".unSelectKeyFrame", `Unselects a keyframe.`, [
+    MAKE_CLASS_METHOD( ".deselectKeyFrame", `Deselects a keyframe.`, [
         ["trackIdx", "Number"],
         ["frameIdx", "Number"],
     ], "Boolean" );
-    MAKE_CLASS_METHOD( ".unSelectAllKeyFrames", `Unselects all keyframes.`, [
+    MAKE_CLASS_METHOD( ".deselectAllKeyFrames", `Deselects all keyframes.`, [
     ], "" );
 
     MAKE_CLASS_METHOD( ".unHoverAll", `Unhover current keyframes.`, [
@@ -740,23 +740,23 @@ panel.attach(clipTimeline.root);` );
         ["skipCallback", "Boolean"]
     ], "" );
 
-    MAKE_CLASS_METHOD( ".selectClip", `Selected a clip of the track. If ${INLINE_CODE("unselect")} is true, it unselects all selected clips, and makes this the only one selected`, [
+    MAKE_CLASS_METHOD( ".selectClip", `Selected a clip of the track. If ${INLINE_CODE("deselect")} is true, it deselects all selected clips, and makes this the only one selected`, [
         ["trackIdx", "Number"],
         ["clipIdx", "Number"],
-        ["unselect", "Boolean"],
+        ["deselect", "Boolean"],
         ["skipCallback", "Boolean"]
     ], "Number" );
 
-    MAKE_CLASS_METHOD( ".selectAll", `Unselect all selected clips.`, [
+    MAKE_CLASS_METHOD( ".selectAll", `Deselect all selected clips.`, [
         ["skipCallback", "Boolean"]
     ], "" );
 
-    MAKE_CLASS_METHOD( ".unSelectClip", `Unselect a clip of the track.`, [
+    MAKE_CLASS_METHOD( ".deselectClip", `Deselect a clip of the track.`, [
         ["trackIdx", "Number"],
         ["clipIdx", "Number"],
     ], "Number" );
 
-    MAKE_CLASS_METHOD( ".unSelectAllClips", `Unselect all selected clips.`, [
+    MAKE_CLASS_METHOD( ".deselectAllClips", `Deselect all selected clips.`, [
     ], "" );
 
     MAKE_CLASS_METHOD( ".unHoverAll", `Unhover current clips.`, [
