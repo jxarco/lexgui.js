@@ -4447,8 +4447,15 @@ class TabSections extends Widget {
             throw( "Param @tabs must be an Array!" );
         }
 
+        if( !tabs.length )
+        {
+            throw( "Tab list cannot be empty!" );
+        }
+
         const vertical = options.vertical ?? true;
         const showNames = !vertical && ( options.showNames ?? false );
+
+        this.tabDOMs = {};
 
         let container = document.createElement( 'div' );
         container.className = "lextabscontainer";
@@ -4462,25 +4469,25 @@ class TabSections extends Widget {
         container.appendChild( tabContainer );
         this.root.appendChild( container );
 
-        for( let i = 0; i < tabs.length; ++i )
+        // Check at least 1 is selected
+        if( tabs.findIndex( e => e.selected === true ) < 0 )
         {
-            const tab = tabs[ i ];
+            tabs[ 0 ].selected = true;
+        }
+
+        for( let tab of tabs )
+        {
             console.assert( tab.name );
-            const isSelected = ( i == 0 );
             let tabEl = document.createElement( "div" );
-            tabEl.className = "lextab " + (i == tabs.length - 1 ? "last" : "") + ( isSelected ? "selected" : "" );
+            tabEl.className = "lextab " + ( ( tab.selected ?? false ) ? "selected" : "" );
             tabEl.innerHTML = ( showNames ? tab.name : "" );
             tabEl.appendChild( LX.makeIcon( tab.icon ?? "Hash", { title: tab.name, iconClass: tab.iconClass, svgClass: tab.svgClass } ) );
+            this.tabDOMs[ tab.name ] = tabEl;
 
             let infoContainer = document.createElement( "div" );
             infoContainer.id = tab.name.replace( /\s/g, '' );
             infoContainer.className = "widgets";
-
-            if( !isSelected )
-            {
-                infoContainer.toggleAttribute( "hidden", true );
-            }
-
+            infoContainer.toggleAttribute( "hidden", !( tab.selected ?? false ) );
             container.appendChild( infoContainer );
 
             tabEl.addEventListener( "click", e => {
@@ -4510,6 +4517,20 @@ class TabSections extends Widget {
                 creationPanel.clearQueue();
             }
         }
+
+        this.tabs = tabs;
+    }
+
+    select( name ) {
+
+        const tabEl = this.tabDOMs[ name ];
+
+        if( !tabEl )
+        {
+            return;
+        }
+
+        tabEl.click();
     }
 }
 

@@ -11,6 +11,7 @@ Widgets:
 - Layers Widget allow `options.maxBits` to specify number of bit layers.
 - If Button is selectable, the `selected` state is not sent to the callback.
 - Fixed Color Picker not updating on change Hex text input.
+- TabSections: Allow `item.selected` option. Add support for `select( tabName )`.
 
 New `AreaOverlayButtons` to improve management and support changing buttons state.
 Fixed Commandbar error on checking String Menubar items.
