@@ -12,6 +12,7 @@ Widgets:
 - If Button is selectable, the `selected` state is not sent to the callback.
 
 New `AreaOverlayButtons` to improve management and support changing buttons state.
+Fixed Commandbar error on checking String Menubar items.
 Fixed Asset View custom title overflow.
 Docs updated.
 

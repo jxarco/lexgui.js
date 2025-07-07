@@ -313,7 +313,7 @@ function _createCommandbar( root )
 
     const _propagateAdd = ( item, filter, path, skipPropagation ) => {
 
-        if( !item )
+        if( !item || ( item.constructor != Object ) )
         {
             return;
         }
