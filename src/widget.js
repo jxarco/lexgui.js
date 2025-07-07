@@ -4150,11 +4150,17 @@ class Progress extends Widget {
         };
 
         this.onSetValue = ( newValue, skipCallback, event ) => {
+			newValue = LX.clamp( newValue, progress.min, progress.max );
             this.root.querySelector("meter").value = newValue;
             _updateColor();
             if( this.root.querySelector("span") )
             {
                 this.root.querySelector("span").innerText = newValue;
+            }
+
+            if( !skipCallback )
+            {
+                this._trigger( new LX.IEvent( name, newValue, event ), options.callback );
             }
         };
 
@@ -4239,11 +4245,6 @@ class Progress extends Widget {
                     const rect = progress.getBoundingClientRect();
                     const newValue = LX.round( LX.remapRange( e.offsetX - rect.x, 0, rect.width, progress.min, progress.max ) );
                     this.set( newValue, false, e );
-
-                    if( options.callback )
-                    {
-                        options.callback( newValue, e );
-                    }
                 }
 
                 e.stopPropagation();
