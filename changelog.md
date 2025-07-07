@@ -2,6 +2,8 @@
 
 ## dev
 
+## 0.6.10 (master)
+
 Timeline:
 - Added support for cloning clips and tracks.
 - Minor fixes.
@@ -19,7 +21,7 @@ Fixed Commandbar error on checking String Menubar items.
 Fixed Asset View custom title overflow.
 Docs updated.
 
-## 0.6.9 (master)
+## 0.6.9
 
 Timeline:
 - `addKeyframes` now returns new indices.

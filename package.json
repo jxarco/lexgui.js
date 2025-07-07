@@ -1,6 +1,6 @@
 {
     "name": "lexgui",
-    "version": "0.6.9",
+    "version": "0.6.10",
     "description": "JS library to create web graphical user interfaces",
     "type": "module",
     "main": "./build/lexgui.js",
@@ -39,7 +39,8 @@
         "rollup-js": "rollup -c rollup.build.config.js",
         "minify-css": "cleancss -o build/lexgui.min.css build/lexgui.css",
         "minify": "npm run rollup-js && npm run minify-css",
-        "build": "python build-legacy.py && npm run minify"
+        "legacy": "python build-legacy.py",
+        "build": "npm run legacy && npm run minify"
     },
     "devDependencies": {
         "@rollup/plugin-terser": "^0.4.4"
