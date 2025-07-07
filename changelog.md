@@ -12,6 +12,7 @@ Widgets:
 - If Button is selectable, the `selected` state is not sent to the callback.
 - Fixed Color Picker not updating on change Hex text input.
 - TabSections: Allow `item.selected` option. Add support for `select( tabName )`.
+- Fixed Select Widget positioning when no space above&below.
 
 New `AreaOverlayButtons` to improve management and support changing buttons state.
 Fixed Commandbar error on checking String Menubar items.

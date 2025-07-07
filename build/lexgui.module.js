@@ -9069,6 +9069,7 @@ class Select extends Widget {
             }
 
             this.root.dataset["opened"] = ( !!suboptionsFunc );
+            list.style.height = ""; // set auto height by default
 
             if( !skipCallback )
             {
@@ -9090,7 +9091,7 @@ class Select extends Widget {
         wValue.name = name;
         wValue.iValue = value;
 
-        if( options.overflowContainer )
+        if( options.overflowContainer !== undefined )
         {
             options.overflowContainerX = options.overflowContainerY = options.overflowContainer;
         }
@@ -9103,7 +9104,7 @@ class Select extends Widget {
 
             // Manage vertical aspect
             {
-                const overflowContainer = options.overflowContainerY ?? parent.getParentArea();
+                const overflowContainer = options.overflowContainerY !== undefined ? options.overflowContainerY : parent.getParentArea();
                 const listHeight = parent.offsetHeight;
                 let topPosition = rect.y;
 
@@ -9123,18 +9124,25 @@ class Select extends Widget {
                 }
 
                 parent.style.top = ( topPosition + selectRoot.offsetHeight ) + 'px';
+                list.style.height = ""; // set auto height by default
 
-                const showAbove = ( topPosition + listHeight ) > maxY;
-                if( showAbove )
+                const failBelow = ( topPosition + listHeight ) > maxY;
+                const failAbove = ( topPosition - listHeight ) < 0;
+                if( failBelow && !failAbove )
                 {
                     parent.style.top = ( topPosition - listHeight ) + 'px';
                     parent.classList.add( "place-above" );
+                }
+                // If does not fit in any direction, put it below but limit height..
+                else if( failBelow && failAbove )
+                {
+                    list.style.height = `${ maxY - topPosition - 32 }px`; // 32px margin
                 }
             }
 
             // Manage horizontal aspect
             {
-                const overflowContainer = options.overflowContainerX ?? parent.getParentArea();
+                const overflowContainer = options.overflowContainerX !== undefined ? options.overflowContainerX : parent.getParentArea();
                 const listWidth = parent.offsetWidth;
                 let leftPosition = rect.x;
 
