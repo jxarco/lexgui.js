@@ -14,7 +14,7 @@ console.warn( 'Script _build/lexgui.js_ is depracated and will be removed soon. 
 */
 
 const LX = {
-    version: "0.6.9",
+    version: "0.6.10",
     ready: false,
     components: [], // Specific pre-build components
     signals: {}, // Events and triggers
@@ -318,7 +318,7 @@ function _createCommandbar( root )
 
     const _propagateAdd = ( item, filter, path, skipPropagation ) => {
 
-        if( !item )
+        if( !item || ( item.constructor != Object ) )
         {
             return;
         }
@@ -1537,7 +1537,7 @@ class ColorPicker {
                 copyButtonWidget.root.querySelector( "input[type='checkbox']" ).style.pointerEvents = "none";
 
                 LX.doAsync( () => {
-                    copyButtonWidget.root.swap( true );
+                    copyButtonWidget.swap( true );
                     copyButtonWidget.root.querySelector( "input[type='checkbox']" ).style.pointerEvents = "auto";
                 }, 3000 );
 
@@ -6020,6 +6020,176 @@ LX.drawSpline = drawSpline;
 
 // area.js @jxarco
 
+class AreaOverlayButtons {
+
+    /**
+     * @constructor AreaOverlayButtons
+     */
+
+    constructor( area, buttonsArray, options = {} ) {
+
+        this.area = area;
+        this.options = options;
+
+        this.buttons = {};
+
+        this._buildButtons( buttonsArray, options );
+    }
+
+    _buildButtons( buttonsArray, options ) {
+
+        options.className = "lexoverlaybuttons";
+
+        let overlayPanel = this.area.addPanel( options );
+        let overlayGroup = null;
+
+        const container = document.createElement( "div" );
+        container.className = "lexoverlaybuttonscontainer";
+        container.appendChild( overlayPanel.root );
+        this.area.attach( container );
+
+        const float = options.float;
+        let floatClass = "";
+
+        if( float )
+        {
+            for( let i = 0; i < float.length; i++ )
+            {
+                const t = float[ i ];
+                switch( t )
+                {
+                case 'h': break;
+                case 'v': floatClass += " vertical"; break;
+                case 't': break;
+                case 'm': floatClass += " middle"; break;
+                case 'b': floatClass += " bottom"; break;
+                case 'l': break;
+                case 'c': floatClass += " center"; break;
+                case 'r': floatClass += " right"; break;
+                }
+            }
+
+            container.className += ` ${ floatClass }`;
+        }
+
+        const _addButton = ( b, group, last ) => {
+
+            const _options = {
+                width: "auto",
+                selectable: b.selectable,
+                selected: b.selected,
+                icon: b.icon,
+                img: b.img,
+                className: b.class ?? "",
+                title: b.name,
+                overflowContainerX: overlayPanel.root,
+                swap: b.swap
+            };
+
+            if( group )
+            {
+                if( !overlayGroup )
+                {
+                    overlayGroup = document.createElement('div');
+                    overlayGroup.className = "lexoverlaygroup";
+                    overlayPanel.queuedContainer = overlayGroup;
+                }
+
+                _options.parent = overlayGroup;
+            }
+
+            let callback = b.callback;
+            let widget = null;
+
+            if( b.options )
+            {
+                widget = overlayPanel.addSelect( null, b.options, b.value ?? b.name, callback, _options );
+            }
+            else
+            {
+                widget = overlayPanel.addButton( null, b.name, function( value, event ) {
+                    if( b.selectable )
+                    {
+                        if( b.group )
+                        {
+                            let _prev = b.selected;
+                            b.group.forEach( sub => sub.selected = false );
+                            b.selected = !_prev;
+                        }
+                        else
+                        {
+                            b.selected = !b.selected;
+                        }
+                    }
+
+                    if( callback )
+                    {
+                        callback( value, event, widget.root );
+                    }
+
+                }, _options );
+            }
+
+            this.buttons[ b.name ] = widget;
+
+            // ends the group
+            if( overlayGroup && last )
+            {
+                overlayPanel.root.appendChild( overlayGroup );
+                overlayGroup = null;
+                overlayPanel.clearQueue();
+            }
+        };
+
+        const _refreshPanel = function() {
+
+            overlayPanel.clear();
+
+            for( let b of buttonsArray )
+            {
+                if( b === null )
+                {
+                    // Add a separator
+                    const separator = document.createElement("div");
+                    separator.className = "lexoverlayseparator" + floatClass;
+                    overlayPanel.root.appendChild( separator );
+                    continue;
+                }
+
+                if( b.constructor === Array )
+                {
+                    for( let i = 0; i < b.length; ++i )
+                    {
+                        let sub = b[ i ];
+                        sub.group = b;
+                        _addButton( sub, true, i == ( b.length - 1 ) );
+                    }
+                }
+                else
+                {
+                    _addButton( b );
+                }
+            }
+
+            // Add floating info
+            if( float )
+            {
+                var height = 0;
+                overlayPanel.root.childNodes.forEach( c => { height += c.offsetHeight; } );
+
+                if( container.className.includes( "middle" ) )
+                {
+                    container.style.top = "-moz-calc( 50% - " + (height * 0.5) + "px )";
+                    container.style.top = "-webkit-calc( 50% - " + (height * 0.5) + "px )";
+                    container.style.top = "calc( 50% - " + (height * 0.5) + "px )";
+                }
+            }
+        };
+
+        _refreshPanel();
+    }
+}
+
 class Area {
 
     /**
@@ -6785,8 +6955,7 @@ class Area {
         // Add to last split section if area has been split
         if( this.sections.length )
         {
-            this.sections[ 1 ].addOverlayButtons(  buttons, options );
-            return;
+            return this.sections[ 1 ].addOverlayButtons(  buttons, options );
         }
 
         console.assert( buttons.constructor == Array && buttons.length );
@@ -6794,152 +6963,10 @@ class Area {
         // Set area to relative to use local position
         this.root.style.position = "relative";
 
-        options.className = "lexoverlaybuttons";
+        // Reset if already exists
+        this.overlayButtons = new AreaOverlayButtons( this, buttons, options );
 
-        let overlayPanel = this.addPanel( options );
-        let overlayGroup = null;
-
-        const container = document.createElement("div");
-        container.className = "lexoverlaybuttonscontainer";
-        container.appendChild( overlayPanel.root );
-        this.attach( container );
-
-        const float = options.float;
-        let floatClass = "";
-
-        if( float )
-        {
-            for( let i = 0; i < float.length; i++ )
-            {
-                const t = float[ i ];
-                switch( t )
-                {
-                case 'h': break;
-                case 'v': floatClass += " vertical"; break;
-                case 't': break;
-                case 'm': floatClass += " middle"; break;
-                case 'b': floatClass += " bottom"; break;
-                case 'l': break;
-                case 'c': floatClass += " center"; break;
-                case 'r': floatClass += " right"; break;
-                }
-            }
-
-            container.className += ` ${ floatClass }`;
-        }
-
-        const _addButton = function( b, group, last ) {
-
-            const _options = {
-                width: "auto",
-                selectable: b.selectable,
-                selected: b.selected,
-                icon: b.icon,
-                img: b.img,
-                className: b.class ?? "",
-                title: b.name,
-                overflowContainerX: overlayPanel.root,
-                swap: b.swap
-            };
-
-            if( group )
-            {
-                if( !overlayGroup )
-                {
-                    overlayGroup = document.createElement('div');
-                    overlayGroup.className = "lexoverlaygroup";
-                    overlayPanel.queuedContainer = overlayGroup;
-                }
-
-                _options.parent = overlayGroup;
-            }
-
-            let callback = b.callback;
-
-            if( b.options )
-            {
-                overlayPanel.addSelect( null, b.options, b.name, callback, _options );
-            }
-            else
-            {
-                const button = overlayPanel.addButton( null, b.name, function( value, event ) {
-                    if( b.selectable )
-                    {
-                        if( b.group )
-                        {
-                            let _prev = b.selected;
-                            b.group.forEach( sub => sub.selected = false );
-                            b.selected = !_prev;
-                        }
-                        else
-                        {
-                            b.selected = !b.selected;
-                        }
-                    }
-
-                    if( callback )
-                    {
-                        callback( value, event, button.root );
-                    }
-
-                }, _options );
-            }
-
-            // ends the group
-            if( overlayGroup && last )
-            {
-                overlayPanel.root.appendChild( overlayGroup );
-                overlayGroup = null;
-                overlayPanel.clearQueue();
-            }
-        };
-
-        const _refreshPanel = function() {
-
-            overlayPanel.clear();
-
-            for( let b of buttons )
-            {
-                if( b === null )
-                {
-                    // Add a separator
-                    const separator = document.createElement("div");
-                    separator.className = "lexoverlayseparator" + floatClass;
-                    overlayPanel.root.appendChild( separator );
-                    continue;
-                }
-
-                if( b.constructor === Array )
-                {
-                    for( let i = 0; i < b.length; ++i )
-                    {
-                        let sub = b[ i ];
-                        sub.group = b;
-                        _addButton(sub, true, i == ( b.length - 1 ));
-                    }
-                }
-                else
-                {
-                    _addButton( b );
-                }
-            }
-
-            // Add floating info
-            if( float )
-            {
-                var height = 0;
-                overlayPanel.root.childNodes.forEach( c => { height += c.offsetHeight; } );
-
-                if( container.className.includes( "middle" ) )
-                {
-                    container.style.top = "-moz-calc( 50% - " + (height * 0.5) + "px )";
-                    container.style.top = "-webkit-calc( 50% - " + (height * 0.5) + "px )";
-                    container.style.top = "calc( 50% - " + (height * 0.5) + "px )";
-                }
-            }
-        };
-
-        _refreshPanel();
+        return this.overlayButtons;
     }
 
     /**
@@ -8462,14 +8489,15 @@ class Button extends Widget {
         super( Widget.BUTTON, name, null, options );
 
         this.onGetValue = () => {
-            return wValue.querySelector( "input" )?.checked;
+            const swapInput = wValue.querySelector( "input" );
+            return swapInput ? swapInput.checked : value
         };
 
         this.onSetValue = ( newValue, skipCallback, event ) => {
 
             if( ( options.swap ?? false ) )
             {
-                this.root.setState( newValue, skipCallback );
+                this.setState( newValue, skipCallback );
                 return;
             }
 
@@ -8499,6 +8527,30 @@ class Button extends Widget {
             wValue.style.width = `calc( 100% - ${ realNameWidth })`;
         };
 
+        // In case of swap, set if a change has to be performed
+        this.setState = function( v, skipCallback ) {
+            const swapInput = wValue.querySelector( "input" );
+
+            if( swapInput )
+            {
+                swapInput.checked = v;
+            }
+            else if( options.selectable )
+            {
+                if( options.parent )
+                {
+                    options.parent.querySelectorAll(".lexbutton.selected").forEach( b => { if( b == wValue ) return; b.classList.remove( "selected" ); } );
+                }
+
+                wValue.classList.toggle( "selected", v );
+            }
+
+            if( !skipCallback )
+            {
+                this._trigger( new LX.IEvent( name, swapInput ? swapInput.checked : ( options.selectable ? v : value ), null ), callback );
+            }
+        };
+
         var wValue = document.createElement( 'button' );
         wValue.title = options.tooltip ? "" : ( options.title ?? "" );
         wValue.className = "lexbutton p-1 " + ( options.buttonClass ?? "" );
@@ -8518,7 +8570,7 @@ class Button extends Widget {
         }
         else if( options.icon )
         {
-            const icon = LX.makeIcon( options.icon );
+            const icon = LX.makeIcon( options.icon, { iconClass: options.iconClass, svgClass: options.svgClass } );
             const iconPosition = options.iconPosition ?? "cover";
 
             // Default
@@ -8589,19 +8641,9 @@ class Button extends Widget {
             const swapIcon = LX.makeIcon( options.swap, { iconClass: "swap-on" } );
             wValue.appendChild( swapIcon );
 
-            this.root.swap = function( skipCallback ) {
+            this.swap = function( skipCallback ) {
                 const swapInput = wValue.querySelector( "input" );
                 swapInput.checked = !swapInput.checked;
-                if( !skipCallback )
-                {
-                    trigger.click();
-                }
-            };
-
-            // Set if swap has to be performed
-            this.root.setState = function( v, skipCallback ) {
-                const swapInput = wValue.querySelector( "input" );
-                swapInput.checked = v;
                 if( !skipCallback )
                 {
                     trigger.click();
@@ -8610,6 +8652,7 @@ class Button extends Widget {
         }
 
         trigger.addEventListener( "click", e => {
+            let isSelected;
             if( options.selectable )
             {
                 if( options.parent )
@@ -8617,7 +8660,7 @@ class Button extends Widget {
                     options.parent.querySelectorAll(".lexbutton.selected").forEach( b => { if( b == wValue ) return; b.classList.remove( "selected" ); } );
                 }
 
-                wValue.classList.toggle('selected');
+                isSelected = wValue.classList.toggle('selected');
             }
 
             if( options.fileInput )
@@ -8627,7 +8670,7 @@ class Button extends Widget {
             else
             {
                 const swapInput = wValue.querySelector( "input" );
-                this._trigger( new LX.IEvent( name, swapInput?.checked ?? value, e ), callback );
+                this._trigger( new LX.IEvent( name, swapInput?.checked ?? ( options.selectable ? isSelected : value ), e ), callback );
             }
         });
 
@@ -9033,6 +9076,7 @@ class Select extends Widget {
             }
 
             this.root.dataset["opened"] = ( !!suboptionsFunc );
+            list.style.height = ""; // set auto height by default
 
             if( !skipCallback )
             {
@@ -9054,7 +9098,7 @@ class Select extends Widget {
         wValue.name = name;
         wValue.iValue = value;
 
-        if( options.overflowContainer )
+        if( options.overflowContainer !== undefined )
         {
             options.overflowContainerX = options.overflowContainerY = options.overflowContainer;
         }
@@ -9067,7 +9111,7 @@ class Select extends Widget {
 
             // Manage vertical aspect
             {
-                const overflowContainer = options.overflowContainerY ?? parent.getParentArea();
+                const overflowContainer = options.overflowContainerY !== undefined ? options.overflowContainerY : parent.getParentArea();
                 const listHeight = parent.offsetHeight;
                 let topPosition = rect.y;
 
@@ -9087,18 +9131,25 @@ class Select extends Widget {
                 }
 
                 parent.style.top = ( topPosition + selectRoot.offsetHeight ) + 'px';
+                list.style.height = ""; // set auto height by default
 
-                const showAbove = ( topPosition + listHeight ) > maxY;
-                if( showAbove )
+                const failBelow = ( topPosition + listHeight ) > maxY;
+                const failAbove = ( topPosition - listHeight ) < 0;
+                if( failBelow && !failAbove )
                 {
                     parent.style.top = ( topPosition - listHeight ) + 'px';
                     parent.classList.add( "place-above" );
+                }
+                // If does not fit in any direction, put it below but limit height..
+                else if( failBelow && failAbove )
+                {
+                    list.style.height = `${ maxY - topPosition - 32 }px`; // 32px margin
                 }
             }
 
             // Manage horizontal aspect
             {
-                const overflowContainer = options.overflowContainerX ?? parent.getParentArea();
+                const overflowContainer = options.overflowContainerX !== undefined ? options.overflowContainerX : parent.getParentArea();
                 const listWidth = parent.offsetWidth;
                 let leftPosition = rect.x;
 
@@ -9526,9 +9577,11 @@ class Layers extends Widget {
             container.style.width = `calc( 100% - ${ realNameWidth })`;
         };
 
-        var container = document.createElement( "div" );
+        const container = document.createElement( "div" );
         container.className = "lexlayers";
         this.root.appendChild( container );
+
+        const maxBits = options.maxBits ?? 16;
 
         this.setLayers = ( val ) =>  {
 
@@ -9538,19 +9591,19 @@ class Layers extends Widget {
             let nbits = binary.length;
 
             // fill zeros
-            for( let i = 0; i < ( 16 - nbits ); ++i )
+            for( let i = 0; i < ( maxBits - nbits ); ++i )
             {
                 binary = '0' + binary;
             }
 
-            for( let bit = 0; bit < 16; ++bit )
+            for( let bit = 0; bit < maxBits; ++bit )
             {
                 let layer = document.createElement( "div" );
                 layer.className = "lexlayer";
 
                 if( val != undefined )
                 {
-                    const valueBit = binary[ 16 - bit - 1 ];
+                    const valueBit = binary[ maxBits - bit - 1 ];
                     if( valueBit != undefined && valueBit == '1' )
                     {
                         layer.classList.add( "selected" );
@@ -9558,7 +9611,7 @@ class Layers extends Widget {
                 }
 
                 layer.innerText = bit + 1;
-                layer.title = "Bit " + bit + ", value " + (1 << bit);
+                layer.title = "Bit " + bit + ", value " + ( 1 << bit );
                 container.appendChild( layer );
 
                 layer.addEventListener( "click", e => {
@@ -10205,9 +10258,7 @@ class ColorInput extends Widget {
             colorModel: options.useRGB ? "RGB" : "Hex",
             useAlpha,
             onChange: ( color ) => {
-                this._fromColorPicker = true;
                 this.set( color.hex );
-                delete this._fromColorPicker;
             }
         } );
 
@@ -10245,6 +10296,7 @@ class ColorInput extends Widget {
             this._skipTextUpdate = true;
             this.set( v );
             delete this._skipTextUpdate;
+            this.picker.fromHexColor( v );
         }, { width: "calc( 100% - 24px )", disabled: options.disabled });
 
         textWidget.root.style.marginLeft = "6px";
@@ -11517,8 +11569,15 @@ class TabSections extends Widget {
             throw( "Param @tabs must be an Array!" );
         }
 
+        if( !tabs.length )
+        {
+            throw( "Tab list cannot be empty!" );
+        }
+
         const vertical = options.vertical ?? true;
         const showNames = !vertical && ( options.showNames ?? false );
+
+        this.tabDOMs = {};
 
         let container = document.createElement( 'div' );
         container.className = "lextabscontainer";
@@ -11532,25 +11591,25 @@ class TabSections extends Widget {
         container.appendChild( tabContainer );
         this.root.appendChild( container );
 
-        for( let i = 0; i < tabs.length; ++i )
+        // Check at least 1 is selected
+        if( tabs.findIndex( e => e.selected === true ) < 0 )
         {
-            const tab = tabs[ i ];
+            tabs[ 0 ].selected = true;
+        }
+
+        for( let tab of tabs )
+        {
             console.assert( tab.name );
-            const isSelected = ( i == 0 );
             let tabEl = document.createElement( "div" );
-            tabEl.className = "lextab " + (i == tabs.length - 1 ? "last" : "") + ( isSelected ? "selected" : "" );
+            tabEl.className = "lextab " + ( ( tab.selected ?? false ) ? "selected" : "" );
             tabEl.innerHTML = ( showNames ? tab.name : "" );
             tabEl.appendChild( LX.makeIcon( tab.icon ?? "Hash", { title: tab.name, iconClass: tab.iconClass, svgClass: tab.svgClass } ) );
+            this.tabDOMs[ tab.name ] = tabEl;
 
             let infoContainer = document.createElement( "div" );
             infoContainer.id = tab.name.replace( /\s/g, '' );
             infoContainer.className = "widgets";
-
-            if( !isSelected )
-            {
-                infoContainer.toggleAttribute( "hidden", true );
-            }
-
+            infoContainer.toggleAttribute( "hidden", !( tab.selected ?? false ) );
             container.appendChild( infoContainer );
 
             tabEl.addEventListener( "click", e => {
@@ -11580,6 +11639,20 @@ class TabSections extends Widget {
                 creationPanel.clearQueue();
             }
         }
+
+        this.tabs = tabs;
+    }
+
+    select( name ) {
+
+        const tabEl = this.tabDOMs[ name ];
+
+        if( !tabEl )
+        {
+            return;
+        }
+
+        tabEl.click();
     }
 }
 
@@ -14031,45 +14104,42 @@ class Menubar {
         }
 
         let button = this.buttons[ name ];
+        // If the button already exists, delete it
+        // since only one button of this type can exist
         if( button )
         {
-            button.innerHTML = "";
-            button.appendChild( LX.makeIcon( icon, { svgClass: "xl" } ) );
-            return;
+            delete this.buttons[ name ];
+            LX.deleteElement( button.root );
         }
 
         // Otherwise, create it
-        button = document.createElement('div');
-        const disabled = options.disabled ?? false;
-        button.className = "lexmenubutton main" + (disabled ? " disabled" : "");
-        button.title = name;
-        button.appendChild( LX.makeIcon( icon, { svgClass: "xl" } ) );
+        button = new LX.Button( name, null, callback, {
+            title: name,
+            buttonClass: "lexmenubutton main bg-none",
+            disabled: options.disabled,
+            icon,
+            svgClass: "xl",
+            hideName: true,
+            swap: options.swap
+        } );
 
         if( options.float == "right" )
         {
-            button.right = true;
+            button.root.right = true;
         }
 
         if( this.root.lastChild && this.root.lastChild.right )
         {
-            this.root.lastChild.before( button );
+            this.root.lastChild.before( button.root );
         }
         else if( options.float == "left" )
         {
-            this.root.prepend( button );
+            this.root.prepend( button.root );
         }
         else
         {
-            this.root.appendChild( button );
+            this.root.appendChild( button.root );
         }
-
-        const _b = button.querySelector('a');
-        _b.addEventListener("click", (e) => {
-            if( callback && !disabled )
-            {
-                callback.call( this, _b, e );
-            }
-        });
 
         this.buttons[ name ] = button;
     }
@@ -14176,7 +14246,7 @@ class Menubar {
 
             if( title )
             {
-                this.buttons[ title ] = button.root;
+                this.buttons[ title ] = button;
             }
         }
     }
@@ -14937,10 +15007,14 @@ class AssetView {
 
         if( options.rootPath )
         {
-            if(options.rootPath.constructor !== String)
-                console.warn("Asset Root Path must be a String (now is " + path.constructor.name + ")");
+            if( options.rootPath.constructor !== String )
+            {
+                console.warn( `Asset Root Path must be a String (now is a ${ path.constructor.name })` );
+            }
             else
+            {
                 this.rootPath = options.rootPath;
+            }
         }
 
         let div = document.createElement('div');
@@ -15309,7 +15383,7 @@ class AssetView {
         this.content.className = (isContentLayout ? "lexassetscontent" : "lexassetscontent list");
         let that = this;
 
-        const add_item = function(item) {
+        const _addItem = function(item) {
 
             const type = item.type.charAt( 0 ).toUpperCase() + item.type.slice( 1 );
             const extension = LX.getExtension( item.id );
@@ -15334,20 +15408,27 @@ class AssetView {
                         return;
                     }
 
+                    const dialog = itemEl.closest('dialog');
                     const rect = itemEl.getBoundingClientRect();
                     const targetRect = e.target.getBoundingClientRect();
-                    const parentRect = desc.parentElement.getBoundingClientRect();
 
-                    let localOffsetX = targetRect.x - parentRect.x - ( targetRect.x - rect.x );
-                    let localOffsetY = targetRect.y - parentRect.y - ( targetRect.y - rect.y );
+                    let localOffsetX = rect.x + e.offsetX;
+                    let localOffsetY = rect.y + e.offsetY;
+
+                    if( dialog )
+                    {
+                        const dialogRect = dialog.getBoundingClientRect();
+                        localOffsetX -= dialogRect.x;
+                        localOffsetY -= dialogRect.y;
+                    }
 
                     if( e.target.classList.contains( "lexassettitle" ) )
                     {
                         localOffsetY += ( targetRect.y - rect.y );
                     }
 
-                    desc.style.left = (localOffsetX + e.offsetX + 12) + "px";
-                    desc.style.top = (localOffsetY + e.offsetY) + "px";
+                    desc.style.left = ( localOffsetX ) + "px";
+                    desc.style.top = ( localOffsetY - 36 ) + "px";
                 });
 
                 itemEl.addEventListener("mouseenter", () => {
@@ -15545,7 +15626,7 @@ class AssetView {
                 } });
             }else
             {
-                item.domEl = add_item( item );
+                item.domEl = _addItem( item );
             }
         }
 
