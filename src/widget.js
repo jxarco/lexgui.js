@@ -3136,9 +3136,7 @@ class ColorInput extends Widget {
             colorModel: options.useRGB ? "RGB" : "Hex",
             useAlpha,
             onChange: ( color ) => {
-                this._fromColorPicker = true;
                 this.set( color.hex );
-                delete this._fromColorPicker;
             }
         } );
 
@@ -3176,6 +3174,7 @@ class ColorInput extends Widget {
             this._skipTextUpdate = true;
             this.set( v );
             delete this._skipTextUpdate;
+            this.picker.fromHexColor( v );
         }, { width: "calc( 100% - 24px )", disabled: options.disabled });
 
         textWidget.root.style.marginLeft = "6px";

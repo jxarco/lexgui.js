@@ -10,6 +10,7 @@ Widgets:
 - All `Button` widgets have now `setState` method (not only those with `swap` feature).
 - Layers Widget allow `options.maxBits` to specify number of bit layers.
 - If Button is selectable, the `selected` state is not sent to the callback.
+- Fixed Color Picker not updating on change Hex text input.
 
 New `AreaOverlayButtons` to improve management and support changing buttons state.
 Fixed Commandbar error on checking String Menubar items.
