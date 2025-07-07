@@ -2,6 +2,9 @@
 
 ## dev
 
+Widgets:
+- Fixed Progress Widget value clamp and callback.
+
 ## 0.6.10 (master)
 
 Timeline:
