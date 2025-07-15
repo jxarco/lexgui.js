@@ -15882,7 +15882,7 @@ class Tour {
 
         this.tourContainer.style.display = "block";
 
-        this._showStep();
+        this._showStep( 0 );
     }
 
     /**
@@ -15891,26 +15891,33 @@ class Tour {
 
     stop() {
 
-        if( this.tourMask )
+        if( this.useModal )
         {
             this.tourMask.style.display = "none";
             this.tourContainer.removeChild( this.tourMask );
         }
 
+        this._popover?.destroy();
+
         this.tourContainer.style.display = "none";
     }
 
     // Show the current step of the tour
-    _showStep() {
+    _showStep( stepOffset = 1 ) {
 
-        const step = this.steps[ this.currentStep++ ];
+        this.currentStep += stepOffset;
+
+        const step = this.steps[ this.currentStep ];
         if ( !step ) {
             this.stop();
             return;
         }
 
+        const prevStep = this.steps[ this.currentStep - 1 ];
+        const nextStep = this.steps[ this.currentStep + 1 ];
+
         this._generateMask( step.reference );
-        this._createHighlight( step );
+        this._createHighlight( step, prevStep, nextStep );
     }
 
     // Generate mask for the specific step reference
@@ -15938,8 +15945,6 @@ class Tour {
         const refBounding = reference.getBoundingClientRect();
         const [ boundingX, boundingWidth ] = ceilAndShiftRect( refBounding.x, refBounding.width );
         const [ boundingY, boundingHeight ] = ceilAndShiftRect( refBounding.y, refBounding.height );
-
-        console.log( "Tour reference bounding box:", boundingX, boundingY, boundingWidth, boundingHeight );
 
         const vOffset = this.verticalOffset ?? this.offset;
         const hOffset = this.horizontalOffset ?? this.offset;
@@ -16020,9 +16025,78 @@ class Tour {
     }
 
     // Create the container with the user hints
-    _createHighlight( step ) {
+    _createHighlight( step, previousStep, nextStep ) {
 
-       
+        const popoverContainer = LX.makeContainer( ["auto", "auto"], "tour-step-container" );
+
+        {
+            const header = LX.makeContainer( ["100%", "auto"], "flex flex-row", "", popoverContainer );
+            LX.makeContainer( ["70%", "auto"], "p-2 font-medium", step.title, header );
+            const closer = LX.makeContainer( ["30%", "auto"], "flex flex-row p-2 justify-end", "", header );
+            const closeIcon = LX.makeIcon( "X" );
+            closer.appendChild( closeIcon );
+
+            closeIcon.listen( "click", () => {
+                this.stop();
+            } );
+        }
+
+        LX.makeContainer( ["100%", "auto"], "p-2 text-md", step.content, popoverContainer, { maxWidth: "400px" } );
+        const footer = LX.makeContainer( ["100%", "auto"], "flex flex-row text-md", "", popoverContainer );
+
+        {
+            const footerSteps = LX.makeContainer( ["50%", "auto"], "p-2 gap-1 self-center flex flex-row text-md", "", footer );
+            for(  let i = 0; i < this.steps.length; i++ )
+            {
+                const stepIndicator = document.createElement( "span" );
+                stepIndicator.className = "tour-step-indicator";
+                if( i === this.currentStep )
+                {
+                    stepIndicator.classList.add( "active" );
+                }
+                footerSteps.appendChild( stepIndicator );
+            }
+        }
+
+        const footerButtons = LX.makeContainer( ["50%", "auto"], "text-md", "", footer );
+        const footerPanel = new LX.Panel();
+
+        let numButtons = 1;
+
+        if( previousStep )
+        {
+            numButtons++;
+        }
+
+        if( numButtons > 1 )
+        {
+            footerPanel.sameLine( 2, "justify-end" );
+        }
+
+        if( previousStep )
+        {
+            footerPanel.addButton( null, "Previous", () => {
+                this._showStep( -1 );
+            }, { buttonClass: "contrast" } );
+        }
+
+        if( nextStep )
+        {
+            footerPanel.addButton( null, "Next", () => {
+                this._showStep( 1 );
+            }, { buttonClass: "accent" } );
+        }
+        else
+        {
+            footerPanel.addButton( null, "Finish", () => {
+                this.stop();
+            } );
+        }
+
+        footerButtons.appendChild( footerPanel.root );
+
+        this._popover?.destroy();
+        this._popover = new LX.Popover( null, [ popoverContainer ], { reference: step.reference, side: step.position } );
     }
 }
 LX.Tour = Tour;

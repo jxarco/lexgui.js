@@ -6,6 +6,7 @@ Widgets:
 - Fixed Progress Widget value clamp and callback.
 
 Popover are now allowed to be created without a trigger element using `options.reference`.
+Added support for new Tour Component to guide users through an app.
 
 ## 0.6.10 (master)
 

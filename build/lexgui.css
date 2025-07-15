@@ -4779,7 +4779,7 @@ ul.lexassetscontent {
     background-color: #1f1f1fe7;
     --webkit-backdrop-filter: blur(2px);
     backdrop-filter: blur(2px);
-    z-index: 1000;
+    z-index: 99;
     clip-path: url(#svgTourClipPath);
 }
 
@@ -4788,8 +4788,20 @@ ul.lexassetscontent {
     background-color: #1f1f1fe7;
     --webkit-backdrop-filter: blur(2px);
     backdrop-filter: blur(2px);
-    z-index: 1000;
+    z-index: 100;
     mask: url(#svgTourReferenceMask);
+}
+
+.tour-step-indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+    background-color: var(--global-text-quaternary);
+    display: inline-flex;
+}
+
+.tour-step-indicator.active {
+    background-color: var(--global-text-primary);
 }
 
 /* Code Editor */

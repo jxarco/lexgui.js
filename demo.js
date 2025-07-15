@@ -89,6 +89,30 @@ const area = await LX.init( { layoutMode: "document", rootClass: "wrapper" } );
             ] },
             { name: "Help", submenu: [
                 { name: "Search Help", icon: "Search", kbd:  "F1" },
+                { name: "Start Tour", icon: "CircleHelp", callback: () => {
+                    const exampleTour = new LX.Tour([
+                        {
+                            title: "Welcome to LexGUI.js",
+                            content: "This is the main canvas where you can draw your application.",
+                            reference: canvas,
+                            position: "top"
+                        },
+                        {
+                            title: "Menubar",
+                            content: "This menubar contains all the main actions and settings for your application.",
+                            reference: menubar.root,
+                            position: "bottom"
+                        },
+                        {
+                            title: "Side Panel",
+                            content: "This panel contains various widgets and settings for your application.",
+                            reference: sidePanel.root,
+                            position: "left"
+                        }
+                    ], { xoffset: 8, xradius: 12, xhorizontalOffset: 46, xverticalOffset: 46 });
+
+                    exampleTour.begin();
+                } },
                 { name: "Support LexGUI", icon: "Heart" },
             ] },
         ], { sticky: false });
