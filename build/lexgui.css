@@ -4771,6 +4771,27 @@ ul.lexassetscontent {
     transform: scale(1.12);
 }
 
+/* Tour */
+
+.tour-mask {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: #1f1f1fe7;
+    --webkit-backdrop-filter: blur(2px);
+    backdrop-filter: blur(2px);
+    z-index: 1000;
+    clip-path: url(#svgTourClipPath);
+}
+
+.tour-ref-mask {
+    position: absolute;
+    background-color: #1f1f1fe7;
+    --webkit-backdrop-filter: blur(2px);
+    backdrop-filter: blur(2px);
+    z-index: 1000;
+    mask: url(#svgTourReferenceMask);
+}
+
 /* Code Editor */
 .codebasearea {
     display: flex;

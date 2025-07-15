@@ -10,3 +10,4 @@ export * from './branch.js';
 export * from './menubar.js';
 export * from './sidebar.js';
 export * from './asset_view.js';
+export * from './tour.js';
