@@ -5,6 +5,8 @@
 Widgets:
 - Fixed Progress Widget value clamp and callback.
 
+Popover are now allowed to be created without a trigger element using `options.reference`.
+
 ## 0.6.10 (master)
 
 Timeline:

@@ -722,8 +722,6 @@ class Popover {
 
     constructor( trigger, content, options = {} ) {
 
-        console.assert( trigger, "Popover needs a DOM element as trigger!" );
-
         if( Popover.activeElement )
         {
             Popover.activeElement.destroy();
@@ -731,13 +729,18 @@ class Popover {
         }
 
         this._trigger = trigger;
-        trigger.classList.add( "triggered" );
-        trigger.active = this;
+
+        if( trigger )
+        {
+            trigger.classList.add( "triggered" );
+            trigger.active = this;
+        }
 
         this._windowPadding = 4;
         this.side = options.side ?? "bottom";
         this.align = options.align ?? "center";
         this.avoidCollisions = options.avoidCollisions ?? true;
+        this.reference = options.reference;
 
         this.root = document.createElement( "div" );
         this.root.dataset["side"] = this.side;
@@ -772,29 +775,35 @@ class Popover {
         LX.doAsync( () => {
             this._adjustPosition();
 
-            this.root.focus();
+            if( this._trigger )
+            {
+                this.root.focus();
 
-            this._onClick = e => {
-                if( e.target && ( this.root.contains( e.target ) || e.target == this._trigger ) )
-                {
-                    return;
-                }
-                this.destroy();
-            };
+                this._onClick = e => {
+                    if( e.target && ( this.root.contains( e.target ) || e.target == this._trigger ) )
+                    {
+                        return;
+                    }
+                    this.destroy();
+                };
 
-            document.body.addEventListener( "mousedown", this._onClick, true );
-            document.body.addEventListener( "focusin", this._onClick, true );
+                document.body.addEventListener( "mousedown", this._onClick, true );
+                document.body.addEventListener( "focusin", this._onClick, true );
+            }
+
         }, 10 );
     }
 
     destroy() {
 
-        this._trigger.classList.remove( "triggered" );
+        if( this._trigger )
+        {
+            this._trigger.classList.remove( "triggered" );
+            delete this._trigger.active;
 
-        delete this._trigger.active;
-
-        document.body.removeEventListener( "mousedown", this._onClick, true );
-        document.body.removeEventListener( "focusin", this._onClick, true );
+            document.body.removeEventListener( "mousedown", this._onClick, true );
+            document.body.removeEventListener( "focusin", this._onClick, true );
+        }
 
         this.root.remove();
 
@@ -807,7 +816,9 @@ class Popover {
 
         // Place menu using trigger position and user options
         {
-            const rect = this._trigger.getBoundingClientRect();
+            const el = this.reference ?? this._trigger;
+            console.assert( el, "Popover needs a trigger or reference element!" );
+            const rect = el.getBoundingClientRect();
 
             let alignWidth = true;
 
