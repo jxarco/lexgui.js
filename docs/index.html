@@ -183,6 +183,7 @@
             m.add( "Context Menus", { callback: open.bind( this, "context-menu.html", null ) } );
             m.add( "Event Handling", { callback: open.bind( this, "event-handling.html", null ) } );
             m.add( "Theme Customization", { callback: open.bind( this, "themes.html", null ) } );
+            m.add( "Tour", { callback: open.bind( this, "tour.html", null ) } );
             m.add( "Icons", { callback: open.bind( this, "icons.html", null ) } );
             m.separator();
             m.group( "Widgets" );
@@ -197,7 +198,7 @@
             }
 
             m.add( "Data Inputs" );
-            for( const w of [ "Color", "Curve", "Date Picker", "File", "Item Array", "Layers", "Map 2D", "Number", "OTP Input", "Pad", "Range", "Select", "Size", "Tags", "Text", "Text Area", "Vector" ] )
+            for( const w of [ "Color", "Curve", "Date Picker", "File", "Form", "Item Array", "Layers", "Map 2D", "Number", "OTP Input", "Pad", "Range", "Select", "Size", "Tags", "Text", "Text Area", "Vector" ] )
             {
                 const url = w.toLowerCase().replace( /\s/g, '-') + ".html";
                 m.add( "Data Inputs/" + w, { callback: open.bind( this, "widgets/" + url, null ) } );
@@ -206,7 +207,7 @@
             }
 
             m.add( "Layout and Structure" );
-            for( const w of [ "Data Tree", "Form", "List", "Tab Sections", "Table", "Title" ] )
+            for( const w of [ "Data Tree", "List", "Tab Sections", "Table", "Title" ] )
             {
                 const url = w.toLowerCase().replace( /\s/g, '-') + ".html";
                 m.add( "Layout and Structure/" + w, { callback: open.bind( this, "widgets/" + url, null ) } );

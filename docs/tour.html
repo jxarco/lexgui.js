@@ -1,0 +1,53 @@
+<script type="text/javascript">
+
+    MAKE_HEADER( "Tour.", "h1", "tour" );
+            
+    MAKE_PARAGRAPH( `A dynamic popup component that guides users step-by-step through the interface of an application. It highlights key features, explains functionality,
+     and improves onboarding by providing contextual instructions and tips directly within the app.` );
+
+    INSERT_IMAGE(`../data/tour.png`, "dialogs" );
+
+    MAKE_HEADER( "Creating the tour.", "h3", "creating-tour" );
+
+    MAKE_PARAGRAPH( `To create a guided tour in LexGUI.js, instantiate a new ${ INLINE_CODE( "LX.Tour" ) } with an array of step definitions and optional configuration settings. Each step is an object describing a UI element to highlight,
+     along with a title, descriptive content, and the preferred position for the tooltip relative to the element. Use the ${ INLINE_CODE( "reference" ) } field to bind the step to a DOM element or widget,
+      and ${ INLINE_CODE( "position" ) } to specify the tooltip placement ("top", "bottom", "left", or "right").` );
+
+    MAKE_CODE( `@const@ @[var]exampleTour@ = @new@ @[cls]LX@.@[cls]Tour@([
+    {
+        title: @"Welcome to LexGUI.js"@,
+        content: @"This is the main canvas where you can draw your application."@,
+        reference: canvas,
+        position: @"top"@
+    },
+    {
+        title: @"Menubar"@,
+        content: @"This menubar contains all the main actions and settings for your application."@,
+        reference: menubar.root,
+        position: @"bottom"@
+    },
+    {
+        title: @"Side Panel"@,
+        content: @"This panel contains various widgets and settings for your application."@,
+        reference: sidePanel.root,
+        position: @"left"@
+    }
+], { radius: @12@, horizontalOffset: @12@, verticalOffset: @4@ });
+` );
+
+    MAKE_PARAGRAPH( `The second argument is an optional configuration Object that allows customizing the tour’s appearance:` );
+    MAKE_CODE_BULLET_LIST( [
+        ["offset", "Number", "Margin of the highlighted area around the element [8px]"],
+        ["radius", "Number", "Border radius of the highlighted area [12px]"],
+        ["horizontalOffset", "Number", "Horizontal margin of the highlighted area (replaces offset value)"],
+        ["verticalOffset", "Number", "Vertical margin of the highlighted area (replaces offset value)"]
+    ] );
+
+    MAKE_HEADER( "Starting the tour.", "h3", "starting-tour" );
+    
+    MAKE_PARAGRAPH( `Just call ${ INLINE_CODE( "Tour.begin()" ) } to start the tour!` );
+
+    MAKE_LINE_BREAK();
+    MAKE_LINE_BREAK();
+
+</script>

@@ -8,6 +8,7 @@ Widgets:
 
 Popover are now allowed to be created without a trigger element using `options.reference`.
 Added support for new Tour Component to guide users through an app.
+Docs updated.
 
 ## 0.6.10 (master)
 
