@@ -4,6 +4,7 @@
 
 Widgets:
 - Fixed Progress Widget value clamp and callback.
+- Fix Form data entries initial value if not an Object. Added support for Form `entryData.label`.
 
 Popover are now allowed to be created without a trigger element using `options.reference`.
 Added support for new Tour Component to guide users through an app.

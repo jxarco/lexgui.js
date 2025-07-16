@@ -8966,16 +8966,17 @@ class Form extends Widget {
 
             if( entryData.constructor != Object )
             {
-                entryData = { };
+                const oldValue = JSON.parse( JSON.stringify( entryData ) );
+                entryData = { value: oldValue };
                 data[ entry ] = entryData;
             }
 
-            entryData.placeholder = entryData.placeholder ?? entry;
+            entryData.placeholder = entryData.placeholder ?? ( entryData.label ?? `Enter ${ entry }` );
             entryData.width = "100%";
 
             if( !( options.skipLabels ?? false ) )
             {
-                const label = new LX.TextInput( null, entry, null, { disabled: true, inputClass: "formlabel nobg" } );
+                const label = new LX.TextInput( null, entryData.label ?? entry, null, { disabled: true, inputClass: "formlabel nobg" } );
                 container.appendChild( label.root );
             }
 
