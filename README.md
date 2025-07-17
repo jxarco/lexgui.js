@@ -6,15 +6,15 @@ NPM Package: [npmjs.com/package/lexgui](https://www.npmjs.com/package/lexgui)
 
 <table>
   <tr>
-    <td valign="top"><img src="data/Screenshot.png"/></td>
-    <td valign="top"><img src="data/Screenshot_Godot.png"/></td>
+    <td valign="top"><img src="data/Screenshot_Editor.png"/></td>
+    <td valign="top"><img src="data/Screenshot_Examples.png"/></td>
   </tr>
 </table>
 
 <table>
   <tr>
     <td valign="top"><h3>Code Editor</h3><img src="data/Screenshot_Code.png"/></td>
-    <td valign="top"><h3>Node Graph Editor (WIP)</h3><img src="data/Screenshot_Graph.png"/></td>
+    <td valign="top"><h3>Node Graph Editor</h3><img src="data/Screenshot_Graph.png"/></td>
   </tr>
 </table>
 
