@@ -4239,6 +4239,11 @@ class ClipsTimeline extends Timeline {
         track.selected.fill(false);
         track.hovered.fill(false);
 
+        // sanity check. Also done in addClip
+        for( let i = 0; i < track.clips.length; ++i ){
+            track.clips[i].active = track.clips[i].active ?? true; 
+        }
+
         return stateToReturn;
     }
 
