@@ -3553,15 +3553,15 @@ class Vector extends Widget {
 
             for( let i = 0; i < vectorInputs.length; ++i )
             {
-                let value = newValue[ i ];
-                value = LX.clamp( value, +vectorInputs[ i ].min, +vectorInputs[ i ].max );
-                value = LX.round( value, options.precision ) ?? 0;
-                vectorInputs[ i ].value = newValue[ i ] = value;
+                let vecValue = newValue[ i ];
+                vecValue = LX.clamp( vecValue, +vectorInputs[ i ].min, +vectorInputs[ i ].max );
+                vecValue = LX.round( vecValue, options.precision ) ?? 0;
+                vectorInputs[ i ].value = value[ i ] = vecValue;
             }
 
             if( !skipCallback )
             {
-                this._trigger( new LX.IEvent( name, newValue, event ), callback );
+                this._trigger( new LX.IEvent( name, value, event ), callback );
             }
         };
 

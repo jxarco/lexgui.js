@@ -4,7 +4,8 @@
 
 Widgets:
 - Fixed Progress Widget value clamp and callback.
-- Fix Form data entries initial value if not an Object. Added support for Form `entryData.label`.
+- Fixed Form data entries initial value if not an Object. Added support for Form `entryData.label`.
+- Fixed Vector reset issue getting old values after reset.
 
 Popover are now allowed to be created without a trigger element using `options.reference`.
 Added support for DropdownMenu and Popover `options.sideOffset` and `options.alignOffset`.
