@@ -1006,6 +1006,8 @@ class DropdownMenu {
         this._windowPadding = 4;
         this.side = options.side ?? "bottom";
         this.align = options.align ?? "center";
+        this.sideOffset = options.sideOffset ?? 0;
+        this.alignOffset = options.alignOffset ?? 0;
         this.avoidCollisions = options.avoidCollisions ?? true;
         this.onBlur = options.onBlur;
         this.inPlace = false;
@@ -1248,19 +1250,19 @@ class DropdownMenu {
             switch( this.side )
             {
                 case "left":
-                    position[ 0 ] += ( rect.x - this.root.offsetWidth );
+                    position[ 0 ] += ( rect.x - this.root.offsetWidth - this.sideOffset );
                     alignWidth = false;
                     break;
                 case "right":
-                    position[ 0 ] += ( rect.x + rect.width );
+                    position[ 0 ] += ( rect.x + rect.width + this.sideOffset );
                     alignWidth = false;
                     break;
                 case "top":
-                    position[ 1 ] += ( rect.y - this.root.offsetHeight );
+                    position[ 1 ] += ( rect.y - this.root.offsetHeight - this.sideOffset );
                     alignWidth = true;
                     break;
                 case "bottom":
-                    position[ 1 ] += ( rect.y + rect.height );
+                    position[ 1 ] += ( rect.y + rect.height + this.sideOffset );
                     alignWidth = true;
                     break;
                 default:
@@ -1284,6 +1286,9 @@ class DropdownMenu {
                 default:
                     break;
             }
+
+            if( alignWidth ) { position[ 0 ] += this.alignOffset; }
+            else { position[ 1 ] += this.alignOffset; }
         }
 
         if( this.avoidCollisions )

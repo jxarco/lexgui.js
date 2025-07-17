@@ -7,7 +7,7 @@ Widgets:
 - Fix Form data entries initial value if not an Object. Added support for Form `entryData.label`.
 
 Popover are now allowed to be created without a trigger element using `options.reference`.
-Added support for Popover `options.sideOffset` and `options.alignOffset`.
+Added support for DropdownMenu and Popover `options.sideOffset` and `options.alignOffset`.
 Added support for new `LX.Tour` Component to guide users through an app.
 Docs updated.
 
