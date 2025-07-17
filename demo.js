@@ -95,19 +95,22 @@ const area = await LX.init( { layoutMode: "document", rootClass: "wrapper" } );
                             title: "Welcome to LexGUI.js",
                             content: "This is the main canvas where you can draw your application.",
                             reference: canvas,
-                            position: "top"
+                            side: "top",
+                            align: "center"
                         },
                         {
                             title: "Menubar",
                             content: "This menubar contains all the main actions and settings for your application.",
                             reference: menubar.root,
-                            position: "bottom"
+                            side: "bottom",
+                            align: "center"
                         },
                         {
                             title: "Side Panel",
                             content: "This panel contains various widgets and settings for your application.",
                             reference: sidePanel.root,
-                            position: "left"
+                            side: "left",
+                            align: "start"
                         }
                     ], { xoffset: 8, xradius: 12, xhorizontalOffset: 46, xverticalOffset: 46 });
 

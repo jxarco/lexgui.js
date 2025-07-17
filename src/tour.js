@@ -261,8 +261,17 @@ class Tour {
 
         footerButtons.appendChild( footerPanel.root );
 
+        const sideOffset = ( step.side === "left" || step.side === "right" ? this.horizontalOffset : this.verticalOffset ) ?? this.offset;
+        const alignOffset = ( step.align === "start" || step.align === "end" ? sideOffset : 0 );
+
         this._popover?.destroy();
-        this._popover = new LX.Popover( null, [ popoverContainer ], { reference: step.reference, side: step.position } );
+        this._popover = new LX.Popover( null, [ popoverContainer ], {
+            reference: step.reference,
+            side: step.side,
+            align: step.align,
+            sideOffset,
+            alignOffset: step.align === "start" ? -alignOffset : alignOffset,
+        } );
     }
 };
 
