@@ -5,8 +5,6 @@
 }
 
 :root {
-	color-scheme: light dark;
-
 	--border-style: 1px solid #444;
 	--panel-width: 300px;
 	--page-padding: 24px;

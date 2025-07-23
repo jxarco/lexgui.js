@@ -10,6 +10,7 @@ Widgets:
 Popover are now allowed to be created without a trigger element using `options.reference`.
 Added support for DropdownMenu and Popover `options.sideOffset` and `options.alignOffset`.
 Added support for new `LX.Tour` Component to guide users through an app.
+Fixed light-dark themes in docs css.
 Docs updated.
 
 ## 0.6.10 (master)
