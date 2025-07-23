@@ -14,7 +14,7 @@ console.warn( 'Script _build/lexgui.js_ is depracated and will be removed soon. 
 */
 
 const LX = {
-    version: "0.6.10",
+    version: "0.6.11",
     ready: false,
     components: [], // Specific pre-build components
     signals: {}, // Events and triggers
@@ -725,8 +725,6 @@ class Popover {
 
     constructor( trigger, content, options = {} ) {
 
-        console.assert( trigger, "Popover needs a DOM element as trigger!" );
-
         if( Popover.activeElement )
         {
             Popover.activeElement.destroy();
@@ -734,13 +732,20 @@ class Popover {
         }
 
         this._trigger = trigger;
-        trigger.classList.add( "triggered" );
-        trigger.active = this;
+
+        if( trigger )
+        {
+            trigger.classList.add( "triggered" );
+            trigger.active = this;
+        }
 
         this._windowPadding = 4;
         this.side = options.side ?? "bottom";
         this.align = options.align ?? "center";
+        this.sideOffset = options.sideOffset ?? 0;
+        this.alignOffset = options.alignOffset ?? 0;
         this.avoidCollisions = options.avoidCollisions ?? true;
+        this.reference = options.reference;
 
         this.root = document.createElement( "div" );
         this.root.dataset["side"] = this.side;
@@ -775,29 +780,35 @@ class Popover {
         LX.doAsync( () => {
             this._adjustPosition();
 
-            this.root.focus();
+            if( this._trigger )
+            {
+                this.root.focus();
 
-            this._onClick = e => {
-                if( e.target && ( this.root.contains( e.target ) || e.target == this._trigger ) )
-                {
-                    return;
-                }
-                this.destroy();
-            };
+                this._onClick = e => {
+                    if( e.target && ( this.root.contains( e.target ) || e.target == this._trigger ) )
+                    {
+                        return;
+                    }
+                    this.destroy();
+                };
 
-            document.body.addEventListener( "mousedown", this._onClick, true );
-            document.body.addEventListener( "focusin", this._onClick, true );
+                document.body.addEventListener( "mousedown", this._onClick, true );
+                document.body.addEventListener( "focusin", this._onClick, true );
+            }
+
         }, 10 );
     }
 
     destroy() {
 
-        this._trigger.classList.remove( "triggered" );
+        if( this._trigger )
+        {
+            this._trigger.classList.remove( "triggered" );
+            delete this._trigger.active;
 
-        delete this._trigger.active;
-
-        document.body.removeEventListener( "mousedown", this._onClick, true );
-        document.body.removeEventListener( "focusin", this._onClick, true );
+            document.body.removeEventListener( "mousedown", this._onClick, true );
+            document.body.removeEventListener( "focusin", this._onClick, true );
+        }
 
         this.root.remove();
 
@@ -810,26 +821,28 @@ class Popover {
 
         // Place menu using trigger position and user options
         {
-            const rect = this._trigger.getBoundingClientRect();
+            const el = this.reference ?? this._trigger;
+            console.assert( el, "Popover needs a trigger or reference element!" );
+            const rect = el.getBoundingClientRect();
 
             let alignWidth = true;
 
             switch( this.side )
             {
                 case "left":
-                    position[ 0 ] += ( rect.x - this.root.offsetWidth );
+                    position[ 0 ] += ( rect.x - this.root.offsetWidth - this.sideOffset );
                     alignWidth = false;
                     break;
                 case "right":
-                    position[ 0 ] += ( rect.x + rect.width );
+                    position[ 0 ] += ( rect.x + rect.width + this.sideOffset );
                     alignWidth = false;
                     break;
                 case "top":
-                    position[ 1 ] += ( rect.y - this.root.offsetHeight );
+                    position[ 1 ] += ( rect.y - this.root.offsetHeight - this.sideOffset );
                     alignWidth = true;
                     break;
                 case "bottom":
-                    position[ 1 ] += ( rect.y + rect.height );
+                    position[ 1 ] += ( rect.y + rect.height + this.sideOffset );
                     alignWidth = true;
                     break;
             }
@@ -849,6 +862,9 @@ class Popover {
                     else { position[ 1 ] += rect.y - this.root.offsetHeight + rect.height; }
                     break;
             }
+
+            if( alignWidth ) { position[ 0 ] += this.alignOffset; }
+            else { position[ 1 ] += this.alignOffset; }
         }
 
         if( this.avoidCollisions )
@@ -985,6 +1001,8 @@ class DropdownMenu {
         this._windowPadding = 4;
         this.side = options.side ?? "bottom";
         this.align = options.align ?? "center";
+        this.sideOffset = options.sideOffset ?? 0;
+        this.alignOffset = options.alignOffset ?? 0;
         this.avoidCollisions = options.avoidCollisions ?? true;
         this.onBlur = options.onBlur;
         this.inPlace = false;
@@ -1227,19 +1245,19 @@ class DropdownMenu {
             switch( this.side )
             {
                 case "left":
-                    position[ 0 ] += ( rect.x - this.root.offsetWidth );
+                    position[ 0 ] += ( rect.x - this.root.offsetWidth - this.sideOffset );
                     alignWidth = false;
                     break;
                 case "right":
-                    position[ 0 ] += ( rect.x + rect.width );
+                    position[ 0 ] += ( rect.x + rect.width + this.sideOffset );
                     alignWidth = false;
                     break;
                 case "top":
-                    position[ 1 ] += ( rect.y - this.root.offsetHeight );
+                    position[ 1 ] += ( rect.y - this.root.offsetHeight - this.sideOffset );
                     alignWidth = true;
                     break;
                 case "bottom":
-                    position[ 1 ] += ( rect.y + rect.height );
+                    position[ 1 ] += ( rect.y + rect.height + this.sideOffset );
                     alignWidth = true;
                     break;
             }
@@ -1259,6 +1277,9 @@ class DropdownMenu {
                     else { position[ 1 ] += rect.y - this.root.offsetHeight + rect.height; }
                     break;
             }
+
+            if( alignWidth ) { position[ 0 ] += this.alignOffset; }
+            else { position[ 1 ] += this.alignOffset; }
         }
 
         if( this.avoidCollisions )
@@ -8962,16 +8983,17 @@ class Form extends Widget {
 
             if( entryData.constructor != Object )
             {
-                entryData = { };
+                const oldValue = JSON.parse( JSON.stringify( entryData ) );
+                entryData = { value: oldValue };
                 data[ entry ] = entryData;
             }
 
-            entryData.placeholder = entryData.placeholder ?? entry;
+            entryData.placeholder = entryData.placeholder ?? ( entryData.label ?? `Enter ${ entry }` );
             entryData.width = "100%";
 
             if( !( options.skipLabels ?? false ) )
             {
-                const label = new LX.TextInput( null, entry, null, { disabled: true, inputClass: "formlabel nobg" } );
+                const label = new LX.TextInput( null, entryData.label ?? entry, null, { disabled: true, inputClass: "formlabel nobg" } );
                 container.appendChild( label.root );
             }
 
@@ -10666,15 +10688,15 @@ class Vector extends Widget {
 
             for( let i = 0; i < vectorInputs.length; ++i )
             {
-                let value = newValue[ i ];
-                value = LX.clamp( value, +vectorInputs[ i ].min, +vectorInputs[ i ].max );
-                value = LX.round( value, options.precision ) ?? 0;
-                vectorInputs[ i ].value = newValue[ i ] = value;
+                let vecValue = newValue[ i ];
+                vecValue = LX.clamp( vecValue, +vectorInputs[ i ].min, +vectorInputs[ i ].max );
+                vecValue = LX.round( vecValue, options.precision ) ?? 0;
+                vectorInputs[ i ].value = value[ i ] = vecValue;
             }
 
             if( !skipCallback )
             {
-                this._trigger( new LX.IEvent( name, newValue, event ), callback );
+                this._trigger( new LX.IEvent( name, value, event ), callback );
             }
         };
 
@@ -11264,11 +11286,17 @@ class Progress extends Widget {
         };
 
         this.onSetValue = ( newValue, skipCallback, event ) => {
+			newValue = LX.clamp( newValue, progress.min, progress.max );
             this.root.querySelector("meter").value = newValue;
             _updateColor();
             if( this.root.querySelector("span") )
             {
                 this.root.querySelector("span").innerText = newValue;
+            }
+
+            if( !skipCallback )
+            {
+                this._trigger( new LX.IEvent( name, newValue, event ), options.callback );
             }
         };
 
@@ -11353,11 +11381,6 @@ class Progress extends Widget {
                     const rect = progress.getBoundingClientRect();
                     const newValue = LX.round( LX.remapRange( e.offsetX - rect.x, 0, rect.width, progress.min, progress.max ) );
                     this.set( newValue, false, e );
-
-                    if( options.callback )
-                    {
-                        options.callback( newValue, e );
-                    }
                 }
 
                 e.stopPropagation();
@@ -15827,5 +15850,282 @@ class AssetView {
 }
 
 LX.AssetView = AssetView;
+
+// tour.js @jxarco
+
+class Tour {
+
+    /**
+     * @constructor Tour
+     * @param {Array} steps
+     * @param {Object} options
+     * useModal: Use a modal to highlight the tour step [true]
+     * offset: Horizontal and vertical margin offset [0]
+     * horizontalOffset: Horizontal offset [0]
+     * verticalOffset: Vertical offset [0]
+     * radius: Radius for the tour step highlight [8]
+     */
+
+    constructor( steps, options = {} ) {
+
+        this.steps = steps || [];
+        this.currentStep = 0;
+
+        this.useModal = options.useModal ?? true;
+        this.offset = options.offset ?? 8;
+        this.horizontalOffset = options.horizontalOffset;
+        this.verticalOffset = options.verticalOffset;
+        this.radius = options.radius ?? 12;
+
+        this.tourContainer = LX.makeContainer( ["100%", "100%"], "tour-container" );
+        this.tourContainer.style.display = "none";
+        document.body.appendChild( this.tourContainer );
+
+        this.tourMask = LX.makeContainer( ["100%", "100%"], "tour-mask" );
+    }
+
+    /**
+     * @method begin
+     */
+
+    begin() {
+
+        this.currentStep = 0;
+
+        if ( this.useModal )
+        {
+            this.tourMask.style.display = "block";
+            this.tourContainer.appendChild( this.tourMask );
+        }
+
+        this.tourContainer.style.display = "block";
+
+        this._showStep( 0 );
+    }
+
+    /**
+     * @method stop
+     */
+
+    stop() {
+
+        if( this.useModal )
+        {
+            this.tourMask.style.display = "none";
+            this.tourContainer.removeChild( this.tourMask );
+        }
+
+        this._popover?.destroy();
+
+        this.tourContainer.style.display = "none";
+    }
+
+    // Show the current step of the tour
+    _showStep( stepOffset = 1 ) {
+
+        this.currentStep += stepOffset;
+
+        const step = this.steps[ this.currentStep ];
+        if ( !step ) {
+            this.stop();
+            return;
+        }
+
+        const prevStep = this.steps[ this.currentStep - 1 ];
+        const nextStep = this.steps[ this.currentStep + 1 ];
+
+        this._generateMask( step.reference );
+        this._createHighlight( step, prevStep, nextStep );
+    }
+
+    // Generate mask for the specific step reference
+    // using a fullscreen SVG with "rect" elements
+    _generateMask( reference ) {
+
+        this.tourMask.innerHTML = ""; // Clear previous content
+
+        const svg = document.createElementNS( "http://www.w3.org/2000/svg", "svg" );
+        svg.style.width = "100%";
+        svg.style.height = "100%";
+        this.tourMask.appendChild( svg );
+
+        const clipPath = document.createElementNS( "http://www.w3.org/2000/svg", "clipPath" );
+        clipPath.setAttribute( "id", "svgTourClipPath" );
+        svg.appendChild( clipPath );
+
+        function ceilAndShiftRect( p, s ) {
+            const cp = Math.ceil( p );
+            const delta = cp - p;
+            const ds = s - delta;
+            return [  cp, ds ];
+        }
+
+        const refBounding = reference.getBoundingClientRect();
+        const [ boundingX, boundingWidth ] = ceilAndShiftRect( refBounding.x, refBounding.width );
+        const [ boundingY, boundingHeight ] = ceilAndShiftRect( refBounding.y, refBounding.height );
+
+        const vOffset = this.verticalOffset ?? this.offset;
+        const hOffset = this.horizontalOffset ?? this.offset;
+
+        // Left
+        {
+            const rect = document.createElementNS( "http://www.w3.org/2000/svg", "rect" );
+            rect.setAttribute( "x", 0 );
+            rect.setAttribute( "y", 0 );
+            rect.setAttribute( "width", boundingX - hOffset );
+            rect.setAttribute( "height", window.innerHeight );
+            rect.setAttribute( "stroke", "none" );
+            clipPath.appendChild( rect );
+        }
+
+        // Top
+        {
+            const rect = document.createElementNS( "http://www.w3.org/2000/svg", "rect" );
+            rect.setAttribute( "x", boundingX - hOffset );
+            rect.setAttribute( "y", 0 );
+            rect.setAttribute( "width", boundingWidth + hOffset * 2 );
+            rect.setAttribute( "height", boundingY - vOffset );
+            rect.setAttribute( "stroke", "none" );
+            clipPath.appendChild( rect );
+        }
+
+        // Bottom
+        {
+            const rect = document.createElementNS( "http://www.w3.org/2000/svg", "rect" );
+            rect.setAttribute( "x", boundingX - hOffset );
+            rect.setAttribute( "y", boundingY + boundingHeight + vOffset );
+            rect.setAttribute( "width", boundingWidth + hOffset * 2 );
+            rect.setAttribute( "height", window.innerHeight - boundingY - boundingHeight - vOffset );
+            rect.setAttribute( "stroke", "none" );
+            clipPath.appendChild( rect );
+        }
+
+        // Right
+        {
+            const rect = document.createElementNS( "http://www.w3.org/2000/svg", "rect" );
+            rect.setAttribute( "x", boundingX + boundingWidth + hOffset );
+            rect.setAttribute( "y", 0 );
+            rect.setAttribute( "width", window.innerWidth - boundingX - boundingWidth );
+            rect.setAttribute( "height", window.innerHeight );
+            rect.setAttribute( "stroke", "none" );
+            clipPath.appendChild( rect );
+        }
+
+        // Reference Highlight
+        const refContainer = LX.makeContainer( ["0", "0"], "tour-ref-mask" );
+        refContainer.style.left = `${ boundingX - hOffset - 1 }px`;
+        refContainer.style.top = `${ boundingY - vOffset - 1 }px`;
+        refContainer.style.width = `${ boundingWidth + hOffset * 2 + 2 }px`;
+        refContainer.style.height = `${ boundingHeight + vOffset * 2 + 2}px`;
+        this.tourContainer.appendChild( refContainer );
+
+        const referenceMask = document.createElementNS( "http://www.w3.org/2000/svg", "mask" );
+        referenceMask.setAttribute( "id", "svgTourReferenceMask" );
+        svg.appendChild( referenceMask );
+
+        // Reference Mask
+        {
+            const rectWhite = document.createElementNS( "http://www.w3.org/2000/svg", "rect" );
+            rectWhite.setAttribute( "width", boundingWidth + hOffset * 2 + 2 );
+            rectWhite.setAttribute( "height", boundingHeight + vOffset * 2 + 2);
+            rectWhite.setAttribute( "stroke", "none" );
+            rectWhite.setAttribute( "fill", "white" );
+            referenceMask.appendChild( rectWhite );
+
+            const rectBlack = document.createElementNS( "http://www.w3.org/2000/svg", "rect" );
+            rectBlack.setAttribute( "rx", this.radius );
+            rectBlack.setAttribute( "width", boundingWidth + hOffset * 2 + 2);
+            rectBlack.setAttribute( "height", boundingHeight + vOffset * 2 + 2);
+            rectBlack.setAttribute( "stroke", "none" );
+            rectBlack.setAttribute( "fill", "black" );
+            referenceMask.appendChild( rectBlack );
+        }
+    }
+
+    // Create the container with the user hints
+    _createHighlight( step, previousStep, nextStep ) {
+
+        const popoverContainer = LX.makeContainer( ["auto", "auto"], "tour-step-container" );
+
+        {
+            const header = LX.makeContainer( ["100%", "auto"], "flex flex-row", "", popoverContainer );
+            LX.makeContainer( ["70%", "auto"], "p-2 font-medium", step.title, header );
+            const closer = LX.makeContainer( ["30%", "auto"], "flex flex-row p-2 justify-end", "", header );
+            const closeIcon = LX.makeIcon( "X" );
+            closer.appendChild( closeIcon );
+
+            closeIcon.listen( "click", () => {
+                this.stop();
+            } );
+        }
+
+        LX.makeContainer( ["100%", "auto"], "p-2 text-md", step.content, popoverContainer, { maxWidth: "400px" } );
+        const footer = LX.makeContainer( ["100%", "auto"], "flex flex-row text-md", "", popoverContainer );
+
+        {
+            const footerSteps = LX.makeContainer( ["50%", "auto"], "p-2 gap-1 self-center flex flex-row text-md", "", footer );
+            for(  let i = 0; i < this.steps.length; i++ )
+            {
+                const stepIndicator = document.createElement( "span" );
+                stepIndicator.className = "tour-step-indicator";
+                if( i === this.currentStep )
+                {
+                    stepIndicator.classList.add( "active" );
+                }
+                footerSteps.appendChild( stepIndicator );
+            }
+        }
+
+        const footerButtons = LX.makeContainer( ["50%", "auto"], "text-md", "", footer );
+        const footerPanel = new LX.Panel();
+
+        let numButtons = 1;
+
+        if( previousStep )
+        {
+            numButtons++;
+        }
+
+        if( numButtons > 1 )
+        {
+            footerPanel.sameLine( 2, "justify-end" );
+        }
+
+        if( previousStep )
+        {
+            footerPanel.addButton( null, "Previous", () => {
+                this._showStep( -1 );
+            }, { buttonClass: "contrast" } );
+        }
+
+        if( nextStep )
+        {
+            footerPanel.addButton( null, "Next", () => {
+                this._showStep( 1 );
+            }, { buttonClass: "accent" } );
+        }
+        else
+        {
+            footerPanel.addButton( null, "Finish", () => {
+                this.stop();
+            } );
+        }
+
+        footerButtons.appendChild( footerPanel.root );
+
+        const sideOffset = ( step.side === "left" || step.side === "right" ? this.horizontalOffset : this.verticalOffset ) ?? this.offset;
+        const alignOffset = ( step.align === "start" || step.align === "end" ? sideOffset : 0 );
+
+        this._popover?.destroy();
+        this._popover = new LX.Popover( null, [ popoverContainer ], {
+            reference: step.reference,
+            side: step.side,
+            align: step.align,
+            sideOffset,
+            alignOffset: step.align === "start" ? -alignOffset : alignOffset,
+        } );
+    }
+}
+LX.Tour = Tour;
 
 })( typeof(window) != 'undefined' ? window : (typeof(self) != 'undefined' ? self : global ) );

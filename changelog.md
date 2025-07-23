@@ -2,6 +2,8 @@
 
 ## dev
 
+## 0.6.11 (master)
+
 Widgets:
 - Fixed Progress Widget value clamp and callback.
 - Fixed Form data entries initial value if not an Object. Added support for Form `entryData.label`.
@@ -13,7 +15,7 @@ Added support for new `LX.Tour` Component to guide users through an app.
 Fixed light-dark themes in docs css.
 Docs updated.
 
-## 0.6.10 (master)
+## 0.6.10
 
 Timeline:
 - Added support for cloning clips and tracks.
