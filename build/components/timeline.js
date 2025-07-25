@@ -4389,11 +4389,10 @@ class ClipsTimeline extends Timeline {
     validateDuration(t) {
         for(let i = 0; i < this.animationClip.tracks.length; i++) {
             const track = this.animationClip.tracks[i];
-            const clipsIdxs = this.getClipsInRange( track, t , this.animationClip.duration, 0 );
-            if(!clipsIdxs)
-                continue;
-            const clip = track.clips[clipsIdxs[clipsIdxs.length - 1]];
-            t = Math.max(t, clip.start + clip.duration);
+            if ( track.clips.length ){
+                const clip = track.clips[track.clips.length-1]; // assuming they are ordered ascendently
+                t = Math.max(t, clip.start + clip.duration);
+            }
         }
         return t;
     }
@@ -4401,7 +4400,7 @@ class ClipsTimeline extends Timeline {
     setDuration( t, skipCallback = false, updateHeader = true ){
         const oldT = t;
         const newT = this.validateDuration(t);
-        super.setDuration( this.validateDuration(t), skipCallback, oldT != newT || updateHeader );
+        super.setDuration( newT, skipCallback, oldT != newT || updateHeader );
     }
 }
 
