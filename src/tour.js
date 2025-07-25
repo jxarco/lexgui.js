@@ -91,6 +91,11 @@ class Tour {
     _generateMask( reference ) {
 
         this.tourMask.innerHTML = ""; // Clear previous content
+        for( let i = this.tourContainer.children.length-1; i > -1; --i){ // Clear from previous tour-ref-mask
+            if( this.tourContainer.children[i] != this.tourMask ){
+                this.tourContainer.children[i].remove();
+            }
+        }
 
         const svg = document.createElementNS( "http://www.w3.org/2000/svg", "svg" );
         svg.style.width = "100%";
@@ -120,7 +125,7 @@ class Tour {
             const rect = document.createElementNS( "http://www.w3.org/2000/svg", "rect" );
             rect.setAttribute( "x", 0 );
             rect.setAttribute( "y", 0 );
-            rect.setAttribute( "width", boundingX - hOffset );
+            rect.setAttribute( "width", Math.max( 0, boundingX - hOffset ) );
             rect.setAttribute( "height", window.innerHeight );
             rect.setAttribute( "stroke", "none" );
             clipPath.appendChild( rect );
@@ -131,8 +136,8 @@ class Tour {
             const rect = document.createElementNS( "http://www.w3.org/2000/svg", "rect" );
             rect.setAttribute( "x", boundingX - hOffset );
             rect.setAttribute( "y", 0 );
-            rect.setAttribute( "width", boundingWidth + hOffset * 2 );
-            rect.setAttribute( "height", boundingY - vOffset );
+            rect.setAttribute( "width", Math.max( 0, boundingWidth + hOffset * 2 ) );
+            rect.setAttribute( "height", Math.max( 0, boundingY - vOffset ) );
             rect.setAttribute( "stroke", "none" );
             clipPath.appendChild( rect );
         }
@@ -142,8 +147,8 @@ class Tour {
             const rect = document.createElementNS( "http://www.w3.org/2000/svg", "rect" );
             rect.setAttribute( "x", boundingX - hOffset );
             rect.setAttribute( "y", boundingY + boundingHeight + vOffset );
-            rect.setAttribute( "width", boundingWidth + hOffset * 2 );
-            rect.setAttribute( "height", window.innerHeight - boundingY - boundingHeight - vOffset );
+            rect.setAttribute( "width", Math.max( 0, boundingWidth + hOffset * 2 ) );
+            rect.setAttribute( "height", Math.max( 0, window.innerHeight - boundingY - boundingHeight - vOffset ) );
             rect.setAttribute( "stroke", "none" );
             clipPath.appendChild( rect );
         }
@@ -153,8 +158,8 @@ class Tour {
             const rect = document.createElementNS( "http://www.w3.org/2000/svg", "rect" );
             rect.setAttribute( "x", boundingX + boundingWidth + hOffset );
             rect.setAttribute( "y", 0 );
-            rect.setAttribute( "width", window.innerWidth - boundingX - boundingWidth );
-            rect.setAttribute( "height", window.innerHeight );
+            rect.setAttribute( "width", Math.max( 0, window.innerWidth - boundingX - boundingWidth ) );
+            rect.setAttribute( "height", Math.max( 0, window.innerHeight ) );
             rect.setAttribute( "stroke", "none" );
             clipPath.appendChild( rect );
         }
