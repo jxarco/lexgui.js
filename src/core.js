@@ -1852,8 +1852,12 @@ class Calendar {
 
                         const dayDate = new Date( `${ this.month }/${ dayData.day }/${ this.year }` );
                         const date = new Date();
+                        // today inclusives
                         const beforeToday = this.untilToday ? ( dayDate.getTime() < date.getTime() ) : true;
-                        const afterToday = this.fromToday ? ( dayDate.getTime() > date.getTime() ) : true;
+                        const afterToday = this.fromToday ? ( dayDate.getFullYear() > date.getFullYear() ||
+                            (dayDate.getFullYear() === date.getFullYear() && dayDate.getMonth() > date.getMonth()) ||
+                            (dayDate.getFullYear() === date.getFullYear() && dayDate.getMonth() === date.getMonth() && dayDate.getDate() >= date.getDate())
+                        ) : true;
                         const selectable = dayData.currentMonth && beforeToday && afterToday;
 
                         if( this.currentDate && ( dayData.day == this.currentDate.day ) && ( this.month == this.currentDate.month )
@@ -1877,6 +1881,20 @@ class Calendar {
                                 if( this.onChange )
                                 {
                                     this.onChange( this.currentDate );
+                                }
+                            } );
+                        }
+                        // This event should only be applied in non current month days
+                        else if( !dayData.currentMonth )
+                        {
+                            th.addEventListener( "click", () => {
+                                if( dayData?.prevMonth )
+                                {
+                                    this._previousMonth();
+                                }
+                                else
+                                {
+                                    this._nextMonth();
                                 }
                             } );
                         }
@@ -1923,7 +1941,7 @@ class Calendar {
         // Fill in days from previous month
         for( let i = firstDay - 1; i >= 0; i--)
         {
-            calendarDays.push( { day: daysInPrevMonth - i, currentMonth: false } );
+            calendarDays.push( { day: daysInPrevMonth - i, currentMonth: false, prevMonth: true } );
         }
 
         // Fill in current month days
@@ -1936,7 +1954,7 @@ class Calendar {
         const remaining = 42 - calendarDays.length;
         for( let i = 1; i <= remaining; i++ )
         {
-            calendarDays.push( { day: i, currentMonth: false } );
+            calendarDays.push( { day: i, currentMonth: false, nextMonth: true } );
         }
 
         this.monthName = this.getMonthName( month );
