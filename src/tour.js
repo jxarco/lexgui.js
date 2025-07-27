@@ -3,6 +3,8 @@ import { LX } from './core.js';
 
 class Tour {
 
+    static ACTIVE_TOURS = [];
+
     /**
      * @constructor Tour
      * @param {Array} steps
@@ -31,6 +33,14 @@ class Tour {
             this.tourContainer = LX.makeContainer( ["100%", "100%"], "tour-container" );
             this.tourContainer.style.display = "none";
             document.body.appendChild( this.tourContainer );
+
+            window.addEventListener( "resize", () => {
+
+                for( const tour of Tour.ACTIVE_TOURS )
+                {
+                    tour._showStep( 0 );
+                }
+            } );
         }
     }
 
@@ -43,6 +53,8 @@ class Tour {
         this.currentStep = 0;
 
         this.tourContainer.style.display = "block";
+
+        Tour.ACTIVE_TOURS.push( this );
 
         this._showStep( 0 );
     }
@@ -60,6 +72,12 @@ class Tour {
         }
 
         this._popover?.destroy();
+
+        const index = Tour.ACTIVE_TOURS.indexOf( this );
+        if( index !== -1 )
+        {
+            Tour.ACTIVE_TOURS.splice( index, 1 );
+        }
 
         this.tourContainer.innerHTML = "";
         this.tourContainer.style.display = "none";

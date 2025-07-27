@@ -7,7 +7,7 @@ Timeline:
 - Clips now have the read-only attribute trackIdx.
 - All "unselect" attribute have been renamed to "deselect".
 
-Previous Tour masks are now removed.
+Previous Tour masks are now removed. Fixed Tour on resize window.
 
 ## 0.6.11 (master)
 
