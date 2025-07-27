@@ -1834,8 +1834,12 @@ class Calendar {
 
                         const dayDate = new Date( `${ this.month }/${ dayData.day }/${ this.year }` );
                         const date = new Date();
+                        // today inclusives
                         const beforeToday = this.untilToday ? ( dayDate.getTime() < date.getTime() ) : true;
-                        const afterToday = this.fromToday ? ( dayDate.getTime() > date.getTime() ) : true;
+                        const afterToday = this.fromToday ? ( dayDate.getFullYear() > date.getFullYear() ||
+                            (dayDate.getFullYear() === date.getFullYear() && dayDate.getMonth() > date.getMonth()) ||
+                            (dayDate.getFullYear() === date.getFullYear() && dayDate.getMonth() === date.getMonth() && dayDate.getDate() >= date.getDate())
+                        ) : true;
                         const selectable = dayData.currentMonth && beforeToday && afterToday;
 
                         if( this.currentDate && ( dayData.day == this.currentDate.day ) && ( this.month == this.currentDate.month )
@@ -1859,6 +1863,20 @@ class Calendar {
                                 if( this.onChange )
                                 {
                                     this.onChange( this.currentDate );
+                                }
+                            } );
+                        }
+                        // This event should only be applied in non current month days
+                        else if( !dayData.currentMonth )
+                        {
+                            th.addEventListener( "click", () => {
+                                if( dayData?.prevMonth )
+                                {
+                                    this._previousMonth();
+                                }
+                                else
+                                {
+                                    this._nextMonth();
                                 }
                             } );
                         }
@@ -1905,7 +1923,7 @@ class Calendar {
         // Fill in days from previous month
         for( let i = firstDay - 1; i >= 0; i--)
         {
-            calendarDays.push( { day: daysInPrevMonth - i, currentMonth: false } );
+            calendarDays.push( { day: daysInPrevMonth - i, currentMonth: false, prevMonth: true } );
         }
 
         // Fill in current month days
@@ -1918,7 +1936,7 @@ class Calendar {
         const remaining = 42 - calendarDays.length;
         for( let i = 1; i <= remaining; i++ )
         {
-            calendarDays.push( { day: i, currentMonth: false } );
+            calendarDays.push( { day: i, currentMonth: false, nextMonth: true } );
         }
 
         this.monthName = this.getMonthName( month );
@@ -12506,6 +12524,8 @@ class DatePicker extends Widget {
 
         super( Widget.DATE, name, null, options );
 
+        const dateAsRange = ( dateString?.constructor === Array );
+
         if( options.today )
         {
             const date = new Date();
@@ -12518,11 +12538,26 @@ class DatePicker extends Widget {
 
         this.onSetValue = ( newValue, skipCallback, event ) => {
 
+            if( !dateAsRange )
+            {
+                this.calendar.fromDateString( newValue );
+            }
+            else
+            {
+                if( newValue[ 0 ] )
+                {
+                    this.calendar.fromDateString( newValue[ 0 ] );
+                }
+                else
+                {
+                    console.assert( this.optCalendar, "No secondary calendar to set range date!" );
+                    this.optCalendar.fromDateString( newValue[ 1 ] );
+                }
+            }
+
             dateString = newValue;
 
-            this.calendar.fromDateString( newValue );
-
-            refresh( this.calendar.getFullDate() );
+            refresh( dateAsRange ? `${ this.calendar.getFullDate() } to ${ this?.optCalendar.getFullDate() }` : this.calendar.getFullDate() );
 
             if( !skipCallback )
             {
@@ -12539,22 +12574,46 @@ class DatePicker extends Widget {
         container.className = "lexdate";
         this.root.appendChild( container );
 
-        this.calendar = new LX.Calendar( dateString, { onChange: ( date ) => {
-            this.set( `${ date.day }/${ date.month }/${ date.year }` );
+        this.calendar = new LX.Calendar( dateAsRange ? dateString[ 0 ] : dateString, { onChange: ( date ) => {
+            const newDateString = `${ date.day }/${ date.month }/${ date.year }`;
+            this.set( dateAsRange ? [ newDateString, null ] : newDateString );
         }, ...options });
+
+        const popoverContent = [ this.calendar ];
+
+        if( dateAsRange )
+        {
+            this.optCalendar = new LX.Calendar( dateString[ 1 ], { onChange: ( date ) => {
+                const newDateString = `${ date.day }/${ date.month }/${ date.year }`;
+                this.set( dateAsRange ? [ null, newDateString ] : newDateString );
+            }, ...options });
+
+            popoverContent.push( this.optCalendar );
+        }
 
         const refresh = ( currentDate ) => {
             container.innerHTML = "";
             const calendarIcon = LX.makeIcon( "Calendar" );
             const calendarButton = new LX.Button( null, currentDate ?? "Pick a date", () => {
-                this._popover = new LX.Popover( calendarButton.root, [ this.calendar ] );
+                this._popover = new LX.Popover( calendarButton.root, popoverContent );
+                if( dateAsRange )
+                {
+                    Object.assign( this._popover.root.style, { display: "flex", width: "auto" } );
+                }
             }, { buttonClass: `flex flex-row px-3 ${ currentDate ? "" : "fg-tertiary" } justify-between` } );
 
             calendarButton.root.querySelector( "button" ).appendChild( calendarIcon );
             container.appendChild( calendarButton.root );
         };
 
-        refresh( dateString ? this.calendar.getFullDate(): null );
+        if( dateString )
+        {
+            refresh( dateAsRange ? `${ this.calendar.getFullDate() } to ${ this?.optCalendar.getFullDate() }` : this.calendar.getFullDate() );
+        }
+        else
+        {
+            refresh();
+        }
 
         LX.doAsync( this.onResize.bind( this ) );
     }

@@ -13,6 +13,7 @@ Timeline:
 Previous Tour masks are now removed. Fixed Tour on resize window.
 Added new `LX.PopConfirm`.
 Fixed PlainText <> symbols in CodeEditor.
+Fixed Calendar `options.fromToday` not including today's date.
 
 ## 0.6.11 (master)
 
