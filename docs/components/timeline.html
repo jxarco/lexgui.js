@@ -135,7 +135,8 @@
         [".currentTime", "Number", `${INLINE_CODE("Read-Only")}. Use ${INLINE_CODE("setTime")} to modify its value`],  
         [".historyMaxSteps", "Int", `Sets the maximum number of states for the history (undo & redo).`],  
         [".trackHeight", "Number", `${INLINE_CODE("Read-Only")}. Size of the tracks drawn.`],
-        [".optimizeThreshold", "Number", `Used to optimize tracks, if it has an optimization function`]
+        [".optimizeThreshold", "Number", `Used to optimize tracks, if it has an optimization function`],
+        [".visualOriginTime", "Number", `Sets the horizontal scroll of the timeline, displaying the specified time (seconds) at pixel 0 (left). Allows negative values`] 
     ] );
 
     MAKE_HEADER( "Methods", "h2", "" );
@@ -404,7 +405,7 @@ panel.attach(kfTimeline.root);` );
         ["currentSelection", "[trackIdx, keyframeIdx, time of keyframe]"],
     ] );
     
-    MAKE_CLASS_METHOD( "onUnselectKeyFrames", `Triggered before unselecting all keyframes.`, [
+    MAKE_CLASS_METHOD( "onDeselectKeyFrames", `Triggered before deselecting all keyframes.`, [
         ["selectedKeyframes", "Array of [trackIdx, keyframeIdx, timestamp of keyframe]"],
     ] );
 
@@ -492,11 +493,11 @@ panel.attach(kfTimeline.root);` );
         ["skipCallback", "Boolean"],
     ], "[trackIdx, frameIdx, frameTime]" );
            
-    MAKE_CLASS_METHOD( ".unSelectKeyFrame", `Unselects a keyframe.`, [
+    MAKE_CLASS_METHOD( ".deselectKeyFrame", `Deselects a keyframe.`, [
         ["trackIdx", "Number"],
         ["frameIdx", "Number"],
     ], "Boolean" );
-    MAKE_CLASS_METHOD( ".unSelectAllKeyFrames", `Unselects all keyframes.`, [
+    MAKE_CLASS_METHOD( ".deselectAllKeyFrames", `Deselects all keyframes.`, [
     ], "" );
 
     MAKE_CLASS_METHOD( ".unHoverAll", `Unhover current keyframes.`, [
@@ -535,7 +536,7 @@ panel.attach(kfTimeline.root);` );
             tracks: [
                 { id: "track0" },
                 { id: "track1", clips: [{id:"clip1", start: 0, duration:1, clipColor:"#800"}] },
-                { id: "track2", clips: [{id:"clip1", start: 1, fadein: 1.2, fadeout: 1.7, duration:1, clipColor:"#080"}] },
+                { id: "track2", clips: [{id:"inactive clip ", start: 1, fadein: 1.2, fadeout: 1.7, duration:1, clipColor:"#080", active: false}] },
                 { id: "My Track", clips: [{id:"clip1", start: 1, fadein: 1.2, fadeout: 1.7, duration:1, clipColor:"#008", fadeColor: "#003"}] },
             ]
         }
@@ -648,6 +649,9 @@ panel.attach(clipTimeline.root);` );
         [".fadeout", "Number", `If defined, sets the time at which the fadeout starts. Must be in global, not relative to start`],
         [".clipColor", "Color", `Defines the color of the clip. Must be a value accepted by ${INLINE_CODE("CanvasRenderingContext2D.fillStyle")}.`],
         [".fadeColor", "Color", `Color of the areas defined by the fade attributes. Must be a value accepted by ${INLINE_CODE("CanvasRenderingContext2D.fillStyle")}.`],
+        [".active", "Boolean", `Whether the clip is enabled or not. It only changes the color from clipColor to a default disabled color. Can be written directly. ${INLINE_CODE("Track.active")} has precedence over this.`],
+        [".trackIdx", "Number", `${INLINE_CODE("READ ONLY")} Track index where the clip is. This attribute is managed by the addClip function.`],
+
     ] );
 
     MAKE_PARAGRAPH( `Clips can contain any other attributes and will be accessible at all times.`);
@@ -736,23 +740,23 @@ panel.attach(clipTimeline.root);` );
         ["skipCallback", "Boolean"]
     ], "" );
 
-    MAKE_CLASS_METHOD( ".selectClip", `Selected a clip of the track. If ${INLINE_CODE("unselect")} is true, it unselects all selected clips, and makes this the only one selected`, [
+    MAKE_CLASS_METHOD( ".selectClip", `Selected a clip of the track. If ${INLINE_CODE("deselect")} is true, it deselects all selected clips, and makes this the only one selected`, [
         ["trackIdx", "Number"],
         ["clipIdx", "Number"],
-        ["unselect", "Boolean"],
+        ["deselect", "Boolean"],
         ["skipCallback", "Boolean"]
     ], "Number" );
 
-    MAKE_CLASS_METHOD( ".selectAll", `Unselect all selected clips.`, [
+    MAKE_CLASS_METHOD( ".selectAll", `Deselect all selected clips.`, [
         ["skipCallback", "Boolean"]
     ], "" );
 
-    MAKE_CLASS_METHOD( ".unSelectClip", `Unselect a clip of the track.`, [
+    MAKE_CLASS_METHOD( ".deselectClip", `Deselect a clip of the track.`, [
         ["trackIdx", "Number"],
         ["clipIdx", "Number"],
     ], "Number" );
 
-    MAKE_CLASS_METHOD( ".unSelectAllClips", `Unselect all selected clips.`, [
+    MAKE_CLASS_METHOD( ".deselectAllClips", `Deselect all selected clips.`, [
     ], "" );
 
     MAKE_CLASS_METHOD( ".unHoverAll", `Unhover current clips.`, [

@@ -213,7 +213,7 @@
                 },
                 onCreateAfterTopBar: (panel) => {
                     panel.addButton("autoKeyEnabled", "autoKeyEnable", null, { icon: 'WandSparkles', hideName: true });
-                    panel.addButton("unselectAll", "unselectAll", (value, event) => { kfTimeline.unSelectAllKeyFrames();}, { icon: 'X', hideName: true, callback: (value, event) => { kfTimeline.unSelectAllKeyFrames();} });
+                    panel.addButton("deselectAll", "deselectAll", (value, event) => { kfTimeline.deselectAllKeyFrames();}, { icon: 'X', hideName: true, callback: (value, event) => { kfTimeline.deselectAllKeyFrames();} });
                 }
             });
 
