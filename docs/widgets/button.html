@@ -16,6 +16,10 @@
                 console.log(event);
             });
 
+            panel.addButton(null, "A Must Confirm Button", (value, event) => {
+                console.log(event);
+            }, { mustConfirm: true });
+
             panel.addButton("A Button Label", "Print event", (value, event) => {
                 console.log(event);
             });
@@ -49,17 +53,30 @@
         panel.addTable( null, {
             head: [ "Option", "Type", "Description", "Default" ],
             body: [
+                ["buttonClass", "String", "Class to add to the native button element", "—"],
                 ["disabled", "Boolean", "Make the widget disabled", "false"],
-                ["icon", "String", "Icon to be added before the input", "—"],
-                ["iconPosition", `<span class='cursor-pointer' title='cover | start | end'>Enum</span>`, "Icon position", `"cover"`],
                 ["fileInput", "Boolean", "Button click requests a file", "false"],
                 ["fileInputType", "String", "Type of the requested file", `"text"`],
+                ["icon", "String", "Icon to be added before the input", "—"],
+                ["iconPosition", `<span class='cursor-pointer' title='cover | start | end'>Enum</span>`, "Icon position", `"cover"`],
                 ["img", "String", "Path to image to show as button value", "—"],
+                ["mustConfirm", "Boolean", "User must confirm trigger in a popover", "false"],
                 ["title", "String", "Text to show in native Element title", "—"],
-                ["buttonClass", "String", "Class to add to the native button element", "—"]
             ].map( v => {
                 return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
             } )
         }, {});
     }
+
+    MAKE_NOTE( `When ${INLINE_CODE("mustConfirm")} is set to true, the following options are available to use:
+    <ul>
+    <li>${INLINE_CODE("title (String)")}</li>
+    <li>${INLINE_CODE("content (String)")}</li>
+    <li>${INLINE_CODE("confirmText (String)")}</li>
+    <li>${INLINE_CODE("cancelText (String)")}</li>
+    <li>${INLINE_CODE("confirmSide ('left'|'right'|'top'|'bottom')")}</li>
+    <li>${INLINE_CODE("confirmAlign ('start'|'center'|'end')")}</li>
+    </ul>
+    ` );
+
 </script>

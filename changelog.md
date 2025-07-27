@@ -2,12 +2,16 @@
 
 ## dev
 
+Widgets:
+- Button Widget now supports `options.mustConfirm` to confirm the trigger with custom options.
+
 Timeline:
 - Clips now have the active property to enable/disable the clip (only visuals).
 - Clips now have the read-only attribute trackIdx.
 - All "unselect" attribute have been renamed to "deselect".
 
 Previous Tour masks are now removed. Fixed Tour on resize window.
+Added new `LX.PopConfirm`.
 Fixed PlainText <> symbols in CodeEditor.
 
 ## 0.6.11 (master)

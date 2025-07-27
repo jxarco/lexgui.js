@@ -610,6 +610,7 @@ class Panel {
      * img: Path to image to show as button value
      * title: Text to show in native Element title
      * buttonClass: Class to add to the native button element
+     * mustConfirm: User must confirm trigger in a popover
      */
 
     addButton( name, value, callback, options = {} ) {

@@ -1553,6 +1553,20 @@ class Button extends Widget {
             {
                 wValue.querySelector( ".file-input" ).click();
             }
+            else if( options.mustConfirm )
+            {
+                new LX.PopConfirm( wValue, {
+                    onConfirm: () => {
+                        this._trigger( new LX.IEvent( name, value, e ), callback );
+                    },
+                    side: options.confirmSide,
+                    align: options.confirmAlign,
+                    confirmText: options.confirmText,
+                    cancelText: options.confirmCancelText,
+                    title: options.confirmTitle,
+                    content: options.confirmContent
+                } );
+            }
             else
             {
                 const swapInput = wValue.querySelector( "input" );

@@ -279,7 +279,14 @@ const area = await LX.init( { layoutMode: "document", rootClass: "wrapper" } );
             panel.addVector3( "Position", [0.0, 0.0, 0.0] );
             panel.addVector4( "Rotation", [0.0, 0.0, 0.0, 1.0] );
             panel.addVector3( "Scale", [1.0, 1.0, 1.0] );
-            panel.addButton(null, "Export", null, { buttonClass: "contrast" });
+            panel.addButton(null, "Export", () =>  { console.log("Exported!") }, { buttonClass: "contrast", xmustConfirm: true,
+                // confirmSide: "left",
+                // confirmAlign: "start",
+                // confirmText: "Yeah",
+                // confirmCancelText: "Nope",
+                // confirmTitle: "Confirm action",
+                // confirmContent: "Are your sure??"
+             });
             panel.merge();
         }
     }

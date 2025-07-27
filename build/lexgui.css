@@ -853,6 +853,12 @@ a svg, svg path {
     }
 }
 
+@media (min-width: 2100px) {
+    .lexcontainer.wrapper {
+        max-width: 1736px;
+    }
+}
+
 .lextooltip {
     position: fixed;
     background-color: var(--global-text-primary);
