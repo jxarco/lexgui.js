@@ -2,6 +2,13 @@
 
 ## dev
 
+Timeline:
+- Clips now have the active property to enable/disable the clip (only visuals).
+- Clips now have the read-only attribute trackIdx.
+- All "unselect" attribute have been renamed to "deselect".
+
+Previous Tour masks are now removed.
+
 ## 0.6.11 (master)
 
 Widgets:

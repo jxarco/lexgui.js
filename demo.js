@@ -112,7 +112,7 @@ const area = await LX.init( { layoutMode: "document", rootClass: "wrapper" } );
                             side: "left",
                             align: "start"
                         }
-                    ], { xoffset: 8, xradius: 12, xhorizontalOffset: 46, xverticalOffset: 46 });
+                    ], { xoffset: 8, xradius: 12, xhorizontalOffset: 46, xverticalOffset: 46, xuseModal: false });
 
                     exampleTour.begin();
                 } },

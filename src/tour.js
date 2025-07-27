@@ -25,11 +25,13 @@ class Tour {
         this.verticalOffset = options.verticalOffset;
         this.radius = options.radius ?? 12;
 
-        this.tourContainer = LX.makeContainer( ["100%", "100%"], "tour-container" );
-        this.tourContainer.style.display = "none";
-        document.body.appendChild( this.tourContainer );
-
-        this.tourMask = LX.makeContainer( ["100%", "100%"], "tour-mask" );
+        this.tourContainer = document.querySelector( ".tour-container" );
+        if( !this.tourContainer )
+        {
+            this.tourContainer = LX.makeContainer( ["100%", "100%"], "tour-container" );
+            this.tourContainer.style.display = "none";
+            document.body.appendChild( this.tourContainer );
+        }
     }
 
     /**
@@ -39,12 +41,6 @@ class Tour {
     begin() {
 
         this.currentStep = 0;
-
-        if ( this.useModal )
-        {
-            this.tourMask.style.display = "block";
-            this.tourContainer.appendChild( this.tourMask );
-        }
 
         this.tourContainer.style.display = "block";
 
@@ -59,12 +55,13 @@ class Tour {
 
         if( this.useModal )
         {
-            this.tourMask.style.display = "none";
-            this.tourContainer.removeChild( this.tourMask );
+            this.tourMask.remove();
+            this.tourMask = undefined;
         }
 
         this._popover?.destroy();
 
+        this.tourContainer.innerHTML = "";
         this.tourContainer.style.display = "none";
     }
 
@@ -82,7 +79,11 @@ class Tour {
         const prevStep = this.steps[ this.currentStep - 1 ];
         const nextStep = this.steps[ this.currentStep + 1 ];
 
-        this._generateMask( step.reference );
+        if( this.useModal )
+        {
+            this._generateMask( step.reference );
+        }
+
         this._createHighlight( step, prevStep, nextStep );
     }
 
@@ -90,12 +91,10 @@ class Tour {
     // using a fullscreen SVG with "rect" elements
     _generateMask( reference ) {
 
-        this.tourMask.innerHTML = ""; // Clear previous content
-        for( let i = this.tourContainer.children.length-1; i > -1; --i){ // Clear from previous tour-ref-mask
-            if( this.tourContainer.children[i] != this.tourMask ){
-                this.tourContainer.children[i].remove();
-            }
-        }
+        this.tourContainer.innerHTML = ""; // Clear previous content
+
+        this.tourMask = LX.makeContainer( ["100%", "100%"], "tour-mask" );
+        this.tourContainer.appendChild( this.tourMask );
 
         const svg = document.createElementNS( "http://www.w3.org/2000/svg", "svg" );
         svg.style.width = "100%";
