@@ -8,6 +8,7 @@ Timeline:
 - All "unselect" attribute have been renamed to "deselect".
 
 Previous Tour masks are now removed. Fixed Tour on resize window.
+Fixed PlainText <> symbols in CodeEditor.
 
 ## 0.6.11 (master)
 

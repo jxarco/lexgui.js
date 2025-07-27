@@ -2859,18 +2859,18 @@ class CodeEditor {
         }
 
         const lang = this.languages[ this.highlight ];
-        const local_line_num =  this.toLocalLine( linenum );
-        const gutter_line = "<span class='line-gutter'>" + (linenum + 1) + "</span>";
+        const localLineNum =  this.toLocalLine( linenum );
+        const gutterLineHtml = "<span class='line-gutter'>" + (linenum + 1) + "</span>";
 
         const UPDATE_LINE = ( html ) => {
             if( !force ) // Single line update
             {
-                this.code.childNodes[ local_line_num ].innerHTML = gutter_line + html;
+                this.code.childNodes[ localLineNum ].innerHTML = gutterLineHtml + html;
                 this._setActiveLine( linenum );
                 this._clearTmpVariables();
             }
             else // Update all lines at once
-                return "<pre>" + ( gutter_line + html ) + "</pre>";
+                return "<pre>" + ( gutterLineHtml + html ) + "</pre>";
         }
 
         // multi-line strings not supported by now
@@ -2883,14 +2883,15 @@ class CodeEditor {
         // Single line
         if( !force )
         {
-            LX.deleteElement( this.code.childNodes[ local_line_num ] );
-            this.code.insertChildAtIndex( document.createElement( 'pre' ), local_line_num );
+            LX.deleteElement( this.code.childNodes[ localLineNum ] );
+            this.code.insertChildAtIndex( document.createElement( 'pre' ), localLineNum );
         }
 
         // Early out check for no highlighting languages
         if( this.highlight == 'Plain Text' )
         {
-            return UPDATE_LINE( linestring );
+            const plainTextHtml = linestring.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+            return UPDATE_LINE( plainTextHtml );
         }
 
         this._currentLineNumber = linenum;
@@ -2899,9 +2900,11 @@ class CodeEditor {
         const tokensToEvaluate = this._getTokensFromLine( linestring );
 
         if( !tokensToEvaluate.length )
-        return "<pre><span class='line-gutter'>" + linenum + "</span></pre>";
+        {
+            return "<pre><span class='line-gutter'>" + linenum + "</span></pre>";
+        }
 
-        var line_inner_html = "";
+        var lineInnerHtml = "";
 
         // Process all tokens
         for( var i = 0; i < tokensToEvaluate.length; ++i )
@@ -2929,7 +2932,7 @@ class CodeEditor {
                     this._buildingBlockComment = linenum;
             }
 
-            line_inner_html += this._evaluateToken( {
+            lineInnerHtml += this._evaluateToken( {
                 token: token,
                 prev: prev,
                 prevWithSpaces: tokensToEvaluate[ i - 1 ],
@@ -2942,7 +2945,7 @@ class CodeEditor {
             } );
         }
 
-        return UPDATE_LINE( line_inner_html );
+        return UPDATE_LINE( lineInnerHtml );
     }
 
     _lineHasComment( linestring ) {
