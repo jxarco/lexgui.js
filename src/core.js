@@ -6,7 +6,7 @@
 */
 
 const LX = {
-    version: "0.6.11",
+    version: "0.6.12",
     ready: false,
     components: [], // Specific pre-build components
     signals: {}, // Events and triggers
