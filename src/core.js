@@ -1737,8 +1737,15 @@ class Calendar {
         this.root = LX.makeContainer( ["256px", "auto"], "p-1 text-md" );
 
         this.onChange = options.onChange;
+        this.onPreviousMonth = options.onPreviousMonth;
+        this.onNextMonth = options.onNextMonth;
+
         this.untilToday = options.untilToday;
         this.fromToday = options.fromToday;
+        this.range = options.range;
+
+        this.skipPrevMonth = options.skipPrevMonth;
+        this.skipNextMonth = options.skipNextMonth;
 
         if( dateString )
         {
@@ -1762,7 +1769,7 @@ class Calendar {
         }
     }
 
-    _previousMonth() {
+    _previousMonth( skipCallback ) {
 
         this.month = Math.max( 0, this.month - 1 );
 
@@ -1773,9 +1780,14 @@ class Calendar {
         }
 
         this.fromMonthYear( this.month, this.year );
+
+        if( !skipCallback && this.onPreviousMonth )
+        {
+            this.onPreviousMonth( this.currentDate );
+        }
     }
 
-    _nextMonth() {
+    _nextMonth( skipCallback ) {
 
         this.month = Math.min( this.month + 1, 12 );
 
@@ -1786,6 +1798,11 @@ class Calendar {
         }
 
         this.fromMonthYear( this.month, this.year );
+
+        if( !skipCallback && this.onNextMonth )
+        {
+            this.onNextMonth( this.currentDate );
+        }
     }
 
     refresh() {
@@ -1796,19 +1813,25 @@ class Calendar {
         {
             const header = LX.makeContainer( ["100%", "auto"], "flex flex-row p-1", "", this.root );
 
-            const prevMonthIcon = LX.makeIcon( "Left", { title: "Previous Month", iconClass: "border p-1 rounded hover:bg-secondary", svgClass: "sm" } );
-            header.appendChild( prevMonthIcon );
-            prevMonthIcon.addEventListener( "click", () => {
-                this._previousMonth();
-            } );
+            if( !this.skipPrevMonth )
+            {
+                const prevMonthIcon = LX.makeIcon( "Left", { title: "Previous Month", iconClass: "border p-1 rounded hover:bg-secondary", svgClass: "sm" } );
+                header.appendChild( prevMonthIcon );
+                prevMonthIcon.addEventListener( "click", () => {
+                    this._previousMonth();
+                } );
+            }
 
             const monthYearLabel = LX.makeContainer( ["100%", "auto"], "text-center font-medium select-none", `${ this.monthName } ${ this.year }`, header );
 
-            const nextMonthIcon = LX.makeIcon( "Right", { title: "Next Month", iconClass: "border p-1 rounded hover:bg-secondary", svgClass: "sm" } );
-            header.appendChild( nextMonthIcon );
-            nextMonthIcon.addEventListener( "click", () => {
-                this._nextMonth();
-            } );
+            if( !this.skipNextMonth )
+            {
+                const nextMonthIcon = LX.makeIcon( "Right", { title: "Next Month", iconClass: "border p-1 rounded hover:bg-secondary", svgClass: "sm" } );
+                header.appendChild( nextMonthIcon );
+                nextMonthIcon.addEventListener( "click", () => {
+                    this._nextMonth();
+                } );
+            }
         }
 
         // Body
@@ -1840,6 +1863,11 @@ class Calendar {
                 const body = document.createElement( 'tbody' );
                 daysTable.appendChild( body );
 
+                let fromRangeDate = this.range ? LX.dateFromDateString( this.range[ 0 ] ) : null;
+                let toRangeDate = this.range ? LX.dateFromDateString( this.range[ 1 ] ) : null;
+
+                const _currentDate = this.currentDate ? new Date( `${ this.currentDate.month }/${ this.currentDate.day }/${ this.currentDate.year }` ) : null;
+
                 for( let week = 0; week < 6; week++ )
                 {
                     const hrow = document.createElement( 'tr' );
@@ -1859,11 +1887,20 @@ class Calendar {
                             (dayDate.getFullYear() === date.getFullYear() && dayDate.getMonth() === date.getMonth() && dayDate.getDate() >= date.getDate())
                         ) : true;
                         const selectable = dayData.currentMonth && beforeToday && afterToday;
+                        const currentDay = this.currentDate && ( dayData.day == this.currentDate.day ) && ( this.month == this.currentDate.month )
+                            && ( this.year == this.currentDate.year ) && dayData.currentMonth;
+                        const currentFromRange = selectable && fromRangeDate && ( dayData.day == fromRangeDate.getDate() ) && ( this.month == ( fromRangeDate.getMonth() + 1 ) )
+                            && ( this.year == fromRangeDate.getFullYear() );
+                        const currentToRange = selectable && toRangeDate && ( dayData.day == toRangeDate.getDate() ) && ( this.month == ( toRangeDate.getMonth() + 1 ) )
+                            && ( this.year == toRangeDate.getFullYear() );
 
-                        if( this.currentDate && ( dayData.day == this.currentDate.day ) && ( this.month == this.currentDate.month )
-                            && ( this.year == this.currentDate.year ) && dayData.currentMonth )
+                        if( ( !this.range && currentDay ) || this.range && ( currentFromRange || currentToRange ) )
                         {
                             th.className += ` bg-contrast fg-contrast`;
+                        }
+                        else if( this.range && selectable && ( dayDate > fromRangeDate ) && ( dayDate < toRangeDate ) )
+                        {
+                            th.className += ` bg-accent fg-contrast`;
                         }
                         else
                         {
@@ -1885,7 +1922,7 @@ class Calendar {
                             } );
                         }
                         // This event should only be applied in non current month days
-                        else if( !dayData.currentMonth )
+                        else if( this.range === undefined && !dayData.currentMonth )
                         {
                             th.addEventListener( "click", () => {
                                 if( dayData?.prevMonth )
@@ -1912,6 +1949,7 @@ class Calendar {
 
         this.day = parseInt( tokens[ 0 ] );
         this.month = parseInt( tokens[ 1 ] );
+        this.monthName = this.getMonthName( this.month - 1 );
         this.year = parseInt( tokens[ 2 ] );
 
         this.currentDate = this._getCurrentDate();
@@ -1970,8 +2008,14 @@ class Calendar {
         return formatter.format( new Date( 2000, monthIndex, 1 ) );
     }
 
-    getFullDate() {
-        return `${ this.monthName } ${ this.day }${ this._getOrdinalSuffix( this.day ) }, ${ this.year }`;
+    getFullDate( monthName, day, year ) {
+        return `${ monthName ?? this.monthName } ${ day ?? this.day }${ this._getOrdinalSuffix( day ?? this.day ) }, ${ year ?? this.year }`;
+    }
+
+    setRange( range ) {
+        console.assert( range.constructor === Array, "Date Range must be in Array format" );
+        this.range = range;
+        this.refresh();
     }
 
     _getOrdinalSuffix( day ) {
@@ -1987,6 +2031,110 @@ class Calendar {
 }
 
 LX.Calendar = Calendar;
+
+class CalendarRange {
+
+    /**
+     * @constructor CalendarRange
+     * @param {Array} range ["DD/MM/YYYY", "DD/MM/YYYY"]
+     * @param {Object} options
+     */
+
+    constructor( range, options = {} ) {
+
+        this.root = LX.makeContainer( ["auto", "auto"], "flex flex-row" );
+
+        console.assert( range && range.constructor === Array, "Range cannot be empty and has to be an Array!" );
+
+        let mustAdvanceMonth = false;
+
+        // Fix any issues with date range picking
+        {
+            const t0 = LX.dateFromDateString( range[ 0 ] );
+            const t1 = LX.dateFromDateString( range[ 1 ] );
+
+            if( t0 > t1 )
+            {
+                const tmp = range[ 0 ];
+                range[ 0 ] = range[ 1 ];
+                range[ 1 ] = tmp;
+            }
+
+            mustAdvanceMonth = ( t0.getMonth() == t1.getMonth() ) && ( t0.getFullYear() == t1.getFullYear() );
+        }
+
+        this.from = range[ 0 ];
+        this.to = range[ 1 ];
+
+        this._selectingRange = false;
+
+        const onChange = ( date ) => {
+
+            const newDateString = `${ date.day }/${ date.month }/${ date.year }`;
+
+            if( !this._selectingRange )
+            {
+                this.from = this.to = newDateString;
+                this._selectingRange = true;
+            }
+            else
+            {
+                this.to = newDateString;
+                this._selectingRange = false;
+            }
+
+            const newRange = [ this.from, this.to ];
+
+            this.fromCalendar.setRange( newRange );
+            this.toCalendar.setRange( newRange );
+
+            if( options.onChange )
+            {
+                options.onChange( newRange );
+            }
+
+        };
+
+        this.fromCalendar = new LX.Calendar( this.from, {
+            skipNextMonth: true,
+            onChange,
+            onPreviousMonth: () => {
+                this.toCalendar._previousMonth();
+            },
+            range
+        });
+
+        this.toCalendar = new LX.Calendar( this.to, {
+            skipPrevMonth: true,
+            onChange,
+            onNextMonth: () => {
+                this.fromCalendar._nextMonth();
+            },
+            range
+        });
+
+        if( mustAdvanceMonth )
+        {
+            this.toCalendar._nextMonth( true );
+        }
+
+        this.root.appendChild( this.fromCalendar.root );
+        this.root.appendChild( this.toCalendar.root );
+    }
+
+    getFullDate() {
+
+        const d0 = LX.dateFromDateString( this.from );
+        const d0Month = this.fromCalendar.getMonthName( d0.getMonth() );
+
+        const d1 = LX.dateFromDateString( this.to );
+        const d1Month = this.toCalendar.getMonthName( d1.getMonth() );
+
+        return `${ this.fromCalendar.getFullDate( d0Month, d0.getDate(), d0.getFullYear() ) } to ${ this.toCalendar.getFullDate( d1Month, d1.getDate(), d1.getFullYear() ) }`;
+    }
+}
+
+LX.CalendarRange = CalendarRange;
 
 /**
  * @class Tabs

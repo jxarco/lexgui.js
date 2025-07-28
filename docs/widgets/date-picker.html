@@ -8,14 +8,18 @@
     MAKE_HEADER(widgetName + ".", "h1", widgetName.toLowerCase());
     MAKE_PARAGRAPH(`Represents a date field that allows users to enter and edit dates.`);
     MAKE_LINE_BREAK();
-    MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addDate(name, dateString, callback, options)")} to add a ${ widgetName } Widget to your panel or
+    MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addDate(name, dateValue, callback, options)")} to add a ${ widgetName } Widget to your panel or
     create it anywhere using ${INLINE_CODE(`new LX.${ widgetName.replace( /\s/g, '' ) }`)} to append its root to any container.` );
 
     {
         window.__addInteractiveCodeExample( content, widgetName, panel => {
             panel.addDate("Event Date", "16/04/2025", ( date ) => {
-            console.log(date);
-        }, { today: true });
+                console.log(date);
+            }, { today: true });
+
+            panel.addDate("Range Date", ["16/04/2025", "19/04/2025"], ( date ) => {
+                console.log(date);
+            });
         });
     }
 
@@ -28,7 +32,7 @@
             head: [ "Parameter", "Type", "Description", "Default" ],
             body: [
                 ["name", "String", "Widget name", "—"],
-                ["dateString", "String", "Date in String format DD/MM/YYYY", "—"],
+                ["dateValue", "String", "Date in String format DD/MM/YYYY", "—"],
                 ["callback", "Function", "Function called when date changes", "—"],
                 ["options", "Object", "Basic options for a Widget", "—"]
             ].map( v => {
@@ -42,6 +46,12 @@
                 ["today", "Boolean", "Set current day as selected by default", "false"],
                 ["untilToday", "Boolean", "Allow dates only until current day", "false"],
                 ["fromToday", "Boolean", "Allow dates only from current day", "false"],
+                ["onChange", "Function", "Function to call on date changes", "—"],
+                ["onPreviousMonth", "Function", "Function to call on previous month action triggered", "—"],
+                ["onNextMonth", "Function", "Function to call on next month action triggered", "—"],
+                ["range", "Array", "Date range", "—"],
+                ["skipPrevMonth", "Boolean", "Skip creation of previous month button", "false"],
+                ["skipNextMonth", "Boolean", "Skip creation of next month button", "false"],
             ].map( v => {
                 return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
             } )

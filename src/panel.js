@@ -1156,7 +1156,7 @@ class Panel {
     /**
      * @method addDate
      * @param {String} name Widget name
-     * @param {String} dateString
+     * @param {String} dateValue
      * @param {Function} callback
      * @param {Object} options:
      * hideName: Don't use name as label [false]
@@ -1165,8 +1165,8 @@ class Panel {
      * fromToday: Allow dates only from current day
      */
 
-    addDate( name, dateString, callback, options = { } ) {
-        const widget = new LX.DatePicker( name, dateString, callback, options );
+    addDate( name, dateValue, callback, options = { } ) {
+        const widget = new LX.DatePicker( name, dateValue, callback, options );
         return this._attachWidget( widget );
     }
 

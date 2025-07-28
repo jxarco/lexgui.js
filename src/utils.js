@@ -442,6 +442,22 @@ function hsvToRgb( hsv )
 LX.hsvToRgb = hsvToRgb;
 
 /**
+ * @method dateFromDateString
+ * @description Get an instance of Date() from a Date in String format (DD/MM/YYYY)
+ * @param {String} dateString
+ */
+function dateFromDateString( dateString )
+{
+    const tokens = dateString.split( '/' );
+    const day = parseInt( tokens[ 0 ] );
+    const month = parseInt( tokens[ 1 ] );
+    const year = parseInt( tokens[ 2 ] );
+    return new Date( `${ month }/${ day }/${ year }` );
+}
+
+LX.dateFromDateString = dateFromDateString;
+
+/**
  * @method measureRealWidth
  * @description Measure the pixel width of a text
  * @param {Number} value Text to measure

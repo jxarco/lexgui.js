@@ -5324,20 +5324,20 @@ LX.Table = Table;
 
 class DatePicker extends Widget {
 
-    constructor( name, dateString, callback, options = { } ) {
+    constructor( name, dateValue, callback, options = { } ) {
 
         super( Widget.DATE, name, null, options );
 
-        const dateAsRange = ( dateString?.constructor === Array );
+        const dateAsRange = ( dateValue?.constructor === Array );
 
-        if( options.today )
+        if( !dateAsRange && options.today )
         {
             const date = new Date();
-            dateString = `${ date.getDate() }/${ date.getMonth() + 1 }/${ date.getFullYear() }`;
+            dateValue = `${ date.getDate() }/${ date.getMonth() + 1 }/${ date.getFullYear() }`;
         }
 
         this.onGetValue = () => {
-            return dateString;
+            return dateValue;
         }
 
         this.onSetValue = ( newValue, skipCallback, event ) => {
@@ -5346,22 +5346,10 @@ class DatePicker extends Widget {
             {
                 this.calendar.fromDateString( newValue );
             }
-            else
-            {
-                if( newValue[ 0 ] )
-                {
-                    this.calendar.fromDateString( newValue[ 0 ] );
-                }
-                else
-                {
-                    console.assert( this.optCalendar, "No secondary calendar to set range date!" );
-                    this.optCalendar.fromDateString( newValue[ 1 ] );
-                }
-            }
 
-            dateString = newValue;
+            dateValue = newValue;
 
-            refresh( dateAsRange ? `${ this.calendar.getFullDate() } to ${ this?.optCalendar.getFullDate() }` : this.calendar.getFullDate() );
+            refresh( this.calendar.getFullDate() );
 
             if( !skipCallback )
             {
@@ -5374,45 +5362,75 @@ class DatePicker extends Widget {
             container.style.width = `calc( 100% - ${ realNameWidth })`;
         };
 
-        const container = document.createElement('div');
-        container.className = "lexdate";
+        const container = LX.makeContainer( [ "auto", "auto" ], "lexdate flex flex-row" );
         this.root.appendChild( container );
 
-        this.calendar = new LX.Calendar( dateAsRange ? dateString[ 0 ] : dateString, { onChange: ( date ) => {
-            const newDateString = `${ date.day }/${ date.month }/${ date.year }`;
-            this.set( dateAsRange ? [ newDateString, null ] : newDateString );
-        }, ...options });
-
-        const popoverContent = [ this.calendar ];
-
-        if( dateAsRange )
+        if( !dateAsRange )
         {
-            this.optCalendar = new LX.Calendar( dateString[ 1 ], { onChange: ( date ) => {
-                const newDateString = `${ date.day }/${ date.month }/${ date.year }`;
-                this.set( dateAsRange ? [ null, newDateString ] : newDateString );
-            }, ...options });
-
-            popoverContent.push( this.optCalendar );
+            this.calendar = new LX.Calendar( dateValue, {
+                onChange: ( date ) => {
+                    const newDateString = `${ date.day }/${ date.month }/${ date.year }`;
+                    this.set( newDateString );
+                },
+                ...options
+            });
+        }
+        else
+        {
+            this.calendar = new LX.CalendarRange( dateValue, {
+                onChange: ( dateRange ) => {
+                    this.set( dateRange );
+                },
+                ...options
+            });
         }
 
         const refresh = ( currentDate ) => {
+
+            const emptyDate = !!currentDate;
+
             container.innerHTML = "";
+
+            currentDate = currentDate ?? "Pick a date";
+
+            const dts = currentDate.split( " to " );
+            const d0 = dateAsRange ? dts[ 0 ] : currentDate;
+
             const calendarIcon = LX.makeIcon( "Calendar" );
-            const calendarButton = new LX.Button( null, currentDate ?? "Pick a date", () => {
-                this._popover = new LX.Popover( calendarButton.root, popoverContent );
+            const calendarButton = new LX.Button( null, d0, () => {
+                this._popover = new LX.Popover( calendarButton.root, [ this.calendar ] );
                 if( dateAsRange )
                 {
                     Object.assign( this._popover.root.style, { display: "flex", width: "auto" } );
                 }
-            }, { buttonClass: `flex flex-row px-3 ${ currentDate ? "" : "fg-tertiary" } justify-between` } );
-
+            }, { buttonClass: `flex flex-row px-3 ${ emptyDate ? "" : "fg-tertiary" } justify-between` } );
             calendarButton.root.querySelector( "button" ).appendChild( calendarIcon );
+            calendarButton.root.style.width = "100%";
             container.appendChild( calendarButton.root );
+
+            if( dateAsRange )
+            {
+                const arrowRightIcon = LX.makeIcon( "ArrowRight" );
+                LX.makeContainer( ["32px", "auto"], "content-center", arrowRightIcon.innerHTML, container );
+
+                const d1 = dts[ 1 ];
+                const calendarIcon = LX.makeIcon( "Calendar" );
+                const calendarButton = new LX.Button( null, d1, () => {
+                    this._popover = new LX.Popover( calendarButton.root, [ this.calendar ] );
+                    if( dateAsRange )
+                    {
+                        Object.assign( this._popover.root.style, { display: "flex", width: "auto" } );
+                    }
+                }, { buttonClass: `flex flex-row px-3 ${ emptyDate ? "" : "fg-tertiary" } justify-between` } );
+                calendarButton.root.querySelector( "button" ).appendChild( calendarIcon );
+                calendarButton.root.style.width = "100%";
+                container.appendChild( calendarButton.root );
+            }
         };
 
-        if( dateString )
+        if( dateValue )
         {
-            refresh( dateAsRange ? `${ this.calendar.getFullDate() } to ${ this?.optCalendar.getFullDate() }` : this.calendar.getFullDate() );
+            refresh( this.calendar.getFullDate() );
         }
         else
         {
