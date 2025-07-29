@@ -5401,10 +5401,6 @@ class DatePicker extends Widget {
             const calendarIcon = LX.makeIcon( "Calendar" );
             const calendarButton = new LX.Button( null, d0, () => {
                 this._popover = new LX.Popover( calendarButton.root, [ this.calendar ] );
-                if( dateAsRange )
-                {
-                    Object.assign( this._popover.root.style, { display: "flex", width: "auto" } );
-                }
             }, { buttonClass: `flex flex-row px-3 ${ emptyDate ? "" : "fg-tertiary" } justify-between` } );
             calendarButton.root.querySelector( "button" ).appendChild( calendarIcon );
             calendarButton.root.style.width = "100%";
@@ -5419,10 +5415,6 @@ class DatePicker extends Widget {
                 const calendarIcon = LX.makeIcon( "Calendar" );
                 const calendarButton = new LX.Button( null, d1, () => {
                     this._popover = new LX.Popover( calendarButton.root, [ this.calendar ] );
-                    if( dateAsRange )
-                    {
-                        Object.assign( this._popover.root.style, { display: "flex", width: "auto" } );
-                    }
                 }, { buttonClass: `flex flex-row px-3 ${ emptyDate ? "" : "fg-tertiary" } justify-between` } );
                 calendarButton.root.querySelector( "button" ).appendChild( calendarIcon );
                 calendarButton.root.style.width = "100%";

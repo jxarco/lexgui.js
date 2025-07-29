@@ -1866,8 +1866,6 @@ class Calendar {
                 let fromRangeDate = this.range ? LX.dateFromDateString( this.range[ 0 ] ) : null;
                 let toRangeDate = this.range ? LX.dateFromDateString( this.range[ 1 ] ) : null;
 
-                const _currentDate = this.currentDate ? new Date( `${ this.currentDate.month }/${ this.currentDate.day }/${ this.currentDate.year }` ) : null;
-
                 for( let week = 0; week < 6; week++ )
                 {
                     const hrow = document.createElement( 'tr' );
@@ -2018,6 +2016,13 @@ class Calendar {
         this.refresh();
     }
 
+    setMonth( month ) {
+
+        this.month = month;
+
+        this.fromMonthYear( this.month, this.year );
+    }
+
     _getOrdinalSuffix( day ) {
         if ( day > 3 && day < 21 ) return "th";
         switch ( day % 10 )
@@ -2046,7 +2051,8 @@ class CalendarRange {
 
         console.assert( range && range.constructor === Array, "Range cannot be empty and has to be an Array!" );
 
-        let mustAdvanceMonth = false;
+        let mustSetMonth = null;
+        let dateReversed = false;
 
         // Fix any issues with date range picking
         {
@@ -2058,9 +2064,10 @@ class CalendarRange {
                 const tmp = range[ 0 ];
                 range[ 0 ] = range[ 1 ];
                 range[ 1 ] = tmp;
+                dateReversed = true;
             }
 
-            mustAdvanceMonth = ( t0.getMonth() == t1.getMonth() ) && ( t0.getFullYear() == t1.getFullYear() );
+            mustSetMonth = (dateReversed ? t1.getMonth() : t0.getMonth() ) + 2; // +1 to convert range, +1 to use next month
         }
 
         this.from = range[ 0 ];
@@ -2113,10 +2120,8 @@ class CalendarRange {
             range
         });
 
-        if( mustAdvanceMonth )
-        {
-            this.toCalendar._nextMonth( true );
-        }
+        console.assert( mustSetMonth && "New Month must be valid" );
+        this.toCalendar.setMonth( mustSetMonth );
 
         this.root.appendChild( this.fromCalendar.root );
         this.root.appendChild( this.toCalendar.root );

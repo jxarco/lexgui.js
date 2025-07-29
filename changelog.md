@@ -2,6 +2,9 @@
 
 ## dev
 
+Widgets:
+- Fixed minor issue with LX.CalendarRange when selecting >1 months apart.
+
 ## 0.6.12 (master)
 
 Widgets:
