@@ -1248,6 +1248,13 @@ function badge( text, className, options = {} )
     container.innerHTML = text;
     container.className = "lexbadge " + ( className ?? "" );
     Object.assign( container.style, options.style ?? {} );
+
+    if( options.parent )
+    {
+        options.parent.classList.add( "lexbadge-parent" );
+        options.parent.appendChild( container );
+    }
+
     return ( options.asElement ?? false ) ? container : container.outerHTML;
 }
 

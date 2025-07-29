@@ -2327,6 +2327,19 @@ class Tabs {
         tabEl.instance = this;
         contentEl.id = tabEl.id + "_content";
 
+        if( options.badge )
+        {
+            const asChild = options.badge.asChild ?? false;
+            const badgeOptions = { };
+
+            if( asChild )
+            {
+                badgeOptions.parent = tabEl;
+            }
+
+            tabEl.innerHTML += LX.badge( options.badge.content ?? "", options.badge.className, badgeOptions );
+        }
+
         if( tabEl.selected )
         {
             this.selected = name;
@@ -5780,6 +5793,13 @@ function badge( text, className, options = {} )
     container.innerHTML = text;
     container.className = "lexbadge " + ( className ?? "" );
     Object.assign( container.style, options.style ?? {} );
+
+    if( options.parent )
+    {
+        options.parent.classList.add( "lexbadge-parent" );
+        options.parent.appendChild( container );
+    }
+
     return ( options.asElement ?? false ) ? container : container.outerHTML;
 }
 

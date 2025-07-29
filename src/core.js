@@ -2346,6 +2346,19 @@ class Tabs {
         tabEl.instance = this;
         contentEl.id = tabEl.id + "_content";
 
+        if( options.badge )
+        {
+            const asChild = options.badge.asChild ?? false;
+            const badgeOptions = { };
+
+            if( asChild )
+            {
+                badgeOptions.parent = tabEl;
+            }
+
+            tabEl.innerHTML += LX.badge( options.badge.content ?? "", options.badge.className, badgeOptions );
+        }
+
         if( tabEl.selected )
         {
             this.selected = name;

@@ -2917,6 +2917,18 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 .lexbadge.lg { padding-inline: 0.8rem; font-size: var(--global-font-size-lg); }
 .lexbadge.xl { padding-inline: 1rem; font-size: var(--global-font-size-xl) }
 
+.lexbadge-parent {
+    position: relative;
+}
+
+.lexbadge-parent .lexbadge {
+    border-radius: 0.5rem;
+    padding-inline: 0.25rem;
+    position: absolute;
+    margin-top: -0.25rem;
+    right: 0.1rem;
+}
+
 /* Menu Bar */
 
 .lexmenubar {

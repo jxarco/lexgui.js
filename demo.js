@@ -297,7 +297,7 @@ const starterTheme = LX.getTheme();
     // Mail
     {
         const mailContainer = LX.makeContainer( [ null, "800px" ], "flex flex-col bg-primary border rounded-lg overflow-hidden" );
-        tabs.add( "Mail", mailContainer, { xselected: true } );
+        tabs.add( "Mail", mailContainer, { xselected: true, badge: { content: "5", className: "xs fg-white bg-error", asChild: true } } );
 
         const mailArea = new LX.Area();
         mailContainer.appendChild( mailArea.root );
