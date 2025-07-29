@@ -203,6 +203,20 @@
             }
         }
 
+        const dataInputWidgets = [ "Color", "Curve", "Date Picker", "File", "Form", "Item Array", "Layers", "Map 2D", "Number", "OTP Input", "Pad", "Range", "Select", "Size", "Tags", "Text", "Text Area", "Vector" ];
+        const widgetVersion = {
+            "Date Picker": "5.9",
+            "Form": "1.40",
+            "Map 2D": "6.3",
+            "OTP Input": "5.6",
+            "Pad": "1.39",
+            "Radio Group": "4.0",
+            "Range": "3.0",
+            "Size": "1.38",
+            "Table": "2.0"
+        };
+        const badgeClass = "contrast sm";
+
         const sidebarCallback = m => {
             m.group( "Manual" );
             m.add( "Installation", { callback: open.bind( this, "installation.html", null ) } );
@@ -216,7 +230,7 @@
             m.add( "Context Menus", { callback: open.bind( this, "context-menu.html", null ) } );
             m.add( "Event Handling", { callback: open.bind( this, "event-handling.html", null ) } );
             m.add( "Theme Customization", { callback: open.bind( this, "themes.html", null ) } );
-            m.add( "User Tour", { callback: open.bind( this, "tour.html", null ) } );
+            m.add( "User Tour", { callback: open.bind( this, "tour.html", null ), content: LX.badge( "6.11", badgeClass, { asElement: true }) } );
             m.add( "Icons", { callback: open.bind( this, "icons.html", null ) } );
             m.separator();
             m.group( "Widgets" );
@@ -225,16 +239,22 @@
             for( const w of [ "Button", "Checkbox", "Combo Buttons", "Radio Group", "Toggle" ] )
             {
                 const url = w.toLowerCase().replace( /\s/g, '-') + ".html";
-                m.add( "Buttons and Toggles/" + w, { callback: open.bind( this, "widgets/" + url, null ) } );
+                m.add( "Buttons and Toggles/" + w, {
+                    callback: open.bind( this, "widgets/" + url, null ),
+                    content: widgetVersion[ w ] ? LX.badge( widgetVersion[ w ], badgeClass, { asElement: true }) : undefined
+                } );
 
                 LX.registerCommandbarEntry( w, open.bind( this, "widgets/" + url, null ) );
             }
 
             m.add( "Data Inputs" );
-            for( const w of [ "Color", "Curve", "Date Picker", "File", "Form", "Item Array", "Layers", "Map 2D", "Number", "OTP Input", "Pad", "Range", "Select", "Size", "Tags", "Text", "Text Area", "Vector" ] )
+            for( const w of dataInputWidgets )
             {
                 const url = w.toLowerCase().replace( /\s/g, '-') + ".html";
-                m.add( "Data Inputs/" + w, { callback: open.bind( this, "widgets/" + url, null ) } );
+                m.add( "Data Inputs/" + w, {
+                    callback: open.bind( this, "widgets/" + url, null ),
+                    content: widgetVersion[ w ] ? LX.badge( widgetVersion[ w ], badgeClass, { asElement: true }) : undefined
+                } );
 
                 LX.registerCommandbarEntry( w, open.bind( this, "widgets/" + url, null ) );
             }
@@ -243,7 +263,10 @@
             for( const w of [ "Data Tree", "List", "Tab Sections", "Table", "Title" ] )
             {
                 const url = w.toLowerCase().replace( /\s/g, '-') + ".html";
-                m.add( "Layout and Structure/" + w, { callback: open.bind( this, "widgets/" + url, null ) } );
+                m.add( "Layout and Structure/" + w, {
+                    callback: open.bind( this, "widgets/" + url, null ),
+                    content: widgetVersion[ w ] ? LX.badge( widgetVersion[ w ], badgeClass, { asElement: true }) : undefined
+                } );
 
                 LX.registerCommandbarEntry( w, open.bind( this, "widgets/" + url, null ) );
             }
@@ -252,7 +275,10 @@
             for( const w of [ "Custom", "Progress", "Other Widgets" ] )
             {
                 const url = w.toLowerCase().replace( /\s/g, '-') + ".html";
-                m.add( "Misc/" + w, { callback: open.bind( this, "widgets/" + url, null ) } );
+                m.add( "Misc/" + w, {
+                    callback: open.bind( this, "widgets/" + url, null ),
+                    content: widgetVersion[ w ] ? LX.badge( widgetVersion[ w ], badgeClass, { asElement: true }) : undefined
+                } );
 
                 LX.registerCommandbarEntry( w, open.bind( this, "widgets/" + url, null ) );
             }
@@ -269,7 +295,7 @@
             m.separator();
             m.group( "API Reference" );
             m.add( "Area", { callback: open.bind( this, "reference/area.html", null ) } );
-            m.add( "AreaOverlayButtons", { callback: open.bind( this, "reference/area-overlay-buttons.html", null ) } );
+            m.add( "AreaOverlayButtons", { callback: open.bind( this, "reference/area-overlay-buttons.html", null ), content: LX.badge( "6.10", badgeClass, { asElement: true }) } );
             m.add( "Branch", { callback: open.bind( this, "reference/branch.html", null ) } );
             m.add( "Menubar", { callback: open.bind( this, "reference/menubar.html", null ) } );
             m.add( "Panel", { callback: open.bind( this, "reference/panel.html", null ) } );

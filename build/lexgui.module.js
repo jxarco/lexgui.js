@@ -15352,6 +15352,14 @@ class Sidebar {
 
                 subentry.className = "lexsidebarentry";
                 subentry.id = subkey;
+
+                if( suboptions.content )
+                {
+                    const parentContainer = LX.makeElement( "div" );
+                    parentContainer.appendChild( suboptions.content );
+                    subentry.appendChild( parentContainer );
+                }
+
                 subentryContainer.appendChild( subentry );
 
                 subentry.addEventListener("click", (e) => {
