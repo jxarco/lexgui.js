@@ -2,8 +2,15 @@
 
     MAKE_HEADER( "Code Editor.", "h1", "code-editor" );
 
-    INSERT_IMAGE(`../data/Screenshot_Code.png`, "code_editor" );
-    MAKE_LINE_BREAK();
+    {
+        const area = new LX.Area( { skipAppend: true, height: "700px" } );
+        content.appendChild( area.root );
+        let editor = new LX.CodeEditor( area, {
+            files: [ "../data/js_sample.js" ]
+        } );
+        area.root.className += " border rounded-lg shadow-lg bg-secondary overflow-hidden";
+    }
+
     MAKE_LINE_BREAK();
 
     MAKE_PARAGRAPH( `The Code Editor component supports the following language highlightings:` );

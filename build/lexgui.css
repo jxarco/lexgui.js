@@ -4900,7 +4900,7 @@ ul.lexassetscontent {
 }
 
 .lexcodeeditor .codetabsarea {
-    height: calc(100% - 75px) !important;
+    height: 100% !important;
     background-color: light-dark(var(--global-color-secondary), var(--global-medium-background));
     overflow: scroll;
 }

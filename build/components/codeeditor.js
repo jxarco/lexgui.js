@@ -822,8 +822,9 @@ class CodeEditor {
             this.resetCursorPos( CodeEditor.CURSOR_LEFT, cursor );
             this.cursorToString( cursor, this.code.lines[ ln ] );
 
-            const last_char = ( this.code.clientWidth / this.charWidth )|0;
-            this.setScrollLeft( cursor.position >= last_char ? ( cursor.position - last_char ) * this.charWidth : 0 );
+            var viewportSizeX = ( this.codeScroller.clientWidth + this.getScrollLeft() ) - CodeEditor.LINE_GUTTER_WIDTH; // Gutter offset
+            if( ( cursor.position * this.charWidth ) >= viewportSizeX )
+                this.setScrollLeft( this.code.lines[ ln ].length * this.charWidth );
 
             // Merge cursors
             this.mergeCursors( ln );
@@ -1097,39 +1098,68 @@ class CodeEditor {
         this.loadedTabs = { };
         this.openedTabs = { };
 
+        const onLoadAll = () => {
+            // Create inspector panel when the initial state is complete
+            // and we have at least 1 tab opened
+            this.infoPanel = this._createInfoPanel();
+            if( this.infoPanel )
+            {
+                area.attach( this.infoPanel );
+            }
+
+            const fontUrl = "https://raw.githubusercontent.com/jxarco/lexgui.js/master/" + "/data/CommitMono-400-Regular.otf";
+            const commitMono = new FontFace(
+                "CommitMono",
+                `url(${ fontUrl })`,
+                {
+                    style: "normal",
+                    weight: "400",
+                    display: "swap"
+                }
+            );
+
+            // Add to the document.fonts (FontFaceSet)
+            document.fonts.add( commitMono );
+
+            // Load the font
+            commitMono.load();
+
+            // Wait until the fonts are all loaded
+            document.fonts.ready.then(() => {
+                // console.log("commitMono loaded")
+                this.charWidth = this._measureChar( "a", true );
+            });
+
+            window.editor = this;
+        };
+
         if( options.allowAddScripts ?? true )
         {
             this.addTab("+", false, "New File");
         }
 
-        this.addTab( options.name || "untitled", true, options.title, { language: options.highlight ?? "Plain Text" } );
+        if( options.files )
+        {
+            console.assert( options.files.constructor === Array, "_files_ must be an Array!" );
+            const numFiles = options.files.length;
+            let filesLoaded = 0;
 
-        // Create inspector panel
-        let panel = this._createPanelInfo();
-        if( panel ) area.attach( panel );
-
-        const fontUrl = "https://raw.githubusercontent.com/jxarco/lexgui.js/master/" + "/data/CommitMono-400-Regular.otf";
-        const commitMono = new FontFace(
-            "CommitMono",
-            `url(${ fontUrl })`,
+            for( let url of options.files )
             {
-                style: "normal",
-                weight: "400",
-                display: "swap"
+                this.loadFile( url, { callback: () => {
+                    filesLoaded++;
+                    if( filesLoaded == numFiles )
+                    {
+                        onLoadAll();
+                    }
+                }});
             }
-        );
-
-        // Add to the document.fonts (FontFaceSet)
-        document.fonts.add( commitMono );
-
-        // Load the font
-        commitMono.load();
-
-        // Wait until the fonts are all loaded
-        document.fonts.ready.then(() => {
-            // console.log("commitMono loaded")
-            this.charWidth = this._measureChar( "a", true );
-        });
+        }
+        else
+        {
+            this.addTab( options.name || "untitled", true, options.title, { language: options.highlight ?? "Plain Text" } );
+            onLoadAll();
+        }
     }
 
     static getInstances()
@@ -1286,6 +1316,11 @@ class CodeEditor {
                 {
                     this._changeLanguageFromExtension( LX.getExtension( name ) );
                 }
+            }
+
+            if( options.callback )
+            {
+                options.callback( text );
             }
         };
 
@@ -1560,7 +1595,7 @@ class CodeEditor {
         this._changeLanguage( 'Plain Text' );
     }
 
-    _createPanelInfo() {
+    _createInfoPanel() {
 
         if( !this.skipInfo )
         {
@@ -3567,12 +3602,12 @@ class CodeEditor {
         this.restartBlink();
 
         // Add horizontal scroll
-
-        doAsync(() => {
-            var viewportSizeX = ( this.codeScroller.clientWidth + this.getScrollLeft() ) - CodeEditor.LINE_GUTTER_WIDTH; // Gutter offset
-            if( (cursor.position * this.charWidth) >= viewportSizeX )
-                this.setScrollLeft( this.getScrollLeft() + this.charWidth );
-        });
+        const currentScrollLeft = this.getScrollLeft();
+        var viewportSizeX = ( this.codeScroller.clientWidth + currentScrollLeft ) - CodeEditor.LINE_GUTTER_WIDTH; // Gutter offset
+        if( (cursor.position * this.charWidth) >= viewportSizeX )
+        {
+            this.setScrollLeft( currentScrollLeft + this.charWidth );
+        }
     }
 
     cursorToLeft( key, cursor ) {
@@ -3588,11 +3623,12 @@ class CodeEditor {
 
         // Add horizontal scroll
 
-        doAsync(() => {
-            var viewportSizeX = this.getScrollLeft(); // Gutter offset
-            if( ( ( cursor.position - 1 ) * this.charWidth ) < viewportSizeX )
-                this.setScrollLeft( this.getScrollLeft() - this.charWidth );
-        });
+        const currentScrollLeft = this.getScrollLeft();
+        var viewportSizeX = currentScrollLeft; // Gutter offset
+        if( ( ( cursor.position - 1 ) * this.charWidth ) < viewportSizeX )
+        {
+            this.setScrollLeft( currentScrollLeft - this.charWidth );
+        }
     }
 
     cursorToTop( cursor, resetLeft = false ) {
@@ -3603,30 +3639,40 @@ class CodeEditor {
         this.restartBlink();
 
         if( resetLeft )
+        {
             this.resetCursorPos( CodeEditor.CURSOR_LEFT, cursor );
+        }
 
-        doAsync(() => {
-            var first_line = ( this.getScrollTop() / this.lineHeight )|0;
-            if( (cursor.line - 1) < first_line )
-                this.setScrollTop( this.getScrollTop() - this.lineHeight );
-        });
+        const currentScrollTop = this.getScrollTop();
+        var firstLine = ( currentScrollTop / this.lineHeight )|0;
+        if( (cursor.line - 1) < firstLine )
+        {
+            this.setScrollTop( currentScrollTop - this.lineHeight );
+        }
     }
 
     cursorToBottom( cursor, resetLeft = false ) {
 
         cursor._top += this.lineHeight;
-        cursor.style.top = "calc(" + cursor._top + "px)";
+        cursor.style.top = `calc(${ cursor._top }px)`;
 
         this.restartBlink();
 
         if( resetLeft )
+        {
             this.resetCursorPos( CodeEditor.CURSOR_LEFT, cursor );
+        }
 
-        doAsync(() => {
-            var last_line = ( ( this.codeScroller.offsetHeight + this.getScrollTop() ) / this.lineHeight )|0;
-            if( cursor.line >= last_line )
-                this.setScrollTop( this.getScrollTop() + this.lineHeight );
-        });
+        const currentScrollTop = this.getScrollTop();
+        const tabsHeight = this.tabs.root.getBoundingClientRect().height;
+        const infoPanelHeight = this.skipInfo ? 0 : this.infoPanel.root.getBoundingClientRect().height;
+        const scrollerHeight = this.codeScroller.offsetHeight;
+
+        var lastLine = ( ( scrollerHeight - tabsHeight - infoPanelHeight + currentScrollTop ) / this.lineHeight )|0;
+        if( cursor.line >= lastLine )
+        {
+            this.setScrollTop( currentScrollTop + this.lineHeight );
+        }
     }
 
     cursorToString( cursor, text, reverse ) {
@@ -3635,7 +3681,9 @@ class CodeEditor {
             return;
 
         for( let char of text )
+        {
             reverse ? this.cursorToLeft( char, cursor ) : this.cursorToRight( char, cursor );
+        }
     }
 
     cursorToPosition( cursor, position ) {
@@ -3759,9 +3807,8 @@ class CodeEditor {
     }
 
     _removeSpaces( cursor ) {
-
-        // Remove indentation
         const lidx = cursor.line;
+        // Remove indentation
         let lineStart = firstNonspaceIndex( this.code.lines[ lidx ] );
 
         // Nothing to remove... we are at the start of the line
@@ -3795,29 +3842,29 @@ class CodeEditor {
     }
 
     getScrollLeft() {
-
         if( !this.codeScroller ) return 0;
         return this.codeScroller.scrollLeft;
     }
 
     getScrollTop() {
-
         if( !this.codeScroller ) return 0;
         return this.codeScroller.scrollTop;
     }
 
     setScrollLeft( value ) {
-
         if( !this.codeScroller ) return;
-        this.codeScroller.scrollLeft = value;
-        this.setScrollBarValue( 'horizontal', 0 );
+        doAsync( () => {
+            this.codeScroller.scrollLeft = value;
+            this.setScrollBarValue( 'horizontal', 0 );
+        }, 20 );
     }
 
     setScrollTop( value ) {
-
         if( !this.codeScroller ) return;
-        this.codeScroller.scrollTop = value;
-        this.setScrollBarValue( 'vertical' );
+        doAsync( () => {
+            this.codeScroller.scrollTop = value;
+            this.setScrollBarValue( 'vertical' );
+        }, 20 );
     }
 
     resize( pMaxLength, onResize ) {
@@ -3827,12 +3874,15 @@ class CodeEditor {
             // Update max viewport
             const maxLineLength = pMaxLength ?? this.getMaxLineLength();
             const scrollWidth = maxLineLength * this.charWidth + CodeEditor.LINE_GUTTER_WIDTH;
+
+            const tabsHeight = this.tabs.root.getBoundingClientRect().height;
+            const infoPanelHeight = this.skipInfo ? 0 : this.infoPanel.root.getBoundingClientRect().height;
             const scrollHeight = this.code.lines.length * this.lineHeight;
 
             this._lastMaxLineLength = maxLineLength;
 
             this.codeSizer.style.minWidth = scrollWidth + "px";
-            this.codeSizer.style.minHeight = scrollHeight + "px";
+            this.codeSizer.style.minHeight = ( scrollHeight + tabsHeight + infoPanelHeight ) + "px";
 
             this.resizeScrollBars();
 
