@@ -1,6 +1,9 @@
 # lexgui.js
 
-**lexgui.js** is a lightweight JavaScript library for building web interfaces. No bloated frameworks, no unnecessary complexity, just pure HTML, CSS, and JavaScript magic. It gives you an easy API for crafting dynamic, interactive editor interfaces without the headache of big libraries.
+![logo](./images/icon_dark.png#gh-dark-mode-only)
+![logo](./images/icon_light.png#gh-light-mode-only)
+
+**lexgui.js** is a lightweight JavaScript library for building web user interfaces. No bloated frameworks, no unnecessary complexity, just pure HTML, CSS, and JavaScript magic. It gives you an easy API for crafting dynamic, interactive editor interfaces without the headache of big libraries.
 
 NPM Package: [npmjs.com/package/lexgui](https://www.npmjs.com/package/lexgui)
 

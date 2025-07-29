@@ -6,7 +6,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
     <title>LexGUI demo</title>
     <link rel="stylesheet" href="../build/lexgui.css">
-    <link rel="icon" href="../images/icon.png">
+    <link rel="icon" href="../images/favicon.png">
 
     <script type="importmap">
       {
@@ -32,6 +32,7 @@
     // Init library and get main area
     let area = await LX.init();
 
+    const starterTheme = LX.getTheme();
     const menubar = area.addMenubar( [], { sticky: false } );
     menubar.addButtons([
         {
@@ -48,7 +49,11 @@
     ]);
 
     menubar.setButtonIcon("Github", "Github", () => { window.open("https://github.com/jxarco/lexgui.js/") })
-    menubar.setButtonImage("lexgui.js", "../images/icon.png", () => { window.open("https://jxarco.github.io/lexgui.js/") }, { float: "left" })
+    menubar.setButtonImage("lexgui.js", `../images/icon_small_${ starterTheme }.png`, () => { window.open("https://jxarco.github.io/lexgui.js/") }, { float: "left" } );
+
+    LX.addSignal( "@on_new_color_scheme", ( el, value ) => {
+        menubar.setButtonImage( "lexgui.js", `../images/icon_small_${ value }.png` );
+    } );
 
     var [middle, right] = area.split({ sizes: ["70%", "30%"], minimizable: true });
     var [left, center] = middle.split({ sizes: ["50%", null], minimizable: true });

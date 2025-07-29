@@ -6,7 +6,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
     <title>LexGUI Editor demo</title>
     <link rel="stylesheet" href="../build/lexgui.css">
-    <link rel="icon" href="../images/icon.png">
+    <link rel="icon" href="../images/favicon.png">
 
     <script type="importmap">
         {
@@ -238,7 +238,11 @@
     ]);
 
     menubar.setButtonIcon("Github", "Github@solid", () => { window.open("https://github.com/jxarco/lexgui.js/") })
-    menubar.setButtonImage("lexgui.js", "../images/icon.png", () => { window.open("https://jxarco.github.io/lexgui.js/") }, { float: "left" })
+    menubar.setButtonImage("lexgui.js", `../images/icon_small_${ starterTheme }.png`, () => { window.open("https://jxarco.github.io/lexgui.js/") }, { float: "left" } );
+
+    LX.addSignal( "@on_new_color_scheme", ( el, value ) => {
+        menubar.setButtonImage( "lexgui.js", `../images/icon_small_${ value }.png` );
+    } );
 
     // split main area
     var [left, right] = area.split({ sizes: ["70%", "30%"], minimizable: true });

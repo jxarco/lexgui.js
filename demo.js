@@ -6,6 +6,7 @@ import 'lexgui/components/audio.js';
 window.LX = LX;
 
 const area = await LX.init( { layoutMode: "document", rootClass: "wrapper" } );
+const starterTheme = LX.getTheme();
 
 // Menubar
 {
@@ -14,14 +15,16 @@ const area = await LX.init( { layoutMode: "document", rootClass: "wrapper" } );
         { name: "Examples", callback: () => { window.open("./examples/") } },
     ] );
 
-    menubar.setButtonImage("lexgui.js", "images/icon.png", () => {window.open("https://jxarco.github.io/lexgui.js/")}, {float: "left"})
+    menubar.setButtonImage("lexgui.js", `images/icon_small_${ starterTheme }.png`, () => {window.open("https://jxarco.github.io/lexgui.js/")}, {float: "left"})
+
+    LX.addSignal( "@on_new_color_scheme", ( el, value ) => {
+        menubar.setButtonImage("lexgui.js", `images/icon_small_${ value }.png` );
+    } );
 
     const commandButton = new LX.Button(null, `Search command...<span class="ml-auto">${ LX.makeKbd( ["Ctrl", "Space"], false, "bg-tertiary border px-1 rounded" ).innerHTML }</span>`, () => { LX.setCommandbarState( true ) }, {
         width: "256px", className: "right", buttonClass: "border fg-tertiary bg-secondary" }
     );
     menubar.root.appendChild( commandButton.root );
-
-    const starterTheme = LX.getTheme();
 
     menubar.addButtons( [
         {
@@ -317,7 +320,7 @@ const area = await LX.init( { layoutMode: "document", rootClass: "wrapper" } );
             className: "border-right",
             headerTitle: "jxarco",
             headerSubtitle: "alexroco.30@gmail.com",
-            headerImage: "https://raw.githubusercontent.com/jxarco/lexgui.js/refs/heads/master/images/icon.png",
+            headerImage: "https://raw.githubusercontent.com/jxarco/lexgui.js/refs/heads/master/images/favicon.png",
             skipFooter: true,
             displaySelected: true,
             onHeaderPressed: (e, element) => { }
