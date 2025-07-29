@@ -4755,12 +4755,14 @@ class Table extends Widget {
                                     f.start = v;
                                     const inUse = ( f.start != f.min || f.end != f.max );
                                     spanName.innerHTML = icon.innerHTML + f.name + ( inUse ? separatorHtml + LX.badge( `${ f.start } - ${ f.end } ${ f.units ?? "" }`, "bg-tertiary fg-secondary text-sm border-0" ) : "" );
+                                    if( inUse ) this._resetCustomFiltersBtn.root.classList.remove( "hidden" );
                                     this.refresh();
                                 }, { skipSlider: true, min: f.min, max: f.max, step: f.step, units: f.units } );
                                 panel.addNumber( null, f.end, (v) => {
                                     f.end = v;
                                     const inUse = ( f.start != f.min || f.end != f.max );
                                     spanName.innerHTML = icon.innerHTML + f.name + ( inUse ? separatorHtml + LX.badge( `${ f.start } - ${ f.end } ${ f.units ?? "" }`, "bg-tertiary fg-secondary text-sm border-0" ) : "" );
+                                    if( inUse ) this._resetCustomFiltersBtn.root.classList.remove( "hidden" );
                                     this.refresh();
                                 }, { skipSlider: true, min: f.min, max: f.max, step: f.step, units: f.units } );
                                 panel.addButton( null, "Reset", () => {
