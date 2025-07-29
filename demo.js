@@ -485,17 +485,17 @@ const area = await LX.init( { layoutMode: "document", rootClass: "wrapper" } );
         `, tasksContainer );
 
         const tableWidget = new LX.Table(null, {
-            head: [ "Name", "Status", "Priority", "ID" ],
+            head: [ "Name", "Status", "Priority", "Date", "ID" ],
             body: [
-                [ "Alice", "In Progress", "High", 1 ],
-                [ "Bob", "Backlog", "Medium", 2 ],
-                [ "Prince", "Canceled", "Low", 3 ],
-                [ "Sean", "Done", "High", 4 ],
-                [ "Carter", "In Progress", "Medium", 5 ],
-                [ "James", "Backlog", "Low", 6 ],
-                [ "Mickey", "Todo", "Low", 7 ],
-                [ "Charlie", "Canceled", "Low", 8 ],
-                [ "Potato", "Todo", "High", 9 ]
+                [ "Alice", "In Progress", "High", "20/06/2025", 1 ],
+                [ "Bob", "Backlog", "Medium", "11/04/2025", 2 ],
+                [ "Prince", "Canceled", "Low", "13/05/2025", 3 ],
+                [ "Sean", "Done", "High", "28/07/2025", 4 ],
+                [ "Carter", "In Progress", "Medium", "20/03/2025", 5 ],
+                [ "James", "Backlog", "Low", "10/02/2025", 6 ],
+                [ "Mickey", "Todo", "Low", "08/01/2025", 7 ],
+                [ "Charlie", "Canceled", "Low", "23/05/2025", 8 ],
+                [ "Potato", "Todo", "High", "15/07/2025", 9 ]
             ]
         }, {
             selectable: true,
@@ -506,6 +506,7 @@ const area = await LX.init( { layoutMode: "document", rootClass: "wrapper" } );
                 { name: "Status", options: ["Backlog", "Todo", "In Progress", "Done", "Canceled"] },
                 { name: "Priority", options: ["Low", "Medium", "High"] },
                 { name: "ID", type: "range", min: 0, max: 9, step: 1, units: "hr" },
+                { name: "Date", type: "date", xdefault: ["23/07/2025", "29/07/2025"] },
             ],
             rowActions: [
                 { icon: "Edit", title: "Edit Row" },

@@ -4777,6 +4777,38 @@ class Table extends Widget {
                             container.appendChild( panel.root );
                             new LX.Popover( f.widget.root, [ container ], { side: "bottom" } );
                         }
+                        else if( f.type == "date" )
+                        {
+                            const container = LX.makeContainer( ["auto", "auto"], "text-md" );
+                            const panel = new LX.Panel();
+                            LX.makeContainer( ["100%", "auto"], "px-3 p-2 pb-0 text-md font-medium", f.name, container );
+
+                            panel.refresh = () => {
+                                panel.clear();
+
+                                // Generate default value once the filter is used
+                                if( !f.default )
+                                {
+                                    const date = new Date();
+                                    const todayStringDate = `${ date.getDate() }/${ date.getMonth() + 1 }/${ date.getFullYear() }`;
+                                    f.default = [ todayStringDate, todayStringDate ];
+                                }
+
+                                const calendar = new LX.CalendarRange( f.value, {
+                                    onChange: ( dateRange ) => {
+                                        f.value = dateRange;
+                                        spanName.innerHTML = icon.innerHTML + f.name + ( separatorHtml + LX.badge( `${ calendar.getFullDate() }`, "bg-tertiary fg-secondary text-sm border-0" ) );
+                                        this._resetCustomFiltersBtn.root.classList.remove( "hidden" );
+                                        this.refresh();
+                                    }
+                                });
+
+                                panel.attach( calendar );
+                            }
+                            panel.refresh();
+                            container.appendChild( panel.root );
+                            new LX.Popover( f.widget.root, [ container ], { side: "bottom" } );
+                        }
 
                     }, { buttonClass: "px-2 primary dashed" } );
                     headerContainer.appendChild( f.widget.root );
@@ -4792,6 +4824,10 @@ class Table extends Widget {
                         {
                             f.start = f.min;
                             f.end = f.max;
+                        }
+                        else if( f.type == "date" )
+                        {
+                            delete f.default;
                         }
                     }
                     this.refresh();
@@ -5075,7 +5111,28 @@ class Table extends Widget {
                             }
                             else if( f.type == "date" )
                             {
-                                // TODO
+                                acfMap[ acfName ] = acfMap[ acfName ] ?? false;
+
+                                const filterColIndex = data.head.indexOf( acfName );
+                                if( filterColIndex > -1 )
+                                {
+                                    if( !f.default )
+                                    {
+                                        const date = new Date();
+                                        const todayStringDate = `${ date.getDate() }/${ date.getMonth() + 1 }/${ date.getFullYear() }`;
+                                        f.value = [ todayStringDate, todayStringDate ];
+                                        acfMap[ acfName ] |= true;
+                                        continue;
+                                    }
+
+                                    f.value = f.value ?? f.default;
+
+                                    const dateString = bodyData[ filterColIndex ];
+                                    const date = LX.dateFromDateString( dateString );
+                                    const minDate = LX.dateFromDateString( f.value[ 0 ] );
+                                    const maxDate = LX.dateFromDateString( f.value[ 1 ] );
+                                    acfMap[ acfName ] |= ( date >= minDate ) && ( date <= maxDate );
+                                }
                             }
                         }
 

@@ -1848,8 +1848,6 @@ class Calendar {
                 let fromRangeDate = this.range ? LX.dateFromDateString( this.range[ 0 ] ) : null;
                 let toRangeDate = this.range ? LX.dateFromDateString( this.range[ 1 ] ) : null;
 
-                this.currentDate ? new Date( `${ this.currentDate.month }/${ this.currentDate.day }/${ this.currentDate.year }` ) : null;
-
                 for( let week = 0; week < 6; week++ )
                 {
                     const hrow = document.createElement( 'tr' );
@@ -2000,6 +1998,13 @@ class Calendar {
         this.refresh();
     }
 
+    setMonth( month ) {
+
+        this.month = month;
+
+        this.fromMonthYear( this.month, this.year );
+    }
+
     _getOrdinalSuffix( day ) {
         if ( day > 3 && day < 21 ) return "th";
         switch ( day % 10 )
@@ -2028,7 +2033,8 @@ class CalendarRange {
 
         console.assert( range && range.constructor === Array, "Range cannot be empty and has to be an Array!" );
 
-        let mustAdvanceMonth = false;
+        let mustSetMonth = null;
+        let dateReversed = false;
 
         // Fix any issues with date range picking
         {
@@ -2040,9 +2046,10 @@ class CalendarRange {
                 const tmp = range[ 0 ];
                 range[ 0 ] = range[ 1 ];
                 range[ 1 ] = tmp;
+                dateReversed = true;
             }
 
-            mustAdvanceMonth = ( t0.getMonth() == t1.getMonth() ) && ( t0.getFullYear() == t1.getFullYear() );
+            mustSetMonth = (dateReversed ? t1.getMonth() : t0.getMonth() ) + 2; // +1 to convert range, +1 to use next month
         }
 
         this.from = range[ 0 ];
@@ -2095,10 +2102,8 @@ class CalendarRange {
             range
         });
 
-        if( mustAdvanceMonth )
-        {
-            this.toCalendar._nextMonth( true );
-        }
+        console.assert( mustSetMonth && "New Month must be valid" );
+        this.toCalendar.setMonth( mustSetMonth );
 
         this.root.appendChild( this.fromCalendar.root );
         this.root.appendChild( this.toCalendar.root );
@@ -12117,12 +12122,14 @@ class Table extends Widget {
                                     f.start = v;
                                     const inUse = ( f.start != f.min || f.end != f.max );
                                     spanName.innerHTML = icon.innerHTML + f.name + ( inUse ? separatorHtml + LX.badge( `${ f.start } - ${ f.end } ${ f.units ?? "" }`, "bg-tertiary fg-secondary text-sm border-0" ) : "" );
+                                    if( inUse ) this._resetCustomFiltersBtn.root.classList.remove( "hidden" );
                                     this.refresh();
                                 }, { skipSlider: true, min: f.min, max: f.max, step: f.step, units: f.units } );
                                 panel.addNumber( null, f.end, (v) => {
                                     f.end = v;
                                     const inUse = ( f.start != f.min || f.end != f.max );
                                     spanName.innerHTML = icon.innerHTML + f.name + ( inUse ? separatorHtml + LX.badge( `${ f.start } - ${ f.end } ${ f.units ?? "" }`, "bg-tertiary fg-secondary text-sm border-0" ) : "" );
+                                    if( inUse ) this._resetCustomFiltersBtn.root.classList.remove( "hidden" );
                                     this.refresh();
                                 }, { skipSlider: true, min: f.min, max: f.max, step: f.step, units: f.units } );
                                 panel.addButton( null, "Reset", () => {
@@ -12132,6 +12139,38 @@ class Table extends Widget {
                                     panel.refresh();
                                     this.refresh();
                                 }, { buttonClass: "contrast" } );
+                            };
+                            panel.refresh();
+                            container.appendChild( panel.root );
+                            new LX.Popover( f.widget.root, [ container ], { side: "bottom" } );
+                        }
+                        else if( f.type == "date" )
+                        {
+                            const container = LX.makeContainer( ["auto", "auto"], "text-md" );
+                            const panel = new LX.Panel();
+                            LX.makeContainer( ["100%", "auto"], "px-3 p-2 pb-0 text-md font-medium", f.name, container );
+
+                            panel.refresh = () => {
+                                panel.clear();
+
+                                // Generate default value once the filter is used
+                                if( !f.default )
+                                {
+                                    const date = new Date();
+                                    const todayStringDate = `${ date.getDate() }/${ date.getMonth() + 1 }/${ date.getFullYear() }`;
+                                    f.default = [ todayStringDate, todayStringDate ];
+                                }
+
+                                const calendar = new LX.CalendarRange( f.value, {
+                                    onChange: ( dateRange ) => {
+                                        f.value = dateRange;
+                                        spanName.innerHTML = icon.innerHTML + f.name + ( separatorHtml + LX.badge( `${ calendar.getFullDate() }`, "bg-tertiary fg-secondary text-sm border-0" ) );
+                                        this._resetCustomFiltersBtn.root.classList.remove( "hidden" );
+                                        this.refresh();
+                                    }
+                                });
+
+                                panel.attach( calendar );
                             };
                             panel.refresh();
                             container.appendChild( panel.root );
@@ -12152,6 +12191,10 @@ class Table extends Widget {
                         {
                             f.start = f.min;
                             f.end = f.max;
+                        }
+                        else if( f.type == "date" )
+                        {
+                            delete f.default;
                         }
                     }
                     this.refresh();
@@ -12434,7 +12477,30 @@ class Table extends Widget {
                                 }
                             }
                             else if( f.type == "date" )
-                            ;
+                            {
+                                acfMap[ acfName ] = acfMap[ acfName ] ?? false;
+
+                                const filterColIndex = data.head.indexOf( acfName );
+                                if( filterColIndex > -1 )
+                                {
+                                    if( !f.default )
+                                    {
+                                        const date = new Date();
+                                        const todayStringDate = `${ date.getDate() }/${ date.getMonth() + 1 }/${ date.getFullYear() }`;
+                                        f.value = [ todayStringDate, todayStringDate ];
+                                        acfMap[ acfName ] |= true;
+                                        continue;
+                                    }
+
+                                    f.value = f.value ?? f.default;
+
+                                    const dateString = bodyData[ filterColIndex ];
+                                    const date = LX.dateFromDateString( dateString );
+                                    const minDate = LX.dateFromDateString( f.value[ 0 ] );
+                                    const maxDate = LX.dateFromDateString( f.value[ 1 ] );
+                                    acfMap[ acfName ] |= ( date >= minDate ) && ( date <= maxDate );
+                                }
+                            }
                         }
 
                         const show = Object.values( acfMap ).reduce( ( e, acc ) => acc *= e, true );
@@ -12759,10 +12825,6 @@ class DatePicker extends Widget {
             const calendarIcon = LX.makeIcon( "Calendar" );
             const calendarButton = new LX.Button( null, d0, () => {
                 this._popover = new LX.Popover( calendarButton.root, [ this.calendar ] );
-                if( dateAsRange )
-                {
-                    Object.assign( this._popover.root.style, { display: "flex", width: "auto" } );
-                }
             }, { buttonClass: `flex flex-row px-3 ${ emptyDate ? "" : "fg-tertiary" } justify-between` } );
             calendarButton.root.querySelector( "button" ).appendChild( calendarIcon );
             calendarButton.root.style.width = "100%";
@@ -12777,10 +12839,6 @@ class DatePicker extends Widget {
                 const calendarIcon = LX.makeIcon( "Calendar" );
                 const calendarButton = new LX.Button( null, d1, () => {
                     this._popover = new LX.Popover( calendarButton.root, [ this.calendar ] );
-                    if( dateAsRange )
-                    {
-                        Object.assign( this._popover.root.style, { display: "flex", width: "auto" } );
-                    }
                 }, { buttonClass: `flex flex-row px-3 ${ emptyDate ? "" : "fg-tertiary" } justify-between` } );
                 calendarButton.root.querySelector( "button" ).appendChild( calendarIcon );
                 calendarButton.root.style.width = "100%";

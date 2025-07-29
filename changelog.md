@@ -4,6 +4,7 @@
 
 Widgets:
 - Fixed minor issue with LX.CalendarRange when selecting >1 months apart.
+- Added support for Calendar Date filter in Table Widget.
 
 ## 0.6.12 (master)
 
