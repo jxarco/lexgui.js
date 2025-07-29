@@ -39,6 +39,11 @@ const starterTheme = LX.getTheme();
             icon: starterTheme == "dark" ? "Moon" : "Sun",
             swap: starterTheme == "dark" ? "Sun" : "Moon",
             callback:  (value, event) => { LX.switchTheme() }
+        },
+        {
+            title: "Switch Spacing",
+            icon: "AlignVerticalSpaceAround",
+            callback:  (value, event) => { LX.switchSpacing() }
         }
     ], { float: "right" });
 }

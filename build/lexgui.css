@@ -36,6 +36,11 @@
     --global-blur-background: light-dark(#f7f7f7d8, #1f1f1fe7);
     --global-color-transparent: #00000000;
 
+    --global-padding-sm: 0.25rem;
+    --global-padding-md: 0.5rem;
+    --global-padding-lg: 0.75rem;
+    --global-padding-xl: 1rem;
+
     --svg-size-xs: 0.7rem;
     --svg-size-sm: 0.85rem;
     --svg-size-md: 1rem;
@@ -46,6 +51,13 @@
     --code-editor-font-size: 14px;
     --code-editor-row-height: 20px;
     --graphnode-background: 17, 17, 17;
+}
+
+:root[data-spacing="compact"] {
+    --global-padding-sm: 0.15rem;
+    --global-padding-md: 0.35rem;
+    --global-padding-lg: 0.5rem;
+    --global-padding-xl: 0.75rem;
 }
 
 :root[data-theme="light"] { color-scheme: light }
@@ -430,7 +442,7 @@ a svg, svg path {
     touch-action: none;
     overflow: hidden;
     pointer-events: auto;
-    padding: 0.8rem;
+    padding: 0.75rem;
     border-radius: 8px;
     z-index: 3000;
     transition: all 0.5s cubic-bezier(.42,.97,.52,1.19);
@@ -471,7 +483,7 @@ a svg, svg path {
 }
 
 .lextoast .lexwidget {
-    padding-inline: 16px;
+    padding-inline: 1rem;
 }
 
 .lextoast .closer {
@@ -685,8 +697,7 @@ a svg, svg path {
     font-size: var(--global-font-size-xl);
     color: var(--global-text-secondary);
     text-shadow: 0px 1px 6px #22222283;
-    padding: 12px;
-    padding-left: 16px;
+    padding: var(--global-padding-lg);
     border-top-left-radius: 8px;
     border-top-right-radius: 8px;
     outline: none;
@@ -701,7 +712,7 @@ a svg, svg path {
 
 .lexdialogcontent {
     width: 100%;
-    padding: 15px;
+    padding: 0.25rem;
     word-break: break-all;
     color: var(--global-text-primary);
     font-size: var(--global-font-size);
@@ -713,7 +724,6 @@ a svg, svg path {
 .lexdialogcontent.notitle {
     border-top-left-radius: 8px;
     border-top-right-radius: 8px;
-    padding-top: 24px;
 }
 
 .lexdialogcloser {
@@ -729,8 +739,8 @@ a svg, svg path {
 
 .lexdialogcloser.notitle {
     position: absolute;
-    top: 0.8em;
-    right: 0.6em;
+    top: 0.5em;
+    right: 0;
 }
 
 .lexdialogcloser:hover {
@@ -766,8 +776,6 @@ a svg, svg path {
 }
 
 .lexdialog.pocket .lexdialogcontent {
-    padding: 4px;
-    padding-left: 8px;
     max-height: -webkit-fill-available;
     opacity: 1;
 
@@ -1037,7 +1045,7 @@ a svg, svg path {
     z-index: 150;
     display: flex;
     flex-direction: column;
-    padding: 0.2rem;
+    padding: var(--global-padding-sm);
     border-radius: 6px;
     border: 1px solid #7a797c4f;
     outline: none;
@@ -1049,7 +1057,7 @@ a svg, svg path {
 .lexdropdownmenuitem {
     display: flex;
     flex-direction: row;
-    padding: 0.5rem;
+    padding: var(--global-padding-md);
     border-radius: 6px;
     gap: 0.5rem;
     white-space: nowrap;
@@ -1160,7 +1168,7 @@ a svg, svg path {
 
 .lexpanel {
     margin: 0;
-    padding: 4px;
+    padding: var(--global-padding-sm);
     overflow: hidden;
     overflow-y: scroll;
 }
@@ -1179,7 +1187,7 @@ a svg, svg path {
 }
 
 .lexbranch .lexbranchcontent {
-    padding: 4px;
+    padding: var(--global-padding-sm);
     background-color: var(--global-color-secondary);
     border-bottom-left-radius: 8px;
     border-bottom-right-radius: 8px;
@@ -1197,7 +1205,7 @@ a svg, svg path {
     background-color: var(--global-color-secondary);
     text-shadow: 0px 1px 6px #42424260;
     letter-spacing: calc(var(--global-font-size-lg) * 0.025);
-    padding: 10px;
+    padding: var(--global-padding-lg);
     display: flex;
     border-top-left-radius: 8px;
     border-top-right-radius: 8px;
@@ -1212,44 +1220,7 @@ a svg, svg path {
     background-color: inherit;
 }
 
-.lexbranchtitle:active {
-    padding-left: 11px;
-}
-
-.lexbranchtitle.wtabs {
-    display: flex;
-    padding: 0px;
-    cursor: default;
-    background-color: var(--global-color-tertiary);
-    text-shadow: none;
-    color: #5f6770;
-}
-
 /* Tab */
-.lexbranchtitle.wtabs span {
-    padding: 10px;
-    cursor: pointer;
-}
-
-.lexbranchtitle.wtabs span:hover {
-    background-color: #47505872;
-}
-
-.lexbranchtitle.wtabs span:active {
-    margin-top: 1px;
-}
-
-.lexbranchtitle.wtabs span.first {
-    border-top-left-radius: 8px;
-}
-
-.lexbranchtitle.wtabs span.selected {
-    border-top: 2px solid var(--global-color-accent-light);
-    background-color: var(--global-color-secondary);
-    color: var(--global-text-primary);
-    text-shadow: 0px 1px 2px #000;
-}
-
 .lexbranch .branchicon {
     font-size: var(--global-font-size);
     margin-right: 12px;
@@ -1288,7 +1259,7 @@ a svg, svg path {
 .lexwidget {
     display: flex;
     align-items: center;
-    padding: 5px;
+    padding: var(--global-padding-sm);
     font-size: var(--global-font-size);
     color: var(--global-text-primary);
     line-height: 2;
@@ -1313,8 +1284,6 @@ a svg, svg path {
 .lexwidget.micro {
     min-width: 24px;
     width: 3% !important;
-    padding-left: 4px;
-    padding-right: 4px;
 }
 
 .lexwidget.right {
@@ -1388,7 +1357,7 @@ a svg, svg path {
 
 .lexwidget input:not(.lexcheckbox, .lextoggle, .lexrangeslider) {
     font-family: var(--global-font);
-    padding: 4px;
+    padding: var(--global-padding-sm);
     color: var(--global-text-primary);
     --background-color: var(--global-color-tertiary);
     background-color: var(--background-color);
@@ -1422,7 +1391,7 @@ a svg, svg path {
     border-radius: 6px;
     position: relative;
     border: 1px solid transparent;
-    padding: 6px 12px;
+    padding: var(--global-padding-sm) 0.75rem;
 }
 
 .lexwidget .lextext:disabled {
@@ -1482,7 +1451,7 @@ a svg, svg path {
     word-break: break-word;
     font-family: var(--global-font);
     background: none;
-    padding: 5px;
+    padding: var(--global-padding-sm);
     color: var(--global-text-primary);
     outline: none;
     border-radius: 6px;
@@ -1763,7 +1732,7 @@ a svg, svg path {
     background-color: var(--global-color-tertiary);
     width: max-content;
     justify-self: center;
-    padding: 3px;
+    padding: var(--global-padding-sm);
     border-radius: 8px;
     gap: 0.2em;
 }
@@ -4931,7 +4900,7 @@ ul.lexassetscontent {
 }
 
 .lexcodeeditor .codetabsarea {
-    height: calc(100% - 76px) !important;
+    height: calc(100% - 75px) !important;
     background-color: light-dark(var(--global-color-secondary), var(--global-medium-background));
     overflow: scroll;
 }

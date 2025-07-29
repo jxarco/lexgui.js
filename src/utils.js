@@ -288,6 +288,19 @@ function getThemeColor( colorName )
 LX.getThemeColor = getThemeColor;
 
 /**
+ * @method switchSpacing
+ * @description Toggles between "default" and "compact" spacing layouts
+ */
+function switchSpacing()
+{
+    const currentSpacing = document.documentElement.getAttribute( "data-spacing" ) ?? "default";
+    document.documentElement.setAttribute( "data-spacing", ( currentSpacing == "default" ) ? "compact" : "default" );
+    LX.emit( "@on_new_spacing_layout", currentSpacing );
+}
+
+LX.switchSpacing = switchSpacing;
+
+/**
  * @method getBase64Image
  * @description Convert an image to a base64 string
  * @param {Image} img
