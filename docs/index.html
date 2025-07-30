@@ -150,20 +150,26 @@
                 icon: starterTheme == "dark" ? "Moon" : "Sun",
                 swap: starterTheme == "dark" ? "Sun" : "Moon",
                 callback:  (value, event) => { LX.switchTheme() }
+            },
+            {
+                title: "Switch Spacing",
+                icon: "AlignVerticalSpaceAround",
+                callback:  (value, event) => { LX.switchSpacing() }
             }
         ];
 
         const customFooter = LX.makeContainer( ["100%", "32px"], "", "<p>Site created with _</p><span><a href='https://github.com/jxarco/lexgui.js/'>LexGUI.js</a></span>_" );
+        const localHost = window.location.protocol !== "https:";
 
         const sidebarOptions = {
-            headerTitle: `LexGUI v${ LX.version }`,
-            headerSubtitle: await window.getLastCommitDate( "jxarco", 'lexgui.js', 'master' )
+            headerTitle: localHost ? `LexGUI` : `LexGUI v${ LX.version }`,
+            headerSubtitle: localHost ? `v${ LX.version }` : await window.getLastCommitDate( "jxarco", 'lexgui.js', 'master' )
                     .then(date => 'Last Updated on ' + date)
                     .catch(err => {
                         console.error(err);
                         '';
                     }),
-            headerImage: "https://raw.githubusercontent.com/jxarco/lexgui.js/refs/heads/master/images/favicon.png",
+            headerImage: "../images/favicon.png",
             footerTitle: "jxarco",
             footerSubtitle: "alexroco.30@gmail.com",
             footerImage: "https://avatars.githubusercontent.com/u/25059187?s=400&u=ad8907b748c13e4e1a7cdd3882826acb6a2928b5&v=4",
@@ -334,6 +340,11 @@
         customFooter.classList.add( "fg-secondary", "justify-center" );
 
         menubar.addButtons( menubarButtons );
+
+        menubar.setButtonImage("lexgui.js", `../images/icon_${ starterTheme }.png`, () => {window.open("https://jxarco.github.io/lexgui.js/")}, {float: "left"})
+        LX.addSignal( "@on_new_color_scheme", ( el, value ) => {
+            menubar.setButtonImage("lexgui.js", `../images/icon_${ value }.png` );
+        } );
 
         menubar.siblingArea.root.style.overflowY = "scroll";
         menubar.siblingArea.root.appendChild( content );

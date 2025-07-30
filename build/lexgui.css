@@ -3337,8 +3337,8 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     width: 100%;
     height: 48px;
     display: flex;
-    border-radius: 8px;
-    padding: 8px;
+    border-radius: 0.5rem;
+    padding: 0.5rem;
     font-size: var(--global-font-size);
     cursor: pointer;
     align-items: center;

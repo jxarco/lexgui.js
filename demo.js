@@ -449,7 +449,7 @@ const starterTheme = LX.getTheme();
                     const avatarContainer = LX.makeContainer( [ "40px", "40px" ], "bg-tertiary rounded-full content-center", "", mailPreviewInfo );
 
                     const mailNames = mail.name.split( ' ' );
-                    const avatarIcon = LX.makeContainer( [ "auto", "auto" ], "font-medium text-lg self-center", mailNames[ 0 ][ 0 ] + mailNames[ 1 ][ 0 ], avatarContainer );
+                    const avatarIcon = LX.makeContainer( [ "auto", "auto" ], "font-medium self-center", mailNames[ 0 ][ 0 ] + mailNames[ 1 ][ 0 ], avatarContainer );
 
                     const senderData = LX.makeContainer( [ "auto", "auto" ], "flex flex-col gap-0.5", `
                     <div class="text-md font-semibold">${ mail.name }</div>
