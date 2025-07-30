@@ -418,6 +418,7 @@ function _createCommandbar( root )
  * skipRoot: Skip adding LX root container
  * skipDefaultArea: Skip creation of main area
  * layoutMode: Sets page layout mode (document | app)
+ * spacingMode: Sets page layout spacing mode (default | compact)
  */
 
 async function init( options = { } )
@@ -468,6 +469,9 @@ async function init( options = { } )
             } );
         } );
     }
+
+    this.spacingMode = options.spacingMode ?? "default";
+    document.documentElement.setAttribute( "data-spacing", this.spacingMode );
 
     this.container.appendChild( this.modal );
 
@@ -563,6 +567,19 @@ function setLayoutMode( mode )
 }
 
 LX.setLayoutMode = setLayoutMode;
+
+/**
+ * @method setSpacingMode
+ * @param {String} mode: default | compact
+ */
+
+function setSpacingMode( mode )
+{
+    this.spacingMode = mode;
+    document.documentElement.setAttribute( "data-spacing", this.spacingMode );
+}
+
+LX.setSpacingMode = setSpacingMode;
 
 /**
  * @method setCommandbarState
