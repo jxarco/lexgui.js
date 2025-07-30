@@ -2201,7 +2201,7 @@ class Select extends Widget {
 
                 let option = document.createElement( "div" );
                 option.className = "option";
-                option.innerHTML = iValue;
+                option.innerHTML = ( LX.makeIcon( "Inbox", { svgClass: "mr-2" } ).innerHTML + iValue );
 
                 let li = document.createElement( "li" );
                 li.className = "lexselectitem empty";
