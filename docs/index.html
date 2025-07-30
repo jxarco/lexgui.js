@@ -162,7 +162,7 @@
         const localHost = window.location.protocol !== "https:";
 
         const sidebarOptions = {
-            headerTitle: localHost ? `LexGUI` : `LexGUI v${ LX.version }`,
+            headerTitle: localHost ? `lexgui.js` : `lexgui.js v${ LX.version }`,
             headerSubtitle: localHost ? `v${ LX.version }` : await window.getLastCommitDate( "jxarco", 'lexgui.js', 'master' )
                     .then(date => 'Last Updated on ' + date)
                     .catch(err => {
@@ -241,7 +241,7 @@
             m.separator();
             m.group( "Widgets" );
 
-            m.add( "Buttons and Toggles" );
+            m.add( "Buttons and Toggles", { skipSelection: true } );
             for( const w of [ "Button", "Checkbox", "Combo Buttons", "Radio Group", "Toggle" ] )
             {
                 const url = w.toLowerCase().replace( /\s/g, '-') + ".html";
@@ -253,7 +253,7 @@
                 LX.registerCommandbarEntry( w, open.bind( this, "widgets/" + url, null ) );
             }
 
-            m.add( "Data Inputs" );
+            m.add( "Data Inputs", { skipSelection: true } );
             for( const w of dataInputWidgets )
             {
                 const url = w.toLowerCase().replace( /\s/g, '-') + ".html";
@@ -265,7 +265,7 @@
                 LX.registerCommandbarEntry( w, open.bind( this, "widgets/" + url, null ) );
             }
 
-            m.add( "Layout and Structure" );
+            m.add( "Layout and Structure", { skipSelection: true } );
             for( const w of [ "Data Tree", "List", "Tab Sections", "Table", "Title" ] )
             {
                 const url = w.toLowerCase().replace( /\s/g, '-') + ".html";
@@ -277,7 +277,7 @@
                 LX.registerCommandbarEntry( w, open.bind( this, "widgets/" + url, null ) );
             }
 
-            m.add( "Misc" );
+            m.add( "Misc", { skipSelection: true } );
             for( const w of [ "Custom", "Progress", "Other Widgets" ] )
             {
                 const url = w.toLowerCase().replace( /\s/g, '-') + ".html";
@@ -299,18 +299,19 @@
             m.add( "Timeline/Clips Timeline", { callback: open.bind( this, "components/clips_timeline.html", null ) } );
             m.add( "Video Editor", { callback: open.bind( this, "components/video-editor.html", null ) } );
             m.separator();
-            m.group( "API Reference" );
-            m.add( "Area", { callback: open.bind( this, "reference/area.html", null ) } );
-            m.add( "AreaOverlayButtons", { callback: open.bind( this, "reference/area-overlay-buttons.html", null ), content: LX.badge( "6.10", badgeClass, { asElement: true }) } );
-            m.add( "Branch", { callback: open.bind( this, "reference/branch.html", null ) } );
-            m.add( "Menubar", { callback: open.bind( this, "reference/menubar.html", null ) } );
-            m.add( "Panel", { callback: open.bind( this, "reference/panel.html", null ) } );
-            m.add( "Sidebar", { callback: open.bind( this, "reference/sidebar.html", null ) } );
-            m.add( "Tabs", { callback: open.bind( this, "reference/tabs.html", null ) } );
-            m.add( "Widget", { callback: open.bind( this, "reference/widget.html", null ) } );
+            m.add( "API Reference", { skipSelection: true } );
+            m.add( "API Reference/Area", { callback: open.bind( this, "reference/area.html", null ) } );
+            m.add( "API Reference/AreaOverlayButtons", { callback: open.bind( this, "reference/area-overlay-buttons.html", null ), content: LX.badge( "6.10", badgeClass, { asElement: true }) } );
+            m.add( "API Reference/Branch", { callback: open.bind( this, "reference/branch.html", null ) } );
+            m.add( "API Reference/Menubar", { callback: open.bind( this, "reference/menubar.html", null ) } );
+            m.add( "API Reference/Panel", { callback: open.bind( this, "reference/panel.html", null ) } );
+            m.add( "API Reference/Sidebar", { callback: open.bind( this, "reference/sidebar.html", null ) } );
+            m.add( "API Reference/Tabs", { callback: open.bind( this, "reference/tabs.html", null ) } );
+            m.add( "API Reference/Widget", { callback: open.bind( this, "reference/widget.html", null ) } );
             m.separator();
-            m.add( "LexGUI Examples", { icon: "Monitor", callback: open.bind( this, "../examples/", "_blank" ) } );
-            m.add( "Source Code", { icon: "Code", callback: open.bind( this, "https://github.com/jxarco/lexgui.js/", "_blank" ) } );
+            m.add( "LexGUI Examples", { icon: "Monitor", skipSelection: true, callback: open.bind( this, "../examples/", "_blank" ) } );
+            m.add( "Source Code", { icon: "Code", skipSelection: true, callback: open.bind( this, "https://github.com/jxarco/lexgui.js/", "_blank" ) } );
+            m.add( "Changelog", { icon: "Logs", skipSelection: true, callback: open.bind( this, "changelog.html", null ) } );
         }
 
         if( mobile )

@@ -190,19 +190,24 @@ function MAKE_CODE( text, language = "js" )
 
 window.MAKE_CODE = MAKE_CODE;
 
-function MAKE_LIST( list, type )
+function MAKE_LIST( list, type, target )
 {
     const validTypes = [ 'bullet', 'numbered' ];
     console.assert( list && list.length > 0 && validTypes.includes(type), "Invalid list type or empty list" + type );
     const typeString = type == 'bullet' ? 'ul' : 'ol';
     let ul = document.createElement( typeString );
+    target = target ?? mainContainer;
+    target.appendChild( ul );
     for( var el of list ) {
+        if( el.constructor === Array ) {
+            MAKE_LIST( el, type, ul );
+            return;
+        }
         let li = document.createElement( 'li' );
         li.className = "leading-loose";
         li.innerHTML = el;
         ul.appendChild( li );
     }
-    mainContainer.appendChild( ul );
 }
 
 function MAKE_BULLET_LIST( list )

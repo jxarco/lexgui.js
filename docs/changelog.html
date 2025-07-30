@@ -1,0 +1,96 @@
+<script type="module">
+
+    import { LX } from 'lexgui';
+
+    MAKE_HEADER( "Changelog.", "h1", "changelog" );
+
+    MAKE_PARAGRAPH( `Latest updates and announcements.` );
+    
+    {
+        const params = new URLSearchParams( document.location.search );
+        const content = document.getElementById('content');
+        const area = new LX.Area( { skipAppend: true, height: "auto" } );
+
+        const container = LX.makeContainer( ["100%", "auto"], "", "", area );
+
+        const _parseMD = ( text ) => {
+
+            const lines = text.replaceAll("\r\n", "\n").split( "\n" ).slice( 2 );
+            let masterVersion = false;
+            let currentList = [];
+
+            for( let line of lines )
+            {
+                if( !masterVersion && !(masterVersion = line.includes( "(master)" )) )
+                {
+                    continue;   
+                }
+
+                if( line[ 0 ] == '#' )
+                {
+                    // its a header
+                    const ht = (line.match(/#/g) || []).length;
+                    MAKE_HEADER( line.substring( 1 ).replaceAll( "#", "" ), `h${ ht }` );
+                }
+                else
+                {
+                    let codeIndex = line.indexOf( '`' );
+
+                    while( codeIndex > -1 )
+                    {
+                        const nextIndex = line.substring( codeIndex + 1 ).indexOf( '`' );
+                        const trim = line.substring( codeIndex, codeIndex + nextIndex + 2 );
+                        const trimReplaced = INLINE_CODE( trim ).replaceAll( '`', '' );
+                        line = line.replace( trim, trimReplaced );
+                        codeIndex = line.indexOf( '`' );
+                    }
+
+                    if( line[ 0 ] == '-' )
+                    {
+                        currentList.push( line.substring( 2 ) );
+                        continue;
+                    }
+                    else if( currentList.length )
+                    {
+                        if( line[ 0 ] == ' ' )
+                        {
+                            const updatedLine = line.substring( 4 );
+                            if( currentList[ currentList.length - 1 ].constructor === Array )
+                            {
+                                currentList[ currentList.length - 1 ].push( updatedLine );
+                            }
+                            else
+                            {
+                                currentList.push( [] );
+                                currentList[ currentList.length - 1 ].push( updatedLine );
+                            }
+                        }
+                        else
+                        {
+                            // close list
+                            MAKE_BULLET_LIST( currentList );
+                            currentList = [];
+                        }
+                    }
+
+                    if( line.length )
+                    {
+                        MAKE_PARAGRAPH( line );
+                    }
+                }
+            }
+
+        };
+
+        LX.requestText( "../changelog.md", ( text ) => {
+            _parseMD( text );
+        }, (err) => {
+            console.error( err );
+        } )
+
+        content.appendChild( area.root );
+    }
+
+    </script>
+
+</body>
