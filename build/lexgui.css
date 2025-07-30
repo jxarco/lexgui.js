@@ -36,7 +36,8 @@
     --global-blur-background: light-dark(#f7f7f7d8, #1f1f1fe7);
     --global-color-transparent: #00000000;
 
-    --global-padding-sm: 0.25rem;
+    --global-padding-xs: 0.25rem;
+    --global-padding-sm: 0.375rem;
     --global-padding-md: 0.5rem;
     --global-padding-lg: 0.75rem;
     --global-padding-xl: 1rem;
@@ -54,7 +55,8 @@
 }
 
 :root[data-spacing="compact"] {
-    --global-padding-sm: 0.15rem;
+    --global-padding-xs: 0.15rem;
+    --global-padding-sm: 0.25rem;
     --global-padding-md: 0.35rem;
     --global-padding-lg: 0.5rem;
     --global-padding-xl: 0.75rem;
@@ -1045,7 +1047,7 @@ a svg, svg path {
     z-index: 150;
     display: flex;
     flex-direction: column;
-    padding: var(--global-padding-sm);
+    padding: var(--global-padding-xs);
     border-radius: 6px;
     border: 1px solid #7a797c4f;
     outline: none;
@@ -1168,7 +1170,7 @@ a svg, svg path {
 
 .lexpanel {
     margin: 0;
-    padding: var(--global-padding-sm);
+    padding: var(--global-padding-xs);
     overflow: hidden;
     overflow-y: scroll;
 }
@@ -1187,7 +1189,7 @@ a svg, svg path {
 }
 
 .lexbranch .lexbranchcontent {
-    padding: var(--global-padding-sm);
+    padding: var(--global-padding-xs);
     background-color: var(--global-color-secondary);
     border-bottom-left-radius: 8px;
     border-bottom-right-radius: 8px;
@@ -1259,7 +1261,7 @@ a svg, svg path {
 .lexwidget {
     display: flex;
     align-items: center;
-    padding: var(--global-padding-sm);
+    padding: var(--global-padding-xs);
     font-size: var(--global-font-size);
     color: var(--global-text-primary);
     line-height: 2;
@@ -1357,7 +1359,7 @@ a svg, svg path {
 
 .lexwidget input:not(.lexcheckbox, .lextoggle, .lexrangeslider) {
     font-family: var(--global-font);
-    padding: var(--global-padding-sm);
+    padding: var(--global-padding-xs);
     color: var(--global-text-primary);
     --background-color: var(--global-color-tertiary);
     background-color: var(--background-color);
@@ -1391,7 +1393,7 @@ a svg, svg path {
     border-radius: 6px;
     position: relative;
     border: 1px solid transparent;
-    padding: var(--global-padding-sm) 0.75rem;
+    padding: var(--global-padding-xs) 0.75rem;
 }
 
 .lexwidget .lextext:disabled {
@@ -1451,7 +1453,7 @@ a svg, svg path {
     word-break: break-word;
     font-family: var(--global-font);
     background: none;
-    padding: var(--global-padding-sm);
+    padding: var(--global-padding-md);
     color: var(--global-text-primary);
     outline: none;
     border-radius: 6px;
@@ -1591,9 +1593,7 @@ a svg, svg path {
     font-weight: 600;
     font-size: var(--global-font-size);
     margin: 12px;
-    padding: 2px;
-    padding-left: 12px;
-    padding-right: 12px;
+    padding: var(--global-padding-xs) var(--global-padding-lg);
     line-height: 1.5;
     display: grid;
     align-content: center;
@@ -1732,7 +1732,7 @@ a svg, svg path {
     background-color: var(--global-color-tertiary);
     width: max-content;
     justify-self: center;
-    padding: var(--global-padding-sm);
+    padding: var(--global-padding-xs);
     border-radius: 8px;
     gap: 0.2em;
 }
@@ -3198,8 +3198,8 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 
 .lexsidebar .lexsidebarentry {
     width: 100%;
-    padding-inline: 8px;
-    padding-block: 6px;
+    padding-inline: var(--global-padding-md);
+    padding-block: var(--global-padding-sm);
     margin-block: 0.15rem;
     border-radius: 8px;
     cursor: pointer;
@@ -3503,7 +3503,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 
 .lexoverlaybuttons .lexbutton {
     --button-color: var(--global-color-secondary);
-    padding: 6px 6px;
+    padding: var(--global-padding-sm) var(--global-padding-sm);
     font-size: var(--global-font-size-lg);
     border-radius: 10px;
     justify-content: center;
@@ -3615,7 +3615,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexareatabs.row .lexareatab {
-    padding: 0.45em 1.45em;
+    padding: var(--global-padding-md) 1.45em;
     transition: 0.1s;
     background: none;
     border-radius: 6px;
@@ -3883,7 +3883,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     line-height: 12px;
     background-color: var(--global-color-tertiary);
     border-radius: 8px;
-    padding: 4px;
+    padding: var(--global-padding-xs);
 }
 
 .lextags input {
@@ -3994,7 +3994,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lextable th, .lextable td {
-    padding: 6px;
+    padding-block: var(--global-padding-sm);
     padding-inline: 12px;
     text-align: left;
     align-content: center;

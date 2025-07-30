@@ -45,6 +45,11 @@
             icon: "Moon",
             swap: "Sun",
             callback: (swapValue) => { LX.setTheme(swapValue ? "light" : "dark") }
+        },
+        {
+            title: "Switch Spacing",
+            icon: "AlignVerticalSpaceAround",
+            callback:  (value, event) => { LX.switchSpacing() }
         }
     ]);
 
