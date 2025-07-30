@@ -593,7 +593,7 @@ class Sidebar {
                 }
 
                 // Manage selected
-                if( this.displaySelected )
+                if( this.displaySelected && !options.skipSelection )
                 {
                     this.root.querySelectorAll(".lexsidebarentry").forEach( e => e.classList.remove( 'selected' ) );
                     entry.classList.add( "selected" );

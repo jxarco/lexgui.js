@@ -3164,7 +3164,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 .lexsidebar .lexsidebargrouptitle {
     font-size: var(--global-font-size-sm);
     font-weight: 600;
-    color: var(--global-text-secondary);
+    color: var(--global-text-tertiary);
     overflow: hidden;
     display: flex;
 }
