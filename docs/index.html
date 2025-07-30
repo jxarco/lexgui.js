@@ -3,7 +3,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <title>LexGUI Docs</title>
+    <title>Documentation - LexGUI</title>
     <link rel="stylesheet" href="../build/lexgui.css">
     <link rel="stylesheet" href="../build/lexgui-docs.css">
     <link rel="icon" href="../images/favicon.png">
@@ -32,7 +32,7 @@
 
         SET_DOM_TARGET( content );
 
-        window.loadPage = function(page, addToHistory = true) {
+        window.loadPage = function(page, addToHistory = true, title) {
             fetch(page)
                 .then(response => response.text())
                 .then(html => {
@@ -62,9 +62,12 @@
                         oldScripts.push( newScript );
                     });
 
-                    if (addToHistory) {
+                    if( addToHistory )
+                    {
                         history.pushState({ page }, "", `?p=${page.replace( ".html", "" )}`);
                     }
+
+                    if( title ) document.title = `${ title } - LexGUI`;
                 })
                 .catch(() => content.innerHTML = "<p>Error loading content.</p>");
         }
@@ -201,7 +204,7 @@
             }
             else
             {
-                loadPage( url );
+                loadPage( url, true, name );
             }
             if( window.__currentSheet )
             {
