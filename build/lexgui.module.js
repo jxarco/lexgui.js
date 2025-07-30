@@ -9404,7 +9404,7 @@ class Select extends Widget {
             options.overflowContainerX = options.overflowContainerY = options.overflowContainer;
         }
 
-        const _placeOptions = ( parent ) => {
+        const _placeOptions = ( parent, forceLastPlacement ) => {
 
             const selectRoot = selectedOption.root;
             const rect = selectRoot.getBoundingClientRect();
@@ -9434,8 +9434,8 @@ class Select extends Widget {
                 parent.style.top = ( topPosition + selectRoot.offsetHeight ) + 'px';
                 list.style.height = ""; // set auto height by default
 
-                const failBelow = ( topPosition + listHeight ) > maxY;
-                const failAbove = ( topPosition - listHeight ) < 0;
+                const failAbove = forceLastPlacement ? this._lastPlacement[ 0 ] : ( topPosition - listHeight ) < 0;
+                const failBelow = forceLastPlacement ? this._lastPlacement[ 1 ] : ( topPosition + listHeight ) > maxY;
                 if( failBelow && !failAbove )
                 {
                     parent.style.top = ( topPosition - listHeight ) + 'px';
@@ -9446,6 +9446,8 @@ class Select extends Widget {
                 {
                     list.style.height = `${ maxY - topPosition - 32 }px`; // 32px margin
                 }
+
+                this._lastPlacement = [ failAbove, failBelow ];
             }
 
             // Manage horizontal aspect
@@ -9568,6 +9570,7 @@ class Select extends Widget {
             filter = new LX.TextInput(null, options.filterValue ?? "", ( v ) => {
                 const filteredOptions = this._filterOptions( values, v );
                 list.refresh( filteredOptions );
+                _placeOptions( listDialog, true );
             }, filterOptions );
             filter.root.querySelector( ".lextext" ).style.border = "1px solid transparent";
 
