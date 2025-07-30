@@ -15390,7 +15390,7 @@ class Sidebar {
                     // Manage selected
                     if( this.displaySelected && !suboptions.skipSelection )
                     {
-                        subentryContainer.querySelectorAll(".lexsidebarentry").forEach( e => e.classList.remove( 'selected' ) );
+                        this.root.querySelectorAll(".lexsidebarentry").forEach( e => e.classList.remove( 'selected' ) );
                         subentry.classList.add( "selected" );
                     }
                 });
