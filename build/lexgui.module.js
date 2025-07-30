@@ -15388,10 +15388,10 @@ class Sidebar {
                     if( f ) f.call( this, subkey, subentry, e );
 
                     // Manage selected
-                    if( this.displaySelected )
+                    if( this.displaySelected && !suboptions.skipSelection )
                     {
-                        this.root.querySelectorAll(".lexsidebarentry").forEach( e => e.classList.remove( 'selected' ) );
-                        entry.classList.add( "selected" );
+                        subentryContainer.querySelectorAll(".lexsidebarentry").forEach( e => e.classList.remove( 'selected' ) );
+                        subentry.classList.add( "selected" );
                     }
                 });
             }
