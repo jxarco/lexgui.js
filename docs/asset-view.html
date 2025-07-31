@@ -96,17 +96,13 @@ assetView.@[mtd]load@(assetData);
     MAKE_PARAGRAPH( `The parameter ${ INLINE_CODE( "onevent" ) } in a Function callback where you can process the following events:` );
 
     MAKE_CODE_BULLET_LIST( [
-        ["layout", "wefwef"],
-        ["rootPath", "String", "Override default rootPath for internal data"],
-        ["skipBrowser", "Boolean", "Skip creation of the file explorer [false]"],
-        ["skipPreview", "Boolean", "Skip creation of the preview section [false]"],
-        ["useNativeTitle", "Boolean", "Use native element titles instead of custom Lexgui hover titles [false]"],
-        ["onlyFolders", "Boolean", "[true]"],
-        ["allowMultipleSelection", "Boolean", "Allow multiple asset selection [true]"],
-        ["previewActions", "Array", "Customize the asset preview actions"],
-        ["contextMenu", "Array", "Customize the asset context menu actions"],
-        ["allowedTypes", "Array", "Asset allowed types (strings)"],
-        ["onRefreshContent", "Function", "Function to call when the content is refreshed"],
+        [ "AssetViewEvent.ASSET_SELECTED", "Asset has been selected" ],
+        [ "AssetViewEvent.ASSET_DELETED", "Asset has been deleted" ],
+        [ "AssetViewEvent.ASSET_RENAMED", "Asset has been renamed" ],
+        [ "AssetViewEvent.ASSET_CLONED", "Asset has been cloned" ],
+        [ "AssetViewEvent.ASSET_DBLCLICKED", "Asset has been double clicked" ],
+        [ "AssetViewEvent.ASSET_CHECKED", "Asset has been checked" ],
+        [ "AssetViewEvent.ENTER_FOLDER", "Folder has been entered" ],
     ] );
 
     MAKE_LINE_BREAK();
