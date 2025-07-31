@@ -75,13 +75,52 @@
         content.appendChild( area.root );
     }
 
+    MAKE_PARAGRAPH( `Using these dropdowns, you can even add radio button groups. Just make sure your trigger element contains a member with the name of your group and its current value.:` );
+
+    {
+        const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
+        const button = LX.makeContainer( ["auto", "auto"], "self-center bg-contrast fg-contrast p-2 rounded-lg cursor-pointer", "Click here", area );
+        button.listen( "click", ( event ) => {
+            event.preventDefault();
+            LX.addDropdownMenu( button, [
+                "Preferences",
+                null,
+                {
+                    name: "View mode",
+                    options: [
+                        { name: "Theater" },
+                        { name: "TV" },
+                        { name: "Cinema" },
+                    ]
+                },
+                { name: "Github", icon: "Github" },
+                { name: "Support", submenu: [
+                    { name: "Email", icon: "Mail" },
+                    { name: "Message", submenu: [
+                        { name: "Whatsapp", kbd: "W" },
+                        { name: "iMessage", kbd: "M" },
+                    ]},
+                ]  }
+            ], { side: "right", align: "start" });
+        } );
+        button["View mode"] = "TV";
+        content.appendChild( area.root );
+    }
+
     MAKE_CODE( `LX.@[mtd]addDropdownMenu@( button, [
     @"My Account"@,
     @null@,
     { name: @"Profile"@, kbd: [@"Meta"@, @"P"@], icon: @"User"@ },
     { name: @"Billing"@, disabled: @true@, icon: @"CreditCard"@ },
     { name: @"Settings"@, kbd: @"S"@ },
-    @null@,
+    {
+        name: @"View mode"@,
+        options: [
+            { name: @"Theater"@ },
+            { name: @"TV"@ },
+            { name: @"Cinema"@ },
+        ]
+    },
     { name: @"Team"@ },
     { name: @"Invite users"@, icon: @"Search"@ },
     @null@,
@@ -93,7 +132,10 @@
             { name: @"iMessage"@, kbd: @"M"@ },
         ]},
     ]  }
-], { side: @"right"@, align: @"start"@ });` );
+], { side: @"right"@, align: @"start"@ });
+
+button[@"View mode"@] = @"TV"@;
+` );
 
     MAKE_PARAGRAPH( `As options, you can set ${ INLINE_CODE("side") } and ${ INLINE_CODE("align") } options to place the menu relative to its trigger.` );
 

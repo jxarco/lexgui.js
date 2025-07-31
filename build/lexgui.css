@@ -42,6 +42,7 @@
     --global-padding-lg: 0.75rem;
     --global-padding-xl: 1rem;
 
+    --svg-size-xxs: 0.5rem;
     --svg-size-xs: 0.7rem;
     --svg-size-sm: 0.85rem;
     --svg-size-md: 1rem;
@@ -335,6 +336,7 @@ body.noevents * {
 .goldenrod { color: goldenrod }
 .heliotrope { color: #d460ff }
 
+svg.xxs { width: var(--svg-size-xxs); height: var(--svg-size-xxs); }
 svg.xs { width: var(--svg-size-xs); height: var(--svg-size-xs); }
 svg.sm { width: var(--svg-size-sm); height: var(--svg-size-sm); }
 svg.lg { width: var(--svg-size-lg); height: var(--svg-size-lg); }
@@ -5929,6 +5931,7 @@ ul.lexassetscontent {
 .hover\:scale-xl:hover { transform: scale(1.25); transition: transform 0.3s cubic-bezier(.42,.97,.52,1.19); }
 
 .stroke-none { stroke: none }
+.fill-current { fill: currentColor }
 
 /* Layout */
 

@@ -1170,139 +1170,180 @@ class DropdownMenu {
 
         for( let item of items )
         {
-            if( !item )
+            this._createItem( item, parentDom, applyIconPadding );
+        }
+    }
+
+    _createItem( item, parentDom, applyIconPadding ) {
+
+        if( !item )
+        {
+            this._addSeparator( parentDom );
+            return;
+        }
+
+        const key = item.name ?? item;
+        const pKey = LX.getSupportedDOMName( key );
+
+        // Item already created
+        if( parentDom.querySelector( "#" + pKey ) )
+        {
+            return;
+        }
+
+        const menuItem = document.createElement('div');
+        menuItem.className = "lexdropdownmenuitem" + ( item.name ? "" : " label" ) + ( item.disabled ?? false ? " disabled" : "" ) + ( ` ${ item.className ?? "" }` );
+        menuItem.dataset["id"] = pKey;
+        menuItem.innerHTML = `<span>${ key }</span>`;
+        menuItem.tabIndex = "1";
+        parentDom.appendChild( menuItem );
+
+        if( item.constructor === String ) // Label case
+        {
+            return;
+        }
+
+        if( item.submenu )
+        {
+            const submenuIcon = LX.makeIcon( "Right", { svgClass: "sm" } );
+            menuItem.appendChild( submenuIcon );
+        }
+        else if( item.kbd )
+        {
+            item.kbd = [].concat( item.kbd );
+
+            const kbd = LX.makeKbd( item.kbd );
+            menuItem.appendChild( kbd );
+
+            document.addEventListener( "keydown", e => {
+                if( !this._trigger.ddm ) return;
+                e.preventDefault();
+                // Check if it's a letter or other key
+                let kdbKey = item.kbd.join("");
+                kdbKey = kdbKey.length == 1 ? kdbKey.toLowerCase() : kdbKey;
+                if( kdbKey == e.key )
+                {
+                    menuItem.click();
+                }
+            } );
+        }
+
+        const disabled = item.disabled ?? false;
+
+        if( this._radioGroup !== undefined )
+        {
+            if( item.name === this._radioGroup.selected )
             {
-                this._addSeparator( parentDom );
-                continue;
-            }
-
-            const key = item.name ?? item;
-            const pKey = LX.getSupportedDOMName( key );
-
-            // Item already created
-            if( parentDom.querySelector( "#" + pKey ) )
-            {
-                continue;
-            }
-
-            const menuItem = document.createElement('div');
-            menuItem.className = "lexdropdownmenuitem" + ( item.name ? "" : " label" ) + ( item.disabled ?? false ? " disabled" : "" ) + ( ` ${ item.className ?? "" }` );
-            menuItem.dataset["id"] = pKey;
-            menuItem.innerHTML = `<span>${ key }</span>`;
-            menuItem.tabIndex = "1";
-            parentDom.appendChild( menuItem );
-
-            if( item.constructor === String ) // Label case
-            {
-                continue;
-            }
-
-            if( item.submenu )
-            {
-                const submenuIcon = LX.makeIcon( "Right", { svgClass: "sm" } );
-                menuItem.appendChild( submenuIcon );
-            }
-            else if( item.kbd )
-            {
-                item.kbd = [].concat( item.kbd );
-
-                const kbd = LX.makeKbd( item.kbd );
-                menuItem.appendChild( kbd );
-
-                document.addEventListener( "keydown", e => {
-                    if( !this._trigger.ddm ) return;
-                    e.preventDefault();
-                    // Check if it's a letter or other key
-                    let kdbKey = item.kbd.join("");
-                    kdbKey = kdbKey.length == 1 ? kdbKey.toLowerCase() : kdbKey;
-                    if( kdbKey == e.key )
-                    {
-                        menuItem.click();
-                    }
-                } );
-            }
-
-            const disabled = item.disabled ?? false;
-
-            if( item.icon )
-            {
-                const icon = LX.makeIcon( item.icon, { svgClass: disabled ? "fg-tertiary" : item.className } );
+                const icon = LX.makeIcon( "Circle", { svgClass: "xxs fill-current" } );
                 menuItem.prepend( icon );
             }
-            else if( item.checked == undefined && applyIconPadding ) // no checkbox, no icon, apply padding if there's checkbox or icon in other items
-            {
-                menuItem.classList.add( "pl-8" );
-            }
 
-            if( disabled )
-            {
-                continue;
-            }
+            menuItem.setAttribute( "data-radioname", this._radioGroup.name );
+        }
+        else if( item.icon )
+        {
+            const icon = LX.makeIcon( item.icon, { svgClass: disabled ? "fg-tertiary" : item.className } );
+            menuItem.prepend( icon );
+        }
+        else if( item.checked == undefined && applyIconPadding ) // no checkbox, no icon, apply padding if there's checkbox or icon in other items
+        {
+            menuItem.classList.add( "pl-8" );
+        }
 
-            if( item.checked != undefined )
-            {
-                const checkbox = new LX.Checkbox( pKey + "_entryChecked", item.checked, (v) => {
-                    const f = item[ 'callback' ];
-                    item.checked = v;
-                    if( f )
-                    {
-                        f.call( this, key, v, menuItem );
-                    }
-                }, { className: "accent" });
-                const input = checkbox.root.querySelector( "input" );
-                input.classList.add( "ml-auto" );
-                menuItem.appendChild( input );
+        if( disabled )
+        {
+            return;
+        }
 
-                menuItem.addEventListener( "click", (e) => {
-                    if( e.target.type == "checkbox" ) return;
-                    input.checked = !input.checked;
-                    checkbox.set( input.checked );
-                } );
-            }
-            else
-            {
-                menuItem.addEventListener( "click", () => {
-                    const f = item[ 'callback' ];
-                    if( f )
-                    {
-                        f.call( this, key, menuItem );
-                    }
-
-                    this.destroy( true );
-                } );
-            }
-
-            menuItem.addEventListener("mouseover", e => {
-
-                let path = menuItem.dataset["id"];
-                let p = parentDom;
-
-                while( p )
+        if( item.checked != undefined )
+        {
+            const checkbox = new LX.Checkbox( pKey + "_entryChecked", item.checked, (v) => {
+                const f = item[ 'callback' ];
+                item.checked = v;
+                if( f )
                 {
-                    path += "/" + p.dataset["id"];
-                    p = p.currentParent?.parentElement;
+                    f.call( this, key, v, menuItem );
+                }
+            }, { className: "accent" });
+            const input = checkbox.root.querySelector( "input" );
+            input.classList.add( "ml-auto" );
+            menuItem.appendChild( input );
+
+            menuItem.addEventListener( "click", (e) => {
+                if( e.target.type == "checkbox" ) return;
+                input.checked = !input.checked;
+                checkbox.set( input.checked );
+            } );
+        }
+        else
+        {
+            menuItem.addEventListener( "click", () => {
+                const f = item[ 'callback' ];
+                if( f )
+                {
+                    f.call( this, key, menuItem );
                 }
 
-                LX.root.querySelectorAll( ".lexdropdownmenu" ).forEach( m => {
-                    if( !path.includes( m.dataset["id"] ) )
-                    {
-                        m.currentParent.built = false;
-                        m.remove();
-                    }
-                } );
-
-                if( item.submenu && this.inPlace )
+                const radioName = menuItem.getAttribute( "data-radioname" );
+                if( radioName )
                 {
-                    if( menuItem.built )
-                    {
-                        return;
-                    }
-                    menuItem.built = true;
-                    this._create( item.submenu, menuItem );
+                    this._trigger[ radioName ] = key;
                 }
 
-                e.stopPropagation();
-            });
+                this.destroy( true );
+            } );
+        }
+
+        menuItem.addEventListener("mouseover", e => {
+
+            let path = menuItem.dataset["id"];
+            let p = parentDom;
+
+            while( p )
+            {
+                path += "/" + p.dataset["id"];
+                p = p.currentParent?.parentElement;
+            }
+
+            LX.root.querySelectorAll( ".lexdropdownmenu" ).forEach( m => {
+                if( !path.includes( m.dataset["id"] ) )
+                {
+                    m.currentParent.built = false;
+                    m.remove();
+                }
+            } );
+
+            if( item.submenu && this.inPlace )
+            {
+                if( menuItem.built )
+                {
+                    return;
+                }
+                menuItem.built = true;
+                this._create( item.submenu, menuItem );
+            }
+
+            e.stopPropagation();
+        });
+
+        if( item.options )
+        {
+            this._addSeparator();
+
+            console.assert( this._trigger[ item.name ] && "An item of the radio group must be selected!" );
+            this._radioGroup = {
+                name: item.name,
+                selected: this._trigger[ item.name ]
+            };
+
+            for( let o of item.options )
+            {
+                this._createItem( o, parentDom, applyIconPadding );
+            }
+
+            delete this._radioGroup;
+
+            this._addSeparator();
         }
     }
 

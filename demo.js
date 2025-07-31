@@ -325,7 +325,7 @@ const starterTheme = LX.getTheme();
             className: "border-right",
             headerTitle: "jxarco",
             headerSubtitle: "alexroco.30@gmail.com",
-            headerImage: "https://raw.githubusercontent.com/jxarco/lexgui.js/refs/heads/master/images/favicon.png",
+            headerImage: "images/favicon.png",
             skipFooter: true,
             displaySelected: true,
             onHeaderPressed: (e, element) => { }
