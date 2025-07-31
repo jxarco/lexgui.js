@@ -43,7 +43,7 @@ NPM Package: [npmjs.com/package/lexgui](https://www.npmjs.com/package/lexgui)
         {
           "imports": {
             "lexgui": "https://cdn.skypack.dev/lexgui@^<version>/build/lexgui.module.js",
-            "lexgui/components/": "https://cdn.skypack.dev/lexgui@^<version>/build/components/"
+            "lexgui/extensions/": "https://cdn.skypack.dev/lexgui@^<version>/build/extensions/"
           }
         }
     </script>
@@ -59,8 +59,8 @@ NPM Package: [npmjs.com/package/lexgui](https://www.npmjs.com/package/lexgui)
 ```js
 import { LX } from 'lexgui';
 
-// Using components
-import { CodeEditor } from 'lexgui/components/codeeditor.js';
+// Using extensions
+import { CodeEditor } from 'lexgui/extensions/codeeditor.js';
 
 // Create main area
 let area = await LX.init();

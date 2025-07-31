@@ -4,7 +4,7 @@ if(!LX) {
     throw("lexgui.js missing!");
 }
 
-LX.components.push( 'CodeEditor' );
+LX.extensions.push( 'CodeEditor' );
 
 function swapElements( obj, a, b ) {
     [obj[a], obj[b]] = [obj[b], obj[a]];

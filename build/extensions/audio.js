@@ -5,7 +5,7 @@ if( !LX )
     throw("lexgui.js missing!");
 }
 
-LX.components.push( 'Audio' );
+LX.extensions.push( 'Audio' );
 
 /**
  * @class Knob

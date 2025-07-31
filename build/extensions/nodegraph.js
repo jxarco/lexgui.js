@@ -4,7 +4,7 @@ if(!LX) {
     throw("lexgui.js missing!");
 }
 
-LX.components.push( 'GraphEditor' );
+LX.extensions.push( 'GraphEditor' );
 
 class BoundingBox {
 

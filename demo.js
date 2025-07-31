@@ -1,7 +1,7 @@
 import { LX } from 'lexgui';
-import 'lexgui/components/codeeditor.js';
-import 'lexgui/components/timeline.js';
-import 'lexgui/components/audio.js';
+import 'lexgui/extensions/codeeditor.js';
+import 'lexgui/extensions/timeline.js';
+import 'lexgui/extensions/audio.js';
 
 window.LX = LX;
 
@@ -50,12 +50,18 @@ const starterTheme = LX.getTheme();
 
 // Header
 {
-    const header = LX.makeContainer( [ null, "auto" ], "flex flex-col border-top border-bottom gap-2 px-6 py-12", `
+    const header = LX.makeContainer( [ null, "auto" ], "flex flex-col border-top border-bottom gap-2 px-10 py-8", `
         <a>Get started with LexGUI.js <span class="text-sm fg-secondary">${ LX.version }</span></a>
         <h1>Build your application interface</h1>
         <p class="font-light" style="max-width:32rem">A set of beautifully-designed, accessible widgets and components.
         No complex frameworks. Pure JavaScript and CSS. Open Source.</p>
     `, area );
+
+    const headerButtons = LX.makeContainer( [ "auto", "auto" ], "flex flex-row", ``, header );
+    const getStartedButton = new LX.Button( null, "Get Started", null, { buttonClass: "contrast p-1 px-3" } );
+    const componentsButton = new LX.Button( null, "View Components", null, { buttonClass: "tertiary p-1 px-3" } );
+    headerButtons.appendChild( getStartedButton.root );
+    headerButtons.appendChild( componentsButton.root );
 }
 
 // Content

@@ -4,7 +4,7 @@ if(!LX) {
     throw("lexgui.js missing!");
 }
 
-LX.components.push( 'VideoEditor' );
+LX.extensions.push( 'VideoEditor' );
 
 /**
  * @class TimeBar

@@ -21,7 +21,7 @@
 {
     @"imports"@: {
         @"lexgui"@: @"https://cdn.skypack.dev/lexgui|@^&lt;version&gt;/build/lexgui.module.js"@,
-        @"lexgui/components/"@: @"https://cdn.skypack.dev/lexgui|@^&lt;version&gt;/build/components/"@
+        @"lexgui/extensions/"@: @"https://cdn.skypack.dev/lexgui|@^&lt;version&gt;/build/extensions/"@
     }
 }
 &lt;/@script@&gt;
@@ -42,17 +42,17 @@
 
 
     MAKE_HEADER( "Building components", "h2", "components" );
-    MAKE_PARAGRAPH( `By default, lexgui.js provides the core elements for creating web interfaces. Other components, such as the code editor or timelines are located in the ${ INLINE_CODE( "components/" ) } directory. 
+    MAKE_PARAGRAPH( `By default, lexgui.js provides the core elements for creating web interfaces. Other composite components, such as the code editor or timelines are located in the ${ INLINE_CODE( "extensions/" ) } directory. 
     These ones are not required to be installed individually, but they <span class='font-semibold'>do need to be imported separately</span>:` );
     MAKE_CODE( `@import@ { @[cls]LX@ } @from@ @'lexgui'@;
 
 @[com]// First option, importing the component@
-@import@ { @[cls]CodeEditor@ } @from@ @'lexgui/components/codeeditor.js'@;
+@import@ { @[cls]CodeEditor@ } @from@ @'lexgui/extensions/codeeditor.js'@;
 
 @const@ @[var]editor@ = @new@ @[cls]CodeEditor@();
 
 @[com]// Or since it's added to the LX namespace...@
-@import@ @'lexgui/components/codeeditor.js'@;
+@import@ @'lexgui/extensions/codeeditor.js'@;
 
 @const@ @[var]editor@ = @new@ @[cls]LX@.@[cls]CodeEditor@();` );
 

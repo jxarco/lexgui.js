@@ -11,7 +11,7 @@
         {
           "imports": {
             "lexgui": "../build/lexgui.module.js",
-            "lexgui/components/": "../build/components/"
+            "lexgui/extensions/": "../build/extensions/"
           }
         }
     </script>
@@ -21,8 +21,8 @@
     <script type="module">
 
         import { LX } from 'lexgui';
-        import 'lexgui/components/codeeditor.js';
-        import 'lexgui/components/docmaker.js';
+        import 'lexgui/extensions/codeeditor.js';
+        import 'lexgui/extensions/docmaker.js';
 
         window.LX = LX;
 
@@ -218,11 +218,13 @@
             }
         }
 
-        const buttonToggleWidgets = [ "Button", "Checkbox", "Combo Buttons", "Radio Group", "Toggle" ];
-        const dataInputWidgets = [ "Color", "Curve", "Date Picker", "File", "Form", "Item Array", "Layers", "Map 2D", "Number", "OTP Input", "Pad", "Range", "Select", "Size", "Tags", "Text", "Text Area", "Vector" ];
-        const layoutWidgets = [ "Data Tree", "List", "Tab Sections", "Table", "Title" ];
-        const miscWidgets = [ "Custom", "Progress", "Other Widgets" ];
-        const widgetVersion = {
+        const generalComponents = [ "Button", "Combo Buttons", "Radio Group", "Other Components" ];
+        const dataInputComponents = [ "Checkbox", "Color", "Curve", "Custom", "File", "Form", "Item Array", "Layers", "Map 2D", "Number", "OTP Input", "Pad", "Range", "Select", "Size", "Tags", "Text", "Text Area", "Toggle", "Vector" ];
+        const dataDisplayComponents = [ "Asset View", "Data Tree", "Date Picker", "List", "Tab Sections", "Table", "Title", "Tour" ];
+        const feedbackComponents = [ "Dialog", "Progress", "Skeleton", "Toast" ];
+        const navigationComponents = [ "Dropdown" ];
+
+        const componentVersion = {
             "Date Picker": "5.9",
             "Form": "1.40",
             "Map 2D": "6.3",
@@ -231,7 +233,9 @@
             "Radio Group": "4.0",
             "Range": "3.0",
             "Size": "1.38",
-            "Table": "2.0"
+            "Skeleton": "7.0",
+            "Table": "2.0",
+            "Tour": "6.11"
         };
         const badgeClass = "contrast sm";
 
@@ -243,75 +247,75 @@
             m.add( "Instancing Panels", { callback: open.bind( this, "instancing-panels.html", null ) } );
             m.add( "Panel Branching", { callback: open.bind( this, "branching.html", null ) } );
             m.add( "Adding First Widgets", { callback: open.bind( this, "first-widgets.html", null ) } );
-            m.add( "Dialogs", { callback: open.bind( this, "dialogs.html", null ) } );
-            m.add( "Notifications", { callback: open.bind( this, "notifications.html", null ) } );
-            m.add( "Context Menus", { callback: open.bind( this, "context-menu.html", null ) } );
             m.add( "Event Handling", { callback: open.bind( this, "event-handling.html", null ) } );
             m.add( "Theme Customization", { callback: open.bind( this, "themes.html", null ) } );
-            m.add( "Asset View", { callback: open.bind( this, "asset-view.html", null ) } );
-            m.add( "User Tour", { callback: open.bind( this, "tour.html", null ), content: LX.badge( "6.11", badgeClass, { asElement: true, callback: open.bind( this, "changelog.html", "#6.11" ) }) } );
-            m.add( "Skeleton", { callback: open.bind( this, "skeleton.html", null ), content: LX.badge( "7.0", badgeClass, { asElement: true, callback: open.bind( this, "changelog.html", "#7.0" ) }) } );
             m.add( "Icons", { callback: open.bind( this, "icons.html", null ) } );
             m.separator();
-            m.group( "Widgets" );
-
-            m.add( "Buttons and Toggles", { skipSelection: true } );
-            for( const w of buttonToggleWidgets )
-            {
-                const url = w.toLowerCase().replace( /\s/g, '-') + ".html";
-                m.add( "Buttons and Toggles/" + w, {
-                    callback: open.bind( this, "widgets/" + url, null ),
-                    content: widgetVersion[ w ] ? LX.badge( widgetVersion[ w ], badgeClass, { asElement: true, callback: open.bind( this, "changelog.html", `#${ widgetVersion[ w ] }` ) }) : undefined
-                } );
-
-                LX.registerCommandbarEntry( w, open.bind( this, "widgets/" + url, null ) );
-            }
-
-            m.add( "Data Inputs", { skipSelection: true } );
-            for( const w of dataInputWidgets )
-            {
-                const url = w.toLowerCase().replace( /\s/g, '-') + ".html";
-                m.add( "Data Inputs/" + w, {
-                    callback: open.bind( this, "widgets/" + url, null ),
-                    content: widgetVersion[ w ] ? LX.badge( widgetVersion[ w ], badgeClass, { asElement: true, callback: open.bind( this, "changelog.html", `#${ widgetVersion[ w ] }` ) }) : undefined
-                } );
-
-                LX.registerCommandbarEntry( w, open.bind( this, "widgets/" + url, null ) );
-            }
-
-            m.add( "Layout and Structure", { skipSelection: true } );
-            for( const w of layoutWidgets )
-            {
-                const url = w.toLowerCase().replace( /\s/g, '-') + ".html";
-                m.add( "Layout and Structure/" + w, {
-                    callback: open.bind( this, "widgets/" + url, null ),
-                    content: widgetVersion[ w ] ? LX.badge( widgetVersion[ w ], badgeClass, { asElement: true, callback: open.bind( this, "changelog.html", `#${ widgetVersion[ w ] }` ) }) : undefined
-                } );
-
-                LX.registerCommandbarEntry( w, open.bind( this, "widgets/" + url, null ) );
-            }
-
-            m.add( "Misc", { skipSelection: true } );
-            for( const w of miscWidgets )
-            {
-                const url = w.toLowerCase().replace( /\s/g, '-') + ".html";
-                m.add( "Misc/" + w, {
-                    callback: open.bind( this, "widgets/" + url, null ),
-                    content: widgetVersion[ w ] ? LX.badge( widgetVersion[ w ], badgeClass, { asElement: true, callback: open.bind( this, "changelog.html", `#${ widgetVersion[ w ] }` ) }) : undefined
-                } );
-
-                LX.registerCommandbarEntry( w, open.bind( this, "widgets/" + url, null ) );
-            }
-
-            m.separator();
             m.group( "Components" );
-            m.add( "Code Editor", { callback: open.bind( this, "components/code-editor.html", null ) } );
-            m.add( "Doc Maker", { callback: open.bind( this, "components/doc-maker.html", null ) } );
-            m.add( "Graph Editor", { callback: open.bind( this, "components/graph-editor.html", null ) } );
-            m.add( "Timeline", { callback: open.bind( this, "components/timeline.html", null ) } );
-            m.add( "Timeline/Keyframes Timeline", { callback: open.bind( this, "components/keyframe-timeline.html", null ) } );
-            m.add( "Timeline/Clips Timeline", { callback: open.bind( this, "components/clips-timeline.html", null ) } );
-            m.add( "Video Editor", { callback: open.bind( this, "components/video-editor.html", null ) } );
+            m.add( "General", { skipSelection: true } );
+            for( const c of generalComponents )
+            {
+                const url = c.toLowerCase().replace( /\s/g, '-') + ".html";
+                m.add( "General/" + c, {
+                    callback: open.bind( this, "components/" + url, null ),
+                    content: componentVersion[ c ] ? LX.badge( componentVersion[ c ], badgeClass, { asElement: true, callback: open.bind( this, "changelog.html", `#${ componentVersion[ c ] }` ) }) : undefined
+                } );
+
+                LX.registerCommandbarEntry( c, open.bind( this, "components/" + url, null ) );
+            }
+            m.add( "Data Display", { skipSelection: true } );
+            for( const c of dataDisplayComponents )
+            {
+                const url = c.toLowerCase().replace( /\s/g, '-') + ".html";
+                m.add( "Data Display/" + c, {
+                    callback: open.bind( this, "components/" + url, null ),
+                    content: componentVersion[ c ] ? LX.badge( componentVersion[ c ], badgeClass, { asElement: true, callback: open.bind( this, "changelog.html", `#${ componentVersion[ c ] }` ) }) : undefined
+                } );
+                
+                LX.registerCommandbarEntry( c, open.bind( this, "components/" + url, null ) );
+            }
+            m.add( "Data Inputs", { skipSelection: true } );
+            for( const c of dataInputComponents )
+            {
+                const url = c.toLowerCase().replace( /\s/g, '-') + ".html";
+                m.add( "Data Inputs/" + c, {
+                    callback: open.bind( this, "components/" + url, null ),
+                    content: componentVersion[ c ] ? LX.badge( componentVersion[ c ], badgeClass, { asElement: true, callback: open.bind( this, "changelog.html", `#${ componentVersion[ c ] }` ) }) : undefined
+                } );
+
+                LX.registerCommandbarEntry( c, open.bind( this, "components/" + url, null ) );
+            }
+            m.add( "Feedback", { skipSelection: true } );
+            for( const c of feedbackComponents )
+            {
+                const url = c.toLowerCase().replace( /\s/g, '-') + ".html";
+                m.add( "Feedback/" + c, {
+                    callback: open.bind( this, "components/" + url, null ),
+                    content: componentVersion[ c ] ? LX.badge( componentVersion[ c ], badgeClass, { asElement: true, callback: open.bind( this, "changelog.html", `#${ componentVersion[ c ] }` ) }) : undefined
+                } );
+
+                LX.registerCommandbarEntry( c, open.bind( this, "components/" + url, null ) );
+            }
+            m.add( "Navigation", { skipSelection: true } );
+            for( const c of navigationComponents )
+            {
+                const url = c.toLowerCase().replace( /\s/g, '-') + ".html";
+                m.add( "Navigation/" + c, {
+                    callback: open.bind( this, "components/" + url, null ),
+                    content: componentVersion[ c ] ? LX.badge( componentVersion[ c ], badgeClass, { asElement: true, callback: open.bind( this, "changelog.html", `#${ componentVersion[ c ] }` ) }) : undefined
+                } );
+
+                LX.registerCommandbarEntry( c, open.bind( this, "components/" + url, null ) );
+            }
+            m.separator();
+            m.group( "Extensions" );
+            m.add( "Code Editor", { callback: open.bind( this, "extensions/code-editor.html", null ) } );
+            m.add( "Doc Maker", { callback: open.bind( this, "extensions/doc-maker.html", null ) } );
+            m.add( "Graph Editor", { callback: open.bind( this, "extensions/graph-editor.html", null ) } );
+            m.add( "Timeline", { callback: open.bind( this, "extensions/timeline.html", null ) } );
+            m.add( "Timeline/Keyframes Timeline", { callback: open.bind( this, "extensions/keyframe-timeline.html", null ) } );
+            m.add( "Timeline/Clips Timeline", { callback: open.bind( this, "extensions/clips-timeline.html", null ) } );
+            m.add( "Video Editor", { callback: open.bind( this, "extensions/video-editor.html", null ) } );
             m.separator();
             m.add( "API Reference", { skipSelection: true } );
             m.add( "API Reference/Area", { callback: open.bind( this, "reference/area.html", null ) } );

@@ -6,9 +6,9 @@
 */
 
 const LX = {
-    version: "0.6.12",
+    version: "0.7.0",
     ready: false,
-    components: [], // Specific pre-build components
+    extensions: [], // Store extensions used
     signals: {}, // Events and triggers
     extraCommandbarEntries: [], // User specific entries for command bar
     activeDraggable: null // Watch for the current active draggable
@@ -203,7 +203,7 @@ function _createCommandbar( root )
         }
         else
         {
-            for( let c of LX.components )
+            for( let c of LX.extensions )
             {
                 if( !LX[ c ] || !LX[ c ].prototype.onKeyPressed )
                 {

@@ -4,7 +4,7 @@ if(!LX) {
     throw("lexgui.js missing!");
 }
 
-LX.components.push( 'ImUI' );
+LX.extensions.push( 'ImUI' );
 
 function swapElements (obj, a, b) {
     [obj[a], obj[b]] = [obj[b], obj[a]];

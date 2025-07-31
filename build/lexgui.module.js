@@ -7,9 +7,9 @@
 */
 
 const LX = {
-    version: "0.6.12",
+    version: "0.7.0",
     ready: false,
-    components: [], // Specific pre-build components
+    extensions: [], // Store extensions used
     signals: {}, // Events and triggers
     extraCommandbarEntries: [], // User specific entries for command bar
     activeDraggable: null // Watch for the current active draggable
@@ -203,7 +203,7 @@ function _createCommandbar( root )
         }
         else
         {
-            for( let c of LX.components )
+            for( let c of LX.extensions )
             {
                 if( !LX[ c ] || !LX[ c ].prototype.onKeyPressed )
                 {
@@ -4745,12 +4745,12 @@ LX.getSupportedDOMName = getSupportedDOMName;
 
 /**
  * @method has
- * @description Ask if LexGUI is using a specific component
- * @param {String} componentName Name of the LexGUI component
+ * @description Ask if LexGUI is using a specific extension
+ * @param {String} extensionName Name of the LexGUI extension
  */
-function has( componentName )
+function has( extensionName )
 {
-    return ( LX.components.indexOf( componentName ) > -1 );
+    return ( LX.extensions.indexOf( extensionName ) > -1 );
 }
 
 LX.has = has;

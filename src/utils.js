@@ -105,12 +105,12 @@ LX.getSupportedDOMName = getSupportedDOMName;
 
 /**
  * @method has
- * @description Ask if LexGUI is using a specific component
- * @param {String} componentName Name of the LexGUI component
+ * @description Ask if LexGUI is using a specific extension
+ * @param {String} extensionName Name of the LexGUI extension
  */
-function has( componentName )
+function has( extensionName )
 {
-    return ( LX.components.indexOf( componentName ) > -1 );
+    return ( LX.extensions.indexOf( extensionName ) > -1 );
 }
 
 LX.has = has;

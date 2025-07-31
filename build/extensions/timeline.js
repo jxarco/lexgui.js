@@ -4,7 +4,7 @@ if(!LX) {
     throw("lexgui.js missing!");
 }
 
-LX.components.push( 'Timeline' );
+LX.extensions.push( 'Timeline' );
 
 /**
  * @class Timeline

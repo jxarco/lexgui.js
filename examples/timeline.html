@@ -9,7 +9,7 @@
         {
           "imports": {
             "lexgui": "../build/lexgui.module.js",
-            "lexgui/components/": "../build/components/"
+            "lexgui/extensions/": "../build/extensions/"
           }
         }
     </script>
@@ -18,7 +18,7 @@
     <script type="module">
 
         import { LX } from 'lexgui';
-        import { Timeline, KeyFramesTimeline, ClipsTimeline } from 'lexgui/components/timeline.js';
+        import { Timeline, KeyFramesTimeline, ClipsTimeline } from 'lexgui/extensions/timeline.js';
 
         // init library and get main area
         let area = await LX.init();
