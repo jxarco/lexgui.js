@@ -1262,6 +1262,18 @@ function badge( text, className, options = {} )
     container.className = "lexbadge " + ( className ?? "" );
     Object.assign( container.style, options.style ?? {} );
 
+    if( options.callback )
+    {
+        const arrowIcon = LX.makeIcon( "ArrowUpRight", { svgClass: "xs fg-contrast" } );
+        arrowIcon.querySelector("svg").style.marginLeft = "-0.25rem";
+        container.innerHTML += arrowIcon.innerHTML;
+        container.addEventListener( "click", e => {
+            e.preventDefault();
+            e.stopPropagation();
+            options.callback();
+        } );
+    }
+
     if( options.parent )
     {
         options.parent.classList.add( "lexbadge-parent" );
