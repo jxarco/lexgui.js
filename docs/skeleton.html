@@ -1,0 +1,32 @@
+<script type="text/javascript">
+
+    MAKE_HEADER( "Skeleton.", "h1", "skeleton" );
+            
+    MAKE_PARAGRAPH( `Use to show a placeholder while page content is loading.` );
+    MAKE_LINE_BREAK();
+
+    {
+        const area = new LX.Area( { skipAppend: true, height: "auto" } );
+        content.appendChild( area.root );
+        const skeleton = new LX.Skeleton(  `
+            <div class="w-12 h-12 rounded-full lexskeletonpart"></div>
+            <div class="flex flex-col w-full p-2 gap-2">
+                <div class="w-full h-4 lexskeletonpart"></div>
+                <div class="w-2/3 h-4 lexskeletonpart"></div>
+            </div>
+        ` );
+        area.attach( skeleton );
+        area.root.className += " p-4 border rounded-lg shadow-lg bg-secondary overflow-hidden";
+    }
+
+    MAKE_LINE_BREAK();
+
+    MAKE_PARAGRAPH( `To create a skeleton in LexGUI.js, instantiate a new ${ INLINE_CODE( "LX.Skeleton" ) } with either a html string with all your elements or an array containing all the elements that are contained in the skeleton element. The specific
+    elements that should have the highlights need to have the ${ INLINE_CODE( "lexskeletonpart" ) }.` );
+
+    MAKE_NOTE( `Make sure to destroy the skeleton once your content is loaded using ${ INLINE_CODE( "LX.Skeleton.destroy()" ) }.` );
+
+    MAKE_LINE_BREAK();
+    MAKE_LINE_BREAK();
+
+</script>

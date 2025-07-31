@@ -4402,6 +4402,43 @@ class CanvasMap2D {
 
 LX.CanvasMap2D = CanvasMap2D;
 
+class Skeleton {
+
+    constructor( elements ) {
+
+        this.root = LX.makeContainer( [ "auto", "auto" ], "flex flex-row lexskeleton" );
+
+        if( elements.constructor === String )
+        {
+            this.root.innerHTML = elements;
+        }
+        else
+        {
+            // Force array
+            elements = [].concat( elements );
+
+            for( let e of elements )
+            {
+                this.root.appendChild( e );
+            }
+        }
+    }
+
+    destroy() {
+
+        this.root.dataset[ "closed" ] = true;
+
+        LX.doAsync( () => {
+            this.root.remove();
+            this.root = null;
+        }, 200 );
+    }
+}
+
+LX.Skeleton = Skeleton;
+
+// Js native overrides
+
 Object.defineProperty(String.prototype, 'lastChar', {
     get: function() { return this[ this.length - 1 ]; },
     enumerable: true,
