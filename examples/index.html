@@ -86,7 +86,7 @@
 
         let iframe = document.createElement('iframe');
         iframe.id = iframe.name = 'viewer';
-        iframe.src = examples[0].replace(" ", "_").toLowerCase() + ".html";
+        iframe.src = examples[0].replace(" ", "-").toLowerCase() + ".html";
         iframe.style.width = "100%";
         iframe.style.height = "100%";
         iFrameArea.root.appendChild(iframe);
@@ -101,7 +101,7 @@
 
             for( let ex of examples )
             {
-                const id = ex.replace(" ", "_").toLowerCase();
+                const id = ex.replace(" ", "-").toLowerCase();
                 const options = {
                     img: "previews/" + id + ".png",
                     callback: function() {
