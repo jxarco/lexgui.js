@@ -30,7 +30,10 @@
                 {
                     // its a header
                     const ht = (line.match(/#/g) || []).length;
-                    MAKE_HEADER( line.substring( 1 ).replaceAll( "#", "" ), `h${ ht }` );
+                    const headerString = line.substring( ht + 3 ).replaceAll( "#", "" );
+                    const endIdx = headerString.indexOf( " " );
+                    const id = endIdx > -1 ? headerString.substring( 0, endIdx ) : headerString;
+                    MAKE_HEADER( headerString, `h${ ht }`, id );
                 }
                 else
                 {

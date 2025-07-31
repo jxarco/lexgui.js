@@ -15,10 +15,10 @@ const starterTheme = LX.getTheme();
         { name: "Examples", callback: () => { window.open("./examples/") } },
     ] );
 
-    menubar.setButtonImage("lexgui.js", `images/icon_small_${ starterTheme }.png`, () => {window.open("https://jxarco.github.io/lexgui.js/")}, {float: "left"})
+    menubar.setButtonImage("lexgui.js", `images/icon_${ starterTheme }.png`, () => {window.open("https://jxarco.github.io/lexgui.js/")}, {float: "left"})
 
     LX.addSignal( "@on_new_color_scheme", ( el, value ) => {
-        menubar.setButtonImage("lexgui.js", `images/icon_small_${ value }.png` );
+        menubar.setButtonImage("lexgui.js", `images/icon_${ value }.png` );
     } );
 
     const commandButton = new LX.Button(null, `Search command...<span class="ml-auto">${ LX.makeKbd( ["Ctrl", "Space"], false, "bg-tertiary border px-1 rounded" ).innerHTML }</span>`, () => { LX.setCommandbarState( true ) }, {

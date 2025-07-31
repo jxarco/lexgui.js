@@ -32,7 +32,7 @@
 
         SET_DOM_TARGET( content );
 
-        window.loadPage = function(page, addToHistory = true, title) {
+        window.loadPage = function(page, addToHistory = true, title, callback) {
             fetch(page)
                 .then(response => response.text())
                 .then(html => {
@@ -69,6 +69,7 @@
 
                     if( title ) document.title = `${ title } - LexGUI`;
                 })
+                .then( callback )
                 .catch(() => content.innerHTML = "<p>Error loading content.</p>");
         }
 
@@ -146,6 +147,7 @@
         let area = await LX.init( { rootClass: "wrapper" } );
         let menubar = null;
 
+        const localHost = window.location.protocol !== "https:";
         const starterTheme = LX.getTheme();
         const menubarButtons = [
             {
@@ -160,10 +162,6 @@
                 callback:  (value, event) => { LX.switchSpacing() }
             }
         ];
-
-        const customFooter = LX.makeContainer( ["100%", "32px"], "", "<p>Site created with _</p><span><a href='https://github.com/jxarco/lexgui.js/'>LexGUI.js</a></span>_" );
-        const localHost = window.location.protocol !== "https:";
-
         const sidebarOptions = {
             headerTitle: localHost ? `lexgui.js` : `lexgui.js v${ LX.version }`,
             headerSubtitle: localHost ? `v${ LX.version }` : await window.getLastCommitDate( "jxarco", 'lexgui.js', 'master' )
@@ -190,7 +188,6 @@
                     { name: "Linkedin", icon: "Linkedin", callback: () => open( "https://www.linkedin.com/in/alejandro-roco/", "_blank" ) },
                 ], { side: "right", align: "start" });
             },
-            // footer: customFooter,
             collapsed: false,
             collapsable: false,
             displaySelected: true
@@ -198,21 +195,33 @@
 
         const open = ( url, target, name, dom, event ) => {
             if( event ) event.preventDefault();
-            if( target )
+
+            const anchor = target && ( target[ 0 ] == '#' );
+
+            if( target && !anchor )
             {
                 window.open( url, target );
             }
             else
             {
-                loadPage( url, true, name );
+                loadPage( url, true, name, () => {
+                    if( anchor )
+                    {
+                        LX.doAsync( () => document.getElementById( target.substring( 1 ) )?.scrollIntoView({ behavior: 'smooth' }), 20 );
+                    }
+                } );
             }
+
             if( window.__currentSheet )
             {
                 window.__currentSheet.destroy();
             }
         }
 
+        const buttonToggleWidgets = [ "Button", "Checkbox", "Combo Buttons", "Radio Group", "Toggle" ];
         const dataInputWidgets = [ "Color", "Curve", "Date Picker", "File", "Form", "Item Array", "Layers", "Map 2D", "Number", "OTP Input", "Pad", "Range", "Select", "Size", "Tags", "Text", "Text Area", "Vector" ];
+        const layoutWidgets = [ "Data Tree", "List", "Tab Sections", "Table", "Title" ];
+        const miscWidgets = [ "Custom", "Progress", "Other Widgets" ];
         const widgetVersion = {
             "Date Picker": "5.9",
             "Form": "1.40",
@@ -239,18 +248,18 @@
             m.add( "Context Menus", { callback: open.bind( this, "context-menu.html", null ) } );
             m.add( "Event Handling", { callback: open.bind( this, "event-handling.html", null ) } );
             m.add( "Theme Customization", { callback: open.bind( this, "themes.html", null ) } );
-            m.add( "User Tour", { callback: open.bind( this, "tour.html", null ), content: LX.badge( "6.11", badgeClass, { asElement: true }) } );
+            m.add( "User Tour", { callback: open.bind( this, "tour.html", null ), content: LX.badge( "6.11", badgeClass, { asElement: true, callback: open.bind( this, "changelog.html", "#6.11" ) }) } );
             m.add( "Icons", { callback: open.bind( this, "icons.html", null ) } );
             m.separator();
             m.group( "Widgets" );
 
             m.add( "Buttons and Toggles", { skipSelection: true } );
-            for( const w of [ "Button", "Checkbox", "Combo Buttons", "Radio Group", "Toggle" ] )
+            for( const w of buttonToggleWidgets )
             {
                 const url = w.toLowerCase().replace( /\s/g, '-') + ".html";
                 m.add( "Buttons and Toggles/" + w, {
                     callback: open.bind( this, "widgets/" + url, null ),
-                    content: widgetVersion[ w ] ? LX.badge( widgetVersion[ w ], badgeClass, { asElement: true }) : undefined
+                    content: widgetVersion[ w ] ? LX.badge( widgetVersion[ w ], badgeClass, { asElement: true, callback: open.bind( this, "changelog.html", `#${ widgetVersion[ w ] }` ) }) : undefined
                 } );
 
                 LX.registerCommandbarEntry( w, open.bind( this, "widgets/" + url, null ) );
@@ -262,31 +271,31 @@
                 const url = w.toLowerCase().replace( /\s/g, '-') + ".html";
                 m.add( "Data Inputs/" + w, {
                     callback: open.bind( this, "widgets/" + url, null ),
-                    content: widgetVersion[ w ] ? LX.badge( widgetVersion[ w ], badgeClass, { asElement: true }) : undefined
+                    content: widgetVersion[ w ] ? LX.badge( widgetVersion[ w ], badgeClass, { asElement: true, callback: open.bind( this, "changelog.html", `#${ widgetVersion[ w ] }` ) }) : undefined
                 } );
 
                 LX.registerCommandbarEntry( w, open.bind( this, "widgets/" + url, null ) );
             }
 
             m.add( "Layout and Structure", { skipSelection: true } );
-            for( const w of [ "Data Tree", "List", "Tab Sections", "Table", "Title" ] )
+            for( const w of layoutWidgets )
             {
                 const url = w.toLowerCase().replace( /\s/g, '-') + ".html";
                 m.add( "Layout and Structure/" + w, {
                     callback: open.bind( this, "widgets/" + url, null ),
-                    content: widgetVersion[ w ] ? LX.badge( widgetVersion[ w ], badgeClass, { asElement: true }) : undefined
+                    content: widgetVersion[ w ] ? LX.badge( widgetVersion[ w ], badgeClass, { asElement: true, callback: open.bind( this, "changelog.html", `#${ widgetVersion[ w ] }` ) }) : undefined
                 } );
 
                 LX.registerCommandbarEntry( w, open.bind( this, "widgets/" + url, null ) );
             }
 
             m.add( "Misc", { skipSelection: true } );
-            for( const w of [ "Custom", "Progress", "Other Widgets" ] )
+            for( const w of miscWidgets )
             {
                 const url = w.toLowerCase().replace( /\s/g, '-') + ".html";
                 m.add( "Misc/" + w, {
                     callback: open.bind( this, "widgets/" + url, null ),
-                    content: widgetVersion[ w ] ? LX.badge( widgetVersion[ w ], badgeClass, { asElement: true }) : undefined
+                    content: widgetVersion[ w ] ? LX.badge( widgetVersion[ w ], badgeClass, { asElement: true, callback: open.bind( this, "changelog.html", `#${ widgetVersion[ w ] }` ) }) : undefined
                 } );
 
                 LX.registerCommandbarEntry( w, open.bind( this, "widgets/" + url, null ) );
@@ -304,7 +313,7 @@
             m.separator();
             m.add( "API Reference", { skipSelection: true } );
             m.add( "API Reference/Area", { callback: open.bind( this, "reference/area.html", null ) } );
-            m.add( "API Reference/AreaOverlayButtons", { callback: open.bind( this, "reference/area-overlay-buttons.html", null ), content: LX.badge( "6.10", badgeClass, { asElement: true }) } );
+            m.add( "API Reference/AreaOverlayButtons", { callback: open.bind( this, "reference/area-overlay-buttons.html", null ), content: LX.badge( "6.10", badgeClass, { asElement: true, callback: open.bind( this, "changelog.html", "#6.10" ) }) } );
             m.add( "API Reference/Branch", { callback: open.bind( this, "reference/branch.html", null ) } );
             m.add( "API Reference/Menubar", { callback: open.bind( this, "reference/menubar.html", null ) } );
             m.add( "API Reference/Panel", { callback: open.bind( this, "reference/panel.html", null ) } );
@@ -339,9 +348,6 @@
             const sidebar = area.addSidebar( sidebarCallback, sidebarOptions );
             menubar = sidebar.siblingArea.addMenubar();
         }
-
-        customFooter.style.fontSize = "12px";
-        customFooter.classList.add( "fg-secondary", "justify-center" );
 
         menubar.addButtons( menubarButtons );
 

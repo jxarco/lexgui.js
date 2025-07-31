@@ -3229,7 +3229,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     color: #f4f4f4;
 }
 
-.lexsidebar .lexsidebarentry.selected svg path {
+.lexsidebar .lexsidebarentry.selected .lexsidebarentryicon svg path {
     color: #f4f4f4;
 }
 
