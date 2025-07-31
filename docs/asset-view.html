@@ -1,0 +1,115 @@
+<script type="text/javascript">
+
+    MAKE_HEADER( "Asset View.", "h1", "asset-view" );
+            
+    MAKE_PARAGRAPH( `Displays assets by type with optional folder hierarchy and tree navigation, in a file-explorer-style layout.` );
+    MAKE_LINE_BREAK();
+
+    {
+        const area = new LX.Area( { skipAppend: true, height: "700px" } );
+        content.appendChild( area.root );
+        const assetView = new LX.AssetView({ xskipPreview: true });
+        const assetData = [
+            { id: "dog.png", type: "image", path: "https://pngfre.com/wp-content/uploads/1653714420512-1-904x1024.png" },
+            { id: "sigml_test.sigml", type: "sigml", src: "../data/sigml_test.sigml", lastModified: 1740588312813 },
+            { id: "test.json", type: "JSON", src: "../data/test.json", lastModified: 1740581312813 },
+            { id: "godot", type: "folder", children: [
+                    { id: "color.png", type: "image", src: "https://godotengine.org/assets/press/icon_color.png" },
+                    { id: "monochrome_light.png", type: "image", src: "https://godotengine.org/assets/press/icon_monochrome_light.png" },
+                    { id: "example.png", type: "image", src: "../data/godot_pixelart.png" },
+                    { id: "vertical_color.png", type: "image", src: "https://godotengine.org/assets/press/logo_vertical_color_dark.png" },
+                    { id: "doggies", type: "folder",
+                        children: [
+                            { id: "pepe.png", type: "image", src: "https://pngfre.com/wp-content/uploads/1653714420512-1-904x1024.png" }
+                        ]
+                    }
+                ]
+            },
+            { id: "blacky.png", type: "image", src: "https://www.pngall.com/wp-content/uploads/5/Black-Dog-PNG.png" },
+            { id: "german.png", type: "image", src: "https://static.vecteezy.com/system/resources/previews/017/420/504/original/portrait-of-a-dog-png.png" },
+            { id: "unreal", type: "folder",
+                children: [
+                    { id: "color.png", type: "image", src: "https://cdn2.unrealengine.com/ue-logotype-2023-vertical-white-1686x2048-bbfded26daa7.png" },
+                    { id: "demo.js", type: "script", src: "../data/script.js" },
+                    { id: "empty_folder", type: "folder", children: [] }
+                ]
+            },
+            { id: "brow_lowerer.png", type: "clip", src: "../data/brow_lowerer.png", lastModified: 1740181312813 }
+        ];
+
+        assetView.load(assetData);
+        area.attach(assetView);
+        area.root.className += " border rounded-lg shadow-lg bg-secondary overflow-hidden";
+    }
+
+    MAKE_LINE_BREAK();
+    MAKE_PARAGRAPH( `To create an Asset View in LexGUI.js, instantiate a new ${ INLINE_CODE( "LX.AssetView" ) } with the following options:` );
+
+    MAKE_CODE_BULLET_LIST( [
+        ["layout", "Number", "Layout appearance of the assets (AssetView.LAYOUT_CONTENT|AssetView.LAYOUT_LIST)"],
+        ["rootPath", "String", "Override default rootPath for internal data"],
+        ["skipBrowser", "Boolean", "Skip creation of the file explorer [false]"],
+        ["skipPreview", "Boolean", "Skip creation of the preview section [false]"],
+        ["useNativeTitle", "Boolean", "Use native element titles instead of custom Lexgui hover titles [false]"],
+        ["onlyFolders", "Boolean", "[true]"],
+        ["allowMultipleSelection", "Boolean", "Allow multiple asset selection [true]"],
+        ["previewActions", "Array", "Customize the asset preview actions"],
+        ["contextMenu", "Array", "Customize the asset context menu actions"],
+        ["allowedTypes", "Array", "Asset allowed types (strings)"],
+        ["onRefreshContent", "Function", "Function to call when the content is refreshed"],
+    ] );
+
+    MAKE_PARAGRAPH( `Once done, you can load your data using ${ INLINE_CODE( "LX.AssetView.load( data, onevent )" ) }:` );
+
+    MAKE_CODE( `@const@ assetData = [
+    { id: @"dog.png"@, type: @"image"@, path: @"https://pngfre.com/wp-content/uploads/1653714420512-1-904x1024.png"@ },
+    { id: @"sigml_test.sigml"@, type: @"sigml"@, src: @"../data/sigml_test.sigml"@, lastModified: @1740588312813@ },
+    { id: @"test.json"@, type: @"JSON"@, src: @"../data/test.json"@, lastModified: @1740581312813@ },
+    { id: @"godot"@, type: @"folder"@, children: [
+            { id: @"color.png"@, type: @"image"@, src: @"https://godotengine.org/assets/press/icon_color.png"@ },
+            { id: @"monochrome_light.png"@, type: @"image"@, src: @"https://godotengine.org/assets/press/icon_monochrome_light.png"@ },
+            { id: @"example.png"@, type: @"image"@, src: @"../data/godot_pixelart.png"@ },
+            { id: @"vertical_color.png"@, type: @"image"@, src: @"https://godotengine.org/assets/press/logo_vertical_color_dark.png"@ },
+            { id: @"doggies"@, type: @"folder"@,
+                children: [
+                    { id: @"pepe.png"@, type: @"image"@, src: @"https://pngfre.com/wp-content/uploads/1653714420512-1-904x1024.png"@ }
+                ]
+            }
+        ]
+    },
+    { id: @"blacky.png"@, type: @"image"@, src: @"https://www.pngall.com/wp-content/uploads/5/Black-Dog-PNG.png"@ },
+    { id: @"german.png"@, type: @"image"@, src: @"https://static.vecteezy.com/system/resources/previews/017/420/504/original/portrait-of-a-dog-png.png"@ },
+    { id: @"unreal"@, type: @"folder"@,
+        children: [
+            { id: @"color.png"@, type: @"image"@, src: @"https://cdn2.unrealengine.com/ue-logotype-2023-vertical-white-1686x2048-bbfded26daa7.png"@ },
+            { id: @"demo.js"@, type: @"script"@, src: @"../data/script.js"@ },
+            { id: @"empty_folder"@, type: @"folder"@, children: [] }
+        ]
+    },
+    { id: @"brow_lowerer.png"@, type: @"clip"@, src: @"../data/brow_lowerer.png"@, lastModified: @1740181312813@ }
+];
+
+assetView.@[mtd]load@(assetData);
+` );
+
+
+    MAKE_PARAGRAPH( `The parameter ${ INLINE_CODE( "onevent" ) } in a Function callback where you can process the following events:` );
+
+    MAKE_CODE_BULLET_LIST( [
+        ["layout", "wefwef"],
+        ["rootPath", "String", "Override default rootPath for internal data"],
+        ["skipBrowser", "Boolean", "Skip creation of the file explorer [false]"],
+        ["skipPreview", "Boolean", "Skip creation of the preview section [false]"],
+        ["useNativeTitle", "Boolean", "Use native element titles instead of custom Lexgui hover titles [false]"],
+        ["onlyFolders", "Boolean", "[true]"],
+        ["allowMultipleSelection", "Boolean", "Allow multiple asset selection [true]"],
+        ["previewActions", "Array", "Customize the asset preview actions"],
+        ["contextMenu", "Array", "Customize the asset context menu actions"],
+        ["allowedTypes", "Array", "Asset allowed types (strings)"],
+        ["onRefreshContent", "Function", "Function to call when the content is refreshed"],
+    ] );
+
+    MAKE_LINE_BREAK();
+    MAKE_LINE_BREAK();
+
+</script>

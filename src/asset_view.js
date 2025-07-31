@@ -9,8 +9,8 @@ class AssetViewEvent {
     static ASSET_RENAMED    = 3;
     static ASSET_CLONED     = 4;
     static ASSET_DBLCLICKED = 5;
-    static ENTER_FOLDER     = 6;
-    static ASSET_CHECKED    = 7;
+    static ASSET_CHECKED    = 6;
+    static ENTER_FOLDER     = 7;
 
     constructor( type, item, value ) {
         this.type = type || LX.TreeEvent.NONE;
@@ -28,8 +28,8 @@ class AssetViewEvent {
             case AssetViewEvent.ASSET_RENAMED: return "assetview_event_renamed";
             case AssetViewEvent.ASSET_CLONED: return "assetview_event_cloned";
             case AssetViewEvent.ASSET_DBLCLICKED: return "assetview_event_dblclicked";
-            case AssetViewEvent.ENTER_FOLDER: return "assetview_event_enter_folder";
             case AssetViewEvent.ASSET_CHECKED: return "assetview_event_checked";
+            case AssetViewEvent.ENTER_FOLDER: return "assetview_event_enter_folder";
         }
     }
 };
