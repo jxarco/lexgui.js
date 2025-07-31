@@ -21,6 +21,34 @@
 
     MAKE_LINE_BREAK();
 
+    {
+        const area = new LX.Area( { skipAppend: true, height: "auto" } );
+        content.appendChild( area.root );
+        const skeleton = new LX.Skeleton(  `
+            <div class="flex flex-row w-full p-2 gap-2">
+                <div class="flex flex-col w-1/3 p-2 gap-2">
+                    <div class="w-full h-32 lexskeletonpart"></div>
+                    <div class="w-full h-4 lexskeletonpart"></div>
+                    <div class="w-2/3 h-4 lexskeletonpart"></div>
+                </div>
+                <div class="flex flex-col w-1/3 p-2 gap-2">
+                    <div class="w-full h-32 lexskeletonpart"></div>
+                    <div class="w-full h-4 lexskeletonpart"></div>
+                    <div class="w-2/3 h-4 lexskeletonpart"></div>
+                </div>
+                <div class="flex flex-col w-1/3 p-2 gap-2">
+                    <div class="w-full h-32 lexskeletonpart"></div>
+                    <div class="w-full h-4 lexskeletonpart"></div>
+                    <div class="w-2/3 h-4 lexskeletonpart"></div>
+                </div>
+            </div>
+        ` );
+        area.attach( skeleton );
+        area.root.className += " p-4 border rounded-lg shadow-lg bg-secondary overflow-hidden";
+    }
+
+    MAKE_LINE_BREAK();
+
     MAKE_PARAGRAPH( `To create a skeleton in LexGUI.js, instantiate a new ${ INLINE_CODE( "LX.Skeleton" ) } with either a html string with all your elements or an array containing all the elements that are contained in the skeleton element. The specific
     elements that should have the highlights need to have the ${ INLINE_CODE( "lexskeletonpart" ) }.` );
 

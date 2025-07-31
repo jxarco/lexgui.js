@@ -6277,6 +6277,7 @@ ul.lexassetscontent {
 .w-14 { width: 3.5rem }
 .w-15 { width: 3.75rem }
 .w-16 { width: 4rem }     /* 64px */
+.w-32 { width: 8rem }     /* 128px */
 
 
 .h-full { height: 100% }
@@ -6299,6 +6300,7 @@ ul.lexassetscontent {
 .h-14 { height: 3.5rem }
 .h-15 { height: 3.75rem }
 .h-16 { height: 4rem }
+.h-32 { height: 8rem }
 
 .resize-none { resize: none }
 
@@ -6350,16 +6352,16 @@ ul.lexassetscontent {
 .border-l-0 { border-left-width: 0 }
 .border-r-0 { border-right-width: 0 }
 
-.rounded-none { border-radius: 0 }
-.rounded-sm { border-radius: 0.125rem }
-.rounded { border-radius: 0.25rem }
-.rounded-md { border-radius: 0.375rem }
-.rounded-lg { border-radius: 0.5rem }
-.rounded-xl { border-radius: 0.75rem }
-.rounded-2xl { border-radius: 1rem }
-.rounded-3xl { border-radius: 1.5rem }
-.rounded-full { border-radius: 9999px }
-.rounded-inherit { border-radius: inherit }
+.rounded-none { border-radius: 0 !important }
+.rounded-sm { border-radius: 0.125rem !important }
+.rounded { border-radius: 0.25rem !important }
+.rounded-md { border-radius: 0.375rem !important }
+.rounded-lg { border-radius: 0.5rem !important }
+.rounded-xl { border-radius: 0.75rem !important }
+.rounded-2xl { border-radius: 1rem !important }
+.rounded-3xl { border-radius: 1.5rem !important }
+.rounded-full { border-radius: 9999px !important }
+.rounded-inherit { border-radius: inherit !important }
 
 .rounded-t-none   { border-top-left-radius: 0; border-top-right-radius: 0 }
 .rounded-r-none   { border-top-right-radius: 0; border-bottom-right-radius: 0 }
