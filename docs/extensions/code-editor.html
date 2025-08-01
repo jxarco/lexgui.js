@@ -34,7 +34,7 @@
 
     MAKE_PARAGRAPH( `The Editor has to be appended to an existing area. It means that it can be created anywhere in the document window (e.g. dialogs, panels, areas, etc.), since to create an area it's as easy as instancing a new
     one. The following lines instanciate the DOM element for the editor:` );
-    MAKE_CODE( `@let@ @[var]editor@ = @new@ @[cls]LX@.@[cls]CodeEditor@( @[var]area@ );` );
+    MAKE_CODE( `@let@ @[var]editor@ = @new@ @[cls]LX@.@[cls]CodeEditor@( @[var]area@, @[var]options@ );` );
 
     MAKE_PARAGRAPH( `When creating it, you can use different options to adapt the editor to your needs:` );
     MAKE_CODE_BULLET_LIST( [
