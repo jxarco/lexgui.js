@@ -2347,12 +2347,24 @@ input[type=number] {
     transition: 0.1s linear;
 }
 
+.lexcomponent .numberbox::-webkit-scrollbar {
+    display: none;
+}
+
 .lexcomponent .numberbox:hover {
     background-color: color-mix(in srgb, var(--global-color-tertiary), #000 7%);
 }
 
 .lexcomponent .numberbox:has(input:focus) {
     border: 1px solid var(--global-text-quaternary);
+}
+
+.lexcomponent .numberbox .input-box {
+    padding-block: var(--global-padding-xs);
+}
+
+.lexcomponent .numberbox .input-box input {
+    padding-block: 0;
 }
 
 .lexcomponent .numberbox span {

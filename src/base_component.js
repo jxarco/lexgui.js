@@ -3400,7 +3400,7 @@ class NumberInput extends BaseComponent {
         // Add slider below
         if( !options.skipSlider && options.min !== undefined && options.max !== undefined )
         {
-            let sliderBox = LX.makeContainer( [ "100%", "auto" ], "", "", box );
+            let sliderBox = LX.makeContainer( [ "100%", "auto" ], "z-1 input-box", "", box );
             let slider = document.createElement( 'input' );
             slider.className = "lexinputslider";
             slider.min = options.min;
