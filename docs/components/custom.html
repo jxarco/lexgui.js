@@ -2,19 +2,19 @@
     import { LX } from 'lexgui';
 
     const content = document.getElementById('content');
-    const widgetName = "Custom";
+    const componentName = "Custom";
 
-    MAKE_HEADER(widgetName + ".", "h1", widgetName.toLowerCase());
-    MAKE_PARAGRAPH(`Lexgui supports generating custom widgets based on specific object data. By calling the function ${INLINE_CODE("LX.ADD_CUSTOM_WIDGET( name, options )")}, 
-        you can register a new Panel method that will create your custom widgets. Once the widget has been registered, call ${INLINE_CODE("Panel.add&lt;WidgetName&gt;(name, value, callback)")} to add the custom Widget to your panel.`);
+    MAKE_HEADER(componentName + ".", "h1", componentName.toLowerCase());
+    MAKE_PARAGRAPH(`Lexgui supports generating custom components based on specific object data. By calling the function ${INLINE_CODE("LX.ADD_CUSTOM_COMPONENT( name, options )")}, 
+        you can register a new Panel method that will create your custom components. Once the component has been registered, call ${INLINE_CODE("Panel.add&lt;ComponentName&gt;(name, value, callback)")} to add the Custom Component to your panel.`);
 
     MAKE_LINE_BREAK();
-    MAKE_PARAGRAPH(`Within the options of ${INLINE_CODE("LX.ADD_CUSTOM_WIDGET")}, you can add the following data:`);
+    MAKE_PARAGRAPH(`Within the options of ${INLINE_CODE("LX.ADD_CUSTOM_COMPONENT")}, you can add the following data:`);
 
     MAKE_CODE_BULLET_LIST( [
-        [ "icon", "String", "Icon to be added into the custom widget" ],
+        [ "icon", "String", "Icon to be added into the custom component" ],
         [ "default", "Object", "The data for a default instance of your class" ],
-        [ "onCreate", "Function", "Callback to add more widgets to the instance panel" ],
+        [ "onCreate", "Function", "Callback to add more components to the instance panel" ],
     ] )
 
     MAKE_NOTE( `If you are using non-native types (e.g. Emscripten handles, or any other custom classes which LexGUI doesn't know how to inspect), you can add getters and setters for each of your
@@ -23,7 +23,7 @@
     MAKE_CODE( `@[com]// Getters convert to native Array type@
 @[com]// and Setters convert to custom class from native Array type@
 
-@[cls]LX@.@[mtd]ADD_CUSTOM_WIDGET@( @"AABB"@, {
+@[cls]LX@.@[mtd]ADD_CUSTOM_COMPONENT@( @"AABB"@, {
     icon: @"Box"@,
     @[mtd]_get_center@: @function@() {
         @return@ [ @this@.center.x, @this@.center.y, @this@.center.z ];
@@ -44,10 +44,10 @@
 });` );
 
     MAKE_LINE_BREAK();
-    MAKE_PARAGRAPH(`You can also provide a custom creation callback (${INLINE_CODE("options.onCreate")}) that runs when the widget is created, allowing you to add additional widgets beyond the default instance property widgets, such as buttons.
-    Since the registration only occur once, you can pass your custom parameters when you create each of the instance widgets, which will be available when the creation function is called: `);
+    MAKE_PARAGRAPH(`You can also provide a custom creation callback (${INLINE_CODE("options.onCreate")}) that runs when the component is created, allowing you to add additional components beyond the default instance property components, such as buttons.
+    Since the registration only occur once, you can pass your custom parameters when you create each of the instance components, which will be available when the creation function is called: `);
 
-        MAKE_CODE( `@[cls]LX@.@[mtd]ADD_CUSTOM_WIDGET@( @"Shader"@, {
+        MAKE_CODE( `@[cls]LX@.@[mtd]ADD_CUSTOM_COMPONENT@( @"Shader"@, {
     icon: @"FileText"@,
     default: {
         path: @""@,
@@ -70,8 +70,8 @@
 });` );
 
     {
-        window.__addInteractiveCodeExample( content, widgetName, panel => {
-            LX.ADD_CUSTOM_WIDGET('Shader', {
+        window.__addInteractiveCodeExample( content, componentName, panel => {
+            LX.ADD_CUSTOM_COMPONENT('Shader', {
                 icon: "Box",
                 default: {
                     'position': [0, 0],
@@ -105,22 +105,12 @@
         panel.addTable( null, {
             head: [ "Parameter", "Type", "Description", "Default" ],
             body: [
-                ["name", "String", "Widget name", "—"],
+                ["name", "String", "Component name", "—"],
                 ["value", "Object", "The new instance data", "—"],
-                ["callback", "Function", "Function called when the instance changes", "—"],
-                // ["options", "Object", "Basic options for a Widget", "—"]
+                ["callback", "Function", "Function called when the instance changes", "—"]
             ].map( v => {
                 return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
             } )
         }, {});
-        // panel.addBlank( null, "24px" );
-        // panel.addTable( null, {
-        //     head: [ "Option", "Type", "Description", "Default" ],
-        //     body: [
-                
-        //     ].map( v => {
-        //         return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
-        //     } )
-        // }, {});
     }
 </script>

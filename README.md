@@ -71,7 +71,7 @@ let panel = area.addPanel();
 // Start branch/section
 panel.branch("Section Title");
 
-// Add some widgets
+// Add some components
 panel.addButton(null, "Click me, Im Full Width...");
 panel.addText("Text", "Warning text", null, { warning: true });
 
@@ -85,7 +85,7 @@ The library documentation is available at [lexgui.js/docs/](https://jxarco.githu
 
 ## Examples
 
-Look at this [examples](https://jxarco.github.io/lexgui.js/examples/) to see how to create the different widgets and components!
+Look at this [examples](https://jxarco.github.io/lexgui.js/examples/) to see how to create the different components and integrate the extensions!
 
 ## Projects using lexgui.js
 

@@ -37,42 +37,42 @@ class Panel {
 
         this.root = root;
         this.branches = [];
-        this.widgets = {};
+        this.components = {};
 
         this._branchOpen = false;
         this._currentBranch = null;
-        this._queue = []; // Append widgets in other locations
-        this._inlineWidgetsLeft = -1;
-        this._inline_queued_container = null;
+        this._queue = []; // Append components in other locations
+        this._inlineComponentsLeft = -1;
+        this._inlineQueuedContainer = null;
     }
 
     get( name ) {
 
-        return this.widgets[ name ];
+        return this.components[ name ];
     }
 
     getValue( name ) {
 
-        let widget = this.widgets[ name ];
+        let component = this.components[ name ];
 
-        if( !widget )
+        if( !component )
         {
-            throw( "No widget called " + name );
+            throw( "No component called " + name );
         }
 
-        return widget.value();
+        return component.value();
     }
 
     setValue( name, value, skipCallback ) {
 
-        let widget = this.widgets[ name ];
+        let component = this.components[ name ];
 
-        if( !widget )
+        if( !component )
         {
-            throw( "No widget called " + name );
+            throw( "No component called " + name );
         }
 
-        return widget.set( value, skipCallback );
+        return component.set( value, skipCallback );
     }
 
     /**
@@ -93,18 +93,18 @@ class Panel {
 
     clear() {
 
-        this._branchOpen = false;
         this.branches = [];
+        this._branchOpen = false;
         this._currentBranch = null;
 
-        for( let w in this.widgets )
+        for( let w in this.components )
         {
-            if( this.widgets[ w ].options && this.widgets[ w ].options.signal )
+            if( this.components[ w ].options && this.components[ w ].options.signal )
             {
-                const signal = this.widgets[ w ].options.signal;
+                const signal = this.components[ w ].options.signal;
                 for( let i = 0; i < LX.signals[signal].length; i++ )
                 {
-                    if( LX.signals[signal][ i ] == this.widgets[ w ] )
+                    if( LX.signals[signal][ i ] == this.components[ w ] )
                     {
                         LX.signals[signal] = [...LX.signals[signal].slice(0, i), ...LX.signals[signal].slice(i+1)];
                     }
@@ -116,11 +116,11 @@ class Panel {
         {
             for( let w = 0; w < this.signals.length; w++ )
             {
-                let widget = Object.values(this.signals[ w ])[ 0 ];
-                let signal = widget.options.signal;
+                let c = Object.values(this.signals[ w ])[ 0 ];
+                let signal = c.options.signal;
                 for( let i = 0; i < LX.signals[signal].length; i++ )
                 {
-                    if( LX.signals[signal][ i ] == widget )
+                    if( LX.signals[signal][ i ] == c )
                     {
                         LX.signals[signal] = [...LX.signals[signal].slice(0, i), ...LX.signals[signal].slice(i+1)];
                     }
@@ -128,46 +128,46 @@ class Panel {
             }
         }
 
-        this.widgets = {};
+        this.components = {};
         this.root.innerHTML = "";
     }
 
     /**
      * @method sameLine
-     * @param {Number} number Of widgets that will be placed in the same line
-     * @param {String} className Extra class to customize inline widgets parent container
-     * @description Next N widgets will be in the same line. If no number, it will inline all until calling nextLine()
+     * @param {Number} numberOfComponents Of components that will be placed in the same line
+     * @param {String} className Extra class to customize inline components parent container
+     * @description Next N components will be in the same line. If no number, it will inline all until calling nextLine()
      */
 
-    sameLine( number, className ) {
+    sameLine( numberOfComponents, className ) {
 
-        this._inline_queued_container = this.queuedContainer;
-        this._inlineWidgetsLeft = ( number ?? Infinity );
+        this._inlineQueuedContainer = this.queuedContainer;
+        this._inlineComponentsLeft = ( numberOfComponents ?? Infinity );
         this._inlineExtraClass = className ?? null;
     }
 
     /**
      * @method endLine
-     * @param {String} className Extra class to customize inline widgets parent container
-     * @description Stop inlining widgets. Use it only if the number of widgets to be inlined is NOT specified.
+     * @param {String} className Extra class to customize inline components parent container
+     * @description Stop inlining components. Use it only if the number of components to be inlined is NOT specified.
      */
 
     endLine( className ) {
 
         className = className ?? this._inlineExtraClass;
 
-        if( this._inlineWidgetsLeft == -1 )
+        if( this._inlineComponentsLeft == -1 )
         {
-            console.warn("No pending widgets to be inlined!");
+            console.warn("No pending components to be inlined!");
             return;
         }
 
-        this._inlineWidgetsLeft = -1;
+        this._inlineComponentsLeft = -1;
 
         if( !this._inlineContainer )
         {
             this._inlineContainer = document.createElement('div');
-            this._inlineContainer.className = "lexinlinewidgets";
+            this._inlineContainer.className = "lexinlinecomponents";
 
             if( className )
             {
@@ -176,14 +176,14 @@ class Panel {
         }
 
         // Push all elements single element or Array[element, container]
-        for( let item of this._inlineWidgets )
+        for( let item of this._inlineComponents )
         {
             const isPair = ( item.constructor == Array );
 
             if( isPair )
             {
                 // eg. an array, inline items appended later to
-                if( this._inline_queued_container )
+                if( this._inlineQueuedContainer )
                 {
                     this._inlineContainer.appendChild( item[ 0 ] );
                 }
@@ -199,7 +199,7 @@ class Panel {
             }
         }
 
-        if( !this._inline_queued_container )
+        if( !this._inlineQueuedContainer )
         {
             if( this._currentBranch )
             {
@@ -212,10 +212,10 @@ class Panel {
         }
         else
         {
-            this._inline_queued_container.appendChild( this._inlineContainer );
+            this._inlineQueuedContainer.appendChild( this._inlineContainer );
         }
 
-        delete this._inlineWidgets;
+        delete this._inlineComponents;
         delete this._inlineContainer;
         delete this._inlineExtraClass;
     }
@@ -228,7 +228,7 @@ class Panel {
      * className: Add class to the branch
      * closed: Set branch collapsed/opened [false]
      * icon: Set branch icon (LX.ICONS)
-     * filter: Allow filter widgets in branch by name [false]
+     * filter: Allow filter components in branch by name [false]
      */
 
     branch( name, options = {} ) {
@@ -249,10 +249,10 @@ class Panel {
         this.branches.push( branch );
         this.root.appendChild( branch.root );
 
-        // Add widget filter
+        // Add component filter
         if( options.filter )
         {
-            this._addFilter( options.filter, { callback: this._searchWidgets.bind( this, branch.name ) } );
+            this._addFilter( options.filter, { callback: this._searchComponents.bind( this, branch.name ) } );
         }
 
         return branch;
@@ -268,27 +268,27 @@ class Panel {
     }
 
     /*
-        Panel Widgets
+        Panel Components
     */
 
-    _attachWidget( widget, options = {} ) {
+    _attachComponent( component, options = {} ) {
 
-        if( widget.name != undefined )
+        if( component.name != undefined )
         {
-            this.widgets[ widget.name ] = widget;
+            this.components[ component.name ] = component;
         }
 
-        if( widget.options.signal && !widget.name )
+        if( component.options.signal && !component.name )
         {
             if( !this.signals )
             {
                 this.signals = [];
             }
 
-            this.signals.push( { [ widget.options.signal ]: widget } )
+            this.signals.push( { [ component.options.signal ]: component } )
         }
 
-        const _insertWidget = el => {
+        const _insertComponent = el => {
             if( options.container )
             {
                 options.container.appendChild( el );
@@ -297,9 +297,9 @@ class Panel {
             {
                 if( this._currentBranch )
                 {
-                    if( !options.skipWidget )
+                    if( !options.skipComponent )
                     {
-                        this._currentBranch.widgets.push( widget );
+                        this._currentBranch.components.push( component );
                     }
                     this._currentBranch.content.appendChild( el );
                 }
@@ -316,54 +316,54 @@ class Panel {
             }
         };
 
-        const _storeWidget = el => {
+        const _storeComponent = el => {
 
             if( !this.queuedContainer )
             {
-                this._inlineWidgets.push( el );
+                this._inlineComponents.push( el );
             }
             // Append content to queued tab container
             else
             {
-                this._inlineWidgets.push( [ el, this.queuedContainer ] );
+                this._inlineComponents.push( [ el, this.queuedContainer ] );
             }
         };
 
-        // Process inline widgets
-        if( this._inlineWidgetsLeft > 0 && !options.skipInlineCount )
+        // Process inline components
+        if( this._inlineComponentsLeft > 0 && !options.skipInlineCount )
         {
-            if( !this._inlineWidgets )
+            if( !this._inlineComponents )
             {
-                this._inlineWidgets = [];
+                this._inlineComponents = [];
             }
 
-            // Store widget and its container
-            _storeWidget( widget.root );
+            // Store component and its container
+            _storeComponent( component.root );
 
-            this._inlineWidgetsLeft--;
+            this._inlineComponentsLeft--;
 
-            // Last widget
-            if( !this._inlineWidgetsLeft )
+            // Last component
+            if( !this._inlineComponentsLeft )
             {
                 this.endLine();
             }
         }
         else
         {
-            _insertWidget( widget.root );
+            _insertComponent( component.root );
         }
 
-        return widget;
+        return component;
     }
 
     _addFilter( placeholder, options = {} ) {
 
         options.placeholder = placeholder.constructor == String ? placeholder : "Filter properties..";
-        options.skipWidget = options.skipWidget ?? true;
+        options.skipComponent = options.skipComponent ?? true;
         options.skipInlineCount = true;
 
-        let widget = new LX.TextInput( null, null, null, options )
-        const element = widget.root;
+        let component = new LX.TextInput( null, null, null, options )
+        const element = component.root;
         element.className += " lexfilter";
 
         let input = document.createElement('input');
@@ -386,7 +386,7 @@ class Panel {
         return element;
     }
 
-    _searchWidgets( branchName, value ) {
+    _searchComponents( branchName, value ) {
 
         for( let b of this.branches )
         {
@@ -395,8 +395,8 @@ class Panel {
                 continue;
             }
 
-            // remove all widgets
-            for( let w of b.widgets )
+            // remove all components
+            for( let w of b.components )
             {
                 if( w.domEl.classList.contains('lexfilter') )
                 {
@@ -410,8 +410,8 @@ class Panel {
 
             const emptyFilter = !value.length;
 
-            // add widgets
-            for( let w of b.widgets )
+            // add components
+            for( let w of b.components )
             {
                 if( !emptyFilter )
                 {
@@ -421,7 +421,7 @@ class Panel {
                     if(!name.includes(value)) continue;
                 }
 
-                // insert filtered widget
+                // insert filtered component
                 this.queuedContainer.appendChild( w.domEl );
             }
 
@@ -492,13 +492,13 @@ class Panel {
         var element = document.createElement('div');
         element.className = "lexseparator";
 
-        let widget = new LX.Widget( LX.Widget.SEPARATOR );
-        widget.root = element;
+        let component = new LX.BaseComponent( LX.BaseComponent.SEPARATOR );
+        component.root = element;
 
         if( this._currentBranch )
         {
             this._currentBranch.content.appendChild( element );
-            this._currentBranch.widgets.push( widget );
+            this._currentBranch.components.push( component );
         }
         else
         {
@@ -513,8 +513,8 @@ class Panel {
      */
 
     addBlank( width, height ) {
-        const widget = new LX.Blank( width, height );
-        return this._attachWidget( widget );
+        const component = new LX.Blank( width, height );
+        return this._attachComponent( component );
     }
 
     /**
@@ -529,18 +529,18 @@ class Panel {
      */
 
     addTitle( name, options = {} ) {
-        const widget = new LX.Title( name, options );
-        return this._attachWidget( widget );
+        const component = new LX.Title( name, options );
+        return this._attachComponent( component );
     }
 
     /**
      * @method addText
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {String} value Text value
      * @param {Function} callback Callback function on change
      * @param {Object} options:
      * hideName: Don't use name as label [false]
-     * disabled: Make the widget disabled [false]
+     * disabled: Make the component disabled [false]
      * required: Make the input required
      * placeholder: Add input placeholder
      * icon: Icon (if any) to append at the input start
@@ -555,18 +555,18 @@ class Panel {
      */
 
     addText( name, value, callback, options = {} ) {
-        const widget = new LX.TextInput( name, value, callback, options );
-        return this._attachWidget( widget );
+        const component = new LX.TextInput( name, value, callback, options );
+        return this._attachComponent( component );
     }
 
     /**
      * @method addTextArea
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {String} value Text Area value
      * @param {Function} callback Callback function on change
      * @param {Object} options:
      * hideName: Don't use name as label [false]
-     * disabled: Make the widget disabled [false]
+     * disabled: Make the component disabled [false]
      * placeholder: Add input placeholder
      * resize: Allow resize [true]
      * trigger: Choose onchange trigger (default, input) [default]
@@ -577,8 +577,8 @@ class Panel {
      */
 
     addTextArea( name, value, callback, options = {} ) {
-        const widget = new LX.TextArea( name, value, callback, options );
-        return this._attachWidget( widget );
+        const component = new LX.TextArea( name, value, callback, options );
+        return this._attachComponent( component );
     }
 
     /**
@@ -590,19 +590,19 @@ class Panel {
     addLabel( value, options = {} ) {
         options.disabled = true;
         options.inputClass = ( options.inputClass ?? "" ) + " nobg";
-        const widget = this.addText( null, value, null, options );
-        widget.type = LX.Widget.LABEL;
-        return widget;
+        const component = this.addText( null, value, null, options );
+        component.type = LX.BaseComponent.LABEL;
+        return component;
     }
 
     /**
      * @method addButton
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {String} value Button name
      * @param {Function} callback Callback function on click
      * @param {Object} options:
      * hideName: Don't use name as label [false]
-     * disabled: Make the widget disabled [false]
+     * disabled: Make the component disabled [false]
      * icon: Icon class to show as button value
      * iconPosition: Icon position (cover|start|end)
      * fileInput: Button click requests a file
@@ -614,13 +614,13 @@ class Panel {
      */
 
     addButton( name, value, callback, options = {} ) {
-        const widget = new LX.Button( name, value, callback, options );
-        return this._attachWidget( widget );
+        const component = new LX.Button( name, value, callback, options );
+        return this._attachComponent( component );
     }
 
     /**
      * @method addComboButtons
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {Array} values Each of the {value, callback, selected, disabled} items
      * @param {Object} options:
      * hideName: Don't use name as label [false]
@@ -631,8 +631,8 @@ class Panel {
      */
 
     addComboButtons( name, values, options = {} ) {
-        const widget = new LX.ComboButtons( name, values, options );
-        return this._attachWidget( widget );
+        const component = new LX.ComboButtons( name, values, options );
+        return this._attachComponent( component );
     }
 
     /**
@@ -647,13 +647,13 @@ class Panel {
      */
 
     addCard( name, options = {} ) {
-        const widget = new LX.Card( name, options );
-        return this._attachWidget( widget );
+        const component = new LX.Card( name, options );
+        return this._attachComponent( component );
     }
 
     /**
      * @method addForm
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {Object} data Form data
      * @param {Function} callback Callback function on submit form
      * @param {Object} options:
@@ -666,13 +666,13 @@ class Panel {
      */
 
     addForm( name, data, callback, options = {} ) {
-        const widget = new LX.Form( name, data, callback, options );
-        return this._attachWidget( widget );
+        const component = new LX.Form( name, data, callback, options );
+        return this._attachComponent( component );
     }
 
     /**
      * @method addContent
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {HTMLElement/String} element
      * @param {Object} options
      */
@@ -698,15 +698,15 @@ class Panel {
 
         options.hideName = true;
 
-        let widget = new LX.Widget( LX.Widget.CONTENT, name, null, options );
-        widget.root.appendChild( element );
+        let component = new LX.BaseComponent( LX.BaseComponent.CONTENT, name, null, options );
+        component.root.appendChild( element );
 
-        return this._attachWidget( widget );
+        return this._attachComponent( component );
     }
 
     /**
      * @method addImage
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {String} url Image Url
      * @param {Object} options
      * hideName: Don't use name as label [false]
@@ -725,43 +725,43 @@ class Panel {
         Object.assign( img.style, options.style ?? {} );
         container.appendChild( img );
 
-        let widget = new LX.Widget( LX.Widget.IMAGE, name, null, options );
-        widget.root.appendChild( container );
+        let component = new LX.BaseComponent( LX.BaseComponent.IMAGE, name, null, options );
+        component.root.appendChild( container );
 
         // await img.decode();
         img.decode();
 
-        return this._attachWidget( widget );
+        return this._attachComponent( component );
     }
 
     /**
      * @method addSelect
-     * @param {String} name Widget name
-     * @param {Array} values Posible options of the select widget -> String (for default select) or Object = {value, url} (for images, gifs..)
+     * @param {String} name Component name
+     * @param {Array} values Posible options of the select component -> String (for default select) or Object = {value, url} (for images, gifs..)
      * @param {String} value Select by default option
      * @param {Function} callback Callback function on change
      * @param {Object} options:
      * hideName: Don't use name as label [false]
-     * filter: Add a search bar to the widget [false]
-     * disabled: Make the widget disabled [false]
+     * filter: Add a search bar to the component [false]
+     * disabled: Make the component disabled [false]
      * skipReset: Don't add the reset value button when value changes
      * placeholder: Placeholder for the filter input
      * emptyMsg: Custom message to show when no filtered results
      */
 
     addSelect( name, values, value, callback, options = {} ) {
-        const widget = new LX.Select( name, values, value, callback, options );
-        return this._attachWidget( widget );
+        const component = new LX.Select( name, values, value, callback, options );
+        return this._attachComponent( component );
     }
 
     /**
      * @method addCurve
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {Array of Array} values Array of 2N Arrays of each value of the curve
      * @param {Function} callback Callback function on change
      * @param {Object} options:
      * skipReset: Don't add the reset value button when value changes
-     * bgColor: Widget background color
+     * bgColor: Component background color
      * pointsColor: Curve points color
      * lineColor: Curve line color
      * noOverlap: Points do not overlap, replacing themselves if necessary
@@ -771,18 +771,18 @@ class Panel {
     */
 
     addCurve( name, values, callback, options = {} ) {
-        const widget = new LX.Curve( name, values, callback, options );
-        return this._attachWidget( widget );
+        const component = new LX.Curve( name, values, callback, options );
+        return this._attachComponent( component );
     }
 
     /**
      * @method addDial
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {Array of Array} values Array of 2N Arrays of each value of the dial
      * @param {Function} callback Callback function on change
      * @param {Object} options:
      * skipReset: Don't add the reset value button when value changes
-     * bgColor: Widget background color
+     * bgColor: Component background color
      * pointsColor: Curve points color
      * lineColor: Curve line color
      * noOverlap: Points do not overlap, replacing themselves if necessary
@@ -792,26 +792,26 @@ class Panel {
     */
 
     addDial( name, values, callback, options = {} ) {
-        const widget = new LX.Dial( name, values, callback, options );
-        return this._attachWidget( widget );
+        const component = new LX.Dial( name, values, callback, options );
+        return this._attachComponent( component );
     }
 
     /**
      * @method addLayers
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {Number} value Flag value by default option
      * @param {Function} callback Callback function on change
      * @param {Object} options:
      */
 
     addLayers( name, value, callback, options = {} ) {
-        const widget = new LX.Layers( name, value, callback, options );
-        return this._attachWidget( widget );
+        const component = new LX.Layers( name, value, callback, options );
+        return this._attachComponent( component );
     }
 
     /**
      * @method addArray
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {Array} values By default values in the array
      * @param {Function} callback Callback function on change
      * @param {Object} options:
@@ -819,13 +819,13 @@ class Panel {
      */
 
     addArray( name, values = [], callback, options = {} ) {
-        const widget = new LX.ItemArray( name, values, callback, options );
-        return this._attachWidget( widget );
+        const component = new LX.ItemArray( name, values, callback, options );
+        return this._attachComponent( component );
     }
 
     /**
      * @method addList
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {Array} values List values
      * @param {String} value Selected list value
      * @param {Function} callback Callback function on change
@@ -834,13 +834,13 @@ class Panel {
      */
 
     addList( name, values, value, callback, options = {} ) {
-        const widget = new LX.List( name, values, value, callback, options );
-        return this._attachWidget( widget );
+        const component = new LX.List( name, values, value, callback, options );
+        return this._attachComponent( component );
     }
 
     /**
      * @method addTags
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {String} value Comma separated tags
      * @param {Function} callback Callback function on change
      * @param {Object} options:
@@ -848,85 +848,85 @@ class Panel {
      */
 
     addTags( name, value, callback, options = {} ) {
-        const widget = new LX.Tags( name, value, callback, options );
-        return this._attachWidget( widget );
+        const component = new LX.Tags( name, value, callback, options );
+        return this._attachComponent( component );
     }
 
     /**
      * @method addCheckbox
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {Boolean} value Value of the checkbox
      * @param {Function} callback Callback function on change
      * @param {Object} options:
-     * disabled: Make the widget disabled [false]
+     * disabled: Make the component disabled [false]
      * label: Checkbox label
-     * suboptions: Callback to add widgets in case of TRUE value
+     * suboptions: Callback to add components in case of TRUE value
      * className: Extra classes to customize style
      */
 
     addCheckbox( name, value, callback, options = {} ) {
-        const widget = new LX.Checkbox( name, value, callback, options );
-        return this._attachWidget( widget );
+        const component = new LX.Checkbox( name, value, callback, options );
+        return this._attachComponent( component );
     }
 
     /**
      * @method addToggle
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {Boolean} value Value of the checkbox
      * @param {Function} callback Callback function on change
      * @param {Object} options:
-     * disabled: Make the widget disabled [false]
+     * disabled: Make the component disabled [false]
      * label: Toggle label
-     * suboptions: Callback to add widgets in case of TRUE value
+     * suboptions: Callback to add components in case of TRUE value
      * className: Customize colors
      */
 
     addToggle( name, value, callback, options = {} ) {
-        const widget = new LX.Toggle( name, value, callback, options );
-        return this._attachWidget( widget );
+        const component = new LX.Toggle( name, value, callback, options );
+        return this._attachComponent( component );
     }
 
     /**
      * @method addRadioGroup
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {String} label Radio label
      * @param {Array} values Radio options
      * @param {Function} callback Callback function on change
      * @param {Object} options:
-     * disabled: Make the widget disabled [false]
+     * disabled: Make the component disabled [false]
      * className: Customize colors
      * selected: Index of the default selected option
      */
 
     addRadioGroup( name, label, values, callback, options = {} ) {
-        const widget = new LX.RadioGroup( name, label, values, callback, options );
-        return this._attachWidget( widget );
+        const component = new LX.RadioGroup( name, label, values, callback, options );
+        return this._attachComponent( component );
     }
 
     /**
      * @method addColor
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {String} value Default color (hex)
      * @param {Function} callback Callback function on change
      * @param {Object} options:
-     * disabled: Make the widget disabled [false]
+     * disabled: Make the component disabled [false]
      * useRGB: The callback returns color as Array (r, g, b) and not hex [false]
      */
 
     addColor( name, value, callback, options = {} ) {
-        const widget = new LX.ColorInput( name, value, callback, options );
-        return this._attachWidget( widget );
+        const component = new LX.ColorInput( name, value, callback, options );
+        return this._attachComponent( component );
     }
 
     /**
      * @method addRange
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {Number} value Default number value
      * @param {Function} callback Callback function on change
      * @param {Object} options:
      * hideName: Don't use name as label [false]
      * className: Extra classes to customize style
-     * disabled: Make the widget disabled [false]
+     * disabled: Make the component disabled [false]
      * left: The slider goes to the left instead of the right
      * fill: Fill slider progress [true]
      * step: Step of the input
@@ -934,18 +934,18 @@ class Panel {
      */
 
     addRange( name, value, callback, options = {} ) {
-        const widget = new LX.RangeInput( name, value, callback, options );
-        return this._attachWidget( widget );
+        const component = new LX.RangeInput( name, value, callback, options );
+        return this._attachComponent( component );
     }
 
     /**
      * @method addNumber
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {Number} value Default number value
      * @param {Function} callback Callback function on change
      * @param {Object} options:
      * hideName: Don't use name as label [false]
-     * disabled: Make the widget disabled [false]
+     * disabled: Make the component disabled [false]
      * step: Step of the input
      * precision: The number of digits to appear after the decimal point
      * min, max: Min and Max values for the input
@@ -956,24 +956,24 @@ class Panel {
      */
 
     addNumber( name, value, callback, options = {} ) {
-        const widget = new LX.NumberInput( name, value, callback, options );
-        return this._attachWidget( widget );
+        const component = new LX.NumberInput( name, value, callback, options );
+        return this._attachComponent( component );
     }
 
     static VECTOR_COMPONENTS = { 0: 'x', 1: 'y', 2: 'z', 3: 'w' };
 
     _addVector( numComponents, name, value, callback, options = {} ) {
-        const widget = new LX.Vector( numComponents, name, value, callback, options );
-        return this._attachWidget( widget );
+        const component = new LX.Vector( numComponents, name, value, callback, options );
+        return this._attachComponent( component );
     }
 
     /**
      * @method addVector N (2, 3, 4)
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {Array} value Array of N components
      * @param {Function} callback Callback function on change
      * @param {Object} options:
-     * disabled: Make the widget disabled [false]
+     * disabled: Make the component disabled [false]
      * step: Step of the inputs
      * min, max: Min and Max values for the inputs
      * onPress: Callback function on mouse down
@@ -994,43 +994,43 @@ class Panel {
 
     /**
      * @method addSize
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {Number} value Default number value
      * @param {Function} callback Callback function on change
      * @param {Object} options:
      * hideName: Don't use name as label [false]
-     * disabled: Make the widget disabled [false]
+     * disabled: Make the component disabled [false]
      * units: Unit as string added to the end of the value
      */
 
     addSize( name, value, callback, options = {} ) {
-        const widget = new LX.SizeInput( name, value, callback, options );
-        return this._attachWidget( widget );
+        const component = new LX.SizeInput( name, value, callback, options );
+        return this._attachComponent( component );
     }
 
     /**
      * @method addOTP
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {String} value Default numeric value in string format
      * @param {Function} callback Callback function on change
      * @param {Object} options:
      * hideName: Don't use name as label [false]
-     * disabled: Make the widget disabled [false]
+     * disabled: Make the component disabled [false]
      * pattern: OTP numeric pattern
      */
 
     addOTP( name, value, callback, options = {} ) {
-        const widget = new LX.OTPInput( name, value, callback, options );
-        return this._attachWidget( widget );
+        const component = new LX.OTPInput( name, value, callback, options );
+        return this._attachComponent( component );
     }
 
     /**
      * @method addPad
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {Array} value Pad value
      * @param {Function} callback Callback function on change
      * @param {Object} options:
-     * disabled: Make the widget disabled [false]
+     * disabled: Make the component disabled [false]
      * min, max: Min and Max values
      * padSize: Size of the pad (css)
      * onPress: Callback function on mouse down
@@ -1038,13 +1038,13 @@ class Panel {
      */
 
     addPad( name, value, callback, options = {} ) {
-        const widget = new LX.Pad( name, value, callback, options );
-        return this._attachWidget( widget );
+        const component = new LX.Pad( name, value, callback, options );
+        return this._attachComponent( component );
     }
 
     /**
      * @method addProgress
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {Number} value Progress value
      * @param {Object} options:
      * min, max: Min and Max values
@@ -1055,29 +1055,29 @@ class Panel {
      */
 
     addProgress( name, value, options = {} ) {
-        const widget = new LX.Progress( name, value, options );
-        return this._attachWidget( widget );
+        const component = new LX.Progress( name, value, options );
+        return this._attachComponent( component );
     }
 
     /**
      * @method addFile
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {Function} callback Callback function on change
      * @param {Object} options:
      * local: Ask for local file
-     * disabled: Make the widget disabled [false]
+     * disabled: Make the component disabled [false]
      * read: Return the file itself (False) or the contents (True)
      * type: type to read as [text (Default), buffer, bin, url]
      */
 
     addFile( name, callback, options = { } ) {
-        const widget = new LX.FileInput( name, callback, options );
-        return this._attachWidget( widget );
+        const component = new LX.FileInput( name, callback, options );
+        return this._attachComponent( component );
     }
 
     /**
      * @method addTree
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {Object} data Data of the tree
      * @param {Object} options:
      * icons: Array of objects with icon button information {name, icon, callback}
@@ -1087,13 +1087,13 @@ class Panel {
      */
 
     addTree( name, data, options = {} ) {
-        const widget = new LX.Tree( name, data, options );
-        return this._attachWidget( widget );
+        const component = new LX.Tree( name, data, options );
+        return this._attachComponent( component );
     }
 
     /**
      * @method addTabSections
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {Array} tabs Contains objects with {
      *      name: Name of the tab (if icon, use as title)
      *      icon: Icon to be used as the tab icon (optional)
@@ -1108,30 +1108,30 @@ class Panel {
      */
 
     addTabSections( name, tabs, options = {} ) {
-        const widget = new LX.TabSections( name, tabs, options );
-        return this._attachWidget( widget );
+        const component = new LX.TabSections( name, tabs, options );
+        return this._attachComponent( component );
     }
 
     /**
      * @method addCounter
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {Number} value Counter value
      * @param {Function} callback Callback function on change
      * @param {Object} options:
-     * disabled: Make the widget disabled [false]
+     * disabled: Make the component disabled [false]
      * min, max: Min and Max values
      * step: Step for adding/substracting
      * label: Text to show below the counter
      */
 
     addCounter( name, value, callback, options = { } ) {
-        const widget = new LX.Counter( name, value, callback, options );
-        return this._attachWidget( widget );
+        const component = new LX.Counter( name, value, callback, options );
+        return this._attachComponent( component );
     }
 
     /**
      * @method addTable
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {Number} data Table data
      * @param {Object} options:
      * hideName: Don't use name as label [false]
@@ -1149,13 +1149,13 @@ class Panel {
      */
 
     addTable( name, data, options = { } ) {
-        const widget = new LX.Table( name, data, options );
-        return this._attachWidget( widget );
+        const component = new LX.Table( name, data, options );
+        return this._attachComponent( component );
     }
 
     /**
      * @method addDate
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {String} dateValue
      * @param {Function} callback
      * @param {Object} options:
@@ -1166,21 +1166,21 @@ class Panel {
      */
 
     addDate( name, dateValue, callback, options = { } ) {
-        const widget = new LX.DatePicker( name, dateValue, callback, options );
-        return this._attachWidget( widget );
+        const component = new LX.DatePicker( name, dateValue, callback, options );
+        return this._attachComponent( component );
     }
 
     /**
      * @method addMap2D
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {Array} points
      * @param {Function} callback
      * @param {Object} options:
      */
 
     addMap2D( name, points, callback, options = { } ) {
-        const widget = new LX.Map2D( name, points, callback, options );
-        return this._attachWidget( widget );
+        const component = new LX.Map2D( name, points, callback, options );
+        return this._attachComponent( component );
     }
 }
 

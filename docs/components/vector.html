@@ -2,21 +2,21 @@
     import { LX } from 'lexgui';
 
     const content = document.getElementById('content');
-    const widgetName = "VectorN";
+    const componentName = "VectorN";
 
     // Vector
-    MAKE_HEADER(widgetName + ".", "h1", widgetName.toLowerCase());
-    MAKE_PARAGRAPH(`Similar to the Number widget, it represents a decimal vector input. It's composed by multiple ${ INLINE_PAGE( "number", "widgets/number.html" ) } widgets.`);
+    MAKE_HEADER(componentName + ".", "h1", componentName.toLowerCase());
+    MAKE_PARAGRAPH(`Similar to the Number component, it represents a decimal vector input. It's composed by multiple ${ INLINE_PAGE( "number", "components/number.html" ) } components.`);
     MAKE_LINE_BREAK();
-    MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addVectorN(name, value, callback, options)")}, where N is a number in the range [2, 4], to add a ${ widgetName } Widget to your panel or
-    create it anywhere using ${INLINE_CODE(`new LX.${ widgetName.replace( /\s/g, '' ) }`)} to append its root to any container.` );
+    MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addVectorN(name, value, callback, options)")}, where N is a number in the range [2, 4], to add a ${ componentName } Component to your panel or
+    create it anywhere using ${INLINE_CODE(`new LX.${ componentName.replace( /\s/g, '' ) }`)} to append its root to any container.` );
     MAKE_LINE_BREAK();
-    MAKE_PARAGRAPH(`In case you are using limits, store the widget and call <code class='inline'>vectorWidget.setLimits( min, max, step )</code> to change its parameters at any given time.` );
+    MAKE_PARAGRAPH(`In case you are using limits, store the component and call <code class='inline'>vectorComponent.setLimits( min, max, step )</code> to change its parameters at any given time.` );
     MAKE_LINE_BREAK();
-    MAKE_PARAGRAPH( `Note: Since a Vector Widget is a composition of multiple Number Widgets, you can change its value the same way as the Number inputs.`, true );
+    MAKE_PARAGRAPH( `Note: Since a Vector Component is a composition of multiple Number Component, you can change its value the same way as the Number inputs.`, true );
 
     {
-        window.__addInteractiveCodeExample( content, widgetName, panel => {
+        window.__addInteractiveCodeExample( content, componentName, panel => {
             panel.addVector2("2D Position", [250, 350], (value, event) => {
                 console.log(value);
             }, { min: 0, max: 1024 });
@@ -39,10 +39,10 @@
         panel.addTable( null, {
             head: [ "Parameter", "Type", "Description", "Default" ],
             body: [
-                ["name", "String", "Widget name", "—"],
+                ["name", "String", "Component name", "—"],
                 ["value", "Array", "Array containing the values for the vector", "—"],
                 ["callback", "Function", "Function called when any of the N number inputs change", "—"],
-                ["options", "Object", "Basic options for a Widget", "—"]
+                ["options", "Object", "Basic options for a component", "—"]
             ].map( v => {
                 return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
             } )
@@ -51,7 +51,7 @@
         panel.addTable( null, {
             head: [ "Option", "Type", "Description", "Default" ],
             body: [
-                ["disabled", "Boolean", "Make the widget disabled", "false"],
+                ["disabled", "Boolean", "Make the component disabled", "false"],
                 ["step", "Number", "Change Step value", `"any"`],
                 ["min", "Number", "Min input value", "-1e24"],
                 ["max", "Number", "Max input value", "1e24"],

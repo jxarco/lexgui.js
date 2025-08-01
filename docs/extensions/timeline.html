@@ -21,30 +21,30 @@
         ["skipVisibility", "Boolean", "When it's true, the un/active track button is disabled."],
         ["skipLock", "Boolean", "When it's true, the un/lock track button is disabled."],
         ["disableNewTracks", "Boolean", "When it's true, add new tracks option is disabled."],                
-        ["onCreateBeforeTopBar", "Function", `Callback to add widgets on the top bar before the 'current time' widget.`],
-        ["onCreateAfterTopBar", "Function", `Callback to add widgets on the top bar after the 'duration' widget.`],
-        ["onCreateControlsButtons", "Function", `Callback to add widgets on the top bar after the default ones (play, stop, loop).`],
-        ["onCreateSettingsButtons", "Function", `Callback to add widgets on the top bar before the default ones (optimize, configuration).`],
+        ["onCreateBeforeTopBar", "Function", `Callback to add components on the top bar before the 'current time' component.`],
+        ["onCreateAfterTopBar", "Function", `Callback to add components on the top bar after the 'duration' component.`],
+        ["onCreateControlsButtons", "Function", `Callback to add components on the top bar after the default ones (play, stop, loop).`],
+        ["onCreateSettingsButtons", "Function", `Callback to add components on the top bar before the default ones (optimize, configuration).`],
         ["onShowOptimizeMenu", "Function", `Callback to add an optimize menu on the right side, before the configuration menu. If undefined, the menu will appear and use the default implementation. Set it to null, to deactivate it.`],
-        ["onShowConfiguration", "Function", `Callback to add widgets to the configuration menu.`]
+        ["onShowConfiguration", "Function", `Callback to add components to the configuration menu.`]
     ] );
         
     MAKE_HEADER( "Callbacks", "h2", "" );
     MAKE_HEADER( "Constructor Callbacks", "h3", "" );
     MAKE_PARAGRAPH( `These are used to build the interface of the timeline. Setting them outside the constructor will require a call to ${INLINE_CODE("updateHeader")} for them to take effect:`);
-    MAKE_CLASS_METHOD( "onCreateBeforeTopBar", `Callback to add widgets on the top bar before the 'current time' widget.`, [
+    MAKE_CLASS_METHOD( "onCreateBeforeTopBar", `Callback to add components on the top bar before the 'current time' component.`, [
         ["panel", "LX panel"]
     ] );
     
-    MAKE_CLASS_METHOD( "onCreateAfterTopBar", `Callback to add widgets on the top bar after the 'duration' widget.`, [
+    MAKE_CLASS_METHOD( "onCreateAfterTopBar", `Callback to add components on the top bar after the 'duration' component.`, [
         ["panel", "LX panel"]
     ] );
     
-    MAKE_CLASS_METHOD( "onCreateControlsButtons", `Callback to add widgets on the top bar after the default ones (play, stop, loop).`, [
+    MAKE_CLASS_METHOD( "onCreateControlsButtons", `Callback to add components on the top bar after the default ones (play, stop, loop).`, [
         ["panel", "LX panel"]
     ] );
 
-    MAKE_CLASS_METHOD( "onCreateSettingsButtons", `Callback to add widgets on the top bar before the default ones (optimize, configuration).`, [
+    MAKE_CLASS_METHOD( "onCreateSettingsButtons", `Callback to add components on the top bar before the default ones (optimize, configuration).`, [
         ["panel", "LX panel"]
     ] );
 
@@ -52,7 +52,7 @@
         ["panel", "LX panel"]
     ] );
 
-    MAKE_CLASS_METHOD( "onShowConfiguration", `Callback to add widgets to the configuration menu.`, [
+    MAKE_CLASS_METHOD( "onShowConfiguration", `Callback to add components to the configuration menu.`, [
         ["panel", "LX panel"]
     ] );
 

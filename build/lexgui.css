@@ -486,7 +486,7 @@ a svg, svg path {
     color: var(--global-text-secondary);
 }
 
-.lextoast .lexwidget {
+.lextoast .lexcomponent {
     padding-inline: 1rem;
 }
 
@@ -1258,9 +1258,9 @@ a svg, svg path {
     background-color: inherit;
 }
 
-/* Widgets */
+/* Components */
 
-.lexwidget {
+.lexcomponent {
     display: flex;
     align-items: center;
     padding: var(--global-padding-xs);
@@ -1270,44 +1270,44 @@ a svg, svg path {
     overflow: hidden;
 }
 
-.lexinlinewidgets .lexwidgetname.float-center {
+.lexinlinecomponents .lexcomponentname.float-center {
     justify-content: center;
 }
 
-.lexinlinewidgets .lexwidgetname.float-right {
+.lexinlinecomponents .lexcomponentname.float-right {
     justify-content: end;
     -moz-transform: translateX(-1em);
     -webkit-transform: translateX(-1em);
     transform: translateX(-1em);
 }
 
-.lexwidget.auto {
+.lexcomponent.auto {
     width: unset !important;
 }
 
-.lexwidget.micro {
+.lexcomponent.micro {
     min-width: 24px;
     width: 3% !important;
 }
 
-.lexwidget.right {
+.lexcomponent.right {
     margin-left: auto;
     margin-right: 8px;
 }
 
-.lexwidget.small {
+.lexcomponent.small {
     width: 5% !important;
 }
 
-.lexwidget.md {
+.lexcomponent.md {
     width: 75% !important;
 }
 
-.lexinlinewidgets {
+.lexinlinecomponents {
     display: flex;
 }
 
-.lexwidgetseparator div {
+.lexcomponentseparator div {
     -ms-transform: translateY(-11px);
     -webkit-transform: translateY(-11px);
     transform: translateY(-11px);
@@ -1317,15 +1317,15 @@ a svg, svg path {
     color: var(--global-text-tertiary);
 }
 
-.lexwidgetseparator div:hover {
+.lexcomponentseparator div:hover {
     color: #4d4d5ac4;
 }
 
-.lexwidgetseparator div div {
+.lexcomponentseparator div div {
     background: #dddddd33;
 }
 
-.lexwidgetname {
+.lexcomponentname {
     white-space: nowrap;
     overflow: hidden;
     display: flex;
@@ -1334,7 +1334,7 @@ a svg, svg path {
     color: var(--global-text-secondary);
 }
 
-.lexinlinewidgets .lexwidgetname {
+.lexinlinecomponents .lexcomponentname {
     width: fit-content !important;
     padding-inline: 0.4rem;
 }
@@ -1359,7 +1359,7 @@ a svg, svg path {
     border-bottom: 1px solid #c1c1c1;
 }
 
-.lexwidget input:not(.lexcheckbox, .lextoggle, .lexrangeslider) {
+.lexcomponent input:not(.lexcheckbox, .lextoggle, .lexrangeslider) {
     font-family: var(--global-font);
     padding: var(--global-padding-xs);
     color: var(--global-text-primary);
@@ -1373,24 +1373,24 @@ a svg, svg path {
     transition-duration: .15s;
 }
 
-.lexwidget input:not(.lexcheckbox, .lextoggle, .lexrangeslider, .outline):hover {
+.lexcomponent input:not(.lexcheckbox, .lextoggle, .lexrangeslider, .outline):hover {
     background-color: color-mix(in srgb, var(--background-color), #000 5%);
 }
 
-.lexwidget input.colorinput {
+.lexcomponent input.colorinput {
     border: none;
     margin-left: -4px;
 }
 
-.lexwidget input:disabled:not(.lextoggle) {
+.lexcomponent input:disabled:not(.lextoggle) {
     outline: none;
     border: none;
     color: var(--global-text-tertiary);
 }
 
-/* Text Widget */
+/* Text Component */
 
-.lexwidget input.lextext, .lexwidget div.lextext {
+.lexcomponent input.lextext, .lexcomponent div.lextext {
     width: 100%;
     border-radius: 6px;
     position: relative;
@@ -1398,12 +1398,12 @@ a svg, svg path {
     padding: var(--global-padding-xs) 0.75rem;
 }
 
-.lexwidget .lextext:disabled {
+.lexcomponent .lextext:disabled {
     background-color: var(--global-color-tertiary);
     color: var(--global-text-tertiary);
 }
 
-.lexwidget .lextext.formlabel {
+.lexcomponent .lextext.formlabel {
     margin-left: 8px;
     margin-bottom: -6px;
     font-weight: 500;
@@ -1411,46 +1411,46 @@ a svg, svg path {
     font-size: var(--global-font-size-sm);
 }
 
-.lexwidget .lextext.outline {
+.lexcomponent .lextext.outline {
     background: var(--global-color-primary);
     border: 1px solid #7a797c4f;
 }
 
-.lexwidget .lextext.nobg {
+.lexcomponent .lextext.nobg {
     background: none;
     border: 1px solid transparent;
 }
 
-.lexwidget .lextext.dashed {
+.lexcomponent .lextext.dashed {
     background: var(--global-color-primary);
     border: 1px dashed #7a797c4f;
 }
 
-.lexwidget .lextext.nobg:hover {
+.lexcomponent .lextext.nobg:hover {
     background: none;
 }
 
-.lexwidget .lextext:focus {
+.lexcomponent .lextext:focus {
     border: 1px solid var(--global-text-quaternary);
 }
 
-.lexwidget .lextext:invalid:focus {
+.lexcomponent .lextext:invalid:focus {
     border: 1px solid var(--global-color-error);
 }
 
-.lexwidget .lextext.lexwarning div {
+.lexcomponent .lextext.lexwarning div {
     color: var(--global-color-warning);
     font-weight: 600;
 }
 
-.lexwidget .lextext.lexwarning i {
+.lexcomponent .lextext.lexwarning i {
     color: var(--global-color-warning);
     margin-right: 16px;
 }
 
-/* TextArea Widget */
+/* TextArea Component */
 
-.lexwidget textarea {
+.lexcomponent textarea {
     width: 100%;
     word-break: break-word;
     font-family: var(--global-font);
@@ -1463,34 +1463,34 @@ a svg, svg path {
     transition: 0.1s linear;
 }
 
-.lexwidget textarea.outline {
+.lexcomponent textarea.outline {
     background: var(--global-color-primary);
     border: 1px solid #7a797c4f;
 }
 
-.lexwidget textarea.nobg {
+.lexcomponent textarea.nobg {
     background: none;
     border: 1px solid transparent;
 }
 
-.lexwidget textarea.dashed {
+.lexcomponent textarea.dashed {
     background: var(--global-color-primary);
     border: 1px dashed #7a797c4f;
 }
 
-.lexwidget textarea.outline:hover, .lexwidget .lextext.nobg:hover {
+.lexcomponent textarea.outline:hover, .lexcomponent .lextext.nobg:hover {
     background: none;
 }
 
-.lexwidget textarea:disabled {
+.lexcomponent textarea:disabled {
     resize: none;
 }
 
-.lexwidget textarea:focus {
+.lexcomponent textarea:focus {
     border: 1px solid var(--global-text-quaternary);
 }
 
-/* Input Color Widget */
+/* Input Color Component */
 
 .lexcolor {
     display: flex;
@@ -1515,7 +1515,7 @@ a svg, svg path {
     font-weight: 600;
 }
 
-.lexcolor .lexwidget {
+.lexcolor .lexcomponent {
     padding: 0px;
 }
 
@@ -1582,11 +1582,11 @@ a svg, svg path {
     letter-spacing: 0.02rem;
 }
 
-.lexcolorpicker .lexwidget {
+.lexcolorpicker .lexcomponent {
     padding: 2px !important;
 }
 
-/* Title Widget */
+/* Title Component */
 
 .lextitle {
     width: fit-content !important;
@@ -1608,7 +1608,7 @@ a svg, svg path {
     user-select: none;
 }
 
-.lexinlinewidgets .lextitle {
+.lexinlinecomponents .lextitle {
     margin: 8px;
     height: 24px;
     flex: none;
@@ -1626,7 +1626,7 @@ a svg, svg path {
 }
 
 
-/* Button Widget */
+/* Button Component */
 
 .lexbutton {
     --button-color: var(--global-color-tertiary);
@@ -1776,7 +1776,7 @@ a svg, svg path {
     position: relative;
 }
 
-.lexselect .lexwidget {
+.lexselect .lexcomponent {
     padding: 0;
 }
 
@@ -2004,11 +2004,11 @@ dialog .lexselect .lexselectoptions {
     grid-column: span 2;
 }
 
-.lexcheckboxsubmenu .lexwidget {
+.lexcheckboxsubmenu .lexcomponent {
     width: 100% !important;
 }
 
-/* Toggle Widget */
+/* Toggle Component */
 
 .lextoggle {
     --toggle-bg-color: var(--global-text-tertiary); /* Color of background CHECKED */
@@ -2169,7 +2169,7 @@ dialog .lexselect .lexselectoptions {
     grid-column: span 2;
 }
 
-/* Radio Group Widget */
+/* Radio Group Component */
 
 .lexradiogroup {
     width: 100% !important;
@@ -2234,7 +2234,7 @@ dialog .lexselect .lexselectoptions {
 .lexradiogroup.error .lexradiogroupitem button.checked span { background-color: var(--global-color-error); }
 .lexradiogroup.warning .lexradiogroupitem button.checked span { background-color: var(--global-color-warning); }
 
-/* Vector Widgets */
+/* Vector Component */
 
 .lexvector {
     display: flex;
@@ -2261,8 +2261,8 @@ dialog .lexselect .lexselectoptions {
     background-color: color-mix(in srgb, var(--global-color-tertiary), #000 7%);
 }
 
-.lexwidget .numberbox .drag-icon,
-.lexwidget .vecbox .drag-icon {
+.lexcomponent .numberbox .drag-icon,
+.lexcomponent .vecbox .drag-icon {
     font-size: var(--global-font-size-sm);
     color: var(--global-text-secondary);
     z-index: 11;
@@ -2331,9 +2331,9 @@ input[type=number] {
     color: var(--global-text-secondary);
 }
 
-/* Number Widget */
+/* Number Component */
 
-.lexwidget .numberbox {
+.lexcomponent .numberbox {
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -2346,21 +2346,21 @@ input[type=number] {
     transition: 0.1s linear;
 }
 
-.lexwidget .numberbox:hover {
+.lexcomponent .numberbox:hover {
     background-color: color-mix(in srgb, var(--global-color-tertiary), #000 7%);
 }
 
-.lexwidget .numberbox:has(input:focus) {
+.lexcomponent .numberbox:has(input:focus) {
     border: 1px solid var(--global-text-quaternary);
 }
 
-.lexwidget .numberbox span {
+.lexcomponent .numberbox span {
     position: absolute;
     pointer-events: none;
     align-self: center;
 }
 
-.lexwidget .numberbox:has(input[type=range]) span {
+.lexcomponent .numberbox:has(input[type=range]) span {
     margin-top: -12px;
 }
 
@@ -2418,7 +2418,7 @@ input[type=number] {
     cursor: pointer;
 }
 
-/* Range Widget */
+/* Range Component */
 
 .lexrangeslider {
     --range-thumb-color: var(--global-color-primary);
@@ -2523,7 +2523,7 @@ input[type=number] {
     top: 50%;
 }
 
-/* OTP Widget */
+/* OTP Component */
 
 .lexotpslot.active {
     border: 1px solid var(--global-text-primary);
@@ -2535,18 +2535,18 @@ input[type=number] {
     cursor: not-allowed;
 }
 
-/* Pad Widget */
+/* Pad Component */
 
-.lexwidget .lexpad {
+.lexcomponent .lexpad {
     place-items: center;
 }
 
-.lexwidget .lexpad .lexinnerpad {
+.lexcomponent .lexpad .lexinnerpad {
     border-radius: 4px;
     background-color: light-dark(var(--global-color-tertiary), var(--global-intense-background));
 }
 
-.lexwidget .lexpad .lexinnerpad .lexpadthumb {
+.lexcomponent .lexpad .lexinnerpad .lexpadthumb {
     background-color: var(--global-color-accent);
     width: 10%;
     height: 10%;
@@ -2554,11 +2554,11 @@ input[type=number] {
     transform: translate(0px, 0px);
 }
 
-.lexwidget .lexpad .lexinnerpad .lexpadthumb.active {
+.lexcomponent .lexpad .lexinnerpad .lexpadthumb.active {
     background-color: var(--global-color-accent-light);
 }
 
-/* Tabs Widget */
+/* Tabs Component */
 
 .lextabscontainer {
     width: 100%;
@@ -2587,7 +2587,7 @@ input[type=number] {
     flex-direction: row;
 }
 
-.lextabscontainer .widgets {
+.lextabscontainer .components {
     width: 100%;
     padding: 4px;
 }
@@ -2600,7 +2600,7 @@ input[type=number] {
     text-align: center;
 }
 
-/* Data Tree Widget */
+/* Data Tree Component */
 
 .lextree {
     border-radius: 6px;
@@ -2630,7 +2630,7 @@ input[type=number] {
     gap: 0.5rem;
 }
 
-.lexwidget.nobranch .lextree .lextreetools {
+.lexcomponent.nobranch .lextree .lextreetools {
     background: var(--global-color-secondary);
 }
 
@@ -3124,7 +3124,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     display: none;
 }
 
-.lexsidebar .lexwidget {
+.lexsidebar .lexcomponent {
     width: 100% !important;
     padding: 0 !important;
 }
@@ -3449,13 +3449,13 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     border-radius: 12px;
 }
 
-.lexoverlaybuttons .lexwidget {
+.lexoverlaybuttons .lexcomponent {
     padding: 0px;
     pointer-events: auto;
     min-width: 32px;
 }
 
-.lexoverlaybuttons .lexwidget button {
+.lexoverlaybuttons .lexcomponent button {
     min-width: 32px;
 }
 
@@ -3468,12 +3468,12 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     display: grid;
 }
 
-.lexoverlaybuttonscontainer.vertical .lexwidget {
+.lexoverlaybuttonscontainer.vertical .lexcomponent {
     margin-bottom: 6px;
     margin-right: 0px;
 }
 
-.lexoverlaybuttonscontainer.vertical .lexwidget button {
+.lexoverlaybuttonscontainer.vertical .lexcomponent button {
     min-width: 32px;
     max-height: 32px !important;
 }
@@ -3499,7 +3499,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     justify-items: right;
 }
 
-.lexoverlaybuttons .lexwidget:hover {
+.lexoverlaybuttons .lexcomponent:hover {
     background-color: unset;
 }
 
@@ -3540,21 +3540,21 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     margin-bottom: 6px;
 }
 
-.lexoverlaybuttons .lexoverlaygroup .lexwidget {
+.lexoverlaybuttons .lexoverlaygroup .lexcomponent {
     padding: 0px;
     margin-right: 0px;
 }
 
-.lexoverlaybuttonscontainer.vertical .lexoverlaygroup .lexwidget {
+.lexoverlaybuttonscontainer.vertical .lexoverlaygroup .lexcomponent {
     margin-right: 0px;
     margin-bottom: 0px;
 }
 
-.lexoverlaybuttonscontainer.vertical .lexoverlaygroup .lexwidget button {
+.lexoverlaybuttonscontainer.vertical .lexoverlaygroup .lexcomponent button {
     width: 100% !important;
 }
 
-.lexoverlaybuttons .lexwidget:last-child {
+.lexoverlaybuttons .lexcomponent:last-child {
     margin-right: 0px;
 }
 
@@ -3674,13 +3674,13 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     max-height: 0px;
 }
 
-/* Curve Widget */
+/* Curve Component */
 
 .curve canvas {
     border-radius: 2px;
 }
 
-/* Avatar Widget */
+/* Avatar Component */
 
 .lexavatar {
     width: 48px;
@@ -3698,7 +3698,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     height: 100%;
 }
 
-/* Card Widget */
+/* Card Component */
 
 .lexcard {
     position: relative;
@@ -3750,7 +3750,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     color: var(--global-color-accent);
 }
 
-/* Layers Widget */
+/* Layers Component */
 
 .lexlayers {
     display: grid;
@@ -3788,7 +3788,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     transform: scale(0.99);
 }
 
-/* List Widget */
+/* List Component */
 
 .lexlist {
     background: var(--global-color-primary);
@@ -3836,26 +3836,26 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     background-color: var(--global-color-accent);
 }
 
-/* Array Widget */
+/* Array Component */
 
-.lexwidget:has(.lexarrayitems),
-.lexwidget:has(.lexcheckboxsubmenu),
-.lexwidget:has(.lextogglesubmenu),
-.lexwidget:has(.lexcustomcontainer) {
+.lexcomponent:has(.lexarrayitems),
+.lexcomponent:has(.lexcheckboxsubmenu),
+.lexcomponent:has(.lextogglesubmenu),
+.lexcomponent:has(.lexcustomcontainer) {
     border-radius: 6px;
     transition: background-color 0.2s ease-out;
     display: flex;
     flex-wrap: wrap;
 }
 
-.lexwidget:has(.lexarrayitems)[data-opened=true],
-.lexwidget:has(.lexcheckboxsubmenu)[data-opened=true],
-.lexwidget:has(.lextogglesubmenu)[data-opened=true],
-.lexwidget:has(.lexcustomcontainer)[data-opened=true] {
+.lexcomponent:has(.lexarrayitems)[data-opened=true],
+.lexcomponent:has(.lexcheckboxsubmenu)[data-opened=true],
+.lexcomponent:has(.lextogglesubmenu)[data-opened=true],
+.lexcomponent:has(.lexcustomcontainer)[data-opened=true] {
     background-color: light-dark(var(--global-color-tertiary), var(--global-medium-background));
 }
 
-.lexarray .lexwidget {
+.lexarray .lexcomponent {
     padding: 0px;
     width: 100% !important;
 }
@@ -3869,7 +3869,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     grid-column: span 2;
 }
 
-.lexarrayitems .lexwidgetname {
+.lexarrayitems .lexcomponentname {
     color: var(--global-text-tertiary);
     font-size: var(--global-font-size-sm);
     justify-content: center;
@@ -3877,7 +3877,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     font-weight: 600;
 }
 
-/* Tags Widget */
+/* Tags Component */
 
 .lextags {
     display: inline-flex;
@@ -3915,7 +3915,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     cursor: pointer;
 }
 
-/* Counter Widget */
+/* Counter Component */
 
 .lexcounter {
     display: flex;
@@ -3943,7 +3943,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     color: var(--global-text-secondary);
 }
 
-/* Table Widget */
+/* Table Component */
 
 .lextable {
     overflow-x: scroll;
@@ -4103,7 +4103,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     box-shadow: none;
 }
 
-/* Custom Widgets Widget */
+/* Custom Component */
 
 .lexcustomitems {
     width: 100%;
@@ -4120,7 +4120,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     justify-content: space-between;
 }
 
-/* Knob Widget */
+/* Knob Component */
 
 .lexknob {
     padding: 8px;
@@ -4342,11 +4342,11 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     padding: 0 10px;
 }
 
-.lextimeline .lexwidget:has(.lexbutton:not(.array)) {
+.lextimeline .lexcomponent:has(.lexbutton:not(.array)) {
     padding: 1px;
 }
 
-.lextimeline .lexinlinewidgets {
+.lextimeline .lexinlinecomponents {
     padding-right: 10px;
 }
 
@@ -4932,7 +4932,7 @@ ul.lexassetscontent {
     padding-inline: 1rem;
 }
 
-.lexcodetabinfo .lexinlinewidgets {
+.lexcodetabinfo .lexinlinecomponents {
     justify-content: end;
 }
 
@@ -5853,7 +5853,7 @@ ul.lexassetscontent {
     height: inherit;
 }
 
-.lexvideoeditor .lexwidget.nobranch {
+.lexvideoeditor .lexcomponent.nobranch {
     padding: 0;
     width: 100% !important;
 }

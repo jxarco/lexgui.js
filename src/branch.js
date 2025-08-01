@@ -28,7 +28,7 @@ class Branch {
 
         this.closed = options.closed ?? false;
         this.root = root;
-        this.widgets = [];
+        this.components = [];
 
         // Create element
         var title = document.createElement( 'div' );
@@ -99,8 +99,8 @@ class Branch {
     _onMakeFloating() {
 
         const dialog = new LX.Dialog( this.name, p => {
-            // add widgets
-            for( let w of this.widgets )
+            // Add components
+            for( let w of this.components )
             {
                 p.root.appendChild( w.root );
             }
@@ -111,7 +111,7 @@ class Branch {
 
         dialog.branchData = {
             name: this.name,
-            widgets: this.widgets,
+            components: this.components,
             closed: this.closed,
             panel: this.panel,
             childIndex
@@ -123,7 +123,7 @@ class Branch {
     _addBranchSeparator() {
 
         const element = document.createElement('div');
-        element.className = "lexwidgetseparator";
+        element.className = "lexcomponentseparator";
         element.style.width = "100%";
         element.style.background = "none";
 
@@ -176,7 +176,7 @@ class Branch {
 
         function innerMouseUp(e)
         {
-            that._updateWidgets();
+            that._updateComponents();
 
             line.style.height = "0px";
 
@@ -189,15 +189,15 @@ class Branch {
         this.content.appendChild( element );
     }
 
-    _updateWidgets() {
+    _updateComponents() {
 
         var size = this.grabber.style.marginLeft;
 
-        // Update sizes of widgets inside
-        for( let i = 0; i < this.widgets.length; i++ )
+        // Update sizes of components inside
+        for( let i = 0; i < this.components.length; i++ )
         {
-            let widget = this.widgets[ i ];
-            const element = widget.root;
+            let component = this.components[ i ];
+            const element = component.root;
 
             if( element.children.length < 2 )
             {
@@ -210,10 +210,10 @@ class Branch {
             name.style.width = size;
             name.style.minWidth = size;
 
-            switch( widget.type )
+            switch( component.type )
             {
-                case LX.Widget.CUSTOM:
-                case LX.Widget.ARRAY:
+                case LX.BaseComponent.CUSTOM:
+                case LX.BaseComponent.ARRAY:
                     continue;
             };
 

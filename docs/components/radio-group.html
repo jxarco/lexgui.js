@@ -2,16 +2,16 @@
     import { LX } from 'lexgui';
 
     const content = document.getElementById('content');
-    const widgetName = "Radio Group";
+    const componentName = "Radio Group";
 
-    MAKE_HEADER(widgetName + ".", "h1", widgetName.toLowerCase());
+    MAKE_HEADER(componentName + ".", "h1", componentName.toLowerCase());
     MAKE_PARAGRAPH(`Represents a set of checkable buttons where no more than one of the buttons can be checked at a time.`);
     MAKE_LINE_BREAK();
-    MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addRadioGroup(name, label, values, callback, options)")} to add a ${ widgetName } Widget to your panel or
-    create it anywhere using ${INLINE_CODE(`new LX.${ widgetName.replace( /\s/g, '' ) }`)} to append its root to any container.` );
+    MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addRadioGroup(name, label, values, callback, options)")} to add a ${ componentName } Component to your panel or
+    create it anywhere using ${INLINE_CODE(`new LX.${ componentName.replace( /\s/g, '' ) }`)} to append its root to any container.` );
 
     {
-        window.__addInteractiveCodeExample( content, widgetName, panel => {
+        window.__addInteractiveCodeExample( content, componentName, panel => {
             panel.addRadioGroup("View", "A Label:", ["Default", "Comfortable", "Compact"], (value, event) => {
                 console.log(value);
             }, { selected: 1 });
@@ -26,11 +26,11 @@
         panel.addTable( null, {
             head: [ "Parameter", "Type", "Description", "Default" ],
             body: [
-                ["name", "String", "Widget name", "—"],
+                ["name", "String", "Component name", "—"],
                 ["label", "String", "Radio label", "—"],
                 ["values", "Array", "Radio options", "—"],
                 ["callback", "Function", "Function called checks changes", "—"],
-                ["options", "Object", "Basic options for a Widget", "—"]
+                ["options", "Object", "Basic options for a component", "—"]
             ].map( v => {
                 return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
             } )
@@ -39,7 +39,7 @@
         panel.addTable( null, {
             head: [ "Option", "Type", "Description", "Default" ],
             body: [
-                ["disabled", "Boolean", "Make the widget disabled", "false"],
+                ["disabled", "Boolean", "Make the component disabled", "false"],
                 ["className", "String", "Extra classes to customize style", "—"],
                 ["selected", "Number", "Index of the default selected option", "—"]
             ].map( v => {

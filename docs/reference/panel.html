@@ -22,9 +22,9 @@
     MAKE_HEADER( "Properties", "h2", "properties" );
     MAKE_CODE_BULLET_LIST( [
         [".branches", "Array", "Array of opened branches in the panel"],
-        [".onevent", "Function", "Function called when any of its widgets changes its value"],
+        [".onevent", "Function", "Function called when any of its components changes its value"],
         [".root", "HTMLElement", "Container element of the panel"],
-        [".widgets", "Object", "Data of all the widgets created inside the panel"]
+        [".components", "Object", "Data of all the components created inside the panel"]
     ] );
     
     MAKE_HEADER( "Methods", "h2", "methods" );
@@ -38,36 +38,39 @@
         ["options", "Object"],
     ] );
     
-    MAKE_CLASS_METHOD( ".clear", `Clear the panel root and all of its widgets.`, [] );
+    MAKE_CLASS_METHOD( ".clear", `Clear the panel root and all of its components.`, [] );
 
-    MAKE_CLASS_METHOD( ".clearQueue", `Removes the queued container, so widgets will be appended in its corresponding branch/container.`, [] );
+    MAKE_CLASS_METHOD( ".clearQueue", `Removes the queued container, so components will be appended in its corresponding branch/container.`, [] );
 
-    MAKE_CLASS_METHOD( ".endLine", `Stop inlining widgets when created.`, [] );
+    MAKE_CLASS_METHOD( ".endLine", `Stop inlining components when created.`, [
+        ["className", "String"],
+    ] );
 
-    MAKE_CLASS_METHOD( ".get", `Returns a given widget (in the panel) searched by name.`, [
+    MAKE_CLASS_METHOD( ".get", `Returns a given component (in the panel) searched by name.`, [
         ["name", "String"]
-    ], `${ INLINE_PAGE( "Widget", "reference/widget.html" ) }`);
+    ], `${ INLINE_PAGE( "component", "reference/component.html" ) }`);
 
     MAKE_CLASS_METHOD( ".getBranch", `Returns a given branch (in the panel) searched by name.`, [
         ["name", "String"]
     ], `${ INLINE_PAGE( "Branch", "reference/branch.html" ) }` );
 
-    MAKE_CLASS_METHOD( ".getValue", `Returns the value of a given widget (in the panel) searched by name.`, [
+    MAKE_CLASS_METHOD( ".getValue", `Returns the value of a given component (in the panel) searched by name.`, [
         ["name", "String"]
     ], "*");
 
-    MAKE_CLASS_METHOD( ".merge", `Merges current opened branch, meaning the following widgets will be created directly to the panel.`, [] );
+    MAKE_CLASS_METHOD( ".merge", `Merges current opened branch, meaning the following components will be created directly to the panel.`, [] );
 
-    MAKE_CLASS_METHOD( ".queue", `Sets a new temporal container for the newly created widgets. To stop using it, call <code class='inline'>Panel.clearQueue</code>.`, [
+    MAKE_CLASS_METHOD( ".queue", `Sets a new temporal container for the newly created components. To stop using it, call <code class='inline'>Panel.clearQueue</code>.`, [
         ["container", "HTMLElement"]
     ] );
 
-    MAKE_CLASS_METHOD( ".sameLine", `Sets the following N widgets to be inlined when created. If N is <code class='inline'><span class="kwd">null</span></code>, every widget created will be 
+    MAKE_CLASS_METHOD( ".sameLine", `Sets the following N components to be inlined when created. If N is <code class='inline'><span class="kwd">null</span></code>, every component created will be 
 inlined until <code class='inline'>Panel.endLine</code> is called.`, [
-        ["numberOfWidgets", "Number"]
+        ["numberOfComponents", "Number"],
+        ["className", "String"],
     ] );
 
-    MAKE_CLASS_METHOD( ".setValue", `Sets the value of a given widget (in the panel) searched by name.`, [
+    MAKE_CLASS_METHOD( ".setValue", `Sets the value of a given component (in the panel) searched by name.`, [
         ["name", "String"],
         ["value", "*"]
     ] );

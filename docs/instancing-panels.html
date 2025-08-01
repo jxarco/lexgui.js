@@ -2,7 +2,7 @@
 
     MAKE_HEADER( "Instancing Panels.", "h1", "instancing-panels" );
             
-    MAKE_PARAGRAPH( `Panels are the DOM elements that will enclose your UI ${INLINE_LINK("widgets", "widget_list.html")}. The pipeline is simple, create a Panel, attach it to an Area and fill it!
+    MAKE_PARAGRAPH( `Panels are the DOM elements that will enclose your UI components. The pipeline is simple, create a Panel, attach it to an Area and fill it!
         An area could contain multiple panels since at the end a panel is only an specific type of container (div) element.` );
     MAKE_PARAGRAPH( `You could do it manually instancing a new ${INLINE_CODE("LX.Panel")} and attaching it using ${INLINE_CODE("Area.attach(content)")} but you might want to call ${INLINE_CODE("Area.addPanel(options)")} to get an instanced panel already attached to that area:` );
     MAKE_CODE( `@[com]// Option 1@
@@ -21,7 +21,7 @@
         ["height", "Number", "Height of the panel element [fit space]"],
         ["style", "Object", "CSS Style object to be applied to the panel"]
     ] );
-    MAKE_PARAGRAPH( `Once you have an instantiated panel, you can start adding UI widgets!` );
+    MAKE_PARAGRAPH( `Once you have an instantiated panel, you can start adding UI components!` );
     
     MAKE_LINE_BREAK();
     MAKE_LINE_BREAK();

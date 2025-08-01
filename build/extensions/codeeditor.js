@@ -458,7 +458,7 @@ class CodeEditor {
                         const dX = ( e.deltaY > 0.0 ? 10.0 : -10.0 ) * ( e.shiftKey ? 1.0 : 0.0 );
                         if( dX != 0.0 ) this.setScrollBarValue( 'horizontal', dX );
                     }
-                });
+                }, { passive: true });
             }
         }
 

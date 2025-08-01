@@ -2,19 +2,19 @@
     import { LX } from 'lexgui';
 
     const content = document.getElementById('content');
-    const widgetName = "Data Tree";
+    const componentName = "Data Tree";
 
     // Data Tree
-    MAKE_HEADER(widgetName + ".", "h1", widgetName.toLowerCase());
+    MAKE_HEADER(componentName + ".", "h1", componentName.toLowerCase());
     MAKE_PARAGRAPH(`Represents a <strong>data hierarchy visualization Tree</strong>. Enables developers to display hierarchical data in an organized
      and visually appealing manner. This feature is especially useful when presenting data with parent-child
       relationships, such as file directories, organizational structures, family trees, and more.` );
       MAKE_LINE_BREAK();
-    MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addTree(name, data, options)")} to add a ${ widgetName } Widget to your panel or
-    create it anywhere using ${INLINE_CODE(`new LX.${ widgetName.replace( /\s/g, '' ) }`)} to append its root to any container.` );
+    MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addTree(name, data, options)")} to add a ${ componentName } Component to your panel or
+    create it anywhere using ${INLINE_CODE(`new LX.${ componentName.replace( /\s/g, '' ) }`)} to append its root to any container.` );
 
     {
-        window.__addInteractiveCodeExample( content, widgetName, panel => {
+        window.__addInteractiveCodeExample( content, componentName, panel => {
             const sceneData = {
                 id: "root",
                 children: [ {
@@ -60,9 +60,9 @@
         panel.addTable( null, {
             head: [ "Parameter", "Type", "Description", "Default" ],
             body: [
-                ["name", "String", "Widget name", "—"],
+                ["name", "String", "Component name", "—"],
                 ["data", "Object", "Hierarchical data", "—"],
-                ["options", "Object", "Basic options for a Widget", "—"]
+                ["options", "Object", "Basic options for a component", "—"]
             ].map( v => {
                 return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
             } )

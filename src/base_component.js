@@ -1,11 +1,11 @@
-// widget.js @jxarco
+// base_component.js @jxarco
 import { LX } from './core.js';
 
 /**
- * @class Widget
+ * @class BaseComponent
  */
 
-class Widget {
+class BaseComponent {
 
     static NONE         = 0;
     static TEXT         = 1;
@@ -49,10 +49,10 @@ class Widget {
     static BLANK        = 39;
 
     static NO_CONTEXT_TYPES = [
-        Widget.BUTTON,
-        Widget.LIST,
-        Widget.FILE,
-        Widget.PROGRESS
+        BaseComponent.BUTTON,
+        BaseComponent.LIST,
+        BaseComponent.FILE,
+        BaseComponent.PROGRESS
     ];
 
     constructor( type, name, value, options = {} ) {
@@ -63,7 +63,7 @@ class Widget {
         this._initialValue = value;
 
         const root = document.createElement( 'div' );
-        root.className = "lexwidget";
+        root.className = "lexcomponent";
 
         if( options.id )
         {
@@ -80,7 +80,7 @@ class Widget {
             root.className += " " + options.className;
         }
 
-        if( type != Widget.TITLE )
+        if( type != BaseComponent.TITLE )
         {
             if( options.width )
             {
@@ -99,7 +99,7 @@ class Widget {
                 root.style.height = root.style.minHeight = options.height;
             }
 
-            LX.widgetResizeObserver.observe( root );
+            LX.componentResizeObserver.observe( root );
         }
 
         if( name != undefined )
@@ -107,7 +107,7 @@ class Widget {
             if( !( options.hideName ?? false ) )
             {
                 let domName = document.createElement( 'div' );
-                domName.className = "lexwidgetname";
+                domName.className = "lexcomponentname";
 
                 if( options.justifyName )
                 {
@@ -169,7 +169,7 @@ class Widget {
     }
 
     _canPaste() {
-        let pasteAllowed = this.type === Widget.CUSTOM ?
+        let pasteAllowed = this.type === BaseComponent.CUSTOM ?
             ( navigator.clipboard.customIdx !== undefined && this.customIdx == navigator.clipboard.customIdx ) : navigator.clipboard.type === this.type;
 
         pasteAllowed &= ( this.disabled !== true );
@@ -206,7 +206,7 @@ class Widget {
 
         if( this.onSetValue )
         {
-            let resetButton = this.root.querySelector( ".lexwidgetname .lexicon" );
+            let resetButton = this.root.querySelector( ".lexcomponentname .lexicon" );
             if( resetButton )
             {
                 resetButton.style.display = ( value != this.value() ? "block" : "none" );
@@ -232,7 +232,7 @@ class Widget {
 
     oncontextmenu( e ) {
 
-        if( Widget.NO_CONTEXT_TYPES.includes( this.type ) )
+        if( BaseComponent.NO_CONTEXT_TYPES.includes( this.type ) )
         {
             return;
         }
@@ -263,41 +263,41 @@ class Widget {
 
         switch( this.type )
         {
-            case Widget.TEXT: return "Text";
-            case Widget.TEXTAREA: return "TextArea";
-            case Widget.BUTTON: return "Button";
-            case Widget.SELECT: return "Select";
-            case Widget.CHECKBOX: return "Checkbox";
-            case Widget.TOGGLE: return "Toggle";
-            case Widget.RADIO: return "Radio";
-            case Widget.COLOR: return "Color";
-            case Widget.RANGE: return "Range";
-            case Widget.NUMBER: return "Number";
-            case Widget.VECTOR: return "Vector";
-            case Widget.TREE: return "Tree";
-            case Widget.PROGRESS: return "Progress";
-            case Widget.FILE: return "File";
-            case Widget.LAYERS: return "Layers";
-            case Widget.ARRAY: return "Array";
-            case Widget.LIST: return "List";
-            case Widget.TAGS: return "Tags";
-            case Widget.CURVE: return "Curve";
-            case Widget.KNOB: return "Knob";
-            case Widget.SIZE: return "Size";
-            case Widget.PAD: return "Pad";
-            case Widget.FORM: return "Form";
-            case Widget.DIAL: return "Dial";
-            case Widget.COUNTER: return "Counter";
-            case Widget.TABLE: return "Table";
-            case Widget.TABS: return "Tabs";
-            case Widget.DATE: return "Date";
-            case Widget.MAP2D: return "Map2D";
-            case Widget.LABEL: return "Label";
-            case Widget.BLANK: return "Blank";
-            case Widget.CUSTOM: return this.customName;
+            case BaseComponent.TEXT: return "Text";
+            case BaseComponent.TEXTAREA: return "TextArea";
+            case BaseComponent.BUTTON: return "Button";
+            case BaseComponent.SELECT: return "Select";
+            case BaseComponent.CHECKBOX: return "Checkbox";
+            case BaseComponent.TOGGLE: return "Toggle";
+            case BaseComponent.RADIO: return "Radio";
+            case BaseComponent.COLOR: return "Color";
+            case BaseComponent.RANGE: return "Range";
+            case BaseComponent.NUMBER: return "Number";
+            case BaseComponent.VECTOR: return "Vector";
+            case BaseComponent.TREE: return "Tree";
+            case BaseComponent.PROGRESS: return "Progress";
+            case BaseComponent.FILE: return "File";
+            case BaseComponent.LAYERS: return "Layers";
+            case BaseComponent.ARRAY: return "Array";
+            case BaseComponent.LIST: return "List";
+            case BaseComponent.TAGS: return "Tags";
+            case BaseComponent.CURVE: return "Curve";
+            case BaseComponent.KNOB: return "Knob";
+            case BaseComponent.SIZE: return "Size";
+            case BaseComponent.PAD: return "Pad";
+            case BaseComponent.FORM: return "Form";
+            case BaseComponent.DIAL: return "Dial";
+            case BaseComponent.COUNTER: return "Counter";
+            case BaseComponent.TABLE: return "Table";
+            case BaseComponent.TABS: return "Tabs";
+            case BaseComponent.DATE: return "Date";
+            case BaseComponent.MAP2D: return "Map2D";
+            case BaseComponent.LABEL: return "Label";
+            case BaseComponent.BLANK: return "Blank";
+            case BaseComponent.CUSTOM: return this.customName;
         }
 
-        console.error( `Unknown Widget type: ${ this.type }` );
+        console.error( `Unknown Component type: ${ this.type }` );
     }
 
     refresh() {
@@ -305,52 +305,52 @@ class Widget {
     }
 }
 
-LX.Widget = Widget;
+LX.BaseComponent = BaseComponent;
 
-function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
+function ADD_CUSTOM_COMPONENT( customComponentName, options = {} )
 {
     let customIdx = LX.guidGenerator();
 
-    LX.Panel.prototype[ 'add' + customWidgetName ] = function( name, instance, callback ) {
+    LX.Panel.prototype[ 'add' + customComponentName ] = function( name, instance, callback ) {
 
         const userParams = Array.from( arguments ).slice( 3 );
 
-        let widget = new Widget( Widget.CUSTOM, name, null, options );
-        this._attachWidget( widget );
+        let component = new BaseComponent( BaseComponent.CUSTOM, name, null, options );
+        this._attachComponent( component );
 
-        widget.customName = customWidgetName;
-        widget.customIdx = customIdx;
+        component.customName = customComponentName;
+        component.customIdx = customIdx;
 
-        widget.onGetValue = () => {
+        component.onGetValue = () => {
             return instance;
         };
 
-        widget.onSetValue = ( newValue, skipCallback, event ) => {
+        component.onSetValue = ( newValue, skipCallback, event ) => {
             instance = newValue;
-            refresh_widget();
+            _refreshComponent();
             element.querySelector( ".lexcustomitems" ).toggleAttribute( 'hidden', false );
             if( !skipCallback )
             {
-                widget._trigger( new LX.IEvent( name, instance, event ), callback );
+                component._trigger( new LX.IEvent( name, instance, event ), callback );
             }
         };
 
-        widget.onResize = ( rect ) => {
-            const realNameWidth = ( widget.root.domName?.style.width ?? "0px" );
+        component.onResize = ( rect ) => {
+            const realNameWidth = ( component.root.domName?.style.width ?? "0px" );
             container.style.width = `calc( 100% - ${ realNameWidth })`;
         };
 
-        const element = widget.root;
+        const element = component.root;
 
-        let container, customWidgetsDom;
+        let container, customComponentsDom;
         let defaultInstance = options.default ?? {};
 
         // Add instance button
 
-        const refresh_widget = () => {
+        const _refreshComponent = () => {
 
             if( container ) container.remove();
-            if( customWidgetsDom ) customWidgetsDom.remove();
+            if( customComponentsDom ) customComponentsDom.remove();
 
             container = document.createElement('div');
             container.className = "lexcustomcontainer w-full";
@@ -360,7 +360,7 @@ function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
             const customIcon = LX.makeIcon( options.icon ?? "Box" );
             const menuIcon = LX.makeIcon( "Menu" );
 
-            let buttonName = customWidgetName + (!instance ? " [empty]" : "");
+            let buttonName = customComponentName + (!instance ? " [empty]" : "");
             let buttonEl = this.addButton(null, buttonName, (value, event) => {
                 if( instance )
                 {
@@ -370,9 +370,9 @@ function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
                 else
                 {
                     LX.addContextMenu(null, event, c => {
-                        c.add("New " + customWidgetName, () => {
+                        c.add("New " + customComponentName, () => {
                             instance = {};
-                            refresh_widget();
+                            _refreshComponent();
                             element.querySelector(".lexcustomitems").toggleAttribute('hidden', false);
                             element.dataset["opened"] = !element.querySelector(".lexcustomitems").hasAttribute("hidden");
                         });
@@ -394,7 +394,7 @@ function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
                     LX.addContextMenu(null, e, c => {
                         c.add("Clear", () => {
                             instance = null;
-                            refresh_widget();
+                            _refreshComponent();
                         });
                     });
                 });
@@ -402,14 +402,14 @@ function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
 
             // Show elements
 
-            customWidgetsDom = document.createElement('div');
-            customWidgetsDom.className = "lexcustomitems";
-            customWidgetsDom.toggleAttribute('hidden', true);
-            element.appendChild( customWidgetsDom );
+            customComponentsDom = document.createElement('div');
+            customComponentsDom.className = "lexcustomitems";
+            customComponentsDom.toggleAttribute('hidden', true);
+            element.appendChild( customComponentsDom );
 
             if( instance )
             {
-                this.queue( customWidgetsDom );
+                this.queue( customComponentsDom );
 
                 const on_instance_changed = ( key, value, event ) => {
                     const setter = options[ `_set_${ key }` ];
@@ -421,7 +421,7 @@ function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
                     {
                         instance[ key ] = value;
                     }
-                    widget._trigger( new LX.IEvent( name, instance, event ), callback );
+                    component._trigger( new LX.IEvent( name, instance, event ), callback );
                 };
 
                 for( let key in defaultInstance )
@@ -486,11 +486,11 @@ function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
             }
         };
 
-        refresh_widget();
+        _refreshComponent();
     };
 }
 
-LX.ADD_CUSTOM_WIDGET = ADD_CUSTOM_WIDGET;
+LX.ADD_CUSTOM_COMPONENT = ADD_CUSTOM_COMPONENT;
 
 /**
  * @class NodeTree
@@ -1062,14 +1062,14 @@ LX.NodeTree = NodeTree;
 
 /**
  * @class Blank
- * @description Blank Widget
+ * @description Blank Component
  */
 
-class Blank extends Widget {
+class Blank extends BaseComponent {
 
     constructor( width, height ) {
 
-        super( Widget.BLANK );
+        super( BaseComponent.BLANK );
 
         this.root.style.width = width ?? "auto";
         this.root.style.height = height ?? "8px";
@@ -1080,17 +1080,17 @@ LX.Blank = Blank;
 
 /**
  * @class Title
- * @description Title Widget
+ * @description Title Component
  */
 
-class Title extends Widget {
+class Title extends BaseComponent {
 
     constructor( name, options = {} ) {
 
-        console.assert( name, "Can't create Title Widget without text!" );
+        console.assert( name, "Can't create Title Component without text!" );
 
-        // Note: Titles are not registered in Panel.widgets by now
-        super( Widget.TITLE, null, null, options );
+        // Note: Titles are not registered in Panel.components by now
+        super( BaseComponent.TITLE, null, null, options );
 
         this.root.className = `lextitle ${ this.root.className }`;
 
@@ -1124,14 +1124,14 @@ LX.Title = Title;
 
 /**
  * @class TextInput
- * @description TextInput Widget
+ * @description TextInput Component
  */
 
-class TextInput extends Widget {
+class TextInput extends BaseComponent {
 
     constructor( name, value, callback, options = {} ) {
 
-        super( Widget.TEXT, name, String( value ), options );
+        super( BaseComponent.TEXT, name, String( value ), options );
 
         this.onGetValue = () => {
             return value;
@@ -1264,14 +1264,14 @@ LX.TextInput = TextInput;
 
 /**
  * @class TextArea
- * @description TextArea Widget
+ * @description TextArea Component
  */
 
-class TextArea extends Widget {
+class TextArea extends BaseComponent {
 
     constructor( name, value, callback, options = {} ) {
 
-        super( Widget.TEXTAREA, name, value, options );
+        super( BaseComponent.TEXTAREA, name, value, options );
 
         this.onGetValue = () => {
             return value;
@@ -1365,14 +1365,14 @@ LX.TextArea = TextArea;
 
 /**
  * @class Button
- * @description Button Widget
+ * @description Button Component
  */
 
-class Button extends Widget {
+class Button extends BaseComponent {
 
     constructor( name, value, callback, options = {} ) {
 
-        super( Widget.BUTTON, name, null, options );
+        super( BaseComponent.BUTTON, name, null, options );
 
         this.onGetValue = () => {
             const swapInput = wValue.querySelector( "input" );
@@ -1587,10 +1587,10 @@ LX.Button = Button;
 
 /**
  * @class ComboButtons
- * @description ComboButtons Widget
+ * @description ComboButtons Component
  */
 
-class ComboButtons extends Widget {
+class ComboButtons extends BaseComponent {
 
     constructor( name, values, options = {} ) {
 
@@ -1705,7 +1705,7 @@ class ComboButtons extends Widget {
             currentValue = currentValue[ 0 ];
         }
 
-        super( Widget.BUTTONS, name, null, options );
+        super( BaseComponent.BUTTONS, name, null, options );
 
         this.onGetValue = () => {
             return currentValue;
@@ -1748,16 +1748,16 @@ LX.ComboButtons = ComboButtons;
 
 /**
  * @class Card
- * @description Card Widget
+ * @description Card Component
  */
 
-class Card extends Widget {
+class Card extends BaseComponent {
 
     constructor( name, options = {} ) {
 
         options.hideName = true;
 
-        super( Widget.CARD, name, null, options );
+        super( BaseComponent.CARD, name, null, options );
 
         let container = document.createElement('div');
         container.className = "lexcard";
@@ -1811,10 +1811,10 @@ LX.Card = Card;
 
 /**
  * @class Form
- * @description Form Widget
+ * @description Form Component
  */
 
-class Form extends Widget {
+class Form extends BaseComponent {
 
     constructor( name, data, callback, options = {} ) {
 
@@ -1827,7 +1827,7 @@ class Form extends Widget {
         // Always hide name for this one
         options.hideName = true;
 
-        super( Widget.FORM, name, null, options );
+        super( BaseComponent.FORM, name, null, options );
 
         this.onGetValue = () => {
             return container.formData;
@@ -1835,18 +1835,18 @@ class Form extends Widget {
 
         this.onSetValue = ( newValue, skipCallback, event ) => {
             container.formData = newValue;
-            const entries = container.querySelectorAll( ".lexwidget" );
+            const entries = container.querySelectorAll( ".lexcomponent" );
             for( let i = 0; i < entries.length; ++i )
             {
                 const entry = entries[ i ];
-                if( entry.jsInstance.type != LX.Widget.TEXT )
+                if( entry.jsInstance.type != BaseComponent.TEXT )
                 {
                     continue;
                 }
-                let entryName = entries[ i ].querySelector( ".lexwidgetname" ).innerText;
+                let entryName = entries[ i ].querySelector( ".lexcomponentname" ).innerText;
                 let entryInput = entries[ i ].querySelector( ".lextext input" );
                 entryInput.value = newValue[ entryName ] ?? "";
-                Widget._dispatchEvent( entryInput, "focusout", skipCallback );
+                BaseComponent._dispatchEvent( entryInput, "focusout", skipCallback );
             }
         };
 
@@ -1876,10 +1876,10 @@ class Form extends Widget {
                 container.appendChild( label.root );
             }
 
-            entryData.textWidget = new LX.TextInput( null, entryData.constructor == Object ? entryData.value : entryData, ( value ) => {
+            entryData.textComponent = new LX.TextInput( null, entryData.constructor == Object ? entryData.value : entryData, ( value ) => {
                 container.formData[ entry ] = value;
             }, entryData );
-            container.appendChild( entryData.textWidget.root );
+            container.appendChild( entryData.textComponent.root );
 
             container.formData[ entry ] = entryData.constructor == Object ? entryData.value : entryData;
         }
@@ -1904,7 +1904,7 @@ class Form extends Widget {
             {
                 let entryData = data[ entry ];
 
-                if( !entryData.textWidget.valid() )
+                if( !entryData.textComponent.valid() )
                 {
                     return;
                 }
@@ -1924,14 +1924,14 @@ LX.Form = Form;
 
 /**
  * @class Select
- * @description Select Widget
+ * @description Select Component
  */
 
-class Select extends Widget {
+class Select extends BaseComponent {
 
     constructor( name, values, value, callback, options = {} ) {
 
-        super( Widget.SELECT, name, value, options );
+        super( BaseComponent.SELECT, name, value, options );
 
         this.onGetValue = () => {
             return value;
@@ -2161,7 +2161,7 @@ class Select extends Widget {
         {
             const filterOptions = LX.deepCopy( options );
             filterOptions.placeholder = filterOptions.placeholder ?? "Search...";
-            filterOptions.skipWidget = filterOptions.skipWidget ?? true;
+            filterOptions.skipComponent = filterOptions.skipComponent ?? true;
             filterOptions.trigger = "input";
             filterOptions.icon = "Search";
             filterOptions.className = "lexfilter";
@@ -2313,7 +2313,7 @@ class Select extends Widget {
         const emptyFilter = !value.length;
         let filteredOptions = [];
 
-        // Add widgets
+        // Add components
         for( let i = 0; i < options.length; i++ )
         {
             let o = options[ i ];
@@ -2336,16 +2336,16 @@ LX.Select = Select;
 
 /**
  * @class Curve
- * @description Curve Widget
+ * @description Curve Component
  */
 
-class Curve extends Widget {
+class Curve extends BaseComponent {
 
     constructor( name, values, callback, options = {} ) {
 
         let defaultValues = JSON.parse( JSON.stringify( values ) );
 
-        super( Widget.CURVE, name, defaultValues, options );
+        super( BaseComponent.CURVE, name, defaultValues, options );
 
         this.onGetValue = () => {
             return JSON.parse(JSON.stringify( curveInstance.element.value ));
@@ -2397,16 +2397,16 @@ LX.Curve = Curve;
 
 /**
  * @class Dial
- * @description Dial Widget
+ * @description Dial Component
  */
 
-class Dial extends Widget {
+class Dial extends BaseComponent {
 
     constructor( name, values, callback, options = {} ) {
 
         let defaultValues = JSON.parse( JSON.stringify( values ) );
 
-        super( Widget.DIAL, name, defaultValues, options );
+        super( BaseComponent.DIAL, name, defaultValues, options );
 
         this.onGetValue = () => {
             return JSON.parse( JSON.stringify( dialInstance.element.value ) );
@@ -2454,14 +2454,14 @@ LX.Dial = Dial;
 
 /**
  * @class Layers
- * @description Layers Widget
+ * @description Layers Component
  */
 
-class Layers extends Widget {
+class Layers extends BaseComponent {
 
     constructor( name, value, callback, options = {} ) {
 
-        super( Widget.LAYERS, name, value, options );
+        super( BaseComponent.LAYERS, name, value, options );
 
         this.onGetValue = () => {
             return value;
@@ -2538,16 +2538,16 @@ LX.Layers = Layers;
 
 /**
  * @class ItemArray
- * @description ItemArray Widget
+ * @description ItemArray Component
  */
 
-class ItemArray extends Widget {
+class ItemArray extends BaseComponent {
 
     constructor( name, values = [], callback, options = {} ) {
 
         options.nameWidth = "100%";
 
-        super( Widget.ARRAY, name, null, options );
+        super( BaseComponent.ARRAY, name, null, options );
 
         this.onGetValue = () => {
             return values;
@@ -2602,41 +2602,41 @@ class ItemArray extends Widget {
             {
                 const value = values[ i ];
                 let baseclass = options.innerValues ? 'select' : value.constructor;
-                let widget = null;
+                let component = null;
 
                 switch( baseclass  )
                 {
                     case String:
-                        widget = new LX.TextInput(i + "", value, function(value, event) {
+                        component = new LX.TextInput(i + "", value, function(value, event) {
                             values[ i ] = value;
                             callback( values );
                         }, { nameWidth: "12px", className: "p-0", skipReset: true });
                         break;
                     case Number:
-                        widget = new NumberInput(i + "", value, function(value, event) {
+                        component = new NumberInput(i + "", value, function(value, event) {
                             values[ i ] = value;
                             callback( values );
                         }, { nameWidth: "12px", className: "p-0", skipReset: true });
                         break;
                     case 'select':
-                        widget = new Select(i + "", options.innerValues, value, function(value, event) {
+                        component = new Select(i + "", options.innerValues, value, function(value, event) {
                             values[ i ] = value;
                             callback( values );
                         }, { nameWidth: "12px", className: "p-0", skipReset: true });
                         break;
                 }
 
-                console.assert( widget, `Value of type ${ baseclass } cannot be modified in ItemArray` );
+                console.assert( component, `Value of type ${ baseclass } cannot be modified in ItemArray` );
 
-                arrayItems.appendChild( widget.root );
+                arrayItems.appendChild( component.root );
 
-                const removeWidget = new LX.Button( null, "", ( v, event) => {
+                const removeComponent = new LX.Button( null, "", ( v, event) => {
                     values.splice( values.indexOf( value ), 1 );
                     this._updateItems();
                     this._trigger( new LX.IEvent(name, values, event), callback );
                 }, { title: "Remove item", icon: "Trash3"} );
 
-                widget.root.appendChild( removeWidget.root );
+                component.root.appendChild( removeComponent.root );
             }
 
             const addButton = new LX.Button(null, LX.makeIcon( "Plus", { svgClass: "sm" } ).innerHTML + "Add item", (v, event) => {
@@ -2656,14 +2656,14 @@ LX.ItemArray = ItemArray;
 
 /**
  * @class List
- * @description List Widget
+ * @description List Component
  */
 
-class List extends Widget {
+class List extends BaseComponent {
 
     constructor( name, values, value, callback, options = {} ) {
 
-        super( Widget.LIST, name, value, options );
+        super( BaseComponent.LIST, name, value, options );
 
         this.onGetValue = () => {
             return value;
@@ -2756,17 +2756,17 @@ LX.List = List;
 
 /**
  * @class Tags
- * @description Tags Widget
+ * @description Tags Component
  */
 
-class Tags extends Widget {
+class Tags extends BaseComponent {
 
     constructor( name, value, callback, options = {} ) {
 
         value = value.replace( /\s/g, '' ).split( ',' );
 
         let defaultValue = [].concat( value );
-        super( Widget.TAGS, name, defaultValue, options );
+        super( BaseComponent.TAGS, name, defaultValue, options );
 
         this.onGetValue = () => {
             return [].concat( value );
@@ -2845,19 +2845,19 @@ LX.Tags = Tags;
 
 /**
  * @class Checkbox
- * @description Checkbox Widget
+ * @description Checkbox Component
  */
 
-class Checkbox extends Widget {
+class Checkbox extends BaseComponent {
 
     constructor( name, value, callback, options = {} ) {
 
         if( !name && !options.label )
         {
-            throw( "Set Widget Name or at least a label!" );
+            throw( "Set Component Name or at least a label!" );
         }
 
-        super( Widget.CHECKBOX, name, value, options );
+        super( BaseComponent.CHECKBOX, name, value, options );
 
         this.onGetValue = () => {
             return value;
@@ -2928,19 +2928,19 @@ LX.Checkbox = Checkbox;
 
 /**
  * @class Toggle
- * @description Toggle Widget
+ * @description Toggle Component
  */
 
-class Toggle extends Widget {
+class Toggle extends BaseComponent {
 
     constructor( name, value, callback, options = {} ) {
 
         if( !name && !options.label )
         {
-            throw( "Set Widget Name or at least a label!" );
+            throw( "Set Component Name or at least a label!" );
         }
 
-        super( Widget.TOGGLE, name, value, options );
+        super( BaseComponent.TOGGLE, name, value, options );
 
         this.onGetValue = () => {
             return toggle.checked;
@@ -3012,14 +3012,14 @@ LX.Toggle = Toggle;
 
 /**
  * @class RadioGroup
- * @description RadioGroup Widget
+ * @description RadioGroup Component
  */
 
-class RadioGroup extends Widget {
+class RadioGroup extends BaseComponent {
 
     constructor( name, label, values, callback, options = {} ) {
 
-        super( Widget.RADIO, name, null, options );
+        super( BaseComponent.RADIO, name, null, options );
 
         let currentIndex = null;
 
@@ -3091,10 +3091,10 @@ LX.RadioGroup = RadioGroup;
 
 /**
  * @class ColorInput
- * @description ColorInput Widget
+ * @description ColorInput Component
  */
 
-class ColorInput extends Widget {
+class ColorInput extends BaseComponent {
 
     constructor( name, value, callback, options = {} ) {
 
@@ -3103,12 +3103,12 @@ class ColorInput extends Widget {
         const useAlpha = options.useAlpha ??
             ( ( value.constructor === Object && 'a' in value ) || ( value.constructor === String && [ 5, 9 ].includes( value.length ) ) );
 
-        const widgetColor = new LX.Color( value );
+        const componentColor = new LX.Color( value );
 
         // Force always hex internally
-        value = useAlpha ? widgetColor.hex : widgetColor.hex.substr( 0, 7 );
+        value = useAlpha ? componentColor.hex : componentColor.hex.substr( 0, 7 );
 
-        super( Widget.COLOR, name, value, options );
+        super( BaseComponent.COLOR, name, value, options );
 
         this.onGetValue = () => {
             const currentColor = new LX.Color( value );
@@ -3128,7 +3128,7 @@ class ColorInput extends Widget {
 
             if( !this._skipTextUpdate )
             {
-                textWidget.set( value, true, event );
+                textComponent.set( value, true, event );
             }
 
             if( !skipCallback )
@@ -3196,15 +3196,15 @@ class ColorInput extends Widget {
             colorSampleRGB.style.width = "18px";
         }
 
-        const textWidget = new LX.TextInput( null, value, v => {
+        const textComponent = new LX.TextInput( null, value, v => {
             this._skipTextUpdate = true;
             this.set( v );
             delete this._skipTextUpdate;
             this.picker.fromHexColor( v );
         }, { width: "calc( 100% - 24px )", disabled: options.disabled });
 
-        textWidget.root.style.marginLeft = "6px";
-        container.appendChild( textWidget.root );
+        textComponent.root.style.marginLeft = "6px";
+        container.appendChild( textComponent.root );
 
         LX.doAsync( this.onResize.bind( this ) );
     }
@@ -3214,14 +3214,14 @@ LX.ColorInput = ColorInput;
 
 /**
  * @class RangeInput
- * @description RangeInput Widget
+ * @description RangeInput Component
  */
 
-class RangeInput extends Widget {
+class RangeInput extends BaseComponent {
 
     constructor( name, value, callback, options = {} ) {
 
-        super( Widget.RANGE, name, value, options );
+        super( BaseComponent.RANGE, name, value, options );
 
         this.onGetValue = () => {
             return value;
@@ -3305,7 +3305,7 @@ class RangeInput extends Widget {
             slider.min = newMin ?? slider.min;
             slider.max = newMax ?? slider.max;
             slider.step = newStep ?? slider.step;
-            Widget._dispatchEvent( slider, "input", true );
+            BaseComponent._dispatchEvent( slider, "input", true );
         };
 
         LX.doAsync( this.onResize.bind( this ) );
@@ -3316,14 +3316,14 @@ LX.RangeInput = RangeInput;
 
 /**
  * @class NumberInput
- * @description NumberInput Widget
+ * @description NumberInput Component
  */
 
-class NumberInput extends Widget {
+class NumberInput extends BaseComponent {
 
     constructor( name, value, callback, options = {} ) {
 
-        super( Widget.NUMBER, name, value, options );
+        super( BaseComponent.NUMBER, name, value, options );
 
         this.onGetValue = () => {
             return value;
@@ -3538,17 +3538,17 @@ LX.NumberInput = NumberInput;
 
 /**
  * @class Vector
- * @description Vector Widget
+ * @description Vector Component
  */
 
-class Vector extends Widget {
+class Vector extends BaseComponent {
 
     constructor( numComponents, name, value, callback, options = {} ) {
 
         numComponents = LX.clamp( numComponents, 2, 4 );
         value = value ?? new Array( numComponents ).fill( 0 );
 
-        super( Widget.VECTOR, name, [].concat( value ), options );
+        super( BaseComponent.VECTOR, name, [].concat( value ), options );
 
         this.onGetValue = () => {
             let inputs = this.root.querySelectorAll( "input[type='number']" );
@@ -3643,13 +3643,13 @@ class Vector extends Widget {
                     for( let v of that.querySelectorAll(".vecinput") )
                     {
                         v.value = LX.round( +v.valueAsNumber - mult * ( e.deltaY > 0 ? 1 : -1 ), options.precision );
-                        Widget._dispatchEvent( v, "change" );
+                        BaseComponent._dispatchEvent( v, "change" );
                     }
                 }
                 else
                 {
                     this.value = LX.round( +this.valueAsNumber - mult * ( e.deltaY > 0 ? 1 : -1 ), options.precision );
-                    Widget._dispatchEvent( vecinput, "change" );
+                    BaseComponent._dispatchEvent( vecinput, "change" );
                 }
             }, { passive: false } );
 
@@ -3723,13 +3723,13 @@ class Vector extends Widget {
                         for( let v of that.root.querySelectorAll( ".vecinput" ) )
                         {
                             v.value = LX.round( +v.valueAsNumber + mult * dt, options.precision );
-                            Widget._dispatchEvent( v, "change" );
+                            BaseComponent._dispatchEvent( v, "change" );
                         }
                     }
                     else
                     {
                         vecinput.value = LX.round( +vecinput.valueAsNumber + mult * dt, options.precision );
-                        Widget._dispatchEvent( vecinput, "change" );
+                        BaseComponent._dispatchEvent( vecinput, "change" );
                     }
                 }
 
@@ -3788,14 +3788,14 @@ LX.Vector = Vector;
 
 /**
  * @class SizeInput
- * @description SizeInput Widget
+ * @description SizeInput Component
  */
 
-class SizeInput extends Widget {
+class SizeInput extends BaseComponent {
 
     constructor( name, value, callback, options = {} ) {
 
-        super( Widget.SIZE, name, value, options );
+        super( BaseComponent.SIZE, name, value, options );
 
         this.onGetValue = () => {
             const value = [];
@@ -3876,10 +3876,10 @@ LX.SizeInput = SizeInput;
 
 /**
  * @class OTPInput
- * @description OTPInput Widget
+ * @description OTPInput Component
  */
 
-class OTPInput extends Widget {
+class OTPInput extends BaseComponent {
 
     constructor( name, value, callback, options = {} ) {
 
@@ -3892,7 +3892,7 @@ class OTPInput extends Widget {
             value = "x".repeat( patternSize );
         }
 
-        super( Widget.OTP, name, value, options );
+        super( BaseComponent.OTP, name, value, options );
 
         this.onGetValue = () => {
             return +value;
@@ -4034,14 +4034,14 @@ LX.OTPInput = OTPInput;
 
 /**
  * @class Pad
- * @description Pad Widget
+ * @description Pad Component
  */
 
-class Pad extends Widget {
+class Pad extends BaseComponent {
 
     constructor( name, value, callback, options = {} ) {
 
-        super( Widget.PAD, name, null, options );
+        super( BaseComponent.PAD, name, null, options );
 
         this.onGetValue = () => {
             return thumb.value.xy;
@@ -4154,14 +4154,14 @@ LX.Pad = Pad;
 
 /**
  * @class Progress
- * @description Progress Widget
+ * @description Progress Component
  */
 
-class Progress extends Widget {
+class Progress extends BaseComponent {
 
     constructor( name, value, options = {} ) {
 
-        super( Widget.PROGRESS, name, value, options );
+        super( BaseComponent.PROGRESS, name, value, options );
 
         this.onGetValue = () => {
             return progress.value;
@@ -4291,14 +4291,14 @@ LX.Progress = Progress;
 
 /**
  * @class FileInput
- * @description FileInput Widget
+ * @description FileInput Component
  */
 
-class FileInput extends Widget {
+class FileInput extends BaseComponent {
 
     constructor( name, callback, options = { } ) {
 
-        super( Widget.FILE, name, null, options );
+        super( BaseComponent.FILE, name, null, options );
 
         let local = options.local ?? true;
         let type = options.type ?? 'text';
@@ -4376,16 +4376,16 @@ LX.FileInput = FileInput;
 
 /**
  * @class Tree
- * @description Tree Widget
+ * @description Tree Component
  */
 
-class Tree extends Widget {
+class Tree extends BaseComponent {
 
     constructor( name, data, options = {} ) {
 
         options.hideName = true;
 
-        super( Widget.TREE, name, null, options );
+        super( BaseComponent.TREE, name, null, options );
 
         let container = document.createElement('div');
         container.className = "lextree";
@@ -4458,16 +4458,16 @@ LX.Tree = Tree;
 
 /**
  * @class TabSections
- * @description TabSections Widget
+ * @description TabSections Component
  */
 
-class TabSections extends Widget {
+class TabSections extends BaseComponent {
 
     constructor( name, tabs, options = {} ) {
 
         options.hideName = true;
 
-        super( Widget.TABS, name, null, options );
+        super( BaseComponent.TABS, name, null, options );
 
         if( tabs.constructor != Array )
         {
@@ -4513,7 +4513,7 @@ class TabSections extends Widget {
 
             let infoContainer = document.createElement( "div" );
             infoContainer.id = tab.name.replace( /\s/g, '' );
-            infoContainer.className = "widgets";
+            infoContainer.className = "components";
             infoContainer.toggleAttribute( "hidden", !( tab.selected ?? false ) );
             container.appendChild( infoContainer );
 
@@ -4522,7 +4522,7 @@ class TabSections extends Widget {
                 tabContainer.querySelectorAll( ".lextab" ).forEach( e => { e.classList.remove( "selected" ); } );
                 tabEl.classList.add( "selected" );
                 // Hide all tabs content
-                container.querySelectorAll(".widgets").forEach( e => { e.toggleAttribute( "hidden", true ); } );
+                container.querySelectorAll(".components").forEach( e => { e.toggleAttribute( "hidden", true ); } );
                 // Show tab content
                 const el = container.querySelector( '#' + infoContainer.id );
                 el.toggleAttribute( "hidden" );
@@ -4565,14 +4565,14 @@ LX.TabSections = TabSections;
 
 /**
  * @class Counter
- * @description Counter Widget
+ * @description Counter Component
  */
 
-class Counter extends Widget {
+class Counter extends BaseComponent {
 
     constructor( name, value, callback, options = { } ) {
 
-        super( Widget.COUNTER, name, value, options );
+        super( BaseComponent.COUNTER, name, value, options );
 
         this.onGetValue = () => {
             return counterText.count;
@@ -4635,10 +4635,10 @@ LX.Counter = Counter;
 
 /**
  * @class Table
- * @description Table Widget
+ * @description Table Component
  */
 
-class Table extends Widget {
+class Table extends BaseComponent {
 
     constructor( name, data, options = { } ) {
 
@@ -4647,7 +4647,7 @@ class Table extends Widget {
             throw( "Data is needed to create a table!" );
         }
 
-        super( Widget.TABLE, name, null, options );
+        super( BaseComponent.TABLE, name, null, options );
 
         this.onResize = ( rect ) => {
             const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
@@ -4697,7 +4697,7 @@ class Table extends Widget {
             {
                 const filterOptions = LX.deepCopy( options );
                 filterOptions.placeholder = `Filter ${ this.filter }...`;
-                filterOptions.skipWidget = true;
+                filterOptions.skipComponent = true;
                 filterOptions.trigger = "input";
                 filterOptions.inputClass = "outline";
 
@@ -4716,9 +4716,9 @@ class Table extends Widget {
 
                 for( let f of this.customFilters )
                 {
-                    f.widget = new LX.Button(null, icon.innerHTML + f.name, ( v ) => {
+                    f.component = new LX.Button(null, icon.innerHTML + f.name, ( v ) => {
 
-                        const spanName = f.widget.root.querySelector( "span" );
+                        const spanName = f.component.root.querySelector( "span" );
 
                         if( f.options )
                         {
@@ -4739,7 +4739,7 @@ class Table extends Widget {
                                 }
                                 return item;
                             } );
-                            new LX.DropdownMenu( f.widget.root, menuOptions, { side: "bottom", align: "start" });
+                            new LX.DropdownMenu( f.component.root, menuOptions, { side: "bottom", align: "start" });
                         }
                         else if( f.type == "range" )
                         {
@@ -4778,7 +4778,7 @@ class Table extends Widget {
                             }
                             panel.refresh();
                             container.appendChild( panel.root );
-                            new LX.Popover( f.widget.root, [ container ], { side: "bottom" } );
+                            new LX.Popover( f.component.root, [ container ], { side: "bottom" } );
                         }
                         else if( f.type == "date" )
                         {
@@ -4810,11 +4810,11 @@ class Table extends Widget {
                             }
                             panel.refresh();
                             container.appendChild( panel.root );
-                            new LX.Popover( f.widget.root, [ container ], { side: "bottom" } );
+                            new LX.Popover( f.component.root, [ container ], { side: "bottom" } );
                         }
 
                     }, { buttonClass: "px-2 primary dashed" } );
-                    headerContainer.appendChild( f.widget.root );
+                    headerContainer.appendChild( f.component.root );
                 }
 
                 this._resetCustomFiltersBtn = new LX.Button(null, "resetButton", ( v ) => {
@@ -4822,7 +4822,7 @@ class Table extends Widget {
                     this._resetCustomFiltersBtn.root.classList.add( "hidden" );
                     for( let f of this.customFilters )
                     {
-                        f.widget.root.querySelector( "span" ).innerHTML = ( icon.innerHTML + f.name );
+                        f.component.root.querySelector( "span" ).innerHTML = ( icon.innerHTML + f.name );
                         if( f.type == "range" )
                         {
                             f.start = f.min;
@@ -5381,14 +5381,14 @@ LX.Table = Table;
 
 /**
  * @class DatePicker
- * @description DatePicker Widget
+ * @description DatePicker Component
  */
 
-class DatePicker extends Widget {
+class DatePicker extends BaseComponent {
 
     constructor( name, dateValue, callback, options = { } ) {
 
-        super( Widget.DATE, name, null, options );
+        super( BaseComponent.DATE, name, null, options );
 
         const dateAsRange = ( dateValue?.constructor === Array );
 
@@ -5499,14 +5499,14 @@ LX.DatePicker = DatePicker;
 
 /**
  * @class Map2D
- * @description Map2D Widget
+ * @description Map2D Component
  */
 
-class Map2D extends Widget {
+class Map2D extends BaseComponent {
 
     constructor( name, points, callback, options = {} ) {
 
-        super( Widget.MAP2D, name, null, options );
+        super( BaseComponent.MAP2D, name, null, options );
 
         this.onGetValue = () => {
             return this.map2d.weightsObj;
@@ -5544,4 +5544,4 @@ class Map2D extends Widget {
 
 LX.Map2D = Map2D;
 
-export { Widget, ADD_CUSTOM_WIDGET };
+export { BaseComponent, ADD_CUSTOM_COMPONENT };

@@ -80,15 +80,15 @@ class AreaOverlayButtons {
             }
 
             let callback = b.callback;
-            let widget = null;
+            let component = null;
 
             if( b.options )
             {
-                widget = overlayPanel.addSelect( null, b.options, b.value ?? b.name, callback, _options );
+                component = overlayPanel.addSelect( null, b.options, b.value ?? b.name, callback, _options );
             }
             else
             {
-                widget = overlayPanel.addButton( null, b.name, function( value, event ) {
+                component = overlayPanel.addButton( null, b.name, function( value, event ) {
                     if( b.selectable )
                     {
                         if( b.group )
@@ -105,13 +105,13 @@ class AreaOverlayButtons {
 
                     if( callback )
                     {
-                        callback( value, event, widget.root );
+                        callback( value, event, component.root );
                     }
 
                 }, _options );
             }
 
-            this.buttons[ b.name ] = widget;
+            this.buttons[ b.name ] = component;
 
             // ends the group
             if( overlayGroup && last )

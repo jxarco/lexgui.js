@@ -2,12 +2,12 @@
 
     MAKE_HEADER( "Panel Branching.", "h1", "branch" );
             
-    MAKE_PARAGRAPH( `Before you begin adding widgets, consider whether they could be grouped into specific categories. 
-    If so, it might be beneficial to organize them into sections known as <strong>branches</strong> These branches help maintain a structured and organized arrangement of widgets.
-    By opening and merging branches at any time, you can seamlessly incorporate widgets into your panels using ${INLINE_CODE("Panel.branch(name, options)")}:` );
+    MAKE_PARAGRAPH( `Before you begin adding components, consider whether they could be grouped into specific categories. 
+    If so, it might be beneficial to organize them into sections known as <strong>branches</strong> These branches help maintain a structured and organized arrangement of components.
+    By opening and merging branches at any time, you can seamlessly incorporate components into your panels using ${INLINE_CODE("Panel.branch(name, options)")}:` );
     MAKE_CODE( `@[var]panel@.@[mtd]branch@(@"Section Title"@);
 
-@[com]// Add widgets here...@
+@[com]// Add components here...@
 
 @[var]panel@.@[mtd]merge@();
 ` );
@@ -17,7 +17,7 @@
         ["className", "Add class to the branch"],
         ["closed", "Set branch collapsed/opened [false]"],
         ["icon", "Set branch icon"],
-        ["filter", "Allow filter widgets in branch by name [false]"]
+        ["filter", "Allow filter components in branch by name [false]"]
     ] );
 
     MAKE_LINE_BREAK();

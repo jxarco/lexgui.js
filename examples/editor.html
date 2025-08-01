@@ -130,7 +130,7 @@
                 {
                     name: "Settings", icon: "Settings2", callback: () => {
                         const dialog = new LX.Dialog("Settings", p => {
-                            p.addText("A Text", "Testing first widget");
+                            p.addText("A Text", "Testing first Component");
                             p.sameLine(3);
                             p.addLabel("Buttons:");
                             p.addButton(null, "Click me", () => {
@@ -531,7 +531,7 @@
 
         var ctx = canvas.getContext("2d");
 
-        // Get values from panel widgets (e.g. color value)
+        // Get values from panel components (e.g. color value)
         ctx.fillStyle = sidePanel.getValue('Background');
 
         ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -666,7 +666,7 @@
             }
         });
 
-        // add widgets to panel branch
+        // add components to panel branch
         panel.branch("Canvas", { icon: "Palette", filter: true });
         panel.addColor("Background", "#b7a9b1", (value, event) => {
             console.log(value);
@@ -846,9 +846,9 @@
                 }
             ], { vertical: false /*, showNames: true */ });
 
-            panel.addText(null, "Widgets below are out the tabs", null, { disabled: true })
+            panel.addText(null, "Component below are out the tabs", null, { disabled: true })
 
-            // update panel values uising widget name
+            // update panel values uising component name
             panel.addNumber("HeadRoll Value", 0, (value, event) => {
                 panel.setValue('HeadRoll', value);
             }, { min: -1, max: 1, step: 0.1 });
@@ -891,9 +891,9 @@
             ]);
 
             /************** */
-            // Custom Widget
+            // Custom Component
 
-            LX.ADD_CUSTOM_WIDGET("Shader", {
+            LX.ADD_CUSTOM_COMPONENT("Shader", {
                 icon: "Box",
                 default: {
                     position: [0, 0],
@@ -920,9 +920,9 @@
 
     function fillBottomPanel(panel) {
 
-        // add widgets to panel branch
+        // add components to panel branch
         panel.branch("Information", { icon: "Info" });
-        window.tableWidget = panel.addTable("A Table", {
+        window.tableComponent = panel.addTable("A Table", {
             head: ["Name", "Status", "Priority", "ID"],
             body: [
                 ["Alice", "In Progress", "High", 1],
@@ -955,7 +955,7 @@
                     {
                         name: "Export", callback: (a) => {
                             tableData.body[index][0] = "Alex";
-                            tableWidget.refresh();
+                            tableComponent.refresh();
                         }
                     },
                     { name: "Make a copy", callback: (a) => console.log(a) },

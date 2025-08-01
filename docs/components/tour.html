@@ -11,7 +11,7 @@
     MAKE_HEADER( "Creating the tour.", "h3", "creating-tour" );
 
     MAKE_PARAGRAPH( `To create a guided tour in LexGUI.js, instantiate a new ${ INLINE_CODE( "LX.Tour" ) } with an array of step definitions and optional configuration settings. Each step is an object describing a UI element to highlight,
-     along with a title, descriptive content, the preferred side for the tooltip relative to the element and its alignment. Use the ${ INLINE_CODE( "reference" ) } field to bind the step to a DOM element or widget,
+     along with a title, descriptive content, the preferred side for the tooltip relative to the element and its alignment. Use the ${ INLINE_CODE( "reference" ) } field to bind the step to a DOM element or component,
       ${ INLINE_CODE( "side" ) } to specify the tooltip placement ("top", "bottom", "left" or "right") and ${ INLINE_CODE( "align" ) } to specify the tooltip alignment ("start", "center" or "end")` );
 
     MAKE_CODE( `@const@ @[var]exampleTour@ = @new@ @[cls]LX@.@[cls]Tour@([
@@ -31,7 +31,7 @@
     },
     {
         title: @"Side Panel"@,
-        content: @"This panel contains various widgets and settings for your application."@,
+        content: @"This panel contains various components and settings for your application."@,
         reference: sidePanel.root,
         side: @"left"@,
         align: @"start"@

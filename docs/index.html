@@ -73,12 +73,12 @@
                 .catch(() => content.innerHTML = "<p>Error loading content.</p>");
         }
 
-        window.__addInteractiveCodeExample = function( content, widgetName, onPanel ) {
+        window.__addInteractiveCodeExample = function( content, componentName, onPanel ) {
 
             const area = new LX.Area({ className: "flex flex-col gap-3 docs", skipAppend: true, height: "auto" });
             content.appendChild( area.root );
             const panel = window.__panel = area.addPanel();
-            panel.branch( widgetName );
+            panel.branch( componentName );
             onPanel( panel );
 
             const runCode = () => {
@@ -87,7 +87,7 @@
                 script.innerHTML = `
                     const panel = window.__panel;
                     panel.clear();
-                    panel.branch("${ widgetName }");
+                    panel.branch("${ componentName }");
                     ${ codeEditor.getText() }
                 `;
                 script.async = false;
@@ -96,7 +96,7 @@
 
             const codeArea = new LX.Area({ className: "rounded overflow-hidden", skipAppend: true, height: "auto" });
             area.attach( codeArea.root );
-            const codeEditor = new LX.CodeEditor( codeArea, { name: `${widgetName.toLowerCase().replace( /\s/g, '_' )}.js`, onrun: runCode, skipInfo: true, allowAddScripts: false, language: "JavaScript" } );
+            const codeEditor = new LX.CodeEditor( codeArea, { name: `${componentName.toLowerCase().replace( /\s/g, '_' )}.js`, onrun: runCode, skipInfo: true, allowAddScripts: false, language: "JavaScript" } );
 
             let code = onPanel.toString();
             let lines = code.split( '\n' ).slice( 1, -1 );
@@ -246,7 +246,7 @@
             m.add( "Creating Areas", { callback: open.bind( this, "creating-areas.html", null ) } );
             m.add( "Instancing Panels", { callback: open.bind( this, "instancing-panels.html", null ) } );
             m.add( "Panel Branching", { callback: open.bind( this, "branching.html", null ) } );
-            m.add( "Adding First Widgets", { callback: open.bind( this, "first-widgets.html", null ) } );
+            m.add( "Adding First Components", { callback: open.bind( this, "first-components.html", null ) } );
             m.add( "Event Handling", { callback: open.bind( this, "event-handling.html", null ) } );
             m.add( "Theme Customization", { callback: open.bind( this, "themes.html", null ) } );
             m.add( "Icons", { callback: open.bind( this, "icons.html", null ) } );
@@ -320,12 +320,12 @@
             m.add( "API Reference", { skipSelection: true } );
             m.add( "API Reference/Area", { callback: open.bind( this, "reference/area.html", null ) } );
             m.add( "API Reference/AreaOverlayButtons", { callback: open.bind( this, "reference/area-overlay-buttons.html", null ), content: LX.badge( "6.10", badgeClass, { asElement: true, callback: open.bind( this, "changelog.html", "#6.10" ) }) } );
+            m.add( "API Reference/BaseComponent", { callback: open.bind( this, "reference/base-component.html", null ) } );
             m.add( "API Reference/Branch", { callback: open.bind( this, "reference/branch.html", null ) } );
             m.add( "API Reference/Menubar", { callback: open.bind( this, "reference/menubar.html", null ) } );
             m.add( "API Reference/Panel", { callback: open.bind( this, "reference/panel.html", null ) } );
             m.add( "API Reference/Sidebar", { callback: open.bind( this, "reference/sidebar.html", null ) } );
             m.add( "API Reference/Tabs", { callback: open.bind( this, "reference/tabs.html", null ) } );
-            m.add( "API Reference/Widget", { callback: open.bind( this, "reference/widget.html", null ) } );
             m.separator();
             m.add( "LexGUI Examples", { icon: "Monitor", skipSelection: true, callback: open.bind( this, "../examples/", "_blank" ) } );
             m.add( "Source Code", { icon: "Code", skipSelection: true, callback: open.bind( this, "https://github.com/jxarco/lexgui.js/", "_blank" ) } );

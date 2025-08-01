@@ -97,7 +97,7 @@
                 ctx.font = panel.getValue('Font Size') + "px Monospace";
                 ctx.fillStyle = panel.getValue('Font Color');
     
-                // Get values from panel widgets (e.g. position value)                
+                // Get values from panel component (e.g. position value)
                 const text = panel.getValue('Text');
                 const pos2D = panel.getValue('2D Position');
                 ctx.fillText(text, pos2D[0], pos2D[1]);

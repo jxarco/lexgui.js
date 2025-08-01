@@ -9,10 +9,10 @@ LX.extensions.push( 'Audio' );
 
 /**
  * @class Knob
- * @description Knob Widget
+ * @description Knob Component
  */
 
-class Knob extends LX.Widget {
+class Knob extends LX.BaseComponent {
 
     constructor( name, value, min, max, callback, options = {} ) {
 
@@ -22,7 +22,7 @@ class Knob extends LX.Widget {
             value = options.precision ? LX.round( value, options.precision ) : value;
         }
 
-        super( LX.Widget.KNOB, name, value, options );
+        super( LX.BaseComponent.KNOB, name, value, options );
 
         this.onGetValue = () => {
             return innerKnobCircle.value;
@@ -30,7 +30,7 @@ class Knob extends LX.Widget {
 
         this.onSetValue = ( newValue, skipCallback ) => {
             innerSetValue( newValue );
-            LX.Widget._dispatchEvent( innerKnobCircle, "change", skipCallback );
+            LX.BaseComponent._dispatchEvent( innerKnobCircle, "change", skipCallback );
         };
 
         this.onResize = ( rect ) => {
@@ -107,7 +107,7 @@ class Knob extends LX.Widget {
             // Reset button (default value)
             if( !skipCallback )
             {
-                let btn = this.root.querySelector( ".lexwidgetname .lexicon" );
+                let btn = this.root.querySelector( ".lexcomponentname .lexicon" );
                 if( btn ) btn.style.display = val != innerKnobCircle.iValue ? "block": "none";
 
                 if( !( snapEnabled && !mustSnap ) )
@@ -157,7 +157,7 @@ class Knob extends LX.Widget {
                 else if(e.altKey) mult *= 0.1;
                 let new_value = (innerKnobCircle.value - mult * dt);
                 innerKnobCircle.value = new_value;
-                LX.Widget._dispatchEvent( innerKnobCircle, 'change' );
+                LX.BaseComponent._dispatchEvent( innerKnobCircle, 'change' );
             }
 
             e.stopPropagation();
@@ -175,7 +175,7 @@ class Knob extends LX.Widget {
             if( snapEnabled )
             {
                 mustSnap = true;
-                LX.Widget._dispatchEvent( innerKnobCircle, 'change' );
+                LX.BaseComponent._dispatchEvent( innerKnobCircle, 'change' );
             }
 
             if( document.pointerLockElement )
@@ -196,7 +196,7 @@ LX.Knob = Knob;
 
 /**
  * @method addKnob
- * @param {String} name Widget name
+ * @param {String} name Component name
  * @param {Number} value Knob value
  * @param {Number} min Min Knob value
  * @param {Number} max Max Knob value
@@ -207,6 +207,6 @@ LX.Knob = Knob;
  */
 
 LX.Panel.prototype.addKnob = function( name, value, min, max, callback, options = {} ) {
-    const widget = new Knob( name, value, min, max, callback, options );
-    return this._attachWidget( widget );
+    const component = new Knob( name, value, min, max, callback, options );
+    return this._attachComponent( component );
 }

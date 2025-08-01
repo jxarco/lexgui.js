@@ -12,10 +12,10 @@ const starterTheme = LX.getTheme();
 {
     const menubar = area.addMenubar( [
         { name: "Docs", callback: () => { window.open("./docs/") } },
-        { name: "Examples", callback: () => { window.open("./examples/") } },
+        { name: "Components", callback: () => { window.open("./examples/") } },
     ] );
 
-    menubar.setButtonImage("lexgui.js", `images/icon_${ starterTheme }.png`, () => {window.open("https://jxarco.github.io/lexgui.js/")}, {float: "left"})
+    menubar.setButtonImage("lexgui.js", `images/icon_${ starterTheme }.png`, () => { window.open("https://jxarco.github.io/lexgui.js/") }, { float: "left"} );
 
     LX.addSignal( "@on_new_color_scheme", ( el, value ) => {
         menubar.setButtonImage("lexgui.js", `images/icon_${ value }.png` );
@@ -30,9 +30,7 @@ const starterTheme = LX.getTheme();
         {
             title: "Github",
             icon: "Github@solid",
-            callback:  (event) => {
-                window.open( "https://github.com/jxarco/lexgui.js/", "_blank" );
-            }
+            callback:  (event) => window.open( "https://github.com/jxarco/lexgui.js/", "_blank" )
         },
         {
             title: "Switch Theme",
@@ -53,13 +51,13 @@ const starterTheme = LX.getTheme();
     const header = LX.makeContainer( [ null, "auto" ], "flex flex-col border-top border-bottom gap-2 px-10 py-8", `
         <a>Get started with LexGUI.js <span class="text-sm fg-secondary">${ LX.version }</span></a>
         <h1>Build your application interface</h1>
-        <p class="font-light" style="max-width:32rem">A set of beautifully-designed, accessible widgets and components.
+        <p class="font-light" style="max-width:32rem">A set of beautifully-designed, accessible components.
         No complex frameworks. Pure JavaScript and CSS. Open Source.</p>
     `, area );
 
     const headerButtons = LX.makeContainer( [ "auto", "auto" ], "flex flex-row", ``, header );
-    const getStartedButton = new LX.Button( null, "Get Started", null, { buttonClass: "contrast p-1 px-3" } );
-    const componentsButton = new LX.Button( null, "View Components", null, { buttonClass: "tertiary p-1 px-3" } );
+    const getStartedButton = new LX.Button( null, "Get Started", () => window.open( "./docs/", "_blank" ), { buttonClass: "contrast p-1 px-3" } );
+    const componentsButton = new LX.Button( null, "View Components", () => window.open( "./examples/", "_blank" ), { buttonClass: "tertiary p-1 px-3" } );
     headerButtons.appendChild( getStartedButton.root );
     headerButtons.appendChild( componentsButton.root );
 }
@@ -121,7 +119,7 @@ const starterTheme = LX.getTheme();
                         },
                         {
                             title: "Side Panel",
-                            content: "This panel contains various widgets and settings for your application.",
+                            content: "This panel contains various components and settings for your application.",
                             reference: sidePanel.root,
                             side: "left",
                             align: "start"
@@ -254,7 +252,7 @@ const starterTheme = LX.getTheme();
                 }
             });
 
-            // add widgets to panel branch
+            // add components to panel branch
             panel.branch("Canvas", { icon: "Palette", filter: true });
             panel.addColor("Background", "#b7a9b1", null);
             panel.addText("Text", "LexGUI.js @jxarco", null, {placeholder: "e.g. ColorPicker", icon: "Type"});
@@ -498,7 +496,7 @@ const starterTheme = LX.getTheme();
             <p class="fg-tertiary">Here's a list of your tasks for this month!</p>
         `, tasksContainer );
 
-        const tableWidget = new LX.Table(null, {
+        const tableComponent = new LX.Table(null, {
             head: [ "Name", "Status", "Priority", "Date", "ID" ],
             body: [
                 [ "Alice", "In Progress", "High", "20/06/2025", 1 ],
@@ -537,7 +535,7 @@ const starterTheme = LX.getTheme();
                 ]
             }
         });
-        tasksContainer.appendChild( tableWidget.root );
+        tasksContainer.appendChild( tableComponent.root );
     }
 
     // Code

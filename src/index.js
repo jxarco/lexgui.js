@@ -3,7 +3,7 @@ export * from './icons.js';
 export * from './utils.js';
 
 export * from './area.js';
-export * from './widget.js';
+export * from './base_component.js';
 export * from './panel.js';
 export * from './branch.js';
 

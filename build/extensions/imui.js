@@ -49,9 +49,9 @@ class ImUI {
         //     },
         // );
 
-        // Widgets
+        // Components
 
-        this.widgets = { };
+        this.components = { };
 
         // Mouse state
 
@@ -157,10 +157,10 @@ class ImUI {
 
         // Store slider value
         
-        if(!this.widgets[ text ])
-            this.widgets[ text ] = { value: value };
+        if(!this.components[ text ])
+            this.components[ text ] = { value: value };
         else
-            value = this.widgets[ text ].value;
+            value = this.components[ text ].value;
 
         // Element properties
 
@@ -196,7 +196,7 @@ class ImUI {
         if(active)
         {
             value = LX.clamp((this.mousePosition.x - min) / (max - min), 0.0, 1.0);
-            this.widgets[ text ].value = value;
+            this.components[ text ].value = value;
         }
         
         let valueSize = new LX.vec2( fullSize.x * value, size.y );
@@ -240,10 +240,14 @@ class ImUI {
 
         // Store slider value
         
-        if(!this.widgets[ text ])
-            this.widgets[ text ] = { value: value };
+        if( !this.components[ text ] )
+        {
+            this.components[ text ] = { value: value };
+        }
         else
-            value = this.widgets[ text ].value;
+        {
+            value = this.components[ text ].value;
+        }
 
         // Element properties
 
@@ -280,8 +284,11 @@ class ImUI {
         if( pressed )
         {
             value = !value;
-            this.widgets[ text ].value = value;
-            if(callback) callback( value );
+            this.components[ text ].value = value;
+            if( callback )
+            {
+                callback( value );
+            }
         }
 
         ctx.fillStyle = value ? (active ? "#ddd" : (hovered ? "#6074e7" : "#3e57e4")) : 

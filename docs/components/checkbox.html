@@ -2,16 +2,16 @@
     import { LX } from 'lexgui';
 
     const content = document.getElementById('content');
-    const widgetName = "Checkbox";
+    const componentName = "Checkbox";
 
-    MAKE_HEADER(widgetName + ".", "h1", widgetName.toLowerCase());
+    MAKE_HEADER(componentName + ".", "h1", componentName.toLowerCase());
     MAKE_PARAGRAPH(`Represents a control that allows the user to toggle between checked and not checked.`);
     MAKE_LINE_BREAK();
-    MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addCheckbox(name, value, callback, options)")} to add a ${ widgetName } Widget to your panel or
-    create it anywhere using ${INLINE_CODE(`new LX.${ widgetName.replace( /\s/g, '' ) }`)} to append its root to any container.` );
+    MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addCheckbox(name, value, callback, options)")} to add a ${ componentName } Component to your panel or
+    create it anywhere using ${INLINE_CODE(`new LX.${ componentName.replace( /\s/g, '' ) }`)} to append its root to any container.` );
 
     {
-        window.__addInteractiveCodeExample( content, widgetName, panel => {
+        window.__addInteractiveCodeExample( content, componentName, panel => {
             panel.addCheckbox("Check me", true, (value, event) => {
                 console.log(value);
             });
@@ -30,10 +30,10 @@
         panel.addTable( null, {
             head: [ "Parameter", "Type", "Description", "Default" ],
             body: [
-                ["name", "String", "Widget name", "—"],
+                ["name", "String", "Component name", "—"],
                 ["value", "Boolean", "Checkbox value", "false"],
                 ["callback", "Function", "Function called when the checkbox value changes", "—"],
-                ["options", "Object", "Basic options for a Widget", "—"]
+                ["options", "Object", "Basic options for a component", "—"]
             ].map( v => {
                 return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
             } )
@@ -42,9 +42,9 @@
         panel.addTable( null, {
             head: [ "Option", "Type", "Description", "Default" ],
             body: [
-                ["disabled", "Boolean", "Make the widget disabled", "false"],
+                ["disabled", "Boolean", "Make the component disabled", "false"],
                 ["label", "String", "Checkbox label", "—"],
-                ["suboptions", "Function", "Callback to add widgets shown if checked", "—"],
+                ["suboptions", "Function", "Callback to add components shown if checked", "—"],
                 ["className", "String", "Extra classes to customize style", "—"],
             ].map( v => {
                 return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];

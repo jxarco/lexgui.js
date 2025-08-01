@@ -515,13 +515,13 @@ async function init( options = { } )
     this.DEFAULT_SPLITBAR_SIZE  = 4;
     this.OPEN_CONTEXTMENU_ENTRY = 'click';
 
-    this.widgetResizeObserver = new ResizeObserver( entries => {
+    this.componentResizeObserver = new ResizeObserver( entries => {
         for ( const entry of entries )
         {
-            const widget = entry.target?.jsInstance;
-            if( widget && widget.onResize )
+            const c = entry.target?.jsInstance;
+            if( c && c.onResize )
             {
-                widget.onResize( entry.contentRect );
+                c.onResize( entry.contentRect );
             }
         }
     });
@@ -681,7 +681,7 @@ function emit( signalName, value, options = {} )
 
     for( let obj of data )
     {
-        if( obj instanceof LX.Widget )
+        if( obj instanceof LX.BaseComponent )
         {
             obj.set( value, options.skipCallback ?? true );
         }
@@ -1651,25 +1651,25 @@ class ColorPicker {
             this._updateColorValue( null, true );
         } ).root );
 
-        this.labelWidget = new LX.TextInput( null, "", null, { inputClass: "bg-none", fit: true, disabled: true } );
-        colorLabel.appendChild( this.labelWidget.root );
+        this.labelComponent = new LX.TextInput( null, "", null, { inputClass: "bg-none", fit: true, disabled: true } );
+        colorLabel.appendChild( this.labelComponent.root );
 
         // Copy button
         {
-            const copyButtonWidget = new LX.Button(null, "copy",  async () => {
-                navigator.clipboard.writeText( this.labelWidget.value() );
-                copyButtonWidget.root.querySelector( "input[type='checkbox']" ).style.pointerEvents = "none";
+            const copyButtonComponent = new LX.Button(null, "copy",  async () => {
+                navigator.clipboard.writeText( this.labelComponent.value() );
+                copyButtonComponent.root.querySelector( "input[type='checkbox']" ).style.pointerEvents = "none";
 
                 LX.doAsync( () => {
-                    copyButtonWidget.swap( true );
-                    copyButtonWidget.root.querySelector( "input[type='checkbox']" ).style.pointerEvents = "auto";
+                    copyButtonComponent.swap( true );
+                    copyButtonComponent.root.querySelector( "input[type='checkbox']" ).style.pointerEvents = "auto";
                 }, 3000 );
 
             }, { swap: "Check", icon: "Copy", buttonClass: "bg-none", className: "ml-auto", title: "Copy" } );
 
-            copyButtonWidget.root.querySelector( ".swap-on svg" ).addClass( "fg-success" );
+            copyButtonComponent.root.querySelector( ".swap-on svg" ).addClass( "fg-success" );
 
-            colorLabel.appendChild( copyButtonWidget.root );
+            colorLabel.appendChild( copyButtonComponent.root );
         }
 
         this._updateColorValue( hexValue, true );
@@ -1724,25 +1724,25 @@ class ColorPicker {
         if( this.colorModel == "CSS" )
         {
             const { r, g, b, a } = this.currentColor.css;
-            this.labelWidget.set( `rgb${ this.useAlpha ? 'a' : '' }(${ r },${ g },${ b }${ this.useAlpha ? ',' + toFixed( a ) : '' })` );
+            this.labelComponent.set( `rgb${ this.useAlpha ? 'a' : '' }(${ r },${ g },${ b }${ this.useAlpha ? ',' + toFixed( a ) : '' })` );
         }
         else if( this.colorModel == "Hex" )
         {
-            this.labelWidget.set( ( this.useAlpha ? this.currentColor.hex : this.currentColor.hex.substr( 0, 7 ) ).toUpperCase() );
+            this.labelComponent.set( ( this.useAlpha ? this.currentColor.hex : this.currentColor.hex.substr( 0, 7 ) ).toUpperCase() );
         }
         else if( this.colorModel == "HSV" )
         {
             const { h, s, v, a } = this.currentColor.hsv;
             const components = [ Math.floor( h ) + 'º', Math.floor( s * 100 ) + '%', Math.floor( v * 100 ) + '%' ];
             if( this.useAlpha ) components.push( toFixed( a ) );
-            this.labelWidget.set( components.join( ' ' ) );
+            this.labelComponent.set( components.join( ' ' ) );
         }
         else // RGB
         {
             const { r, g, b, a } = this.currentColor.rgb;
             const components = [ toFixed( r ), toFixed( g ), toFixed( b ) ];
             if( this.useAlpha ) components.push( toFixed( a ) );
-            this.labelWidget.set( components.join( ' ' ) );
+            this.labelComponent.set( components.join( ' ' ) );
         }
     }
 
@@ -2670,7 +2670,7 @@ class Dialog {
 
         if( !callback )
         {
-            console.warn("Content is empty, add some widgets using 'callback' parameter!");
+            console.warn("Content is empty, add some components using 'callback' parameter!");
         }
 
         this._oncreate = callback;
@@ -2738,9 +2738,9 @@ class Dialog {
                 const panelChildCount = panel.root.childElementCount;
 
                 const branch = panel.branch( data.name, { closed: data.closed } );
-                branch.widgets = data.widgets;
+                branch.components = data.components;
 
-                for( let w of branch.widgets )
+                for( let w of branch.components )
                 {
                     branch.content.appendChild( w.root );
                 }
@@ -6492,15 +6492,15 @@ class AreaOverlayButtons {
             }
 
             let callback = b.callback;
-            let widget = null;
+            let component = null;
 
             if( b.options )
             {
-                widget = overlayPanel.addSelect( null, b.options, b.value ?? b.name, callback, _options );
+                component = overlayPanel.addSelect( null, b.options, b.value ?? b.name, callback, _options );
             }
             else
             {
-                widget = overlayPanel.addButton( null, b.name, function( value, event ) {
+                component = overlayPanel.addButton( null, b.name, function( value, event ) {
                     if( b.selectable )
                     {
                         if( b.group )
@@ -6517,13 +6517,13 @@ class AreaOverlayButtons {
 
                     if( callback )
                     {
-                        callback( value, event, widget.root );
+                        callback( value, event, component.root );
                     }
 
                 }, _options );
             }
 
-            this.buttons[ b.name ] = widget;
+            this.buttons[ b.name ] = component;
 
             // ends the group
             if( overlayGroup && last )
@@ -7506,13 +7506,13 @@ class Area {
 }
 LX.Area = Area;
 
-// widget.js @jxarco
+// base_component.js @jxarco
 
 /**
- * @class Widget
+ * @class BaseComponent
  */
 
-class Widget {
+class BaseComponent {
 
     static NONE         = 0;
     static TEXT         = 1;
@@ -7556,10 +7556,10 @@ class Widget {
     static BLANK        = 39;
 
     static NO_CONTEXT_TYPES = [
-        Widget.BUTTON,
-        Widget.LIST,
-        Widget.FILE,
-        Widget.PROGRESS
+        BaseComponent.BUTTON,
+        BaseComponent.LIST,
+        BaseComponent.FILE,
+        BaseComponent.PROGRESS
     ];
 
     constructor( type, name, value, options = {} ) {
@@ -7570,7 +7570,7 @@ class Widget {
         this._initialValue = value;
 
         const root = document.createElement( 'div' );
-        root.className = "lexwidget";
+        root.className = "lexcomponent";
 
         if( options.id )
         {
@@ -7587,7 +7587,7 @@ class Widget {
             root.className += " " + options.className;
         }
 
-        if( type != Widget.TITLE )
+        if( type != BaseComponent.TITLE )
         {
             if( options.width )
             {
@@ -7606,7 +7606,7 @@ class Widget {
                 root.style.height = root.style.minHeight = options.height;
             }
 
-            LX.widgetResizeObserver.observe( root );
+            LX.componentResizeObserver.observe( root );
         }
 
         if( name != undefined )
@@ -7614,7 +7614,7 @@ class Widget {
             if( !( options.hideName ?? false ) )
             {
                 let domName = document.createElement( 'div' );
-                domName.className = "lexwidgetname";
+                domName.className = "lexcomponentname";
 
                 if( options.justifyName )
                 {
@@ -7676,7 +7676,7 @@ class Widget {
     }
 
     _canPaste() {
-        let pasteAllowed = this.type === Widget.CUSTOM ?
+        let pasteAllowed = this.type === BaseComponent.CUSTOM ?
             ( navigator.clipboard.customIdx !== undefined && this.customIdx == navigator.clipboard.customIdx ) : navigator.clipboard.type === this.type;
 
         pasteAllowed &= ( this.disabled !== true );
@@ -7713,7 +7713,7 @@ class Widget {
 
         if( this.onSetValue )
         {
-            let resetButton = this.root.querySelector( ".lexwidgetname .lexicon" );
+            let resetButton = this.root.querySelector( ".lexcomponentname .lexicon" );
             if( resetButton )
             {
                 resetButton.style.display = ( value != this.value() ? "block" : "none" );
@@ -7739,7 +7739,7 @@ class Widget {
 
     oncontextmenu( e ) {
 
-        if( Widget.NO_CONTEXT_TYPES.includes( this.type ) )
+        if( BaseComponent.NO_CONTEXT_TYPES.includes( this.type ) )
         {
             return;
         }
@@ -7770,41 +7770,41 @@ class Widget {
 
         switch( this.type )
         {
-            case Widget.TEXT: return "Text";
-            case Widget.TEXTAREA: return "TextArea";
-            case Widget.BUTTON: return "Button";
-            case Widget.SELECT: return "Select";
-            case Widget.CHECKBOX: return "Checkbox";
-            case Widget.TOGGLE: return "Toggle";
-            case Widget.RADIO: return "Radio";
-            case Widget.COLOR: return "Color";
-            case Widget.RANGE: return "Range";
-            case Widget.NUMBER: return "Number";
-            case Widget.VECTOR: return "Vector";
-            case Widget.TREE: return "Tree";
-            case Widget.PROGRESS: return "Progress";
-            case Widget.FILE: return "File";
-            case Widget.LAYERS: return "Layers";
-            case Widget.ARRAY: return "Array";
-            case Widget.LIST: return "List";
-            case Widget.TAGS: return "Tags";
-            case Widget.CURVE: return "Curve";
-            case Widget.KNOB: return "Knob";
-            case Widget.SIZE: return "Size";
-            case Widget.PAD: return "Pad";
-            case Widget.FORM: return "Form";
-            case Widget.DIAL: return "Dial";
-            case Widget.COUNTER: return "Counter";
-            case Widget.TABLE: return "Table";
-            case Widget.TABS: return "Tabs";
-            case Widget.DATE: return "Date";
-            case Widget.MAP2D: return "Map2D";
-            case Widget.LABEL: return "Label";
-            case Widget.BLANK: return "Blank";
-            case Widget.CUSTOM: return this.customName;
+            case BaseComponent.TEXT: return "Text";
+            case BaseComponent.TEXTAREA: return "TextArea";
+            case BaseComponent.BUTTON: return "Button";
+            case BaseComponent.SELECT: return "Select";
+            case BaseComponent.CHECKBOX: return "Checkbox";
+            case BaseComponent.TOGGLE: return "Toggle";
+            case BaseComponent.RADIO: return "Radio";
+            case BaseComponent.COLOR: return "Color";
+            case BaseComponent.RANGE: return "Range";
+            case BaseComponent.NUMBER: return "Number";
+            case BaseComponent.VECTOR: return "Vector";
+            case BaseComponent.TREE: return "Tree";
+            case BaseComponent.PROGRESS: return "Progress";
+            case BaseComponent.FILE: return "File";
+            case BaseComponent.LAYERS: return "Layers";
+            case BaseComponent.ARRAY: return "Array";
+            case BaseComponent.LIST: return "List";
+            case BaseComponent.TAGS: return "Tags";
+            case BaseComponent.CURVE: return "Curve";
+            case BaseComponent.KNOB: return "Knob";
+            case BaseComponent.SIZE: return "Size";
+            case BaseComponent.PAD: return "Pad";
+            case BaseComponent.FORM: return "Form";
+            case BaseComponent.DIAL: return "Dial";
+            case BaseComponent.COUNTER: return "Counter";
+            case BaseComponent.TABLE: return "Table";
+            case BaseComponent.TABS: return "Tabs";
+            case BaseComponent.DATE: return "Date";
+            case BaseComponent.MAP2D: return "Map2D";
+            case BaseComponent.LABEL: return "Label";
+            case BaseComponent.BLANK: return "Blank";
+            case BaseComponent.CUSTOM: return this.customName;
         }
 
-        console.error( `Unknown Widget type: ${ this.type }` );
+        console.error( `Unknown Component type: ${ this.type }` );
     }
 
     refresh() {
@@ -7812,52 +7812,52 @@ class Widget {
     }
 }
 
-LX.Widget = Widget;
+LX.BaseComponent = BaseComponent;
 
-function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
+function ADD_CUSTOM_COMPONENT( customComponentName, options = {} )
 {
     let customIdx = LX.guidGenerator();
 
-    LX.Panel.prototype[ 'add' + customWidgetName ] = function( name, instance, callback ) {
+    LX.Panel.prototype[ 'add' + customComponentName ] = function( name, instance, callback ) {
 
         const userParams = Array.from( arguments ).slice( 3 );
 
-        let widget = new Widget( Widget.CUSTOM, name, null, options );
-        this._attachWidget( widget );
+        let component = new BaseComponent( BaseComponent.CUSTOM, name, null, options );
+        this._attachComponent( component );
 
-        widget.customName = customWidgetName;
-        widget.customIdx = customIdx;
+        component.customName = customComponentName;
+        component.customIdx = customIdx;
 
-        widget.onGetValue = () => {
+        component.onGetValue = () => {
             return instance;
         };
 
-        widget.onSetValue = ( newValue, skipCallback, event ) => {
+        component.onSetValue = ( newValue, skipCallback, event ) => {
             instance = newValue;
-            refresh_widget();
+            _refreshComponent();
             element.querySelector( ".lexcustomitems" ).toggleAttribute( 'hidden', false );
             if( !skipCallback )
             {
-                widget._trigger( new LX.IEvent( name, instance, event ), callback );
+                component._trigger( new LX.IEvent( name, instance, event ), callback );
             }
         };
 
-        widget.onResize = ( rect ) => {
-            const realNameWidth = ( widget.root.domName?.style.width ?? "0px" );
+        component.onResize = ( rect ) => {
+            const realNameWidth = ( component.root.domName?.style.width ?? "0px" );
             container.style.width = `calc( 100% - ${ realNameWidth })`;
         };
 
-        const element = widget.root;
+        const element = component.root;
 
-        let container, customWidgetsDom;
+        let container, customComponentsDom;
         let defaultInstance = options.default ?? {};
 
         // Add instance button
 
-        const refresh_widget = () => {
+        const _refreshComponent = () => {
 
             if( container ) container.remove();
-            if( customWidgetsDom ) customWidgetsDom.remove();
+            if( customComponentsDom ) customComponentsDom.remove();
 
             container = document.createElement('div');
             container.className = "lexcustomcontainer w-full";
@@ -7867,7 +7867,7 @@ function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
             const customIcon = LX.makeIcon( options.icon ?? "Box" );
             const menuIcon = LX.makeIcon( "Menu" );
 
-            let buttonName = customWidgetName + (!instance ? " [empty]" : "");
+            let buttonName = customComponentName + (!instance ? " [empty]" : "");
             let buttonEl = this.addButton(null, buttonName, (value, event) => {
                 if( instance )
                 {
@@ -7877,9 +7877,9 @@ function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
                 else
                 {
                     LX.addContextMenu(null, event, c => {
-                        c.add("New " + customWidgetName, () => {
+                        c.add("New " + customComponentName, () => {
                             instance = {};
-                            refresh_widget();
+                            _refreshComponent();
                             element.querySelector(".lexcustomitems").toggleAttribute('hidden', false);
                             element.dataset["opened"] = !element.querySelector(".lexcustomitems").hasAttribute("hidden");
                         });
@@ -7901,7 +7901,7 @@ function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
                     LX.addContextMenu(null, e, c => {
                         c.add("Clear", () => {
                             instance = null;
-                            refresh_widget();
+                            _refreshComponent();
                         });
                     });
                 });
@@ -7909,14 +7909,14 @@ function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
 
             // Show elements
 
-            customWidgetsDom = document.createElement('div');
-            customWidgetsDom.className = "lexcustomitems";
-            customWidgetsDom.toggleAttribute('hidden', true);
-            element.appendChild( customWidgetsDom );
+            customComponentsDom = document.createElement('div');
+            customComponentsDom.className = "lexcustomitems";
+            customComponentsDom.toggleAttribute('hidden', true);
+            element.appendChild( customComponentsDom );
 
             if( instance )
             {
-                this.queue( customWidgetsDom );
+                this.queue( customComponentsDom );
 
                 const on_instance_changed = ( key, value, event ) => {
                     const setter = options[ `_set_${ key }` ];
@@ -7928,7 +7928,7 @@ function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
                     {
                         instance[ key ] = value;
                     }
-                    widget._trigger( new LX.IEvent( name, instance, event ), callback );
+                    component._trigger( new LX.IEvent( name, instance, event ), callback );
                 };
 
                 for( let key in defaultInstance )
@@ -7993,11 +7993,11 @@ function ADD_CUSTOM_WIDGET( customWidgetName, options = {} )
             }
         };
 
-        refresh_widget();
+        _refreshComponent();
     };
 }
 
-LX.ADD_CUSTOM_WIDGET = ADD_CUSTOM_WIDGET;
+LX.ADD_CUSTOM_COMPONENT = ADD_CUSTOM_COMPONENT;
 
 /**
  * @class NodeTree
@@ -8569,14 +8569,14 @@ LX.NodeTree = NodeTree;
 
 /**
  * @class Blank
- * @description Blank Widget
+ * @description Blank Component
  */
 
-class Blank extends Widget {
+class Blank extends BaseComponent {
 
     constructor( width, height ) {
 
-        super( Widget.BLANK );
+        super( BaseComponent.BLANK );
 
         this.root.style.width = width ?? "auto";
         this.root.style.height = height ?? "8px";
@@ -8587,17 +8587,17 @@ LX.Blank = Blank;
 
 /**
  * @class Title
- * @description Title Widget
+ * @description Title Component
  */
 
-class Title extends Widget {
+class Title extends BaseComponent {
 
     constructor( name, options = {} ) {
 
-        console.assert( name, "Can't create Title Widget without text!" );
+        console.assert( name, "Can't create Title Component without text!" );
 
-        // Note: Titles are not registered in Panel.widgets by now
-        super( Widget.TITLE, null, null, options );
+        // Note: Titles are not registered in Panel.components by now
+        super( BaseComponent.TITLE, null, null, options );
 
         this.root.className = `lextitle ${ this.root.className }`;
 
@@ -8631,14 +8631,14 @@ LX.Title = Title;
 
 /**
  * @class TextInput
- * @description TextInput Widget
+ * @description TextInput Component
  */
 
-class TextInput extends Widget {
+class TextInput extends BaseComponent {
 
     constructor( name, value, callback, options = {} ) {
 
-        super( Widget.TEXT, name, String( value ), options );
+        super( BaseComponent.TEXT, name, String( value ), options );
 
         this.onGetValue = () => {
             return value;
@@ -8771,14 +8771,14 @@ LX.TextInput = TextInput;
 
 /**
  * @class TextArea
- * @description TextArea Widget
+ * @description TextArea Component
  */
 
-class TextArea extends Widget {
+class TextArea extends BaseComponent {
 
     constructor( name, value, callback, options = {} ) {
 
-        super( Widget.TEXTAREA, name, value, options );
+        super( BaseComponent.TEXTAREA, name, value, options );
 
         this.onGetValue = () => {
             return value;
@@ -8872,14 +8872,14 @@ LX.TextArea = TextArea;
 
 /**
  * @class Button
- * @description Button Widget
+ * @description Button Component
  */
 
-class Button extends Widget {
+class Button extends BaseComponent {
 
     constructor( name, value, callback, options = {} ) {
 
-        super( Widget.BUTTON, name, null, options );
+        super( BaseComponent.BUTTON, name, null, options );
 
         this.onGetValue = () => {
             const swapInput = wValue.querySelector( "input" );
@@ -9094,10 +9094,10 @@ LX.Button = Button;
 
 /**
  * @class ComboButtons
- * @description ComboButtons Widget
+ * @description ComboButtons Component
  */
 
-class ComboButtons extends Widget {
+class ComboButtons extends BaseComponent {
 
     constructor( name, values, options = {} ) {
 
@@ -9212,7 +9212,7 @@ class ComboButtons extends Widget {
             currentValue = currentValue[ 0 ];
         }
 
-        super( Widget.BUTTONS, name, null, options );
+        super( BaseComponent.BUTTONS, name, null, options );
 
         this.onGetValue = () => {
             return currentValue;
@@ -9255,16 +9255,16 @@ LX.ComboButtons = ComboButtons;
 
 /**
  * @class Card
- * @description Card Widget
+ * @description Card Component
  */
 
-class Card extends Widget {
+class Card extends BaseComponent {
 
     constructor( name, options = {} ) {
 
         options.hideName = true;
 
-        super( Widget.CARD, name, null, options );
+        super( BaseComponent.CARD, name, null, options );
 
         let container = document.createElement('div');
         container.className = "lexcard";
@@ -9318,10 +9318,10 @@ LX.Card = Card;
 
 /**
  * @class Form
- * @description Form Widget
+ * @description Form Component
  */
 
-class Form extends Widget {
+class Form extends BaseComponent {
 
     constructor( name, data, callback, options = {} ) {
 
@@ -9334,7 +9334,7 @@ class Form extends Widget {
         // Always hide name for this one
         options.hideName = true;
 
-        super( Widget.FORM, name, null, options );
+        super( BaseComponent.FORM, name, null, options );
 
         this.onGetValue = () => {
             return container.formData;
@@ -9342,18 +9342,18 @@ class Form extends Widget {
 
         this.onSetValue = ( newValue, skipCallback, event ) => {
             container.formData = newValue;
-            const entries = container.querySelectorAll( ".lexwidget" );
+            const entries = container.querySelectorAll( ".lexcomponent" );
             for( let i = 0; i < entries.length; ++i )
             {
                 const entry = entries[ i ];
-                if( entry.jsInstance.type != LX.Widget.TEXT )
+                if( entry.jsInstance.type != BaseComponent.TEXT )
                 {
                     continue;
                 }
-                let entryName = entries[ i ].querySelector( ".lexwidgetname" ).innerText;
+                let entryName = entries[ i ].querySelector( ".lexcomponentname" ).innerText;
                 let entryInput = entries[ i ].querySelector( ".lextext input" );
                 entryInput.value = newValue[ entryName ] ?? "";
-                Widget._dispatchEvent( entryInput, "focusout", skipCallback );
+                BaseComponent._dispatchEvent( entryInput, "focusout", skipCallback );
             }
         };
 
@@ -9383,10 +9383,10 @@ class Form extends Widget {
                 container.appendChild( label.root );
             }
 
-            entryData.textWidget = new LX.TextInput( null, entryData.constructor == Object ? entryData.value : entryData, ( value ) => {
+            entryData.textComponent = new LX.TextInput( null, entryData.constructor == Object ? entryData.value : entryData, ( value ) => {
                 container.formData[ entry ] = value;
             }, entryData );
-            container.appendChild( entryData.textWidget.root );
+            container.appendChild( entryData.textComponent.root );
 
             container.formData[ entry ] = entryData.constructor == Object ? entryData.value : entryData;
         }
@@ -9411,7 +9411,7 @@ class Form extends Widget {
             {
                 let entryData = data[ entry ];
 
-                if( !entryData.textWidget.valid() )
+                if( !entryData.textComponent.valid() )
                 {
                     return;
                 }
@@ -9431,14 +9431,14 @@ LX.Form = Form;
 
 /**
  * @class Select
- * @description Select Widget
+ * @description Select Component
  */
 
-class Select extends Widget {
+class Select extends BaseComponent {
 
     constructor( name, values, value, callback, options = {} ) {
 
-        super( Widget.SELECT, name, value, options );
+        super( BaseComponent.SELECT, name, value, options );
 
         this.onGetValue = () => {
             return value;
@@ -9668,7 +9668,7 @@ class Select extends Widget {
         {
             const filterOptions = LX.deepCopy( options );
             filterOptions.placeholder = filterOptions.placeholder ?? "Search...";
-            filterOptions.skipWidget = filterOptions.skipWidget ?? true;
+            filterOptions.skipComponent = filterOptions.skipComponent ?? true;
             filterOptions.trigger = "input";
             filterOptions.icon = "Search";
             filterOptions.className = "lexfilter";
@@ -9820,7 +9820,7 @@ class Select extends Widget {
         const emptyFilter = !value.length;
         let filteredOptions = [];
 
-        // Add widgets
+        // Add components
         for( let i = 0; i < options.length; i++ )
         {
             let o = options[ i ];
@@ -9843,16 +9843,16 @@ LX.Select = Select;
 
 /**
  * @class Curve
- * @description Curve Widget
+ * @description Curve Component
  */
 
-class Curve extends Widget {
+class Curve extends BaseComponent {
 
     constructor( name, values, callback, options = {} ) {
 
         let defaultValues = JSON.parse( JSON.stringify( values ) );
 
-        super( Widget.CURVE, name, defaultValues, options );
+        super( BaseComponent.CURVE, name, defaultValues, options );
 
         this.onGetValue = () => {
             return JSON.parse(JSON.stringify( curveInstance.element.value ));
@@ -9904,16 +9904,16 @@ LX.Curve = Curve;
 
 /**
  * @class Dial
- * @description Dial Widget
+ * @description Dial Component
  */
 
-class Dial extends Widget {
+class Dial extends BaseComponent {
 
     constructor( name, values, callback, options = {} ) {
 
         let defaultValues = JSON.parse( JSON.stringify( values ) );
 
-        super( Widget.DIAL, name, defaultValues, options );
+        super( BaseComponent.DIAL, name, defaultValues, options );
 
         this.onGetValue = () => {
             return JSON.parse( JSON.stringify( dialInstance.element.value ) );
@@ -9961,14 +9961,14 @@ LX.Dial = Dial;
 
 /**
  * @class Layers
- * @description Layers Widget
+ * @description Layers Component
  */
 
-class Layers extends Widget {
+class Layers extends BaseComponent {
 
     constructor( name, value, callback, options = {} ) {
 
-        super( Widget.LAYERS, name, value, options );
+        super( BaseComponent.LAYERS, name, value, options );
 
         this.onGetValue = () => {
             return value;
@@ -10045,16 +10045,16 @@ LX.Layers = Layers;
 
 /**
  * @class ItemArray
- * @description ItemArray Widget
+ * @description ItemArray Component
  */
 
-class ItemArray extends Widget {
+class ItemArray extends BaseComponent {
 
     constructor( name, values = [], callback, options = {} ) {
 
         options.nameWidth = "100%";
 
-        super( Widget.ARRAY, name, null, options );
+        super( BaseComponent.ARRAY, name, null, options );
 
         this.onGetValue = () => {
             return values;
@@ -10109,41 +10109,41 @@ class ItemArray extends Widget {
             {
                 const value = values[ i ];
                 let baseclass = options.innerValues ? 'select' : value.constructor;
-                let widget = null;
+                let component = null;
 
                 switch( baseclass  )
                 {
                     case String:
-                        widget = new LX.TextInput(i + "", value, function(value, event) {
+                        component = new LX.TextInput(i + "", value, function(value, event) {
                             values[ i ] = value;
                             callback( values );
                         }, { nameWidth: "12px", className: "p-0", skipReset: true });
                         break;
                     case Number:
-                        widget = new NumberInput(i + "", value, function(value, event) {
+                        component = new NumberInput(i + "", value, function(value, event) {
                             values[ i ] = value;
                             callback( values );
                         }, { nameWidth: "12px", className: "p-0", skipReset: true });
                         break;
                     case 'select':
-                        widget = new Select(i + "", options.innerValues, value, function(value, event) {
+                        component = new Select(i + "", options.innerValues, value, function(value, event) {
                             values[ i ] = value;
                             callback( values );
                         }, { nameWidth: "12px", className: "p-0", skipReset: true });
                         break;
                 }
 
-                console.assert( widget, `Value of type ${ baseclass } cannot be modified in ItemArray` );
+                console.assert( component, `Value of type ${ baseclass } cannot be modified in ItemArray` );
 
-                arrayItems.appendChild( widget.root );
+                arrayItems.appendChild( component.root );
 
-                const removeWidget = new LX.Button( null, "", ( v, event) => {
+                const removeComponent = new LX.Button( null, "", ( v, event) => {
                     values.splice( values.indexOf( value ), 1 );
                     this._updateItems();
                     this._trigger( new LX.IEvent(name, values, event), callback );
                 }, { title: "Remove item", icon: "Trash3"} );
 
-                widget.root.appendChild( removeWidget.root );
+                component.root.appendChild( removeComponent.root );
             }
 
             const addButton = new LX.Button(null, LX.makeIcon( "Plus", { svgClass: "sm" } ).innerHTML + "Add item", (v, event) => {
@@ -10163,14 +10163,14 @@ LX.ItemArray = ItemArray;
 
 /**
  * @class List
- * @description List Widget
+ * @description List Component
  */
 
-class List extends Widget {
+class List extends BaseComponent {
 
     constructor( name, values, value, callback, options = {} ) {
 
-        super( Widget.LIST, name, value, options );
+        super( BaseComponent.LIST, name, value, options );
 
         this.onGetValue = () => {
             return value;
@@ -10263,17 +10263,17 @@ LX.List = List;
 
 /**
  * @class Tags
- * @description Tags Widget
+ * @description Tags Component
  */
 
-class Tags extends Widget {
+class Tags extends BaseComponent {
 
     constructor( name, value, callback, options = {} ) {
 
         value = value.replace( /\s/g, '' ).split( ',' );
 
         let defaultValue = [].concat( value );
-        super( Widget.TAGS, name, defaultValue, options );
+        super( BaseComponent.TAGS, name, defaultValue, options );
 
         this.onGetValue = () => {
             return [].concat( value );
@@ -10352,19 +10352,19 @@ LX.Tags = Tags;
 
 /**
  * @class Checkbox
- * @description Checkbox Widget
+ * @description Checkbox Component
  */
 
-class Checkbox extends Widget {
+class Checkbox extends BaseComponent {
 
     constructor( name, value, callback, options = {} ) {
 
         if( !name && !options.label )
         {
-            throw( "Set Widget Name or at least a label!" );
+            throw( "Set Component Name or at least a label!" );
         }
 
-        super( Widget.CHECKBOX, name, value, options );
+        super( BaseComponent.CHECKBOX, name, value, options );
 
         this.onGetValue = () => {
             return value;
@@ -10435,19 +10435,19 @@ LX.Checkbox = Checkbox;
 
 /**
  * @class Toggle
- * @description Toggle Widget
+ * @description Toggle Component
  */
 
-class Toggle extends Widget {
+class Toggle extends BaseComponent {
 
     constructor( name, value, callback, options = {} ) {
 
         if( !name && !options.label )
         {
-            throw( "Set Widget Name or at least a label!" );
+            throw( "Set Component Name or at least a label!" );
         }
 
-        super( Widget.TOGGLE, name, value, options );
+        super( BaseComponent.TOGGLE, name, value, options );
 
         this.onGetValue = () => {
             return toggle.checked;
@@ -10519,14 +10519,14 @@ LX.Toggle = Toggle;
 
 /**
  * @class RadioGroup
- * @description RadioGroup Widget
+ * @description RadioGroup Component
  */
 
-class RadioGroup extends Widget {
+class RadioGroup extends BaseComponent {
 
     constructor( name, label, values, callback, options = {} ) {
 
-        super( Widget.RADIO, name, null, options );
+        super( BaseComponent.RADIO, name, null, options );
 
         let currentIndex = null;
 
@@ -10598,10 +10598,10 @@ LX.RadioGroup = RadioGroup;
 
 /**
  * @class ColorInput
- * @description ColorInput Widget
+ * @description ColorInput Component
  */
 
-class ColorInput extends Widget {
+class ColorInput extends BaseComponent {
 
     constructor( name, value, callback, options = {} ) {
 
@@ -10610,12 +10610,12 @@ class ColorInput extends Widget {
         const useAlpha = options.useAlpha ??
             ( ( value.constructor === Object && 'a' in value ) || ( value.constructor === String && [ 5, 9 ].includes( value.length ) ) );
 
-        const widgetColor = new LX.Color( value );
+        const componentColor = new LX.Color( value );
 
         // Force always hex internally
-        value = useAlpha ? widgetColor.hex : widgetColor.hex.substr( 0, 7 );
+        value = useAlpha ? componentColor.hex : componentColor.hex.substr( 0, 7 );
 
-        super( Widget.COLOR, name, value, options );
+        super( BaseComponent.COLOR, name, value, options );
 
         this.onGetValue = () => {
             const currentColor = new LX.Color( value );
@@ -10635,7 +10635,7 @@ class ColorInput extends Widget {
 
             if( !this._skipTextUpdate )
             {
-                textWidget.set( value, true, event );
+                textComponent.set( value, true, event );
             }
 
             if( !skipCallback )
@@ -10703,15 +10703,15 @@ class ColorInput extends Widget {
             colorSampleRGB.style.width = "18px";
         }
 
-        const textWidget = new LX.TextInput( null, value, v => {
+        const textComponent = new LX.TextInput( null, value, v => {
             this._skipTextUpdate = true;
             this.set( v );
             delete this._skipTextUpdate;
             this.picker.fromHexColor( v );
         }, { width: "calc( 100% - 24px )", disabled: options.disabled });
 
-        textWidget.root.style.marginLeft = "6px";
-        container.appendChild( textWidget.root );
+        textComponent.root.style.marginLeft = "6px";
+        container.appendChild( textComponent.root );
 
         LX.doAsync( this.onResize.bind( this ) );
     }
@@ -10721,14 +10721,14 @@ LX.ColorInput = ColorInput;
 
 /**
  * @class RangeInput
- * @description RangeInput Widget
+ * @description RangeInput Component
  */
 
-class RangeInput extends Widget {
+class RangeInput extends BaseComponent {
 
     constructor( name, value, callback, options = {} ) {
 
-        super( Widget.RANGE, name, value, options );
+        super( BaseComponent.RANGE, name, value, options );
 
         this.onGetValue = () => {
             return value;
@@ -10812,7 +10812,7 @@ class RangeInput extends Widget {
             slider.min = newMin ?? slider.min;
             slider.max = newMax ?? slider.max;
             slider.step = newStep ?? slider.step;
-            Widget._dispatchEvent( slider, "input", true );
+            BaseComponent._dispatchEvent( slider, "input", true );
         };
 
         LX.doAsync( this.onResize.bind( this ) );
@@ -10823,14 +10823,14 @@ LX.RangeInput = RangeInput;
 
 /**
  * @class NumberInput
- * @description NumberInput Widget
+ * @description NumberInput Component
  */
 
-class NumberInput extends Widget {
+class NumberInput extends BaseComponent {
 
     constructor( name, value, callback, options = {} ) {
 
-        super( Widget.NUMBER, name, value, options );
+        super( BaseComponent.NUMBER, name, value, options );
 
         this.onGetValue = () => {
             return value;
@@ -11045,17 +11045,17 @@ LX.NumberInput = NumberInput;
 
 /**
  * @class Vector
- * @description Vector Widget
+ * @description Vector Component
  */
 
-class Vector extends Widget {
+class Vector extends BaseComponent {
 
     constructor( numComponents, name, value, callback, options = {} ) {
 
         numComponents = LX.clamp( numComponents, 2, 4 );
         value = value ?? new Array( numComponents ).fill( 0 );
 
-        super( Widget.VECTOR, name, [].concat( value ), options );
+        super( BaseComponent.VECTOR, name, [].concat( value ), options );
 
         this.onGetValue = () => {
             let inputs = this.root.querySelectorAll( "input[type='number']" );
@@ -11150,13 +11150,13 @@ class Vector extends Widget {
                     for( let v of that.querySelectorAll(".vecinput") )
                     {
                         v.value = LX.round( +v.valueAsNumber - mult * ( e.deltaY > 0 ? 1 : -1 ), options.precision );
-                        Widget._dispatchEvent( v, "change" );
+                        BaseComponent._dispatchEvent( v, "change" );
                     }
                 }
                 else
                 {
                     this.value = LX.round( +this.valueAsNumber - mult * ( e.deltaY > 0 ? 1 : -1 ), options.precision );
-                    Widget._dispatchEvent( vecinput, "change" );
+                    BaseComponent._dispatchEvent( vecinput, "change" );
                 }
             }, { passive: false } );
 
@@ -11230,13 +11230,13 @@ class Vector extends Widget {
                         for( let v of that.root.querySelectorAll( ".vecinput" ) )
                         {
                             v.value = LX.round( +v.valueAsNumber + mult * dt, options.precision );
-                            Widget._dispatchEvent( v, "change" );
+                            BaseComponent._dispatchEvent( v, "change" );
                         }
                     }
                     else
                     {
                         vecinput.value = LX.round( +vecinput.valueAsNumber + mult * dt, options.precision );
-                        Widget._dispatchEvent( vecinput, "change" );
+                        BaseComponent._dispatchEvent( vecinput, "change" );
                     }
                 }
 
@@ -11295,14 +11295,14 @@ LX.Vector = Vector;
 
 /**
  * @class SizeInput
- * @description SizeInput Widget
+ * @description SizeInput Component
  */
 
-class SizeInput extends Widget {
+class SizeInput extends BaseComponent {
 
     constructor( name, value, callback, options = {} ) {
 
-        super( Widget.SIZE, name, value, options );
+        super( BaseComponent.SIZE, name, value, options );
 
         this.onGetValue = () => {
             const value = [];
@@ -11383,10 +11383,10 @@ LX.SizeInput = SizeInput;
 
 /**
  * @class OTPInput
- * @description OTPInput Widget
+ * @description OTPInput Component
  */
 
-class OTPInput extends Widget {
+class OTPInput extends BaseComponent {
 
     constructor( name, value, callback, options = {} ) {
 
@@ -11399,7 +11399,7 @@ class OTPInput extends Widget {
             value = "x".repeat( patternSize );
         }
 
-        super( Widget.OTP, name, value, options );
+        super( BaseComponent.OTP, name, value, options );
 
         this.onGetValue = () => {
             return +value;
@@ -11541,14 +11541,14 @@ LX.OTPInput = OTPInput;
 
 /**
  * @class Pad
- * @description Pad Widget
+ * @description Pad Component
  */
 
-class Pad extends Widget {
+class Pad extends BaseComponent {
 
     constructor( name, value, callback, options = {} ) {
 
-        super( Widget.PAD, name, null, options );
+        super( BaseComponent.PAD, name, null, options );
 
         this.onGetValue = () => {
             return thumb.value.xy;
@@ -11661,14 +11661,14 @@ LX.Pad = Pad;
 
 /**
  * @class Progress
- * @description Progress Widget
+ * @description Progress Component
  */
 
-class Progress extends Widget {
+class Progress extends BaseComponent {
 
     constructor( name, value, options = {} ) {
 
-        super( Widget.PROGRESS, name, value, options );
+        super( BaseComponent.PROGRESS, name, value, options );
 
         this.onGetValue = () => {
             return progress.value;
@@ -11798,14 +11798,14 @@ LX.Progress = Progress;
 
 /**
  * @class FileInput
- * @description FileInput Widget
+ * @description FileInput Component
  */
 
-class FileInput extends Widget {
+class FileInput extends BaseComponent {
 
     constructor( name, callback, options = { } ) {
 
-        super( Widget.FILE, name, null, options );
+        super( BaseComponent.FILE, name, null, options );
 
         let local = options.local ?? true;
         let type = options.type ?? 'text';
@@ -11883,16 +11883,16 @@ LX.FileInput = FileInput;
 
 /**
  * @class Tree
- * @description Tree Widget
+ * @description Tree Component
  */
 
-class Tree extends Widget {
+class Tree extends BaseComponent {
 
     constructor( name, data, options = {} ) {
 
         options.hideName = true;
 
-        super( Widget.TREE, name, null, options );
+        super( BaseComponent.TREE, name, null, options );
 
         let container = document.createElement('div');
         container.className = "lextree";
@@ -11965,16 +11965,16 @@ LX.Tree = Tree;
 
 /**
  * @class TabSections
- * @description TabSections Widget
+ * @description TabSections Component
  */
 
-class TabSections extends Widget {
+class TabSections extends BaseComponent {
 
     constructor( name, tabs, options = {} ) {
 
         options.hideName = true;
 
-        super( Widget.TABS, name, null, options );
+        super( BaseComponent.TABS, name, null, options );
 
         if( tabs.constructor != Array )
         {
@@ -12020,7 +12020,7 @@ class TabSections extends Widget {
 
             let infoContainer = document.createElement( "div" );
             infoContainer.id = tab.name.replace( /\s/g, '' );
-            infoContainer.className = "widgets";
+            infoContainer.className = "components";
             infoContainer.toggleAttribute( "hidden", !( tab.selected ?? false ) );
             container.appendChild( infoContainer );
 
@@ -12029,7 +12029,7 @@ class TabSections extends Widget {
                 tabContainer.querySelectorAll( ".lextab" ).forEach( e => { e.classList.remove( "selected" ); } );
                 tabEl.classList.add( "selected" );
                 // Hide all tabs content
-                container.querySelectorAll(".widgets").forEach( e => { e.toggleAttribute( "hidden", true ); } );
+                container.querySelectorAll(".components").forEach( e => { e.toggleAttribute( "hidden", true ); } );
                 // Show tab content
                 const el = container.querySelector( '#' + infoContainer.id );
                 el.toggleAttribute( "hidden" );
@@ -12072,14 +12072,14 @@ LX.TabSections = TabSections;
 
 /**
  * @class Counter
- * @description Counter Widget
+ * @description Counter Component
  */
 
-class Counter extends Widget {
+class Counter extends BaseComponent {
 
     constructor( name, value, callback, options = { } ) {
 
-        super( Widget.COUNTER, name, value, options );
+        super( BaseComponent.COUNTER, name, value, options );
 
         this.onGetValue = () => {
             return counterText.count;
@@ -12142,10 +12142,10 @@ LX.Counter = Counter;
 
 /**
  * @class Table
- * @description Table Widget
+ * @description Table Component
  */
 
-class Table extends Widget {
+class Table extends BaseComponent {
 
     constructor( name, data, options = { } ) {
 
@@ -12154,7 +12154,7 @@ class Table extends Widget {
             throw( "Data is needed to create a table!" );
         }
 
-        super( Widget.TABLE, name, null, options );
+        super( BaseComponent.TABLE, name, null, options );
 
         this.onResize = ( rect ) => {
             const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
@@ -12204,7 +12204,7 @@ class Table extends Widget {
             {
                 const filterOptions = LX.deepCopy( options );
                 filterOptions.placeholder = `Filter ${ this.filter }...`;
-                filterOptions.skipWidget = true;
+                filterOptions.skipComponent = true;
                 filterOptions.trigger = "input";
                 filterOptions.inputClass = "outline";
 
@@ -12223,9 +12223,9 @@ class Table extends Widget {
 
                 for( let f of this.customFilters )
                 {
-                    f.widget = new LX.Button(null, icon.innerHTML + f.name, ( v ) => {
+                    f.component = new LX.Button(null, icon.innerHTML + f.name, ( v ) => {
 
-                        const spanName = f.widget.root.querySelector( "span" );
+                        const spanName = f.component.root.querySelector( "span" );
 
                         if( f.options )
                         {
@@ -12246,7 +12246,7 @@ class Table extends Widget {
                                 };
                                 return item;
                             } );
-                            new LX.DropdownMenu( f.widget.root, menuOptions, { side: "bottom", align: "start" });
+                            new LX.DropdownMenu( f.component.root, menuOptions, { side: "bottom", align: "start" });
                         }
                         else if( f.type == "range" )
                         {
@@ -12285,7 +12285,7 @@ class Table extends Widget {
                             };
                             panel.refresh();
                             container.appendChild( panel.root );
-                            new LX.Popover( f.widget.root, [ container ], { side: "bottom" } );
+                            new LX.Popover( f.component.root, [ container ], { side: "bottom" } );
                         }
                         else if( f.type == "date" )
                         {
@@ -12317,11 +12317,11 @@ class Table extends Widget {
                             };
                             panel.refresh();
                             container.appendChild( panel.root );
-                            new LX.Popover( f.widget.root, [ container ], { side: "bottom" } );
+                            new LX.Popover( f.component.root, [ container ], { side: "bottom" } );
                         }
 
                     }, { buttonClass: "px-2 primary dashed" } );
-                    headerContainer.appendChild( f.widget.root );
+                    headerContainer.appendChild( f.component.root );
                 }
 
                 this._resetCustomFiltersBtn = new LX.Button(null, "resetButton", ( v ) => {
@@ -12329,7 +12329,7 @@ class Table extends Widget {
                     this._resetCustomFiltersBtn.root.classList.add( "hidden" );
                     for( let f of this.customFilters )
                     {
-                        f.widget.root.querySelector( "span" ).innerHTML = ( icon.innerHTML + f.name );
+                        f.component.root.querySelector( "span" ).innerHTML = ( icon.innerHTML + f.name );
                         if( f.type == "range" )
                         {
                             f.start = f.min;
@@ -12888,14 +12888,14 @@ LX.Table = Table;
 
 /**
  * @class DatePicker
- * @description DatePicker Widget
+ * @description DatePicker Component
  */
 
-class DatePicker extends Widget {
+class DatePicker extends BaseComponent {
 
     constructor( name, dateValue, callback, options = { } ) {
 
-        super( Widget.DATE, name, null, options );
+        super( BaseComponent.DATE, name, null, options );
 
         const dateAsRange = ( dateValue?.constructor === Array );
 
@@ -13006,14 +13006,14 @@ LX.DatePicker = DatePicker;
 
 /**
  * @class Map2D
- * @description Map2D Widget
+ * @description Map2D Component
  */
 
-class Map2D extends Widget {
+class Map2D extends BaseComponent {
 
     constructor( name, points, callback, options = {} ) {
 
-        super( Widget.MAP2D, name, null, options );
+        super( BaseComponent.MAP2D, name, null, options );
 
         this.onGetValue = () => {
             return this.map2d.weightsObj;
@@ -13089,42 +13089,42 @@ class Panel {
 
         this.root = root;
         this.branches = [];
-        this.widgets = {};
+        this.components = {};
 
         this._branchOpen = false;
         this._currentBranch = null;
-        this._queue = []; // Append widgets in other locations
-        this._inlineWidgetsLeft = -1;
-        this._inline_queued_container = null;
+        this._queue = []; // Append components in other locations
+        this._inlineComponentsLeft = -1;
+        this._inlineQueuedContainer = null;
     }
 
     get( name ) {
 
-        return this.widgets[ name ];
+        return this.components[ name ];
     }
 
     getValue( name ) {
 
-        let widget = this.widgets[ name ];
+        let component = this.components[ name ];
 
-        if( !widget )
+        if( !component )
         {
-            throw( "No widget called " + name );
+            throw( "No component called " + name );
         }
 
-        return widget.value();
+        return component.value();
     }
 
     setValue( name, value, skipCallback ) {
 
-        let widget = this.widgets[ name ];
+        let component = this.components[ name ];
 
-        if( !widget )
+        if( !component )
         {
-            throw( "No widget called " + name );
+            throw( "No component called " + name );
         }
 
-        return widget.set( value, skipCallback );
+        return component.set( value, skipCallback );
     }
 
     /**
@@ -13145,18 +13145,18 @@ class Panel {
 
     clear() {
 
-        this._branchOpen = false;
         this.branches = [];
+        this._branchOpen = false;
         this._currentBranch = null;
 
-        for( let w in this.widgets )
+        for( let w in this.components )
         {
-            if( this.widgets[ w ].options && this.widgets[ w ].options.signal )
+            if( this.components[ w ].options && this.components[ w ].options.signal )
             {
-                const signal = this.widgets[ w ].options.signal;
+                const signal = this.components[ w ].options.signal;
                 for( let i = 0; i < LX.signals[signal].length; i++ )
                 {
-                    if( LX.signals[signal][ i ] == this.widgets[ w ] )
+                    if( LX.signals[signal][ i ] == this.components[ w ] )
                     {
                         LX.signals[signal] = [...LX.signals[signal].slice(0, i), ...LX.signals[signal].slice(i+1)];
                     }
@@ -13168,11 +13168,11 @@ class Panel {
         {
             for( let w = 0; w < this.signals.length; w++ )
             {
-                let widget = Object.values(this.signals[ w ])[ 0 ];
-                let signal = widget.options.signal;
+                let c = Object.values(this.signals[ w ])[ 0 ];
+                let signal = c.options.signal;
                 for( let i = 0; i < LX.signals[signal].length; i++ )
                 {
-                    if( LX.signals[signal][ i ] == widget )
+                    if( LX.signals[signal][ i ] == c )
                     {
                         LX.signals[signal] = [...LX.signals[signal].slice(0, i), ...LX.signals[signal].slice(i+1)];
                     }
@@ -13180,46 +13180,46 @@ class Panel {
             }
         }
 
-        this.widgets = {};
+        this.components = {};
         this.root.innerHTML = "";
     }
 
     /**
      * @method sameLine
-     * @param {Number} number Of widgets that will be placed in the same line
-     * @param {String} className Extra class to customize inline widgets parent container
-     * @description Next N widgets will be in the same line. If no number, it will inline all until calling nextLine()
+     * @param {Number} numberOfComponents Of components that will be placed in the same line
+     * @param {String} className Extra class to customize inline components parent container
+     * @description Next N components will be in the same line. If no number, it will inline all until calling nextLine()
      */
 
-    sameLine( number, className ) {
+    sameLine( numberOfComponents, className ) {
 
-        this._inline_queued_container = this.queuedContainer;
-        this._inlineWidgetsLeft = ( number ?? Infinity );
+        this._inlineQueuedContainer = this.queuedContainer;
+        this._inlineComponentsLeft = ( numberOfComponents ?? Infinity );
         this._inlineExtraClass = className ?? null;
     }
 
     /**
      * @method endLine
-     * @param {String} className Extra class to customize inline widgets parent container
-     * @description Stop inlining widgets. Use it only if the number of widgets to be inlined is NOT specified.
+     * @param {String} className Extra class to customize inline components parent container
+     * @description Stop inlining components. Use it only if the number of components to be inlined is NOT specified.
      */
 
     endLine( className ) {
 
         className = className ?? this._inlineExtraClass;
 
-        if( this._inlineWidgetsLeft == -1 )
+        if( this._inlineComponentsLeft == -1 )
         {
-            console.warn("No pending widgets to be inlined!");
+            console.warn("No pending components to be inlined!");
             return;
         }
 
-        this._inlineWidgetsLeft = -1;
+        this._inlineComponentsLeft = -1;
 
         if( !this._inlineContainer )
         {
             this._inlineContainer = document.createElement('div');
-            this._inlineContainer.className = "lexinlinewidgets";
+            this._inlineContainer.className = "lexinlinecomponents";
 
             if( className )
             {
@@ -13228,14 +13228,14 @@ class Panel {
         }
 
         // Push all elements single element or Array[element, container]
-        for( let item of this._inlineWidgets )
+        for( let item of this._inlineComponents )
         {
             const isPair = ( item.constructor == Array );
 
             if( isPair )
             {
                 // eg. an array, inline items appended later to
-                if( this._inline_queued_container )
+                if( this._inlineQueuedContainer )
                 {
                     this._inlineContainer.appendChild( item[ 0 ] );
                 }
@@ -13251,7 +13251,7 @@ class Panel {
             }
         }
 
-        if( !this._inline_queued_container )
+        if( !this._inlineQueuedContainer )
         {
             if( this._currentBranch )
             {
@@ -13264,10 +13264,10 @@ class Panel {
         }
         else
         {
-            this._inline_queued_container.appendChild( this._inlineContainer );
+            this._inlineQueuedContainer.appendChild( this._inlineContainer );
         }
 
-        delete this._inlineWidgets;
+        delete this._inlineComponents;
         delete this._inlineContainer;
         delete this._inlineExtraClass;
     }
@@ -13280,7 +13280,7 @@ class Panel {
      * className: Add class to the branch
      * closed: Set branch collapsed/opened [false]
      * icon: Set branch icon (LX.ICONS)
-     * filter: Allow filter widgets in branch by name [false]
+     * filter: Allow filter components in branch by name [false]
      */
 
     branch( name, options = {} ) {
@@ -13301,10 +13301,10 @@ class Panel {
         this.branches.push( branch );
         this.root.appendChild( branch.root );
 
-        // Add widget filter
+        // Add component filter
         if( options.filter )
         {
-            this._addFilter( options.filter, { callback: this._searchWidgets.bind( this, branch.name ) } );
+            this._addFilter( options.filter, { callback: this._searchComponents.bind( this, branch.name ) } );
         }
 
         return branch;
@@ -13320,27 +13320,27 @@ class Panel {
     }
 
     /*
-        Panel Widgets
+        Panel Components
     */
 
-    _attachWidget( widget, options = {} ) {
+    _attachComponent( component, options = {} ) {
 
-        if( widget.name != undefined )
+        if( component.name != undefined )
         {
-            this.widgets[ widget.name ] = widget;
+            this.components[ component.name ] = component;
         }
 
-        if( widget.options.signal && !widget.name )
+        if( component.options.signal && !component.name )
         {
             if( !this.signals )
             {
                 this.signals = [];
             }
 
-            this.signals.push( { [ widget.options.signal ]: widget } );
+            this.signals.push( { [ component.options.signal ]: component } );
         }
 
-        const _insertWidget = el => {
+        const _insertComponent = el => {
             if( options.container )
             {
                 options.container.appendChild( el );
@@ -13349,9 +13349,9 @@ class Panel {
             {
                 if( this._currentBranch )
                 {
-                    if( !options.skipWidget )
+                    if( !options.skipComponent )
                     {
-                        this._currentBranch.widgets.push( widget );
+                        this._currentBranch.components.push( component );
                     }
                     this._currentBranch.content.appendChild( el );
                 }
@@ -13368,54 +13368,54 @@ class Panel {
             }
         };
 
-        const _storeWidget = el => {
+        const _storeComponent = el => {
 
             if( !this.queuedContainer )
             {
-                this._inlineWidgets.push( el );
+                this._inlineComponents.push( el );
             }
             // Append content to queued tab container
             else
             {
-                this._inlineWidgets.push( [ el, this.queuedContainer ] );
+                this._inlineComponents.push( [ el, this.queuedContainer ] );
             }
         };
 
-        // Process inline widgets
-        if( this._inlineWidgetsLeft > 0 && !options.skipInlineCount )
+        // Process inline components
+        if( this._inlineComponentsLeft > 0 && !options.skipInlineCount )
         {
-            if( !this._inlineWidgets )
+            if( !this._inlineComponents )
             {
-                this._inlineWidgets = [];
+                this._inlineComponents = [];
             }
 
-            // Store widget and its container
-            _storeWidget( widget.root );
+            // Store component and its container
+            _storeComponent( component.root );
 
-            this._inlineWidgetsLeft--;
+            this._inlineComponentsLeft--;
 
-            // Last widget
-            if( !this._inlineWidgetsLeft )
+            // Last component
+            if( !this._inlineComponentsLeft )
             {
                 this.endLine();
             }
         }
         else
         {
-            _insertWidget( widget.root );
+            _insertComponent( component.root );
         }
 
-        return widget;
+        return component;
     }
 
     _addFilter( placeholder, options = {} ) {
 
         options.placeholder = placeholder.constructor == String ? placeholder : "Filter properties..";
-        options.skipWidget = options.skipWidget ?? true;
+        options.skipComponent = options.skipComponent ?? true;
         options.skipInlineCount = true;
 
-        let widget = new LX.TextInput( null, null, null, options );
-        const element = widget.root;
+        let component = new LX.TextInput( null, null, null, options );
+        const element = component.root;
         element.className += " lexfilter";
 
         let input = document.createElement('input');
@@ -13438,7 +13438,7 @@ class Panel {
         return element;
     }
 
-    _searchWidgets( branchName, value ) {
+    _searchComponents( branchName, value ) {
 
         for( let b of this.branches )
         {
@@ -13447,8 +13447,8 @@ class Panel {
                 continue;
             }
 
-            // remove all widgets
-            for( let w of b.widgets )
+            // remove all components
+            for( let w of b.components )
             {
                 if( w.domEl.classList.contains('lexfilter') )
                 {
@@ -13462,8 +13462,8 @@ class Panel {
 
             const emptyFilter = !value.length;
 
-            // add widgets
-            for( let w of b.widgets )
+            // add components
+            for( let w of b.components )
             {
                 if( !emptyFilter )
                 {
@@ -13473,7 +13473,7 @@ class Panel {
                     if(!name.includes(value)) continue;
                 }
 
-                // insert filtered widget
+                // insert filtered component
                 this.queuedContainer.appendChild( w.domEl );
             }
 
@@ -13544,13 +13544,13 @@ class Panel {
         var element = document.createElement('div');
         element.className = "lexseparator";
 
-        let widget = new LX.Widget( LX.Widget.SEPARATOR );
-        widget.root = element;
+        let component = new LX.BaseComponent( LX.BaseComponent.SEPARATOR );
+        component.root = element;
 
         if( this._currentBranch )
         {
             this._currentBranch.content.appendChild( element );
-            this._currentBranch.widgets.push( widget );
+            this._currentBranch.components.push( component );
         }
         else
         {
@@ -13565,8 +13565,8 @@ class Panel {
      */
 
     addBlank( width, height ) {
-        const widget = new LX.Blank( width, height );
-        return this._attachWidget( widget );
+        const component = new LX.Blank( width, height );
+        return this._attachComponent( component );
     }
 
     /**
@@ -13581,18 +13581,18 @@ class Panel {
      */
 
     addTitle( name, options = {} ) {
-        const widget = new LX.Title( name, options );
-        return this._attachWidget( widget );
+        const component = new LX.Title( name, options );
+        return this._attachComponent( component );
     }
 
     /**
      * @method addText
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {String} value Text value
      * @param {Function} callback Callback function on change
      * @param {Object} options:
      * hideName: Don't use name as label [false]
-     * disabled: Make the widget disabled [false]
+     * disabled: Make the component disabled [false]
      * required: Make the input required
      * placeholder: Add input placeholder
      * icon: Icon (if any) to append at the input start
@@ -13607,18 +13607,18 @@ class Panel {
      */
 
     addText( name, value, callback, options = {} ) {
-        const widget = new LX.TextInput( name, value, callback, options );
-        return this._attachWidget( widget );
+        const component = new LX.TextInput( name, value, callback, options );
+        return this._attachComponent( component );
     }
 
     /**
      * @method addTextArea
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {String} value Text Area value
      * @param {Function} callback Callback function on change
      * @param {Object} options:
      * hideName: Don't use name as label [false]
-     * disabled: Make the widget disabled [false]
+     * disabled: Make the component disabled [false]
      * placeholder: Add input placeholder
      * resize: Allow resize [true]
      * trigger: Choose onchange trigger (default, input) [default]
@@ -13629,8 +13629,8 @@ class Panel {
      */
 
     addTextArea( name, value, callback, options = {} ) {
-        const widget = new LX.TextArea( name, value, callback, options );
-        return this._attachWidget( widget );
+        const component = new LX.TextArea( name, value, callback, options );
+        return this._attachComponent( component );
     }
 
     /**
@@ -13642,19 +13642,19 @@ class Panel {
     addLabel( value, options = {} ) {
         options.disabled = true;
         options.inputClass = ( options.inputClass ?? "" ) + " nobg";
-        const widget = this.addText( null, value, null, options );
-        widget.type = LX.Widget.LABEL;
-        return widget;
+        const component = this.addText( null, value, null, options );
+        component.type = LX.BaseComponent.LABEL;
+        return component;
     }
 
     /**
      * @method addButton
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {String} value Button name
      * @param {Function} callback Callback function on click
      * @param {Object} options:
      * hideName: Don't use name as label [false]
-     * disabled: Make the widget disabled [false]
+     * disabled: Make the component disabled [false]
      * icon: Icon class to show as button value
      * iconPosition: Icon position (cover|start|end)
      * fileInput: Button click requests a file
@@ -13666,13 +13666,13 @@ class Panel {
      */
 
     addButton( name, value, callback, options = {} ) {
-        const widget = new LX.Button( name, value, callback, options );
-        return this._attachWidget( widget );
+        const component = new LX.Button( name, value, callback, options );
+        return this._attachComponent( component );
     }
 
     /**
      * @method addComboButtons
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {Array} values Each of the {value, callback, selected, disabled} items
      * @param {Object} options:
      * hideName: Don't use name as label [false]
@@ -13683,8 +13683,8 @@ class Panel {
      */
 
     addComboButtons( name, values, options = {} ) {
-        const widget = new LX.ComboButtons( name, values, options );
-        return this._attachWidget( widget );
+        const component = new LX.ComboButtons( name, values, options );
+        return this._attachComponent( component );
     }
 
     /**
@@ -13699,13 +13699,13 @@ class Panel {
      */
 
     addCard( name, options = {} ) {
-        const widget = new LX.Card( name, options );
-        return this._attachWidget( widget );
+        const component = new LX.Card( name, options );
+        return this._attachComponent( component );
     }
 
     /**
      * @method addForm
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {Object} data Form data
      * @param {Function} callback Callback function on submit form
      * @param {Object} options:
@@ -13718,13 +13718,13 @@ class Panel {
      */
 
     addForm( name, data, callback, options = {} ) {
-        const widget = new LX.Form( name, data, callback, options );
-        return this._attachWidget( widget );
+        const component = new LX.Form( name, data, callback, options );
+        return this._attachComponent( component );
     }
 
     /**
      * @method addContent
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {HTMLElement/String} element
      * @param {Object} options
      */
@@ -13750,15 +13750,15 @@ class Panel {
 
         options.hideName = true;
 
-        let widget = new LX.Widget( LX.Widget.CONTENT, name, null, options );
-        widget.root.appendChild( element );
+        let component = new LX.BaseComponent( LX.BaseComponent.CONTENT, name, null, options );
+        component.root.appendChild( element );
 
-        return this._attachWidget( widget );
+        return this._attachComponent( component );
     }
 
     /**
      * @method addImage
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {String} url Image Url
      * @param {Object} options
      * hideName: Don't use name as label [false]
@@ -13777,43 +13777,43 @@ class Panel {
         Object.assign( img.style, options.style ?? {} );
         container.appendChild( img );
 
-        let widget = new LX.Widget( LX.Widget.IMAGE, name, null, options );
-        widget.root.appendChild( container );
+        let component = new LX.BaseComponent( LX.BaseComponent.IMAGE, name, null, options );
+        component.root.appendChild( container );
 
         // await img.decode();
         img.decode();
 
-        return this._attachWidget( widget );
+        return this._attachComponent( component );
     }
 
     /**
      * @method addSelect
-     * @param {String} name Widget name
-     * @param {Array} values Posible options of the select widget -> String (for default select) or Object = {value, url} (for images, gifs..)
+     * @param {String} name Component name
+     * @param {Array} values Posible options of the select component -> String (for default select) or Object = {value, url} (for images, gifs..)
      * @param {String} value Select by default option
      * @param {Function} callback Callback function on change
      * @param {Object} options:
      * hideName: Don't use name as label [false]
-     * filter: Add a search bar to the widget [false]
-     * disabled: Make the widget disabled [false]
+     * filter: Add a search bar to the component [false]
+     * disabled: Make the component disabled [false]
      * skipReset: Don't add the reset value button when value changes
      * placeholder: Placeholder for the filter input
      * emptyMsg: Custom message to show when no filtered results
      */
 
     addSelect( name, values, value, callback, options = {} ) {
-        const widget = new LX.Select( name, values, value, callback, options );
-        return this._attachWidget( widget );
+        const component = new LX.Select( name, values, value, callback, options );
+        return this._attachComponent( component );
     }
 
     /**
      * @method addCurve
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {Array of Array} values Array of 2N Arrays of each value of the curve
      * @param {Function} callback Callback function on change
      * @param {Object} options:
      * skipReset: Don't add the reset value button when value changes
-     * bgColor: Widget background color
+     * bgColor: Component background color
      * pointsColor: Curve points color
      * lineColor: Curve line color
      * noOverlap: Points do not overlap, replacing themselves if necessary
@@ -13823,18 +13823,18 @@ class Panel {
     */
 
     addCurve( name, values, callback, options = {} ) {
-        const widget = new LX.Curve( name, values, callback, options );
-        return this._attachWidget( widget );
+        const component = new LX.Curve( name, values, callback, options );
+        return this._attachComponent( component );
     }
 
     /**
      * @method addDial
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {Array of Array} values Array of 2N Arrays of each value of the dial
      * @param {Function} callback Callback function on change
      * @param {Object} options:
      * skipReset: Don't add the reset value button when value changes
-     * bgColor: Widget background color
+     * bgColor: Component background color
      * pointsColor: Curve points color
      * lineColor: Curve line color
      * noOverlap: Points do not overlap, replacing themselves if necessary
@@ -13844,26 +13844,26 @@ class Panel {
     */
 
     addDial( name, values, callback, options = {} ) {
-        const widget = new LX.Dial( name, values, callback, options );
-        return this._attachWidget( widget );
+        const component = new LX.Dial( name, values, callback, options );
+        return this._attachComponent( component );
     }
 
     /**
      * @method addLayers
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {Number} value Flag value by default option
      * @param {Function} callback Callback function on change
      * @param {Object} options:
      */
 
     addLayers( name, value, callback, options = {} ) {
-        const widget = new LX.Layers( name, value, callback, options );
-        return this._attachWidget( widget );
+        const component = new LX.Layers( name, value, callback, options );
+        return this._attachComponent( component );
     }
 
     /**
      * @method addArray
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {Array} values By default values in the array
      * @param {Function} callback Callback function on change
      * @param {Object} options:
@@ -13871,13 +13871,13 @@ class Panel {
      */
 
     addArray( name, values = [], callback, options = {} ) {
-        const widget = new LX.ItemArray( name, values, callback, options );
-        return this._attachWidget( widget );
+        const component = new LX.ItemArray( name, values, callback, options );
+        return this._attachComponent( component );
     }
 
     /**
      * @method addList
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {Array} values List values
      * @param {String} value Selected list value
      * @param {Function} callback Callback function on change
@@ -13886,13 +13886,13 @@ class Panel {
      */
 
     addList( name, values, value, callback, options = {} ) {
-        const widget = new LX.List( name, values, value, callback, options );
-        return this._attachWidget( widget );
+        const component = new LX.List( name, values, value, callback, options );
+        return this._attachComponent( component );
     }
 
     /**
      * @method addTags
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {String} value Comma separated tags
      * @param {Function} callback Callback function on change
      * @param {Object} options:
@@ -13900,85 +13900,85 @@ class Panel {
      */
 
     addTags( name, value, callback, options = {} ) {
-        const widget = new LX.Tags( name, value, callback, options );
-        return this._attachWidget( widget );
+        const component = new LX.Tags( name, value, callback, options );
+        return this._attachComponent( component );
     }
 
     /**
      * @method addCheckbox
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {Boolean} value Value of the checkbox
      * @param {Function} callback Callback function on change
      * @param {Object} options:
-     * disabled: Make the widget disabled [false]
+     * disabled: Make the component disabled [false]
      * label: Checkbox label
-     * suboptions: Callback to add widgets in case of TRUE value
+     * suboptions: Callback to add components in case of TRUE value
      * className: Extra classes to customize style
      */
 
     addCheckbox( name, value, callback, options = {} ) {
-        const widget = new LX.Checkbox( name, value, callback, options );
-        return this._attachWidget( widget );
+        const component = new LX.Checkbox( name, value, callback, options );
+        return this._attachComponent( component );
     }
 
     /**
      * @method addToggle
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {Boolean} value Value of the checkbox
      * @param {Function} callback Callback function on change
      * @param {Object} options:
-     * disabled: Make the widget disabled [false]
+     * disabled: Make the component disabled [false]
      * label: Toggle label
-     * suboptions: Callback to add widgets in case of TRUE value
+     * suboptions: Callback to add components in case of TRUE value
      * className: Customize colors
      */
 
     addToggle( name, value, callback, options = {} ) {
-        const widget = new LX.Toggle( name, value, callback, options );
-        return this._attachWidget( widget );
+        const component = new LX.Toggle( name, value, callback, options );
+        return this._attachComponent( component );
     }
 
     /**
      * @method addRadioGroup
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {String} label Radio label
      * @param {Array} values Radio options
      * @param {Function} callback Callback function on change
      * @param {Object} options:
-     * disabled: Make the widget disabled [false]
+     * disabled: Make the component disabled [false]
      * className: Customize colors
      * selected: Index of the default selected option
      */
 
     addRadioGroup( name, label, values, callback, options = {} ) {
-        const widget = new LX.RadioGroup( name, label, values, callback, options );
-        return this._attachWidget( widget );
+        const component = new LX.RadioGroup( name, label, values, callback, options );
+        return this._attachComponent( component );
     }
 
     /**
      * @method addColor
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {String} value Default color (hex)
      * @param {Function} callback Callback function on change
      * @param {Object} options:
-     * disabled: Make the widget disabled [false]
+     * disabled: Make the component disabled [false]
      * useRGB: The callback returns color as Array (r, g, b) and not hex [false]
      */
 
     addColor( name, value, callback, options = {} ) {
-        const widget = new LX.ColorInput( name, value, callback, options );
-        return this._attachWidget( widget );
+        const component = new LX.ColorInput( name, value, callback, options );
+        return this._attachComponent( component );
     }
 
     /**
      * @method addRange
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {Number} value Default number value
      * @param {Function} callback Callback function on change
      * @param {Object} options:
      * hideName: Don't use name as label [false]
      * className: Extra classes to customize style
-     * disabled: Make the widget disabled [false]
+     * disabled: Make the component disabled [false]
      * left: The slider goes to the left instead of the right
      * fill: Fill slider progress [true]
      * step: Step of the input
@@ -13986,18 +13986,18 @@ class Panel {
      */
 
     addRange( name, value, callback, options = {} ) {
-        const widget = new LX.RangeInput( name, value, callback, options );
-        return this._attachWidget( widget );
+        const component = new LX.RangeInput( name, value, callback, options );
+        return this._attachComponent( component );
     }
 
     /**
      * @method addNumber
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {Number} value Default number value
      * @param {Function} callback Callback function on change
      * @param {Object} options:
      * hideName: Don't use name as label [false]
-     * disabled: Make the widget disabled [false]
+     * disabled: Make the component disabled [false]
      * step: Step of the input
      * precision: The number of digits to appear after the decimal point
      * min, max: Min and Max values for the input
@@ -14008,24 +14008,24 @@ class Panel {
      */
 
     addNumber( name, value, callback, options = {} ) {
-        const widget = new LX.NumberInput( name, value, callback, options );
-        return this._attachWidget( widget );
+        const component = new LX.NumberInput( name, value, callback, options );
+        return this._attachComponent( component );
     }
 
     static VECTOR_COMPONENTS = { 0: 'x', 1: 'y', 2: 'z', 3: 'w' };
 
     _addVector( numComponents, name, value, callback, options = {} ) {
-        const widget = new LX.Vector( numComponents, name, value, callback, options );
-        return this._attachWidget( widget );
+        const component = new LX.Vector( numComponents, name, value, callback, options );
+        return this._attachComponent( component );
     }
 
     /**
      * @method addVector N (2, 3, 4)
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {Array} value Array of N components
      * @param {Function} callback Callback function on change
      * @param {Object} options:
-     * disabled: Make the widget disabled [false]
+     * disabled: Make the component disabled [false]
      * step: Step of the inputs
      * min, max: Min and Max values for the inputs
      * onPress: Callback function on mouse down
@@ -14046,43 +14046,43 @@ class Panel {
 
     /**
      * @method addSize
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {Number} value Default number value
      * @param {Function} callback Callback function on change
      * @param {Object} options:
      * hideName: Don't use name as label [false]
-     * disabled: Make the widget disabled [false]
+     * disabled: Make the component disabled [false]
      * units: Unit as string added to the end of the value
      */
 
     addSize( name, value, callback, options = {} ) {
-        const widget = new LX.SizeInput( name, value, callback, options );
-        return this._attachWidget( widget );
+        const component = new LX.SizeInput( name, value, callback, options );
+        return this._attachComponent( component );
     }
 
     /**
      * @method addOTP
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {String} value Default numeric value in string format
      * @param {Function} callback Callback function on change
      * @param {Object} options:
      * hideName: Don't use name as label [false]
-     * disabled: Make the widget disabled [false]
+     * disabled: Make the component disabled [false]
      * pattern: OTP numeric pattern
      */
 
     addOTP( name, value, callback, options = {} ) {
-        const widget = new LX.OTPInput( name, value, callback, options );
-        return this._attachWidget( widget );
+        const component = new LX.OTPInput( name, value, callback, options );
+        return this._attachComponent( component );
     }
 
     /**
      * @method addPad
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {Array} value Pad value
      * @param {Function} callback Callback function on change
      * @param {Object} options:
-     * disabled: Make the widget disabled [false]
+     * disabled: Make the component disabled [false]
      * min, max: Min and Max values
      * padSize: Size of the pad (css)
      * onPress: Callback function on mouse down
@@ -14090,13 +14090,13 @@ class Panel {
      */
 
     addPad( name, value, callback, options = {} ) {
-        const widget = new LX.Pad( name, value, callback, options );
-        return this._attachWidget( widget );
+        const component = new LX.Pad( name, value, callback, options );
+        return this._attachComponent( component );
     }
 
     /**
      * @method addProgress
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {Number} value Progress value
      * @param {Object} options:
      * min, max: Min and Max values
@@ -14107,29 +14107,29 @@ class Panel {
      */
 
     addProgress( name, value, options = {} ) {
-        const widget = new LX.Progress( name, value, options );
-        return this._attachWidget( widget );
+        const component = new LX.Progress( name, value, options );
+        return this._attachComponent( component );
     }
 
     /**
      * @method addFile
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {Function} callback Callback function on change
      * @param {Object} options:
      * local: Ask for local file
-     * disabled: Make the widget disabled [false]
+     * disabled: Make the component disabled [false]
      * read: Return the file itself (False) or the contents (True)
      * type: type to read as [text (Default), buffer, bin, url]
      */
 
     addFile( name, callback, options = { } ) {
-        const widget = new LX.FileInput( name, callback, options );
-        return this._attachWidget( widget );
+        const component = new LX.FileInput( name, callback, options );
+        return this._attachComponent( component );
     }
 
     /**
      * @method addTree
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {Object} data Data of the tree
      * @param {Object} options:
      * icons: Array of objects with icon button information {name, icon, callback}
@@ -14139,13 +14139,13 @@ class Panel {
      */
 
     addTree( name, data, options = {} ) {
-        const widget = new LX.Tree( name, data, options );
-        return this._attachWidget( widget );
+        const component = new LX.Tree( name, data, options );
+        return this._attachComponent( component );
     }
 
     /**
      * @method addTabSections
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {Array} tabs Contains objects with {
      *      name: Name of the tab (if icon, use as title)
      *      icon: Icon to be used as the tab icon (optional)
@@ -14160,30 +14160,30 @@ class Panel {
      */
 
     addTabSections( name, tabs, options = {} ) {
-        const widget = new LX.TabSections( name, tabs, options );
-        return this._attachWidget( widget );
+        const component = new LX.TabSections( name, tabs, options );
+        return this._attachComponent( component );
     }
 
     /**
      * @method addCounter
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {Number} value Counter value
      * @param {Function} callback Callback function on change
      * @param {Object} options:
-     * disabled: Make the widget disabled [false]
+     * disabled: Make the component disabled [false]
      * min, max: Min and Max values
      * step: Step for adding/substracting
      * label: Text to show below the counter
      */
 
     addCounter( name, value, callback, options = { } ) {
-        const widget = new LX.Counter( name, value, callback, options );
-        return this._attachWidget( widget );
+        const component = new LX.Counter( name, value, callback, options );
+        return this._attachComponent( component );
     }
 
     /**
      * @method addTable
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {Number} data Table data
      * @param {Object} options:
      * hideName: Don't use name as label [false]
@@ -14201,13 +14201,13 @@ class Panel {
      */
 
     addTable( name, data, options = { } ) {
-        const widget = new LX.Table( name, data, options );
-        return this._attachWidget( widget );
+        const component = new LX.Table( name, data, options );
+        return this._attachComponent( component );
     }
 
     /**
      * @method addDate
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {String} dateValue
      * @param {Function} callback
      * @param {Object} options:
@@ -14218,21 +14218,21 @@ class Panel {
      */
 
     addDate( name, dateValue, callback, options = { } ) {
-        const widget = new LX.DatePicker( name, dateValue, callback, options );
-        return this._attachWidget( widget );
+        const component = new LX.DatePicker( name, dateValue, callback, options );
+        return this._attachComponent( component );
     }
 
     /**
      * @method addMap2D
-     * @param {String} name Widget name
+     * @param {String} name Component name
      * @param {Array} points
      * @param {Function} callback
      * @param {Object} options:
      */
 
     addMap2D( name, points, callback, options = { } ) {
-        const widget = new LX.Map2D( name, points, callback, options );
-        return this._attachWidget( widget );
+        const component = new LX.Map2D( name, points, callback, options );
+        return this._attachComponent( component );
     }
 }
 
@@ -14267,7 +14267,7 @@ class Branch {
 
         this.closed = options.closed ?? false;
         this.root = root;
-        this.widgets = [];
+        this.components = [];
 
         // Create element
         var title = document.createElement( 'div' );
@@ -14338,8 +14338,8 @@ class Branch {
     _onMakeFloating() {
 
         const dialog = new LX.Dialog( this.name, p => {
-            // add widgets
-            for( let w of this.widgets )
+            // Add components
+            for( let w of this.components )
             {
                 p.root.appendChild( w.root );
             }
@@ -14350,7 +14350,7 @@ class Branch {
 
         dialog.branchData = {
             name: this.name,
-            widgets: this.widgets,
+            components: this.components,
             closed: this.closed,
             panel: this.panel,
             childIndex
@@ -14362,7 +14362,7 @@ class Branch {
     _addBranchSeparator() {
 
         const element = document.createElement('div');
-        element.className = "lexwidgetseparator";
+        element.className = "lexcomponentseparator";
         element.style.width = "100%";
         element.style.background = "none";
 
@@ -14415,7 +14415,7 @@ class Branch {
 
         function innerMouseUp(e)
         {
-            that._updateWidgets();
+            that._updateComponents();
 
             line.style.height = "0px";
 
@@ -14428,15 +14428,15 @@ class Branch {
         this.content.appendChild( element );
     }
 
-    _updateWidgets() {
+    _updateComponents() {
 
         var size = this.grabber.style.marginLeft;
 
-        // Update sizes of widgets inside
-        for( let i = 0; i < this.widgets.length; i++ )
+        // Update sizes of components inside
+        for( let i = 0; i < this.components.length; i++ )
         {
-            let widget = this.widgets[ i ];
-            const element = widget.root;
+            let component = this.components[ i ];
+            const element = component.root;
 
             if( element.children.length < 2 )
             {
@@ -14449,10 +14449,10 @@ class Branch {
             name.style.width = size;
             name.style.minWidth = size;
 
-            switch( widget.type )
+            switch( component.type )
             {
-                case LX.Widget.CUSTOM:
-                case LX.Widget.ARRAY:
+                case LX.BaseComponent.CUSTOM:
+                case LX.BaseComponent.ARRAY:
                     continue;
             }
             value.style.width = "-moz-calc( 100% - " + size + " )";
@@ -16668,4 +16668,4 @@ class Tour {
 }
 LX.Tour = Tour;
 
-export { ADD_CUSTOM_WIDGET, Area, AssetView, AssetViewEvent, Branch, LX, Menubar, Panel, Sidebar, Tour, Widget };
+export { ADD_CUSTOM_COMPONENT, Area, AssetView, AssetViewEvent, BaseComponent, Branch, LX, Menubar, Panel, Sidebar, Tour };

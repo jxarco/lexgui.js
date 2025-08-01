@@ -103,8 +103,8 @@ class Timeline {
         this.selectedItems = []; // [trackInfo, "groupId"], contains the visible items (tracks or groups) of the timeline
         this.leftPanel = left.addPanel( { className: 'lextimelinepanel', width: "100%", height: "100%" } );
         this.trackTreesPanel = null;
-        this.trackTreesWidget = null;
-        this.lastTrackTreesWidgetOffset = 0; // this.trackTreesWidget.innerTree.domEl.offsetTop - canvas.offsetTop. Check draw() 
+        this.trackTreesComponent = null;
+        this.lastTrackTreesComponentOffset = 0; // this.trackTreesComponent.innerTree.domEl.offsetTop - canvas.offsetTop. Check draw() 
         this.updateLeftPanel();
 
         if(this.uniqueID != '') {
@@ -267,8 +267,8 @@ class Timeline {
         const panel = this.leftPanel;
         
         panel.sameLine( 2 );
-        let titleWidget = panel.addTitle( "Tracks", { style: { background: "none"}, className: "fg-secondary text-lg px-4"} );
-        let title = titleWidget.root;
+        let titleComponent = panel.addTitle( "Tracks", { style: { background: "none"}, className: "fg-secondary text-lg px-4"} );
+        let title = titleComponent.root;
         
         if( !this.disableNewTracks ) 
         {
@@ -293,7 +293,7 @@ class Timeline {
         {
             treeTracks = this.generateSelectedItemsTreeData();
         }
-        this.trackTreesWidget = p.addTree(null, treeTracks, {filter: false, rename: false, draggable: false, onevent: (e) => {
+        this.trackTreesComponent = p.addTree(null, treeTracks, {filter: false, rename: false, draggable: false, onevent: (e) => {
             switch(e.type) {
                 case LX.TreeEvent.NODE_SELECTED:
                     if (e.node.trackData){
@@ -310,8 +310,8 @@ class Timeline {
             }
         }});
         // setting a name in the addTree function adds an undesired node
-        this.trackTreesWidget.name = "tracksTrees";
-        p.widgets[this.trackTreesWidget.name] = this.trackTreesWidget;
+        this.trackTreesComponent.name = "tracksTrees";
+        p.components[this.trackTreesComponent.name] = this.trackTreesComponent;
 
         this.trackTreesPanel = p;
         panel.attach( p.root );
@@ -376,8 +376,8 @@ class Timeline {
             return [];
         }
 
-        const startY = minY - this.lastTrackTreesWidgetOffset + this.currentScrollInPixels;
-        const endY = maxY - this.lastTrackTreesWidgetOffset + this.currentScrollInPixels;
+        const startY = minY - this.lastTrackTreesComponentOffset + this.currentScrollInPixels;
+        const endY = maxY - this.lastTrackTreesComponentOffset + this.currentScrollInPixels;
 
         const startIdx = Math.max( 0, Math.floor( startY / this.trackHeight ) );
         const endIdx = Math.min( elements.length-1, Math.floor( endY / this.trackHeight ) ) + 1;
@@ -497,7 +497,7 @@ class Timeline {
 
         // Content
         const topMargin = this.topMargin; 
-        const treeOffset = this.lastTrackTreesWidgetOffset;
+        const treeOffset = this.lastTrackTreesComponentOffset;
         const line_height = this.trackHeight;
     
         //fill track lines
@@ -545,12 +545,12 @@ class Timeline {
         const w = ctx.canvas.width;
         const h = ctx.canvas.height;
 
-        const scrollableHeight = this.trackTreesWidget.root.scrollHeight;
+        const scrollableHeight = this.trackTreesComponent.root.scrollHeight;
         // tree has gaps of 0.25rem (4px) inbetween entries but not in the beginning nor ending. Move half gap upwards.
-        const treeOffset = this.lastTrackTreesWidgetOffset = this.trackTreesWidget.innerTree.domEl.offsetTop - this.canvas.offsetTop -2;
+        const treeOffset = this.lastTrackTreesComponentOffset = this.trackTreesComponent.innerTree.domEl.offsetTop - this.canvas.offsetTop -2;
 
         if ( this.trackTreesPanel.root.scrollHeight > 0 ){
-            const ul = this.trackTreesWidget.innerTree.domEl.children[0];
+            const ul = this.trackTreesComponent.innerTree.domEl.children[0];
             this.trackHeight = ul.children.length < 1 ? 25 : ((ul.offsetHeight+4) / ul.children.length);
         }
         
@@ -783,7 +783,7 @@ class Timeline {
                 }
 
             }
-            else if( (h-this.topMargin) < this.trackTreesWidget.root.scrollHeight)
+            else if( (h-this.topMargin) < this.trackTreesComponent.root.scrollHeight)
             {              
                 this.trackTreesPanel.root.scrollTop += e.deltaY; // wheel deltaY
             }
@@ -852,7 +852,7 @@ class Timeline {
                 this.grabbingTimeBar = true;
                 this.setTime(time);
             }
-            else if( (h-this.topMargin) < this.trackTreesWidget.root.scrollHeight && x > w - 10 ) { // grabbing scroll bar
+            else if( (h-this.topMargin) < this.trackTreesComponent.root.scrollHeight && x > w - 10 ) { // grabbing scroll bar
                 this.grabbing = true;
                 this.grabbingScroll = true;
             }
@@ -972,7 +972,7 @@ class Timeline {
     setState(state, skipCallback = false) {
         this.playing = state;
 
-        this.header.widgets.playBtn.setState(this.playing, true);
+        this.header.components.playBtn.setState(this.playing, true);
 
         if(this.onStateChange && !skipCallback) {
             this.onStateChange(this.playing);
@@ -988,9 +988,9 @@ class Timeline {
     setLoopMode(loopState, skipCallback = false){
         this.loop = loopState;
         if ( this.loop ){
-            this.header.widgets.loopBtn.root.children[0].classList.add("selected");
+            this.header.components.loopBtn.root.children[0].classList.add("selected");
         }else{
-            this.header.widgets.loopBtn.root.children[0].classList.remove("selected")
+            this.header.components.loopBtn.root.children[0].classList.remove("selected")
         }
         if( this.onChangeLoopMode && !skipCallback ){
             this.onChangeLoopMode( this.loop );
@@ -1003,7 +1003,7 @@ class Timeline {
      *  If not a track, trackData will be undefined
      */
     getVisibleItems(){
-        return this.trackTreesWidget.innerTree.domEl.children[0].children; // children of 'ul'
+        return this.trackTreesComponent.innerTree.domEl.children[0].children; // children of 'ul'
     }
 
     /**
@@ -1071,7 +1071,7 @@ class Timeline {
      * Only affects render visualisation
     * @method selectTrack
     * @param {int} trackIdx
-    * // NOTE: to select a track from outside of the timeline, a this.trackTreesWidget.innerTree.select(item) needs to be called.
+    * // NOTE: to select a track from outside of the timeline, a this.trackTreesComponent.innerTree.select(item) needs to be called.
     */
     selectTrack( trackIdx ) {
 
@@ -1247,7 +1247,7 @@ class Timeline {
 
     
     /**
-     * This functions uses the selectedItems and generates the data that will feed the LX.Tree widget.
+     * This functions uses the selectedItems and generates the data that will feed the LX.Tree Component.
      * This function is used by updateLeftPanel. Some timelines might allow grouping of tracks. Such timelines may overwrite this function
      * WARNING: track entries MUST have an attribute of 'trackData' with the track info
      * @returns lexgui tree data as expecte for the creation of a tree
@@ -3402,7 +3402,7 @@ class ClipsTimeline extends Timeline {
             else if ( this.dragClipMode == "move" && this.lastClipsSelected.length ) { // move clips
                 //*********** WARNING: RELIES ON SORTED lastClipsSelected ***********
 
-                const treeOffset = this.lastTrackTreesWidgetOffset;
+                const treeOffset = this.lastTrackTreesComponentOffset;
                 let newTrackClipsMove = Math.floor( (e.localY - treeOffset) / this.trackHeight );
 
                 // move clips vertically

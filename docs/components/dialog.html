@@ -19,9 +19,9 @@
     ] );
 
     MAKE_PARAGRAPH( `To fill the dialog content, a panel is automatically created inside the root so it's possible 
-    to begin branching and adding widgets. The same way as menubars, you can fill the panel inside the creation callback. The following code creates a classic dialog:` );
+    to begin branching and adding components. The same way as menubars, you can fill the panel inside the creation callback. The following code creates a classic dialog:` );
     MAKE_CODE( `@const@ dialog = @new@ LX.@[cls]Dialog@(@"Title"@, p => {
-    @[com]// Start adding widgets@
+    @[com]// Start adding components@
     p.@[mtd]addNumber@(@"Example"@, @18@);
 }, options);
 

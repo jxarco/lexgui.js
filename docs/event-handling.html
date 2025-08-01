@@ -2,19 +2,19 @@
 
     MAKE_HEADER( "Event Handling.", "h1", "event-handling" );
 
-    MAKE_PARAGRAPH( `LexGUI relies almost entirely on callbacks when creating each of its widgets, usually being triggered from one single place.` );
+    MAKE_PARAGRAPH( `LexGUI relies almost entirely on callbacks when creating each of its components, usually being triggered from one single place.` );
 
     MAKE_HEADER( "Signals", "h2" );
     MAKE_PARAGRAPH( `For those cases where there is no trivial connection between the callbacks and the element that triggers it, LexGUI allows
-to create <strong>Signals</strong>. E.g. We could make a widget to be updated when it receives a signal from any location in the application.` );
+to create <strong>Signals</strong>. E.g. We could make a component to be updated when it receives a signal from any location in the application.` );
 
     MAKE_HEADER( "Connect a Signal", "h3" );
-    MAKE_PARAGRAPH( `The following code is creating a widget bound to a signal. That implies that it will be updated when
+    MAKE_PARAGRAPH( `The following code is creating a component bound to a signal. That implies that it will be updated when
     it receives the corresponding signal:` );
     MAKE_CODE( `panel.@[mtd]addNumber@(@"Font Size"@, @36@, (value, event) =&gt; {
     console.@[mtd]log@(value);
 }, { signal: @"|@on_set_fontsize"@, min: @1@, max: @48@ });` );
-    MAKE_PARAGRAPH( `In the case the receiver it's not a widget we could do it using ${INLINE_CODE("LX.addSignal(name, obj, callback)")}:` );
+    MAKE_PARAGRAPH( `In the case the receiver it's not a component we could do it using ${INLINE_CODE("LX.addSignal(name, obj, callback)")}:` );
     MAKE_CODE( `LX.@[mtd]addSignal@( @"|@on_value_changed"@, (element, value) =&gt; {
     console.@[mtd]log@(value);
 } );` );
@@ -26,7 +26,7 @@ to create <strong>Signals</strong>. E.g. We could make a widget to be updated wh
 
     MAKE_CODE_BULLET_LIST( [
         ["target", "DOM element", "If defined, the callback will be called only to that object."],
-        ["skipCallback", "Boolean", "Decide to call the specified widget callback."],
+        ["skipCallback", "Boolean", "Decide to call the specified component callback."],
     ] );
 
     MAKE_LINE_BREAK();

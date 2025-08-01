@@ -517,13 +517,13 @@ async function init( options = { } )
     this.DEFAULT_SPLITBAR_SIZE  = 4;
     this.OPEN_CONTEXTMENU_ENTRY = 'click';
 
-    this.widgetResizeObserver = new ResizeObserver( entries => {
+    this.componentResizeObserver = new ResizeObserver( entries => {
         for ( const entry of entries )
         {
-            const widget = entry.target?.jsInstance;
-            if( widget && widget.onResize )
+            const c = entry.target?.jsInstance;
+            if( c && c.onResize )
             {
-                widget.onResize( entry.contentRect );
+                c.onResize( entry.contentRect );
             }
         }
     });
@@ -685,7 +685,7 @@ function emit( signalName, value, options = {} )
 
     for( let obj of data )
     {
-        if( obj instanceof LX.Widget )
+        if( obj instanceof LX.BaseComponent )
         {
             obj.set( value, options.skipCallback ?? true );
         }
@@ -1668,25 +1668,25 @@ class ColorPicker {
             this._updateColorValue( null, true );
         } ).root );
 
-        this.labelWidget = new LX.TextInput( null, "", null, { inputClass: "bg-none", fit: true, disabled: true } );
-        colorLabel.appendChild( this.labelWidget.root );
+        this.labelComponent = new LX.TextInput( null, "", null, { inputClass: "bg-none", fit: true, disabled: true } );
+        colorLabel.appendChild( this.labelComponent.root );
 
         // Copy button
         {
-            const copyButtonWidget = new LX.Button(null, "copy",  async () => {
-                navigator.clipboard.writeText( this.labelWidget.value() );
-                copyButtonWidget.root.querySelector( "input[type='checkbox']" ).style.pointerEvents = "none";
+            const copyButtonComponent = new LX.Button(null, "copy",  async () => {
+                navigator.clipboard.writeText( this.labelComponent.value() );
+                copyButtonComponent.root.querySelector( "input[type='checkbox']" ).style.pointerEvents = "none";
 
                 LX.doAsync( () => {
-                    copyButtonWidget.swap( true );
-                    copyButtonWidget.root.querySelector( "input[type='checkbox']" ).style.pointerEvents = "auto";
+                    copyButtonComponent.swap( true );
+                    copyButtonComponent.root.querySelector( "input[type='checkbox']" ).style.pointerEvents = "auto";
                 }, 3000 );
 
             }, { swap: "Check", icon: "Copy", buttonClass: "bg-none", className: "ml-auto", title: "Copy" } );
 
-            copyButtonWidget.root.querySelector( ".swap-on svg" ).addClass( "fg-success" );
+            copyButtonComponent.root.querySelector( ".swap-on svg" ).addClass( "fg-success" );
 
-            colorLabel.appendChild( copyButtonWidget.root );
+            colorLabel.appendChild( copyButtonComponent.root );
         }
 
         this._updateColorValue( hexValue, true );
@@ -1741,25 +1741,25 @@ class ColorPicker {
         if( this.colorModel == "CSS" )
         {
             const { r, g, b, a } = this.currentColor.css;
-            this.labelWidget.set( `rgb${ this.useAlpha ? 'a' : '' }(${ r },${ g },${ b }${ this.useAlpha ? ',' + toFixed( a ) : '' })` );
+            this.labelComponent.set( `rgb${ this.useAlpha ? 'a' : '' }(${ r },${ g },${ b }${ this.useAlpha ? ',' + toFixed( a ) : '' })` );
         }
         else if( this.colorModel == "Hex" )
         {
-            this.labelWidget.set( ( this.useAlpha ? this.currentColor.hex : this.currentColor.hex.substr( 0, 7 ) ).toUpperCase() );
+            this.labelComponent.set( ( this.useAlpha ? this.currentColor.hex : this.currentColor.hex.substr( 0, 7 ) ).toUpperCase() );
         }
         else if( this.colorModel == "HSV" )
         {
             const { h, s, v, a } = this.currentColor.hsv;
             const components = [ Math.floor( h ) + 'º', Math.floor( s * 100 ) + '%', Math.floor( v * 100 ) + '%' ];
             if( this.useAlpha ) components.push( toFixed( a ) );
-            this.labelWidget.set( components.join( ' ' ) );
+            this.labelComponent.set( components.join( ' ' ) );
         }
         else // RGB
         {
             const { r, g, b, a } = this.currentColor.rgb;
             const components = [ toFixed( r ), toFixed( g ), toFixed( b ) ];
             if( this.useAlpha ) components.push( toFixed( a ) );
-            this.labelWidget.set( components.join( ' ' ) );
+            this.labelComponent.set( components.join( ' ' ) );
         }
     }
 
@@ -2689,7 +2689,7 @@ class Dialog {
 
         if( !callback )
         {
-            console.warn("Content is empty, add some widgets using 'callback' parameter!");
+            console.warn("Content is empty, add some components using 'callback' parameter!");
         }
 
         this._oncreate = callback;
@@ -2757,9 +2757,9 @@ class Dialog {
                 const panelChildCount = panel.root.childElementCount;
 
                 const branch = panel.branch( data.name, { closed: data.closed } );
-                branch.widgets = data.widgets;
+                branch.components = data.components;
 
-                for( let w of branch.widgets )
+                for( let w of branch.components )
                 {
                     branch.content.appendChild( w.root );
                 }
