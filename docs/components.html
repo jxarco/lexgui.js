@@ -1,0 +1,52 @@
+<script type="module">
+
+    import { LX } from 'lexgui';
+
+    MAKE_HEADER( "Components.", "h1", "components" );
+
+    MAKE_PARAGRAPH( `Here you can find all the available components in the library.<br> Feel free to open issues or open PR to add more components to LexGUI!` );
+    MAKE_LINE_BREAK();
+    
+    {
+        const content = document.getElementById('content');
+        const area = new LX.Area( { skipAppend: true, height: "auto" } );
+
+        function copySVG( svg, event )
+        {
+            navigator.clipboard.writeText( svg.dataset[ "name" ] + ( forceSolid ? "@solid" : "" ) );
+            console.log("Copied!");
+
+            svg.classList.add( "fg-success" );
+
+            setTimeout( () => {
+                svg.classList.remove( "fg-success" );
+            }, 2000 );
+        }
+
+        const allComponentsContainer = LX.makeContainer( ["100%", "auto"], "grid mb-8 gap-3", "", area );
+        allComponentsContainer.style.gridTemplateColumns = "repeat(auto-fit, minmax(333px, 1fr))";
+
+        const generalComponents = [ "Button", "Combo Buttons", "Radio Group" ];
+        const dataInputComponents = [ "Checkbox", "Color", "Curve", "Custom", "File", "Form", "Item Array", "Layers", "Map 2D", "Number", "OTP Input", "Pad", "Range", "Select", "Size", "Tags", "Text", "Text Area", "Toggle", "Vector" ];
+        const dataDisplayComponents = [ "Asset View", "Data Tree", "Date Picker", "List", "Tab Sections", "Table", "Title", "Tour" ];
+        const feedbackComponents = [ "Dialog", "Progress", "Skeleton", "Toast" ];
+        const navigationComponents = [ "Dropdown" ];
+        const allComponents = [].concat( generalComponents, dataInputComponents, dataDisplayComponents, feedbackComponents, navigationComponents ).sort();
+        allComponents.push( "Other Components" );
+
+        for( const c of allComponents )
+        {
+            const url = "components/" + c.toLowerCase().replace( /\s/g, '-') + ".html";
+            const b = new LX.Button( null, c, () => loadPage( url ), { buttonClass: "bg-none font-medium text-lg" } );
+            allComponentsContainer.appendChild( b.root );
+        }
+
+        content.appendChild( area.root );
+    }
+
+    MAKE_LINE_BREAK();
+    MAKE_LINE_BREAK();
+
+    </script>
+
+</body>

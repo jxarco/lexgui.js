@@ -12,7 +12,8 @@ const starterTheme = LX.getTheme();
 {
     const menubar = area.addMenubar( [
         { name: "Docs", callback: () => { window.open("./docs/") } },
-        { name: "Components", callback: () => { window.open("./examples/") } },
+        { name: "Components", callback: () => { window.open("./docs/?p=components") } },
+        { name: "Examples", callback: () => { window.open("./examples/") } },
     ] );
 
     menubar.setButtonImage("lexgui.js", `images/icon_${ starterTheme }.png`, () => { window.open("https://jxarco.github.io/lexgui.js/") }, { float: "left"} );
@@ -57,7 +58,7 @@ const starterTheme = LX.getTheme();
 
     const headerButtons = LX.makeContainer( [ "auto", "auto" ], "flex flex-row", ``, header );
     const getStartedButton = new LX.Button( null, "Get Started", () => window.open( "./docs/", "_blank" ), { buttonClass: "contrast p-1 px-3" } );
-    const componentsButton = new LX.Button( null, "View Components", () => window.open( "./examples/", "_blank" ), { buttonClass: "tertiary p-1 px-3" } );
+    const componentsButton = new LX.Button( null, "View Components", () => window.open( "./docs/?p=components", "_blank" ), { buttonClass: "tertiary p-1 px-3" } );
     headerButtons.appendChild( getStartedButton.root );
     headerButtons.appendChild( componentsButton.root );
 }
@@ -573,8 +574,7 @@ const starterTheme = LX.getTheme();
             {
                 title: "LexGUI",
                 items: [
-                    { title: "Documentation", link: "https://jxarco.github.io/lexgui.js/docs/" },
-                    { title: "Source code", link: "https://github.com/jxarco/lexgui.js/" }
+                    { title: "Source code on Github", link: "https://github.com/jxarco/lexgui.js/" }
                 ]
             },
             {

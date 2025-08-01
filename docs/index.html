@@ -366,7 +366,7 @@
         menubar.siblingArea.root.appendChild( content );
 
         let params = new URLSearchParams( document.location.search );
-        loadPage( ( params.get( "p" ) ?? "installation" ) + ".html", false );
+        loadPage( ( params.get( "p" ) ?? "installation" ) + ".html", !!params.get( "p" ) );
 
     </script>
     </body>
