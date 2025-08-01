@@ -1,6 +1,6 @@
 /* clean-css ignore:start */
-@import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@700&display=swap');
 @font-face { font-family: "GeistSans"; src: url("https://raw.githubusercontent.com/jxarco/lexgui.js/master/data/GeistSans.ttf"); }
+@font-face { font-family: "CascadiaCode"; src: url("https://raw.githubusercontent.com/jxarco/lexgui.js/master/data/CascadiaCode.ttf"); font-weight: 400; }
 /* clean-css ignore:end */
 
 :root {
@@ -8,6 +8,7 @@
     color-scheme: dark;
 
     --global-font: "GeistSans", sans-serif;
+    --global-code-font: "CascadiaCode", monospace;
     --global-title-font: "GeistSans", sans-serif;
     --global-font-size-xs: 0.625rem; /* 10px */
     --global-font-size-sm: 0.75rem; /* 12px */
@@ -4617,7 +4618,10 @@ ul.lexassetscontent {
 .lexassetscontent .asset-file-preview text {
     font-size: 4rem;
     text-anchor: middle;
-    font-family: 'Ubuntu', sans-serif;
+    font-family: var(--global-code-font);
+    font-feature-settings: "ss02", 'ss19',  "ss20";
+    font-feature-settings: "ss02", 'ss19',  "ss20";
+    font-weight: 800;
     color: var(--global-text-tertiary);
 }
 
@@ -4974,19 +4978,19 @@ ul.lexassetscontent {
 
 .lexcodeeditor .code {
     cursor: text;
-    font-family: "CommitMono", monospace;
+    font-family: var(--global-code-font);
+    font-feature-settings: "ss02", 'ss19',  "ss20";
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    font-feature-settings: "ss04", "ss05";
     font-size: var(--code-editor-font-size);
     position: relative;
 }
 
 .codechar {
-    font-family: "CommitMono", monospace;
+    font-family: var(--global-code-font);
+    font-feature-settings: "ss02", 'ss19',  "ss20";
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    font-feature-settings: "ss04", "ss05";
     font-size: var(--code-editor-font-size);
     position: absolute;
     top: 0;
@@ -4997,6 +5001,9 @@ ul.lexassetscontent {
 
 .lexcodeeditor pre {
     -webkit-text-size-adjust: 100%;
+    font-family: var(--global-code-font);
+    font-feature-settings: "ss02", 'ss19',  "ss20";
+    font-size: var(--code-editor-font-size);
     cursor: text;
     box-sizing: border-box;
     border-radius: 0;

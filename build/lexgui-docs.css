@@ -1,8 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap');
-@font-face {
-    font-family: "GeistSans";
-    src: url("https://raw.githubusercontent.com/jxarco/lexgui.js/master/data/GeistSans.ttf");
-}
+@font-face { font-family: "GeistSans"; src: url("https://raw.githubusercontent.com/jxarco/lexgui.js/master/data/GeistSans.ttf"); }
+@font-face { font-family: "CascadiaCode"; src: url("https://raw.githubusercontent.com/jxarco/lexgui.js/master/data/CascadiaCode.ttf"); font-weight: 400; }
 
 :root {
 	--border-style: 1px solid #444;
@@ -104,7 +101,7 @@
 }
 
 code {
-	font-family: "Roboto Mono", monospace;
+	font-family: "CascadiaCode", monospace;
 	font-size: 14px;
 	line-height: calc(var(--line-height) - 1px);
 	/* margin: 16px calc(-1 * var(--page-padding)); */

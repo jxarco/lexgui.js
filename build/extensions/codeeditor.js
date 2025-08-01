@@ -1107,26 +1107,8 @@ class CodeEditor {
                 area.attach( this.infoPanel );
             }
 
-            const fontUrl = "https://raw.githubusercontent.com/jxarco/lexgui.js/master/" + "/data/CommitMono-400-Regular.otf";
-            const commitMono = new FontFace(
-                "CommitMono",
-                `url(${ fontUrl })`,
-                {
-                    style: "normal",
-                    weight: "400",
-                    display: "swap"
-                }
-            );
-
-            // Add to the document.fonts (FontFaceSet)
-            document.fonts.add( commitMono );
-
-            // Load the font
-            commitMono.load();
-
             // Wait until the fonts are all loaded
             document.fonts.ready.then(() => {
-                // console.log("commitMono loaded")
                 this.charWidth = this._measureChar( "a", true );
             });
 
