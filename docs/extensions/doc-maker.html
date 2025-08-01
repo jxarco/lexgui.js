@@ -1,11 +1,44 @@
 <script type="text/javascript">
+    // Header
+    MAKE_HEADER("Doc Maker.", "h1", "doc-maker");
 
-    MAKE_HEADER( "Doc Maker.", "h1", "doc-maker" );
+    // Overview
+    MAKE_PARAGRAPH("Doc Maker is a lightweight script used to programmatically build documentation pages. It exposes helpers for headers, paragraphs, code samples with syntax highlighting, lists, links, images, and notes. It's intended to be embedded by including only this script and calling its functions to compose the doc content.");
 
-    // TODO
-    MAKE_PARAGRAPH( `Site under construction...` + LX.makeIcon( "Construction", { svgClass: "xxl"  } ).innerHTML );
+    // Quick usage
+    MAKE_HEADER("Quick Usage", "h2");
+    MAKE_PARAGRAPH("Set the target container if you need to render into a subelement instead of the body:");
+    MAKE_CODE(`@[mtd]SET_DOM_TARGET@(document.@[mtd]getElementById@(@"my-doc-area"@));`, "js");
 
-    MAKE_LINE_BREAK();
-    MAKE_LINE_BREAK();
+    MAKE_PARAGRAPH("Then use the provided helpers to build content. Example:");
+    MAKE_CODE(`@[mtd]MAKE_HEADER@(@"API Reference"@, @"h2"@);
+@[mtd]MAKE_PARAGRAPH@(@"This section documents available functions."@);
+@[mtd]MAKE_CODE@(@"MAKE_CODE('console.log(\\'Hello World\\');');"@, @"js"@);`, "js");
+
+    // API Reference
+    MAKE_HEADER("API Reference", "h2");
+
+    MAKE_PARAGRAPH("Core helpers to compose documentation:", false);
+    START_CODE_BULLET_LIST();
+    ADD_CODE_LIST_ITEM(["MAKE_HEADER", "Create a header element. Parameters: text, tag (e.g. 'h1'), optional id"]);
+    ADD_CODE_LIST_ITEM(["MAKE_PARAGRAPH", "Add a paragraph or <sup> when flagged. Parameters: text, optional sup flag"]);
+    ADD_CODE_LIST_ITEM(["MAKE_CODE", "Insert a syntax-highlighted code block. Parameters: code text, language"]);
+    ADD_CODE_LIST_ITEM(["MAKE_BULLET_LIST / MAKE_NUMBERED_LIST", "Render bullet or numbered lists from arrays."]);
+    ADD_CODE_LIST_ITEM(["INLINE_LINK", "Returns an HTML anchor string. Parameters: text, href"]);
+    ADD_CODE_LIST_ITEM(["INLINE_PAGE", "Returns an in-page navigation link. Parameters: text, page identifier"]);
+    ADD_CODE_LIST_ITEM(["INLINE_CODE", "Returns inline code markup."]);
+    END_CODE_BULLET_LIST();
+
+    MAKE_PARAGRAPH("Advanced content helpers:", false);
+    START_CODE_BULLET_LIST();
+    ADD_CODE_LIST_ITEM(["MAKE_CLASS_METHOD", "Document a class method with signature and description."]);
+    ADD_CODE_LIST_ITEM(["MAKE_CLASS_CONSTRUCTOR", "Document constructors (JS or C++ style)."]);
+    ADD_CODE_LIST_ITEM(["MAKE_NOTE", "Create a styled note or warning."]);
+    ADD_CODE_LIST_ITEM(["INSERT_IMAGE / INSERT_IMAGES", "Embed images with optional captions."]);
+    ADD_CODE_LIST_ITEM(["INSERT_VIDEO", "Embed looping video content."]);
+    END_CODE_BULLET_LIST();
+
+    // Footnote / tip
+    MAKE_NOTE("After using resources or large dynamic content, you can reset the target by calling SET_DOM_TARGET to another element if needed.", false, "Tip", "Info");
 
 </script>
