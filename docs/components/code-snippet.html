@@ -1,0 +1,81 @@
+<script type="text/javascript">
+
+    MAKE_HEADER("Code Snippet", "h1", "code-snippet");
+
+    MAKE_PARAGRAPH("The Code Snippet helper wraps a read-only instance of the CodeEditor to render syntax-highlighted, annotated code samples. It supports diff-style added/removed line marking, optional window chrome, custom naming/tabs, and toggling gutters (line numbers).");
+    MAKE_LINE_BREAK();
+
+    {
+        const area = new LX.Area( { skipAppend: true, height: "auto" } );
+        content.appendChild( area.root );
+
+        const code = `
+  import { LX } from 'lexgui';
+
+  class Test {
+
+      constructor() {
+
+          this.foo = 1;
+
+          var div = document.createElement('div');
+          div.style.width = "100px"
+          div.style.height = "100px"
+
+          // single line comment
+
+          document.body.appendChild( div );
+
+          let a = 1; /* single line block comment */ let b = 2;
+
+          /*
+              multiple line block comment
+          */
+      }
+  }
+  `;
+
+        const snippet = LX.makeCodeSnippet(code, ["780px", "auto"], {
+            tabName: "script.js",
+            language: "JavaScript",
+            linesAdded: [2, [10, 12]],
+            linesRemoved: [14, 16],
+            xlineNumbers: false,
+            windowMode: true
+        });
+        area.attach( snippet );
+        
+        area.root.className += " items-center p-4 border rounded-lg shadow-lg bg-secondary overflow-hidden";
+    }
+
+    MAKE_HEADER("Quick Usage", "h2");
+    MAKE_CODE(`@const@ snippet = @[cls]LX@.@[mtd]makeCodeSnippet@(
+  @"function foo() { return 42; }"@,
+  [@400@, @200@],
+  {
+    language: @"JavaScript"@,
+    windowMode: @true@,
+    lineNumbers: @false@,
+    tabName: @"example.js"@,
+    linesAdded: [@2@]
+  }
+);
+document.body.@[mtd]appendChild@(snippet);`, "js");
+
+    MAKE_HEADER("API Reference", "h2");
+    MAKE_CLASS_CONSTRUCTOR("LX.makeCodeSnippet", [ [ "code", "String" ], [ "size", "Array" ], [ "options", "Object = {}" ] ]);
+    MAKE_LINE_BREAK();
+    MAKE_PARAGRAPH(`Where ${ INLINE_CODE( "code" ) } is the source code to display, ${ INLINE_CODE( "size" ) } is the size of the snippet container ([width, height]), and ${ INLINE_CODE( "options" ) } can include the following:`)
+
+    MAKE_CODE_BULLET_LIST([
+        ["language", "String", "Language name for syntax highlighting. Defaults to plain text."],
+        ["windowMode", "Boolean", "If true, prepends faux window control buttons (red/yellow/green) to mimic a native window title bar."],
+        ["lineNumbers", "Boolean", "Controls display of the gutter. `false` hides line numbers; defaults to `true`."],
+        // ["firstLine", "Number", "TODO: reserved for specifying the starting line number offset."],
+        ["linesAdded", "Array", "Line numbers or ranges to mark as added. Supports individual numbers or `[start, end]` ranges."],
+        ["linesRemoved", "Array", "Line numbers or ranges to mark as removed"],
+        ["tabName", "String", "Name shown in the editor tab header."],
+        ["className", "String", "Extra CSS class to apply to the snippet container for customization."],
+    ]);
+
+</script>
