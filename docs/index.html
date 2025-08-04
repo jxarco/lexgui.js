@@ -407,7 +407,18 @@
 
         for( let t of tokens )
         {
-            startPath.push( LX.toTitleCase( t ) );
+            const pToken = LX.toTitleCase( t );
+
+            if( startPath.length && startPath[ 0 ] == "Components" )
+            {
+                if( generalComponents.includes( pToken ) ) startPath.push( "General" );
+                if( dataInputComponents.includes( pToken ) ) startPath.push( "Data Input" );
+                if( dataDisplayComponents.includes( pToken ) ) startPath.push( "Data Display" );
+                if( feedbackComponents.includes( pToken ) ) startPath.push( "Feedback" );
+                if( navigationComponents.includes( pToken ) ) startPath.push( "Navigation" );
+            }
+
+            startPath.push( pToken == "Api" ? "API Reference" : pToken );
         }
 
         if( startPath.length )
