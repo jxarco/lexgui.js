@@ -78,6 +78,28 @@ function deleteElement( element )
 LX.deleteElement = deleteElement;
 
 /**
+ * @method toCamelCase
+ * @param {String} str
+ */
+function toCamelCase( str )
+{
+    return str.toLowerCase().replace(/[^a-zA-Z0-9]+(.)/g, (_, chr) => chr.toUpperCase());
+}
+
+LX.toCamelCase = toCamelCase;
+
+/**
+ * @method toTitleCase
+ * @param {String} str
+ */
+function toTitleCase( str )
+{
+    return str.replace(/-/g, " ").toLowerCase().replace(/\b\w/g, char => char.toUpperCase());
+}
+
+LX.toTitleCase = toTitleCase;
+
+/**
  * @method getSupportedDOMName
  * @description Convert a text string to a valid DOM name
  * @param {String} text Original text
