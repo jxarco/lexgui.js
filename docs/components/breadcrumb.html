@@ -1,5 +1,67 @@
-<script type="module">
+<script type="text/javascript">
 
-    
+    MAKE_HEADER("Breadcrumb", "h1", "breadcrumb");
+    MAKE_PARAGRAPH(`Breadcrumb displays the hierarchical path to the current resource. It collapses middle parts when the path is too long, shows separators, supports dropdowns 
+    for intermediate nodes, links, and icons.`);
+    MAKE_LINE_BREAK();
+
+    {
+        const area = new LX.Area( { skipAppend: true, height: "auto" } );
+        content.appendChild( area.root );
+
+        const bc = LX.makeBreadcrumb([
+            { title: "Home", url: "/" },
+            { title: "Projects", url: "/projects" },
+            { title: "MyApp", items: [
+                { title: "Overview", url: "/projects/myapp/overview" },
+                { title: "Settings", url: "/projects/myapp/settings" }
+                ] },
+            { title: "Editor" }
+        ], { maxItems: 4, separatorIcon: "ChevronRight" });
+        area.attach( bc );
+        area.root.className += " items-center p-4 border rounded-lg shadow-lg bg-secondary overflow-hidden";
+    }
+
+    {
+        const area = new LX.Area( { skipAppend: true, height: "auto" } );
+        content.appendChild( area.root );
+
+        const bc = LX.makeBreadcrumb([
+            { title: "Home", url: "/" },
+            { title: "Projects", url: "/projects" },
+            { title: "MyApp", items: [
+                { title: "Overview", url: "/projects/myapp/overview" },
+                { title: "Settings", url: "/projects/myapp/settings" }
+                ] },
+            { title: "Editor" }
+        ], { maxItems: 3, separatorIcon: "ChevronRight" });
+        area.attach( bc );
+        area.root.className += " my-3 items-center p-4 border rounded-lg shadow-lg bg-secondary overflow-hidden";
+    }
+
+    MAKE_HEADER("Quick Usage", "h2");
+    MAKE_CODE(`@const@ bc = @[cls]LX@.@[mtd]makeBreadcrumb@([
+  { title: @"Home"@, url: @"/"@ },
+  { title: @"Projects"@, url: @"/projects"@ },
+  { title: @"MyApp"@, items: [
+      { title: @"Overview"@, url: @"/projects/myapp/overview"@ },
+      { title: @"Settings"@, url: @"/projects/myapp/settings"@ }
+    ] },
+  { title: @"Editor"@ }
+], { maxItems: @4@, separatorIcon: @"ChevronRight"@ });
+
+document.body.@[mtd]appendChild@(bc);`, "js");
+
+    MAKE_HEADER("API Reference", "h2");
+    MAKE_CLASS_CONSTRUCTOR("LX.makeBreadcrumb", [ [ "items", "Array" ], [ "options", "Object = {}" ] ]);
+    MAKE_LINE_BREAK();
+    MAKE_PARAGRAPH(`Where ${ INLINE_CODE( "items" ) } is the array that contains all the breadcrumb items (title, url, items), and ${ INLINE_CODE( "options" ) } can include the following:`)
+
+    MAKE_CODE_BULLET_LIST([
+        ["maxItems", "Number", "Maximum visible entries before the middle is collapsed into an ellipsis. Defaults to 4."],
+        ["separatorIcon", "String", "Name of the icon used between items. Defaults to `ChevronRight`."],
+    ]);
+
+    MAKE_NOTE("If the number of items exceeds `maxItems`, the component collapses the middle segment into a single ellipsis entry. The collapsed titles are preserved as a tooltip on the ellipsis. Items with an `items` array become dropdown triggers; clicking opens a `DropdownMenu` showing the nested entries.", false, "Tip", "Info");
 
 </script>

@@ -5508,12 +5508,22 @@ LX.makeKbd = makeKbd;
  * @description Displays the path to the current resource using a hierarchy
  * @param {Array} items
  * @param {Object} options
+ * maxItems: Max items until ellipsis is used to overflow
+ * separatorIcon: Customize separator icon
  */
 function makeBreadcrumb( items, options = {} )
 {
     const breadcrumb = LX.makeContainer( ["auto", "auto"], "flex flex-row gap-1" );
 
-    options.maxItems ?? 4;
+    const separatorIcon = options.separatorIcon ?? "ChevronRight";
+    const maxItems = options.maxItems ?? 4;
+    const eraseNum = items.length - maxItems;
+    if( eraseNum > 0 )
+    {
+        const erased = items.splice( 1, eraseNum + 1 );
+        const ellipsisItem = { title: "...", ellipsis: erased.map( v => v.title ).join( "/" ) };
+        items.splice( 1, 0, ellipsisItem );
+    }
 
     for( let i = 0; i < items.length; ++i )
     {
@@ -5522,29 +5532,43 @@ function makeBreadcrumb( items, options = {} )
 
         if( i != 0 )
         {
-            const icon = LX.makeIcon( "ChevronRight", { svgClass: "sm fg-secondary separator" } );
+            const icon = LX.makeIcon( separatorIcon, { svgClass: "sm fg-secondary separator" } );
             breadcrumb.appendChild( icon );
         }
 
         const lastElement = ( i == items.length - 1 );
-        const breadcrumbItem = LX.makeContainer( ["auto", "auto"], `p-1 ${ lastElement ? "" : "fg-secondary" }` );
+        const breadcrumbItem = LX.makeContainer( ["auto", "auto"], `p-1 flex flex-row gap-1 items-center ${ lastElement ? "" : "fg-secondary" }` );
         breadcrumb.appendChild( breadcrumbItem );
 
-        if( item.url !== undefined )
+        let itemTitle = LX.makeElement( "p", "", item.title );
+        if( item.icon )
         {
-            breadcrumbItem.innerHTML += `<a class="decoration-none fg-${ lastElement ? "primary" : "secondary" }" href="${ item.url }">${ item.title }</a>`;
+            breadcrumbItem.appendChild( LX.makeIcon( item.icon, { svgClass: "sm" } ) );
         }
-        else if( item.items !== undefined )
+
+        if( item.items !== undefined )
         {
-            const bDropdownTrigger = LX.makeContainer( ["auto", "auto"], `${ lastElement ? "" : "fg-secondary" }`, item.title );
+            const bDropdownTrigger = LX.makeContainer( ["auto", "auto"], `${ lastElement ? "" : "fg-secondary" }` );
             bDropdownTrigger.listen( "click", (e) => {
                 new LX.DropdownMenu( e.target, item.items, { side: "bottom", align: "start" });
             } );
+            bDropdownTrigger.append( itemTitle );
             breadcrumbItem.appendChild( bDropdownTrigger );
+        }
+        else if( item.url !== undefined )
+        {
+            let itemUrl = LX.makeElement( "a", `decoration-none fg-${ lastElement ? "primary" : "secondary" }`, "", breadcrumbItem );
+            itemUrl.href = item.url;
+            itemUrl.appendChild( itemTitle );
         }
         else
         {
-            breadcrumbItem.innerHTML += item.title;
+            breadcrumbItem.appendChild( itemTitle );
+        }
+
+        if( item.ellipsis )
+        {
+            LX.asTooltip( breadcrumbItem, item.ellipsis, { side: "bottom", offset: 4 } );
         }
     }
 
