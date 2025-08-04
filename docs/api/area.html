@@ -35,7 +35,7 @@
     MAKE_CLASS_METHOD( ".addMenubar", `Creates a Menubar inside the area using data in Array format to create each of the entries and subentries.`, [
         ["items", "Array"],
         ["options", "Object"],
-    ], `${ INLINE_PAGE( "Menubar", "reference/menubar.html" ) }` );
+    ], `${ INLINE_PAGE( "Menubar", "api/menubar.html" ) }` );
 
     MAKE_CLASS_METHOD( ".addOverlayButtons", `Creates a group of buttons that can be positioned at specific area locations. 
 <code class='inline ref'>options.float = <span class="str">"htc"</span></code> where h: horizontal; v: vertical; t: top; m: middle; b: bottom; l: left; c: center; r: right.`, [
@@ -45,16 +45,16 @@
 
     MAKE_CLASS_METHOD( ".addPanel", `Creates a Panel and attaches automatically to the area.`, [
         ["options", "Object"],
-    ], `${ INLINE_PAGE( "Panel", "reference/panel.html" ) }` );
+    ], `${ INLINE_PAGE( "Panel", "api/panel.html" ) }` );
 
     MAKE_CLASS_METHOD( ".addSidebar", `Creates a sidebar section inside the area. Use <code class='inline ref'><span class="typ">Sidebar</span>.add()</code> to create and append content to the sidebar.`, [
         ["callback", "Function"],
         ["options", "Object"],
-    ], `${ INLINE_PAGE( "Sidebar", "reference/sidebar.html" ) }` );
+    ], `${ INLINE_PAGE( "Sidebar", "api/sidebar.html" ) }` );
 
     MAKE_CLASS_METHOD( ".addTabs", `Creates a tab section inside the area. Use <code class='inline ref'><span class="typ">Tabs</span>.add()</code> to create and append content for each of the tabs.`, [
         ["options", "Object"],
-    ], `${ INLINE_PAGE( "Tabs", "reference/tabs.html" ) }` );
+    ], `${ INLINE_PAGE( "Tabs", "api/tabs.html" ) }` );
 
     MAKE_CLASS_METHOD( ".attach", `Appends a child to the area (e.g. a Panel or any HTMLElement). If "content" has a root, then appends it, if not, append "content".`, [
         ["content", "HTMLElement"],

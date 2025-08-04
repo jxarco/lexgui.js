@@ -29,6 +29,7 @@
         const mobile = navigator && /Android|iPhone/i.test( navigator.userAgent );
         const content = document.getElementById('content');
         const oldScripts = [];
+        let path = null;
 
         SET_DOM_TARGET( content );
 
@@ -46,8 +47,27 @@
                     
                     const scripts = tempDiv.querySelectorAll("script");
                     scripts.forEach(script => script.remove());
+                    content.innerHTML = "";
 
-                    content.innerHTML = tempDiv.innerHTML;
+                    // Generate breadcrumb
+                    if( path !== null )
+                    {
+                        const bcItems = [];
+
+                        for( let p of path )
+                        {
+                            bcItems.push( { title: p } );
+                        }
+
+                        if( title )
+                        {
+                            bcItems.push( { title } );
+                        }
+
+                        content.appendChild( LX.makeBreadcrumb( bcItems ) );
+                    }
+
+                    content.innerHTML += tempDiv.innerHTML;
 
                     scripts.forEach(script => {
                         const newScript = document.createElement("script");
@@ -70,7 +90,10 @@
                     if( title ) document.title = `${ title } - LexGUI`;
                 })
                 .then( callback )
-                .catch(() => content.innerHTML = "<p>Error loading content.</p>");
+                .catch((err) => {
+                    console.error( err );
+                    content.innerHTML = "<p>Error loading content.</p>";
+                });
         }
 
         window.__addInteractiveCodeExample = function( content, componentName, onPanel ) {
@@ -197,13 +220,21 @@
             if( event ) event.preventDefault();
 
             const anchor = target && ( target[ 0 ] == '#' );
+            const breadcrumb = target && ( target.constructor === Array );
 
-            if( target && !anchor )
+            if( target && !anchor && !breadcrumb )
             {
                 window.open( url, target );
             }
             else
             {
+                path = null;
+
+                if( breadcrumb )
+                {
+                    path = target;
+                }
+
                 loadPage( url, true, name, () => {
                     if( anchor )
                     {
@@ -222,7 +253,7 @@
         const dataInputComponents = [ "Checkbox", "Color", "Curve", "Custom", "Date Picker", "File", "Form", "Item Array", "Layers", "Map 2D", "Number", "OTP Input", "Pad", "Range", "Select", "Size", "Tags", "Text", "Text Area", "Toggle", "Vector" ];
         const dataDisplayComponents = [ "Asset View", "Code Snippet", "Data Tree", "List", "Table", "Title" ];
         const feedbackComponents = [ "Dialog", "Progress", "Skeleton", "Toast", "Tour" ];
-        const navigationComponents = [ "Dropdown", "Tab Sections" ];
+        const navigationComponents = [ "Breadcrumb", "Dropdown", "Tab Sections" ];
 
         const componentVersion = {
             "Date Picker": "5.9",
@@ -237,16 +268,21 @@
         const badgeClass = "contrast sm";
 
         const sidebarCallback = m => {
+
+            const manualCallback = v => open( `manual/${ v.toLowerCase().replaceAll( " ", "-" ) }.html`, [ "Manual", v ] );
+            const extensionCallback = v => open( `extensions/${ v.toLowerCase().replaceAll( " ", "-" ) }.html`, [ "Extensions", v ] );
+            const apiReferenceCallback = v => open( `api/${ v.toLowerCase().replaceAll( " ", "-" ) }.html`, [ "API Reference", v ] );
+
             m.group( "Manual" );
-            m.add( "Installation", { callback: open.bind( this, "installation.html", null ) } );
-            m.add( "Getting Started", { callback: open.bind( this, "getting-started.html", null ) } );
-            m.add( "Creating Areas", { callback: open.bind( this, "creating-areas.html", null ) } );
-            m.add( "Instancing Panels", { callback: open.bind( this, "instancing-panels.html", null ) } );
-            m.add( "Panel Branching", { callback: open.bind( this, "branching.html", null ) } );
-            m.add( "Adding First Components", { callback: open.bind( this, "first-components.html", null ) } );
-            m.add( "Event Handling", { callback: open.bind( this, "event-handling.html", null ) } );
-            m.add( "Theme Customization", { callback: open.bind( this, "themes.html", null ) } );
-            m.add( "Icons", { callback: open.bind( this, "icons.html", null ) } );
+            m.add( "Installation", { callback: manualCallback } );
+            m.add( "Getting Started", { callback: manualCallback } );
+            m.add( "Creating Areas", { callback: manualCallback } );
+            m.add( "Instancing Panels", { callback: manualCallback } );
+            m.add( "Panel Branching", { callback: manualCallback } );
+            m.add( "First Components", { callback: manualCallback } );
+            m.add( "Event Handling", { callback: manualCallback } );
+            m.add( "Theme Customization", { callback: manualCallback } );
+            m.add( "Icons", { callback: manualCallback } );
             m.separator();
             m.group( "Components" );
             m.add( "General", { skipSelection: true } );
@@ -254,7 +290,7 @@
             {
                 const url = c.toLowerCase().replace( /\s/g, '-') + ".html";
                 m.add( "General/" + c, {
-                    callback: open.bind( this, "components/" + url, null ),
+                    callback: open.bind( this, "components/" + url, ["Components", "General"] ),
                     content: componentVersion[ c ] ? LX.badge( componentVersion[ c ], badgeClass, { asElement: true, callback: open.bind( this, "changelog.html", `#${ componentVersion[ c ] }` ) }) : undefined
                 } );
 
@@ -265,7 +301,7 @@
             {
                 const url = c.toLowerCase().replace( /\s/g, '-') + ".html";
                 m.add( "Data Display/" + c, {
-                    callback: open.bind( this, "components/" + url, null ),
+                    callback: open.bind( this, "components/" + url, ["Components", "Data Display"] ),
                     content: componentVersion[ c ] ? LX.badge( componentVersion[ c ], badgeClass, { asElement: true, callback: open.bind( this, "changelog.html", `#${ componentVersion[ c ] }` ) }) : undefined
                 } );
                 
@@ -276,7 +312,7 @@
             {
                 const url = c.toLowerCase().replace( /\s/g, '-') + ".html";
                 m.add( "Data Inputs/" + c, {
-                    callback: open.bind( this, "components/" + url, null ),
+                    callback: open.bind( this, "components/" + url, ["Components", "Data Inputs"] ),
                     content: componentVersion[ c ] ? LX.badge( componentVersion[ c ], badgeClass, { asElement: true, callback: open.bind( this, "changelog.html", `#${ componentVersion[ c ] }` ) }) : undefined
                 } );
 
@@ -287,7 +323,7 @@
             {
                 const url = c.toLowerCase().replace( /\s/g, '-') + ".html";
                 m.add( "Feedback/" + c, {
-                    callback: open.bind( this, "components/" + url, null ),
+                    callback: open.bind( this, "components/" + url, ["Components", "Feedback"] ),
                     content: componentVersion[ c ] ? LX.badge( componentVersion[ c ], badgeClass, { asElement: true, callback: open.bind( this, "changelog.html", `#${ componentVersion[ c ] }` ) }) : undefined
                 } );
 
@@ -298,7 +334,7 @@
             {
                 const url = c.toLowerCase().replace( /\s/g, '-') + ".html";
                 m.add( "Navigation/" + c, {
-                    callback: open.bind( this, "components/" + url, null ),
+                    callback: open.bind( this, "components/" + url, ["Components", "Navigation"] ),
                     content: componentVersion[ c ] ? LX.badge( componentVersion[ c ], badgeClass, { asElement: true, callback: open.bind( this, "changelog.html", `#${ componentVersion[ c ] }` ) }) : undefined
                 } );
 
@@ -306,23 +342,23 @@
             }
             m.separator();
             m.group( "Extensions" );
-            m.add( "Code Editor", { callback: open.bind( this, "extensions/code-editor.html", null ) } );
-            m.add( "Doc Maker", { callback: open.bind( this, "extensions/doc-maker.html", null ) } );
-            m.add( "Graph Editor", { callback: open.bind( this, "extensions/graph-editor.html", null ) } );
-            m.add( "Timeline", { callback: open.bind( this, "extensions/timeline.html", null ) } );
-            m.add( "Timeline/Keyframes Timeline", { callback: open.bind( this, "extensions/keyframe-timeline.html", null ) } );
-            m.add( "Timeline/Clips Timeline", { callback: open.bind( this, "extensions/clips-timeline.html", null ) } );
-            m.add( "Video Editor", { callback: open.bind( this, "extensions/video-editor.html", null ) } );
+            m.add( "Code Editor", { callback: extensionCallback } );
+            m.add( "Doc Maker", { callback: extensionCallback } );
+            m.add( "Graph Editor", { callback: extensionCallback } );
+            m.add( "Timeline", { callback: extensionCallback } );
+            m.add( "Timeline/Keyframes Timeline", { callback: extensionCallback } );
+            m.add( "Timeline/Clips Timeline", { callback: extensionCallback } );
+            m.add( "Video Editor", { callback: extensionCallback } );
             m.separator();
             m.add( "API Reference", { skipSelection: true } );
-            m.add( "API Reference/Area", { callback: open.bind( this, "reference/area.html", null ) } );
-            m.add( "API Reference/AreaOverlayButtons", { callback: open.bind( this, "reference/area-overlay-buttons.html", null ), content: LX.badge( "6.10", badgeClass, { asElement: true, callback: open.bind( this, "changelog.html", "#6.10" ) }) } );
-            m.add( "API Reference/BaseComponent", { callback: open.bind( this, "reference/base-component.html", null ) } );
-            m.add( "API Reference/Branch", { callback: open.bind( this, "reference/branch.html", null ) } );
-            m.add( "API Reference/Menubar", { callback: open.bind( this, "reference/menubar.html", null ) } );
-            m.add( "API Reference/Panel", { callback: open.bind( this, "reference/panel.html", null ) } );
-            m.add( "API Reference/Sidebar", { callback: open.bind( this, "reference/sidebar.html", null ) } );
-            m.add( "API Reference/Tabs", { callback: open.bind( this, "reference/tabs.html", null ) } );
+            m.add( "API Reference/Area", { callback: apiReferenceCallback } );
+            m.add( "API Reference/AreaOverlayButtons", { callback: apiReferenceCallback, content: LX.badge( "6.10", badgeClass, { asElement: true, callback: open.bind( this, "changelog.html", "#6.10" ) }) } );
+            m.add( "API Reference/BaseComponent", { callback: apiReferenceCallback } );
+            m.add( "API Reference/Branch", { callback: apiReferenceCallback } );
+            m.add( "API Reference/Menubar", { callback: apiReferenceCallback } );
+            m.add( "API Reference/Panel", { callback: apiReferenceCallback } );
+            m.add( "API Reference/Sidebar", { callback: apiReferenceCallback } );
+            m.add( "API Reference/Tabs", { callback: apiReferenceCallback } );
             m.separator();
             m.add( "LexGUI Examples", { icon: "Monitor", skipSelection: true, callback: open.bind( this, "../examples/", "_blank" ) } );
             m.add( "Source Code", { icon: "Code", skipSelection: true, callback: open.bind( this, "https://github.com/jxarco/lexgui.js/", "_blank" ) } );
@@ -362,8 +398,23 @@
         menubar.siblingArea.root.style.overflowY = "scroll";
         menubar.siblingArea.root.appendChild( content );
 
-        let params = new URLSearchParams( document.location.search );
-        loadPage( ( params.get( "p" ) ?? "installation" ) + ".html", !!params.get( "p" ) );
+        const params = new URLSearchParams( document.location.search );
+        const queryPage = params.get( "p" );
+        const startPage = queryPage ?? "manual/installation";
+        const tokens = startPage.split( '/' );
+        const startPath = [];
+
+        for( let t of tokens )
+        {
+            startPath.push( LX.toTitleCase( t ) );
+        }
+
+        if( startPath.length )
+        {
+            path = startPath;
+        }
+
+        loadPage( `${ startPage }.html`, !!queryPage );
 
     </script>
     </body>
