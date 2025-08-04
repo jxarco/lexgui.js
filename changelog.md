@@ -126,10 +126,10 @@ Added `hover:scale` CSS selectors.
 ## 0.6.5
 
 Timeline:
-  - Refactored undo-redo.
-  - ClipsTimeline: added an argument on `addClip` to start search at a particular track.
-  - Documentation updated.
-  - Minor fixes.
+- Refactored undo-redo.
+- ClipsTimeline: added an argument on `addClip` to start search at a particular track.
+- Documentation updated.
+- Minor fixes.
 
 Use sidebar inside Sheet element on mobile.
 Removed LX.UTILS. Moved methods to global namespace `LX`.
@@ -138,11 +138,11 @@ Minor fixes in example demos.
 ## 0.6.4
 
 Timeline:
-  - Paste refactor.
-  - `onUpdateTrack` now expects an array of track indices as argument.
-  - Added root.
-  - Added documentation.
-  - Fixed example.
+- Paste refactor.
+- `onUpdateTrack` now expects an array of track indices as argument.
+- Added root.
+- Added documentation.
+- Fixed example.
 
 Widgets:
 - Centered Map2D initial position.
@@ -194,9 +194,6 @@ Improved robustness of `LX.getSupportedDOMName`.
 
 `LX.init` now has to called using `await`.
 Use Dropdowns elements in menubar.
-Remove legacy:
-  - Removed `options.selected` in ComboButtons Widget.
-  - Removed FA icons.
 Added LucideIcons as main icon provider.
 `LX.makeIcon`: Support for solid variants in supported icons (also using `iconName@variant`).
 `LX.registerIcon`: Support for classes and attributes for svg and path elements.
@@ -209,14 +206,18 @@ Added support for right sidebar.
 Restyled Number Widget units to avoid layout trashing when recomputing units span location.
 
 CodeEditor:
-  - Remove language images and use SVG instead.
-  - Scrolling fixes.
-  - Fixed minor css issues.
+- Remove language images and use SVG instead.
+- Scrolling fixes.
+- Fixed minor css issues.
+
+Remove legacy:
+- Removed `options.selected` in ComboButtons Widget.
+- Removed FA icons.
 
 Docs updated:
-  - Added interactive code examples for widgets.
-  - Improved widget list parameters and options.
-  - Added live examples for sidebar and menubar.
+- Added interactive code examples for widgets.
+- Improved widget list parameters and options.
+- Added live examples for sidebar and menubar.
 
 ## 0.5.11
 
@@ -564,8 +565,8 @@ Minor bug fixes.
 Timeline: Fixed timeline signals and added callbacks
 
 Number/Vector widgets:
-    - Support for onPress&onRelease for catching mouse events.
-    - Added `setLimits` for min, max, step parameters.
+- Support for onPress&onRelease for catching mouse events.
+- Added `setLimits` for min, max, step parameters.
 
 Added Size Widget (N dimension number widget).
 Minor bug fixes.
