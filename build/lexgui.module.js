@@ -4718,6 +4718,28 @@ function deleteElement( element )
 LX.deleteElement = deleteElement;
 
 /**
+ * @method toCamelCase
+ * @param {String} str
+ */
+function toCamelCase( str )
+{
+    return str.toLowerCase().replace(/[^a-zA-Z0-9]+(.)/g, (_, chr) => chr.toUpperCase());
+}
+
+LX.toCamelCase = toCamelCase;
+
+/**
+ * @method toTitleCase
+ * @param {String} str
+ */
+function toTitleCase( str )
+{
+    return str.replace(/-/g, " ").toLowerCase().replace(/\b\w/g, char => char.toUpperCase());
+}
+
+LX.toTitleCase = toTitleCase;
+
+/**
  * @method getSupportedDOMName
  * @description Convert a text string to a valid DOM name
  * @param {String} text Original text
@@ -5480,6 +5502,56 @@ function makeKbd( keys, useSpecialKeys = true, extraClass = "" )
 }
 
 LX.makeKbd = makeKbd;
+
+/**
+ * @method makeBreadcrumb
+ * @description Displays the path to the current resource using a hierarchy
+ * @param {Array} items
+ * @param {Object} options
+ */
+function makeBreadcrumb( items, options = {} )
+{
+    const breadcrumb = LX.makeContainer( ["auto", "auto"], "flex flex-row gap-1" );
+
+    options.maxItems ?? 4;
+
+    for( let i = 0; i < items.length; ++i )
+    {
+        const item = items[ i ];
+        console.assert( item.title, "Breadcrumb item must have a title!" );
+
+        if( i != 0 )
+        {
+            const icon = LX.makeIcon( "ChevronRight", { svgClass: "sm fg-secondary separator" } );
+            breadcrumb.appendChild( icon );
+        }
+
+        const lastElement = ( i == items.length - 1 );
+        const breadcrumbItem = LX.makeContainer( ["auto", "auto"], `p-1 ${ lastElement ? "" : "fg-secondary" }` );
+        breadcrumb.appendChild( breadcrumbItem );
+
+        if( item.url !== undefined )
+        {
+            breadcrumbItem.innerHTML += `<a class="decoration-none fg-${ lastElement ? "primary" : "secondary" }" href="${ item.url }">${ item.title }</a>`;
+        }
+        else if( item.items !== undefined )
+        {
+            const bDropdownTrigger = LX.makeContainer( ["auto", "auto"], `${ lastElement ? "" : "fg-secondary" }`, item.title );
+            bDropdownTrigger.listen( "click", (e) => {
+                new LX.DropdownMenu( e.target, item.items, { side: "bottom", align: "start" });
+            } );
+            breadcrumbItem.appendChild( bDropdownTrigger );
+        }
+        else
+        {
+            breadcrumbItem.innerHTML += item.title;
+        }
+    }
+
+    return breadcrumb;
+}
+
+LX.makeBreadcrumb = makeBreadcrumb;
 
 /**
  * @method makeIcon
