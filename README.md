@@ -21,12 +21,14 @@ NPM Package: [npmjs.com/package/lexgui](https://www.npmjs.com/package/lexgui)
   </tr>
 </table>
 
-## Component Features
+## Extension Features
 
-- [x] Asset Browser
 - [x] Timeline
 - [x] Code Editor
-- [ ] Node Graphs (WIP)
+- [x] Docs Maker
+- [ ] Node Graph Editor (WIP)
+- [ ] Video Editor (WIP)
+- [ ] Immediate UI (WIP)
 
 ## Quick start
 
