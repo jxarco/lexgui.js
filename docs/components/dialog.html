@@ -1,8 +1,8 @@
 <script type="text/javascript">
 
-    MAKE_HEADER( "Windowed Dialogs.", "h1", "dialogs" );
+    MAKE_HEADER( "Dialogs.", "h1", "dialogs" );
 
-    MAKE_PARAGRAPH( `LexGUI allows to create Dialogs, also known as modal windows or pop-ups, allowing developers to display
+    MAKE_PARAGRAPH( `Also known as modal windows or pop-ups, allow developers to display
     important information, gather user input, or prompt for user actions without navigating away from the current context.
     The possible dialogs are the following:` );
 
@@ -17,6 +17,8 @@
         ["Prompt", "Classic prompt pop-up to gather user information"],
         ["Pop-up", "Classic prompt pop-up to gather user information that fades out after a while"]
     ] );
+
+    MAKE_HEADER("Quick Usage", "h2");
 
     MAKE_PARAGRAPH( `To fill the dialog content, a panel is automatically created inside the root so it's possible 
     to begin branching and adding components. The same way as menubars, you can fill the panel inside the creation callback. The following code creates a classic dialog:` );
@@ -37,18 +39,31 @@
     MAKE_PARAGRAPH( `For pop-ups, you can use:` );
     MAKE_CODE( `LX.@[mtd]popup@(@"Message"@, @"Title"@, options);` );
 
+    MAKE_HEADER("API Reference", "h2");
+
     MAKE_PARAGRAPH( `The possible ${INLINE_CODE("options (Object)")} when creating dialogs are the following:` );
-    MAKE_CODE_BULLET_LIST( [
-        ["id", "String", "DOM Id of the root element"],
-        ["className", "String", "DOM Class added to the root element"],
-        ["closable", "String", "Set if the dialog can be closed manually"],
-        ["onBeforeClose", "Function", "Function called before the dialog is closed"],
-        ["onclose", "Function", "Function to override closing behaviour"],
-        ["position", "Array", "[x, y] representing left-top values relative to the main LX root area"],
-        ["size", "Array", "[width, height] in css"],
-        ["draggable", "Boolean", `Set the pop-up as draggable. In case of pocket dialogs it's ${INLINE_CODE("false")} by default (they are dockables)` ],
-        ["modal", "Boolean", `Show black modal as background when dialog is open. Default is ${INLINE_CODE("false")}` ],
-    ] );
+
+    {
+        const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
+        const panel = area.addPanel();
+        content.appendChild( area.root );
+        panel.addTable( null, {
+            head: [ "Option", "Type", "Description", "Default" ],
+            body: [
+                ["id", "String", "DOM Id of the root element", "—"],
+                ["className", "String", "DOM Class added to the root element", "—"],
+                ["closable", "String", "Set if the dialog can be closed manually", "true"],
+                ["onBeforeClose", "Function", "Function called before the dialog is closed", "—"],
+                ["onclose", "Function", "Function to override closing behaviour", "—"],
+                ["position", "Array", "[x, y] representing left-top values relative to the main LX root area", "—"],
+                ["size", "Array", "[width, height] in css", "—"],
+                ["draggable", "Boolean", `Set the pop-up as draggable. In case of pocket dialogs it's ${INLINE_CODE("false")} by default (they are dockables)` , "true"],
+                ["modal", "Boolean", `Show backdrop modal as background when dialog is open`, "false"],
+            ].map( v => {
+                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+    }
 
     MAKE_PARAGRAPH( `Prompts:` );
     MAKE_CODE_BULLET_LIST( [

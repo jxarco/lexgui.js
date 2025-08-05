@@ -281,8 +281,9 @@
         const generalComponents = [ "Area Overlay Buttons", "Button", "Combo Buttons", "Radio Group" ];
         const dataInputComponents = [ "Checkbox", "Color", "Curve", "Custom", "Date Picker", "File", "Form", "Item Array", "Layers", "Map 2D", "Number", "OTP Input", "Pad", "Range", "Select", "Size", "Tags", "Text", "Text Area", "Toggle", "Vector" ];
         const dataDisplayComponents = [ "Asset View", "Code Snippet", "Data Tree", "List", "Table", "Title" ];
-        const feedbackComponents = [ "Dialog", "Progress", "Skeleton", "Toast", "Tour" ];
+        const feedbackComponents = [ "Progress", "Skeleton", "Toast" ];
         const navigationComponents = [ "Breadcrumb", "Dropdown", "Menubar", "Sidebar", "Tab Sections", "Tabs" ];
+        const overlayComponents = [ "Dialog", "Sheet", "Tour" ];
 
         const componentVersion = {
             "Area Overlay Buttons": "6.10",
@@ -293,6 +294,7 @@
             "Radio Group": "4.0",
             "Range": "3.0",
             "Sidebar": "4.0",
+            "Sheet": "6.0",
             "Skeleton": "7.0",
             "Tour": "6.11"
         };
@@ -366,6 +368,17 @@
                 const url = c.toLowerCase().replace( /\s/g, '-') + ".html";
                 m.add( "Navigation/" + c, {
                     callback: open.bind( this, "components/" + url, ["Components", "Navigation"] ),
+                    content: componentVersion[ c ] ? LX.badge( componentVersion[ c ], badgeClass, { asElement: true, callback: open.bind( this, "changelog.html", `#${ componentVersion[ c ] }` ) }) : undefined
+                } );
+
+                LX.registerCommandbarEntry( c, open.bind( this, "components/" + url, null ) );
+            }
+            m.add( "Overlay", { skipSelection: true } );
+            for( const c of overlayComponents )
+            {
+                const url = c.toLowerCase().replace( /\s/g, '-') + ".html";
+                m.add( "Overlay/" + c, {
+                    callback: open.bind( this, "components/" + url, ["Components", "Overlay"] ),
                     content: componentVersion[ c ] ? LX.badge( componentVersion[ c ], badgeClass, { asElement: true, callback: open.bind( this, "changelog.html", `#${ componentVersion[ c ] }` ) }) : undefined
                 } );
 
