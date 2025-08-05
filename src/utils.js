@@ -1450,6 +1450,7 @@ function asTooltip( trigger, content, options = {} )
     trigger.dataset[ "disableTooltip" ] = !( options.active ?? true );
 
     let tooltipDom = null;
+    let tooltipParent = LX.root;
 
     trigger.addEventListener( "mouseenter", function(e) {
 
@@ -1458,11 +1459,21 @@ function asTooltip( trigger, content, options = {} )
             return;
         }
 
-        LX.root.querySelectorAll( ".lextooltip" ).forEach( e => e.remove() );
-
         tooltipDom = document.createElement( "div" );
         tooltipDom.className = "lextooltip";
         tooltipDom.innerHTML = content;
+
+        const nestedDialog = trigger.closest( "dialog" );
+        if( nestedDialog && nestedDialog.dataset[ "modal" ] == 'true' )
+        {
+            tooltipParent = nestedDialog;
+        }
+
+        // Remove other first
+        LX.root.querySelectorAll( ".lextooltip" ).forEach( e => e.remove() );
+
+        // Append new tooltip
+        tooltipParent.appendChild( tooltipDom );
 
         LX.doAsync( () => {
 
@@ -1498,11 +1509,16 @@ function asTooltip( trigger, content, options = {} )
             position[ 0 ] = LX.clamp( position[ 0 ], 0, window.innerWidth - tooltipDom.offsetWidth - 4 );
             position[ 1 ] = LX.clamp( position[ 1 ], 0, window.innerHeight - tooltipDom.offsetHeight - 4 );
 
+            if( tooltipParent instanceof HTMLDialogElement )
+            {
+                let parentRect = tooltipParent.getBoundingClientRect();
+                position[ 0 ] -= parentRect.x;
+                position[ 1 ] -= parentRect.y;
+            }
+
             tooltipDom.style.left = `${ position[ 0 ] }px`;
             tooltipDom.style.top = `${ position[ 1 ] }px`;
-        } )
-
-        LX.root.appendChild( tooltipDom );
+        } );
     } );
 
     trigger.addEventListener( "mouseleave", function(e) {

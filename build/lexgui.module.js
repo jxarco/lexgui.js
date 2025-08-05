@@ -761,7 +761,18 @@ class Popover {
         this.root.dataset["side"] = this.side;
         this.root.tabIndex = "1";
         this.root.className = "lexpopover";
-        LX.root.appendChild( this.root );
+
+        const nestedDialog = trigger.closest( "dialog" );
+        if( nestedDialog && nestedDialog.dataset[ "modal" ] == 'true' )
+        {
+            this._parent = nestedDialog;
+        }
+        else
+        {
+            this._parent = LX.root;
+        }
+
+        this._parent.appendChild( this.root );
 
         this.root.addEventListener( "keydown", (e) => {
             if( e.key == "Escape" )
@@ -881,6 +892,13 @@ class Popover {
         {
             position[ 0 ] = LX.clamp( position[ 0 ], 0, window.innerWidth - this.root.offsetWidth - this._windowPadding );
             position[ 1 ] = LX.clamp( position[ 1 ], 0, window.innerHeight - this.root.offsetHeight - this._windowPadding );
+        }
+
+        if( this._parent instanceof HTMLDialogElement )
+        {
+            let parentRect = this._parent.getBoundingClientRect();
+            position[ 0 ] -= parentRect.x;
+            position[ 1 ] -= parentRect.y;
         }
 
         this.root.style.left = `${ position[ 0 ] }px`;
@@ -1074,7 +1092,18 @@ class DropdownMenu {
         this.root.dataset["side"] = this.side;
         this.root.tabIndex = "1";
         this.root.className = "lexdropdownmenu";
-        LX.root.appendChild( this.root );
+
+        const nestedDialog = trigger.closest( "dialog" );
+        if( nestedDialog && nestedDialog.dataset[ "modal" ] == 'true' )
+        {
+            this._parent = nestedDialog;
+        }
+        else
+        {
+            this._parent = LX.root;
+        }
+
+        this._parent.appendChild( this.root );
 
         this._create( this._items );
 
@@ -1110,7 +1139,7 @@ class DropdownMenu {
         document.body.removeEventListener( "mousedown", this._onClick, true );
         document.body.removeEventListener( "focusin", this._onClick, true );
 
-        LX.root.querySelectorAll( ".lexdropdownmenu" ).forEach( m => { m.remove(); } );
+        this._parent.querySelectorAll( ".lexdropdownmenu" ).forEach( m => { m.remove(); } );
 
         DropdownMenu.currentMenu = null;
 
@@ -1135,13 +1164,21 @@ class DropdownMenu {
             newParent.className = "lexdropdownmenu";
             newParent.dataset["id"] = parentDom.dataset["id"];
             newParent.dataset["side"] = "right"; // submenus always come from the right
-            LX.root.appendChild( newParent );
+            this._parent.appendChild( newParent );
 
             newParent.currentParent = parentDom;
             parentDom = newParent;
 
             LX.doAsync( () => {
+
                 const position = [ parentRect.x + parentRect.width, parentRect.y ];
+
+                if( this._parent instanceof HTMLDialogElement )
+                {
+                    let rootParentRect = this._parent.getBoundingClientRect();
+                    position[ 0 ] -= rootParentRect.x;
+                    position[ 1 ] -= rootParentRect.y;
+                }
 
                 if( this.avoidCollisions )
                 {
@@ -1293,7 +1330,7 @@ class DropdownMenu {
                 p = p.currentParent?.parentElement;
             }
 
-            LX.root.querySelectorAll( ".lexdropdownmenu" ).forEach( m => {
+            this._parent.querySelectorAll( ".lexdropdownmenu" ).forEach( m => {
                 if( !path.includes( m.dataset["id"] ) )
                 {
                     m.currentParent.built = false;
@@ -1389,6 +1426,13 @@ class DropdownMenu {
         {
             position[ 0 ] = LX.clamp( position[ 0 ], 0, window.innerWidth - this.root.offsetWidth - this._windowPadding );
             position[ 1 ] = LX.clamp( position[ 1 ], 0, window.innerHeight - this.root.offsetHeight - this._windowPadding );
+        }
+
+        if( this._parent instanceof HTMLDialogElement )
+        {
+            let parentRect = this._parent.getBoundingClientRect();
+            position[ 0 ] -= parentRect.x;
+            position[ 1 ] -= parentRect.y;
         }
 
         this.root.style.left = `${ position[ 0 ] }px`;
@@ -2685,6 +2729,7 @@ class Dialog {
         let root = document.createElement('dialog');
         root.className = "lexdialog " + (options.className ?? "");
         root.id = options.id ?? "dialog" + Dialog._last_id++;
+        root.dataset["modal"] = modal;
         LX.root.appendChild( root );
 
         LX.doAsync( () => {
@@ -2984,9 +3029,6 @@ class ContextMenu {
 
         this.root = document.createElement( "div" );
         this.root.className = "lexcontextmenu";
-        this.root.style.left = ( event.x - 48 ) + "px";
-        this.root.style.top = ( event.y - 8 ) + "px";
-
         this.root.addEventListener("mouseleave", function() {
             this.remove();
         });
@@ -3002,31 +3044,57 @@ class ContextMenu {
             item[ "icon" ] = options.icon;
             this.items.push( item );
         }
+
+        const nestedDialog = event.target.closest( "dialog" );
+        if( nestedDialog && nestedDialog.dataset[ "modal" ] == 'true' )
+        {
+            this._parent = nestedDialog;
+        }
+        else
+        {
+            this._parent = LX.root;
+        }
+
+        this._parent.appendChild( this.root );
+
+        // Set position based on parent
+        const position = [ event.x - 48, event.y - 8 ];
+        if( this._parent instanceof HTMLDialogElement )
+        {
+            let parentRect = this._parent.getBoundingClientRect();
+            position[ 0 ] -= parentRect.x;
+            position[ 1 ] -= parentRect.y;
+        }
+
+        this.root.style.left = `${ position[ 0 ] }px`;
+        this.root.style.top = `${ position[ 1 ] }px`;
     }
 
     _adjustPosition( div, margin, useAbsolute = false ) {
 
         let rect = div.getBoundingClientRect();
+        let left = parseInt( div.style.left );
+        let top = parseInt( div.style.top );
 
         if( !useAbsolute )
         {
             let width = rect.width;
             if( rect.left < 0 )
             {
-                div.style.left = margin + "px";
+                left = margin;
             }
             else if( window.innerWidth - rect.right < 0 )
             {
-                div.style.left = (window.innerWidth - width - margin) + "px";
+                left = (window.innerWidth - width - margin);
             }
 
             if( rect.top < 0 )
             {
-                div.style.top = margin + "px";
+                top = margin;
             }
             else if( (rect.top + rect.height) > window.innerHeight )
             {
-                div.style.top = (window.innerHeight - rect.height - margin) + "px";
+                top = (window.innerHeight - rect.height - margin);
             }
         }
         else
@@ -3034,15 +3102,18 @@ class ContextMenu {
             let dt = window.innerWidth - rect.right;
             if( dt < 0 )
             {
-                div.style.left = div.offsetLeft + (dt - margin) + "px";
+                left = div.offsetLeft + (dt - margin);
             }
 
             dt = window.innerHeight - (rect.top + rect.height);
             if( dt < 0 )
             {
-                div.style.top = div.offsetTop + (dt - margin + 20 ) + "px";
+                top = div.offsetTop + (dt - margin + 20 );
             }
         }
+
+        div.style.left = `${ left }px`;
+        div.style.top = `${ top }px`;
     }
 
     _createSubmenu( o, k, c, d ) {
@@ -3264,7 +3335,6 @@ LX.ContextMenu = ContextMenu;
 function addContextMenu( title, event, callback, options )
 {
     const menu = new ContextMenu( event, title, options );
-    LX.root.appendChild( menu.root );
 
     if( callback )
     {
@@ -6090,6 +6160,7 @@ function asTooltip( trigger, content, options = {} )
     trigger.dataset[ "disableTooltip" ] = !( options.active ?? true );
 
     let tooltipDom = null;
+    let tooltipParent = LX.root;
 
     trigger.addEventListener( "mouseenter", function(e) {
 
@@ -6098,11 +6169,21 @@ function asTooltip( trigger, content, options = {} )
             return;
         }
 
-        LX.root.querySelectorAll( ".lextooltip" ).forEach( e => e.remove() );
-
         tooltipDom = document.createElement( "div" );
         tooltipDom.className = "lextooltip";
         tooltipDom.innerHTML = content;
+
+        const nestedDialog = trigger.closest( "dialog" );
+        if( nestedDialog && nestedDialog.dataset[ "modal" ] == 'true' )
+        {
+            tooltipParent = nestedDialog;
+        }
+
+        // Remove other first
+        LX.root.querySelectorAll( ".lextooltip" ).forEach( e => e.remove() );
+
+        // Append new tooltip
+        tooltipParent.appendChild( tooltipDom );
 
         LX.doAsync( () => {
 
@@ -6138,11 +6219,16 @@ function asTooltip( trigger, content, options = {} )
             position[ 0 ] = LX.clamp( position[ 0 ], 0, window.innerWidth - tooltipDom.offsetWidth - 4 );
             position[ 1 ] = LX.clamp( position[ 1 ], 0, window.innerHeight - tooltipDom.offsetHeight - 4 );
 
+            if( tooltipParent instanceof HTMLDialogElement )
+            {
+                let parentRect = tooltipParent.getBoundingClientRect();
+                position[ 0 ] -= parentRect.x;
+                position[ 1 ] -= parentRect.y;
+            }
+
             tooltipDom.style.left = `${ position[ 0 ] }px`;
             tooltipDom.style.top = `${ position[ 1 ] }px`;
         } );
-
-        LX.root.appendChild( tooltipDom );
     } );
 
     trigger.addEventListener( "mouseleave", function(e) {
@@ -15629,8 +15715,12 @@ LX.AssetViewEvent = AssetViewEvent;
 
 class AssetView {
 
-    static LAYOUT_CONTENT       = 0;
+    static LAYOUT_GRID          = 0;
     static LAYOUT_LIST          = 1;
+
+    static CONTENT_SORT_ASC     = 0;
+    static CONTENT_SORT_DESC    = 1;
+
     static MAX_PAGE_ELEMENTS    = 50;
 
     /**
@@ -15639,7 +15729,8 @@ class AssetView {
     constructor( options = {} ) {
 
         this.rootPath = "https://raw.githubusercontent.com/jxarco/lexgui.js/master/";
-        this.layout = options.layout ?? AssetView.LAYOUT_CONTENT;
+        this.layout = options.layout ?? AssetView.LAYOUT_GRID;
+        this.sortMode = options.sortMode ?? AssetView.CONTENT_SORT_ASC;
         this.contentPage = 1;
 
         if( options.rootPath )
@@ -15757,9 +15848,9 @@ class AssetView {
             this.leftPanel.clear();
         }
 
-        if( this.rightPanel )
+        if( this.toolsPanel )
         {
-            this.rightPanel.clear();
+            this.toolsPanel.clear();
         }
     }
 
@@ -15871,7 +15962,7 @@ class AssetView {
     _setContentLayout( layoutMode ) {
 
         this.layout = layoutMode;
-
+        this.toolsPanel.refresh();
         this._refreshContent();
     }
 
@@ -15881,42 +15972,34 @@ class AssetView {
 
     _createContentPanel( area ) {
 
-        if( this.rightPanel )
+        if( this.toolsPanel )
         {
-            this.rightPanel.clear();
+            this.contentPanel.clear();
         }
         else
         {
-            this.rightPanel = area.addPanel({ className: 'lexassetcontentpanel flex flex-col overflow-hidden' });
+            this.toolsPanel = area.addPanel({ className: 'flex flex-col overflow-hidden' });
+            this.contentPanel = area.addPanel({ className: 'lexassetcontentpanel flex flex-col overflow-hidden' });
         }
 
-        const on_sort = ( value, event ) => {
-            const cmenu = LX.addContextMenu( "Sort by", event, c => {
-                c.add("Name", () => this._sortData('id') );
-                c.add("Type", () => this._sortData('type') );
-                c.add("");
-                c.add("Ascending", () => this._sortData() );
-                c.add("Descending", () => this._sortData(null, true) );
-            } );
-            const parent = this.parent.root.parentElement;
-            if( parent.classList.contains('lexdialog') )
-            {
-                cmenu.root.style.zIndex = (+getComputedStyle( parent ).zIndex) + 1;
-            }
+        const _onSort = ( value, event ) => {
+            new LX.DropdownMenu( event.target, [
+                { name: "Name", icon: "ALargeSmall", callback: () => this._sortData( "id" ) },
+                { name: "Type", icon: "Type", callback: () => this._sortData( "type" ) },
+                null,
+                { name: "Ascending", icon: "SortAsc", callback: () => this._sortData( null, AssetView.CONTENT_SORT_ASC ) },
+                { name: "Descending", icon: "SortDesc", callback: () => this._sortData( null, AssetView.CONTENT_SORT_DESC ) }
+            ], { side: "right", align: "start" });
         };
 
-        const on_change_view = ( value, event ) => {
-            const cmenu = LX.addContextMenu( "Layout", event, c => {
-                c.add("Content", () => this._setContentLayout( AssetView.LAYOUT_CONTENT ) );
-                c.add("");
-                c.add("List", () => this._setContentLayout( AssetView.LAYOUT_LIST ) );
-            } );
-            const parent = this.parent.root.parentElement;
-            if( parent.classList.contains('lexdialog') )
-                cmenu.root.style.zIndex = (+getComputedStyle( parent ).zIndex) + 1;
+        const _onChangeView = ( value, event ) => {
+            new LX.DropdownMenu( event.target, [
+                { name: "Grid", icon: "LayoutGrid", callback: () => this._setContentLayout( AssetView.LAYOUT_GRID ) },
+                { name: "List", icon: "LayoutList", callback: () => this._setContentLayout( AssetView.LAYOUT_LIST ) }
+            ], { side: "right", align: "start" });
         };
 
-        const on_change_page = ( value, event ) => {
+        const _onChangePage = ( value, event ) => {
             if( !this.allowNextPage )
             {
                 return;
@@ -15932,64 +16015,71 @@ class AssetView {
             }
         };
 
-        this.rightPanel.sameLine();
-        this.rightPanel.addSelect( "Filter", this.allowedTypes, this.allowedTypes[ 0 ], v => this._refreshContent.call(this, null, v), { width: "30%", minWidth: "128px" } );
-        this.rightPanel.addText( null, this.searchValue ?? "", v => this._refreshContent.call(this, v, null), { placeholder: "Search assets.." } );
-        this.rightPanel.addButton( null, "", on_sort.bind(this), { title: "Sort", icon: "ArrowUpNarrowWide" } );
-        this.rightPanel.addButton( null, "", on_change_view.bind(this), { title: "View", icon: "GripHorizontal" } );
-        // Content Pages
-        this.rightPanel.addButton( null, "", on_change_page.bind(this, -1), { title: "Previous Page", icon: "ChevronsLeft", className: "ml-auto" } );
-        this.rightPanel.addButton( null, "", on_change_page.bind(this, 1), { title: "Next Page", icon: "ChevronsRight" } );
-        const textString = "Page " + this.contentPage + " / " + ((((this.currentData.length - 1) / AssetView.MAX_PAGE_ELEMENTS )|0) + 1);
-        this.rightPanel.addText(null, textString, null, {
-            inputClass: "nobg", disabled: true, signal: "@on_page_change", maxWidth: "16ch" }
-        );
-        this.rightPanel.endLine();
-
-        if( !this.skipBrowser )
-        {
-            this.rightPanel.sameLine();
-            this.rightPanel.addComboButtons( null, [
-                {
-                    value: "Left",
-                    icon: "ArrowLeft",
-                    callback: domEl => {
-                        if(!this.prevData.length) return;
-                        this.nextData.push( this.currentData );
-                        this.currentData = this.prevData.pop();
-                        this._refreshContent();
-                        this._updatePath( this.currentData );
+        this.toolsPanel.refresh = () => {
+            this.toolsPanel.clear();
+            this.toolsPanel.sameLine();
+            this.toolsPanel.addSelect( "Filter", this.allowedTypes, this.filter ?? this.allowedTypes[ 0 ], v => {
+                this._refreshContent( null, v );
+            }, { width: "30%", minWidth: "128px" } );
+            this.toolsPanel.addText( null, this.searchValue ?? "", v => this._refreshContent.call(this, v, null), { placeholder: "Search assets.." } );
+            this.toolsPanel.addButton( null, "", _onSort.bind(this), { title: "Sort", tooltip: true, icon: ( this.sortMode === AssetView.CONTENT_SORT_ASC ) ? "SortAsc" : "SortDesc" } );
+            this.toolsPanel.addButton( null, "", _onChangeView.bind(this), { title: "View", tooltip: true, icon: ( this.layout === AssetView.LAYOUT_GRID ) ? "LayoutGrid" : "LayoutList" } );
+            // Content Pages
+            this.toolsPanel.addButton( null, "", _onChangePage.bind(this, -1), { title: "Previous Page", icon: "ChevronsLeft", className: "ml-auto" } );
+            this.toolsPanel.addButton( null, "", _onChangePage.bind(this, 1), { title: "Next Page", icon: "ChevronsRight" } );
+            const textString = "Page " + this.contentPage + " / " + ((((this.currentData.length - 1) / AssetView.MAX_PAGE_ELEMENTS )|0) + 1);
+            this.toolsPanel.addText(null, textString, null, {
+                inputClass: "nobg", disabled: true, signal: "@on_page_change", maxWidth: "16ch" }
+            );
+    
+            if( !this.skipBrowser )
+            {
+                this.toolsPanel.addComboButtons( null, [
+                    {
+                        value: "Left",
+                        icon: "ArrowLeft",
+                        callback: domEl => {
+                            if(!this.prevData.length) return;
+                            this.nextData.push( this.currentData );
+                            this.currentData = this.prevData.pop();
+                            this._refreshContent();
+                            this._updatePath( this.currentData );
+                        }
+                    },
+                    {
+                        value: "Right",
+                        icon: "ArrowRight",
+                        callback: domEl => {
+                            if(!this.nextData.length) return;
+                            this.prevData.push( this.currentData );
+                            this.currentData = this.nextData.pop();
+                            this._refreshContent();
+                            this._updatePath( this.currentData );
+                        }
+                    },
+                    {
+                        value: "Refresh",
+                        icon: "Refresh",
+                        callback: domEl => { this._refreshContent(); }
                     }
-                },
-                {
-                    value: "Right",
-                    icon: "ArrowRight",
-                    callback: domEl => {
-                        if(!this.nextData.length) return;
-                        this.prevData.push( this.currentData );
-                        this.currentData = this.nextData.pop();
-                        this._refreshContent();
-                        this._updatePath( this.currentData );
-                    }
-                },
-                {
-                    value: "Refresh",
-                    icon: "Refresh",
-                    callback: domEl => { this._refreshContent(); }
-                }
-            ], { noSelection: true } );
+                ], { noSelection: true } );
+    
+                this.toolsPanel.addText(null, this.path.join('/'), null, {
+                    inputClass: "nobg", disabled: true, signal: "@on_folder_change",
+                    style: { fontWeight: "600", fontSize: "15px" }
+                });
+            }
+    
+            this.toolsPanel.endLine();
+        };
 
-            this.rightPanel.addText(null, this.path.join('/'), null, {
-                inputClass: "nobg", disabled: true, signal: "@on_folder_change",
-                style: { fontWeight: "600", fontSize: "15px" }
-            });
+        this.toolsPanel.refresh();
 
-            this.rightPanel.endLine();
-        }
+        // Start content panel
 
         this.content = document.createElement('ul');
         this.content.className = "lexassetscontent";
-        this.rightPanel.root.appendChild(this.content);
+        this.contentPanel.attach( this.content );
 
         this.content.addEventListener('dragenter', function( e ) {
             e.preventDefault();
@@ -16012,12 +16102,12 @@ class AssetView {
 
     _refreshContent( searchValue, filter ) {
 
-        const isContentLayout = ( this.layout == AssetView.LAYOUT_CONTENT ); // default
+        const isGridLayout = ( this.layout == AssetView.LAYOUT_GRID ); // default
 
         this.filter = filter ?? ( this.filter ?? "None" );
         this.searchValue = searchValue ?? (this.searchValue ?? "");
         this.content.innerHTML = "";
-        this.content.className = (isContentLayout ? "lexassetscontent" : "lexassetscontent list");
+        this.content.className = (isGridLayout ? "lexassetscontent" : "lexassetscontent list");
         let that = this;
 
         const _addItem = function(item) {
@@ -16040,7 +16130,7 @@ class AssetView {
 
                 itemEl.addEventListener("mousemove", e => {
 
-                    if( !isContentLayout )
+                    if( !isGridLayout )
                     {
                         return;
                     }
@@ -16069,14 +16159,14 @@ class AssetView {
                 });
 
                 itemEl.addEventListener("mouseenter", () => {
-                    if( isContentLayout )
+                    if( isGridLayout )
                     {
                         desc.style.display = "unset";
                     }
                 });
 
                 itemEl.addEventListener("mouseleave", () => {
-                    if( isContentLayout )
+                    if( isGridLayout )
                     {
                         setTimeout( () => {
                             desc.style.display = "none";
@@ -16120,11 +16210,11 @@ class AssetView {
                 let preview = null;
                 const hasImage = item.src && (['png', 'jpg'].indexOf( LX.getExtension( item.src ) ) > -1 || item.src.includes("data:image/") ); // Support b64 image as src
 
-                if( hasImage || isFolder || !isContentLayout)
+                if( hasImage || isFolder || !isGridLayout)
                 {
                     preview = document.createElement('img');
                     let real_src = item.unknown_extension ? that.rootPath + "images/file.png" : (isFolder ? that.rootPath + "images/folder.png" : item.src);
-                    preview.src = (isContentLayout || isFolder ? real_src : that.rootPath + "images/file.png");
+                    preview.src = (isGridLayout || isFolder ? real_src : that.rootPath + "images/file.png");
                     itemEl.appendChild( preview );
                 }
                 else
@@ -16385,16 +16475,20 @@ class AssetView {
         }
     }
 
-    _sortData( sort_by, sort_descending = false ) {
+    _sortData( sortBy, sortMode ) {
 
-        sort_by = sort_by ?? (this._lastSortBy ?? 'id');
-        this.currentData = this.currentData.sort( (a, b) => {
-            var r = sort_descending ? b[sort_by].localeCompare(a[sort_by]) : a[sort_by].localeCompare(b[sort_by]);
-            if(r == 0) r = sort_descending ? b['id'].localeCompare(a['id']) : a['id'].localeCompare(b['id']);
+        sortBy = sortBy ?? ( this._lastSortBy ?? 'id' );
+        sortMode = sortMode ?? this.sortMode;
+        const sortDesc = ( sortMode === AssetView.CONTENT_SORT_DESC );
+        this.currentData = this.currentData.sort( ( a, b ) => {
+            var r = sortDesc ? b[ sortBy ].localeCompare( a[ sortBy ] ) : a[ sortBy ].localeCompare( b[ sortBy ] );
+            if( r == 0 ) r = sortDesc ? b['id'].localeCompare( a['id'] ) : a[ 'id' ].localeCompare( b[ 'id' ] );
             return r;
         } );
 
-        this._lastSortBy = sort_by;
+        this._lastSortBy = sortBy;
+        this.sortMode = sortMode;
+        this.toolsPanel.refresh();
         this._refreshContent();
     }
 

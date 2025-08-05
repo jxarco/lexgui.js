@@ -765,7 +765,18 @@ class Popover {
         this.root.dataset["side"] = this.side;
         this.root.tabIndex = "1";
         this.root.className = "lexpopover";
-        LX.root.appendChild( this.root );
+
+        const nestedDialog = trigger.closest( "dialog" );
+        if( nestedDialog && nestedDialog.dataset[ "modal" ] == 'true' )
+        {
+            this._parent = nestedDialog;
+        }
+        else
+        {
+            this._parent = LX.root;
+        }
+
+        this._parent.appendChild( this.root );
 
         this.root.addEventListener( "keydown", (e) => {
             if( e.key == "Escape" )
@@ -889,6 +900,13 @@ class Popover {
         {
             position[ 0 ] = LX.clamp( position[ 0 ], 0, window.innerWidth - this.root.offsetWidth - this._windowPadding );
             position[ 1 ] = LX.clamp( position[ 1 ], 0, window.innerHeight - this.root.offsetHeight - this._windowPadding );
+        }
+
+        if( this._parent instanceof HTMLDialogElement )
+        {
+            let parentRect = this._parent.getBoundingClientRect();
+            position[ 0 ] -= parentRect.x;
+            position[ 1 ] -= parentRect.y;
         }
 
         this.root.style.left = `${ position[ 0 ] }px`;
@@ -1086,7 +1104,18 @@ class DropdownMenu {
         this.root.dataset["side"] = this.side;
         this.root.tabIndex = "1";
         this.root.className = "lexdropdownmenu";
-        LX.root.appendChild( this.root );
+
+        const nestedDialog = trigger.closest( "dialog" );
+        if( nestedDialog && nestedDialog.dataset[ "modal" ] == 'true' )
+        {
+            this._parent = nestedDialog;
+        }
+        else
+        {
+            this._parent = LX.root;
+        }
+
+        this._parent.appendChild( this.root );
 
         this._create( this._items );
 
@@ -1122,7 +1151,7 @@ class DropdownMenu {
         document.body.removeEventListener( "mousedown", this._onClick, true );
         document.body.removeEventListener( "focusin", this._onClick, true );
 
-        LX.root.querySelectorAll( ".lexdropdownmenu" ).forEach( m => { m.remove(); } );
+        this._parent.querySelectorAll( ".lexdropdownmenu" ).forEach( m => { m.remove(); } );
 
         DropdownMenu.currentMenu = null;
 
@@ -1147,13 +1176,21 @@ class DropdownMenu {
             newParent.className = "lexdropdownmenu";
             newParent.dataset["id"] = parentDom.dataset["id"];
             newParent.dataset["side"] = "right"; // submenus always come from the right
-            LX.root.appendChild( newParent );
+            this._parent.appendChild( newParent );
 
             newParent.currentParent = parentDom;
             parentDom = newParent;
 
             LX.doAsync( () => {
+
                 const position = [ parentRect.x + parentRect.width, parentRect.y ];
+
+                if( this._parent instanceof HTMLDialogElement )
+                {
+                    let rootParentRect = this._parent.getBoundingClientRect();
+                    position[ 0 ] -= rootParentRect.x;
+                    position[ 1 ] -= rootParentRect.y;
+                }
 
                 if( this.avoidCollisions )
                 {
@@ -1305,7 +1342,7 @@ class DropdownMenu {
                 p = p.currentParent?.parentElement;
             }
 
-            LX.root.querySelectorAll( ".lexdropdownmenu" ).forEach( m => {
+            this._parent.querySelectorAll( ".lexdropdownmenu" ).forEach( m => {
                 if( !path.includes( m.dataset["id"] ) )
                 {
                     m.currentParent.built = false;
@@ -1405,6 +1442,13 @@ class DropdownMenu {
         {
             position[ 0 ] = LX.clamp( position[ 0 ], 0, window.innerWidth - this.root.offsetWidth - this._windowPadding );
             position[ 1 ] = LX.clamp( position[ 1 ], 0, window.innerHeight - this.root.offsetHeight - this._windowPadding );
+        }
+
+        if( this._parent instanceof HTMLDialogElement )
+        {
+            let parentRect = this._parent.getBoundingClientRect();
+            position[ 0 ] -= parentRect.x;
+            position[ 1 ] -= parentRect.y;
         }
 
         this.root.style.left = `${ position[ 0 ] }px`;
@@ -2704,6 +2748,7 @@ class Dialog {
         let root = document.createElement('dialog');
         root.className = "lexdialog " + (options.className ?? "");
         root.id = options.id ?? "dialog" + Dialog._last_id++;
+        root.dataset["modal"] = modal;
         LX.root.appendChild( root );
 
         LX.doAsync( () => {
@@ -3003,9 +3048,6 @@ class ContextMenu {
 
         this.root = document.createElement( "div" );
         this.root.className = "lexcontextmenu";
-        this.root.style.left = ( event.x - 48 ) + "px";
-        this.root.style.top = ( event.y - 8 ) + "px";
-
         this.root.addEventListener("mouseleave", function() {
             this.remove();
         });
@@ -3021,31 +3063,57 @@ class ContextMenu {
             item[ "icon" ] = options.icon;
             this.items.push( item );
         }
+
+        const nestedDialog = event.target.closest( "dialog" );
+        if( nestedDialog && nestedDialog.dataset[ "modal" ] == 'true' )
+        {
+            this._parent = nestedDialog;
+        }
+        else
+        {
+            this._parent = LX.root;
+        }
+
+        this._parent.appendChild( this.root );
+
+        // Set position based on parent
+        const position = [ event.x - 48, event.y - 8 ];
+        if( this._parent instanceof HTMLDialogElement )
+        {
+            let parentRect = this._parent.getBoundingClientRect();
+            position[ 0 ] -= parentRect.x;
+            position[ 1 ] -= parentRect.y;
+        }
+
+        this.root.style.left = `${ position[ 0 ] }px`;
+        this.root.style.top = `${ position[ 1 ] }px`;
     }
 
     _adjustPosition( div, margin, useAbsolute = false ) {
 
         let rect = div.getBoundingClientRect();
+        let left = parseInt( div.style.left );
+        let top = parseInt( div.style.top );
 
         if( !useAbsolute )
         {
             let width = rect.width;
             if( rect.left < 0 )
             {
-                div.style.left = margin + "px";
+                left = margin;
             }
             else if( window.innerWidth - rect.right < 0 )
             {
-                div.style.left = (window.innerWidth - width - margin) + "px";
+                left = (window.innerWidth - width - margin);
             }
 
             if( rect.top < 0 )
             {
-                div.style.top = margin + "px";
+                top = margin;
             }
             else if( (rect.top + rect.height) > window.innerHeight )
             {
-                div.style.top = (window.innerHeight - rect.height - margin) + "px";
+                top = (window.innerHeight - rect.height - margin);
             }
         }
         else
@@ -3053,15 +3121,18 @@ class ContextMenu {
             let dt = window.innerWidth - rect.right;
             if( dt < 0 )
             {
-                div.style.left = div.offsetLeft + (dt - margin) + "px";
+                left = div.offsetLeft + (dt - margin);
             }
 
             dt = window.innerHeight - (rect.top + rect.height);
             if( dt < 0 )
             {
-                div.style.top = div.offsetTop + (dt - margin + 20 ) + "px";
+                top = div.offsetTop + (dt - margin + 20 );
             }
         }
+
+        div.style.left = `${ left }px`;
+        div.style.top = `${ top }px`;
     }
 
     _createSubmenu( o, k, c, d ) {
@@ -3284,7 +3355,6 @@ LX.ContextMenu = ContextMenu;
 function addContextMenu( title, event, callback, options )
 {
     const menu = new ContextMenu( event, title, options );
-    LX.root.appendChild( menu.root );
 
     if( callback )
     {
