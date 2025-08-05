@@ -7,8 +7,7 @@
     MAKE_HEADER(componentName + ".", "h1", componentName.toLowerCase());
     MAKE_PARAGRAPH(`Lexgui supports generating custom components based on specific object data. By calling the function ${INLINE_CODE("LX.ADD_CUSTOM_COMPONENT( name, options )")}, 
         you can register a new Panel method that will create your custom components. Once the component has been registered, call ${INLINE_CODE("Panel.add&lt;ComponentName&gt;(name, value, callback)")} to add the Custom Component to your panel.`);
-
-    MAKE_LINE_BREAK();
+    MAKE_HEADER("Quick Usage", "h2");
     MAKE_PARAGRAPH(`Within the options of ${INLINE_CODE("LX.ADD_CUSTOM_COMPONENT")}, you can add the following data:`);
 
     MAKE_CODE_BULLET_LIST( [
@@ -96,6 +95,8 @@
             panel.addShader("Empty", null, null, "MySecondButton", "Print also this" );
         });
     }
+
+    MAKE_HEADER("API Reference", "h2");
 
     {
         const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );

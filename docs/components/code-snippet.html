@@ -63,7 +63,7 @@
 document.body.@[mtd]appendChild@(snippet);`, "js");
 
     MAKE_HEADER("API Reference", "h2");
-    MAKE_CLASS_CONSTRUCTOR("LX.makeCodeSnippet", [ [ "code", "String" ], [ "size", "Array" ], [ "options", "Object = {}" ] ]);
+    MAKE_CLASS_CONSTRUCTOR("function LX.makeCodeSnippet", [ [ "code", "String" ], [ "size", "Array" ], [ "options", "Object = {}" ] ]);
     MAKE_LINE_BREAK();
     MAKE_PARAGRAPH(`Where ${ INLINE_CODE( "code" ) } is the source code to display, ${ INLINE_CODE( "size" ) } is the size of the snippet container ([width, height]), and ${ INLINE_CODE( "options" ) } can include the following:`)
 

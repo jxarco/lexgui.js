@@ -3,6 +3,8 @@
     import { LX } from 'lexgui';
 
     MAKE_HEADER( "Toast.", "h1", "toast" );
+    MAKE_PARAGRAPH( `A lightweight notification that appears briefly to provide feedback without interrupting the user’s workflow.` );
+    MAKE_LINE_BREAK();
 
     {
         function createToast() {
@@ -25,28 +27,47 @@
             } },  timeout: -1 } );
         }
 
-        const content = document.getElementById('content');
-        const area = new LX.Area( { skipAppend: true, height: "auto" } );
+        const area = new LX.Area( { className: "border rounded-lg shadow-lg bg-secondary overflow-hidden p-8", skipAppend: true, height: "auto" } );
+        content.appendChild( area.root );
+
         const panel = area.addPanel();
         panel.addButton("Click this button to generate a random toast", "Create toast", (value, event) => {
             createToast();
-        }, { nameWidth: "75%" });
-        content.appendChild( area.root );
+        }, { nameWidth: "75%", buttonClass: "contrast" });
     }
 
     MAKE_LINE_BREAK();
-    MAKE_PARAGRAPH( `LexGUI allows creating <strong>toast</strong> notifications, which appear at the bottom right of the screen with a timer of 3s by default.
-    Use ${INLINE_CODE("LX.toast(title, description, options)")} using the following options:` );
-    MAKE_CODE_BULLET_LIST( [
-            ["title", "String", "Toast title"],
-            ["description", "Array", "Toast description (small text)"],
-            ["options", "Object", "Basic options for a component"],
-            [
-                ["action", "Object", "Data of the custom action { name, callback }"],
-                ["closable", "Boolean", "Allow closing the toast [true]"],
-                ["timeout", "Number", "Time in which the toast closed automatically, in ms. -1 means persistent. [3000]"]
-            ]
-    ] );
+
+     MAKE_HEADER("Quick Usage", "h2");
+    MAKE_CODE(`@[cls]LX@.@[mtd]toast@( toastTitle, toastContent, { action: { name: @"Got it!"@, callback: ( toast, actionName, event ) => {
+    toast.@[mtd]close@();
+} },  timeout: @3000@ } );`, "js");
+
+    MAKE_HEADER("API Reference", "h2");
+    MAKE_CLASS_CONSTRUCTOR( "function LX.Toast", [
+        ["title", "String"],
+        ["description", "String"],
+        ["options", "Object = {}"]
+    ]);
+    MAKE_LINE_BREAK();
+    MAKE_PARAGRAPH(`Where ${ INLINE_CODE( "title" ) } is toast title; ${ INLINE_CODE( "description" ) } is the text content, and ${ INLINE_CODE( "options" ) } can include the following:`);
+    MAKE_LINE_BREAK();
+
+    {
+        const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
+        const panel = area.addPanel();
+        content.appendChild( area.root );
+        panel.addTable( null, {
+            head: [ "Option", "Type", "Description", "Default" ],
+            body: [
+                ["action", "Object", "Data of the custom action { name, callback }", "—"],
+                ["closable", "Boolean", "Allow closing the toast", "true"],
+                ["timeout", "Number", "Time in which the toast closed automatically, in ms. -1 means persistent", "3000"]
+            ].map( v => {
+                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+    }
 
     MAKE_LINE_BREAK();
     MAKE_LINE_BREAK();

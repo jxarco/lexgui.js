@@ -9,7 +9,7 @@
     MAKE_PARAGRAPH(`Represents a <strong>data hierarchy visualization Tree</strong>. Enables developers to display hierarchical data in an organized
      and visually appealing manner. This feature is especially useful when presenting data with parent-child
       relationships, such as file directories, organizational structures, family trees, and more.` );
-      MAKE_LINE_BREAK();
+      MAKE_HEADER("Quick Usage", "h2");
     MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addTree(name, data, options)")} to add a ${ componentName } Component to your panel or
     create it anywhere using ${INLINE_CODE(`new LX.${ componentName.replace( /\s/g, '' ) }`)} to append its root to any container.` );
 
@@ -51,6 +51,8 @@
             });
         });
     }
+
+    MAKE_HEADER("API Reference", "h2");
 
     {
         const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );

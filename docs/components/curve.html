@@ -8,7 +8,7 @@
     MAKE_PARAGRAPH(`Represents a simple Curve Editor. It's a versatile component designed to simplify the manipulation and visualization
 of curves or graphs, ideal for any scenario where the smooth interpolation of values over time
 or other parameters is essential.` );
-    MAKE_LINE_BREAK();
+    MAKE_HEADER("Quick Usage", "h2");
     MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addCurve(name, values, callback, options)")} to add a ${ componentName } Component to your panel or
     create it anywhere using ${INLINE_CODE(`new LX.${ componentName.replace( /\s/g, '' ) }`)} to append its root to any container.` );
 
@@ -25,6 +25,8 @@ or other parameters is essential.` );
             });
         });
     }
+
+    MAKE_HEADER("API Reference", "h2");
 
     {
         const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );

@@ -14,7 +14,7 @@
         area.root.className += " border rounded-lg shadow-lg bg-secondary overflow-hidden";
     }
 
-    MAKE_LINE_BREAK();
+    MAKE_HEADER("Quick Usage", "h2");
     MAKE_PARAGRAPH( `The Code Editor component supports the following language highlightings:` );
     MAKE_CODE_BULLET_LIST( [
         "Plain text",
@@ -30,26 +30,13 @@
         "Markdown"
     ] );
 
-    MAKE_HEADER( "Creating the editor", "h2", "init" );
+    MAKE_HEADER( "Creating the editor", "h3", "init" );
 
     MAKE_PARAGRAPH( `The Editor has to be appended to an existing area. It means that it can be created anywhere in the document window (e.g. dialogs, panels, areas, etc.), since to create an area it's as easy as instancing a new
-    one. The following lines instanciate the DOM element for the editor:` );
+    one. The following lines instantiate the DOM element for the editor:` );
     MAKE_CODE( `@let@ @[var]editor@ = @new@ @[cls]LX@.@[cls]CodeEditor@( @[var]area@, @[var]options@ );` );
 
-    MAKE_PARAGRAPH( `When creating it, you can use different options to adapt the editor to your needs:` );
-    MAKE_CODE_BULLET_LIST( [
-        ["name", "String", "If defined, name of the default code tab"],
-        ["highlight", "String", "Default highlighting"],
-        ["allowAddScripts", "Boolean", "Enables/Disables adding new tabs when double-clicking the tab space and doesn't add the 'New tab' tab"],
-        ["skipInfo", "Boolean", "Show or hide the editor info panel at the bottom (Line, Column, Change Hightlighting, etc.)"],
-        ["fileExplorer", "Boolean", "Create a file explorer for the editor"],
-        ["disableEdition", "Boolean", "Disables the edition of code (To make code snippets)"],
-        ["autocomplete", "Boolean", "Toggle using autocomplete tool"],
-        ["onsave", "Function", "Code to call when pressing <code class='inline'>Ctrl+S</code> in the editor"],
-        ["onrun", "Function", "Code to call when pressing <code class='inline'>Ctrl+Enter</code> in the editor"]
-    ] );
-
-    MAKE_HEADER( "Opening files and new tabs", "h2", "using-tabs" );
+    MAKE_HEADER( "Opening files and new tabs", "h3", "using-tabs" );
     MAKE_PARAGRAPH( `To load existing files you must use ${INLINE_CODE("CodeEditor.loadFile( filename, options )")}. This will open a new tab with the code in it using as options:` );
     MAKE_CODE_BULLET_LIST( [
         ["language", "String", "Override the language highlighting for the new loaded file"]
@@ -60,6 +47,37 @@
         ["Double click to tab space", "Adds new empty tab"],
         ["Middle click to tab", "Closes tab"]
     ] );
+
+    MAKE_HEADER("API Reference", "h2");
+    MAKE_CLASS_CONSTRUCTOR( "class LX.CodeEditor", [
+        ["area", "LX.Area"],
+        ["options", "Object"]
+    ] );
+    MAKE_LINE_BREAK();
+    MAKE_PARAGRAPH(`Where ${ INLINE_CODE( "area" ) } is the area to be attached to, and ${ INLINE_CODE( "options" ) } can include the following:`);
+    MAKE_LINE_BREAK();
+
+    {
+        const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
+        const panel = area.addPanel();
+        content.appendChild( area.root );
+        panel.addTable( null, {
+            head: [ "Option", "Type", "Description", "Default" ],
+            body: [
+                ["name", "String", "If defined, name of the default code tab", "—"],
+                ["highlight", "String", "Default highlighting", `"Plain Text"`],
+                ["allowAddScripts", "Boolean", "Enables/Disables adding new tabs on dbl-click tab space; doesn't add the 'New tab' tab", "true"],
+                ["skipInfo", "Boolean", "Show or hide the editor info panel at the bottom (Line, Column, Change Hightlighting, etc.)", "false"],
+                ["fileExplorer", "Boolean", "Create a file explorer for the editor", "false"],
+                ["disableEdition", "Boolean", "Disables the edition of code (To make code snippets)", "false"],
+                ["autocomplete", "Boolean", "Toggle using autocomplete tool", "true"],
+                ["onsave", "Function", "Code to call when pressing <code class='inline'>Ctrl+S</code> in the editor", "—"],
+                ["onrun", "Function", "Code to call when pressing <code class='inline'>Ctrl+Enter</code> in the editor", "—"],
+            ].map( v => {
+                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+    }
 
     MAKE_LINE_BREAK();
     MAKE_LINE_BREAK();

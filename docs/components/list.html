@@ -6,7 +6,7 @@
 
     MAKE_HEADER(componentName + ".", "h1", componentName.toLowerCase());
     MAKE_PARAGRAPH(`Represents a list of selectable elements.`);
-    MAKE_LINE_BREAK();
+    MAKE_HEADER("Quick Usage", "h2");
     MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addList(name, values, value, callback, options)")} to add a ${ componentName } Component to your panel or
     create it anywhere using ${INLINE_CODE(`new LX.${ componentName.replace( /\s/g, '' ) }`)} to append its root to any container.` );
     MAKE_LINE_BREAK();
@@ -18,6 +18,8 @@
             });
         });
     }
+
+    MAKE_HEADER("API Reference", "h2");
 
     {
         const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
