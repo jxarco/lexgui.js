@@ -974,7 +974,7 @@ class Sheet {
         this.root.tabIndex = "1";
         this.root.role = "dialog";
         this.root.className = "lexsheet fixed z-1000 bg-primary";
-        LX.root.appendChild( this.root );
+        document.body.appendChild( this.root );
 
         this.root.addEventListener( "keydown", (e) => {
             if( e.key == "Escape" )
@@ -1015,16 +1015,20 @@ class Sheet {
                     this.root.style.height = "100%";
                     break;
                 case "top":
+                    this.root.style.left = 0;
                     this.root.style.top = 0;
                     this.root.style.width = "100%";
                     this.root.style.height = size;
                     break;
                 case "bottom":
+                    this.root.style.left = 0;
                     this.root.style.bottom = 0;
                     this.root.style.width = "100%";
                     this.root.style.height = size;
                     break;
             }
+
+            document.documentElement.setAttribute( "data-scale", `sheet-${ this.side }` );
 
             this.root.focus();
 
@@ -1042,6 +1046,8 @@ class Sheet {
     }
 
     destroy() {
+
+        document.documentElement.setAttribute( "data-scale", "" );
 
         document.body.removeEventListener( "mousedown", this._onClick, true );
         document.body.removeEventListener( "focusin", this._onClick, true );

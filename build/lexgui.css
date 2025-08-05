@@ -210,6 +210,30 @@ body {
     flex-direction: column;
     position: absolute;
     outline: none;
+    transform-origin: center center;
+    transition-property: transform, border-radius;
+    transition-duration: 0.5s;
+    transition-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+:root[data-scale="sheet-top"] #lexroot {
+    border-radius: 8px;
+    transform: scale(0.975) translate3d(0, -16px, 0);
+}
+
+:root[data-scale="sheet-bottom"] #lexroot {
+    border-radius: 8px;
+    transform: scale(0.975) translate3d(0, 16px, 0);
+}
+
+:root[data-scale="sheet-left"] #lexroot {
+    border-radius: 8px;
+    transform: scale(0.975) translate3d(-16px, 0, 0);
+}
+
+:root[data-scale="sheet-right"] #lexroot {
+    border-radius: 8px;
+    transform: scale(0.975) translate3d(16px, 0, 0);
 }
 
 /* document layout (scrolling page) */
