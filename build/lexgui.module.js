@@ -15530,9 +15530,21 @@ class Sidebar {
                     LX.asTooltip( itemDom, key, { side: "right", offset: 16, active: false } );
                 }
 
-                let itemName = document.createElement( 'a' );
-                itemName.innerHTML = key;
-                itemDom.appendChild( itemName );
+                LX.makeElement( 'a', "grid-column-start-2", key, itemDom );
+
+                if( options.swap )
+                {
+                    itemDom.classList.add( "swap", "inline-grid" );
+                    itemDom.querySelector( "a" ).classList.add( "swap-off" );
+
+                    const input = document.createElement( "input" );
+                    input.className = "p-0 border-0";
+                    input.type = "checkbox";
+                    itemDom.prepend( input );
+
+                    const swapIcon = LX.makeIcon( options.swap, { iconClass: "lexsidebarentryicon swap-on" } );
+                    itemDom.appendChild( swapIcon );
+                }
 
                 if( options.content )
                 {
@@ -15559,6 +15571,12 @@ class Sidebar {
                 {
                     item.value = !item.value;
                     item.checkbox.set( item.value, true );
+                }
+
+                if( options.swap && !( e.target instanceof HTMLInputElement ) )
+                {
+                    const swapInput = itemDom.querySelector( "input" );
+                    swapInput.checked = !swapInput.checked;
                 }
 
                 // Manage selected

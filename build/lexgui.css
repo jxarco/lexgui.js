@@ -3230,6 +3230,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     white-space: nowrap;
     text-overflow: ellipsis;
     align-self: center;
+    place-content: start;
 }
 
 .lexsidebar .lexsidebarentry:hover {
@@ -5997,7 +5998,8 @@ ul.lexassetscontent {
 /* Layout */
 
 .flex { display: flex }
-.inline-flex { display: inline-flex }
+.inline-flex { display: inline-flex !important }
+.inline-grid { display: inline-grid !important }
 .flex-fill { flex: 1 0 0% }
 .grid { display: grid }
 .block { display: block }
@@ -6068,6 +6070,11 @@ ul.lexassetscontent {
 .content-center { align-content: center }
 .content-end { align-content: end }
 
+.grid-column-start-1 { grid-column-start: 1 }
+.grid-column-start-2 { grid-column-start: 2 }
+
+/* Spacing */
+
 .gap-0 { gap: 0 }
 .gap-0\.5 { gap: 0.125rem }
 .gap-1 { gap: 0.25rem }
@@ -6082,8 +6089,6 @@ ul.lexassetscontent {
 .gap-10 { gap: 2.5rem }
 .gap-11 { gap: 2.75rem }
 .gap-12 { gap: 3rem }
-
-/* Spacing */
 
 .mt-auto { margin-top: auto }
 .mb-auto { margin-bottom: auto }
