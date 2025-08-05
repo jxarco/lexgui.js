@@ -43,23 +43,10 @@
     }
 
     MAKE_LINE_BREAK();
-    MAKE_PARAGRAPH( `To create an Asset View in LexGUI.js, instantiate a new ${ INLINE_CODE( "LX.AssetView" ) } with the following options:` );
 
-    MAKE_CODE_BULLET_LIST( [
-        ["layout", "Number", "Layout appearance of the assets (AssetView.LAYOUT_CONTENT|AssetView.LAYOUT_LIST)"],
-        ["rootPath", "String", "Override default rootPath for internal data"],
-        ["skipBrowser", "Boolean", "Skip creation of the file explorer [false]"],
-        ["skipPreview", "Boolean", "Skip creation of the preview section [false]"],
-        ["useNativeTitle", "Boolean", "Use native element titles instead of custom Lexgui hover titles [false]"],
-        ["onlyFolders", "Boolean", "[true]"],
-        ["allowMultipleSelection", "Boolean", "Allow multiple asset selection [true]"],
-        ["previewActions", "Array", "Customize the asset preview actions"],
-        ["contextMenu", "Array", "Customize the asset context menu actions"],
-        ["allowedTypes", "Array", "Asset allowed types (strings)"],
-        ["onRefreshContent", "Function", "Function to call when the content is refreshed"],
-    ] );
+    MAKE_HEADER("Quick Usage", "h2");
 
-    MAKE_PARAGRAPH( `Once done, you can load your data using ${ INLINE_CODE( "LX.AssetView.load( data, onevent )" ) }:` );
+    MAKE_PARAGRAPH( `Load your data using ${ INLINE_CODE( "LX.AssetView.load( data, onevent )" ) }:` );
 
     MAKE_CODE( `@const@ assetData = [
     { id: @"dog.png"@, type: @"image"@, path: @"https://pngfre.com/wp-content/uploads/1653714420512-1-904x1024.png"@ },
@@ -103,6 +90,35 @@ assetView.@[mtd]load@(assetData);
         [ "AssetViewEvent.ASSET_DBLCLICKED", "Asset has been double clicked" ],
         [ "AssetViewEvent.ASSET_CHECKED", "Asset has been checked" ],
         [ "AssetViewEvent.ENTER_FOLDER", "Folder has been entered" ],
+    ] );
+
+    MAKE_HEADER("API Reference", "h2");
+    MAKE_CLASS_CONSTRUCTOR("LX.AssetView", [ [ "options", "Object = {}" ] ]);
+    MAKE_LINE_BREAK();
+
+    MAKE_PARAGRAPH( `Where you can use the following options:` );
+
+    MAKE_CODE_BULLET_LIST( [
+        ["layout", "Number", "Layout appearance of the assets (AssetView.LAYOUT_CONTENT|AssetView.LAYOUT_LIST)"],
+        ["rootPath", "String", "Override default rootPath for internal data"],
+        ["skipBrowser", "Boolean", "Skip creation of the file explorer [false]"],
+        ["skipPreview", "Boolean", "Skip creation of the preview section [false]"],
+        ["useNativeTitle", "Boolean", "Use native element titles instead of custom Lexgui hover titles [false]"],
+        ["onlyFolders", "Boolean", "[true]"],
+        ["allowMultipleSelection", "Boolean", "Allow multiple asset selection [true]"],
+        ["previewActions", "Array", "Customize the asset preview actions"],
+        ["contextMenu", "Array", "Customize the asset context menu actions"],
+        ["allowedTypes", "Array", "Asset allowed types (strings)"],
+        ["onRefreshContent", "Function", "Function to call when the content is refreshed"],
+    ] );
+
+    MAKE_HEADER( "Methods", "h3", "methods" );
+
+    MAKE_CLASS_METHOD( ".clear", `Clear all AssetView panels`, [] );
+
+    MAKE_CLASS_METHOD( ".load", `Loads and creates all the data elements.`, [
+        ["data", "Object|Array"],
+        ["onevent", "Function"],
     ] );
 
     MAKE_LINE_BREAK();

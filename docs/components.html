@@ -36,8 +36,11 @@
 
         for( const c of allComponents )
         {
-            const url = "components/" + c.toLowerCase().replace( /\s/g, '-') + ".html";
-            const b = new LX.Button( null, c, () => loadPage( url ), { buttonClass: "bg-none font-medium text-lg" } );
+            const page = "components/" + c.toLowerCase().replace( /\s/g, '-');
+            const b = new LX.Button( null, c, () => {
+                const title = window.setPath( page );
+                loadPage( page + ".html", true, title );
+            }, { buttonClass: "bg-none font-medium text-lg" } );
             allComponentsContainer.appendChild( b.root );
         }
 

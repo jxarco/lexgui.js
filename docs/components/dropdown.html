@@ -6,8 +6,12 @@
             
     MAKE_PARAGRAPH( `Context menus provide quick access to relevant actions and options based on the user's current context, enhancing the overall user experience. LexGUI offers two possible ways to create a custom Context Menu using Dropdowns.` );
     MAKE_LINE_BREAK();
+
+    MAKE_HEADER("Quick Usage", "h2");
+
     MAKE_PARAGRAPH( `The first method is to use the ${ INLINE_CODE("LX.addContextMenu(title, event, callback, options)") } function, which allows you to create a reduced Context Menu, 
     that can be triggered not only on right-click but in any custom event at any place where the mouse/trigger element is.` );
+    MAKE_LINE_BREAK();
 
     {
         const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
