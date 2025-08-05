@@ -57,7 +57,7 @@
         if( mobile )
         {
             const sheetArea = new LX.Area({ skipAppend: true });
-            panel = sheetArea.addPanel();
+            panel = sheetArea.addPanel({ className: "flex flex-col gap-2" });
             iFrameArea = area;
 
             overlayButtons.splice( 0, 0, {
@@ -78,7 +78,7 @@
             ] );
             menubar.setButtonIcon("Github", "Github", () => {window.open("https://github.com/jxarco/lexgui.js/")}, { float: "left" });
 
-            panel = leftArea.addPanel();
+            panel = leftArea.addPanel({ className: "flex flex-col gap-1" });
             iFrameArea = rightArea;
         }
 

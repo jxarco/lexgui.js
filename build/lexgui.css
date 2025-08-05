@@ -3715,7 +3715,6 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 
 .lexcard {
     position: relative;
-    margin-bottom: 4px;
 }
 
 .lexcard img {
@@ -3723,7 +3722,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     height: 128px;
     object-fit: cover;
     border-radius: 6px;
-    outline: 3px solid var(--global-text-tertiary);
+    outline: 2px solid var(--global-text-tertiary);
 }
 
 .lexcard:hover a {
@@ -3731,16 +3730,13 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexcard:hover img {
-    outline: 3px solid var(--global-color-accent);
+    outline: 2px solid var(--global-color-accent);
 }
 
 .lexcard span {
     font-size: var(--global-font-size-lg);
-    font-family: var(--global-title-font);
     font-weight: 500;
-    text-transform: uppercase;
     width: 100%;
-    height: 32px;
     display: flex;
     background-color: var(--global-blur-background);
     --webkit-backdrop-filter: blur(12px);
@@ -3749,7 +3745,8 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     position: absolute;
     top: 0;
     left: 0;
-    padding: 8px;
+    padding: var(--global-padding-xs);
+    padding-inline-start: 8px;
     border-top-left-radius: 6px;
     border-top-right-radius: 6px;
 }
