@@ -18,7 +18,7 @@ to create <strong>Signals</strong>. E.g. We could make a component to be updated
     MAKE_CODE( `LX.@[mtd]addSignal@( @"|@on_value_changed"@, (element, value) =&gt; {
     console.@[mtd]log@(value);
 } );` );
-    MAKE_NOTE( `Signals are basically callbacks that will called within the element scope when the signal is emitted.` );
+    MAKE_NOTE( `Signals are callbacks that execute in the element’s own scope when a specific event is triggered.` );
 
     MAKE_HEADER( "Emit a Signal", "h3" );
     MAKE_PARAGRAPH( `To emit a signal you will have to call ${INLINE_CODE("LX.emit(signalName, value, options)")} in any of the cases, where ${INLINE_CODE("options")} 

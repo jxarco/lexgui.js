@@ -249,19 +249,21 @@
             }
         }
 
-        const generalComponents = [ "Button", "Combo Buttons", "Radio Group" ];
+        const generalComponents = [ "Area Overlay Buttons", "Button", "Combo Buttons", "Radio Group" ];
         const dataInputComponents = [ "Checkbox", "Color", "Curve", "Custom", "Date Picker", "File", "Form", "Item Array", "Layers", "Map 2D", "Number", "OTP Input", "Pad", "Range", "Select", "Size", "Tags", "Text", "Text Area", "Toggle", "Vector" ];
         const dataDisplayComponents = [ "Asset View", "Code Snippet", "Data Tree", "List", "Table", "Title" ];
         const feedbackComponents = [ "Dialog", "Progress", "Skeleton", "Toast", "Tour" ];
-        const navigationComponents = [ "Breadcrumb", "Dropdown", "Tab Sections" ];
+        const navigationComponents = [ "Breadcrumb", "Dropdown", "Menubar", "Sidebar", "Tab Sections", "Tabs" ];
 
         const componentVersion = {
+            "Area Overlay Buttons": "6.10",
             "Breadcrumb": "7.0",
             "Date Picker": "5.9",
             "Map 2D": "6.3",
             "OTP Input": "5.6",
             "Radio Group": "4.0",
             "Range": "3.0",
+            "Sidebar": "4.0",
             "Skeleton": "7.0",
             "Table": "2.0",
             "Tour": "6.11"
@@ -270,9 +272,9 @@
 
         const sidebarCallback = m => {
 
-            const manualCallback = v => open( `manual/${ v.toLowerCase().replaceAll( " ", "-" ) }.html`, [ "Manual", v ] );
-            const extensionCallback = v => open( `extensions/${ v.toLowerCase().replaceAll( " ", "-" ) }.html`, [ "Extensions", v ] );
-            const apiReferenceCallback = v => open( `api/${ v.toLowerCase().replaceAll( " ", "-" ) }.html`, [ "API Reference", v ] );
+            const manualCallback = v => open( `manual/${ v.toLowerCase().replaceAll( " ", "-" ) }.html`, [ "Manual", v ], v );
+            const extensionCallback = v => open( `extensions/${ v.toLowerCase().replaceAll( " ", "-" ) }.html`, [ "Extensions", v ], v );
+            const apiReferenceCallback = v => open( `api/${ v.toLowerCase().replaceAll( " ", "-" ) }.html`, [ "API Reference", v ], v );
 
             m.group( "Manual" );
             m.add( "Installation", { callback: manualCallback } );
@@ -353,13 +355,9 @@
             m.separator();
             m.add( "API Reference", { skipSelection: true } );
             m.add( "API Reference/Area", { callback: apiReferenceCallback } );
-            m.add( "API Reference/AreaOverlayButtons", { callback: apiReferenceCallback, content: LX.badge( "6.10", badgeClass, { asElement: true, callback: open.bind( this, "changelog.html", "#6.10" ) }) } );
             m.add( "API Reference/BaseComponent", { callback: apiReferenceCallback } );
             m.add( "API Reference/Branch", { callback: apiReferenceCallback } );
-            m.add( "API Reference/Menubar", { callback: apiReferenceCallback } );
             m.add( "API Reference/Panel", { callback: apiReferenceCallback } );
-            m.add( "API Reference/Sidebar", { callback: apiReferenceCallback } );
-            m.add( "API Reference/Tabs", { callback: apiReferenceCallback } );
             m.separator();
             m.add( "LexGUI Examples", { icon: "Monitor", skipSelection: true, callback: open.bind( this, "../examples/", "_blank" ) } );
             m.add( "Source Code", { icon: "Code", skipSelection: true, callback: open.bind( this, "https://github.com/jxarco/lexgui.js/", "_blank" ) } );
@@ -426,7 +424,7 @@
             path = startPath;
         }
 
-        loadPage( `${ startPage }.html`, !!queryPage );
+        loadPage( `${ startPage }.html`, !!queryPage, startPath.pop() );
 
     </script>
     </body>

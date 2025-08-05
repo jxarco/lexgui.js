@@ -1,0 +1,125 @@
+<script type="module">
+    import { LX } from 'lexgui';
+
+    MAKE_HEADER( "AreaOverlayButtons.", "h1", "area-overlay-buttons" );
+    MAKE_PARAGRAPH( `Component that allows you to create an overlay of buttons on top of an area. It is useful for creating interactive areas with multiple buttons that can be used to trigger different actions.` );
+    MAKE_LINE_BREAK();
+
+    {
+        const area = new LX.Area( { skipAppend: true, height: "200px" } );
+        content.appendChild( area.root );
+
+        const overlayButtons = area.addOverlayButtons([
+            [
+                {
+                    name: "Select",
+                    icon: "MousePointer",
+                    callback: (value, event) => console.log(value),
+                    selectable: true
+                },
+                {
+                    name: "Move",
+                    icon: "Move",
+                    callback: (value, event) => console.log(value),
+                    selectable: true
+                },
+                {
+                    name: "Rotate",
+                    icon: "RotateRight",
+                    callback: (value, event) => console.log(value),
+                    selectable: true
+                }
+            ],
+            null, // Separator
+            {
+                name: "Render Mode",
+                options: ["Lit", "Unlit", "Wireframe"],
+                value: "Lit",
+                callback: (value, event) => console.log(value)
+            },
+            [
+                {
+                    name: "Enable Snap",
+                    icon: "Frame",
+                    callback: (value, event) => console.log(value),
+                    selectable: true
+                },
+                {
+                    name: "Snap Values",
+                    value: 10,
+                    options: [10, 100, 1000],
+                    callback: value => console.log(value)
+                }
+            ]
+        ], { float: "htc" });
+
+        area.root.className += " border rounded-lg shadow-lg bg-tertiary overflow-hidden";
+    }
+
+    MAKE_HEADER("Quick Usage", "h2");
+    MAKE_CODE(`@const@ overlayButtons = area.@[mtd]addOverlayButtons@([
+    [
+        { name: @"Select"@, icon: @"MousePointer"@, callback: (value, event) => console.@[mtd]log@(value), selectable: @true@ },
+        { name: @"Move"@, icon: @"Move"@, callback: (value, event) => console.@[mtd]log@(value), selectable: @true@ },
+        { name: @"Rotate"@, icon: @"RotateRight"@, callback: (value, event) => console.@[mtd]log@(value), selectable: @true@ }
+    ],
+    @null@, @[com]// Separator@
+    { name: @"Render Mode"@, options: [@"Lit"@, @"Unlit"@, @"Wireframe"@], value: @"Lit"@, callback: (value, event) => console.@[mtd]log@(value) },
+    [
+        { name: @"Enable Snap"@, icon: @"Frame"@, callback: (value, event) => console.@[mtd]log@(value), selectable: @true@ },
+        { name: @"Snap Values"@, value: @10@, options: [@10@, @100@, @1000@], callback: value => console.@[mtd]log@(value) }
+    ]
+], { float: @"htc"@ });`, "js");
+
+    MAKE_HEADER("API Reference", "h2");
+    MAKE_CLASS_CONSTRUCTOR( "AreaOverlayButtons", [
+        ["area", "Area"],
+        ["buttonsArray", "Array"],
+        ["options", "Object"]
+    ] );
+    MAKE_LINE_BREAK();
+    MAKE_PARAGRAPH(`Where ${ INLINE_CODE( "area" ) } is the area to be attached to, ${ INLINE_CODE( "buttonsArray" ) } is the array that contains all the buttons data, and ${ INLINE_CODE( "options" ) } can include the following:`)
+    MAKE_LINE_BREAK();
+
+    {
+        const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
+        const panel = area.addPanel();
+        content.appendChild( area.root );
+        panel.addTable( null, {
+            head: [ "Option", "Type", "Description", "Default" ],
+            body: [
+                ["float", "String", `Placement of the buttons (h: horizontal, v: vertical, t: top, m: middle, b: bottom, l: left, c: center, r: right)`, `"htc"`],
+            ].map( v => {
+                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+    }
+
+    MAKE_HEADER( "Properties", "h2", "properties" );
+
+    {
+        const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
+        const panel = area.addPanel();
+        content.appendChild( area.root );
+
+        panel.addTable( null, {
+            head: [ "Parameter", "Type", "Description", "Default" ],
+            body: [
+                ["buttons", "Object", "Map containing all the generated components.", "—"]
+            ].map( v => {
+                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+    }
+
+    // MAKE_HEADER( "Methods", "h2", "methods" );
+
+    // MAKE_CLASS_METHOD( ".addMenubar", `Creates a Menubar inside the area using data in Array format to create each of the entries and subentries.`, [
+    //     ["items", "Array"],
+    //     ["options", "Object"],
+    // ], `${ INLINE_PAGE( "Menubar", "api/menubar.html" ) }` );
+
+    MAKE_LINE_BREAK();
+    MAKE_LINE_BREAK();
+
+</script>

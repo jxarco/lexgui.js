@@ -4,6 +4,8 @@
     const content = document.getElementById( 'content' );
 
     MAKE_HEADER( "Sidebar.", "h1", "sidebar" );
+    MAKE_PARAGRAPH( `A composable, themeable and customizable sidebar component.` );
+    MAKE_LINE_BREAK();
 
     {
         const area = new LX.Area( { skipAppend: true, height: "auto" } );
@@ -39,11 +41,9 @@
             headerTitle: "LexGUI",
             headerSubtitle: LX.version,
             headerImage: "../images/favicon.png",
-            // header: customHeader,
             footerTitle: "jxarco",
             footerSubtitle: "alexroco.30@gmail.com",
             footerImage: "https://avatars.githubusercontent.com/u/25059187?s=400&u=ad8907b748c13e4e1a7cdd3882826acb6a2928b5&v=4",
-            // footer: customFooter,
             onHeaderPressed: (e) => { console.log( "onHeaderPressed" ) },
             onFooterPressed: (e, element) => {
                 new LX.DropdownMenu( element, [
@@ -70,9 +70,25 @@
         area.root.className += " border rounded-lg shadow-lg bg-secondary overflow-hidden";
     }
     
-    MAKE_HEADER( "Constructor", "h2", "constructor" );
+    MAKE_HEADER("Quick Usage", "h2");
+
+    MAKE_PARAGRAPH( `Build a Sidebar element directly into any Area using ${INLINE_CODE("Area.addSidebar(callback, options)")}. 
+    To specify each of the entries, you should pass a <em>callback function</em> to be called when the Sidebar is constructed. Callbacks will have a Sidebar instance as parameter, 
+    so use ${INLINE_CODE("Sidebar.add(entryName, options)")} on that instance inside your callback to add each of the entries.` );
+
+    MAKE_PARAGRAPH( `The different options to be set when adding entries to the Sidebar are the following:` );
+    MAKE_CODE_BULLET_LIST( [
+        ["callback", "Function", "To be called when interacting with the entry"],
+        ["className", "String", "Extra classes to customize style"],
+        ["collapsable", "Boolean", "Add entry as a collapsable section"],
+        ["icon", "String", "Entry icon"],
+    ] );
+
+    MAKE_NOTE( `Subentries are collapsed by default. To disable this behaviour, set ${INLINE_CODE("options.collapsable: false")} in the parent entry.` );
+
+    MAKE_HEADER("API Reference", "h2");
     MAKE_CLASS_CONSTRUCTOR( "Sidebar", [
-        [ "options", "Object" ]
+        [ "options", "Object = {}" ]
     ] );
 
     MAKE_LINE_BREAK();
@@ -101,20 +117,32 @@
         ["width", "String", "Width of the sidebar [16rem]"],
     ] );
 
-    MAKE_HEADER( "Properties", "h2", "properties" );
-    MAKE_CODE_BULLET_LIST( [
-        [".collapsable", "Boolean", "Indicates whether the sidebar can be collapsed"],
-        [".collapsed", "Boolean", "Indicates whether the sidebar is collapsed"],
-        [".content", "HTMLElement", "Scrollable content element"],
-        [".footer", "HTMLElement", "Footer element"],
-        [".groups", "Object", "Map containing group data"],
-        [".header", "HTMLElement", "Header element"],
-        [".icons", "Array", "List of the sidebar items with the data: name, DOM element and callback"],
-        [".items", "Object", "Map containing the icons for each entry"],
-        [".root", "HTMLElement", "Container element of the sidebar"]
-    ] );
-    
-    MAKE_HEADER( "Methods", "h2", "methods" );
+    MAKE_HEADER( "Properties", "h3", "properties" );
+
+    {
+        const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
+        const panel = area.addPanel();
+        content.appendChild( area.root );
+
+        panel.addTable( null, {
+            head: [ "Name", "Type", "Description", "Default" ],
+            body: [
+                ["collapsable", "Boolean", "Indicates whether the sidebar can be collapsed", "true"],
+                ["collapsed", "Boolean", "Indicates whether the sidebar is collapsed", "false"],
+                ["content", "HTMLElement", "Scrollable content element", "—"],
+                ["footer", "HTMLElement", "Footer element", "—"],
+                ["groups", "Object", "Map containing group data", "—"],
+                ["header", "HTMLElement", "Header element", "—"],
+                ["icons", "Array", "List of the sidebar items with the data: name, DOM element and callback", "—"],
+                ["items", "Object", "Map containing the icons for each entry", "—"],
+                ["root", "HTMLElement", "Container element of the sidebar", "—"]
+            ].map( v => {
+                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+    }
+
+    MAKE_HEADER( "Methods", "h3", "methods" );
 
     MAKE_CLASS_METHOD( ".add", `Creates a Sidebar entry/subentry.`, [
         ["key", "String"],
