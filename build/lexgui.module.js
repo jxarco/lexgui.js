@@ -16031,7 +16031,7 @@ class AssetView {
             this.toolsPanel.addText(null, textString, null, {
                 inputClass: "nobg", disabled: true, signal: "@on_page_change", maxWidth: "16ch" }
             );
-    
+
             if( !this.skipBrowser )
             {
                 this.toolsPanel.addComboButtons( null, [
@@ -16063,13 +16063,13 @@ class AssetView {
                         callback: domEl => { this._refreshContent(); }
                     }
                 ], { noSelection: true } );
-    
+
                 this.toolsPanel.addText(null, this.path.join('/'), null, {
                     inputClass: "nobg", disabled: true, signal: "@on_folder_change",
                     style: { fontWeight: "600", fontSize: "15px" }
                 });
             }
-    
+
             this.toolsPanel.endLine();
         };
 
