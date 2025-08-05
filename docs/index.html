@@ -33,6 +33,35 @@
 
         SET_DOM_TARGET( content );
 
+        window.setPath = function( startPage ) {
+
+            const tokens = startPage.split( '/' );
+            const startPath = [];
+
+            for( let t of tokens )
+            {
+                const pToken = LX.toTitleCase( t );
+
+                if( startPath.length && startPath[ 0 ] == "Components" )
+                {
+                    if( generalComponents.includes( pToken ) ) startPath.push( "General" );
+                    if( dataInputComponents.includes( pToken ) ) startPath.push( "Data Input" );
+                    if( dataDisplayComponents.includes( pToken ) ) startPath.push( "Data Display" );
+                    if( feedbackComponents.includes( pToken ) ) startPath.push( "Feedback" );
+                    if( navigationComponents.includes( pToken ) ) startPath.push( "Navigation" );
+                }
+
+                startPath.push( pToken == "Api" ? "API Reference" : pToken );
+            }
+
+            if( startPath.length )
+            {
+                path = startPath;
+            }
+
+            return startPath.pop();
+        }
+
         window.loadPage = function(page, addToHistory = true, title, callback) {
             fetch(page)
                 .then(response => response.text())
@@ -265,16 +294,15 @@
             "Range": "3.0",
             "Sidebar": "4.0",
             "Skeleton": "7.0",
-            "Table": "2.0",
             "Tour": "6.11"
         };
         const badgeClass = "contrast sm";
 
         const sidebarCallback = m => {
 
-            const manualCallback = v => open( `manual/${ v.toLowerCase().replaceAll( " ", "-" ) }.html`, [ "Manual", v ], v );
-            const extensionCallback = v => open( `extensions/${ v.toLowerCase().replaceAll( " ", "-" ) }.html`, [ "Extensions", v ], v );
-            const apiReferenceCallback = v => open( `api/${ v.toLowerCase().replaceAll( " ", "-" ) }.html`, [ "API Reference", v ], v );
+            const manualCallback = v => open( `manual/${ v.toLowerCase().replaceAll( " ", "-" ) }.html`, [ "Manual" ], v );
+            const extensionCallback = v => open( `extensions/${ v.toLowerCase().replaceAll( " ", "-" ) }.html`, [ "Extensions" ], v );
+            const apiReferenceCallback = v => open( `api/${ v.toLowerCase().replaceAll( " ", "-" ) }.html`, [ "API Reference" ], v );
 
             m.group( "Manual" );
             m.add( "Installation", { callback: manualCallback } );
@@ -400,31 +428,9 @@
         const params = new URLSearchParams( document.location.search );
         const queryPage = params.get( "p" );
         const startPage = queryPage ?? "manual/installation";
-        const tokens = startPage.split( '/' );
-        const startPath = [];
+        const tabName = window.setPath( startPage );
 
-        for( let t of tokens )
-        {
-            const pToken = LX.toTitleCase( t );
-
-            if( startPath.length && startPath[ 0 ] == "Components" )
-            {
-                if( generalComponents.includes( pToken ) ) startPath.push( "General" );
-                if( dataInputComponents.includes( pToken ) ) startPath.push( "Data Input" );
-                if( dataDisplayComponents.includes( pToken ) ) startPath.push( "Data Display" );
-                if( feedbackComponents.includes( pToken ) ) startPath.push( "Feedback" );
-                if( navigationComponents.includes( pToken ) ) startPath.push( "Navigation" );
-            }
-
-            startPath.push( pToken == "Api" ? "API Reference" : pToken );
-        }
-
-        if( startPath.length )
-        {
-            path = startPath;
-        }
-
-        loadPage( `${ startPage }.html`, !!queryPage, startPath.pop() );
+        loadPage( `${ startPage }.html`, !!queryPage, tabName );
 
     </script>
     </body>

@@ -321,7 +321,9 @@ window.INLINE_LINK = INLINE_LINK;
 function INLINE_PAGE( string, page )
 {
     console.assert(string && page);
-    return `<a onclick="loadPage('` + page + `')">` + string + `</a>`;
+    const startPage = page.replace(".html", "");
+    const tabName = window.setPath( startPage );
+    return `<a onclick="loadPage('${ page }', true, '${ tabName }')">${ string }</a>`;
 }
 
 window.INLINE_PAGE = INLINE_PAGE;
