@@ -124,6 +124,9 @@
     MAKE_PARAGRAPH( `and ${INLINE_CODE("Menubar.setButtonImage(title, src, callback, options)")}:` );
     MAKE_CODE( `menubar.@[mtd]setButtonImage@(@"LexGUI"@, @"path/image.png"@, @null@, { float: @"left"@ });` );
 
+    MAKE_HEADER( "Searchbar for Menu Entries", "h3", "searchbar-for-menu-entries" );
+    MAKE_PARAGRAPH( `Pressing ${INLINE_CODE("Ctrl+Space")} you can open a search bar as a shortcut for any Menubar entry created in the whole UI.` );
+
     MAKE_HEADER("API Reference", "h2");
     MAKE_CLASS_CONSTRUCTOR("LX.Menubar", [ [ "options", "Object = {}" ] ]);
     MAKE_LINE_BREAK();

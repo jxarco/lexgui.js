@@ -6779,6 +6779,7 @@ class Area {
      * minHeight: Minimum height to be applied when resizing
      * maxWidth: Maximum width to be applied when resizing
      * maxHeight: Maximum height to be applied when resizing
+     * layout: Layout to automatically split the area
      */
 
     constructor( options = {} ) {
@@ -6822,6 +6823,11 @@ class Area {
         if( lexroot && !options.skipAppend )
         {
             lexroot.appendChild( this.root );
+        }
+
+        if( options.layout )
+        {
+            this.setLayout( options.layout );
         }
 
         let overlay = options.overlay;
@@ -6982,6 +6988,47 @@ class Area {
 
         let element = content.root ? content.root : content;
         this.root.appendChild( element );
+    }
+
+    /**
+     * @method setLayout
+     * @description Automatically split the area to generate the desired layout
+     * @param {Array} layout
+     */
+
+    setLayout( layout ) {
+
+        this.layout = LX.deepCopy( layout );
+
+        if( !layout.splits )
+        {
+            console.warn( "Area layout has no splits!" );
+            return;
+        }
+
+        const _splitArea = ( area, layout ) => {
+
+            if( layout.className )
+            {
+                area.root.className += ` ${ layout.className }`;
+            }
+
+            if( !layout.splits )
+            {
+                return;
+            }
+
+            const type = layout.type ?? "horizontal";
+            const resize = layout.resize ?? true;
+            const minimizable = layout.minimizable ?? false;
+            const [ splitA, splitB ] = area.split( { type, resize, minimizable, sizes: [ layout.splits[ 0 ].size, layout.splits[ 1 ].size ] } );
+
+            _splitArea( splitA, layout.splits[ 0 ] );
+            _splitArea( splitB, layout.splits[ 1 ] );
+
+        };
+
+        _splitArea( this, layout );
     }
 
     /**
@@ -7242,12 +7289,17 @@ class Area {
             doc.addEventListener( 'mouseup', innerMouseUp );
             e.stopPropagation();
             e.preventDefault();
-            document.body.classList.add( 'nocursor' );
-            that.splitBar.classList.add( 'nocursor' );
         }
 
         function innerMouseMove( e )
         {
+            const rect = that.root.getBoundingClientRect();
+            if( ( ( e.x ) < rect.x || ( e.x ) > ( rect.x + rect.width ) ) ||
+                ( ( e.y ) < rect.y || ( e.y ) > ( rect.y + rect.height ) ) )
+            {
+                return;
+            }
+
             if( that.type == "horizontal" )
             {
                 that._moveSplit( -e.movementX );
@@ -7266,8 +7318,6 @@ class Area {
             const doc = that.root.ownerDocument;
             doc.removeEventListener( 'mousemove', innerMouseMove );
             doc.removeEventListener( 'mouseup', innerMouseUp );
-            document.body.classList.remove( 'nocursor' );
-            that.splitBar.classList.remove( 'nocursor' );
         }
 
         return this.sections;
@@ -7626,10 +7676,11 @@ class Area {
         }
         else
         {
+            const parentHeight = this.size[ 1 ];
             var size = Math.max( ( a2Root.offsetHeight + dt ) + a2.offset, parseInt( a2.minHeight ) );
+            size = Math.min( parentHeight - LX.DEFAULT_SPLITBAR_SIZE, size );
             if( forceWidth ) size = forceWidth;
 
-            const parentHeight = this.size[ 1 ];
             const bottomPercent = ( size / parentHeight ) * 100;
             const topPercent = Math.max( 0, 100 - bottomPercent );
 

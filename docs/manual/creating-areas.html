@@ -21,8 +21,16 @@
     sizes: [@"80vh"@, @"20vh"@]
 });` );
 
-    MAKE_HEADER( "Searchbar for Menu Entries", "h3", "searchbar-for-menu-entries" );
-
-    MAKE_PARAGRAPH( `Pressing ${INLINE_CODE("Ctrl+Space")} you can open a search bar as a shortcut for any Menubar entry created in the whole UI.` );
+    MAKE_PARAGRAPH( `You can also specify a layout for a new area (using ${INLINE_CODE( "options.layout" )}), which will automatically split the area to achieve the desired layout:` );
+    MAKE_CODE( `@const@ area = @new@ @[cls]LX@.@[cls]Area@({ width: @"800px"@, height: @"400px"@, layout: {
+    type: @"horizontal"@,
+    splits: [
+        { size: @"50%"@, className: @"bg-error"@ },
+        { size: @"50%"@, type: @"vertical"@, resize: @false@, splits: [
+            { size: @"50%"@, className: @"bg-accent"@ },
+            { size: @"50%"@, className: @"bg-secondary"@ }
+        ] }
+    ]
+} });` );
 
 </script>
