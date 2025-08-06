@@ -1253,7 +1253,7 @@ LX.prompt = prompt;
  * @param {String} title
  * @param {String} description (Optional)
  * @param {Object} options
- * float: Set new position for the toasts (left, center, right)
+ * position: Set new position for the toasts ("top-left" | "top-center" | "top-right" | "bottom-left" | "bottom-center" | "bottom-right")
  * action: Data of the custom action { name, callback }
  * closable: Allow closing the toast
  * timeout: Time in which the toast closed automatically, in ms. -1 means persistent. [3000]
@@ -1270,30 +1270,47 @@ function toast( title, description, options = {} )
 
     const toast = document.createElement( "li" );
     toast.className = "lextoast";
-    toast.style.translate = "0 calc(100% + 30px)";
     this.notifications.prepend( toast );
 
-    if( options.float )
-    {
-        this.notifications.style.right = "unset";
-        this.notifications.style.left = "unset";
-        this.notifications.style.placeSelf = "unset";
+    const [ positionVertical, positionHorizontal ] = options.position ? options.position.split( "-" ) : [ "bottom", "right" ];
 
-        switch( options.float )
-        {
-            case "left":
-                this.notifications.style.left = "1rem";
-                toast.classList.add( options.float );
-                break;
-            case "center":
-                this.notifications.style.placeSelf = "center";
-                toast.classList.add( options.float );
-                break;
-            case "right":
-                this.notifications.style.right = "1rem";
-                break;
-        }
+    // Reset style
+    this.notifications.style.right = "unset";
+    this.notifications.style.left = "unset";
+    this.notifications.style.top = "unset";
+    this.notifications.style.bottom = "unset";
+    this.notifications.style.placeSelf = "unset";
+
+    switch( positionVertical )
+    {
+        case "top":
+            toast.style.translate = "0 -30px";
+            this.notifications.style.top = "1rem";
+            this.notifications.style.flexDirection = "column";
+            break;
+        case "bottom":
+            toast.style.translate = "0 calc(100% + 30px)";
+            this.notifications.style.top = "auto";
+            this.notifications.style.bottom = "1rem";
+            this.notifications.style.flexDirection = "column-reverse";
+            break;
     }
+
+    switch( positionHorizontal )
+    {
+        case "left":
+            this.notifications.style.left = "1rem";
+            break;
+        case "center":
+            this.notifications.style.placeSelf = "center";
+            break;
+        case "right":
+            this.notifications.style.right = "1rem";
+            break;
+    }
+
+    toast.classList.add( positionVertical );
+    toast.classList.add( positionHorizontal );
 
     LX.doAsync( () => {
 

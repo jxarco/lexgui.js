@@ -24,7 +24,7 @@
 
             LX.toast( generatedToasts[idx][0], generatedToasts[idx][1], { action: { name: "Got it!", callback: ( toast, actionName, event ) => {
                 toast.close();
-            } }, timeout: -1, xfloat: "left" } );
+            } }, timeout: -1, position: "bottom-left" } );
         }
 
         const area = new LX.Area( { className: "border rounded-lg shadow-lg bg-secondary overflow-hidden p-8", skipAppend: true, height: "auto" } );
@@ -41,7 +41,7 @@
      MAKE_HEADER("Quick Usage", "h2");
     MAKE_CODE(`@[cls]LX@.@[mtd]toast@( toastTitle, toastDescription, { action: { name: @"Got it!"@, callback: ( toast, actionName, event ) => {
     toast.@[mtd]close@();
-} },  timeout: @3000@ } );`, "js");
+} }, timeout: @3000@, position: @"top-right"@ } );`, "js");
 
     MAKE_HEADER("API Reference", "h2");
     MAKE_CLASS_CONSTRUCTOR( "function LX.Toast", [
@@ -62,7 +62,7 @@
             body: [
                 ["action", "Object", "Data of the custom action { name, callback }", "—"],
                 ["closable", "Boolean", "Allow closing the toast", "true"],
-                ["float", `<span class='cursor-pointer' title='left | center | right'>Enum</span>`, "Set new position for the toasts", `"right"`],
+                ["position", `<span class='cursor-pointer' title='top | bottom\nleft | center | right'>Enum</span>`, "Set new position for the toasts", `"bottom-right"`],
                 ["timeout", "Number", "Time in which the toast closed automatically, in ms. -1 means persistent", "3000"]
             ].map( v => {
                 return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];

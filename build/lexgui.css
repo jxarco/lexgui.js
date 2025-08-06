@@ -442,9 +442,6 @@ a svg, svg path {
     max-height: 100vh;
     position: fixed;
     margin: 0;
-    bottom: 1rem;
-    top: auto;
-    right: 1rem;
     pointer-events: none;
     display: flex;
     flex-direction: column-reverse;
@@ -481,21 +478,29 @@ a svg, svg path {
     --stack-offset: calc(100% - var(--element-offset));
 }
 
+.lextoast.top {
+    --stack-offset: calc(-100% + var(--element-offset));
+}
+
 .lextoast[data-open="true"] {
     translate: 0 0 !important;
 }
 
 .lextoast[data-open="false"] {
-    translate: calc(100% + 30px) 0 !important;
+    translate: 100% 0 !important;
     opacity: 0 !important;
 }
 
 .lextoast.center[data-open="false"] {
-    translate: 0 calc(100% + 30px) !important;
+    translate: 0 30px !important;
+}
+
+.lextoast.center.top[data-open="false"] {
+    translate: 0 -30px !important;
 }
 
 .lextoast.left[data-open="false"] {
-    translate: -30px 0 !important;
+    translate: -100% 0 !important;
 }
 
 .lextoast .lextoastcontent {
