@@ -2952,11 +2952,13 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     position: absolute;
     margin-top: -0.25rem;
     right: 0.25rem;
+    border: none !important;
 }
 
 .lexbadge.chip {
     border-radius: 0.5rem;
     padding-inline: 0.25rem;
+    border: none !important;
 }
 
 /* Menu Bar */
