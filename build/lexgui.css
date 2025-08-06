@@ -2902,14 +2902,15 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 /* Badges */
 
 .lexbadge {
-    border-radius: 0.35rem;
+    border-radius: 0.4rem;
     color: #f4f4f5;
     border: 1px solid var(--badge-color, #14171a);
     width: fit-content;
+    height: 1.1rem;
     justify-content: center;
     align-items: center;
-    gap: 0.5rem;
-    padding-inline: 0.6rem;
+    gap: 0.25rem;
+    padding-inline: 0.5rem;
     font-size: var(--global-font-size);
     display: inline-flex;
     background-color: var(--badge-color, #1d232a);
@@ -2935,11 +2936,11 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     border: none;
 }
 /* Sizes */
-.lexbadge.xs { padding-inline: 0.4rem; font-size: var(--global-font-size-xs); }
-.lexbadge.sm { padding-inline: 0.5rem; font-size: var(--global-font-size-sm); }
+.lexbadge.xs { height: 0.7rem; padding-inline: 0.3rem; font-size: var(--global-font-size-xs); }
+.lexbadge.sm { height: 0.9rem; padding-inline: 0.4rem; font-size: var(--global-font-size-sm); }
 /* .lexbadge.md { default } */
-.lexbadge.lg { padding-inline: 0.8rem; font-size: var(--global-font-size-lg); }
-.lexbadge.xl { padding-inline: 1rem; font-size: var(--global-font-size-xl) }
+.lexbadge.lg { height: 1.3rem; padding-inline: 0.7rem; font-size: var(--global-font-size-lg); }
+.lexbadge.xl { height: 1.5rem; padding-inline: 0.85rem; font-size: var(--global-font-size-xl) }
 
 .lexbadge-parent {
     position: relative;
@@ -2950,7 +2951,12 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     padding-inline: 0.25rem;
     position: absolute;
     margin-top: -0.25rem;
-    right: 0.1rem;
+    right: 0.25rem;
+}
+
+.lexbadge.chip {
+    border-radius: 0.5rem;
+    padding-inline: 0.25rem;
 }
 
 /* Menu Bar */
@@ -6110,6 +6116,10 @@ ul.lexassetscontent {
 .content-center { align-content: center }
 .content-end { align-content: end }
 
+.place-content-start { place-content: start }
+.place-content-center { place-content: center }
+.place-content-end { place-content: end }
+
 .grid-column-start-1 { grid-column-start: 1 }
 .grid-column-start-2 { grid-column-start: 2 }
 
@@ -6218,6 +6228,10 @@ ul.lexassetscontent {
 .p-6 { padding: 1.5rem }
 .p-7 { padding: 1.75rem }
 .p-8 { padding: 2rem }
+.p-9 { padding: 2.25rem }
+.p-10 { padding: 2.5rem }
+.p-11 { padding: 2.75rem }
+.p-12 { padding: 3rem }
 
 .pt-0 { padding-top: 0 }
 .pt-1 { padding-top: 0.25rem }
@@ -6391,6 +6405,7 @@ ul.lexassetscontent {
 /* Borders / Radius / Shadow */
 
 .border { border: 1px solid var(--global-color-tertiary) }
+.border-none { border: none }
 .border-colored { border: 1px solid currentColor }
 
 .border-solid { border-style: solid }

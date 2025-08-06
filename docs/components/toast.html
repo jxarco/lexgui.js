@@ -44,13 +44,13 @@
 } }, timeout: @3000@, position: @"top-right"@ } );`, "js");
 
     MAKE_HEADER("API Reference", "h2");
-    MAKE_CLASS_CONSTRUCTOR( "function LX.Toast", [
+    MAKE_CLASS_CONSTRUCTOR( "function LX.toast", [
         ["title", "String"],
         ["description", "String"],
         ["options", "Object = {}"]
     ]);
     MAKE_LINE_BREAK();
-    MAKE_PARAGRAPH(`Where ${ INLINE_CODE( "title" ) } is toast title; ${ INLINE_CODE( "description" ) } is the text description content, and ${ INLINE_CODE( "options" ) } can include the following:`);
+    MAKE_PARAGRAPH(`Where ${ INLINE_CODE( "title" ) } is the toast title; ${ INLINE_CODE( "description" ) } is the text description content, and ${ INLINE_CODE( "options" ) } can include the following:`);
     MAKE_LINE_BREAK();
 
     {

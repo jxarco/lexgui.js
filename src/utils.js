@@ -1396,6 +1396,12 @@ function badge( text, className, options = {} )
     const container = document.createElement( "div" );
     container.innerHTML = text;
     container.className = "lexbadge " + ( className ?? "" );
+
+    if( options.chip )
+    {
+        container.classList.add( "chip" );
+    }
+
     Object.assign( container.style, options.style ?? {} );
 
     if( options.callback )

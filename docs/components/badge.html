@@ -1,0 +1,63 @@
+<script type="module">
+
+    import { LX } from 'lexgui';
+
+    MAKE_HEADER( "Badge.", "h1", "badge" );
+    MAKE_PARAGRAPH( `Used to display short text or status labels, such as categories, states, or tags.` );
+    MAKE_LINE_BREAK();
+
+    {
+        const area = new LX.Area( { className: "flex flex-col border rounded-lg shadow-lg bg-secondary overflow-hidden p-12 gap-1", skipAppend: true, height: "auto" } );
+        content.appendChild( area.root );
+
+        const panel = area.addPanel( { className: "flex flex-row gap-1 place-content-center" } );
+        panel.attach( LX.badge("Badge", "border-none", { asElement: true }) );
+        panel.attach( LX.badge("Contrast", "contrast", { asElement: true }) );
+        panel.attach( LX.badge("Destructive", "error", { asElement: true }) );
+        panel.attach( LX.badge("Outline", "primary border", { asElement: true }) );
+        const panelB = area.addPanel( { className: "flex flex-row gap-1 place-content-center" } );
+        panelB.attach( LX.badge( LX.makeIcon( "BadgeCheck", { svgClass: "sm" } ).innerHTML + "Verified", "accent", { asElement: true }) );
+        panelB.attach( LX.badge("8", "contrast", { asElement: true, chip: true }) );
+        panelB.attach( LX.badge("99", "error", { asElement: true, chip: true }) );
+        panelB.attach( LX.badge("20+", "primary border", { asElement: true, chip: true }) );
+        const panelC = area.addPanel( { className: "flex flex-row gap-1 place-content-center" } );
+        const chipParent = LX.makeContainer( ["auto", "auto"], "py-1 px-8 bg-tertiary rounded-lg", "Parent Chip", panelC );
+        LX.badge("9", "error fg-white", { asElement: true, xchip: true, parent: chipParent });
+    }
+
+    MAKE_LINE_BREAK();
+
+    MAKE_HEADER("Quick Usage", "h2");
+    MAKE_CODE(`@[cls]LX@.@[mtd]badge@( badgeText, @"accent outline"@, { asElement: @true@ } );`, "js");
+
+    MAKE_HEADER("API Reference", "h2");
+    MAKE_CLASS_CONSTRUCTOR( "function LX.badge", [
+        ["text", "String"],
+        ["className", "String"],
+        ["options", "Object = {}"]
+    ]);
+    MAKE_LINE_BREAK();
+    MAKE_PARAGRAPH(`Where ${ INLINE_CODE( "text" ) } is the text content; ${ INLINE_CODE( "className" ) } contains the badge specific classes, and ${ INLINE_CODE( "options" ) } can include the following:`);
+    MAKE_LINE_BREAK();
+
+    {
+        const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
+        const panel = area.addPanel();
+        content.appendChild( area.root );
+        panel.addTable( null, {
+            head: [ "Option", "Type", "Description", "Default" ],
+            body: [
+                ["asElement", "Boolean", "Return the badge as HTMLElement instead of html string", "false"],
+                ["callback", "Function", "Function to be called when the badge is clicked", "—"],
+                ["chip", "Boolean", "Use the badge as a chip indicator", "false"],
+                ["parent", "HTMLElement", "Append the badge into the desired parent to use badge as a child chip", "—"]
+            ].map( v => {
+                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+    }
+
+    MAKE_LINE_BREAK();
+    MAKE_LINE_BREAK();
+
+</script>
