@@ -481,12 +481,21 @@ a svg, svg path {
     --stack-offset: calc(100% - var(--element-offset));
 }
 
-.lextoast[data-open] {
+.lextoast[data-open="true"] {
     translate: 0 0 !important;
 }
 
-.lextoast[data-closed] {
+.lextoast[data-open="false"] {
     translate: calc(100% + 30px) 0 !important;
+    opacity: 0 !important;
+}
+
+.lextoast.center[data-open="false"] {
+    translate: 0 calc(100% + 30px) !important;
+}
+
+.lextoast.left[data-open="false"] {
+    translate: -30px 0 !important;
 }
 
 .lextoast .lextoastcontent {

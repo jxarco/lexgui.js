@@ -1283,9 +1283,11 @@ function toast( title, description, options = {} )
         {
             case "left":
                 this.notifications.style.left = "1rem";
+                toast.classList.add( options.float );
                 break;
             case "center":
                 this.notifications.style.placeSelf = "center";
+                toast.classList.add( options.float );
                 break;
             case "right":
                 this.notifications.style.right = "1rem";
@@ -1331,7 +1333,7 @@ function toast( title, description, options = {} )
     const that = this;
 
     toast.close = function() {
-        this.dataset[ "closed" ] = true;
+        this.dataset[ "open" ] = false;
         LX.doAsync( () => {
             this.remove();
             if( !that.notifications.childElementCount )
