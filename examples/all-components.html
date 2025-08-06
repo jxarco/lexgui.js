@@ -278,6 +278,13 @@
             panelB.addFile("Disabled", null, { disabled: true });
         }
 
+        // Rate
+        {
+            panelC.branch("Rate", { closed: closedDefault });
+            panelC.addRate("Basic Rate", 2, null);
+            panelC.addRate("Rate With Halfs", 4.5, null, { allowHalf: true });
+        }
+
         // DatePicker
         {
             panelC.branch("Date Picker", { closed: closedDefault });

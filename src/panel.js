@@ -1182,6 +1182,19 @@ class Panel {
         const component = new LX.Map2D( name, points, callback, options );
         return this._attachComponent( component );
     }
+
+    /**
+     * @method addRate
+     * @param {String} name Component name
+     * @param {Number} value
+     * @param {Function} callback
+     * @param {Object} options:
+     */
+
+    addRate( name, value, callback, options = { } ) {
+        const component = new LX.Rate( name, value, callback, options );
+        return this._attachComponent( component );
+    }
 }
 
 LX.Panel = Panel;

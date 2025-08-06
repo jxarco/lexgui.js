@@ -359,6 +359,7 @@ body.noevents * {
 .pictonblue { color: #45B1E8 }
 .lightblue { color: #5aa8f7 }
 .goldenrod { color: goldenrod }
+.metallicyellow { color: #FDCC0D }
 .heliotrope { color: #d460ff }
 
 svg.xxs { width: var(--svg-size-xxs); height: var(--svg-size-xxs); }
