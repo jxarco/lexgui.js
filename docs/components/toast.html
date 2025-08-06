@@ -24,7 +24,7 @@
 
             LX.toast( generatedToasts[idx][0], generatedToasts[idx][1], { action: { name: "Got it!", callback: ( toast, actionName, event ) => {
                 toast.close();
-            } },  timeout: -1 } );
+            } }, timeout: -1, float: "center" } );
         }
 
         const area = new LX.Area( { className: "border rounded-lg shadow-lg bg-secondary overflow-hidden p-8", skipAppend: true, height: "auto" } );
@@ -39,7 +39,7 @@
     MAKE_LINE_BREAK();
 
      MAKE_HEADER("Quick Usage", "h2");
-    MAKE_CODE(`@[cls]LX@.@[mtd]toast@( toastTitle, toastContent, { action: { name: @"Got it!"@, callback: ( toast, actionName, event ) => {
+    MAKE_CODE(`@[cls]LX@.@[mtd]toast@( toastTitle, toastDescription, { action: { name: @"Got it!"@, callback: ( toast, actionName, event ) => {
     toast.@[mtd]close@();
 } },  timeout: @3000@ } );`, "js");
 
@@ -50,7 +50,7 @@
         ["options", "Object = {}"]
     ]);
     MAKE_LINE_BREAK();
-    MAKE_PARAGRAPH(`Where ${ INLINE_CODE( "title" ) } is toast title; ${ INLINE_CODE( "description" ) } is the text content, and ${ INLINE_CODE( "options" ) } can include the following:`);
+    MAKE_PARAGRAPH(`Where ${ INLINE_CODE( "title" ) } is toast title; ${ INLINE_CODE( "description" ) } is the text description content, and ${ INLINE_CODE( "options" ) } can include the following:`);
     MAKE_LINE_BREAK();
 
     {
@@ -62,6 +62,7 @@
             body: [
                 ["action", "Object", "Data of the custom action { name, callback }", "—"],
                 ["closable", "Boolean", "Allow closing the toast", "true"],
+                ["float", `<span class='cursor-pointer' title='left | center | right'>Enum</span>`, "Set new position for the toasts", `"right"`],
                 ["timeout", "Number", "Time in which the toast closed automatically, in ms. -1 means persistent", "3000"]
             ].map( v => {
                 return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];

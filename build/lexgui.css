@@ -442,14 +442,15 @@ a svg, svg path {
     max-height: 100vh;
     position: fixed;
     margin: 0;
-    right: 1rem;
     bottom: 1rem;
     top: auto;
+    right: 1rem;
     pointer-events: none;
     display: flex;
     flex-direction: column-reverse;
     gap: 0.15em;
     z-index: 100;
+    padding: 0;
 }
 
 .notifications ol.list {
@@ -461,9 +462,9 @@ a svg, svg path {
     flex-direction: row;
     position: relative;
     width: 100%;
-    background-color: var(--global-intense-background);
+    background-color: light-dark(var(--global-color-primary), var(--global-color-secondary));
     border: 1px solid var(--global-color-tertiary);
-    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
     overflow: hidden;
     -webkit-user-select: none;
     -moz-user-select: none;

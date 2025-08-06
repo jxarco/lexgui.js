@@ -5969,6 +5969,7 @@ LX.prompt = prompt;
  * @param {String} title
  * @param {String} description (Optional)
  * @param {Object} options
+ * float: Set new position for the toasts (left, center, right)
  * action: Data of the custom action { name, callback }
  * closable: Allow closing the toast
  * timeout: Time in which the toast closed automatically, in ms. -1 means persistent. [3000]
@@ -5987,6 +5988,26 @@ function toast( title, description, options = {} )
     toast.className = "lextoast";
     toast.style.translate = "0 calc(100% + 30px)";
     this.notifications.prepend( toast );
+
+    if( options.float )
+    {
+        this.notifications.style.right = "unset";
+        this.notifications.style.left = "unset";
+        this.notifications.style.placeSelf = "unset";
+
+        switch( options.float )
+        {
+            case "left":
+                this.notifications.style.left = "1rem";
+                break;
+            case "center":
+                this.notifications.style.placeSelf = "center";
+                break;
+            case "right":
+                this.notifications.style.right = "1rem";
+                break;
+        }
+    }
 
     LX.doAsync( () => {
 
