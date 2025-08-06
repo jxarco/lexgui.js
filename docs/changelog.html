@@ -50,6 +50,13 @@
 
                     if( line[ 0 ] == '-' )
                     {
+                        // I was doing another list
+                        if( currentList.length && currentList[ currentList.length - 1 ].constructor === Array )
+                        {
+                            MAKE_BULLET_LIST( currentList );
+                            currentList = [];
+                        }
+
                         currentList.push( line.substring( 2 ) );
                         continue;
                     }

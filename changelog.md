@@ -2,11 +2,57 @@
 
 ## dev
 
-Widgets:
-- Fixed minor issue with LX.CalendarRange when selecting >1 months apart.
-- Added support for Calendar Date filter in Table Widget.
+## 0.7.0 (master)
 
-## 0.6.12 (master)
+General/Utils:
+- "Components" have been renamed to "Extensions".
+- Every elements, widget, etc. is now a "Component".
+- Added support for `LX.toCamelCase` and `LX.toTitleCase`.
+- Polished CSS.
+- Changed LexGUI brand icons.
+- Unified code fonts. Using now CascadiaCode (https://github.com/microsoft/cascadia-code).
+
+New Components:
+- Skeleton Component (Feedback)
+- Breadcrumb Component (Navigation)
+- Rate Component (Data Input)
+
+New "default" | "compact" layout spacing:
+- `options.spacingMode` in LX.init
+- `LX.setSpacingMode` and `LX.switchSpacing`
+
+Component Updates:
+- Badges:
+  - Added `options.parent` to use them as notification indicators inside an element
+  - Added `options.chip` to use as notification indicators alone
+  - Added `options.callback` option on click.
+- Toast:
+  - Allow creation at left, center and right + top/bottom using `options.position`.
+- Sidebar:
+  - Added subitem option `options.content` to match main items.
+  - Added entry option `options.skipSelection` to avoid selections even with `displaySelected`.
+  - Support swap icons in entries.
+  - Fixed subentry selection.
+- Dropdowns:
+  - Support radio button groups.
+- AssetView:
+  - Improved toolbar with Dropdowns. Now refreshes icons on change sort and layout modes.
+- Table:
+  - Added support for Calendar Date filter in Table Component.
+- Other Bugfixes:
+  - Fixed Select Component above placement on filter.
+  - FIxed CodeEditor 'End' horizontal scrolling.
+  - Fixed CodeEditor CSS harcoded Tab height.
+  - Fixed dropdown, popovers, etc within modal backdrop.
+  - Fixed minor issue with CalendarRange when selecting >1 months apart.
+
+Improved Documentation:
+- Added AssetView, CodeSnippet and other small components (badge, sheet, toast, etc.).
+- Added Docmaker and Video Editor extension docs.
+- Added addition version to elements in sidebar.
+- Added Changelog section.
+
+## 0.6.12
 
 Widgets:
 - Button Widget now supports `options.mustConfirm` to confirm the trigger with custom options.
