@@ -1486,7 +1486,10 @@ LX.makeContainer = makeContainer;
  * @param {Object} options
  * side: Side of the tooltip
  * offset: Tooltip margin offset
+ * offsetX: Tooltip margin horizontal offset
+ * offsetY: Tooltip margin vertical offset
  * active: Tooltip active by default [true]
+ * callback: Callback function to execute when the tooltip is shown
  */
 
 function asTooltip( trigger, content, options = {} )
@@ -1498,6 +1501,10 @@ function asTooltip( trigger, content, options = {} )
     let tooltipDom = null;
     let tooltipParent = LX.root;
 
+    const _offset = options.offset ?? 6;
+    const _offsetX = options.offsetX ?? _offset;
+    const _offsetY = options.offsetY ?? _offset;
+
     trigger.addEventListener( "mouseenter", function(e) {
 
         if( trigger.dataset[ "disableTooltip" ] == "true" )
@@ -1507,7 +1514,7 @@ function asTooltip( trigger, content, options = {} )
 
         tooltipDom = document.createElement( "div" );
         tooltipDom.className = "lextooltip";
-        tooltipDom.innerHTML = content;
+        tooltipDom.innerHTML = trigger.dataset[ "tooltipContent" ] ?? content;
 
         const nestedDialog = trigger.closest( "dialog" );
         if( nestedDialog && nestedDialog.dataset[ "modal" ] == 'true' )
@@ -1524,32 +1531,33 @@ function asTooltip( trigger, content, options = {} )
         LX.doAsync( () => {
 
             const position = [ 0, 0 ];
+            const offsetX = parseFloat( trigger.dataset[ "tooltipOffsetX" ] ?? _offsetX );
+            const offsetY = parseFloat( trigger.dataset[ "tooltipOffsetY" ] ?? _offsetY );
             const rect = this.getBoundingClientRect();
-            const offset = options.offset ?? 6;
             let alignWidth = true;
 
             switch( options.side ?? "top" )
             {
                 case "left":
-                    position[ 0 ] += ( rect.x - tooltipDom.offsetWidth - offset );
+                    position[ 0 ] += ( rect.x - tooltipDom.offsetWidth - offsetX );
                     alignWidth = false;
                     break;
                 case "right":
-                    position[ 0 ] += ( rect.x + rect.width + offset );
+                    position[ 0 ] += ( rect.x + rect.width + offsetX );
                     alignWidth = false;
                     break;
                 case "top":
-                    position[ 1 ] += ( rect.y - tooltipDom.offsetHeight - offset );
+                    position[ 1 ] += ( rect.y - tooltipDom.offsetHeight - offsetY );
                     alignWidth = true;
                     break;
                 case "bottom":
-                    position[ 1 ] += ( rect.y + rect.height + offset );
+                    position[ 1 ] += ( rect.y + rect.height + offsetY );
                     alignWidth = true;
                     break;
             }
 
-            if( alignWidth ) { position[ 0 ] += ( rect.x + rect.width * 0.5 ) - tooltipDom.offsetWidth * 0.5; }
-            else { position[ 1 ] += ( rect.y + rect.height * 0.5 ) - tooltipDom.offsetHeight * 0.5; }
+            if( alignWidth ) { position[ 0 ] += ( rect.x + rect.width * 0.5 ) - tooltipDom.offsetWidth * 0.5 + offsetX; }
+            else { position[ 1 ] += ( rect.y + rect.height * 0.5 ) - tooltipDom.offsetHeight * 0.5 + offsetY; }
 
             // Avoid collisions
             position[ 0 ] = LX.clamp( position[ 0 ], 0, window.innerWidth - tooltipDom.offsetWidth - 4 );
@@ -1564,6 +1572,11 @@ function asTooltip( trigger, content, options = {} )
 
             tooltipDom.style.left = `${ position[ 0 ] }px`;
             tooltipDom.style.top = `${ position[ 1 ] }px`;
+
+            if( options.callback )
+            {
+                options.callback( tooltipDom, trigger );
+            }
         } );
     } );
 
@@ -1572,7 +1585,7 @@ function asTooltip( trigger, content, options = {} )
         {
             tooltipDom.remove();
         }
-    } )
+    } );
 }
 
 LX.asTooltip = asTooltip;

@@ -2,7 +2,11 @@
 
 ## dev
 
-Added support for selecting custom Min, Max range in RangeInput.
+Added support for selecting custom Min, Max range in RangeInput component.
+Added value labels to RangeInput component.
+`LX.asTooltip` Updates:
+- Now supports `options.offsetX`, `options.offsetY` and `options.callback`.
+- Change content and offsets dynamically using `trigger.dataset["tooltipContent" | "tooltipOffsetX" | "tooltipOffsetY"]`.
 Fixed Popovers using `options.reference`.
 
 ## 0.7.0 (master)
