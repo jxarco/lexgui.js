@@ -259,7 +259,8 @@ const starterTheme = LX.getTheme();
             panel.addText("Text", "LexGUI.js @jxarco", null, {placeholder: "e.g. ColorPicker", icon: "Type"});
             panel.addColor("Font Color", "#303b8d", null);
             panel.addNumber("Font Size", 36, null, { min: 1, max: 48, step: 1, units: "px"});
-            panel.addSelect("Font Family", ["Arial", "GeistSans", "Monospace", "Ubuntu"], "GeistSans");
+            panel.addSelect("Font Family", ["Arial", "GeistSans", "Monospace", "CascadiaCode"], "GeistSans");
+            panel.addRange("Threshold Range", [2, 7], (v) => console.log(v), { min: 0, max: 10, step: 1, className: "accent" });
             panel.addVector2("2D Position", [300, 350], null, { min: 0, max: 1024 });
             const opacityValues = [
                 [0.2, 0.3146875],

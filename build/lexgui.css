@@ -2478,7 +2478,7 @@ input[type=number] {
     --range-thumb-size: 1rem;
     --range-progress: currentColor;
     --range-fill: 1;
-    --range-thumb-padding: 0.15rem;
+    --range-thumb-padding: 0.2rem;
     --range-bg: color-mix(in oklab,currentColor 20%,#0000);
     --range-dir: 1;
     --radius-selector: 0.5rem;
@@ -2521,7 +2521,19 @@ input[type=number] {
 
 .lexrangeslider.no-fill {
     --range-fill: 0;
-    --range-bg: currentColor;
+    --in-range-color: color-mix(in oklab,currentColor 30%,#0000);
+    --range-bg: linear-gradient(to right,
+    var(--in-range-color) 0%,
+    var(--in-range-color) calc(var(--range-min-value) + var(--range-fix-min-offset)),
+    currentColor calc(var(--range-min-value) + var(--range-fix-min-offset)),
+    currentColor calc( var(--range-max-value) - var(--range-fix-max-offset)),
+    var(--in-range-color) calc( var(--range-max-value) - var(--range-fix-max-offset)),
+    var(--in-range-color) 100%);
+    background: var(--range-bg);
+}
+
+.lexrangeslider.overlap {
+    --range-bg: transparent;
 }
 
 .lexrangeslider:hover {
@@ -2560,6 +2572,7 @@ input[type=number] {
     background-color: currentColor;
     position: relative;
     top: 50%;
+    pointer-events: all !important;
     transform: translateY(-50%);
 }
 
@@ -2574,6 +2587,7 @@ input[type=number] {
     background-color: currentColor;
     position: relative;
     top: 50%;
+    pointer-events: all !important;
 }
 
 /* OTP Component */

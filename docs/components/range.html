@@ -18,6 +18,9 @@
             panel.addRange("Intensity Value", 25, (value, event) => {
                 console.log(value);
             }, { min: 1, max: 100 });
+            panel.addRange("Threshold Value", [2, 6], (value, event) => {
+                console.log(value);
+            }, { min: 1, max: 10, step: 1, className: "accent" });
         });
     }
 

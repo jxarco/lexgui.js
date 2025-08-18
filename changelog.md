@@ -2,6 +2,7 @@
 
 ## dev
 
+Added support for selecting custom Min, Max range in RangeInput.
 Fixed Popovers using `options.reference`.
 
 ## 0.7.0 (master)

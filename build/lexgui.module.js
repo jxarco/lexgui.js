@@ -762,7 +762,8 @@ class Popover {
         this.root.tabIndex = "1";
         this.root.className = "lexpopover";
 
-        const nestedDialog = trigger.closest( "dialog" );
+        const refElement = trigger ?? this.reference;
+        const nestedDialog = refElement.closest( "dialog" );
         if( nestedDialog && nestedDialog.dataset[ "modal" ] == 'true' )
         {
             this._parent = nestedDialog;
@@ -11015,38 +11016,93 @@ class RangeInput extends BaseComponent {
 
     constructor( name, value, callback, options = {} ) {
 
-        super( BaseComponent.RANGE, name, value, options );
+        const ogValue = LX.deepCopy( value );
+
+        super( BaseComponent.RANGE, name, LX.deepCopy( ogValue ), options );
+
+        const isRangeValue = ( value.constructor == Array && value.length == 2 );
+        if( isRangeValue )
+        {
+            value = ogValue[ 0 ];
+            options.fill = false; // Range inputs do not fill by default
+        }
 
         this.onGetValue = () => {
-            return value;
+            let finalValue = value;
+            if( isRangeValue )
+            {
+                finalValue = [ value, ogValue[ 1 ] ];
+            }
+            else if( options.left )
+            {
+                finalValue = ( ( +slider.max ) - value + ( +slider.min ) );
+            }
+            return finalValue;
         };
 
         this.onSetValue = ( newValue, skipCallback, event ) => {
 
-            if( isNaN( newValue ) )
+            if( isRangeValue )
             {
-                return;
-            }
+                slider.value = value = LX.clamp( +newValue[ 0 ], +slider.min, +slider.max );
+                this._maxSlider.value = ogValue[ 1 ] = LX.clamp( +newValue[ 1 ], +slider.min, +slider.max );
 
-            slider.value = value = LX.clamp( +newValue, +slider.min, +slider.max );
+                // Update the range slider
+                const diff = ( options.max - options.min );
+                const diffOffset = ( value / diff ) - 0.5;
+                const diffMaxOffset = ( ogValue[ 1 ] / diff ) - 0.5;
+                slider.style.setProperty("--range-min-value", `${ LX.remapRange( value, options.min, options.max, 0, 1 ) * 100 }%`);
+                slider.style.setProperty("--range-max-value", `${ LX.remapRange( ogValue[ 1 ], options.min, options.max, 0, 1 ) * 100 }%`);
+                slider.style.setProperty("--range-fix-min-offset", `${ -diffOffset * 0.5 }rem`);
+                slider.style.setProperty("--range-fix-max-offset", `${ diffMaxOffset * 0.5 }rem`);
+            }
+            else
+            {
+                if( isNaN( newValue ) )
+                {
+                    return;
+                }
+
+                slider.value = value = LX.clamp( +newValue, +slider.min, +slider.max );
+            }
 
             if( !skipCallback )
             {
-                this._trigger( new LX.IEvent( name, options.left ? ( ( +slider.max ) - value + ( +slider.min ) ) : value, event ), callback );
+                let finalValue = value;
+                if( isRangeValue )
+                {
+                    finalValue = [ value, ogValue[ 1 ] ];
+                }
+                else if( options.left )
+                {
+                    finalValue = ( ( +slider.max ) - value + ( +slider.min ) );
+                }
+
+                this._trigger( new LX.IEvent( name, finalValue, event ), callback );
             }
         };
 
         this.onResize = ( rect ) => {
             const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
             container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth })`;
+            if( isRangeValue )
+            {
+                const diff = ( options.max - options.min );
+                const diffOffset = ( value / diff ) - 0.5;
+                const diffMaxOffset = ( ogValue[ 1 ] / diff ) - 0.5;
+                slider.style.setProperty("--range-min-value", `${ LX.remapRange( value, options.min, options.max, 0, 1 ) * 100 }%`);
+                slider.style.setProperty("--range-max-value", `${ LX.remapRange( ogValue[ 1 ], options.min, options.max, 0, 1 ) * 100 }%`);
+                slider.style.setProperty("--range-fix-min-offset", `${ -diffOffset * 0.5 }rem`);
+                slider.style.setProperty("--range-fix-max-offset", `${ diffMaxOffset * 0.5 }rem`);
+            }
         };
 
         const container = document.createElement( 'div' );
-        container.className = "lexrange";
+        container.className = "lexrange relative";
         this.root.appendChild( container );
 
         let slider = document.createElement( 'input' );
-        slider.className = "lexrangeslider " + ( options.className ?? "" );
+        slider.className = "lexrangeslider " + ( isRangeValue ? "pointer-events-none " : "" ) + ( options.className ?? "" );
         slider.min = options.min ?? 0;
         slider.max = options.max ?? 100;
         slider.step = options.step ?? 1;
@@ -11077,22 +11133,26 @@ class RangeInput extends BaseComponent {
         }
 
         slider.addEventListener( "input", e => {
-            this.set( e.target.valueAsNumber, false, e );
+            this.set( isRangeValue ? [ e.target.valueAsNumber, ogValue[ 1 ] ] : e.target.valueAsNumber, false, e );
         }, { passive: false });
 
-        slider.addEventListener( "mousedown", function( e ) {
-            if( options.onPress )
-            {
-                options.onPress.bind( slider )( e, slider );
-            }
-        }, false );
+        // If its a range value, we need to update the slider using the thumbs
+        if( !isRangeValue )
+        {
+            slider.addEventListener( "mousedown", function( e ) {
+                if( options.onPress )
+                {
+                    options.onPress.bind( slider )( e, slider );
+                }
+            }, false );
 
-        slider.addEventListener( "mouseup", function( e ) {
-            if( options.onRelease )
-            {
-                options.onRelease.bind( slider )( e, slider );
-            }
-        }, false );
+            slider.addEventListener( "mouseup", function( e ) {
+                if( options.onRelease )
+                {
+                    options.onRelease.bind( slider )( e, slider );
+                }
+            }, false );
+        }
 
         // Method to change min, max, step parameters
         this.setLimits = ( newMin, newMax, newStep ) => {
@@ -11103,6 +11163,27 @@ class RangeInput extends BaseComponent {
         };
 
         LX.doAsync( this.onResize.bind( this ) );
+
+        if( ogValue.constructor == Array ) // Its a range value
+        {
+            let maxSlider = document.createElement( 'input' );
+            maxSlider.className = "lexrangeslider no-fill pointer-events-none overlap absolute top-0 left-0 " + ( options.className ?? "" );
+            maxSlider.min = options.min ?? 0;
+            maxSlider.max = options.max ?? 100;
+            maxSlider.step = options.step ?? 1;
+            maxSlider.type = "range";
+            maxSlider.disabled = options.disabled ?? false;
+            this._maxSlider = maxSlider;
+
+            let maxRangeValue = ogValue[ 1 ];
+            maxSlider.value = maxRangeValue = LX.clamp( maxRangeValue, +maxSlider.min, +maxSlider.max );
+            container.appendChild( maxSlider );
+
+            maxSlider.addEventListener( "input", e => {
+                ogValue[ 1 ] = +e.target.valueAsNumber;
+                this.set( [ value, ogValue[ 1 ] ], false, e );
+            }, { passive: false });
+        }
     }
 }
 

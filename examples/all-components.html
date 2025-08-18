@@ -262,6 +262,7 @@
             panelB.addRange("Warning", 2, null, { min: 0, max: 10, step: 1, className: "warning" });
             panelB.addRange("Inverted", 22, null, { min: 20, max: 48, step: 1, left: true });
             panelB.addRange("NoFill", 10, null, { min: 1, max: 48, step: 1, fill: false });
+            panelB.addRange("With Range", [2, 6], null, { min: 1, max: 10, step: 1 });
             panelB.addRange("Disabled", 29, null, { min: 1, max: 48, step: 1, disabled: true });
             panelB.branch("Select Inputs", { closed: closedDefault });
             panelB.addSelect("Classic", selectValues, "Unity", null);
