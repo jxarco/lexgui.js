@@ -766,7 +766,8 @@ class Popover {
         this.root.tabIndex = "1";
         this.root.className = "lexpopover";
 
-        const nestedDialog = trigger.closest( "dialog" );
+        const refElement = trigger ?? this.reference;
+        const nestedDialog = refElement.closest( "dialog" );
         if( nestedDialog && nestedDialog.dataset[ "modal" ] == 'true' )
         {
             this._parent = nestedDialog;

@@ -2,6 +2,8 @@
 
 ## dev
 
+Fixed Popovers using `options.reference`.
+
 ## 0.7.0 (master)
 
 General/Utils:
