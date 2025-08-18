@@ -14,7 +14,7 @@ console.warn( 'Script _build/lexgui.js_ is depracated and will be removed soon. 
 */
 
 const LX = {
-    version: "0.7.0",
+    version: "0.7.1",
     ready: false,
     extensions: [], // Store extensions used
     signals: {}, // Events and triggers
@@ -769,7 +769,8 @@ class Popover {
         this.root.tabIndex = "1";
         this.root.className = "lexpopover";
 
-        const nestedDialog = trigger.closest( "dialog" );
+        const refElement = trigger ?? this.reference;
+        const nestedDialog = refElement.closest( "dialog" );
         if( nestedDialog && nestedDialog.dataset[ "modal" ] == 'true' )
         {
             this._parent = nestedDialog;
@@ -6209,7 +6210,10 @@ LX.makeContainer = makeContainer;
  * @param {Object} options
  * side: Side of the tooltip
  * offset: Tooltip margin offset
+ * offsetX: Tooltip margin horizontal offset
+ * offsetY: Tooltip margin vertical offset
  * active: Tooltip active by default [true]
+ * callback: Callback function to execute when the tooltip is shown
  */
 
 function asTooltip( trigger, content, options = {} )
@@ -6221,6 +6225,10 @@ function asTooltip( trigger, content, options = {} )
     let tooltipDom = null;
     let tooltipParent = LX.root;
 
+    const _offset = options.offset ?? 6;
+    const _offsetX = options.offsetX ?? _offset;
+    const _offsetY = options.offsetY ?? _offset;
+
     trigger.addEventListener( "mouseenter", function(e) {
 
         if( trigger.dataset[ "disableTooltip" ] == "true" )
@@ -6230,7 +6238,7 @@ function asTooltip( trigger, content, options = {} )
 
         tooltipDom = document.createElement( "div" );
         tooltipDom.className = "lextooltip";
-        tooltipDom.innerHTML = content;
+        tooltipDom.innerHTML = trigger.dataset[ "tooltipContent" ] ?? content;
 
         const nestedDialog = trigger.closest( "dialog" );
         if( nestedDialog && nestedDialog.dataset[ "modal" ] == 'true' )
@@ -6247,32 +6255,33 @@ function asTooltip( trigger, content, options = {} )
         LX.doAsync( () => {
 
             const position = [ 0, 0 ];
+            const offsetX = parseFloat( trigger.dataset[ "tooltipOffsetX" ] ?? _offsetX );
+            const offsetY = parseFloat( trigger.dataset[ "tooltipOffsetY" ] ?? _offsetY );
             const rect = this.getBoundingClientRect();
-            const offset = options.offset ?? 6;
             let alignWidth = true;
 
             switch( options.side ?? "top" )
             {
                 case "left":
-                    position[ 0 ] += ( rect.x - tooltipDom.offsetWidth - offset );
+                    position[ 0 ] += ( rect.x - tooltipDom.offsetWidth - offsetX );
                     alignWidth = false;
                     break;
                 case "right":
-                    position[ 0 ] += ( rect.x + rect.width + offset );
+                    position[ 0 ] += ( rect.x + rect.width + offsetX );
                     alignWidth = false;
                     break;
                 case "top":
-                    position[ 1 ] += ( rect.y - tooltipDom.offsetHeight - offset );
+                    position[ 1 ] += ( rect.y - tooltipDom.offsetHeight - offsetY );
                     alignWidth = true;
                     break;
                 case "bottom":
-                    position[ 1 ] += ( rect.y + rect.height + offset );
+                    position[ 1 ] += ( rect.y + rect.height + offsetY );
                     alignWidth = true;
                     break;
             }
 
-            if( alignWidth ) { position[ 0 ] += ( rect.x + rect.width * 0.5 ) - tooltipDom.offsetWidth * 0.5; }
-            else { position[ 1 ] += ( rect.y + rect.height * 0.5 ) - tooltipDom.offsetHeight * 0.5; }
+            if( alignWidth ) { position[ 0 ] += ( rect.x + rect.width * 0.5 ) - tooltipDom.offsetWidth * 0.5 + offsetX; }
+            else { position[ 1 ] += ( rect.y + rect.height * 0.5 ) - tooltipDom.offsetHeight * 0.5 + offsetY; }
 
             // Avoid collisions
             position[ 0 ] = LX.clamp( position[ 0 ], 0, window.innerWidth - tooltipDom.offsetWidth - 4 );
@@ -6287,6 +6296,11 @@ function asTooltip( trigger, content, options = {} )
 
             tooltipDom.style.left = `${ position[ 0 ] }px`;
             tooltipDom.style.top = `${ position[ 1 ] }px`;
+
+            if( options.callback )
+            {
+                options.callback( tooltipDom, trigger );
+            }
         } );
     } );
 
@@ -11022,38 +11036,110 @@ class RangeInput extends BaseComponent {
 
     constructor( name, value, callback, options = {} ) {
 
-        super( BaseComponent.RANGE, name, value, options );
+        const ogValue = LX.deepCopy( value );
+
+        super( BaseComponent.RANGE, name, LX.deepCopy( ogValue ), options );
+
+        const isRangeValue = ( value.constructor == Array && value.length == 2 );
+        if( isRangeValue )
+        {
+            value = ogValue[ 0 ];
+            options.fill = false; // Range inputs do not fill by default
+        }
 
         this.onGetValue = () => {
-            return value;
+            let finalValue = value;
+            if( isRangeValue )
+            {
+                finalValue = [ value, ogValue[ 1 ] ];
+            }
+            else if( options.left )
+            {
+                finalValue = ( ( +slider.max ) - value + ( +slider.min ) );
+            }
+            return finalValue;
         };
 
         this.onSetValue = ( newValue, skipCallback, event ) => {
 
-            if( isNaN( newValue ) )
+            let newTpContent = "";
+
+            const diff = ( options.max - options.min );
+
+            if( isRangeValue )
             {
-                return;
+                slider.value = value = LX.clamp( +newValue[ 0 ], +slider.min, +slider.max );
+                this._maxSlider.value = ogValue[ 1 ] = LX.clamp( +newValue[ 1 ], +slider.min, +slider.max );
+
+                // Update the range slider
+                const diffOffset = ( value / diff ) - 0.5;
+                const diffMaxOffset = ( ogValue[ 1 ] / diff ) - 0.5;
+                const remappedMin = LX.remapRange( value, options.min, options.max, 0, 1 );
+                const remappedMax = LX.remapRange( ogValue[ 1 ], options.min, options.max, 0, 1 );
+                slider.style.setProperty("--range-min-value", `${ remappedMin * 100 }%`);
+                slider.style.setProperty("--range-max-value", `${ remappedMax * 100 }%`);
+                slider.style.setProperty("--range-fix-min-offset", `${ -diffOffset }rem`);
+                slider.style.setProperty("--range-fix-max-offset", `${ diffMaxOffset }rem`);
+
+                container.dataset[ "tooltipOffsetX" ] = container.offsetWidth * remappedMin + container.offsetWidth * ( remappedMax - remappedMin ) * 0.5 - ( container.offsetWidth * 0.5 );
+                newTpContent = `${ value } - ${ ogValue[ 1 ] }`;
+            }
+            else
+            {
+                if( isNaN( newValue ) )
+                {
+                    return;
+                }
+
+                slider.value = value = LX.clamp( +newValue, +slider.min, +slider.max );
+                const remapped = LX.remapRange( value, options.min, options.max, 0, 1 ) * 0.5;
+                container.dataset[ "tooltipOffsetX" ] = container.offsetWidth * remapped - ( container.offsetWidth * 0.5 );
+                newTpContent = `${ value }`;
             }
 
-            slider.value = value = LX.clamp( +newValue, +slider.min, +slider.max );
+            container.dataset[ "tooltipContent" ] = newTpContent;
+            if( this._labelTooltip )
+            {
+                this._labelTooltip.innerHTML = newTpContent;
+            }
 
             if( !skipCallback )
             {
-                this._trigger( new LX.IEvent( name, options.left ? ( ( +slider.max ) - value + ( +slider.min ) ) : value, event ), callback );
+                let finalValue = value;
+                if( isRangeValue )
+                {
+                    finalValue = [ value, ogValue[ 1 ] ];
+                }
+                else if( options.left )
+                {
+                    finalValue = ( ( +slider.max ) - value + ( +slider.min ) );
+                }
+
+                this._trigger( new LX.IEvent( name, finalValue, event ), callback );
             }
         };
 
         this.onResize = ( rect ) => {
             const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
             container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth })`;
+            if( isRangeValue )
+            {
+                const diff = ( options.max - options.min );
+                const diffOffset = ( value / diff ) - 0.5;
+                const diffMaxOffset = ( ogValue[ 1 ] / diff ) - 0.5;
+                slider.style.setProperty("--range-min-value", `${ LX.remapRange( value, options.min, options.max, 0, 1 ) * 100 }%`);
+                slider.style.setProperty("--range-max-value", `${ LX.remapRange( ogValue[ 1 ], options.min, options.max, 0, 1 ) * 100 }%`);
+                slider.style.setProperty("--range-fix-min-offset", `${ -diffOffset }rem`);
+                slider.style.setProperty("--range-fix-max-offset", `${ diffMaxOffset }rem`);
+            }
         };
 
         const container = document.createElement( 'div' );
-        container.className = "lexrange";
+        container.className = "lexrange relative";
         this.root.appendChild( container );
 
         let slider = document.createElement( 'input' );
-        slider.className = "lexrangeslider " + ( options.className ?? "" );
+        slider.className = "lexrangeslider " + ( isRangeValue ? "pointer-events-none " : "" ) + ( options.className ?? "" );
         slider.min = options.min ?? 0;
         slider.max = options.max ?? 100;
         slider.step = options.step ?? 1;
@@ -11065,16 +11151,9 @@ class RangeInput extends BaseComponent {
             value = LX.clamp( value, +slider.min, +slider.max );
         }
 
-        if( options.left )
-        {
-            value = ( ( +slider.max ) - value + ( +slider.min ) );
-        }
-
-        slider.value = value;
-        container.appendChild( slider );
-
         if( options.left ?? false )
         {
+            value = ( ( +slider.max ) - value + ( +slider.min ) );
             slider.classList.add( "left" );
         }
 
@@ -11083,23 +11162,30 @@ class RangeInput extends BaseComponent {
             slider.classList.add( "no-fill" );
         }
 
+        slider.value = value;
+        container.appendChild( slider );
+
         slider.addEventListener( "input", e => {
-            this.set( e.target.valueAsNumber, false, e );
+            this.set( isRangeValue ? [ e.target.valueAsNumber, ogValue[ 1 ] ] : e.target.valueAsNumber, false, e );
         }, { passive: false });
 
-        slider.addEventListener( "mousedown", function( e ) {
-            if( options.onPress )
-            {
-                options.onPress.bind( slider )( e, slider );
-            }
-        }, false );
+        // If its a range value, we need to update the slider using the thumbs
+        if( !isRangeValue )
+        {
+            slider.addEventListener( "mousedown", function( e ) {
+                if( options.onPress )
+                {
+                    options.onPress.bind( slider )( e, slider );
+                }
+            }, false );
 
-        slider.addEventListener( "mouseup", function( e ) {
-            if( options.onRelease )
-            {
-                options.onRelease.bind( slider )( e, slider );
-            }
-        }, false );
+            slider.addEventListener( "mouseup", function( e ) {
+                if( options.onRelease )
+                {
+                    options.onRelease.bind( slider )( e, slider );
+                }
+            }, false );
+        }
 
         // Method to change min, max, step parameters
         this.setLimits = ( newMin, newMax, newStep ) => {
@@ -11109,7 +11195,47 @@ class RangeInput extends BaseComponent {
             BaseComponent._dispatchEvent( slider, "input", true );
         };
 
-        LX.doAsync( this.onResize.bind( this ) );
+        LX.doAsync( () => {
+
+            this.onResize();
+
+            let offsetX = 0;
+            if( isRangeValue )
+            {
+                const remappedMin = LX.remapRange( value, options.min, options.max, 0, 1 );
+                const remappedMax = LX.remapRange( ogValue[ 1 ], options.min, options.max, 0, 1 );
+                offsetX = container.offsetWidth * remappedMin + container.offsetWidth * ( remappedMax - remappedMin ) * 0.5 - ( container.offsetWidth * 0.5 );
+            }
+            else
+            {
+                const remapped = LX.remapRange( value, options.min, options.max, 0, 1 ) * 0.5;
+                offsetX = container.offsetWidth * remapped - ( container.offsetWidth * 0.5 );
+            }
+            LX.asTooltip( container, `${ value }${ isRangeValue ? `- ${ ogValue[ 1 ] }` : `` }`, { offsetX, callback: ( tpDom ) => {
+                this._labelTooltip = tpDom;
+            } } );
+        } );
+
+        if( ogValue.constructor == Array ) // Its a range value
+        {
+            let maxSlider = document.createElement( 'input' );
+            maxSlider.className = "lexrangeslider no-fill pointer-events-none overlap absolute top-0 left-0 " + ( options.className ?? "" );
+            maxSlider.min = options.min ?? 0;
+            maxSlider.max = options.max ?? 100;
+            maxSlider.step = options.step ?? 1;
+            maxSlider.type = "range";
+            maxSlider.disabled = options.disabled ?? false;
+            this._maxSlider = maxSlider;
+
+            let maxRangeValue = ogValue[ 1 ];
+            maxSlider.value = maxRangeValue = LX.clamp( maxRangeValue, +maxSlider.min, +maxSlider.max );
+            container.appendChild( maxSlider );
+
+            maxSlider.addEventListener( "input", e => {
+                ogValue[ 1 ] = +e.target.valueAsNumber;
+                this.set( [ value, ogValue[ 1 ] ], false, e );
+            }, { passive: false });
+        }
     }
 }
 
