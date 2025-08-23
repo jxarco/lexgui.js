@@ -6216,11 +6216,10 @@ function asTooltip( trigger, content, options = {} )
     trigger.dataset[ "disableTooltip" ] = !( options.active ?? true );
 
     let tooltipDom = null;
-    let tooltipParent = LX.root;
 
-    const _offset = options.offset ?? 6;
-    const _offsetX = options.offsetX ?? _offset;
-    const _offsetY = options.offsetY ?? _offset;
+    const _offset = options.offset;
+    const _offsetX = options.offsetX ?? ( _offset ?? 0 );
+    const _offsetY = options.offsetY ?? ( _offset ?? 6 );
 
     trigger.addEventListener( "mouseenter", function(e) {
 
@@ -6234,10 +6233,7 @@ function asTooltip( trigger, content, options = {} )
         tooltipDom.innerHTML = trigger.dataset[ "tooltipContent" ] ?? content;
 
         const nestedDialog = trigger.closest( "dialog" );
-        if( nestedDialog && nestedDialog.dataset[ "modal" ] == 'true' )
-        {
-            tooltipParent = nestedDialog;
-        }
+        const tooltipParent = nestedDialog ?? LX.root;
 
         // Remove other first
         LX.root.querySelectorAll( ".lextooltip" ).forEach( e => e.remove() );
@@ -6280,7 +6276,7 @@ function asTooltip( trigger, content, options = {} )
             position[ 0 ] = LX.clamp( position[ 0 ], 0, window.innerWidth - tooltipDom.offsetWidth - 4 );
             position[ 1 ] = LX.clamp( position[ 1 ], 0, window.innerHeight - tooltipDom.offsetHeight - 4 );
 
-            if( tooltipParent instanceof HTMLDialogElement )
+            if( nestedDialog )
             {
                 let parentRect = tooltipParent.getBoundingClientRect();
                 position[ 0 ] -= parentRect.x;
@@ -16403,7 +16399,7 @@ class AssetView {
             this.toolsPanel.sameLine();
             this.toolsPanel.addSelect( "Filter", this.allowedTypes, this.filter ?? this.allowedTypes[ 0 ], v => {
                 this._refreshContent( null, v );
-            }, { width: "30%", minWidth: "128px" } );
+            }, { width: "30%", minWidth: "128px", overflowContainer: null } );
             this.toolsPanel.addText( null, this.searchValue ?? "", v => this._refreshContent.call(this, v, null), { placeholder: "Search assets.." } );
             this.toolsPanel.addButton( null, "", _onSort.bind(this), { title: "Sort", tooltip: true, icon: ( this.sortMode === AssetView.CONTENT_SORT_ASC ) ? "SortAsc" : "SortDesc" } );
             this.toolsPanel.addButton( null, "", _onChangeView.bind(this), { title: "View", tooltip: true, icon: ( this.layout === AssetView.LAYOUT_GRID ) ? "LayoutGrid" : "LayoutList" } );

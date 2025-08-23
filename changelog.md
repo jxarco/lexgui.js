@@ -2,6 +2,9 @@
 
 ## dev
 
+Fixed AssetView Filter select.
+Fixed tooltips on Dialog without modal.
+
 ## 0.7.1 (master)
 
 Added support for selecting custom Min, Max range in RangeInput component.
