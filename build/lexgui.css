@@ -925,6 +925,8 @@ a svg, svg path {
 	animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
 	will-change: transform, opacity;
     animation-name: slideUpAndFade;
+    z-index: 150;
+    pointer-events: none;
 }
 
 .lextooltip[data-closed] {
