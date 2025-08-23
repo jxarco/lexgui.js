@@ -5,6 +5,10 @@
 Fixed AssetView Filter select.
 Fixed tooltips on Dialog without modal.
 
+CodeEditor:
+- Fixed Ctrl+Wheel to modify font size.
+- Added ZoomIn/ZoomOut buttons to Info Panel to modify font size.
+
 ## 0.7.1 (master)
 
 Added support for selecting custom Min, Max range in RangeInput component.

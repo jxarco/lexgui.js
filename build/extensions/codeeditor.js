@@ -451,9 +451,13 @@ class CodeEditor {
                     if( e.ctrlKey )
                     {
                         e.preventDefault();
+                        e.stopPropagation();
                         ( e.deltaY > 0.0 ? this._decreaseFontSize() : this._increaseFontSize() );
                     }
-                    else
+                } );
+
+                this.codeScroller.addEventListener( 'wheel', e => {
+                    if( !e.ctrlKey )
                     {
                         const dX = ( e.deltaY > 0.0 ? 10.0 : -10.0 ) * ( e.shiftKey ? 1.0 : 0.0 );
                         if( dX != 0.0 ) this.setScrollBarValue( 'horizontal', dX );
@@ -1109,7 +1113,21 @@ class CodeEditor {
 
             // Wait until the fonts are all loaded
             document.fonts.ready.then(() => {
-                this.charWidth = this._measureChar( "a", true );
+                // Load any font size from local storage
+                const savedFontSize = window.localStorage.getItem( "lexcodeeditor-font-size" );
+                if( savedFontSize )
+                {
+                    this._setFontSize( parseInt( savedFontSize ) );
+                }
+                else // Use default size
+                {
+                    const r = document.querySelector( ':root' );
+                    const s = getComputedStyle( r );
+                    this.fontSize = parseInt( s.getPropertyValue( "--code-editor-font-size" ) );
+                    this.charWidth = this._measureChar( "a", true );
+                }
+
+                LX.emit( "@font-size", this.fontSize );
             });
 
             window.editor = this;
@@ -1581,13 +1599,21 @@ class CodeEditor {
 
         if( !this.skipInfo )
         {
-            let panel = new LX.Panel({ className: "lexcodetabinfo", width: "calc(100%)", height: "auto" });
+            let panel = new LX.Panel({ className: "lexcodetabinfo flex flex-row", height: "auto" });
 
-            panel.sameLine();
-            panel.addLabel( this.code.title, { fit: true, signal: "@tab-name" });
-            panel.addLabel( "Ln " + 1, { fit: true, signal: "@cursor-line" });
-            panel.addLabel( "Col " + 1, { fit: true, signal: "@cursor-pos" });
-            panel.addButton( null, "Spaces: " + this.tabSpaces, ( value, event ) => {
+            let leftInfoPanel = new LX.Panel( { className: "items-start", height: "auto" } );
+            leftInfoPanel.sameLine( 3 );
+            leftInfoPanel.addButton( null, "ZoomOutButton", this._decreaseFontSize.bind( this ), { icon: "ZoomOut", width: "32px", title: "Zoom Out", tooltip: true } );
+            leftInfoPanel.addLabel( this.fontSize ?? 14, { fit: true, signal: "@font-size" });
+            leftInfoPanel.addButton( null, "ZoomInButton", this._increaseFontSize.bind( this ), { icon: "ZoomIn", width: "32px", title: "Zoom In", tooltip: true } );
+            panel.attach( leftInfoPanel.root );
+
+            let rightInfoPanel = new LX.Panel( { height: "auto" } );
+            rightInfoPanel.sameLine();
+            rightInfoPanel.addLabel( this.code.title, { fit: true, signal: "@tab-name" });
+            rightInfoPanel.addLabel( "Ln " + 1, { fit: true, signal: "@cursor-line" });
+            rightInfoPanel.addLabel( "Col " + 1, { fit: true, signal: "@cursor-pos" });
+            rightInfoPanel.addButton( null, "Spaces: " + this.tabSpaces, ( value, event ) => {
                 LX.addContextMenu( "Spaces", event, m => {
                     const options = [ 2, 4, 8 ];
                     for( const n of options )
@@ -1598,7 +1624,7 @@ class CodeEditor {
                         } );
                 });
             }, { nameWidth: "15%", signal: "@tab-spaces" });
-            panel.addButton( "<b>{ }</b>", this.highlight, ( value, event ) => {
+            rightInfoPanel.addButton( "<b>{ }</b>", this.highlight, ( value, event ) => {
                 LX.addContextMenu( "Language", event, m => {
                     for( const lang of Object.keys( this.languages ) )
                     {
@@ -1608,7 +1634,8 @@ class CodeEditor {
                     }
                 });
             }, { nameWidth: "15%", signal: "@highlight" });
-            panel.endLine();
+            rightInfoPanel.endLine();
+            panel.attach( rightInfoPanel.root );
 
             return panel;
         }
@@ -1623,7 +1650,7 @@ class CodeEditor {
                 this.base_area.root.querySelector( '.lexcodescrollbar.vertical' ).style.height = "calc(100% - 27px)";
                 this.tabs.area.root.classList.add( 'no-code-info' );
 
-            }, 100);
+            }, 100 );
         }
     }
 
@@ -4034,7 +4061,7 @@ class CodeEditor {
         return [ word, from, to ];
     }
 
-    _measureChar( char = "a", use_floating = false, get_bb = false ) {
+    _measureChar( char = "a", useFloating = false, getBB = false ) {
         const parentContainer = LX.makeContainer( null, "lexcodeeditor", "", document.body );
         const container = LX.makeContainer( null, "code", "", parentContainer );
         const line = document.createElement( "pre" );
@@ -4044,8 +4071,8 @@ class CodeEditor {
         text.innerText = char;
         var rect = text.getBoundingClientRect();
         LX.deleteElement( parentContainer );
-        const bb = [ use_floating ? rect.width : Math.floor( rect.width ), use_floating ? rect.height : Math.floor( rect.height ) ];
-        return get_bb ? bb : bb[ 0 ];
+        const bb = [ useFloating ? rect.width : Math.floor( rect.width ), useFloating ? rect.height : Math.floor( rect.height ) ];
+        return getBB ? bb : bb[ 0 ];
     }
 
     measureString( str ) {
@@ -4548,60 +4575,45 @@ class CodeEditor {
     }
 
     _hideActiveLine() {
-
         this.code.querySelectorAll( '.active-line' ).forEach( e => e.classList.remove( 'active-line' ) );
     }
 
-    _increaseFontSize() {
+    _setFontSize( size ) {
 
         // Change font size
-
-        var r = document.querySelector( ':root' );
-        var s = getComputedStyle( r );
-        var pixels = parseInt( s.getPropertyValue( "--code-editor-font-size" ) );
-        pixels = LX.clamp( pixels + 1, CodeEditor.CODE_MIN_FONT_SIZE, CodeEditor.CODE_MAX_FONT_SIZE );
-        r.style.setProperty( "--code-editor-font-size", pixels + "px" );
+        this.fontSize = size;
+        const r = document.querySelector( ':root' );
+        r.style.setProperty( "--code-editor-font-size", `${ this.fontSize }px` );
         this.charWidth = this._measureChar( "a", true );
 
-        // Change row size
+        window.localStorage.setItem( "lexcodeeditor-font-size", this.fontSize );
 
-        var row_pixels = pixels + 6;
-        r.style.setProperty( "--code-editor-row-height", row_pixels + "px" );
-        this.lineHeight = row_pixels;
+        // Change row size
+        const rowPixels = this.fontSize + 6;
+        r.style.setProperty( "--code-editor-row-height", `${ rowPixels }px` );
+        this.lineHeight = rowPixels;
 
         // Relocate cursors
-
         this.relocateCursors();
 
         // Resize the code area
-
         this.processLines();
+
+        // Emit event
+        LX.emit( "@font-size", this.fontSize );
+    }
+
+    _applyFontSizeOffset( offset = 0 ) {
+        const newFontSize = LX.clamp( this.fontSize + offset, CodeEditor.CODE_MIN_FONT_SIZE, CodeEditor.CODE_MAX_FONT_SIZE );
+        this._setFontSize( newFontSize );
+    }
+
+    _increaseFontSize() {
+        this._applyFontSizeOffset( 1 );
     }
 
     _decreaseFontSize() {
-
-        // Change font size
-
-        var r = document.querySelector( ':root' );
-        var s = getComputedStyle( r );
-        var pixels = parseInt( s.getPropertyValue( "--code-editor-font-size" ) );
-        pixels = LX.clamp( pixels - 1, CodeEditor.CODE_MIN_FONT_SIZE, CodeEditor.CODE_MAX_FONT_SIZE );
-        r.style.setProperty( "--code-editor-font-size", pixels + "px" );
-        this.charWidth = this._measureChar( "a", true );
-
-        // Change row size
-
-        var row_pixels = pixels + 6;
-        r.style.setProperty( "--code-editor-row-height", row_pixels + "px" );
-        this.lineHeight = row_pixels;
-
-        // Relocate cursors
-
-        this.relocateCursors();
-
-        // Resize the code area
-
-        this.processLines();
+        this._applyFontSizeOffset( -1 );
     }
 
     _clearTmpVariables() {

@@ -27,8 +27,9 @@
 
     const fileExplorer = true;
 
-    if (!fileExplorer) {
-        var [leftArea, rightArea] = area.split({ sizes: ["55%", "45%"] });
+    if( !fileExplorer )
+    {
+        var [ leftArea, rightArea ] = area.split({ sizes: ["55%", "45%"] });
 
         var canvas = document.createElement('canvas');
         canvas.id = "mycanvas";
@@ -50,6 +51,7 @@
         // allowAddScripts: false,
         // autocomplete: false,
         // disableEdition: true,
+        // skipInfo: true,
         fileExplorer: fileExplorer
     });
 
