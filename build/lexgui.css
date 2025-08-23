@@ -5010,10 +5010,6 @@ ul.lexassetscontent {
     padding-inline: 1rem;
 }
 
-.lexcodetabinfo .lexinlinecomponents {
-    justify-content: end;
-}
-
 .lexcodegutter {
     width: 48px;
     height: calc(100% - 65px);

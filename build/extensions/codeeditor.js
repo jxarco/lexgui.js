@@ -499,17 +499,17 @@ class CodeEditor {
 
             // Add search box
             {
-                var box = document.createElement( 'div' );
+                const box = document.createElement( 'div' );
                 box.className = "searchbox";
 
-                var searchPanel = new LX.Panel();
+                const searchPanel = new LX.Panel();
                 box.appendChild( searchPanel.root );
 
                 searchPanel.sameLine( 4 );
                 searchPanel.addText( null, "", null, { placeholder: "Find" } );
-                searchPanel.addButton( null, "up", () => this.search( null, true ), { icon: "ArrowUp" } );
-                searchPanel.addButton( null, "down", () => this.search(), { icon: "ArrowDown" } );
-                searchPanel.addButton( null, "x", this.hideSearchBox.bind( this ), { icon: "X" } );
+                searchPanel.addButton( null, "up", () => this.search( null, true ), { icon: "ArrowUp", title: "Previous Match", tooltip: true } );
+                searchPanel.addButton( null, "down", () => this.search(), { icon: "ArrowDown", title: "Next Match", tooltip: true } );
+                searchPanel.addButton( null, "x", this.hideSearchBox.bind( this ), { icon: "X", title: "Close", tooltip: true } );
 
                 box.querySelector( 'input' ).addEventListener( 'keyup', e => {
                     if( e.key == 'Escape' ) this.hideSearchBox();
@@ -1105,10 +1105,10 @@ class CodeEditor {
         const onLoadAll = () => {
             // Create inspector panel when the initial state is complete
             // and we have at least 1 tab opened
-            this.infoPanel = this._createInfoPanel();
-            if( this.infoPanel )
+            this.statusPanel = this._createStatusPanel();
+            if( this.statusPanel )
             {
-                area.attach( this.infoPanel );
+                area.attach( this.statusPanel );
             }
 
             // Wait until the fonts are all loaded
@@ -1381,7 +1381,11 @@ class CodeEditor {
             get: (v) => { return cursor._position },
             set: (v) => {
                 cursor._position = v;
-                if( cursor.isMain ) this._updateDataInfoPanel( "@cursor-pos", "Col " + ( v + 1 ) );
+                if( cursor.isMain )
+                {
+                    const activeLine = this.state.activeLine;
+                    this._updateDataInfoPanel( "@cursor-data", `Ln ${ activeLine + 1 }, Col ${ v + 1 }` );
+                }
             }
         } );
 
@@ -1595,25 +1599,25 @@ class CodeEditor {
         this._changeLanguage( 'Plain Text' );
     }
 
-    _createInfoPanel() {
+    _createStatusPanel() {
 
         if( !this.skipInfo )
         {
             let panel = new LX.Panel({ className: "lexcodetabinfo flex flex-row", height: "auto" });
 
-            let leftInfoPanel = new LX.Panel( { className: "items-start", height: "auto" } );
-            leftInfoPanel.sameLine( 3 );
-            leftInfoPanel.addButton( null, "ZoomOutButton", this._decreaseFontSize.bind( this ), { icon: "ZoomOut", width: "32px", title: "Zoom Out", tooltip: true } );
-            leftInfoPanel.addLabel( this.fontSize ?? 14, { fit: true, signal: "@font-size" });
-            leftInfoPanel.addButton( null, "ZoomInButton", this._increaseFontSize.bind( this ), { icon: "ZoomIn", width: "32px", title: "Zoom In", tooltip: true } );
-            panel.attach( leftInfoPanel.root );
+            let leftStatusPanel = new LX.Panel( { id: "FontSizeZoomStatusComponent", height: "auto" } );
+            leftStatusPanel.sameLine();
+            leftStatusPanel.addButton( null, "ZoomOutButton", this._decreaseFontSize.bind( this ), { icon: "ZoomOut", width: "32px", title: "Zoom Out", tooltip: true } );
+            leftStatusPanel.addLabel( this.fontSize ?? 14, { fit: true, signal: "@font-size" });
+            leftStatusPanel.addButton( null, "ZoomInButton", this._increaseFontSize.bind( this ), { icon: "ZoomIn", width: "32px", title: "Zoom In", tooltip: true } );
+            leftStatusPanel.endLine( "justify-start" );
+            panel.attach( leftStatusPanel.root );
 
-            let rightInfoPanel = new LX.Panel( { height: "auto" } );
-            rightInfoPanel.sameLine();
-            rightInfoPanel.addLabel( this.code.title, { fit: true, signal: "@tab-name" });
-            rightInfoPanel.addLabel( "Ln " + 1, { fit: true, signal: "@cursor-line" });
-            rightInfoPanel.addLabel( "Col " + 1, { fit: true, signal: "@cursor-pos" });
-            rightInfoPanel.addButton( null, "Spaces: " + this.tabSpaces, ( value, event ) => {
+            let rightStatusPanel = new LX.Panel( { height: "auto" } );
+            rightStatusPanel.sameLine();
+            rightStatusPanel.addLabel( this.code.title, { id: "EditorFilenameStatusComponent", fit: true, signal: "@tab-name" });
+            rightStatusPanel.addButton( null, "Ln 1, Col 1", this.showSearchLineBox.bind( this ), { id: "EditorSelectionStatusComponent", fit: true, signal: "@cursor-data" });
+            rightStatusPanel.addButton( null, "Spaces: " + this.tabSpaces, ( value, event ) => {
                 LX.addContextMenu( "Spaces", event, m => {
                     const options = [ 2, 4, 8 ];
                     for( const n of options )
@@ -1623,8 +1627,8 @@ class CodeEditor {
                             this._updateDataInfoPanel( "@tab-spaces", "Spaces: " + this.tabSpaces );
                         } );
                 });
-            }, { nameWidth: "15%", signal: "@tab-spaces" });
-            rightInfoPanel.addButton( "<b>{ }</b>", this.highlight, ( value, event ) => {
+            }, { id: "EditorIndentationStatusComponent", nameWidth: "15%", signal: "@tab-spaces" });
+            rightStatusPanel.addButton( "<b>{ }</b>", this.highlight, ( value, event ) => {
                 LX.addContextMenu( "Language", event, m => {
                     for( const lang of Object.keys( this.languages ) )
                     {
@@ -1633,9 +1637,41 @@ class CodeEditor {
                         } );
                     }
                 });
-            }, { nameWidth: "15%", signal: "@highlight" });
-            rightInfoPanel.endLine();
-            panel.attach( rightInfoPanel.root );
+            }, { id: "EditorLanguageStatusComponent", nameWidth: "15%", signal: "@highlight" });
+            rightStatusPanel.endLine( "justify-end" );
+            panel.attach( rightStatusPanel.root );
+
+            const itemVisibilityMap = {
+                "Font Size Zoom": true,
+                "Editor Filename": true,
+                "Editor Selection": true,
+                "Editor Indentation": true,
+                "Editor Language": true,
+            };
+
+            panel.root.addEventListener( "contextmenu", (e) => {
+
+                if( e.target && ( e.target.classList.contains( "lexpanel" ) || e.target.classList.contains( "lexinlinecomponents" ) ) )
+                {
+                    return;
+                }
+
+                const menuOptions = Object.keys( itemVisibilityMap ).map( ( itemName, idx ) => {
+                    const item = {
+                        name: itemName,
+                        icon: "Check",
+                        callback: () => {
+                            itemVisibilityMap[ itemName ] = !itemVisibilityMap[ itemName ];
+                            const b = panel.root.querySelector( `#${ itemName.replaceAll( " ", "" ) }StatusComponent` );
+                            console.assert( b, `${ itemName } has no status button!` );
+                            b.classList.toggle( "hidden", !itemVisibilityMap[ itemName ] );
+                        }
+                    }
+                    if( !itemVisibilityMap[ itemName ] ) delete item.icon;
+                    return item;
+                } );
+                new LX.DropdownMenu( e.target, menuOptions, { side: "top", align: "start" });
+            } );
 
             return panel;
         }
@@ -3674,10 +3710,10 @@ class CodeEditor {
 
         const currentScrollTop = this.getScrollTop();
         const tabsHeight = this.tabs.root.getBoundingClientRect().height;
-        const infoPanelHeight = this.skipInfo ? 0 : this.infoPanel.root.getBoundingClientRect().height;
+        const statusPanelHeight = this.skipInfo ? 0 : this.statusPanel.root.getBoundingClientRect().height;
         const scrollerHeight = this.codeScroller.offsetHeight;
 
-        var lastLine = ( ( scrollerHeight - tabsHeight - infoPanelHeight + currentScrollTop ) / this.lineHeight )|0;
+        var lastLine = ( ( scrollerHeight - tabsHeight - statusPanelHeight + currentScrollTop ) / this.lineHeight )|0;
         if( cursor.line >= lastLine )
         {
             this.setScrollTop( currentScrollTop + this.lineHeight );
@@ -3885,13 +3921,13 @@ class CodeEditor {
             const scrollWidth = maxLineLength * this.charWidth + CodeEditor.LINE_GUTTER_WIDTH;
 
             const tabsHeight = this.tabs.root.getBoundingClientRect().height;
-            const infoPanelHeight = this.skipInfo ? 0 : this.infoPanel.root.getBoundingClientRect().height;
+            const statusPanelHeight = this.skipInfo ? 0 : this.statusPanel.root.getBoundingClientRect().height;
             const scrollHeight = this.code.lines.length * this.lineHeight;
 
             this._lastMaxLineLength = maxLineLength;
 
             this.codeSizer.style.minWidth = scrollWidth + "px";
-            this.codeSizer.style.minHeight = ( scrollHeight + tabsHeight + infoPanelHeight ) + "px";
+            this.codeSizer.style.minHeight = ( scrollHeight + tabsHeight + statusPanelHeight ) + "px";
 
             this.resizeScrollBars();
 
@@ -4360,7 +4396,9 @@ class CodeEditor {
         text = text ?? this._lastTextFound;
 
         if( !text )
+        {
             return;
+        }
 
         let cursor = this._getCurrentCursor();
         let cursorData = new LX.vec2( cursor.position, cursor.line );
@@ -4371,6 +4409,7 @@ class CodeEditor {
         {
             LX.deleteElement( this._lastResult.dom );
             cursorData = this._lastResult.pos;
+            cursorData.x += text.length * ( reverse ? -1 : 1 );
             delete this._lastResult;
         }
 
@@ -4416,10 +4455,12 @@ class CodeEditor {
             }
         }
 
-        if( line == null)
+        if( line == null )
         {
             if( !skipAlert )
+            {
                 alert( "No results!" );
+            }
 
             const lastLine = this.code.lines.length - 1;
 
@@ -4427,6 +4468,7 @@ class CodeEditor {
                 'dom': this.searchResultSelections.lastChild,
                 'pos': reverse ? new LX.vec2( this.code.lines[ lastLine ].length, lastLine ) : new LX.vec2( 0, 0 )
             };
+
             return;
         }
 
@@ -4436,9 +4478,10 @@ class CodeEditor {
             have to add the length of the substring (0, first_ocurrence)
         */
 
-
         if( !reverse )
+        {
             char += ( line == cursorData.y ? cursorData.x : 0 );
+        }
 
 
         // Text found..
@@ -4466,8 +4509,13 @@ class CodeEditor {
 
         this._lastResult = {
             'dom': this.searchResultSelections.lastChild,
-            'pos': new LX.vec2( char + text.length * ( reverse ? -1 : 1 ) , line )
+            'pos': new LX.vec2( char , line ),
+            reverse
         };
+
+        // Force focus back to search box
+        const input = this.searchbox.querySelector( 'input' );
+        input.focus();
     }
 
     showSearchLineBox() {
@@ -4554,13 +4602,16 @@ class CodeEditor {
 
         number = number ?? this.state.activeLine;
 
-        this._updateDataInfoPanel( "@cursor-line", "Ln " + ( number + 1 ) );
+        const cursor = this._getCurrentCursor();
+        this._updateDataInfoPanel( "@cursor-data", `Ln ${ number + 1 }, Col ${ cursor.position + 1 }` );
 
-        const old_local = this.toLocalLine( this.state.activeLine );
-        let line = this.code.childNodes[ old_local ];
+        const oldLocal = this.toLocalLine( this.state.activeLine );
+        let line = this.code.childNodes[ oldLocal ];
 
         if( !line )
+        {
             return;
+        }
 
         line.classList.remove( 'active-line' );
 
@@ -4568,8 +4619,8 @@ class CodeEditor {
         {
             this.state.activeLine = number;
 
-            const new_local = this.toLocalLine( number );
-            line = this.code.childNodes[ new_local ];
+            const newLocal = this.toLocalLine( number );
+            line = this.code.childNodes[ newLocal ];
             if( line ) line.classList.add( 'active-line' );
         }
     }

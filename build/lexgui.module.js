@@ -4789,7 +4789,7 @@ LX.flushCss = flushCss;
  */
 function deleteElement( element )
 {
-    if( element !== undefined ) element.remove();
+    if( element ) element.remove();
 }
 
 LX.deleteElement = deleteElement;
