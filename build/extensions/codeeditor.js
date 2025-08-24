@@ -213,6 +213,53 @@ class ScrollBar {
 
 }
 
+/* Highlight rules
+- test: function that receives a context object and returns true or false
+- className: class to apply if test is true
+- action: optional function to execute if test is true, receives context and editor as parameter
+- discard: optional boolean, if true the token is discarded, action value is returned
+        to "ctx.discardToken" and no class is applied
+*/
+
+const HighlightRules = {
+
+    common: [
+        { test: ctx => ctx.inBlockComment, className: "cm-com" },
+        { test: ctx => ctx.inString, action: (ctx, editor) => editor._appendStringToken( ctx.token ), discard: true },
+        { test: (ctx, editor) => editor._isKeyword( ctx ), className: "cm-kwd" },
+        { test: (ctx, editor) => editor._mustHightlightWord( ctx.token, CodeEditor.builtIn, ctx.lang ) && ( ctx.lang.tags ?? false ? ( editor._enclosedByTokens( ctx.token, ctx.tokenIndex, '<', '>' ) ) : true ), className: "cm-bln" },
+        { test: (ctx, editor) => editor._mustHightlightWord( ctx.token, CodeEditor.statementsAndDeclarations, ctx.lang ), className: "cm-std" },
+        { test: (ctx, editor) => editor._mustHightlightWord( ctx.token, CodeEditor.symbols, ctx.lang ), className: "cm-sym" },
+        { test: ctx => ctx.token.substr( 0, ctx.singleLineCommentToken.length ) == ctx.singleLineCommentToken, className: "cm-com" },
+        { test: (ctx, editor) => editor._isNumber( ctx.token ) || editor._isNumber( ctx.token.replace(/[px]|[em]|%/g,'') ), className: "cm-dec" },
+        { test: (ctx, editor) => editor._isType( ctx ), className: "cm-typ" },
+        { test: ctx => ctx.lang.usePreprocessor && ctx.token.includes( '#' ), className: "cm-ppc" },
+    ],
+
+    cpp: [
+        { test: ctx => ctx.prev === "<" && (ctx.next === ">" || ctx.next === "*"), className: "cm-typ" }, // Defining template type in C++
+        { test: ctx => ctx.next === "::" || (ctx.prev === "::" && ctx.next !== "("), className: "cm-typ" } // C++ Class
+    ],
+
+    css: [
+        { test: ctx => ( ctx.prev == '.' || ctx.prev == '::' || ( ctx.prev == ':' && ctx.next == '{' ) || ( ctx.token[ 0 ] == '#' && ctx.prev != ':' ) ), className: "cm-kwd" },
+        { test: ctx => ctx.prev === ':' && (ctx.next === ';' || ctx.next === '!important'), className: "cm-str" }, // CSS value
+        { test: ctx => ctx.prev === undefined && ctx.next === ":", className: "cm-typ" }, // CSS attribute
+    ],
+
+    batch: [
+        { test: ctx => ctx.token === '@' || ctx.prev === ':' || ctx.prev === '@', className: "cm-kwd" }
+    ],
+
+    markdown: [
+        { test: ctx => ctx.isFirstToken && ctx.token.replaceAll('#', '').length != ctx.token.length, action: (ctx, editor) => editor._markdownHeader = true, className: "cm-kwd" }
+    ],
+
+    post_common: [
+        { test: ctx => ctx.token[ 0 ] != '@' && ctx.token[ 0 ] != ',' && ctx.next === '(', className: "cm-mtd" }
+    ],
+};
+
 /**
  * @class CodeEditor
  */
@@ -3126,6 +3173,13 @@ class CodeEditor {
                 // Scan for numbers again
                 return this._processTokens( tokens, idx );
             }
+
+            const importantIdx = tokens.indexOf( 'important' );
+            if( this.highlight == 'CSS' && importantIdx > -1 && tokens[ importantIdx - 1 ] === '!' )
+            {
+                tokens[ importantIdx - 1 ] = "!important";
+                tokens.splice( importantIdx, 1 );
+            }
         }
 
         return tokens;
@@ -3148,14 +3202,28 @@ class CodeEditor {
         return kindArray[ this.highlight ] && kindArray[ this.highlight ][ t ] != undefined;
     }
 
+    _getTokenHighlighting( ctx, highlight ) {
+
+        const rules = [ ...HighlightRules.common, ...( HighlightRules[highlight] || [] ), ...HighlightRules.post_common ];
+
+        for( const rule of rules )
+        {
+            if( !rule.test( ctx, this ) )
+            {
+                continue;
+            }
+
+            const r = rule.action ? rule.action( ctx, this ) : undefined;
+            if( rule.discard ) ctx.discardToken = r;
+            return rule.className;
+        }
+
+        return null;
+    }
+
     _evaluateToken( ctxData ) {
 
-        let token        = ctxData.token,
-            prev         = ctxData.prev,
-            next         = ctxData.next,
-            tokenIndex   = ctxData.tokenIndex,
-            isFirstToken = ctxData.isFirstToken,
-            isLastToken  = ctxData.isLastToken;
+        let { token, prev, next, tokenIndex, isFirstToken, isLastToken } = ctxData;
 
         const lang = this.languages[ this.highlight ],
               highlight = this.highlight.replace( /\s/g, '' ).replaceAll( "+", "p" ).toLowerCase(),
@@ -3179,14 +3247,14 @@ class CodeEditor {
 
         if( usePreviousTokenToCheckString || ( this._buildingBlockComment === undefined && ( lang.tags ?? false ? ( this._enclosedByTokens( token, tokenIndex, '<', '>' ) ) : true ) ) )
         {
-            const checkIfStringEnded = t => {
+            const _checkIfStringEnded = t => {
                 const idx = Object.values( customStringKeys ).indexOf( t );
                 this._stringEnded = (idx > -1) && (idx == Object.values(customStringKeys).indexOf( customStringKeys[ '@' + this._buildingString ] ));
             };
 
             if( this._buildingString != undefined )
             {
-                checkIfStringEnded( usePreviousTokenToCheckString ? ctxData.nextWithSpaces : token );
+                _checkIfStringEnded( usePreviousTokenToCheckString ? ctxData.nextWithSpaces : token );
             }
             else if( customStringKeys[ '@' + ( usePreviousTokenToCheckString ? ctxData.prevWithSpaces : token ) ] )
             {
@@ -3196,77 +3264,24 @@ class CodeEditor {
                 // Check if string ended in same token using next...
                 if( usePreviousTokenToCheckString )
                 {
-                    checkIfStringEnded( ctxData.nextWithSpaces );
+                    _checkIfStringEnded( ctxData.nextWithSpaces );
                 }
             }
         }
 
-        const usesBlockComments = lang.blockComments ?? true;
+        // Update context data for next tests
+        ctxData.discardToken = false;
+        ctxData.inBlockComment = this._buildingBlockComment;
+        ctxData.markdownHeader = this._markdownHeader;
+        ctxData.inString = this._buildingString;
+        ctxData.singleLineCommentToken = lang.singleLineCommentToken ?? this.defaultSingleLineCommentToken;
+        ctxData.lang = lang;
+
+        // Get highlighting class based on language common and specific rules
+        let tokenClass = this._getTokenHighlighting( ctxData, highlight );
+
         const blockCommentsTokens = lang.blockCommentsTokens ?? this.defaultBlockCommentTokens;
-        const singleLineCommentToken = lang.singleLineCommentToken ?? this.defaultSingleLineCommentToken;
-
-        let token_classname = "";
-        let discardToken = false;
-
-        if( this._buildingBlockComment != undefined )
-            token_classname = "cm-com";
-
-        else if( this._buildingString != undefined )
-            discardToken = this._appendStringToken( token );
-
-        else if( this._isKeyword( ctxData, lang ) )
-            token_classname = "cm-kwd";
-
-        else if( this._mustHightlightWord( token, CodeEditor.builtIn, lang ) && ( lang.tags ?? false ? ( this._enclosedByTokens( token, tokenIndex, '<', '>' ) ) : true ) )
-            token_classname = "cm-bln";
-
-        else if( this._mustHightlightWord( token, CodeEditor.statementsAndDeclarations, lang ) )
-            token_classname = "cm-std";
-
-        else if( this._mustHightlightWord( token, CodeEditor.symbols, lang ) )
-            token_classname = "cm-sym";
-
-        else if( token.substr( 0, singleLineCommentToken.length ) == singleLineCommentToken )
-            token_classname = "cm-com";
-
-        else if( this._isNumber( token ) || this._isNumber( token.replace(/[px]|[em]|%/g,'') ) )
-            token_classname = "cm-dec";
-
-        else if( this._isCSSClass( ctxData ) )
-            token_classname = "cm-kwd";
-
-        else if ( this._isType( ctxData, lang ) )
-            token_classname = "cm-typ";
-
-        else if ( lang.usePreprocessor && token.includes( '#' ) )
-            token_classname = "cm-ppc";
-
-        else if ( highlight == 'batch' && ( token == '@' || prev == ':' || prev == '@' ) )
-            token_classname = "cm-kwd";
-
-        else if ( highlight == 'cpp' && prev == '<' && (next == '>' || next == '*') ) // Defining template type in C++
-            token_classname = "cm-typ";
-
-        else if ( highlight == 'cpp' && (next == '::' || prev == '::' && next != '(' )) // C++ Class
-            token_classname = "cm-typ";
-
-        else if ( highlight == 'css' && prev == ':' && (next == ';' || next == '!important') ) // CSS value
-            token_classname = "cm-str";
-
-        else if ( highlight == 'css' && prev == undefined && next == ':' ) // CSS attribute
-            token_classname = "cm-typ";
-
-        else if ( this._markdownHeader || ( highlight == 'markdown' && isFirstToken && token.replaceAll('#', '').length != token.length ) ) // Header
-        {
-            token_classname = "cm-kwd";
-            this._markdownHeader = true;
-        }
-
-        else if ( token[ 0 ] != '@' && token[ 0 ] != ',' && next == '(' )
-            token_classname = "cm-mtd";
-
-
-        if( usesBlockComments && this._buildingBlockComment != undefined
+        if( ( lang.blockComments ?? true ) && this._buildingBlockComment != undefined
             && token.substr( 0, blockCommentsTokens[ 1 ].length ) == blockCommentsTokens[ 1 ] )
         {
             this._blockCommentCache.push( new LX.vec2( this._buildingBlockComment, this._currentLineNumber ) );
@@ -3277,28 +3292,28 @@ class CodeEditor {
         if( this._buildingString && ( this._stringEnded || isLastToken ) )
         {
             token = this._getCurrentString();
-            token_classname = "cm-str";
-            discardToken = false;
+            tokenClass = "cm-str";
+            ctxData.discardToken = false;
         }
 
         // Update state
         this._buildingString = this._stringEnded ? undefined : this._buildingString;
 
-        if( discardToken )
+        if( ctxData.discardToken )
         {
             return "";
         }
 
-        token = token.replace( "<", "&lt;" );
-        token = token.replace( ">", "&gt;" );
+        // Replace html chars
+        token = token.replace( "<", "&lt;" ).replace( ">", "&gt;" );
 
         // No highlighting, no need to put it inside another span..
-        if( !token_classname.length )
+        if( !tokenClass )
         {
             return token;
         }
 
-        return `<span class="${ highlight } ${ token_classname }">${ token }</span>`;
+        return `<span class="${ highlight } ${ tokenClass }">${ token }</span>`;
     }
 
     _appendStringToken( token ) {
@@ -3352,11 +3367,9 @@ class CodeEditor {
         return false;
     }
 
-    _isKeyword( ctxData, lang ) {
+    _isKeyword( ctxData ) {
 
-        const token = ctxData.token;
-        const tokenIndex = ctxData.tokenIndex;
-        const tokens = ctxData.tokens;
+        const { token, tokenIndex, tokens, lang } = ctxData;
 
         let isKwd = this._mustHightlightWord( token, CodeEditor.keywords ) || this.highlight == 'XML';
 
@@ -3373,6 +3386,10 @@ class CodeEditor {
                 isKwd |= ( ctxData.tokens[ tokenIndex - 2 ] == '$' );
             }
         }
+        if( this.highlight == 'Markdown' )
+        {
+            isKwd = ( this._markdownHeader !== undefined );
+        }
         else if( lang.tags )
         {
             isKwd &= ( this._enclosedByTokens( token, tokenIndex, '<', '>' ) != undefined );
@@ -3380,22 +3397,6 @@ class CodeEditor {
 
 
         return isKwd;
-    }
-
-    _isCSSClass( ctxData ) {
-
-        const token = ctxData.token;
-        const prev = ctxData.prev;
-        const next = ctxData.next;
-
-        if( this.highlight != 'CSS' )
-        {
-            return false;
-        }
-
-        return  ( prev == '.' || prev == '::'
-                || ( prev == ':' && next == '{' )
-                || ( token[ 0 ] == '#' && prev != ':' ) );
     }
 
     _isNumber( token ) {
@@ -3431,18 +3432,15 @@ class CodeEditor {
         return token.length && token != ' ' && !Number.isNaN( +token );
     }
 
-    _isType( ctxData, lang ) {
+    _isType( ctxData ) {
 
-        const token = ctxData.token;
+        const { token, prev, next, lang } = ctxData;
 
         // Common case
         if( this._mustHightlightWord( token, CodeEditor.types, lang ) )
         {
             return true;
         }
-
-        const prev = ctxData.prev;
-        const next = ctxData.next;
 
         if( this.highlight == 'JavaScript' )
         {
@@ -4731,7 +4729,6 @@ CodeEditor.utils = { // These ones don't have hightlight, used as suggestions to
 };
 
 CodeEditor.types = {
-
     'JavaScript': ['Object', 'String', 'Function', 'Boolean', 'Symbol', 'Error', 'Number', 'TextEncoder', 'TextDecoder', 'Array', 'ArrayBuffer', 'InputEvent', 'MouseEvent',
                    'Int8Array', 'Int16Array', 'Int32Array', 'Float32Array', 'Float64Array', 'Element'],
     'Rust': ['u128'],
@@ -4743,7 +4740,6 @@ CodeEditor.types = {
 };
 
 CodeEditor.builtIn = {
-
     'JavaScript': ['document', 'console', 'window', 'navigator', 'performance'],
     'CSS': ['*', '!important'],
     'C++': ['vector', 'list', 'map'],
@@ -4752,7 +4748,6 @@ CodeEditor.builtIn = {
 };
 
 CodeEditor.statementsAndDeclarations = {
-
     'JavaScript': ['for', 'if', 'else', 'case', 'switch', 'return', 'while', 'continue', 'break', 'do', 'import', 'from', 'throw', 'async', 'try', 'catch', 'await'],
     'CSS': ['@', 'import'],
     'C': ['for', 'if', 'else', 'return', 'continue', 'break', 'case', 'switch', 'while', 'using', 'default', 'goto', 'do'],
@@ -4766,7 +4761,6 @@ CodeEditor.statementsAndDeclarations = {
 };
 
 CodeEditor.symbols = {
-
     'JavaScript': ['<', '>', '[', ']', '{', '}', '(', ')', ';', '=', '|', '||', '&', '&&', '?', '??'],
     'C': ['<', '>', '[', ']', '{', '}', '(', ')', ';', '=', '|', '||', '&', '&&', '?', '*', '-', '+'],
     'C++': ['<', '>', '[', ']', '{', '}', '(', ')', ';', '=', '|', '||', '&', '&&', '?', '::', '*', '-', '+'],

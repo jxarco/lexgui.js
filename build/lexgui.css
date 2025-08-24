@@ -5380,9 +5380,10 @@ ul.lexassetscontent {
 .cm-com { color: #5cab5a; }   /* comment */
 
 .cm-typ.javascript { color: #36c0b0; }  /* type */
+.cm-bln.javascript { color: #d2d6f5; }   /* builtin */
 .cm-dec.javascript { color: #b1ce9b; }  /* decimal */
 .cm-sym.javascript { color: #e7ded2; }  /* symbol */
-.cm-mtd.javascript { color: #e0cc68 }   /* method */
+.cm-mtd.javascript { color: #e9d98a }   /* method */
 
 .cm-typ.c { color: #36c0b0; }   /* type */
 .cm-bln.c { color: #d44141; }   /* builtin */

@@ -7,11 +7,11 @@ class Test {
         this.foo = 1;
 
         var div = document.createElement('div');
-        div.style.width = "100px"
-        div.style.height = "100px"
-        div.style.background = "red"
-        div.style.position = "absolute"
-        div.style.top = "0px"
+        div.style.width = "100px";
+        div.style.height = "100px";
+        div.style.background = "red";
+        div.style.position = "absolute";
+        div.style.top = "0px";
 
         LX.makeDraggable(div);
 
