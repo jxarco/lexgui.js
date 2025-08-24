@@ -599,12 +599,12 @@ class CodeEditor {
         this.languages = {
             'Plain Text': { ext: 'txt', blockComments: false, singleLineComments: false },
             'JavaScript': { ext: 'js' },
-            'C': { ext: [ 'c', 'h' ] },
-            'C++': { ext: [ 'cpp', 'hpp' ] },
+            'C': { ext: [ 'c', 'h' ], usePreprocessor: true },
+            'C++': { ext: [ 'cpp', 'hpp' ], usePreprocessor: true },
             'CSS': { ext: 'css' },
             'CMake': { ext: 'cmake', singleLineCommentToken: '#', blockComments: false, ignoreCase: true },
-            'GLSL': { ext: 'glsl' },
-            'WGSL': { ext: 'wgsl' },
+            'GLSL': { ext: 'glsl', usePreprocessor: true },
+            'WGSL': { ext: 'wgsl', usePreprocessor: true },
             'JSON': { ext: 'json', blockComments: false, singleLineComments: false },
             'XML': { ext: 'xml', tags: true },
             'Rust': { ext: 'rs' },
@@ -2906,7 +2906,9 @@ class CodeEditor {
         {
             const diff = Math.max( this.code.lines.length - this.visibleLinesViewport.y, 0 );
             if( diff <= this.lineScrollMargin.y )
+            {
                 this.visibleLinesViewport.y += diff;
+            }
         }
 
         // Process visible lines
@@ -2942,7 +2944,7 @@ class CodeEditor {
         const localLineNum =  this.toLocalLine( linenum );
         const gutterLineHtml = "<span class='line-gutter'>" + (linenum + 1) + "</span>";
 
-        const UPDATE_LINE = ( html ) => {
+        const _updateLine = ( html ) => {
             if( !force ) // Single line update
             {
                 this.code.childNodes[ localLineNum ].innerHTML = gutterLineHtml + html;
@@ -2971,7 +2973,7 @@ class CodeEditor {
         if( this.highlight == 'Plain Text' )
         {
             const plainTextHtml = linestring.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
-            return UPDATE_LINE( plainTextHtml );
+            return _updateLine( plainTextHtml );
         }
 
         this._currentLineNumber = linenum;
@@ -3025,7 +3027,7 @@ class CodeEditor {
             } );
         }
 
-        return UPDATE_LINE( lineInnerHtml );
+        return _updateLine( lineInnerHtml );
     }
 
     _lineHasComment( linestring ) {
@@ -3236,11 +3238,11 @@ class CodeEditor {
         else if ( this._isType( ctxData, lang ) )
             token_classname = "cm-typ";
 
+        else if ( lang.usePreprocessor && token.includes( '#' ) )
+            token_classname = "cm-ppc";
+
         else if ( highlight == 'batch' && ( token == '@' || prev == ':' || prev == '@' ) )
             token_classname = "cm-kwd";
-
-        else if ( [ 'cpp', 'c', 'wgsl', 'glsl' ].indexOf( highlight ) > -1 && token.includes( '#' ) ) // C++ preprocessor
-            token_classname = "cm-ppc";
 
         else if ( highlight == 'cpp' && prev == '<' && (next == '>' || next == '*') ) // Defining template type in C++
             token_classname = "cm-typ";
@@ -3296,13 +3298,15 @@ class CodeEditor {
             return token;
         }
 
-        return "<span class='" + highlight + " " + token_classname + "'>" + token + "</span>";
+        return `<span class="${ highlight } ${ token_classname }">${ token }</span>`;
     }
 
     _appendStringToken( token ) {
 
         if( !this._pendingString )
+        {
             this._pendingString = "";
+        }
 
         this._pendingString += token;
 
@@ -3430,14 +3434,15 @@ class CodeEditor {
     _isType( ctxData, lang ) {
 
         const token = ctxData.token;
-        const prev = ctxData.prev;
-        const next = ctxData.next;
 
         // Common case
         if( this._mustHightlightWord( token, CodeEditor.types, lang ) )
         {
             return true;
         }
+
+        const prev = ctxData.prev;
+        const next = ctxData.next;
 
         if( this.highlight == 'JavaScript' )
         {
@@ -3641,7 +3646,7 @@ class CodeEditor {
         if( !key ) return;
 
         cursor._left += this.charWidth;
-        cursor.style.left = "calc( " + cursor._left + "px + " + this.xPadding + " )";
+        cursor.style.left = `calc( ${ cursor._left }px + ${ this.xPadding } )`;
         cursor.position++;
 
         this.restartBlink();
@@ -3661,7 +3666,7 @@ class CodeEditor {
 
         cursor._left -= this.charWidth;
         cursor._left = Math.max( cursor._left, 0 );
-        cursor.style.left = "calc( " + cursor._left + "px + " + this.xPadding + " )";
+        cursor.style.left = `calc( ${ cursor._left }px + ${ this.xPadding } )`;
         cursor.position--;
         cursor.position = Math.max( cursor.position, 0 );
         this.restartBlink();
@@ -3679,8 +3684,8 @@ class CodeEditor {
     cursorToTop( cursor, resetLeft = false ) {
 
         cursor._top -= this.lineHeight;
-        cursor._top = Math.max(cursor._top, 0);
-        cursor.style.top = "calc(" + cursor._top + "px)";
+        cursor._top = Math.max( cursor._top, 0 );
+        cursor.style.top = `calc(${ cursor._top }px)`;
         this.restartBlink();
 
         if( resetLeft )
@@ -3723,7 +3728,9 @@ class CodeEditor {
     cursorToString( cursor, text, reverse ) {
 
         if( !text.length )
+        {
             return;
+        }
 
         for( let char of text )
         {
@@ -3735,7 +3742,7 @@ class CodeEditor {
 
         cursor.position = position;
         cursor._left = position * this.charWidth;
-        cursor.style.left = "calc(" + cursor._left + "px + " + this.xPadding + ")";
+        cursor.style.left = `calc( ${ cursor._left }px + ${ this.xPadding } )`;
     }
 
     cursorToLine( cursor, line, resetLeft = false ) {
@@ -3772,9 +3779,9 @@ class CodeEditor {
         for( let cursor of this.cursors.children )
         {
             cursor._left = cursor.position * this.charWidth;
-            cursor.style.left = "calc(" + cursor._left + "px + " + this.xPadding + ")";
+            cursor.style.left = `calc( ${ cursor._left }px + ${ this.xPadding } )`;
             cursor._top = cursor.line * this.lineHeight;
-            cursor.style.top = "calc(" + cursor._top + "px)";
+            cursor.style.top = `calc(${ cursor._top }px)`;
         }
     }
 
@@ -3793,9 +3800,9 @@ class CodeEditor {
         cursor.line = state.line ?? 0;
 
         cursor._left = cursor.position * this.charWidth;
-        cursor.style.left = "calc(" + cursor._left + "px + " + this.xPadding + ")";
+        cursor.style.left = `calc( ${ cursor._left }px + ${ this.xPadding } )`;
         cursor._top = cursor.line * this.lineHeight;
-        cursor.style.top = "calc(" + cursor._top + "px)";
+        cursor.style.top = `calc(${ cursor._top }px)`;
 
         if( state.selection )
         {
@@ -3835,7 +3842,8 @@ class CodeEditor {
 
     _addSpaceTabs( cursor, n ) {
 
-        for( var i = 0; i < n; ++i ) {
+        for( var i = 0; i < n; ++i )
+        {
             this.actions[ 'Tab' ].callback( cursor.line, cursor, null );
         }
     }
@@ -3852,13 +3860,17 @@ class CodeEditor {
     }
 
     _removeSpaces( cursor ) {
+
         const lidx = cursor.line;
+
         // Remove indentation
         let lineStart = firstNonspaceIndex( this.code.lines[ lidx ] );
 
         // Nothing to remove... we are at the start of the line
         if( lineStart == 0 )
+        {
             return;
+        }
 
         // Only tabs/spaces in the line...
         if( lineStart == -1 ) {
