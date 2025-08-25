@@ -405,7 +405,7 @@ class VideoEditor {
                 this.controlsPanelLeft.refresh();
             }, { width: '40px', icon: (this.playing ? 'Pause@solid' : 'Play@solid'), className: "justify-center"});
 
-            this.controlsPanelLeft.addLabel(this.startTimeString, {width: 50});
+            this.controlsPanelLeft.addLabel(this.startTimeString, {width: 100});
             this.controlsPanelLeft.endLine();
 
             let availableWidth = leftArea.root.clientWidth - controlsLeft.root.clientWidth;
@@ -420,7 +420,7 @@ class VideoEditor {
         this.controlsPanelRight = new LX.Panel({className: 'lexcontrolspanel'});
         this.controlsPanelRight.refresh = () => {
             this.controlsPanelRight.clear();
-            this.controlsPanelRight.addLabel(this.endTimeString, {width: 50});
+            this.controlsPanelRight.addLabel(this.endTimeString, {width: 100});
         }
         this.controlsPanelRight.refresh();
         controlsRight.root.style.minWidth = 'fit-content';
