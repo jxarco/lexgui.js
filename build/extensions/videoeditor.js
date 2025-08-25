@@ -473,13 +473,15 @@ class VideoEditor {
             this.timebar.resize([availableWidth, v.height]);
         }
 
+        const parent = controlsArea.parentElement ? controlsArea.parentElement : controlsArea.root.parentElement;
+
         // Add canvas event listeneres
-        area.root.addEventListener( "mousedown", (event) => {
+        parent.addEventListener( "mousedown", (event) => {
             if(this.controls) {
                 this.timebar.onMouseDown(event);
             }
         });
-        area.root.addEventListener( "mouseup",   (event) => {
+        parent.addEventListener( "mouseup",   (event) => {
             if(this.controls) {
                 this.timebar.onMouseUp(event);
             }
@@ -493,7 +495,7 @@ class VideoEditor {
             this.isResizing = false;
 
         });
-        area.root.addEventListener( "mousemove", (event) => {
+        parent.addEventListener( "mousemove", (event) => {
             if(this.controls) {
                 this.timebar.onMouseMove(event);
             }
