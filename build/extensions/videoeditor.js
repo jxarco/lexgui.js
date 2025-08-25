@@ -4,6 +4,7 @@ if(!LX) {
     throw("lexgui.js missing!");
 }
 
+LX.extensions.push( 'TimeBar' );
 LX.extensions.push( 'VideoEditor' );
 
 /**
@@ -304,6 +305,8 @@ class TimeBar {
         this._draw();
     }
 }
+LX.TimeBar = TimeBar;
+
 
 /**
  * @class VideoEditor
@@ -795,4 +798,4 @@ class VideoEditor {
 
 LX.VideoEditor = VideoEditor;
 
-export { VideoEditor }
+export { VideoEditor, TimeBar }
