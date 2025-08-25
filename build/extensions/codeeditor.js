@@ -379,9 +379,10 @@ class CodeEditor {
         if( !this.disableEdition )
         {
             this.tabs.root.addEventListener( 'dblclick', (e) => {
-                if( options.allowAddScripts ?? true ) {
+                if( options.allowAddScripts ?? true )
+                {
                     e.preventDefault();
-                    this.addTab("unnamed.js", true);
+                    this.addTab( "unnamed.js", true );
                 }
             } );
         }
@@ -626,6 +627,8 @@ class CodeEditor {
         this.defaultSingleLineCommentToken = '//';
         this.defaultBlockCommentTokens = [ '/*', '*/' ];
         this.lineScopes = [];
+        this.lineSymbols = [];
+        this.symbolsTable = new Map();
         this._lastTime = null;
 
         this.pairKeys = {
@@ -656,12 +659,12 @@ class CodeEditor {
 
         if( !CodeEditor._staticReady )
         {
-            for( let lang in CodeEditor.keywords ) CodeEditor.keywords[lang] = CodeEditor.keywords[lang].reduce((a, v) => ({ ...a, [v]: true}), {});
-            for( let lang in CodeEditor.utils ) CodeEditor.utils[lang] = CodeEditor.utils[lang].reduce((a, v) => ({ ...a, [v]: true}), {});
-            for( let lang in CodeEditor.types ) CodeEditor.types[lang] = CodeEditor.types[lang].reduce((a, v) => ({ ...a, [v]: true}), {});
-            for( let lang in CodeEditor.builtIn ) CodeEditor.builtIn[lang] = CodeEditor.builtIn[lang].reduce((a, v) => ({ ...a, [v]: true}), {});
-            for( let lang in CodeEditor.statementsAndDeclarations ) CodeEditor.statementsAndDeclarations[lang] = CodeEditor.statementsAndDeclarations[lang].reduce((a, v) => ({ ...a, [v]: true}), {});
-            for( let lang in CodeEditor.symbols ) CodeEditor.symbols[lang] = CodeEditor.symbols[lang].reduce((a, v) => ({ ...a, [v]: true}), {});
+            for( let lang in CodeEditor.keywords ) CodeEditor.keywords[lang] = new Set( CodeEditor.keywords[lang] );
+            for( let lang in CodeEditor.utils ) CodeEditor.utils[lang] = new Set( CodeEditor.utils[lang] );
+            for( let lang in CodeEditor.types ) CodeEditor.types[lang] = new Set( CodeEditor.types[lang] );
+            for( let lang in CodeEditor.builtIn ) CodeEditor.builtIn[lang] = new Set( CodeEditor.builtIn[lang] );
+            for( let lang in CodeEditor.statementsAndDeclarations ) CodeEditor.statementsAndDeclarations[lang] = new Set( CodeEditor.statementsAndDeclarations[lang] );
+            for( let lang in CodeEditor.symbols ) CodeEditor.symbols[lang] = new Set( CodeEditor.symbols[lang] );
 
             CodeEditor._staticReady = true;
         }
@@ -2943,7 +2946,7 @@ class CodeEditor {
             }
         }
 
-        this._scopeStack = [];
+        this._scopeStack = ["global"];
 
         // Process visible lines
         for( let i = this.visibleLinesViewport.x; i < this.visibleLinesViewport.y; ++i )
@@ -2986,8 +2989,20 @@ class CodeEditor {
         const lang = CodeEditor.languages[ this.highlight ];
         const localLineNum =  this.toLocalLine( lineNumber );
         const gutterLineHtml = `<span class='line-gutter'>${ lineNumber + 1 }</span>`;
+        const lineString = this.code.lines[ lineNumber ];
 
-        const _updateLine = ( html ) => {
+        let pushedScope = false;
+
+        const _updateLine = ( html, tokens = [] ) => {
+
+            const symbols = this._parseLineForSymbols( lineNumber, lineString, tokens, pushedScope );
+            this.lineSymbols[ lineNumber ] = this.lineSymbols[ lineNumber ] ?? [];
+            this.lineSymbols[ lineNumber ] = this.lineSymbols[ lineNumber ].concat( symbols );
+            for( let sym of this.lineSymbols[ lineNumber ] )
+            {
+                this.symbolsTable.set( sym.name, sym );
+            }
+
             if( !force ) // Single line update
             {
                 _processNextLineIfNecessary();
@@ -3018,8 +3033,6 @@ class CodeEditor {
         delete this._buildingString;
         delete this._pendingString;
         delete this._markdownHeader;
-
-        let lineString = this.code.lines[ lineNumber ];
 
         // Single line
         if( !force )
@@ -3071,7 +3084,9 @@ class CodeEditor {
             {
                 const blockCommentsToken = ( lang.blockCommentsTokens ?? this.defaultBlockCommentTokens )[ 0 ];
                 if( token.substr( 0, blockCommentsToken.length ) == blockCommentsToken )
+                {
                     this._buildingBlockComment = lineNumber;
+                }
             }
 
             // Pop current scope if necessary
@@ -3092,35 +3107,154 @@ class CodeEditor {
                 tokens: tokensToEvaluate
             } );
 
-            // Store current scopes
-            if( token === "{" )
+            if( token !== "{" )
             {
-                // Get some context about the scope from previous lines
-                const contextTokens = [
-                    ...this._getTokensFromLine( this.code.lines[ lineNumber - 2 ] ),
-                    ...this._getTokensFromLine( this.code.lines[ lineNumber - 1 ] ),
-                    ...this._getTokensFromLine( this.code.lines[ lineNumber ].substring( 0, lineString.indexOf( token ) ) )
-                ].reverse().filter( v => v.length && v != ' ' );
+                continue;
+            }
 
-                let scopeType = contextTokens[ 1 ]; // This is the type of scope (function, class, enum, etc)
+            // Store current scopes
+            
+            // Get some context about the scope from previous lines
+            let contextTokens = [
+                ...this._getTokensFromLine( this.code.lines[ lineNumber ].substring( 0, lineString.indexOf( token ) ) )
+            ];
 
-                // Special cases
-                if( scopeType === ":" ) // enum type specification
+            for( let k = 1; k < 50; k++ )
+            {
+                let kLineString = this.code.lines[ lineNumber - k ];
+                if( !kLineString ) break;
+                const closeIdx = kLineString.lastIndexOf( '}' );
+                if( closeIdx > -1 )
                 {
-                    scopeType = contextTokens[ 3 ];
+                    kLineString = kLineString.substr( closeIdx );
                 }
+                
+                contextTokens = [ ...this._getTokensFromLine( kLineString ), ...contextTokens ];
 
-                if( !this._mustHightlightWord( scopeType, CodeEditor.keywords, lang ) )
+                if( kLineString.length !== this.code.lines[ lineNumber - k ] )
                 {
-                    // If the scope type is not a keyword, use an empty string
-                    scopeType = "";
+                    break;
                 }
+            }
 
+            contextTokens = contextTokens.reverse().filter( v => v.length && v != ' ' );
+
+            // Keywords that can open a *named* scope
+            const scopeKeywords = ["class", "enum", "function", "interface", "type", "struct", "namespace"];
+
+            let scopeType = null; // This is the type of scope (function, class, enum, etc)
+            let scopeName = null;
+
+            for( let i = 0; i < contextTokens.length; i++ )
+            {
+                const t = contextTokens[ i ];
+
+                if ( scopeKeywords.includes( t ) )
+                {
+                    scopeType = t;
+                    scopeName = contextTokens[ i - 1 ] || "";  // usually right before the keyword in reversed array
+                    break;
+                }
+            }
+
+            // Special case: enum type specification `enum Foo : int {`
+            if( scopeType === "enum" && contextTokens.includes( ":" ) )
+            {
+                const colonIndex = contextTokens.indexOf( ":" );
+                scopeName = contextTokens[ colonIndex - 1 ] || scopeName;
+            }
+
+            if( !scopeType )
+            {
+                const parOpenIndex = contextTokens.indexOf( "(" );
+                scopeName = contextTokens[ parOpenIndex + 1 ] || scopeName;
+
+                if( scopeName )
+                {
+                    scopeType = "method";
+                }
+            }
+
+            if( scopeType )
+            {
                 this._scopeStack.push( scopeType );
+            }
+            else
+            {
+                this._scopeStack.push( "" ); // anonymous scope
+            }
+
+            pushedScope = true;
+        }
+
+        return _updateLine( lineInnerHtml, tokensToEvaluate );
+    }
+
+    /**
+     * Parses a single line of code and extract declared symbols
+     */
+    _parseLineForSymbols( lineNumber, lineString, tokens, pushedScope ) {
+
+        const scopeName = this._scopeStack.at( pushedScope ? -2 : -1 );
+        const symbols = [];
+        const text = lineString.trim();
+
+        const topLevelRegexes = [
+            [/^class\s+([A-Za-z0-9_]+)/, "class"],
+            [/^enum\s+([A-Za-z0-9_]+)/, "enum"],
+            [/^interface\s+([A-Za-z0-9_]+)/, "interface"],
+            [/^type\s+([A-Za-z0-9_]+)/, "type"],
+            [/^function\s+([A-Za-z0-9_]+)/, "function"],
+            [/^(?:const|let|var)\s+([A-Za-z0-9_]+)/, "variable"],
+            [/^([A-Za-z0-9_]+)\s*=\s*\(?.*\)?\s*=>/, "function"] // arrow functions
+        ];
+
+        for( let [ regex, kind ] of topLevelRegexes)
+        {
+            const m = text.match( regex );
+            if( m )
+            {
+                symbols.push( { name: m[ 1 ], kind, scope: scopeName } );
+                break; // stop after first match for top-level declarations
             }
         }
 
-        return _updateLine( lineInnerHtml );
+        const nonWhiteSpaceTokens = tokens.filter( t => t.trim().length );
+
+        for( let i = 0; i < nonWhiteSpaceTokens.length; i++ )
+        {
+            const prev = nonWhiteSpaceTokens[ i - 1 ];
+            const token = nonWhiteSpaceTokens[ i ];
+            const next = nonWhiteSpaceTokens[ i + 1 ];
+            const next2 = nonWhiteSpaceTokens[ i + 2 ];
+            const next3 = nonWhiteSpaceTokens[ i + 3 ];
+
+            if( scopeName.startsWith("class") )
+            {
+                // methods
+                if( next === "(" && /^[a-zA-Z_]\w*$/.test( token ) && prev === undefined )
+                {
+                    symbols.push( { name: token, kind: "method", scope: scopeName } );
+                }
+
+                if( token === "constructor" && next === "(" )
+                {
+                    symbols.push({ name: "constructor", kind: "method", scope: scopeName });
+                }
+            }
+
+            const prevScopeName = this._scopeStack.at( pushedScope ? -3 : -2 );
+            if( scopeName.startsWith("constructor") || ( scopeName.startsWith("method") && prevScopeName.startsWith("class") ) )
+            {
+                // properties: this.foo = ...
+                if( token === "this" && next === "." && next3 === "=" && /^[a-zA-Z_]\w*$/.test( next2 ) )
+                {
+                    symbols.push({ name: next2, kind: "property", scope: scopeName });
+                }
+            }
+        }
+
+        return symbols;
     }
 
     _lineHasComment( lineString ) {
@@ -3247,7 +3381,7 @@ class CodeEditor {
         return tokens;
     }
 
-    _mustHightlightWord( token, kindArray, lang ) {
+    _mustHightlightWord( token, wordCategory, lang ) {
 
         if( !lang )
         {
@@ -3261,12 +3395,12 @@ class CodeEditor {
             t = t.toLowerCase();
         }
 
-        return kindArray[ this.highlight ] && kindArray[ this.highlight ][ t ] != undefined;
+        return wordCategory[ this.highlight ] && wordCategory[ this.highlight ].has( t );
     }
 
     _getTokenHighlighting( ctx, highlight ) {
 
-        const rules = [ ...HighlightRules.common, ...( HighlightRules[highlight] || [] ), ...HighlightRules.post_common ];
+        const rules = [ ...HighlightRules.common, ...( HighlightRules[ highlight ] || [] ), ...HighlightRules.post_common ];
 
         for( const rule of rules )
         {
@@ -3289,7 +3423,8 @@ class CodeEditor {
 
         const lang = CodeEditor.languages[ this.highlight ],
               highlight = this.highlight.replace( /\s/g, '' ).replaceAll( "+", "p" ).toLowerCase(),
-              customStringKeys = Object.assign( {}, this.stringKeys );
+              customStringKeys = Object.assign( {}, this.stringKeys ),
+              lineNumber = this._currentLineNumber;
 
         var usePreviousTokenToCheckString = false;
 
@@ -3338,7 +3473,7 @@ class CodeEditor {
         ctxData.inString = this._buildingString;
         ctxData.singleLineCommentToken = lang.singleLineCommentToken ?? this.defaultSingleLineCommentToken;
         ctxData.lang = lang;
-        ctxData.scope = this._scopeStack[ this._scopeStack.length - 1 ];
+        ctxData.scope = this._scopeStack.at( -1 );
 
         // Get highlighting class based on language common and specific rules
         let tokenClass = this._getTokenHighlighting( ctxData, highlight );
@@ -3347,7 +3482,7 @@ class CodeEditor {
         if( ( lang.blockComments ?? true ) && this._buildingBlockComment != undefined
             && token.substr( 0, blockCommentsTokens[ 1 ].length ) == blockCommentsTokens[ 1 ] )
         {
-            this._blockCommentCache.push( new LX.vec2( this._buildingBlockComment, this._currentLineNumber ) );
+            this._blockCommentCache.push( new LX.vec2( this._buildingBlockComment, lineNumber ) );
             delete this._buildingBlockComment;
         }
 
@@ -4227,31 +4362,37 @@ class CodeEditor {
 
         this.autocomplete.innerHTML = ""; // Clear all suggestions
 
-        let suggestions = [];
-
         // Add language special keys...
-        suggestions = suggestions.concat(
-            Object.keys( CodeEditor.builtIn[ this.highlight ] ?? {} ),
-            Object.keys( CodeEditor.keywords[ this.highlight ] ?? {} ),
-            Object.keys( CodeEditor.statementsAndDeclarations[ this.highlight ] ?? {} ),
-            Object.keys( CodeEditor.types[ this.highlight ] ?? {} ),
-            Object.keys( CodeEditor.utils[ this.highlight ] ?? {} )
-        );
+        let suggestions = [
+            ...Array.from( CodeEditor.keywords[ this.highlight ] ?? [] ),
+            ...Array.from( CodeEditor.builtIn[ this.highlight ] ?? [] ),
+            ...Array.from( CodeEditor.statementsAndDeclarations[ this.highlight ] ?? [] ),
+            ...Array.from( CodeEditor.types[ this.highlight ] ?? [] ),
+            ...Array.from( CodeEditor.utils[ this.highlight ] ?? [] )
+        ];
 
-        // Add words in current tab plus remove current word
-        // suggestions = suggestions.concat( Object.keys(this.code.tokens).filter( a => a != word ) );
+        suggestions = suggestions.concat( Object.keys(this.code.tokens).filter( a => a != word ) );
+
+        const prefix = word.toLowerCase();
 
         // Remove 1/2 char words and duplicates...
-        suggestions = suggestions.filter( (value, index) => value.length > 2 && suggestions.indexOf(value) === index );
+        suggestions = Array.from( new Set( suggestions )).filter( s => s.length > 2 && s.toLowerCase().includes( prefix ) );
+
+        const scopeStack = [ ...this.lineScopes[ cursor.line ] ];
+        console.log(scopeStack)
 
         // Order...
-        suggestions = suggestions.sort( ( a, b ) => a.localeCompare( b ) );
+
+        function scoreSuggestion( s, prefix ) {
+            if( s.startsWith( prefix ) ) return 0; // best option
+            if( s.includes( prefix ))  return 1;
+            return 2; // worst
+        }
+
+        suggestions = suggestions.sort( ( a, b ) => scoreSuggestion( a, prefix ) - scoreSuggestion( b, prefix ) || a.localeCompare( b ) );
 
         for( let s of suggestions )
         {
-            if( !s.toLowerCase().includes( word.toLowerCase() ) )
-            continue;
-
             var pre = document.createElement( 'pre' );
             this.autocomplete.appendChild( pre );
 
@@ -4850,12 +4991,12 @@ CodeEditor.REGISTER_LANGUAGE = function( name, options = {}, def, rules )
 {
     CodeEditor.languages[ name ] = options;
 
-    if( def?.keywords ) CodeEditor.keywords[ name ] = def.keywords.reduce((a, v) => ({ ...a, [v]: true}), {});
-    if( def?.utils ) CodeEditor.utils[ name ] = def.utils.reduce((a, v) => ({ ...a, [v]: true}), {});
-    if( def?.types ) CodeEditor.types[ name ] = def.types.reduce((a, v) => ({ ...a, [v]: true}), {});
-    if( def?.builtIn ) CodeEditor.builtIn[ name ] = def.builtIn.reduce((a, v) => ({ ...a, [v]: true}), {});
-    if( def?.statementsAndDeclarations ) CodeEditor.statementsAndDeclarations[ name ] = def.statementsAndDeclarations.reduce((a, v) => ({ ...a, [v]: true}), {});
-    if( def?.symbols ) CodeEditor.symbols[ name ] = def.symbols.reduce((a, v) => ({ ...a, [v]: true}), {});
+    if( def?.keywords ) CodeEditor.keywords[ name ] = new Set( def.keywords );
+    if( def?.utils ) CodeEditor.utils[ name ] = new Set( def.utils );
+    if( def?.types ) CodeEditor.types[ name ] = new Set( def.types );
+    if( def?.builtIn ) CodeEditor.builtIn[ name ] = new Set( def.builtIn );
+    if( def?.statementsAndDeclarations ) CodeEditor.statementsAndDeclarations[ name ] = new Set( def.statementsAndDeclarations );
+    if( def?.symbols ) CodeEditor.symbols[ name ] = new Set( def.symbols );
 
     if( rules ) HighlightRules[ name ] = rules;
 };

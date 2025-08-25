@@ -1,10 +1,11 @@
-import { LX } from 'lexgui';
+function testFunction() {
+    const alt = 1;
+    console.log("This is a test function", alt);
+}
 
 class Test {
 
     constructor() {
-
-        this.foo = 1;
 
         var div = document.createElement('div');
         div.style.width = "100px";
@@ -12,8 +13,6 @@ class Test {
         div.style.background = "red";
         div.style.position = "absolute";
         div.style.top = "0px";
-
-        LX.makeDraggable(div);
 
         // single line comment
 
