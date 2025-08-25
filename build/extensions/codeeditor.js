@@ -266,6 +266,10 @@ const HighlightRules = {
         { test: ctx => ctx.isFirstToken && ctx.token.replaceAll('#', '').length != ctx.token.length, action: (ctx, editor) => editor._markdownHeader = true, className: "cm-kwd" }
     ],
 
+    php: [
+        { test: ctx => (ctx.prev === 'class' && ctx.next === '{') || (ctx.prev === 'class' && ctx.next === 'implements'), className: "cm-typ" },
+    ],
+
     post_common: [
         { test: ctx => ctx.token[ 0 ] != '@' && ctx.token[ 0 ] != ',' && ctx.next === '(', className: "cm-mtd" }
     ],
@@ -670,6 +674,7 @@ class CodeEditor {
             'HTML': { ext: 'html', tags: true, singleLineComments: false, blockCommentsTokens: [ '<!--', '-->' ], numbers: false },
             'Batch': { ext: 'bat', blockComments: false, singleLineCommentToken: '::' },
             'Markdown': { ext: 'md', blockComments: false, singleLineCommentToken: '::', tags: true, numbers: false },
+            'PHP': { ext: 'php', singleLineCommentToken: '//' },
         };
 
         this.specialKeys = [
@@ -1789,6 +1794,7 @@ class CodeEditor {
             extension == "hpp" ? "CPlusPlus heliotrope" :
             extension == "c" ? "C pictonblue" :
             extension == "h" ? "C heliotrope" :
+            extension == "php" ? "PHP blueviolet" :
             !isNewTabButton ? "AlignLeft gray" : undefined;
     }
 
@@ -3136,7 +3142,7 @@ class CodeEditor {
             charCounter += t.length;
         };
 
-        let iter = linestring.matchAll(/(<!--|-->|\*\/|\/\*|::|[\[\](){}<>.,;:*"'%@!/= ])/g);
+        let iter = linestring.matchAll(/(<!--|-->|\*\/|\/\*|::|[\[\](){}<>.,;:*"'%@$!/= ])/g);
         let subtokens = iter.next();
         if( subtokens.value )
         {
@@ -3190,6 +3196,15 @@ class CodeEditor {
             {
                 tokens[ importantIdx - 1 ] = "!important";
                 tokens.splice( importantIdx, 1 );
+            }
+        }
+        else if( this.highlight == 'PHP' )
+        {
+            const dollarIdx = tokens.indexOf( '$' );
+            if( dollarIdx > -1 && tokens[ dollarIdx + 1 ] === 'this-' )
+            {
+                tokens[ dollarIdx ] = "$this";
+                tokens[ dollarIdx + 1 ] = "-";
             }
         }
 
@@ -4701,6 +4716,7 @@ CodeEditor.keywords = {
               'DRIVERQUERY', 'print', 'PRINT'],
     'HTML': ['html', 'meta', 'title', 'link', 'script', 'body', 'DOCTYPE', 'head', 'br', 'i', 'a', 'li', 'img', 'tr', 'td', 'h1', 'h2', 'h3', 'h4', 'h5'],
     'Markdown': ['br', 'i', 'a', 'li', 'img', 'table', 'title', 'tr', 'td', 'h1', 'h2', 'h3', 'h4', 'h5'],
+    'PHP': ['const', 'function', 'array', 'new', 'int', 'string', '$this', 'public', 'null', 'private', 'protected', 'implements', 'class', 'use', 'namespace', 'abstract', 'clone', 'final'],
 };
 
 CodeEditor.utils = { // These ones don't have hightlight, used as suggestions to autocomplete only...
@@ -4722,7 +4738,8 @@ CodeEditor.types = {
               'ImportError', 'IndentationError', 'IndexError', 'KeyError', 'KeyboardInterrupt', 'LookupError', 'MemoryError', 'NameError', 'NotImplementedError', 'OSError',
               'OverflowError', 'ReferenceError', 'RuntimeError', 'StopIteration', 'SyntaxError', 'TabError', 'SystemError', 'SystemExit', 'TypeError', 'UnboundLocalError',
               'UnicodeError', 'UnicodeEncodeError', 'UnicodeDecodeError', 'UnicodeTranslateError', 'ValueError', 'ZeroDivisionError'],
-    'C++': ['uint8_t', 'uint16_t', 'uint32_t']
+    'C++': ['uint8_t', 'uint16_t', 'uint32_t'],
+    'PHP': ['Exception', 'DateTime', 'JsonSerializable'],
 };
 
 CodeEditor.builtIn = {
@@ -4731,6 +4748,7 @@ CodeEditor.builtIn = {
     'C++': ['vector', 'list', 'map'],
     'HTML': ['type', 'xmlns', 'PUBLIC', 'http-equiv', 'src', 'style', 'lang', 'href', 'rel', 'content', 'xml', 'alt'], // attributes
     'Markdown': ['type', 'src', 'style', 'lang', 'href', 'rel', 'content', 'valign', 'alt'], // attributes
+    'PHP': ['echo', 'print'],
 };
 
 CodeEditor.statementsAndDeclarations = {
@@ -4743,7 +4761,9 @@ CodeEditor.statementsAndDeclarations = {
     'Rust': ['break', 'else', 'continue', 'for', 'if', 'loop', 'match', 'return', 'while', 'do', 'yield'],
     'Python': ['if', 'raise', 'del', 'import', 'return', 'elif', 'try', 'else', 'while', 'as', 'except', 'with', 'assert', 'finally', 'yield', 'break', 'for', 'class', 'continue',
               'global', 'pass', 'from'],
-    'Batch': ['if', 'IF', 'for', 'FOR', 'in', 'IN', 'do', 'DO', 'call', 'CALL', 'goto', 'GOTO', 'exit', 'EXIT']
+    'Batch': ['if', 'IF', 'for', 'FOR', 'in', 'IN', 'do', 'DO', 'call', 'CALL', 'goto', 'GOTO', 'exit', 'EXIT'],
+    'PHP': ['declare', 'enddeclare', 'foreach', 'endforeach', 'if', 'else', 'elseif', 'endif', 'for', 'endfor', 'while', 'endwhile', 'switch', 'case', 'default', 'endswitch', 'return', 'break', 'continue',
+            'try', 'catch', 'die', 'do', 'exit', 'finally'],
 };
 
 CodeEditor.symbols = {
@@ -4759,7 +4779,8 @@ CodeEditor.symbols = {
     'Python': ['<', '>', '[', ']', '(', ')', '='],
     'Batch': ['[', ']', '(', ')', '%'],
     'HTML': ['<', '>', '/'],
-    'XML': ['<', '>', '/']
+    'XML': ['<', '>', '/'],
+    'PHP': ['{', '}', '(', ')'],
 };
 
 LX.CodeEditor = CodeEditor;

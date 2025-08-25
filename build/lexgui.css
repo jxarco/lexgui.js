@@ -361,6 +361,7 @@ body.noevents * {
 .goldenrod { color: goldenrod }
 .metallicyellow { color: #FDCC0D }
 .heliotrope { color: #d460ff }
+.blueviolet { color: blueviolet }
 
 svg.xxs { width: var(--svg-size-xxs); height: var(--svg-size-xxs); }
 svg.xs { width: var(--svg-size-xs); height: var(--svg-size-xs); }
@@ -5429,6 +5430,10 @@ ul.lexassetscontent {
 .cm-sym.xml { color: #929292; }    /* symbol */
 
 .cm-bln.markdown { color: #a1d2f0; }  /* builtin */
+
+.cm-sym.php { color: #cf6dcf; }  /* symbol */
+.cm-mtd.php { color: #e0cc68 }   /* method */
+.cm-bln.php { color: #e0cc68; }  /* builtin */
 
 :root[data-theme="light"] .lexcodeeditor pre.active-line {
     background-color: #e4e0e0ab;

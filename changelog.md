@@ -9,7 +9,9 @@ CodeEditor:
 - Fixed Ctrl+Wheel to modify font size.
 - Added ZoomIn/ZoomOut buttons to Info Panel to modify font size.
 - Selected Font size now persists locally using `localStorage`.
-- Support for showing/hiding status bar elements
+- Support for showing/hiding status bar elements.
+- Improved syntax highlighting consistency using new HightlightRules.
+- Added support for PHP.
 
 ## 0.7.1 (master)
 
