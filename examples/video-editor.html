@@ -34,7 +34,8 @@
     videoArea.attach(video);
 
     const videoEditor = new LX.VideoEditor(leftArea, { videoArea, video, crop: true })
-
+    videoEditor._loadVideo();
+    
     const canvas = document.createElement('canvas');
     canvas.width = video.clientWidth;
     canvas.height = video.clientHeight;

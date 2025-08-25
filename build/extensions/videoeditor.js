@@ -325,7 +325,15 @@ class VideoEditor {
 
         this.mainArea = area;
 
-        let [videoArea, controlsArea] = area.split({ type: 'vertical', sizes: ["85%", null], minimizable: false, resize: false });
+        let videoArea = null;
+        let controlsArea = null;
+        if(options.controlsArea) {
+            videoArea = area;
+            controlsArea = options.controlsArea;
+        }
+        else {
+            [videoArea, controlsArea] = area.split({ type: 'vertical', sizes: ["85%", null], minimizable: false, resize: false });
+        }
         controlsArea.root.classList.add('lexconstrolsarea');
         
         this.cropArea = document.createElement("div");
@@ -347,6 +355,7 @@ class VideoEditor {
             this.video.src = options.src;
             this._loadVideo(options);
         }
+        
         if(options.videoArea) {
             options.videoArea.root.classList.add("lexvideoeditor");
             options.videoArea.attach(this.cropArea);

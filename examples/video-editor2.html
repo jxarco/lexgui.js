@@ -29,7 +29,8 @@
 
     // Split main area
     let [leftArea, rightArea] = area.split({ sizes: ["75%", "25%"], minimizable: true });
-    let [topArea, bottomArea] = leftArea.split({ sizes: ["90%", null], minimizable: false, resize: false, type: "vertical" });
+    let [topArea, bottomArea] = leftArea.split({ sizes: ["80%", null], minimizable: false, resize: false, type: "vertical" });
+    let [controlsArea, buttonsArea] = bottomArea.split({ sizes: ["50%", null], minimizable: false, resize: false, type: "vertical" });
     area.extend();
 
     /* Create video area with a menubar */
@@ -39,8 +40,8 @@
     const video = document.createElement('video');
     video.src = "../data/video.mp4";
     videoArea.attach(video);
-    const videoEditor = new LX.VideoEditor(topArea, { videoArea, video })
-
+    const videoEditor = new LX.VideoEditor(topArea, { videoArea, video, controlsArea })
+    videoEditor._loadVideo();
     /* Add canvas above video */
     const canvas = document.createElement('canvas');
     canvas.width = video.clientWidth;
@@ -80,7 +81,7 @@
         }
     }], { float: 'tvr' });
 
-    let p = bottomArea.addPanel({ width: "100%", height: "100%", style: { display: "flex", "flex-direction": "row", "justify-content": "center", "align-content": "flex-start", "flex-wrap": "wrap" } });
+    let p = buttonsArea.addPanel({ width: "100%", height: "100%", style: { display: "flex", "flex-direction": "row", "justify-content": "center", "align-content": "flex-start", "flex-wrap": "wrap" } });
     p.addButton(null, "Trim", (v) => {
         console.log(videoEditor.getTrimedTimes())
 
