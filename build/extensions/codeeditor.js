@@ -6,26 +6,13 @@ if(!LX) {
 
 LX.extensions.push( 'CodeEditor' );
 
-function swapElements( obj, a, b ) {
-    [obj[a], obj[b]] = [obj[b], obj[a]];
-}
-
-function swapArrayElements( array, id0, id1 ) {
-    [array[id0], array[id1]] = [array[id1], array[id0]];
-};
-
-function sliceChars( str, idx, n = 1 ) {
-    return str.substr(0, idx) + str.substr(idx + n);
-}
-
-function firstNonspaceIndex( str ) {
-    const index = str.search(/\S|$/)
-    return index < str.length ? index : -1;
-}
-
-function strReverse( str ) {
-    return str.split( "" ).reverse().join( "" );
-}
+function swapElements( obj, a, b ) { [obj[a], obj[b]] = [obj[b], obj[a]]; }
+function swapArrayElements( array, id0, id1 ) { [array[id0], array[id1]] = [array[id1], array[id0]]; };
+function sliceChars( str, idx, n = 1 ) { return str.substr(0, idx) + str.substr(idx + n); }
+function firstNonspaceIndex( str ) { const index = str.search(/\S|$/); return index < str.length ? index : -1; }
+function strReverse( str ) { return str.split( "" ).reverse().join( "" ); }
+function isLetter( c ){ return /[a-zA-Z]/.test( c ); };
+function isSymbol( c ){ return /[^\w\s]/.test( c ); };
 
 function indexOfFrom( str, reg, from, reverse ) {
 
@@ -44,15 +31,6 @@ function indexOfFrom( str, reg, from, reverse ) {
         str = str.substr( from );
         return from + str.indexOf( reg );
     }
-}
-
-let ASYNC_ENABLED = true;
-
-function doAsync( fn, ms ) {
-    if( ASYNC_ENABLED )
-        setTimeout( fn, ms ?? 0 );
-    else
-        fn();
 }
 
 class CodeSelection {
@@ -104,7 +82,6 @@ class CodeSelection {
 
         var domEl = document.createElement( 'div' );
         domEl.className = this.className;
-
         domEl._top = y * this.editor.lineHeight;
         domEl.style.top = domEl._top + "px";
         domEl._left = x * this.editor.charWidth;
@@ -240,6 +217,12 @@ const HighlightRules = {
         { test: ctx => (ctx.prev === 'class' && ctx.next === '{') || (ctx.prev === 'new' && ctx.next === '('), className: "cm-typ" }
     ],
 
+    typescript: [
+        { test: ctx => (ctx.prev === ':' && ctx.next !== undefined && isLetter(ctx.token) ) || (ctx.prev === 'interface' && ctx.next === '{') || (ctx.prev === 'enum' && ctx.next === '{'), className: "cm-typ" },
+        { test: ctx => (ctx.prev === 'class' && ctx.next === '{') || (ctx.prev === 'class' && ctx.next === '<') || (ctx.prev === 'new' && ctx.next === '(') || (ctx.prev === 'new' && ctx.next === '<'), className: "cm-typ" },
+        { test: (ctx, editor) => ctx.token !== ',' && editor._enclosedByTokens( ctx.token, ctx.tokenIndex, '<', '>' ), className: "cm-typ" },
+    ],
+
     cpp: [
         { test: ctx => (ctx.prev === 'class' && ctx.next === '{') || (ctx.prev === 'struct' && ctx.next === '{'), className: "cm-typ" },
         { test: ctx => ctx.prev === "<" && (ctx.next === ">" || ctx.next === "*"), className: "cm-typ" }, // Defining template type in C++
@@ -271,7 +254,7 @@ const HighlightRules = {
     ],
 
     post_common: [
-        { test: ctx => ctx.token[ 0 ] != '@' && ctx.token[ 0 ] != ',' && ctx.next === '(', className: "cm-mtd" }
+        { test: ctx => isLetter(ctx.token) && (ctx.token[ 0 ] != '@') && (ctx.token[ 0 ] != ',') && (ctx.next === '('), className: "cm-mtd" }
     ],
 };
 
@@ -661,6 +644,7 @@ class CodeEditor {
         this.languages = {
             'Plain Text': { ext: 'txt', blockComments: false, singleLineComments: false, numbers: false },
             'JavaScript': { ext: 'js' },
+            'TypeScript': { ext: 'ts' },
             'C': { ext: [ 'c', 'h' ], usePreprocessor: true },
             'C++': { ext: [ 'cpp', 'hpp' ], usePreprocessor: true },
             'CSS': { ext: 'css' },
@@ -1740,7 +1724,7 @@ class CodeEditor {
         }
         else
         {
-            doAsync( () => {
+            LX.doAsync( () => {
 
                 // Change css a little bit...
                 this.gutter.style.height = "calc(100% - 28px)";
@@ -1787,6 +1771,7 @@ class CodeEditor {
             extension == "bat" ? "Windows lightblue" :
             extension == "json" ? "Braces fg-primary" :
             extension == "js" ? "Js goldenrod" :
+            extension == "ts" ? "Ts pipelineblue" :
             extension == "py" ? "Python munsellblue" :
             extension == "rs" ? "Rust fg-primary" :
             extension == "md" ? "Markdown fg-primary" :
@@ -1794,7 +1779,7 @@ class CodeEditor {
             extension == "hpp" ? "CPlusPlus heliotrope" :
             extension == "c" ? "C pictonblue" :
             extension == "h" ? "C heliotrope" :
-            extension == "php" ? "PHP blueviolet" :
+            extension == "php" ? "Php blueviolet" :
             !isNewTabButton ? "AlignLeft gray" : undefined;
     }
 
@@ -2950,7 +2935,7 @@ class CodeEditor {
 
     processLines( mode ) {
 
-        var code_html = "";
+        var htmlCode = "";
         this._blockCommentCache.length = 0;
 
         // Reset all lines content
@@ -2978,10 +2963,10 @@ class CodeEditor {
         // Process visible lines
         for( let i = this.visibleLinesViewport.x; i < this.visibleLinesViewport.y; ++i )
         {
-            code_html += this.processLine( i, true );
+            htmlCode += this.processLine( i, true );
         }
 
-        this.code.innerHTML = code_html;
+        this.code.innerHTML = htmlCode;
 
         // Update scroll data
         this.codeScroller.scrollTop = lastScrollTop;
@@ -3050,10 +3035,10 @@ class CodeEditor {
             return "<pre><span class='line-gutter'>" + linenum + "</span></pre>";
         }
 
-        var lineInnerHtml = "";
+        let lineInnerHtml = "";
 
         // Process all tokens
-        for( var i = 0; i < tokensToEvaluate.length; ++i )
+        for( let i = 0; i < tokensToEvaluate.length; ++i )
         {
             let it = i - 1;
             let prev = tokensToEvaluate[ it ];
@@ -3119,6 +3104,11 @@ class CodeEditor {
     }
 
     _getTokensFromLine( linestring, skipNonWords ) {
+
+        if( !linestring || !linestring.length )
+        {
+            return [];
+        }
 
         // Check if line comment
         const ogLine = linestring;
@@ -3913,7 +3903,7 @@ class CodeEditor {
 
     setScrollLeft( value ) {
         if( !this.codeScroller ) return;
-        doAsync( () => {
+        LX.doAsync( () => {
             this.codeScroller.scrollLeft = value;
             this.setScrollBarValue( 'horizontal', 0 );
         }, 20 );
@@ -3921,7 +3911,7 @@ class CodeEditor {
 
     setScrollTop( value ) {
         if( !this.codeScroller ) return;
-        doAsync( () => {
+        LX.doAsync( () => {
             this.codeScroller.scrollTop = value;
             this.setScrollBarValue( 'vertical' );
         }, 20 );
@@ -4695,6 +4685,8 @@ class CodeEditor {
 CodeEditor.keywords = {
     'JavaScript': ['var', 'let', 'const', 'this', 'in', 'of', 'true', 'false', 'new', 'function', 'NaN', 'static', 'class', 'constructor', 'null', 'typeof', 'debugger', 'abstract',
                   'arguments', 'extends', 'instanceof', 'Infinity'],
+    'TypeScript': ['var', 'let', 'const', 'this', 'in', 'of', 'true', 'false', 'new', 'function', 'class', 'extends', 'instanceof', 'Infinity', 'private', 'public', 'protected', 'interface',
+                  'enum', 'type'],
     'C': ['int', 'float', 'double', 'long', 'short', 'char', 'const', 'void', 'true', 'false', 'auto', 'struct', 'typedef', 'signed', 'volatile', 'unsigned', 'static', 'extern', 'enum', 'register',
         'union'],
     'C++': ['int', 'float', 'double', 'bool', 'long', 'short', 'char', 'wchar_t', 'const', 'static_cast', 'dynamic_cast', 'new', 'delete', 'void', 'true', 'false', 'auto', 'class', 'struct', 'typedef', 'nullptr',
@@ -4733,6 +4725,8 @@ CodeEditor.utils = { // These ones don't have hightlight, used as suggestions to
 CodeEditor.types = {
     'JavaScript': ['Object', 'String', 'Function', 'Boolean', 'Symbol', 'Error', 'Number', 'TextEncoder', 'TextDecoder', 'Array', 'ArrayBuffer', 'InputEvent', 'MouseEvent',
                    'Int8Array', 'Int16Array', 'Int32Array', 'Float32Array', 'Float64Array', 'Element'],
+    'TypeScript': ['arguments', 'constructor', 'null', 'typeof', 'debugger', 'abstract', 'Object', 'string', 'String', 'Function', 'Boolean', 'boolean', 'Error', 'Number', 'number', 'TextEncoder',
+                  'TextDecoder', 'Array', 'ArrayBuffer', 'InputEvent', 'MouseEvent', 'Int8Array', 'Int16Array', 'Int32Array', 'Float32Array', 'Float64Array', 'Element'],
     'Rust': ['u128'],
     'Python': ['int', 'type', 'float', 'map', 'list', 'ArithmeticError', 'AssertionError', 'AttributeError', 'Exception', 'EOFError', 'FloatingPointError', 'GeneratorExit',
               'ImportError', 'IndentationError', 'IndexError', 'KeyError', 'KeyboardInterrupt', 'LookupError', 'MemoryError', 'NameError', 'NotImplementedError', 'OSError',
@@ -4753,6 +4747,7 @@ CodeEditor.builtIn = {
 
 CodeEditor.statementsAndDeclarations = {
     'JavaScript': ['for', 'if', 'else', 'case', 'switch', 'return', 'while', 'continue', 'break', 'do', 'import', 'from', 'throw', 'async', 'try', 'catch', 'await'],
+    'TypeScript': ['for', 'if', 'else', 'case', 'switch', 'return', 'while', 'continue', 'break', 'do', 'import', 'from', 'throw', 'async', 'try', 'catch', 'await', 'as'],
     'CSS': ['@', 'import'],
     'C': ['for', 'if', 'else', 'return', 'continue', 'break', 'case', 'switch', 'while', 'using', 'default', 'goto', 'do'],
     'C++': ['std', 'for', 'if', 'else', 'return', 'continue', 'break', 'case', 'switch', 'while', 'using', 'glm', 'spdlog', 'default'],

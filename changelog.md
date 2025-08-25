@@ -11,7 +11,7 @@ CodeEditor:
 - Selected Font size now persists locally using `localStorage`.
 - Support for showing/hiding status bar elements.
 - Improved syntax highlighting consistency using new HightlightRules.
-- Added support for PHP.
+- Added support for PHP and TypeScript highlighting.
 
 ## 0.7.1 (master)
 

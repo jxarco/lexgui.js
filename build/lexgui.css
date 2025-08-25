@@ -354,6 +354,7 @@ body.noevents * {
 
 .orange { color: orange }
 .gray { color: gray }
+.pipelineblue { color: #007acc }
 .dodgerblue { color: dodgerblue }
 .munsellblue { color: #0093af }
 .pictonblue { color: #45B1E8 }
@@ -5385,6 +5386,9 @@ ul.lexassetscontent {
 .cm-bln.javascript { color: #d2d6f5; }   /* builtin */
 .cm-sym.javascript { color: #e7ded2; }  /* symbol */
 .cm-mtd.javascript { color: #e9d98a }   /* method */
+
+.cm-mtd.typescript { color: #e9d98a }   /* method */
+.cm-ppc.typescript { color: #4cacff }   /* preprocessor for enums */
 
 .cm-bln.c { color: #d44141; }   /* builtin */
 .cm-dec.c { color: #2ddf53; }   /* decimal */
