@@ -1,4 +1,3 @@
-return $this->age;
 <?php
 // Example PHP file for syntax highlighting
 

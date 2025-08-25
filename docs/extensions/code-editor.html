@@ -17,17 +17,16 @@
     MAKE_HEADER("Quick Usage", "h2");
     MAKE_PARAGRAPH( `The Code Editor component supports the following language highlightings:` );
     MAKE_CODE_BULLET_LIST( [
-        "Plain text",
-        "HTML, CSS, JavaScript",
+        "Plain text, Markdown",
+        "HTML, CSS, JavaScript, TypeScript, JSON",
         "C, C++",
         "CMake",
         "WGSL, GLSL",
-        "JSON",
         "XML",
         "Rust",
         "Python",
         "Batch",
-        "Markdown"
+        "PHP"
     ] );
 
     MAKE_HEADER( "Creating the editor", "h3", "init" );
@@ -47,6 +46,72 @@
         ["Double click to tab space", "Adds new empty tab"],
         ["Middle click to tab", "Closes tab"]
     ] );
+
+    MAKE_HEADER( "Supporting new languages", "h3", "lang-support" );
+    MAKE_PARAGRAPH(`It is allowed to register new languages with custom highlighting, reserved words, and parsing rules. Use the static method ${INLINE_CODE("CodeEditor.REGISTER_LANGUAGE(name, options, def, rules)")} to extend the editor with your own syntax support.`);
+
+    MAKE_CODE_BULLET_LIST([
+        ["name (String)", "Unique identifier for the language (e.g. 'myLang')."],
+        ["options (Object)", "Configuration for extension, comment styles, case sensitivity, and other parsing options."],
+        [
+            ["ext (String)", "Default file extension for this language."],
+            ["blockComments (Boolean)", "Whether block comments are supported."],
+            ["blockCommentsTokens (Array<String>)", "Tokens marking the start and end of block comments."],
+            ["singleLineComments (Boolean)", "Whether single-line comments are supported."],
+            ["singleLineCommentToken (String)", "The token used for single-line comments."],
+            ["numbers (Boolean)", "Enable automatic highlighting of numeric literals."],
+            ["tags (Boolean)", "Enable highlighting of HTML/XML-style tags."],
+            ["usePreprocessor (Boolean)", "Highlight tokens starting with `#`."],
+            ["ignoreCase (Boolean)", "Treat keywords and identifiers as case-insensitive."],
+        ],
+        ["def (Object)", "Collections of reserved words to categorize tokens. Each property is an array of words"],
+        [
+            ["keywords", "Reserved language keywords (e.g. 'const', 'var', 'public')."],
+            ["utils", "Utility functions or helpers."],
+            ["types", "Type identifiers (e.g. 'int', 'string')."],
+            ["builtIn", "Built-in functions or constants."],
+            ["statementsAndDeclarations", "Control statements and declaration keywords."],
+            ["symbols", "Special symbols or operators."],
+        ],
+        ["rules (Array)", "List of token-matching rules for custom syntax highlighting."],
+    ]);
+
+    // Rules
+    MAKE_HEADER("Highlight Rules", "h3");
+    MAKE_PARAGRAPH(`The ${INLINE_CODE("rules")} array contains objects describing how to highlight tokens. Each rule has a ${INLINE_CODE("test")} function, an optional ${INLINE_CODE("action")}, and a ${INLINE_CODE("className")} to apply.`);
+    MAKE_CODE(`[
+  { test: ctx => ctx.inBlockComment, className: @"cm-com"@ },
+  { test: ctx => ctx.inString, action: (ctx, editor) => editor.@[mtd]_appendStringToken@(ctx.token), discard: @true@ },
+  { test: ctx => ctx.token.@[mtd]startsWith@(ctx.singleLineCommentToken), className: @"cm-com"@ },
+  { test: (ctx, editor) => editor.@[mtd]_isKeyword@(ctx), className: @"cm-kwd"@ },
+  { test: (ctx, editor) => editor.@[mtd]_mustHightlightWord@(ctx.token, CodeEditor.types, ctx.lang), className: @"cm-typ"@ },
+  { test: (ctx, editor) => editor.@[mtd]_isNumber@(ctx.token), className: @"cm-dec"@ },
+  { test: ctx => ctx.lang.usePreprocessor && ctx.token.@[mtd]includes@(@'#'@), className: @"cm-ppc"@ }
+];`, "js");
+
+    MAKE_NOTE(`The ${INLINE_CODE("discard")} option is used to skip the token, and the result of any action will be stored in ${INLINE_CODE("ctx.discardToken")}.`, false, "Tip", "Info");
+
+    // Example
+    MAKE_HEADER("Example: Registering a Custom Language", "h3");
+    MAKE_CODE(`@[cls]CodeEditor@.REGISTER_LANGUAGE(@"mylang"@, {
+    ext: @"ml"@,
+    singleLineComments: @true@,
+    singleLineCommentToken: @"//"@,
+    blockComments: @true@,
+    blockCommentsTokens: [@"/*"@, @"*/"@],
+    numbers: @true@,
+    ignoreCase: @true@
+}, {
+    types: [@"int"@, @"float"@, @"string"@],
+    builtIn: [@"print"@, @"len"@]
+    statementsAndDeclarations: [@"if"@, @"else"@, @"for"@, @"while"@],
+}, [
+    { test: ctx => ctx.inBlockComment, className: @"cm-com"@ },
+    { test: (ctx, editor) => editor.@[mtd]_isKeyword@(ctx), className: @"cm-kwd"@ }
+]);`, "js");
+
+    // Tip
+    MAKE_NOTE("Start with basic keyword and comment highlighting, then extend rules as needed. This modular approach makes it easier to debug syntax definitions.", false, "Tip", "Info");
 
     MAKE_HEADER("API Reference", "h2");
     MAKE_CLASS_CONSTRUCTOR( "class LX.CodeEditor", [

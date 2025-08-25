@@ -13,6 +13,7 @@ CodeEditor:
 - Improved syntax highlighting consistency using new HightlightRules.
 - Added support for PHP and TypeScript highlighting.
 - Started work on scope detection (enums, structs, methods, classes, etc.) for syntax highlighting.
+- Added support for adding new custom language.
 
 ## 0.7.1 (master)
 

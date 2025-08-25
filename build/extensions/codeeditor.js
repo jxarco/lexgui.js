@@ -644,26 +644,6 @@ class CodeEditor {
         // Scan tokens..
         // setInterval( this.scanWordSuggestions.bind( this ), 2000 );
 
-        this.languages = {
-            'Plain Text': { ext: 'txt', blockComments: false, singleLineComments: false, numbers: false },
-            'JavaScript': { ext: 'js' },
-            'TypeScript': { ext: 'ts' },
-            'C': { ext: [ 'c', 'h' ], usePreprocessor: true },
-            'C++': { ext: [ 'cpp', 'hpp' ], usePreprocessor: true },
-            'CSS': { ext: 'css' },
-            'CMake': { ext: 'cmake', singleLineCommentToken: '#', blockComments: false, ignoreCase: true },
-            'GLSL': { ext: 'glsl', usePreprocessor: true },
-            'WGSL': { ext: 'wgsl', usePreprocessor: true },
-            'JSON': { ext: 'json', blockComments: false, singleLineComments: false },
-            'XML': { ext: 'xml', tags: true },
-            'Rust': { ext: 'rs' },
-            'Python': { ext: 'py', singleLineCommentToken: '#' },
-            'HTML': { ext: 'html', tags: true, singleLineComments: false, blockCommentsTokens: [ '<!--', '-->' ], numbers: false },
-            'Batch': { ext: 'bat', blockComments: false, singleLineCommentToken: '::' },
-            'Markdown': { ext: 'md', blockComments: false, singleLineCommentToken: '::', tags: true, numbers: false },
-            'PHP': { ext: 'php', singleLineCommentToken: '//' },
-        };
-
         this.specialKeys = [
             'Backspace', 'Enter', 'ArrowUp', 'ArrowDown',
             'ArrowRight', 'ArrowLeft', 'Delete', 'Home',
@@ -1352,7 +1332,7 @@ class CodeEditor {
                     options: options
                 };
 
-                const ext = this.languages[ options.language ] ?. ext;
+                const ext = CodeEditor.languages[ options.language ] ?. ext;
                 this.addExplorerItem( { id: name, skipVisibility: true, icon: this._getFileIcon( name, ext ) } );
                 this.explorer.innerTree.frefresh( name );
             }
@@ -1587,7 +1567,7 @@ class CodeEditor {
         this._updateDataInfoPanel( "@highlight", lang );
         this.processLines();
 
-        const ext = langExtension ?? this.languages[ lang ].ext;
+        const ext = langExtension ?? CodeEditor.languages[ lang ].ext;
         const icon = this._getFileIcon( null, ext );
 
         // Update tab icon
@@ -1625,9 +1605,9 @@ class CodeEditor {
             return this._changeLanguage( this.code.language );
         }
 
-        for( let l in this.languages )
+        for( let l in CodeEditor.languages )
         {
-            const langExtension = this.languages[ l ].ext;
+            const langExtension = CodeEditor.languages[ l ].ext;
 
             if( langExtension.constructor == Array )
             {
@@ -1680,7 +1660,7 @@ class CodeEditor {
             }, { id: "EditorIndentationStatusComponent", nameWidth: "15%", signal: "@tab-spaces" });
             rightStatusPanel.addButton( "<b>{ }</b>", this.highlight, ( value, event ) => {
                 LX.addContextMenu( "Language", event, m => {
-                    for( const lang of Object.keys( this.languages ) )
+                    for( const lang of Object.keys( CodeEditor.languages ) )
                     {
                         m.add( lang, v => {
                             this._changeLanguage( v, null, true )
@@ -2824,7 +2804,7 @@ class CodeEditor {
 
     _commentLine( cursor, line, minNonspaceIdx ) {
 
-        const lang = this.languages[ this.highlight ];
+        const lang = CodeEditor.languages[ this.highlight ];
 
         if( !( lang.singleLineComments ?? true ))
             return;
@@ -2877,7 +2857,7 @@ class CodeEditor {
 
     _uncommentLine( cursor, line ) {
 
-        const lang = this.languages[ this.highlight ];
+        const lang = CodeEditor.languages[ this.highlight ];
 
         if( !( lang.singleLineComments ?? true ))
             return;
@@ -3003,7 +2983,7 @@ class CodeEditor {
             this._scopeStack = [ ...this.lineScopes[ lineNumber ] ];
         }
 
-        const lang = this.languages[ this.highlight ];
+        const lang = CodeEditor.languages[ this.highlight ];
         const localLineNum =  this.toLocalLine( lineNumber );
         const gutterLineHtml = `<span class='line-gutter'>${ lineNumber + 1 }</span>`;
 
@@ -3145,7 +3125,7 @@ class CodeEditor {
 
     _lineHasComment( lineString ) {
 
-        const lang = this.languages[ this.highlight ];
+        const lang = CodeEditor.languages[ this.highlight ];
 
         if( !(lang.singleLineComments ?? true) )
         {
@@ -3271,7 +3251,7 @@ class CodeEditor {
 
         if( !lang )
         {
-            lang = this.languages[ this.highlight ];
+            lang = CodeEditor.languages[ this.highlight ];
         }
 
         let t = token;
@@ -3307,7 +3287,7 @@ class CodeEditor {
 
         let { token, prev, next, tokenIndex, isFirstToken, isLastToken } = ctxData;
 
-        const lang = this.languages[ this.highlight ],
+        const lang = CodeEditor.languages[ this.highlight ],
               highlight = this.highlight.replace( /\s/g, '' ).replaceAll( "+", "p" ).toLowerCase(),
               customStringKeys = Object.assign( {}, this.stringKeys );
 
@@ -3484,7 +3464,7 @@ class CodeEditor {
 
     _isNumber( token ) {
 
-        const lang = this.languages[ this.highlight ];
+        const lang = CodeEditor.languages[ this.highlight ];
         if( !( lang.numbers ?? true ) )
         {
             return false;
@@ -4750,6 +4730,26 @@ class CodeEditor {
     }
 }
 
+CodeEditor.languages = {
+    'Plain Text': { ext: 'txt', blockComments: false, singleLineComments: false, numbers: false },
+    'JavaScript': { ext: 'js' },
+    'TypeScript': { ext: 'ts' },
+    'C': { ext: [ 'c', 'h' ], usePreprocessor: true },
+    'C++': { ext: [ 'cpp', 'hpp' ], usePreprocessor: true },
+    'CSS': { ext: 'css' },
+    'CMake': { ext: 'cmake', singleLineCommentToken: '#', blockComments: false, ignoreCase: true },
+    'GLSL': { ext: 'glsl', usePreprocessor: true },
+    'WGSL': { ext: 'wgsl', usePreprocessor: true },
+    'JSON': { ext: 'json', blockComments: false, singleLineComments: false },
+    'XML': { ext: 'xml', tags: true },
+    'Rust': { ext: 'rs' },
+    'Python': { ext: 'py', singleLineCommentToken: '#' },
+    'HTML': { ext: 'html', tags: true, singleLineComments: false, blockCommentsTokens: [ '<!--', '-->' ], numbers: false },
+    'Batch': { ext: 'bat', blockComments: false, singleLineCommentToken: '::' },
+    'Markdown': { ext: 'md', blockComments: false, singleLineCommentToken: '::', tags: true, numbers: false },
+    'PHP': { ext: 'php' },
+};
+
 CodeEditor.keywords = {
     'JavaScript': ['var', 'let', 'const', 'this', 'in', 'of', 'true', 'false', 'new', 'function', 'NaN', 'static', 'class', 'constructor', 'null', 'typeof', 'debugger', 'abstract',
                   'arguments', 'extends', 'instanceof', 'Infinity'],
@@ -4844,6 +4844,20 @@ CodeEditor.symbols = {
     'HTML': ['<', '>', '/'],
     'XML': ['<', '>', '/'],
     'PHP': ['{', '}', '(', ')'],
+};
+
+CodeEditor.REGISTER_LANGUAGE = function( name, options = {}, def, rules )
+{
+    CodeEditor.languages[ name ] = options;
+
+    if( def?.keywords ) CodeEditor.keywords[ name ] = def.keywords.reduce((a, v) => ({ ...a, [v]: true}), {});
+    if( def?.utils ) CodeEditor.utils[ name ] = def.utils.reduce((a, v) => ({ ...a, [v]: true}), {});
+    if( def?.types ) CodeEditor.types[ name ] = def.types.reduce((a, v) => ({ ...a, [v]: true}), {});
+    if( def?.builtIn ) CodeEditor.builtIn[ name ] = def.builtIn.reduce((a, v) => ({ ...a, [v]: true}), {});
+    if( def?.statementsAndDeclarations ) CodeEditor.statementsAndDeclarations[ name ] = def.statementsAndDeclarations.reduce((a, v) => ({ ...a, [v]: true}), {});
+    if( def?.symbols ) CodeEditor.symbols[ name ] = def.symbols.reduce((a, v) => ({ ...a, [v]: true}), {});
+
+    if( rules ) HighlightRules[ name ] = rules;
 };
 
 LX.CodeEditor = CodeEditor;
