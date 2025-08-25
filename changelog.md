@@ -4,6 +4,7 @@
 
 Fixed AssetView Filter select.
 Fixed tooltips on Dialog without modal.
+Exposed LX.Timebar in VideoEditor extension.
 
 CodeEditor:
 - Fixed Ctrl+Wheel to modify font size.
