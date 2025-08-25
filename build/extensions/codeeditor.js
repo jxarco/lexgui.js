@@ -226,19 +226,30 @@ const HighlightRules = {
     common: [
         { test: ctx => ctx.inBlockComment, className: "cm-com" },
         { test: ctx => ctx.inString, action: (ctx, editor) => editor._appendStringToken( ctx.token ), discard: true },
+        { test: ctx => ctx.token.substr( 0, ctx.singleLineCommentToken.length ) == ctx.singleLineCommentToken, className: "cm-com" },
         { test: (ctx, editor) => editor._isKeyword( ctx ), className: "cm-kwd" },
         { test: (ctx, editor) => editor._mustHightlightWord( ctx.token, CodeEditor.builtIn, ctx.lang ) && ( ctx.lang.tags ?? false ? ( editor._enclosedByTokens( ctx.token, ctx.tokenIndex, '<', '>' ) ) : true ), className: "cm-bln" },
         { test: (ctx, editor) => editor._mustHightlightWord( ctx.token, CodeEditor.statementsAndDeclarations, ctx.lang ), className: "cm-std" },
         { test: (ctx, editor) => editor._mustHightlightWord( ctx.token, CodeEditor.symbols, ctx.lang ), className: "cm-sym" },
-        { test: ctx => ctx.token.substr( 0, ctx.singleLineCommentToken.length ) == ctx.singleLineCommentToken, className: "cm-com" },
+        { test: (ctx, editor) => editor._mustHightlightWord( ctx.token, CodeEditor.types, ctx.lang ), className: "cm-typ" },
         { test: (ctx, editor) => editor._isNumber( ctx.token ) || editor._isNumber( ctx.token.replace(/[px]|[em]|%/g,'') ), className: "cm-dec" },
-        { test: (ctx, editor) => editor._isType( ctx ), className: "cm-typ" },
         { test: ctx => ctx.lang.usePreprocessor && ctx.token.includes( '#' ), className: "cm-ppc" },
     ],
 
+    javascript: [
+        { test: ctx => (ctx.prev === 'class' && ctx.next === '{') || (ctx.prev === 'new' && ctx.next === '('), className: "cm-typ" }
+    ],
+
     cpp: [
+        { test: ctx => (ctx.prev === 'class' && ctx.next === '{') || (ctx.prev === 'struct' && ctx.next === '{'), className: "cm-typ" },
         { test: ctx => ctx.prev === "<" && (ctx.next === ">" || ctx.next === "*"), className: "cm-typ" }, // Defining template type in C++
         { test: ctx => ctx.next === "::" || (ctx.prev === "::" && ctx.next !== "("), className: "cm-typ" } // C++ Class
+    ],
+
+    wgsl: [
+        { test: ctx => ctx.prev === '>' && (!ctx.next || ctx.next === '{'), className: "cm-typ" }, // Function return type
+        { test: ctx => (ctx.prev === ':' && ctx.next !== undefined) || (ctx.prev === 'struct' && ctx.next === '{'), className: "cm-typ" },
+        { test: (ctx, editor) => ctx.token !== ',' && editor._enclosedByTokens( ctx.token, ctx.tokenIndex, '<', '>' ), className: "cm-typ" },
     ],
 
     css: [
@@ -644,7 +655,7 @@ class CodeEditor {
         // setInterval( this.scanWordSuggestions.bind( this ), 2000 );
 
         this.languages = {
-            'Plain Text': { ext: 'txt', blockComments: false, singleLineComments: false },
+            'Plain Text': { ext: 'txt', blockComments: false, singleLineComments: false, numbers: false },
             'JavaScript': { ext: 'js' },
             'C': { ext: [ 'c', 'h' ], usePreprocessor: true },
             'C++': { ext: [ 'cpp', 'hpp' ], usePreprocessor: true },
@@ -656,9 +667,9 @@ class CodeEditor {
             'XML': { ext: 'xml', tags: true },
             'Rust': { ext: 'rs' },
             'Python': { ext: 'py', singleLineCommentToken: '#' },
-            'HTML': { ext: 'html', tags: true, singleLineComments: false, blockCommentsTokens: [ '<!--', '-->' ] },
+            'HTML': { ext: 'html', tags: true, singleLineComments: false, blockCommentsTokens: [ '<!--', '-->' ], numbers: false },
             'Batch': { ext: 'bat', blockComments: false, singleLineCommentToken: '::' },
-            'Markdown': { ext: 'md', blockComments: false, singleLineCommentToken: '::', tags: true }
+            'Markdown': { ext: 'md', blockComments: false, singleLineCommentToken: '::', tags: true, numbers: false },
         };
 
         this.specialKeys = [
@@ -3401,6 +3412,12 @@ class CodeEditor {
 
     _isNumber( token ) {
 
+        const lang = this.languages[ this.highlight ];
+        if( !( lang.numbers ?? true ) )
+        {
+            return false;
+        }
+
         const subToken = token.substring( 0, token.length - 1 );
 
         if( this.highlight == 'C++' )
@@ -3432,51 +3449,24 @@ class CodeEditor {
         return token.length && token != ' ' && !Number.isNaN( +token );
     }
 
-    _isType( ctxData ) {
-
-        const { token, prev, next, lang } = ctxData;
-
-        // Common case
-        if( this._mustHightlightWord( token, CodeEditor.types, lang ) )
-        {
-            return true;
-        }
-
-        if( this.highlight == 'JavaScript' )
-        {
-            return (prev == 'class' && next == '{') || (prev == 'new' && next == '(');
-        }
-        else if( this.highlight == 'C++' )
-        {
-            return (prev == 'class' && next == '{') || (prev == 'struct' && next == '{');
-        }
-        else if ( this.highlight == 'WGSL' )
-        {
-            const not_kwd = !this._mustHightlightWord( token, CodeEditor.keywords, lang );
-            return  (prev == 'struct' && next == '{') ||
-                    (not_kwd && prev == ':' && next == ';') ||
-            ( not_kwd &&
-                ( prev == ':' && next == ')' || prev == ':' && next == ',' || prev == '>' && next == '{'
-                    || prev == '<' && next == ',' || prev == '<' && next == '>' || prev == '>' && token != ';' && !next ));
-        }
-    }
-
     _encloseSelectedWordWithKey( key, lidx, cursor ) {
 
-        if( !cursor.selection || (cursor.selection.fromY != cursor.selection.toY) )
-        return false;
+        if( !cursor.selection || ( cursor.selection.fromY != cursor.selection.toY ) )
+        {
+            return false;
+        }
 
         cursor.selection.invertIfNecessary();
 
         // Insert first..
         this.code.lines[ lidx ] = [
-            this.code.lines[ lidx ].slice(0, cursor.selection.fromX),
+            this.code.lines[ lidx ].slice( 0, cursor.selection.fromX ),
             key,
-            this.code.lines[ lidx ].slice(cursor.selection.fromX)
+            this.code.lines[ lidx ].slice( cursor.selection.fromX )
         ].join('');
 
         // Go to the end of the word
-        this.cursorToPosition(cursor, cursor.selection.toX + 1);
+        this.cursorToPosition( cursor, cursor.selection.toX + 1 );
 
         // Change next key?
         switch(key)
@@ -4640,7 +4630,6 @@ class CodeEditor {
     }
 
     _setFontSize( size ) {
-
         // Change font size
         this.fontSize = size;
         const r = document.querySelector( ':root' );
@@ -4678,7 +4667,6 @@ class CodeEditor {
     }
 
     _clearTmpVariables() {
-
         delete this._currentLineString;
         delete this._currentLineNumber;
         delete this._buildingString;
@@ -4690,7 +4678,6 @@ class CodeEditor {
 }
 
 CodeEditor.keywords = {
-
     'JavaScript': ['var', 'let', 'const', 'this', 'in', 'of', 'true', 'false', 'new', 'function', 'NaN', 'static', 'class', 'constructor', 'null', 'typeof', 'debugger', 'abstract',
                   'arguments', 'extends', 'instanceof', 'Infinity'],
     'C': ['int', 'float', 'double', 'long', 'short', 'char', 'const', 'void', 'true', 'false', 'auto', 'struct', 'typedef', 'signed', 'volatile', 'unsigned', 'static', 'extern', 'enum', 'register',
@@ -4703,10 +4690,10 @@ CodeEditor.keywords = {
     'JSON': ['true', 'false'],
     'GLSL': ['true', 'false', 'function', 'int', 'float', 'vec2', 'vec3', 'vec4', 'mat2x2', 'mat3x3', 'mat4x4', 'struct'],
     'CSS': ['body', 'html', 'canvas', 'div', 'input', 'span', '.'],
-    'WGSL': ['var', 'let', 'true', 'false', 'fn', 'bool', 'u32', 'i32', 'f16', 'f32', 'vec2f', 'vec3f', 'vec4f', 'mat2x2f', 'mat3x3f', 'mat4x4f', 'array', 'atomic', 'struct',
+    'WGSL': ['var', 'let', 'true', 'false', 'fn', 'bool', 'u32', 'i32', 'f16', 'f32', 'vec2', 'vec3', 'vec4', 'vec2f', 'vec3f', 'vec4f', 'mat2x2f', 'mat3x3f', 'mat4x4f', 'array', 'atomic', 'struct',
             'sampler', 'sampler_comparison', 'texture_depth_2d', 'texture_depth_2d_array', 'texture_depth_cube', 'texture_depth_cube_array', 'texture_depth_multisampled_2d',
             'texture_external', 'texture_1d', 'texture_2d', 'texture_2d_array', 'texture_3d', 'texture_cube', 'texture_cube_array', 'texture_storage_1d', 'texture_storage_2d',
-            'texture_storage_2d_array', 'texture_storage_3d', 'vec2u', 'vec3u', 'vec4u'],
+            'texture_storage_2d_array', 'texture_storage_3d', 'vec2u', 'vec3u', 'vec4u', 'ptr'],
     'Rust': ['as', 'const', 'crate', 'enum', 'extern', 'false', 'fn', 'impl', 'in', 'let', 'mod', 'move', 'mut', 'pub', 'ref', 'self', 'Self', 'static', 'struct', 'super', 'trait', 'true',
              'type', 'unsafe', 'use', 'where', 'abstract', 'become', 'box', 'final', 'macro', 'override', 'priv', 'typeof', 'unsized', 'virtual'],
     'Python': ['False', 'def', 'None', 'True', 'in', 'is', 'and', 'lambda', 'nonlocal', 'not', 'or'],
@@ -4717,7 +4704,6 @@ CodeEditor.keywords = {
 };
 
 CodeEditor.utils = { // These ones don't have hightlight, used as suggestions to autocomplete only...
-
     'JavaScript': ['querySelector', 'body', 'addEventListener', 'removeEventListener', 'remove', 'sort', 'keys', 'filter', 'isNaN', 'parseFloat', 'parseInt', 'EPSILON', 'isFinite',
                   'bind', 'prototype', 'length', 'assign', 'entries', 'values', 'concat', 'substring', 'substr', 'splice', 'slice', 'buffer', 'appendChild', 'createElement', 'prompt',
                   'alert'],
@@ -4753,7 +4739,7 @@ CodeEditor.statementsAndDeclarations = {
     'C': ['for', 'if', 'else', 'return', 'continue', 'break', 'case', 'switch', 'while', 'using', 'default', 'goto', 'do'],
     'C++': ['std', 'for', 'if', 'else', 'return', 'continue', 'break', 'case', 'switch', 'while', 'using', 'glm', 'spdlog', 'default'],
     'GLSL': ['for', 'if', 'else', 'return', 'continue', 'break'],
-    'WGSL': ['const','for', 'if', 'else', 'return', 'continue', 'break', 'storage', 'read', 'read_write', 'uniform', 'function', 'workgroup'],
+    'WGSL': ['const','for', 'if', 'else', 'return', 'continue', 'break', 'storage', 'read', 'read_write', 'uniform', 'function', 'workgroup', 'bitcast'],
     'Rust': ['break', 'else', 'continue', 'for', 'if', 'loop', 'match', 'return', 'while', 'do', 'yield'],
     'Python': ['if', 'raise', 'del', 'import', 'return', 'elif', 'try', 'else', 'while', 'as', 'except', 'with', 'assert', 'finally', 'yield', 'break', 'for', 'class', 'continue',
               'global', 'pass', 'from'],
