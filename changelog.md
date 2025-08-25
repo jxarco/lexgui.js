@@ -2,6 +2,8 @@
 
 ## dev
 
+## 0.7.2 (master)
+
 Fixed AssetView Filter select.
 Fixed tooltips on Dialog without modal.
 Exposed LX.Timebar in VideoEditor extension.
@@ -16,7 +18,7 @@ CodeEditor:
 - Started work on scope detection (enums, structs, methods, classes, etc.) for syntax highlighting.
 - Added support for adding new custom language.
 
-## 0.7.1 (master)
+## 0.7.1
 
 Added support for selecting custom Min, Max range in RangeInput component.
 Added value labels to RangeInput component.
