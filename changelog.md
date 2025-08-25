@@ -12,6 +12,7 @@ CodeEditor:
 - Support for showing/hiding status bar elements.
 - Improved syntax highlighting consistency using new HightlightRules.
 - Added support for PHP and TypeScript highlighting.
+- Started work on scope detection (enums, structs, methods, classes, etc.) for syntax highlighting.
 
 ## 0.7.1 (master)
 

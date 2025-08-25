@@ -5388,7 +5388,7 @@ ul.lexassetscontent {
 .cm-mtd.javascript { color: #e9d98a }   /* method */
 
 .cm-mtd.typescript { color: #e9d98a }   /* method */
-.cm-ppc.typescript { color: #4cacff }   /* preprocessor for enums */
+.cm-enu.typescript { color: #4cacff }   /* enums */
 
 .cm-bln.c { color: #d44141; }   /* builtin */
 .cm-dec.c { color: #2ddf53; }   /* decimal */
@@ -5401,6 +5401,7 @@ ul.lexassetscontent {
 .cm-sym.cpp { color: #e7ded2; }   /* symbol */
 .cm-mtd.cpp { color: #7a9ae0 }    /* method */
 .cm-ppc.cpp { color: #969696 }    /* preprocessor */
+.cm-enu.cpp { color: #b1ce9b }    /* enums */
 
 .cm-sym.cmake { color: #cf6dcf; }  /* symbol */
 

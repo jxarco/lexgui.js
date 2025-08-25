@@ -218,12 +218,14 @@ const HighlightRules = {
     ],
 
     typescript: [
+        { test: ctx => ctx.scope && (ctx.token !== ',' && ctx.scope == "enum"), className: "cm-enu" },
         { test: ctx => (ctx.prev === ':' && ctx.next !== undefined && isLetter(ctx.token) ) || (ctx.prev === 'interface' && ctx.next === '{') || (ctx.prev === 'enum' && ctx.next === '{'), className: "cm-typ" },
         { test: ctx => (ctx.prev === 'class' && ctx.next === '{') || (ctx.prev === 'class' && ctx.next === '<') || (ctx.prev === 'new' && ctx.next === '(') || (ctx.prev === 'new' && ctx.next === '<'), className: "cm-typ" },
         { test: (ctx, editor) => ctx.token !== ',' && editor._enclosedByTokens( ctx.token, ctx.tokenIndex, '<', '>' ), className: "cm-typ" },
     ],
 
     cpp: [
+        { test: ctx => ctx.scope && (ctx.token !== ',' && ctx.scope == "enum"), className: "cm-enu" },
         { test: ctx => (ctx.prev === 'class' && ctx.next === '{') || (ctx.prev === 'struct' && ctx.next === '{'), className: "cm-typ" },
         { test: ctx => ctx.prev === "<" && (ctx.next === ">" || ctx.next === "*"), className: "cm-typ" }, // Defining template type in C++
         { test: ctx => ctx.next === "::" || (ctx.prev === "::" && ctx.next !== "("), className: "cm-typ" } // C++ Class
@@ -623,6 +625,7 @@ class CodeEditor {
         this.charWidth = 7; // To update later depending on size..
         this.defaultSingleLineCommentToken = '//';
         this.defaultBlockCommentTokens = [ '/*', '*/' ];
+        this.lineScopes = [];
         this._lastTime = null;
 
         this.pairKeys = {
@@ -2916,8 +2919,8 @@ class CodeEditor {
 
         for( let i = 0; i < this.code.lines.length; ++i )
         {
-            const linestring = this.code.lines[ i ];
-            const tokens = this._getTokensFromLine( linestring, true );
+            const lineString = this.code.lines[ i ];
+            const tokens = this._getTokensFromLine( lineString, true );
             tokens.forEach( t => this.code.tokens[ t ] = 1 );
         }
     }
@@ -2960,6 +2963,8 @@ class CodeEditor {
             }
         }
 
+        this._scopeStack = [];
+
         // Process visible lines
         for( let i = this.visibleLinesViewport.x; i < this.visibleLinesViewport.y; ++i )
         {
@@ -2980,28 +2985,53 @@ class CodeEditor {
         this.resize();
     }
 
-    processLine( linenum, force ) {
+    processLine( lineNumber, force ) {
 
         // Check if we are in block comment sections..
-        if( !force && this._inBlockCommentSection( linenum ) )
+        if( !force && this._inBlockCommentSection( lineNumber ) )
         {
             this.processLines();
             return;
         }
 
+        if( this._scopeStack )
+        {
+            this.lineScopes[ lineNumber ] = [ ...this._scopeStack ];
+        }
+        else
+        {
+            this._scopeStack = [ ...this.lineScopes[ lineNumber ] ];
+        }
+
         const lang = this.languages[ this.highlight ];
-        const localLineNum =  this.toLocalLine( linenum );
-        const gutterLineHtml = "<span class='line-gutter'>" + (linenum + 1) + "</span>";
+        const localLineNum =  this.toLocalLine( lineNumber );
+        const gutterLineHtml = `<span class='line-gutter'>${ lineNumber + 1 }</span>`;
 
         const _updateLine = ( html ) => {
             if( !force ) // Single line update
             {
+                _processNextLineIfNecessary();
                 this.code.childNodes[ localLineNum ].innerHTML = gutterLineHtml + html;
-                this._setActiveLine( linenum );
+                this._setActiveLine( lineNumber );
                 this._clearTmpVariables();
             }
             else // Update all lines at once
-                return "<pre>" + ( gutterLineHtml + html ) + "</pre>";
+            {
+                return `<pre>${ gutterLineHtml + html }</pre>`;
+            }
+        }
+
+        const _processNextLineIfNecessary = () => {
+            // Only update scope stack if something changed when editing a single line
+            if( this._scopeStack.toString() == this.lineScopes[ lineNumber + 1 ]?.toString() )
+                return;
+
+            this.lineScopes[ lineNumber + 1 ] = [ ...this._scopeStack ];
+
+            if( this.code.lines.length > lineNumber + 1 )
+            {
+                this.processLine( lineNumber + 1 );
+            }
         }
 
         // multi-line strings not supported by now
@@ -3009,7 +3039,7 @@ class CodeEditor {
         delete this._pendingString;
         delete this._markdownHeader;
 
-        let linestring = this.code.lines[ linenum ];
+        let lineString = this.code.lines[ lineNumber ];
 
         // Single line
         if( !force )
@@ -3021,18 +3051,17 @@ class CodeEditor {
         // Early out check for no highlighting languages
         if( this.highlight == 'Plain Text' )
         {
-            const plainTextHtml = linestring.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+            const plainTextHtml = lineString.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
             return _updateLine( plainTextHtml );
         }
 
-        this._currentLineNumber = linenum;
-        this._currentLineString = linestring;
+        this._currentLineNumber = lineNumber;
+        this._currentLineString = lineString;
 
-        const tokensToEvaluate = this._getTokensFromLine( linestring );
-
+        const tokensToEvaluate = this._getTokensFromLine( lineString );
         if( !tokensToEvaluate.length )
         {
-            return "<pre><span class='line-gutter'>" + linenum + "</span></pre>";
+            return _updateLine( "" );
         }
 
         let lineInnerHtml = "";
@@ -3042,14 +3071,16 @@ class CodeEditor {
         {
             let it = i - 1;
             let prev = tokensToEvaluate[ it ];
-            while( prev == ' ' ) {
+            while( prev == ' ' )
+            {
                 it--;
                 prev = tokensToEvaluate[ it ];
             }
 
             it = i + 1;
             let next = tokensToEvaluate[ it ];
-            while( next == ' ' || next == '"' ) {
+            while( next == ' ' || next == '"' )
+            {
                 it++;
                 next = tokensToEvaluate[ it ];
             }
@@ -3060,7 +3091,13 @@ class CodeEditor {
             {
                 const blockCommentsToken = ( lang.blockCommentsTokens ?? this.defaultBlockCommentTokens )[ 0 ];
                 if( token.substr( 0, blockCommentsToken.length ) == blockCommentsToken )
-                    this._buildingBlockComment = linenum;
+                    this._buildingBlockComment = lineNumber;
+            }
+
+            // Pop current scope if necessary
+            if( token === "}" )
+            {
+                this._scopeStack.pop();
             }
 
             lineInnerHtml += this._evaluateToken( {
@@ -3074,20 +3111,49 @@ class CodeEditor {
                 isLastToken: (i == tokensToEvaluate.length - 1),
                 tokens: tokensToEvaluate
             } );
+
+            // Store current scopes
+            if( token === "{" )
+            {
+                // Get some context about the scope from previous lines
+                const contextTokens = [
+                    ...this._getTokensFromLine( this.code.lines[ lineNumber - 2 ] ),
+                    ...this._getTokensFromLine( this.code.lines[ lineNumber - 1 ] ),
+                    ...this._getTokensFromLine( this.code.lines[ lineNumber ].substring( 0, lineString.indexOf( token ) ) )
+                ].reverse().filter( v => v.length && v != ' ' );
+
+                let scopeType = contextTokens[ 1 ]; // This is the type of scope (function, class, enum, etc)
+
+                // Special cases
+                if( scopeType === ":" ) // enum type specification
+                {
+                    scopeType = contextTokens[ 3 ];
+                }
+
+                if( !this._mustHightlightWord( scopeType, CodeEditor.keywords, lang ) )
+                {
+                    // If the scope type is not a keyword, use an empty string
+                    scopeType = "";
+                }
+
+                this._scopeStack.push( scopeType );
+            }
         }
 
         return _updateLine( lineInnerHtml );
     }
 
-    _lineHasComment( linestring ) {
+    _lineHasComment( lineString ) {
 
         const lang = this.languages[ this.highlight ];
 
         if( !(lang.singleLineComments ?? true) )
+        {
             return;
+        }
 
         const singleLineCommentToken = lang.singleLineCommentToken ?? this.defaultSingleLineCommentToken;
-        const idx = linestring.indexOf( singleLineCommentToken );
+        const idx = lineString.indexOf( singleLineCommentToken );
 
         if( idx > -1 )
         {
@@ -3096,27 +3162,27 @@ class CodeEditor {
             var err = false;
             err |= stringKeys.some( function(v) {
                 var re = new RegExp( v, "g" );
-                var matches = (linestring.substring( 0, idx ).match( re ) || []);
+                var matches = (lineString.substring( 0, idx ).match( re ) || []);
                 return (matches.length % 2) !== 0;
             } );
             return err ? undefined : idx;
         }
     }
 
-    _getTokensFromLine( linestring, skipNonWords ) {
+    _getTokensFromLine( lineString, skipNonWords ) {
 
-        if( !linestring || !linestring.length )
+        if( !lineString || !lineString.length )
         {
             return [];
         }
 
         // Check if line comment
-        const ogLine = linestring;
-        const hasCommentIdx = this._lineHasComment( linestring );
+        const ogLine = lineString;
+        const hasCommentIdx = this._lineHasComment( lineString );
 
         if( hasCommentIdx != undefined )
         {
-            linestring = ogLine.substring( 0, hasCommentIdx );
+            lineString = ogLine.substring( 0, hasCommentIdx );
         }
 
         let tokensToEvaluate = []; // store in a temp array so we know prev and next tokens...
@@ -3132,25 +3198,25 @@ class CodeEditor {
             charCounter += t.length;
         };
 
-        let iter = linestring.matchAll(/(<!--|-->|\*\/|\/\*|::|[\[\](){}<>.,;:*"'%@$!/= ])/g);
+        let iter = lineString.matchAll(/(<!--|-->|\*\/|\/\*|::|[\[\](){}<>.,;:*"'%@$!/= ])/g);
         let subtokens = iter.next();
         if( subtokens.value )
         {
             let idx = 0;
             while( subtokens.value != undefined )
             {
-                const _pt = linestring.substring(idx, subtokens.value.index);
+                const _pt = lineString.substring(idx, subtokens.value.index);
                 if( _pt.length ) pushToken( _pt );
                 pushToken( subtokens.value[ 0 ] );
                 idx = subtokens.value.index + subtokens.value[ 0 ].length;
                 subtokens = iter.next();
                 if(!subtokens.value) {
-                    const _at = linestring.substring(idx);
+                    const _at = lineString.substring(idx);
                     if( _at.length ) pushToken( _at );
                 }
             }
         }
-        else pushToken( linestring );
+        else pushToken( lineString );
 
         if( hasCommentIdx != undefined )
         {
@@ -3292,6 +3358,7 @@ class CodeEditor {
         ctxData.inString = this._buildingString;
         ctxData.singleLineCommentToken = lang.singleLineCommentToken ?? this.defaultSingleLineCommentToken;
         ctxData.lang = lang;
+        ctxData.scope = this._scopeStack[ this._scopeStack.length - 1 ];
 
         // Get highlighting class based on language common and specific rules
         let tokenClass = this._getTokenHighlighting( ctxData, highlight );
@@ -4679,6 +4746,7 @@ class CodeEditor {
         delete this._buildingBlockComment;
         delete this._markdownHeader;
         delete this._lastResult;
+        delete this._scopeStack;
     }
 }
 
