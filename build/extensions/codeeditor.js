@@ -4946,7 +4946,7 @@ CodeEditor.languages = {
     'Rust': { ext: 'rs' },
     'Python': { ext: 'py', singleLineCommentToken: '#' },
     'HTML': { ext: 'html', tags: true, singleLineComments: false, blockCommentsTokens: [ '<!--', '-->' ], numbers: false },
-    'Batch': { ext: 'bat', blockComments: false, singleLineCommentToken: '::' },
+    'Batch': { ext: 'bat', blockComments: false, singleLineCommentToken: '::', ignoreCase: true },
     'Markdown': { ext: 'md', blockComments: false, singleLineCommentToken: '::', tags: true, numbers: false },
     'PHP': { ext: 'php' },
 };
@@ -4973,8 +4973,7 @@ CodeEditor.keywords = {
     'Rust': ['as', 'const', 'crate', 'enum', 'extern', 'false', 'fn', 'impl', 'in', 'let', 'mod', 'move', 'mut', 'pub', 'ref', 'self', 'Self', 'static', 'struct', 'super', 'trait', 'true',
              'type', 'unsafe', 'use', 'where', 'abstract', 'become', 'box', 'final', 'macro', 'override', 'priv', 'typeof', 'unsized', 'virtual'],
     'Python': ['False', 'def', 'None', 'True', 'in', 'is', 'and', 'lambda', 'nonlocal', 'not', 'or'],
-    'Batch': ['set', 'SET', 'echo', 'ECHO', 'off', 'OFF', 'del', 'DEL', 'defined', 'DEFINED', 'setlocal', 'SETLOCAL', 'enabledelayedexpansion', 'ENABLEDELAYEDEXPANSION', 'driverquery',
-              'DRIVERQUERY', 'print', 'PRINT'],
+    'Batch': ['set', 'echo', 'off', 'del', 'defined', 'setlocal', 'enabledelayedexpansion', 'driverquery', 'print'],
     'HTML': ['html', 'meta', 'title', 'link', 'script', 'body', 'DOCTYPE', 'head', 'br', 'i', 'a', 'li', 'img', 'tr', 'td', 'h1', 'h2', 'h3', 'h4', 'h5'],
     'Markdown': ['br', 'i', 'a', 'li', 'img', 'table', 'title', 'tr', 'td', 'h1', 'h2', 'h3', 'h4', 'h5'],
     'PHP': ['const', 'function', 'array', 'new', 'int', 'string', '$this', 'public', 'null', 'private', 'protected', 'implements', 'class', 'use', 'namespace', 'abstract', 'clone', 'final'],
