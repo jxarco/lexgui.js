@@ -2668,6 +2668,8 @@ class CodeEditor {
 
     async _pasteContent( cursor ) {
 
+        const mustDetectLanguage = ( !this.getText().length );
+
         let text = await navigator.clipboard.readText();
 
         // Remove any possible tabs (\t) and add spaces
@@ -2682,6 +2684,15 @@ class CodeEditor {
 
         if( currentScroll < scroll ) {
             this.codeScroller.scrollTo( 0, cursor.line * this.lineHeight );
+        }
+
+        if( mustDetectLanguage )
+        {
+            const detectedLang = this._detectLanguage( text );
+            if( detectedLang )
+            {
+                this._changeLanguage( detectedLang );
+            }
         }
     }
 
@@ -3730,6 +3741,46 @@ class CodeEditor {
 
         // Stop propagation
         return true;
+    }
+
+    _detectLanguage( text )
+    {
+        const tokenSet = new Set( this._getTokensFromLine( text, true ) );
+        const scores = {};
+
+        for( let [ lang, wordList ] of Object.entries( CodeEditor.keywords ) )
+        {
+            scores[ lang ] = 0;
+            for( let kw of wordList )
+                if( tokenSet.has( kw ) ) scores[ lang ]++;
+        }
+
+        for( let [ lang, wordList ] of Object.entries( CodeEditor.statements ) )
+        {
+            for( let kw of wordList )
+                if( tokenSet.has( kw ) ) scores[ lang ]++;
+        }
+
+        for( let [ lang, wordList ] of Object.entries( CodeEditor.utils ) )
+        {
+            for( let kw of wordList )
+                if( tokenSet.has( kw ) ) scores[ lang ]++;
+        }
+
+        for( let [ lang, wordList ] of Object.entries( CodeEditor.types ) )
+        {
+            for( let kw of wordList )
+                if( tokenSet.has( kw ) ) scores[ lang ]++;
+        }
+
+        for( let [ lang, wordList ] of Object.entries( CodeEditor.builtIn ) )
+        {
+            for( let kw of wordList )
+                if( tokenSet.has( kw ) ) scores[ lang ]++;
+        }
+
+        const sorted = Object.entries( scores ).sort( ( a, b ) => b[ 1 ] - a[ 1 ] );
+        return sorted[0][1] > 0 ? sorted[0][0] : undefined;
     }
 
     lineUp( cursor, resetLeft ) {
