@@ -3007,6 +3007,7 @@ class CodeEditor {
         }
         else
         {
+            this.code.lineScopes[ lineNumber ] = this.code.lineScopes[ lineNumber ] ?? [];
             this._scopeStack = [ ...this.code.lineScopes[ lineNumber ] ];
         }
 
@@ -3180,8 +3181,14 @@ class CodeEditor {
 
     _processExtraLineIfNecessary( lineNumber, oldSymbols ) {
 
-        if( (lineNumber + 1) === this.code.lines.length )
+        if( ( (lineNumber + 1) === this.code.lines.length ) || !this.code.lineScopes[ lineNumber + 1 ] )
         {
+            return;
+        }
+
+        if( !this._scopeStack )
+        {
+            console.warn( "CodeEditor: No scope available" );
             return;
         }
 
@@ -3205,7 +3212,6 @@ class CodeEditor {
                         continue;
                     }
 
-                    console.log("processLine (symbol occ)"  + ( occ.line ))
                     this.code.lineScopes[ occ.line ] = [ ...this._scopeStack ];
                     this.processLine( occ.line, false, true );
                 }
@@ -3215,7 +3221,6 @@ class CodeEditor {
         }
 
         this.code.lineScopes[ lineNumber + 1 ] = [ ...this._scopeStack ];
-        console.log("processLine " + (lineNumber + 1))
         this.processLine( lineNumber + 1 );
     }
 
@@ -3300,7 +3305,7 @@ class CodeEditor {
 
         const usageRegexes = [
             [/new\s+([A-Za-z0-9_]+)\s*\(/, "constructor-call"],
-            [/([A-Za-z_][A-Za-z0-9_]*)\s*\./, "object-access"],
+            [/this.([A-Za-z_][A-Za-z0-9_]*)\s*\=/, "class-property"],
         ];
 
         for( let [ regex, kind ] of usageRegexes )
@@ -3325,20 +3330,12 @@ class CodeEditor {
             const prev = nonWhiteSpaceTokens[ i - 1 ];
             const token = nonWhiteSpaceTokens[ i ];
             const next = nonWhiteSpaceTokens[ i + 1 ];
-            const next2 = nonWhiteSpaceTokens[ i + 2 ];
-            const next3 = nonWhiteSpaceTokens[ i + 3 ];
 
             if( scopeType.startsWith("class") )
             {
-                // methods
                 if( next === "(" && /^[a-zA-Z_]\w*$/.test( token ) && prev === undefined )
                 {
                     symbols.push( { name: token, kind: "method", scope: scopeName, line: lineNumber } );
-                }
-
-                if( token === "constructor" && next === "(" )
-                {
-                    symbols.push({ name: "constructor", kind: "method", scope: scopeName, line: lineNumber });
                 }
             }
             else if( scopeType.startsWith("enum") )
@@ -3346,17 +3343,6 @@ class CodeEditor {
                 if( !isSymbol( token ) && !this._isNumber( token ) )
                 {
                     symbols.push({ name: token, kind: "enum_value", scope: scopeName, line: lineNumber });
-                }
-            }
-
-            const prevScope = this._scopeStack.at( pushedScope ? -3 : -2 );
-            const prevScopeType = prevScope?.type ?? "";
-            if( scopeType.startsWith("constructor") || ( scopeType.startsWith("method") && prevScopeType.startsWith("class") ) )
-            {
-                // properties: this.foo = ...
-                if( token === "this" && next === "." && next3 === "=" && /^[a-zA-Z_]\w*$/.test( next2 ) )
-                {
-                    symbols.push({ name: next2, kind: "property", scope: scopeName, line: lineNumber });
                 }
             }
         }
