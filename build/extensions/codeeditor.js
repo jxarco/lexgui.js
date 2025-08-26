@@ -33,6 +33,15 @@ function indexOfFrom( str, reg, from, reverse ) {
     }
 }
 
+function codeScopesEqual( a, b ) {
+    if( a.length !== b.length ) return false;
+    for( let i = 0; i < a.length; i++ )
+    {
+        if( a[ i ].type !== b[ i ].type ) return false;
+    }
+    return true;
+}
+
 class CodeSelection {
 
     constructor( editor, cursor, className = "lexcodeselection" ) {
@@ -206,7 +215,7 @@ const HighlightRules = {
         { test: ctx => ctx.token.substr( 0, ctx.singleLineCommentToken.length ) == ctx.singleLineCommentToken, className: "cm-com" },
         { test: (ctx, editor) => editor._isKeyword( ctx ), className: "cm-kwd" },
         { test: (ctx, editor) => editor._mustHightlightWord( ctx.token, CodeEditor.builtIn, ctx.lang ) && ( ctx.lang.tags ?? false ? ( editor._enclosedByTokens( ctx.token, ctx.tokenIndex, '<', '>' ) ) : true ), className: "cm-bln" },
-        { test: (ctx, editor) => editor._mustHightlightWord( ctx.token, CodeEditor.statementsAndDeclarations, ctx.lang ), className: "cm-std" },
+        { test: (ctx, editor) => editor._mustHightlightWord( ctx.token, CodeEditor.statements, ctx.lang ), className: "cm-std" },
         { test: (ctx, editor) => editor._mustHightlightWord( ctx.token, CodeEditor.symbols, ctx.lang ), className: "cm-sym" },
         { test: (ctx, editor) => editor._mustHightlightWord( ctx.token, CodeEditor.types, ctx.lang ), className: "cm-typ" },
         { test: (ctx, editor) => editor._isNumber( ctx.token ) || editor._isNumber( ctx.token.replace(/[px]|[em]|%/g,'') ), className: "cm-dec" },
@@ -214,7 +223,7 @@ const HighlightRules = {
     ],
 
     javascript: [
-        { test: ctx => (ctx.prev === 'class' && ctx.next === '{') || (ctx.prev === 'new' && ctx.next === '('), className: "cm-typ" },
+        { test: ctx => (ctx.prev === 'class' && ctx.next === '{') , className: "cm-typ" },
         { test: ctx => ctx.isClassSymbol( ctx.token ), className: "cm-typ" },
     ],
 
@@ -243,7 +252,8 @@ const HighlightRules = {
     css: [
         { test: ctx => ( ctx.prev == '.' || ctx.prev == '::' || ( ctx.prev == ':' && ctx.next == '{' ) || ( ctx.token[ 0 ] == '#' && ctx.prev != ':' ) ), className: "cm-kwd" },
         { test: ctx => ctx.prev === ':' && (ctx.next === ';' || ctx.next === '!important'), className: "cm-str" }, // CSS value
-        { test: ctx => ctx.prev === undefined && ctx.next === ":", className: "cm-typ" }, // CSS attribute
+        { test: ctx => ( ctx.prev === undefined || ctx.prev === '{' || ctx.prev === ';' ) && ctx.next === ":", className: "cm-typ" }, // CSS attribute
+        { test: ctx => ctx.prev === "(" && ctx.next === ")" && ctx.token.startsWith( "--" ), className: "cm-typ" }, // CSS vars
     ],
 
     batch: [
@@ -663,7 +673,7 @@ class CodeEditor {
             for( let lang in CodeEditor.utils ) CodeEditor.utils[lang] = new Set( CodeEditor.utils[lang] );
             for( let lang in CodeEditor.types ) CodeEditor.types[lang] = new Set( CodeEditor.types[lang] );
             for( let lang in CodeEditor.builtIn ) CodeEditor.builtIn[lang] = new Set( CodeEditor.builtIn[lang] );
-            for( let lang in CodeEditor.statementsAndDeclarations ) CodeEditor.statementsAndDeclarations[lang] = new Set( CodeEditor.statementsAndDeclarations[lang] );
+            for( let lang in CodeEditor.statements ) CodeEditor.statements[lang] = new Set( CodeEditor.statements[lang] );
             for( let lang in CodeEditor.symbols ) CodeEditor.symbols[lang] = new Set( CodeEditor.symbols[lang] );
 
             CodeEditor._staticReady = true;
@@ -1228,15 +1238,15 @@ class CodeEditor {
     // This can be used to empty all text...
     setText( text = "", lang ) {
 
-        let new_lines = text.split( '\n' );
-        this.code.lines = [].concat( new_lines );
+        let newLines = text.split( '\n' );
+        this.code.lines = [].concat( newLines );
 
         this._removeSecondaryCursors();
 
         let cursor = this._getCurrentCursor( true );
-        let lastLine = new_lines.pop();
+        let lastLine = newLines.pop();
 
-        this.cursorToLine( cursor, new_lines.length ); // Already substracted 1
+        this.cursorToLine( cursor, newLines.length ); // Already substracted 1
         this.cursorToPosition( cursor, lastLine.length );
         this.processLines();
 
@@ -1257,14 +1267,14 @@ class CodeEditor {
 
         this.endSelection();
 
-        const new_lines = text.replaceAll( '\r', '' ).split( '\n' );
+        const newLines = text.replaceAll( '\r', '' ).split( '\n' );
 
         // Pasting Multiline...
-        if( new_lines.length != 1 )
+        if( newLines.length != 1 )
         {
-            let num_lines = new_lines.length;
+            let num_lines = newLines.length;
             console.assert( num_lines > 0 );
-            const first_line = new_lines.shift();
+            const first_line = newLines.shift();
             num_lines--;
 
             const remaining = this.code.lines[ lidx ].slice( cursor.position );
@@ -1281,11 +1291,11 @@ class CodeEditor {
 
             let _text = null;
 
-            for( var i = 0; i < new_lines.length; ++i ) {
-                _text = new_lines[ i ];
+            for( var i = 0; i < newLines.length; ++i ) {
+                _text = newLines[ i ];
                 this.cursorToLine( cursor, cursor.line++, true );
                 // Add remaining...
-                if( i == (new_lines.length - 1) )
+                if( i == (newLines.length - 1) )
                     _text += remaining;
                 this.code.lines.splice( 1 + lidx + i, 0, _text );
             }
@@ -1299,11 +1309,11 @@ class CodeEditor {
         {
             this.code.lines[ lidx ] = [
                 this.code.lines[ lidx ].slice( 0, cursor.position ),
-                new_lines[ 0 ],
+                newLines[ 0 ],
                 this.code.lines[ lidx ].slice( cursor.position )
             ].join('');
 
-            this.cursorToPosition( cursor, ( cursor.position + new_lines[ 0 ].length ) );
+            this.cursorToPosition( cursor, ( cursor.position + newLines[ 0 ].length ) );
             this.processLine( lidx );
         }
 
@@ -2982,7 +2992,7 @@ class CodeEditor {
         this.resize();
     }
 
-    processLine( lineNumber, force ) {
+    processLine( lineNumber, force, skipPropagation ) {
 
         // Check if we are in block comment sections..
         if( !force && this._inBlockCommentSection( lineNumber ) )
@@ -3002,67 +3012,7 @@ class CodeEditor {
 
         const lang = CodeEditor.languages[ this.highlight ];
         const localLineNum =  this.toLocalLine( lineNumber );
-        const gutterLineHtml = `<span class='line-gutter'>${ lineNumber + 1 }</span>`;
         const lineString = this.code.lines[ lineNumber ];
-
-        let pushedScope = false;
-
-        const _updateLine = ( html, tokens = [] ) => {
-
-            this.code.lineSymbols[ lineNumber ] = this.code.lineSymbols[ lineNumber ] ?? [];
-
-            // Clean old symbols from current line
-            for( let sym of this.code.lineSymbols[ lineNumber ] )
-            {
-                let arr = this.code.symbolsTable.get( sym.name );
-                if( !arr )
-                {
-                    continue;
-                }
-                this.code.symbolsTable.set( sym.name, arr.filter( s => s.line !== lineNumber ) );
-                if( this.code.symbolsTable.get( sym.name ).length === 0 )
-                {
-                    this.code.symbolsTable.delete( sym.name );
-                }
-            }
-
-            const symbols = this._parseLineForSymbols( lineNumber, lineString, tokens, pushedScope );
-            this.code.lineSymbols[ lineNumber ] = symbols;
-
-            // Add new symbols to table
-            for( let sym of this.code.lineSymbols[ lineNumber ] )
-            {
-                let arr = this.code.symbolsTable.get( sym.name ) ?? [];
-                arr.push(sym);
-                this.code.symbolsTable.set( sym.name, arr );
-            }
-
-            if( !force ) // Single line update
-            {
-                _processNextLineIfNecessary();
-                this.code.childNodes[ localLineNum ].innerHTML = gutterLineHtml + html;
-                this._setActiveLine( lineNumber );
-                this._clearTmpVariables();
-            }
-            else // Update all lines at once
-            {
-                return `<pre>${ gutterLineHtml + html }</pre>`;
-            }
-        }
-
-        const _processNextLineIfNecessary = () => {
-
-            // Only update scope stack if something changed when editing a single line
-            if( JSON.stringify( this._scopeStack ) == JSON.stringify( this.code.lineScopes[ lineNumber + 1 ] ) )
-                return;
-
-            this.code.lineScopes[ lineNumber + 1 ] = [ ...this._scopeStack ];
-
-            if( this.code.lines.length > lineNumber + 1 )
-            {
-                this.processLine( lineNumber + 1 );
-            }
-        }
 
         // multi-line strings not supported by now
         delete this._buildingString;
@@ -3080,7 +3030,7 @@ class CodeEditor {
         if( this.highlight == 'Plain Text' )
         {
             const plainTextHtml = lineString.replaceAll('<', '&lt;').replaceAll('>', '&gt;');
-            return _updateLine( plainTextHtml );
+            return this._updateLine( force, lineNumber, plainTextHtml, skipPropagation );
         }
 
         this._currentLineNumber = lineNumber;
@@ -3089,10 +3039,11 @@ class CodeEditor {
         const tokensToEvaluate = this._getTokensFromLine( lineString );
         if( !tokensToEvaluate.length )
         {
-            return _updateLine( "" );
+            return this._updateLine( force, lineNumber, "", skipPropagation );
         }
 
         let lineInnerHtml = "";
+        let pushedScope = false;
 
         // Process all tokens
         for( let i = 0; i < tokensToEvaluate.length; ++i )
@@ -3175,6 +3126,7 @@ class CodeEditor {
             contextTokens = contextTokens.reverse().filter( v => v.length && v != ' ' );
 
             // Keywords that can open a *named* scope
+            // TODO: Do this per language
             const scopeKeywords = ["class", "enum", "function", "interface", "type", "struct", "namespace"];
 
             let scopeType = null; // This is the type of scope (function, class, enum, etc)
@@ -3222,7 +3174,71 @@ class CodeEditor {
             pushedScope = true;
         }
 
-        return _updateLine( lineInnerHtml, tokensToEvaluate );
+        const symbols = this._parseLineForSymbols( lineNumber, lineString, tokensToEvaluate, pushedScope );
+        return this._updateLine( force, lineNumber, lineInnerHtml, skipPropagation, symbols );
+    }
+
+    _processExtraLineIfNecessary( lineNumber, oldSymbols ) {
+
+        if( (lineNumber + 1) === this.code.lines.length )
+        {
+            return;
+        }
+
+        // Only update scope stack if something changed when editing a single line
+        if( codeScopesEqual( this._scopeStack, this.code.lineScopes[ lineNumber + 1 ] ) )
+        {
+            // First check for occurrencies of the old symbols, to reprocess that lines
+
+            for( const sym of oldSymbols )
+            {
+                const tableSymbol = this.code.symbolsTable.get( sym.name );
+                if( tableSymbol === undefined )
+                {
+                    return;
+                }
+
+                for( const occ of tableSymbol )
+                {
+                    if( occ.line === lineNumber )
+                    {
+                        continue;
+                    }
+
+                    console.log("processLine (symbol occ)"  + ( occ.line ))
+                    this.code.lineScopes[ occ.line ] = [ ...this._scopeStack ];
+                    this.processLine( occ.line, false, true );
+                }
+            }
+
+            return;
+        }
+
+        this.code.lineScopes[ lineNumber + 1 ] = [ ...this._scopeStack ];
+        console.log("processLine " + (lineNumber + 1))
+        this.processLine( lineNumber + 1 );
+    }
+
+    _updateLine( force, lineNumber, html, skipPropagation, symbols = [] ) {
+
+        const gutterLineHtml = `<span class='line-gutter'>${ lineNumber + 1 }</span>`;
+        const oldSymbols = this._updateLineSymbols( lineNumber, symbols );
+
+        if( !force ) // Single line update
+        {
+            if( !skipPropagation )
+            {
+                this._processExtraLineIfNecessary( lineNumber, oldSymbols );
+            }
+
+            this._setActiveLine( lineNumber );
+            this._clearTmpVariables();
+            this.code.childNodes[ this.toLocalLine( lineNumber ) ].innerHTML = gutterLineHtml + html;
+        }
+        else // Update all lines at once
+        {
+            return `<pre>${ gutterLineHtml + html }</pre>`;
+        }
     }
 
     /**
@@ -3234,7 +3250,6 @@ class CodeEditor {
 
         if( !scope )
         {
-            console.warn( "Syntax highlight error:No scope detected" );
             return [];
         }
 
@@ -3243,25 +3258,64 @@ class CodeEditor {
         const symbols = [];
         const text = lineString.trim();
 
+        // Don't make symbols from preprocessor lines
+        if( text.startsWith( "#" ) )
+        {
+            return [];
+        }
+
         const topLevelRegexes = [
             [/^class\s+([A-Za-z0-9_]+)/, "class"],
             [/^struct\s+([A-Za-z0-9_]+)/, "struct"],
             [/^enum\s+([A-Za-z0-9_]+)/, "enum"],
             [/^interface\s+([A-Za-z0-9_]+)/, "interface"],
             [/^type\s+([A-Za-z0-9_]+)/, "type"],
-            [/^function\s+([A-Za-z0-9_]+)/, "function"],
-            [/^(?:const|let|var)\s+([A-Za-z0-9_]+)/, "variable"],
-            [/^([A-Za-z0-9_]+)\s*=\s*\(?.*\)?\s*=>/, "function"] // arrow functions
+            [/^function\s+([A-Za-z0-9_]+)/, "method"],
+            [/^([A-Za-z0-9_]+)\s*=\s*\(?.*\)?\s*=>/, "method"] // arrow functions
         ];
 
-        for( let [ regex, kind ] of topLevelRegexes)
+        {
+            const nativeTypes = CodeEditor.nativeTypes[ this.highlight ];
+            if( nativeTypes )
+            {
+                const nativeTypes = ['int', 'float', 'double', 'bool', 'long', 'short', 'char', 'wchar_t', 'void'];
+                const regex = `^(?:${nativeTypes.join('|')})\\s+([A-Za-z0-9_]+)\s*[\(]+`;
+                topLevelRegexes.push( [ new RegExp( regex ), 'method' ] );
+            }
+
+            const declarationKeywords = CodeEditor.declarationKeywords[ this.highlight ] ?? [ "const", "let", "var" ];
+            const regex = `^(?:${declarationKeywords.join('|')})\\s+([A-Za-z0-9_]+)`;
+            topLevelRegexes.push( [ new RegExp( regex ), 'variable' ] );
+        }
+
+        for( let [ regex, kind ] of topLevelRegexes )
         {
             const m = text.match( regex );
             if( m )
             {
                 symbols.push( { name: m[ 1 ], kind, scope: scopeName, line: lineNumber } );
-                break; // stop after first match for top-level declarations
+                break;
             }
+        }
+
+        const usageRegexes = [
+            [/new\s+([A-Za-z0-9_]+)\s*\(/, "constructor-call"],
+            [/([A-Za-z_][A-Za-z0-9_]*)\s*\./, "object-access"],
+        ];
+
+        for( let [ regex, kind ] of usageRegexes )
+        {
+            const m = text.match( regex );
+            if( m )
+            {
+                symbols.push( { name: m[ 1 ], kind, scope: scopeName, line: lineNumber } );
+            }
+        }
+
+        // Stop after matches for top-level declarations and usage symbols
+        if( symbols.length )
+        {
+            return symbols;
         }
 
         const nonWhiteSpaceTokens = tokens.filter( t => t.trim().length );
@@ -3308,6 +3362,51 @@ class CodeEditor {
         }
 
         return symbols;
+    }
+
+    /**
+     * Updates the symbol table for a single line
+     * - Removes old symbols from that line
+     * - Inserts the new symbols
+     */
+    _updateLineSymbols( lineNumber, newSymbols ) {
+
+        this.code.lineSymbols[ lineNumber ] = this.code.lineSymbols[ lineNumber ] ?? [];
+        const oldSymbols = LX.deepCopy( this.code.lineSymbols[ lineNumber ] );
+
+        // Clean old symbols from current line
+        for( let sym of this.code.lineSymbols[ lineNumber ] )
+        {
+            let array = this.code.symbolsTable.get( sym.name );
+            if( !array )
+            {
+                continue;
+            }
+
+            array = array.filter( s => s.line !== lineNumber );
+
+            if( array.length )
+            {
+                this.code.symbolsTable.set( sym.name, array );
+            }
+            else
+            {
+                this.code.symbolsTable.delete( sym.name );
+            }
+        }
+
+        // Add new symbols to table
+        for( let sym of newSymbols )
+        {
+            let arr = this.code.symbolsTable.get( sym.name ) ?? [];
+            arr.push(sym);
+            this.code.symbolsTable.set( sym.name, arr );
+        }
+
+        // Keep lineSymbols in sync
+        this.code.lineSymbols[ lineNumber ] = newSymbols;
+
+        return oldSymbols;
     }
 
     _lineHasComment( lineString ) {
@@ -4468,7 +4567,7 @@ class CodeEditor {
         let suggestions = [
             ...Array.from( CodeEditor.keywords[ this.highlight ] ?? [] ),
             ...Array.from( CodeEditor.builtIn[ this.highlight ] ?? [] ),
-            ...Array.from( CodeEditor.statementsAndDeclarations[ this.highlight ] ?? [] ),
+            ...Array.from( CodeEditor.statements[ this.highlight ] ?? [] ),
             ...Array.from( CodeEditor.types[ this.highlight ] ?? [] ),
             ...Array.from( CodeEditor.utils[ this.highlight ] ?? [] )
         ];
@@ -5002,6 +5101,15 @@ CodeEditor.languages = {
     'PHP': { ext: 'php' },
 };
 
+CodeEditor.nativeTypes = {
+    'C++': ['int', 'float', 'double', 'bool', 'long', 'short', 'char', 'wchar_t', 'void']
+};
+
+CodeEditor.declarationKeywords = {
+    'JavaScript': ['var', 'let', 'const', 'this', 'static', 'class'],
+    'C++': [...CodeEditor.nativeTypes["C++"], 'const', 'auto', 'class', 'struct', 'namespace', 'enum', 'extern']
+};
+
 CodeEditor.keywords = {
     'JavaScript': ['var', 'let', 'const', 'this', 'in', 'of', 'true', 'false', 'new', 'function', 'NaN', 'static', 'class', 'constructor', 'null', 'typeof', 'debugger', 'abstract',
                   'arguments', 'extends', 'instanceof', 'Infinity'],
@@ -5009,14 +5117,15 @@ CodeEditor.keywords = {
                   'enum', 'type'],
     'C': ['int', 'float', 'double', 'long', 'short', 'char', 'const', 'void', 'true', 'false', 'auto', 'struct', 'typedef', 'signed', 'volatile', 'unsigned', 'static', 'extern', 'enum', 'register',
         'union'],
-    'C++': ['int', 'float', 'double', 'bool', 'long', 'short', 'char', 'wchar_t', 'const', 'static_cast', 'dynamic_cast', 'new', 'delete', 'void', 'true', 'false', 'auto', 'class', 'struct', 'typedef', 'nullptr',
+    'C++': [...CodeEditor.nativeTypes["C++"], 'const', 'static_cast', 'dynamic_cast', 'new', 'delete', 'true', 'false', 'auto', 'class', 'struct', 'typedef', 'nullptr',
             'NULL', 'signed', 'unsigned', 'namespace', 'enum', 'extern', 'union', 'sizeof', 'static', 'private', 'public'],
     'CMake': ['cmake_minimum_required', 'set', 'not', 'if', 'endif', 'exists', 'string', 'strequal', 'add_definitions', 'macro', 'endmacro', 'file', 'list', 'source_group', 'add_executable',
         'target_include_directories', 'set_target_properties', 'set_property', 'add_compile_options', 'add_link_options', 'include_directories', 'add_library', 'target_link_libraries',
         'target_link_options', 'add_subdirectory', 'add_compile_definitions', 'project', 'cache'],
     'JSON': ['true', 'false'],
     'GLSL': ['true', 'false', 'function', 'int', 'float', 'vec2', 'vec3', 'vec4', 'mat2x2', 'mat3x3', 'mat4x4', 'struct'],
-    'CSS': ['body', 'html', 'canvas', 'div', 'input', 'span', '.'],
+    'CSS': ['body', 'html', 'canvas', 'div', 'input', 'span', '.', 'table', 'tr', 'td', 'th', 'label', 'video', 'img', 'code', 'button', 'select', 'option', 'svg', 'media', 'all',
+            'i', 'a', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'last-child', 'tbody', 'pre', 'monospace', 'font-face'],
     'WGSL': ['var', 'let', 'true', 'false', 'fn', 'bool', 'u32', 'i32', 'f16', 'f32', 'vec2', 'vec3', 'vec4', 'vec2f', 'vec3f', 'vec4f', 'mat2x2f', 'mat3x3f', 'mat4x4f', 'array', 'atomic', 'struct',
             'sampler', 'sampler_comparison', 'texture_depth_2d', 'texture_depth_2d_array', 'texture_depth_cube', 'texture_depth_cube_array', 'texture_depth_multisampled_2d',
             'texture_external', 'texture_1d', 'texture_2d', 'texture_2d_array', 'texture_3d', 'texture_cube', 'texture_cube_array', 'texture_storage_1d', 'texture_storage_2d',
@@ -5064,7 +5173,7 @@ CodeEditor.builtIn = {
     'PHP': ['echo', 'print'],
 };
 
-CodeEditor.statementsAndDeclarations = {
+CodeEditor.statements = {
     'JavaScript': ['for', 'if', 'else', 'case', 'switch', 'return', 'while', 'continue', 'break', 'do', 'import', 'from', 'throw', 'async', 'try', 'catch', 'await'],
     'TypeScript': ['for', 'if', 'else', 'case', 'switch', 'return', 'while', 'continue', 'break', 'do', 'import', 'from', 'throw', 'async', 'try', 'catch', 'await', 'as'],
     'CSS': ['@', 'import'],
@@ -5105,7 +5214,7 @@ CodeEditor.REGISTER_LANGUAGE = function( name, options = {}, def, rules )
     if( def?.utils ) CodeEditor.utils[ name ] = new Set( def.utils );
     if( def?.types ) CodeEditor.types[ name ] = new Set( def.types );
     if( def?.builtIn ) CodeEditor.builtIn[ name ] = new Set( def.builtIn );
-    if( def?.statementsAndDeclarations ) CodeEditor.statementsAndDeclarations[ name ] = new Set( def.statementsAndDeclarations );
+    if( def?.statements ) CodeEditor.statements[ name ] = new Set( def.statements );
     if( def?.symbols ) CodeEditor.symbols[ name ] = new Set( def.symbols );
 
     if( rules ) HighlightRules[ name ] = rules;
