@@ -214,21 +214,24 @@ const HighlightRules = {
     ],
 
     javascript: [
-        { test: ctx => (ctx.prev === 'class' && ctx.next === '{') || (ctx.prev === 'new' && ctx.next === '('), className: "cm-typ" }
+        { test: ctx => (ctx.prev === 'class' && ctx.next === '{') || (ctx.prev === 'new' && ctx.next === '('), className: "cm-typ" },
+        { test: ctx => ctx.isClassSymbol( ctx.token ), className: "cm-typ" },
     ],
 
     typescript: [
-        { test: ctx => ctx.scope && (ctx.token !== ',' && ctx.scope == "enum"), className: "cm-enu" },
+        { test: ctx => ctx.scope && (ctx.token !== ',' && ctx.scope.type == "enum"), className: "cm-enu" },
         { test: ctx => (ctx.prev === ':' && ctx.next !== undefined && isLetter(ctx.token) ) || (ctx.prev === 'interface' && ctx.next === '{') || (ctx.prev === 'enum' && ctx.next === '{'), className: "cm-typ" },
         { test: ctx => (ctx.prev === 'class' && ctx.next === '{') || (ctx.prev === 'class' && ctx.next === '<') || (ctx.prev === 'new' && ctx.next === '(') || (ctx.prev === 'new' && ctx.next === '<'), className: "cm-typ" },
         { test: (ctx, editor) => ctx.token !== ',' && editor._enclosedByTokens( ctx.token, ctx.tokenIndex, '<', '>' ), className: "cm-typ" },
     ],
 
     cpp: [
-        { test: ctx => ctx.scope && (ctx.token !== ',' && ctx.scope == "enum"), className: "cm-enu" },
+        { test: ctx => ctx.scope && (ctx.token !== ',' && ctx.scope.type == "enum"), className: "cm-enu" },
+        { test: ctx => ctx.isEnumValueSymbol( ctx.token ), className: "cm-enu" },
         { test: ctx => (ctx.prev === 'class' && ctx.next === '{') || (ctx.prev === 'struct' && ctx.next === '{'), className: "cm-typ" },
         { test: ctx => ctx.prev === "<" && (ctx.next === ">" || ctx.next === "*"), className: "cm-typ" }, // Defining template type in C++
-        { test: ctx => ctx.next === "::" || (ctx.prev === "::" && ctx.next !== "("), className: "cm-typ" } // C++ Class
+        { test: ctx => ctx.next === "::" || (ctx.prev === "::" && ctx.next !== "("), className: "cm-typ" }, // C++ Class
+        { test: ctx => ctx.isClassSymbol( ctx.token ) || ctx.isStructSymbol( ctx.token ), className: "cm-typ" },
     ],
 
     wgsl: [
@@ -626,9 +629,6 @@ class CodeEditor {
         this.charWidth = 7; // To update later depending on size..
         this.defaultSingleLineCommentToken = '//';
         this.defaultBlockCommentTokens = [ '/*', '*/' ];
-        this.lineScopes = [];
-        this.lineSymbols = [];
-        this.symbolsTable = new Map();
         this._lastTime = null;
 
         this.pairKeys = {
@@ -1850,6 +1850,9 @@ class CodeEditor {
         code.cursorState = {};
         code.undoSteps = [];
         code.redoSteps = [];
+        code.lineScopes = [];
+        code.lineSymbols = [];
+        code.symbolsTable = new Map();
         code.tabName = name;
         code.title = title ?? name;
         code.tokens = {};
@@ -2946,7 +2949,7 @@ class CodeEditor {
             }
         }
 
-        this._scopeStack = ["global"];
+        this._scopeStack = [ { name: "", type: "global" } ];
 
         // Process visible lines
         for( let i = this.visibleLinesViewport.x; i < this.visibleLinesViewport.y; ++i )
@@ -2979,11 +2982,11 @@ class CodeEditor {
 
         if( this._scopeStack )
         {
-            this.lineScopes[ lineNumber ] = [ ...this._scopeStack ];
+            this.code.lineScopes[ lineNumber ] = [ ...this._scopeStack ];
         }
         else
         {
-            this._scopeStack = [ ...this.lineScopes[ lineNumber ] ];
+            this._scopeStack = [ ...this.code.lineScopes[ lineNumber ] ];
         }
 
         const lang = CodeEditor.languages[ this.highlight ];
@@ -2995,12 +2998,32 @@ class CodeEditor {
 
         const _updateLine = ( html, tokens = [] ) => {
 
-            const symbols = this._parseLineForSymbols( lineNumber, lineString, tokens, pushedScope );
-            this.lineSymbols[ lineNumber ] = this.lineSymbols[ lineNumber ] ?? [];
-            this.lineSymbols[ lineNumber ] = this.lineSymbols[ lineNumber ].concat( symbols );
-            for( let sym of this.lineSymbols[ lineNumber ] )
+            this.code.lineSymbols[ lineNumber ] = this.code.lineSymbols[ lineNumber ] ?? [];
+
+            // Clean old symbols from current line
+            for( let sym of this.code.lineSymbols[ lineNumber ] )
             {
-                this.symbolsTable.set( sym.name, sym );
+                let arr = this.code.symbolsTable.get( sym.name );
+                if( !arr )
+                {
+                    continue;
+                }
+                this.code.symbolsTable.set( sym.name, arr.filter( s => s.line !== lineNumber ) );
+                if( this.code.symbolsTable.get( sym.name ).length === 0 )
+                {
+                    this.code.symbolsTable.delete( sym.name );
+                }
+            }
+
+            const symbols = this._parseLineForSymbols( lineNumber, lineString, tokens, pushedScope );
+            this.code.lineSymbols[ lineNumber ] = symbols;
+
+            // Add new symbols to table
+            for( let sym of this.code.lineSymbols[ lineNumber ] )
+            {
+                let arr = this.code.symbolsTable.get( sym.name ) ?? [];
+                arr.push(sym);
+                this.code.symbolsTable.set( sym.name, arr );
             }
 
             if( !force ) // Single line update
@@ -3017,11 +3040,12 @@ class CodeEditor {
         }
 
         const _processNextLineIfNecessary = () => {
+
             // Only update scope stack if something changed when editing a single line
-            if( this._scopeStack.toString() == this.lineScopes[ lineNumber + 1 ]?.toString() )
+            if( JSON.stringify( this._scopeStack ) == JSON.stringify( this.code.lineScopes[ lineNumber + 1 ] ) )
                 return;
 
-            this.lineScopes[ lineNumber + 1 ] = [ ...this._scopeStack ];
+            this.code.lineScopes[ lineNumber + 1 ] = [ ...this._scopeStack ];
 
             if( this.code.lines.length > lineNumber + 1 )
             {
@@ -3090,7 +3114,7 @@ class CodeEditor {
             }
 
             // Pop current scope if necessary
-            if( token === "}" )
+            if( token === "}" && this._scopeStack.length > 1 )
             {
                 this._scopeStack.pop();
             }
@@ -3152,7 +3176,7 @@ class CodeEditor {
                 if ( scopeKeywords.includes( t ) )
                 {
                     scopeType = t;
-                    scopeName = contextTokens[ i - 1 ] || "";  // usually right before the keyword in reversed array
+                    scopeName = contextTokens[ i - 1 ];  // usually right before the keyword in reversed array
                     break;
                 }
             }
@@ -3161,7 +3185,7 @@ class CodeEditor {
             if( scopeType === "enum" && contextTokens.includes( ":" ) )
             {
                 const colonIndex = contextTokens.indexOf( ":" );
-                scopeName = contextTokens[ colonIndex - 1 ] || scopeName;
+                scopeName = contextTokens[ colonIndex + 1 ] || scopeName;
             }
 
             if( !scopeType )
@@ -3177,11 +3201,11 @@ class CodeEditor {
 
             if( scopeType )
             {
-                this._scopeStack.push( scopeType );
+                this._scopeStack.push( { name: scopeName ?? "", type: scopeType } );
             }
             else
             {
-                this._scopeStack.push( "" ); // anonymous scope
+                this._scopeStack.push( { name: "", type: "anonymous" } ); // anonymous scope
             }
 
             pushedScope = true;
@@ -3195,12 +3219,22 @@ class CodeEditor {
      */
     _parseLineForSymbols( lineNumber, lineString, tokens, pushedScope ) {
 
-        const scopeName = this._scopeStack.at( pushedScope ? -2 : -1 );
+        const scope = this._scopeStack.at( pushedScope ? -2 : -1 );
+
+        if( !scope )
+        {
+            console.warn( "Syntax highlight error:No scope detected" );
+            return [];
+        }
+
+        const scopeName = scope.name;
+        const scopeType = scope.type;
         const symbols = [];
         const text = lineString.trim();
 
         const topLevelRegexes = [
             [/^class\s+([A-Za-z0-9_]+)/, "class"],
+            [/^struct\s+([A-Za-z0-9_]+)/, "struct"],
             [/^enum\s+([A-Za-z0-9_]+)/, "enum"],
             [/^interface\s+([A-Za-z0-9_]+)/, "interface"],
             [/^type\s+([A-Za-z0-9_]+)/, "type"],
@@ -3214,7 +3248,7 @@ class CodeEditor {
             const m = text.match( regex );
             if( m )
             {
-                symbols.push( { name: m[ 1 ], kind, scope: scopeName } );
+                symbols.push( { name: m[ 1 ], kind, scope: scopeName, line: lineNumber } );
                 break; // stop after first match for top-level declarations
             }
         }
@@ -3229,27 +3263,35 @@ class CodeEditor {
             const next2 = nonWhiteSpaceTokens[ i + 2 ];
             const next3 = nonWhiteSpaceTokens[ i + 3 ];
 
-            if( scopeName.startsWith("class") )
+            if( scopeType.startsWith("class") )
             {
                 // methods
                 if( next === "(" && /^[a-zA-Z_]\w*$/.test( token ) && prev === undefined )
                 {
-                    symbols.push( { name: token, kind: "method", scope: scopeName } );
+                    symbols.push( { name: token, kind: "method", scope: scopeName, line: lineNumber } );
                 }
 
                 if( token === "constructor" && next === "(" )
                 {
-                    symbols.push({ name: "constructor", kind: "method", scope: scopeName });
+                    symbols.push({ name: "constructor", kind: "method", scope: scopeName, line: lineNumber });
+                }
+            }
+            else if( scopeType.startsWith("enum") )
+            {
+                if( !isSymbol( token ) && !this._isNumber( token ) )
+                {
+                    symbols.push({ name: token, kind: "enum_value", scope: scopeName, line: lineNumber });
                 }
             }
 
-            const prevScopeName = this._scopeStack.at( pushedScope ? -3 : -2 );
-            if( scopeName.startsWith("constructor") || ( scopeName.startsWith("method") && prevScopeName.startsWith("class") ) )
+            const prevScope = this._scopeStack.at( pushedScope ? -3 : -2 );
+            const prevScopeType = prevScope?.type ?? "";
+            if( scopeType.startsWith("constructor") || ( scopeType.startsWith("method") && prevScopeType.startsWith("class") ) )
             {
                 // properties: this.foo = ...
                 if( token === "this" && next === "." && next3 === "=" && /^[a-zA-Z_]\w*$/.test( next2 ) )
                 {
-                    symbols.push({ name: next2, kind: "property", scope: scopeName });
+                    symbols.push({ name: next2, kind: "property", scope: scopeName, line: lineNumber });
                 }
             }
         }
@@ -3474,6 +3516,12 @@ class CodeEditor {
         ctxData.singleLineCommentToken = lang.singleLineCommentToken ?? this.defaultSingleLineCommentToken;
         ctxData.lang = lang;
         ctxData.scope = this._scopeStack.at( -1 );
+
+        // Add utils functions for the rules
+        ctxData.isVariableSymbol = ( token ) => this.code.symbolsTable.has( token ) && this.code.symbolsTable.get( token )[ 0 ].kind === "variable";
+        ctxData.isEnumValueSymbol = ( token ) => this.code.symbolsTable.has( token ) && this.code.symbolsTable.get( token )[ 0 ].kind === "enum_value";
+        ctxData.isClassSymbol = ( token ) => this.code.symbolsTable.has( token ) && this.code.symbolsTable.get( token )[ 0 ].kind === "class";
+        ctxData.isStructSymbol = ( token ) => this.code.symbolsTable.has( token ) && this.code.symbolsTable.get( token )[ 0 ].kind === "struct";
 
         // Get highlighting class based on language common and specific rules
         let tokenClass = this._getTokenHighlighting( ctxData, highlight );
@@ -4352,10 +4400,13 @@ class CodeEditor {
     showAutoCompleteBox( key, cursor ) {
 
         if( !cursor.isMain )
+        {
             return;
+        }
 
-        const [word, start, end] = this.getWordAtPos( cursor, -1 );
-        if( key == ' ' || !word.length ) {
+        const [ word, start, end ] = this.getWordAtPos( cursor, -1 );
+        if( key == ' ' || !word.length )
+        {
             this.hideAutoCompleteBox();
             return;
         }
@@ -4373,13 +4424,23 @@ class CodeEditor {
 
         suggestions = suggestions.concat( Object.keys(this.code.tokens).filter( a => a != word ) );
 
+        const scopeStack = [ ...this.code.lineScopes[ cursor.line ] ];
+        const scope = scopeStack.at( -1 );
+        if( scope.type.startsWith( "enum" ) )
+        {
+            const enumValues = Array.from( this.code.symbolsTable ).filter( s => s[ 1 ][ 0 ].kind === "enum_value" && s[ 1 ][ 0 ].scope === scope.name ).map( s => s[ 0 ] );
+            suggestions = suggestions.concat( enumValues.slice( 0, -1 ) );
+        }
+        else
+        {
+            const otherValues = Array.from( this.code.symbolsTable ).map( s => s[ 0 ] );
+            suggestions = suggestions.concat( otherValues.slice( 0, -1 ) );
+        }
+
         const prefix = word.toLowerCase();
 
         // Remove 1/2 char words and duplicates...
         suggestions = Array.from( new Set( suggestions )).filter( s => s.length > 2 && s.toLowerCase().includes( prefix ) );
-
-        const scopeStack = [ ...this.lineScopes[ cursor.line ] ];
-        console.log(scopeStack)
 
         // Order...
 
@@ -4397,7 +4458,6 @@ class CodeEditor {
             this.autocomplete.appendChild( pre );
 
             var icon = "Type";
-
             if( this._mustHightlightWord( s, CodeEditor.utils ) )
                 icon = "Box";
             else if( this._mustHightlightWord( s, CodeEditor.types ) )
@@ -4433,11 +4493,11 @@ class CodeEditor {
         }
 
         // Select always first option
-        this.autocomplete.firstChild.classList.add('selected');
+        this.autocomplete.firstChild.classList.add( 'selected' );
 
         // Show box
-        this.autocomplete.classList.toggle('show', true);
-        this.autocomplete.classList.toggle('no-scrollbar', !(this.autocomplete.scrollHeight > this.autocomplete.offsetHeight));
+        this.autocomplete.classList.toggle( 'show', true );
+        this.autocomplete.classList.toggle( 'no-scrollbar', !( this.autocomplete.scrollHeight > this.autocomplete.offsetHeight ) );
         this.autocomplete.style.left = (cursor._left + CodeEditor.LINE_GUTTER_WIDTH - this.getScrollLeft()) + "px";
         this.autocomplete.style.top = (cursor._top + 28 + this.lineHeight - this.getScrollTop()) + "px";
 

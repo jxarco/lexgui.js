@@ -2,6 +2,10 @@
 
 ## dev
 
+CodeEditor:
+- Improved scope detection.
+- Added basic symbols detection to feed autocomplete.
+
 ## 0.7.2 (master)
 
 Fixed AssetView Filter select.
