@@ -224,7 +224,6 @@ const HighlightRules = {
 
     javascript: [
         { test: ctx => (ctx.prev === 'class' && ctx.next === '{') , className: "cm-typ" },
-        { test: ctx => ctx.isClassSymbol( ctx.token ), className: "cm-typ" },
     ],
 
     typescript: [
@@ -265,7 +264,8 @@ const HighlightRules = {
     ],
 
     php: [
-        { test: ctx => (ctx.prev === 'class' && ctx.next === '{') || (ctx.prev === 'class' && ctx.next === 'implements'), className: "cm-typ" },
+        { test: ctx => ctx.token.startsWith( '$' ), className: "cm-var" },
+        { test: ctx => (ctx.prev === 'class' && (ctx.next === '{' || ctx.next === 'implements') ) || (ctx.prev === 'enum'), className: "cm-typ" },
     ],
 
     post_common: [
@@ -1231,7 +1231,6 @@ class CodeEditor {
     }
 
     getText( min ) {
-
         return this.code.lines.join( min ? ' ' : '\n' );
     }
 
@@ -1243,7 +1242,7 @@ class CodeEditor {
 
         this._removeSecondaryCursors();
 
-        let cursor = this._getCurrentCursor( true );
+        let cursor = this.getCurrentCursor( true );
         let lastLine = newLines.pop();
 
         this.cursorToLine( cursor, newLines.length ); // Already substracted 1
@@ -1260,7 +1259,8 @@ class CodeEditor {
 
         let lidx = cursor.line;
 
-        if( cursor.selection ) {
+        if( cursor.selection )
+        {
             this.deleteSelection( cursor );
             lidx = cursor.line;
         }
@@ -1326,7 +1326,7 @@ class CodeEditor {
 
     loadFile( file, options = {} ) {
 
-        const inner_add_tab = ( text, name, title ) => {
+        const _innerAddTab = ( text, name, title ) => {
 
             // Remove Carriage Return in some cases and sub tabs using spaces
             text = text.replaceAll( '\r', '' );
@@ -1372,7 +1372,7 @@ class CodeEditor {
             let filename = file;
             LX.request({ url: filename, success: text => {
                 const name = filename.substring(filename.lastIndexOf( '/' ) + 1);
-                inner_add_tab( text, name, filename );
+                _innerAddTab( text, name, filename );
             } });
         }
         else // File Blob
@@ -1381,83 +1381,8 @@ class CodeEditor {
             fr.readAsText( file );
             fr.onload = e => {
                 const text = e.currentTarget.result;
-                inner_add_tab( text, file.name );
+                _innerAddTab( text, file.name );
             };
-        }
-    }
-
-    _addCursor( line = 0, position = 0, force, isMain = false ) {
-
-        // If cursor in that position exists, remove it instead..
-        const exists = Array.from( this.cursors.children ).find( v => v.position == position && v.line == line );
-        if( exists && !force )
-        {
-            if( !exists.isMain )
-                exists.remove();
-
-            return;
-        }
-
-        let cursor = document.createElement( 'div' );
-        cursor.name = "cursor" + this.cursors.childElementCount;
-        cursor.className = "cursor";
-        cursor.innerHTML = "&nbsp;";
-        cursor.isMain = isMain;
-        cursor._left = position * this.charWidth;
-        cursor.style.left = "calc( " + cursor._left + "px + " + this.xPadding + " )";
-        cursor._top = line * this.lineHeight;
-        cursor.style.top = cursor._top + "px";
-        cursor._position = position;
-        cursor._line = line;
-        cursor.print = (function() { console.log( this._line, this._position ) }).bind( cursor );
-        cursor.isLast = (function() { return this.cursors.lastChild == cursor; }).bind( this );
-
-        Object.defineProperty( cursor, 'line', {
-            get: (v) => { return cursor._line },
-            set: (v) => {
-                cursor._line = v;
-                if( cursor.isMain ) this._setActiveLine( v );
-            }
-        } );
-
-        Object.defineProperty( cursor, 'position', {
-            get: (v) => { return cursor._position },
-            set: (v) => {
-                cursor._position = v;
-                if( cursor.isMain )
-                {
-                    const activeLine = this.state.activeLine;
-                    this._updateDataInfoPanel( "@cursor-data", `Ln ${ activeLine + 1 }, Col ${ v + 1 }` );
-                }
-            }
-        } );
-
-        this.cursors.appendChild( cursor );
-
-        return cursor;
-    }
-
-    _getCurrentCursor( removeOthers ) {
-
-        if( removeOthers )
-        {
-            this._removeSecondaryCursors();
-        }
-
-        return this.cursors.children[ 0 ];
-    }
-
-    _removeSecondaryCursors() {
-
-        while( this.cursors.childElementCount > 1 )
-            this.cursors.lastChild.remove();
-    }
-
-    _logCursors() {
-
-        for( let cursor of this.cursors.children )
-        {
-            cursor.print();
         }
     }
 
@@ -1472,12 +1397,18 @@ class CodeEditor {
 
         if( !force )
         {
-            if( !this._lastTime ) {
+            if( !this._lastTime )
+            {
                 this._lastTime = current;
-            } else {
-                if( ( current - this._lastTime ) > 2000 ){
+            }
+            else
+            {
+                if( ( current - this._lastTime ) > 2000 )
+                {
                     this._lastTime = null;
-                } else {
+                }
+                else
+                {
                     // If time not enough, reset timer
                     this._lastTime = current;
                     return;
@@ -1733,55 +1664,64 @@ class CodeEditor {
         }
     }
 
-    _getFileIcon( name, extension ) {
+    _getFileIcon( name, extension, lang ) {
 
         const isNewTabButton = name ? ( name === '+' ) : false;
-
-        if( !extension )
+        if( isNewTabButton )
         {
-            extension = LX.getExtension( name );
+            return;
         }
-        else
+
+        if( !lang )
         {
-            const possibleExtensions = [].concat( extension );
-
-            if( name )
+            if( !extension )
             {
-                const fileExtension = LX.getExtension( name );
-                const idx = possibleExtensions.indexOf( fileExtension );
-
-                if( idx > -1)
-                {
-                    extension = possibleExtensions[ idx ];
-                }
+                extension = LX.getExtension( name );
             }
             else
             {
-                extension = possibleExtensions[ 0 ];
+                const possibleExtensions = [].concat( extension );
+    
+                if( name )
+                {
+                    const fileExtension = LX.getExtension( name );
+                    const idx = possibleExtensions.indexOf( fileExtension );
+    
+                    if( idx > -1)
+                    {
+                        extension = possibleExtensions[ idx ];
+                    }
+                }
+                else
+                {
+                    extension = possibleExtensions[ 0 ];
+                }
             }
+
+            for( const [ l, lData ] of Object.entries( CodeEditor.languages ) )
+            {
+                const extensions = [].concat( lData.ext );
+                if( extensions.includes( extension ) )
+                {
+                    lang = l;
+                    break;
+                }
+            }
+
         }
 
-        return extension == "html" ? "Code orange" :
-            extension == "css" ? "Hash dodgerblue" :
-            extension == "xml" ? "Rss orange" :
-            extension == "bat" ? "Windows lightblue" :
-            extension == "json" ? "Braces fg-primary" :
-            extension == "js" ? "Js goldenrod" :
-            extension == "ts" ? "Ts pipelineblue" :
-            extension == "py" ? "Python munsellblue" :
-            extension == "rs" ? "Rust fg-primary" :
-            extension == "md" ? "Markdown fg-primary" :
-            extension == "cpp" ? "CPlusPlus pictonblue" :
-            extension == "hpp" ? "CPlusPlus heliotrope" :
-            extension == "c" ? "C pictonblue" :
-            extension == "h" ? "C heliotrope" :
-            extension == "php" ? "Php blueviolet" :
-            !isNewTabButton ? "AlignLeft gray" : undefined;
+        const iconPlusClasses = CodeEditor.languages[ lang ]?.icon;
+        if( iconPlusClasses )
+        {
+            return iconPlusClasses[ extension ] ?? iconPlusClasses;
+        }
+
+        return "AlignLeft gray";
     }
 
     _onNewTab( e ) {
 
-        this.processFocus(false);
+        this.processFocus( false );
 
         LX.addContextMenu( null, e, m => {
             m.add( "Create", this.addTab.bind( this, "unnamed.js", true, "", { language: "JavaScript" } ) );
@@ -1804,7 +1744,7 @@ class CodeEditor {
 
         this._removeSecondaryCursors();
 
-        var cursor = this._getCurrentCursor( true );
+        var cursor = this.getCurrentCursor( true );
         this.saveCursor( cursor, this.code.cursorState );
         this.code = this.loadedTabs[ name ];
         this.restoreCursor( cursor, this.code.cursorState );
@@ -1828,12 +1768,12 @@ class CodeEditor {
     _onContextMenuTab( isNewTabButton, event, name,  ) {
 
         if( isNewTabButton )
-        return;
+            return;
 
         LX.addContextMenu( null, event, m => {
             m.add( "Close", () => { this.tabs.delete( name ) } );
-            m.add( "" );
-            m.add( "Rename", () => { console.warn( "TODO" )} );
+            // m.add( "" );
+            // m.add( "Rename", () => { console.warn( "TODO" )} );
         });
     }
 
@@ -2010,12 +1950,14 @@ class CodeEditor {
     }
 
     loadTabFromFile() {
+
         const input = document.createElement( 'input' );
         input.type = 'file';
         document.body.appendChild( input );
         input.click();
         input.addEventListener('change', e => {
-            if (e.target.files[ 0 ]) {
+            if (e.target.files[ 0 ])
+            {
                 this.loadFile( e.target.files[ 0 ] );
             }
             input.remove();
@@ -2025,8 +1967,11 @@ class CodeEditor {
     processFocus( active ) {
 
         if( active )
+        {
             this.restartBlink();
-        else {
+        }
+        else
+        {
             clearInterval( this.blinker );
             this.cursors.classList.remove( 'show' );
         }
@@ -2037,7 +1982,7 @@ class CodeEditor {
         if( !e.target.classList.contains('code') && !e.target.classList.contains('codetabsarea') ) return;
         if( !this.code ) return;
 
-        var cursor = this._getCurrentCursor();
+        var cursor = this.getCurrentCursor();
         var code_rect = this.code.getBoundingClientRect();
         var mouse_pos = [(e.clientX - code_rect.x), (e.clientY - code_rect.y)];
 
@@ -2132,14 +2077,17 @@ class CodeEditor {
 
     _onMouseUp( e ) {
 
-        if( (LX.getTime() - this.lastMouseDown) < 120 ) {
+        if( ( LX.getTime() - this.lastMouseDown ) < 120 )
+        {
             this.state.selectingText = false;
             this.endSelection();
         }
 
-        const cursor = this._getCurrentCursor();
+        const cursor = this.getCurrentCursor();
         if( cursor.selection )
+        {
             cursor.selection.invertIfNecessary();
+        }
 
         this.state.selectingText = false;
         delete this._lastSelectionKeyDir;
@@ -2147,7 +2095,7 @@ class CodeEditor {
 
     processClick( e ) {
 
-        var cursor = this._getCurrentCursor();
+        var cursor = this.getCurrentCursor();
         var code_rect = this.codeScroller.getBoundingClientRect();
         var position = [( e.clientX - code_rect.x ) + this.getScrollLeft(), (e.clientY - code_rect.y) + this.getScrollTop()];
         var ln = (position[ 1 ] / this.lineHeight)|0;
@@ -2164,7 +2112,6 @@ class CodeEditor {
         {
             // Make sure we only keep the main cursor..
             this._removeSecondaryCursors();
-
             this.cursorToLine( cursor, ln, true );
             this.cursorToPosition( cursor, string.length );
         }
@@ -2178,38 +2125,45 @@ class CodeEditor {
         this.hideAutoCompleteBox();
     }
 
-    updateSelections( e, keep_range, flags = CodeEditor.SELECTION_X_Y ) {
+    updateSelections( e, keepRange, flags = CodeEditor.SELECTION_X_Y ) {
 
         for( let cursor of this.cursors.children )
         {
             if( !cursor.selection )
+            {
                 continue;
+            }
 
-            this._processSelection( cursor, e, keep_range, flags );
+            this._processSelection( cursor, e, keepRange, flags );
         }
     }
 
-    processSelections( e, keep_range, flags = CodeEditor.SELECTION_X_Y ) {
+    processSelections( e, keepRange, flags = CodeEditor.SELECTION_X_Y ) {
 
         for( let cursor of this.cursors.children )
         {
-            this._processSelection( cursor, e, keep_range, flags );
+            this._processSelection( cursor, e, keepRange, flags );
         }
     }
 
-    _processSelection( cursor, e, keep_range, flags = CodeEditor.SELECTION_X_Y ) {
+    _processSelection( cursor, e, keepRange, flags = CodeEditor.SELECTION_X_Y ) {
 
         const isMouseEvent = e && ( e.constructor == MouseEvent );
 
-        if( isMouseEvent ) this.processClick( e );
+        if( isMouseEvent )
+        {
+            this.processClick( e );
+        }
 
         if( !cursor.selection )
+        {
             this.startSelection( cursor );
+        }
 
         this._hideActiveLine();
 
         // Update selection
-        if( !keep_range )
+        if( !keepRange )
         {
             let ccw = true;
 
@@ -2276,19 +2230,19 @@ class CodeEditor {
                 }
 
                 // Compute new width and selection margins
-                let string;
+                let string = "";
 
-                if(sId == 0) // First line 2 cases (single line, multiline)
+                if( sId == 0 ) // First line 2 cases (single line, multiline)
                 {
                     const reverse = fromX > toX;
                     if(deltaY == 0) string = !reverse ? this.code.lines[ i ].substring( fromX, toX ) : this.code.lines[ i ].substring(toX, fromX);
                     else string = this.code.lines[ i ].substr( fromX );
-                    const pixels = (reverse && deltaY == 0 ? toX : fromX) * this.charWidth;
-                    if( isVisible ) domEl.style.left = "calc(" + pixels + "px + " + this.xPadding + ")";
+                    const pixels = ( reverse && deltaY == 0 ? toX : fromX ) * this.charWidth;
+                    if( isVisible ) domEl.style.left = `calc(${ pixels }px + ${ this.xPadding })`;
                 }
                 else
                 {
-                    string = (i == toY) ? this.code.lines[ i ].substring( 0, toX ) : this.code.lines[ i ]; // Last line, any multiple line...
+                    string = ( i == toY ) ? this.code.lines[ i ].substring( 0, toX ) : this.code.lines[ i ]; // Last line, any multiple line...
                     if( isVisible ) domEl.style.left = this.xPadding;
                 }
 
@@ -2297,7 +2251,7 @@ class CodeEditor {
 
                 if( isVisible )
                 {
-                    domEl.style.width = (stringWidth || 8) + "px";
+                    domEl.style.width = ( stringWidth || 8 ) + "px";
                     domEl._top = i * this.lineHeight;
                     domEl.style.top = domEl._top + "px";
                 }
@@ -2318,7 +2272,7 @@ class CodeEditor {
                 {
                     // Make sure that the line selection is generated...
                     domEl = cursorSelections.childNodes[ sId ];
-                    if(!domEl)
+                    if( !domEl )
                     {
                         domEl = document.createElement( 'div' );
                         domEl.className = "lexcodeselection";
@@ -2437,7 +2391,7 @@ class CodeEditor {
 
     _processGlobalKeys( e, key ) {
 
-        let cursor = this._getCurrentCursor();
+        let cursor = this.getCurrentCursor();
 
         if( e.ctrlKey || e.metaKey )
         {
@@ -2505,7 +2459,7 @@ class CodeEditor {
 
     async _processKeyAtCursor( e, key, cursor ) {
 
-        const skip_undo = e.detail.skip_undo ?? false;
+        const skipUndo = e.detail.skipUndo ?? false;
 
         // keys with length > 1 are probably special keys
         if( key.length > 1 && this.specialKeys.indexOf( key ) == -1 )
@@ -2595,7 +2549,7 @@ class CodeEditor {
 
         // Add undo steps
 
-        if( !skip_undo && this.code.lines.length )
+        if( !skipUndo && this.code.lines.length )
         {
             this._addUndoStep( cursor );
         }
@@ -2692,7 +2646,8 @@ class CodeEditor {
         const currentScroll = this.getScrollTop();
         const scroll = Math.max( cursor.line * this.lineHeight - this.codeScroller.offsetWidth, 0 );
 
-        if( currentScroll < scroll ) {
+        if( currentScroll < scroll )
+        {
             this.codeScroller.scrollTo( 0, cursor.line * this.lineHeight );
         }
 
@@ -2726,7 +2681,9 @@ class CodeEditor {
             let index = 0;
 
             for( let i = 0; i <= cursor.selection.fromY; i++ )
+            {
                 index += ( i == cursor.selection.fromY ? cursor.selection.fromX : this.code.lines[ i ].length );
+            }
 
             index += cursor.selection.fromY * separator.length;
             const num_chars = cursor.selection.chars + ( cursor.selection.toY - cursor.selection.fromY ) * separator.length;
@@ -2802,7 +2759,7 @@ class CodeEditor {
 
         if( cursor.selection )
         {
-            var cursor = this._getCurrentCursor();
+            var cursor = this.getCurrentCursor();
             this._addUndoStep( cursor, true );
 
             const selectedLines = this.code.lines.slice( cursor.selection.fromY, cursor.selection.toY );
@@ -2861,7 +2818,7 @@ class CodeEditor {
 
         if( cursor.selection )
         {
-            var cursor = this._getCurrentCursor();
+            var cursor = this.getCurrentCursor();
             this._addUndoStep( cursor, true );
 
             for( var i = cursor.selection.fromY; i <= cursor.selection.toY; ++i )
@@ -2915,7 +2872,6 @@ class CodeEditor {
     }
 
     _actionMustDelete( cursor, action, e ) {
-
         return cursor.selection && action.deleteSelection &&
             ( action.eventSkipDelete ? !e[ action.eventSkipDelete ] : true );
     }
@@ -2933,13 +2889,11 @@ class CodeEditor {
     }
 
     toLocalLine( line ) {
-
         const d = Math.max( this.firstLineInViewport - this.lineScrollMargin.x, 0 );
         return Math.min( Math.max( line - d, 0 ), this.code.lines.length - 1 );
     }
 
     getMaxLineLength() {
-
         return Math.max(...this.code.lines.map( v => v.length ));
     }
 
@@ -3228,9 +3182,14 @@ class CodeEditor {
 
         const gutterLineHtml = `<span class='line-gutter'>${ lineNumber + 1 }</span>`;
         const oldSymbols = this._updateLineSymbols( lineNumber, symbols );
+        const lineScope = CodeEditor.debugScopes ? this.code.lineScopes[ lineNumber ].map( s => `${ s.type }` ).join( ", " ) : "";
+        const lineSymbols = CodeEditor.debugSymbols ? this.code.lineSymbols[ lineNumber ].map( s => `${ s.name }(${ s.kind })` ).join( ", " ) : "";
+        const debugString = lineScope + ( lineScope.length ? " - " : "" ) + lineSymbols;
 
         if( !force ) // Single line update
         {
+            this.code.childNodes[ this.toLocalLine( lineNumber ) ].innerHTML = ( gutterLineHtml + html + debugString );
+
             if( !skipPropagation )
             {
                 this._processExtraLineIfNecessary( lineNumber, oldSymbols );
@@ -3238,11 +3197,11 @@ class CodeEditor {
 
             this._setActiveLine( lineNumber );
             this._clearTmpVariables();
-            this.code.childNodes[ this.toLocalLine( lineNumber ) ].innerHTML = gutterLineHtml + html;
         }
         else // Update all lines at once
         {
-            return `<pre>${ gutterLineHtml + html }</pre>`;
+            
+            return `<pre>${ ( gutterLineHtml + html + debugString ) }</pre>`;
         }
     }
 
@@ -3340,7 +3299,7 @@ class CodeEditor {
             }
             else if( scopeType.startsWith("enum") )
             {
-                if( !isSymbol( token ) && !this._isNumber( token ) )
+                if( !isSymbol( token ) && !this._isNumber( token ) && !this._mustHightlightWord( token, CodeEditor.statements ) )
                 {
                     symbols.push({ name: token, kind: "enum_value", scope: scopeName, line: lineNumber });
                 }
@@ -3508,11 +3467,26 @@ class CodeEditor {
         }
         else if( this.highlight == 'PHP' )
         {
-            const dollarIdx = tokens.indexOf( '$' );
-            if( dollarIdx > -1 && tokens[ dollarIdx + 1 ] === 'this-' )
+            let offset = 0;
+            let dollarIdx = tokens.indexOf( '$' );
+
+            while( dollarIdx > -1 )
             {
-                tokens[ dollarIdx ] = "$this";
-                tokens[ dollarIdx + 1 ] = "-";
+                const offsetIdx = dollarIdx + offset;
+
+                if( tokens[ offsetIdx + 1 ] === 'this-' )
+                {
+                    tokens[ offsetIdx ] = "$this";
+                    tokens[ offsetIdx + 1 ] = "-";
+                }
+                else
+                {
+                    tokens[ offsetIdx ] += ( tokens[ offsetIdx + 1 ] ?? "" );
+                    tokens.splice( offsetIdx + 1, 1 );
+                }
+
+                dollarIdx = tokens.slice( offsetIdx ).indexOf( '$' );
+                offset = offsetIdx;
             }
         }
 
@@ -3618,6 +3592,7 @@ class CodeEditor {
         ctxData.isEnumValueSymbol = ( token ) => this.code.symbolsTable.has( token ) && this.code.symbolsTable.get( token )[ 0 ].kind === "enum_value";
         ctxData.isClassSymbol = ( token ) => this.code.symbolsTable.has( token ) && this.code.symbolsTable.get( token )[ 0 ].kind === "class";
         ctxData.isStructSymbol = ( token ) => this.code.symbolsTable.has( token ) && this.code.symbolsTable.get( token )[ 0 ].kind === "struct";
+        ctxData.isEnumSymbol = ( token ) => this.code.symbolsTable.has( token ) && this.code.symbolsTable.get( token )[ 0 ].kind === "enum";
 
         // Get highlighting class based on language common and specific rules
         let tokenClass = this._getTokenHighlighting( ctxData, highlight );
@@ -3671,7 +3646,6 @@ class CodeEditor {
     }
 
     _getCurrentString() {
-
         const chars = this._pendingString;
         delete this._pendingString;
         return chars;
@@ -3800,7 +3774,7 @@ class CodeEditor {
         this.cursorToPosition( cursor, cursor.selection.toX + 1 );
 
         // Change next key?
-        switch(key)
+        switch( key )
         {
             case "'":
             case "\"":
@@ -3828,8 +3802,8 @@ class CodeEditor {
         return true;
     }
 
-    _detectLanguage( text )
-    {
+    _detectLanguage( text ) {
+
         const tokenSet = new Set( this._getTokensFromLine( text, true ) );
         const scores = {};
 
@@ -3983,7 +3957,7 @@ class CodeEditor {
         // Use main cursor
         this._removeSecondaryCursors();
 
-        var cursor = this._getCurrentCursor();
+        var cursor = this.getCurrentCursor();
         this.resetCursorPos( CodeEditor.CURSOR_LEFT_TOP, cursor );
 
         this.startSelection( cursor );
@@ -4133,6 +4107,16 @@ class CodeEditor {
         return cursors;
     }
 
+    getCurrentCursor( removeOthers ) {
+
+        if( removeOthers )
+        {
+            this._removeSecondaryCursors();
+        }
+
+        return this.cursors.children[ 0 ];
+    }
+
     relocateCursors() {
 
         for( let cursor of this.cursors.children )
@@ -4182,7 +4166,7 @@ class CodeEditor {
 
     resetCursorPos( flag, cursor ) {
 
-        cursor = cursor ?? this._getCurrentCursor();
+        cursor = cursor ?? this.getCurrentCursor();
 
         if( flag & CodeEditor.CURSOR_LEFT )
         {
@@ -4199,6 +4183,71 @@ class CodeEditor {
         }
     }
 
+    _addCursor( line = 0, position = 0, force, isMain = false ) {
+
+        // If cursor in that position exists, remove it instead..
+        const exists = Array.from( this.cursors.children ).find( v => v.position == position && v.line == line );
+        if( exists && !force )
+        {
+            if( !exists.isMain )
+                exists.remove();
+
+            return;
+        }
+
+        let cursor = document.createElement( 'div' );
+        cursor.name = "cursor" + this.cursors.childElementCount;
+        cursor.className = "cursor";
+        cursor.innerHTML = "&nbsp;";
+        cursor.isMain = isMain;
+        cursor._left = position * this.charWidth;
+        cursor.style.left = "calc( " + cursor._left + "px + " + this.xPadding + " )";
+        cursor._top = line * this.lineHeight;
+        cursor.style.top = cursor._top + "px";
+        cursor._position = position;
+        cursor._line = line;
+        cursor.print = (function() { console.log( this._line, this._position ) }).bind( cursor );
+        cursor.isLast = (function() { return this.cursors.lastChild == cursor; }).bind( this );
+
+        Object.defineProperty( cursor, 'line', {
+            get: (v) => { return cursor._line },
+            set: (v) => {
+                cursor._line = v;
+                if( cursor.isMain ) this._setActiveLine( v );
+            }
+        } );
+
+        Object.defineProperty( cursor, 'position', {
+            get: (v) => { return cursor._position },
+            set: (v) => {
+                cursor._position = v;
+                if( cursor.isMain )
+                {
+                    const activeLine = this.state.activeLine;
+                    this._updateDataInfoPanel( "@cursor-data", `Ln ${ activeLine + 1 }, Col ${ v + 1 }` );
+                }
+            }
+        } );
+
+        this.cursors.appendChild( cursor );
+
+        return cursor;
+    }
+
+    _removeSecondaryCursors() {
+
+        while( this.cursors.childElementCount > 1 )
+            this.cursors.lastChild.remove();
+    }
+
+    _logCursors() {
+
+        for( let cursor of this.cursors.children )
+        {
+            cursor.print();
+        }
+    }
+
     _addSpaceTabs( cursor, n ) {
 
         for( var i = 0; i < n; ++i )
@@ -4209,9 +4258,10 @@ class CodeEditor {
 
     _addSpaces( n ) {
 
-        for( var i = 0; i < n; ++i ) {
+        for( var i = 0; i < n; ++i )
+        {
             this.root.dispatchEvent( new CustomEvent( 'keydown', { 'detail': {
-                skip_undo: true,
+                skipUndo: true,
                 key: ' ',
                 targetCursor: this._lastProcessedCursorIndex
             }}));
@@ -4232,7 +4282,8 @@ class CodeEditor {
         }
 
         // Only tabs/spaces in the line...
-        if( lineStart == -1 ) {
+        if( lineStart == -1 )
+        {
             lineStart = this.code.lines[ lidx ].length;
         }
 
@@ -4414,7 +4465,6 @@ class CodeEditor {
     }
 
     getCharAtPos( cursor, offset = 0 ) {
-
         return this.code.lines[ cursor.line ][ cursor.position + offset ];
     }
 
@@ -4483,7 +4533,6 @@ class CodeEditor {
     }
 
     measureString( str ) {
-
         return str.length * this.charWidth;
     }
 
@@ -4745,7 +4794,7 @@ class CodeEditor {
         }
         else
         {
-            const cursor = this._getCurrentCursor();
+            const cursor = this.getCurrentCursor();
 
             if( cursor.selection )
             {
@@ -4789,7 +4838,7 @@ class CodeEditor {
             return;
         }
 
-        let cursor = this._getCurrentCursor();
+        let cursor = this.getCurrentCursor();
         let cursorData = new LX.vec2( cursor.position, cursor.line );
         let line = null;
         let char = -1;
@@ -4936,7 +4985,7 @@ class CodeEditor {
         this.codeScroller.scrollTo( 0, Math.max( line - 15 ) * this.lineHeight );
 
         // Select line ?
-        var cursor = this._getCurrentCursor( true );
+        var cursor = this.getCurrentCursor( true );
         this.cursorToLine( cursor, line - 1, true );
     }
 
@@ -4991,7 +5040,7 @@ class CodeEditor {
 
         number = number ?? this.state.activeLine;
 
-        const cursor = this._getCurrentCursor();
+        const cursor = this.getCurrentCursor();
         this._updateDataInfoPanel( "@cursor-data", `Ln ${ number + 1 }, Col ${ cursor.position + 1 }` );
 
         const oldLocal = this.toLocalLine( this.state.activeLine );
@@ -5068,23 +5117,23 @@ class CodeEditor {
 }
 
 CodeEditor.languages = {
-    'Plain Text': { ext: 'txt', blockComments: false, singleLineComments: false, numbers: false },
-    'JavaScript': { ext: 'js' },
-    'TypeScript': { ext: 'ts' },
-    'C': { ext: [ 'c', 'h' ], usePreprocessor: true },
-    'C++': { ext: [ 'cpp', 'hpp' ], usePreprocessor: true },
-    'CSS': { ext: 'css' },
-    'CMake': { ext: 'cmake', singleLineCommentToken: '#', blockComments: false, ignoreCase: true },
-    'GLSL': { ext: 'glsl', usePreprocessor: true },
-    'WGSL': { ext: 'wgsl', usePreprocessor: true },
-    'JSON': { ext: 'json', blockComments: false, singleLineComments: false },
-    'XML': { ext: 'xml', tags: true },
-    'Rust': { ext: 'rs' },
-    'Python': { ext: 'py', singleLineCommentToken: '#' },
-    'HTML': { ext: 'html', tags: true, singleLineComments: false, blockCommentsTokens: [ '<!--', '-->' ], numbers: false },
-    'Batch': { ext: 'bat', blockComments: false, singleLineCommentToken: '::', ignoreCase: true },
-    'Markdown': { ext: 'md', blockComments: false, singleLineCommentToken: '::', tags: true, numbers: false },
-    'PHP': { ext: 'php' },
+    'Plain Text': { ext: "txt", blockComments: false, singleLineComments: false, numbers: false, icon: "AlignLeft gray" },
+    'JavaScript': { ext: "js", icon: "Js goldenrod" },
+    'TypeScript': { ext: "ts", icon: "Ts pipelineblue" },
+    'C': { ext: [ 'c', 'h' ], usePreprocessor: true, icon: { 'c': "C pictonblue", 'h': "C heliotrope" } },
+    'C++': { ext: [ "cpp", "hpp" ], usePreprocessor: true, icon: { 'cpp': "CPlusPlus pictonblue", 'hpp': "CPlusPlus heliotrope" } },
+    'CSS': { ext: "css", icon: "Hash dodgerblue" },
+    'CMake': { ext: "cmake", singleLineCommentToken: '#', blockComments: false, ignoreCase: true },
+    'GLSL': { ext: "glsl", usePreprocessor: true },
+    'WGSL': { ext: "wgsl", usePreprocessor: true },
+    'JSON': { ext: "json", blockComments: false, singleLineComments: false, icon: "Braces fg-primary" },
+    'XML': { ext: "xml", tags: true, icon: "Rss orange" },
+    'Rust': { ext: "rs", icon: "Rust fg-primary" },
+    'Python': { ext: "py", singleLineCommentToken: '#', icon: "Python munsellblue" },
+    'HTML': { ext: "html", tags: true, singleLineComments: false, blockCommentsTokens: [ '<!--', '-->' ], numbers: false, icon: "Code orange" },
+    'Batch': { ext: "bat", blockComments: false, singleLineCommentToken: '::', ignoreCase: true, icon: "Windows lightblue" },
+    'Markdown': { ext: "md", blockComments: false, singleLineCommentToken: '::', tags: true, numbers: false, icon: "Markdown fg-primary" },
+    'PHP': { ext: "php", icon: "Php blueviolet" },
 };
 
 CodeEditor.nativeTypes = {
@@ -5122,7 +5171,8 @@ CodeEditor.keywords = {
     'Batch': ['set', 'echo', 'off', 'del', 'defined', 'setlocal', 'enabledelayedexpansion', 'driverquery', 'print'],
     'HTML': ['html', 'meta', 'title', 'link', 'script', 'body', 'DOCTYPE', 'head', 'br', 'i', 'a', 'li', 'img', 'tr', 'td', 'h1', 'h2', 'h3', 'h4', 'h5'],
     'Markdown': ['br', 'i', 'a', 'li', 'img', 'table', 'title', 'tr', 'td', 'h1', 'h2', 'h3', 'h4', 'h5'],
-    'PHP': ['const', 'function', 'array', 'new', 'int', 'string', '$this', 'public', 'null', 'private', 'protected', 'implements', 'class', 'use', 'namespace', 'abstract', 'clone', 'final'],
+    'PHP': ['const', 'function', 'array', 'new', 'int', 'string', '$this', 'public', 'null', 'private', 'protected', 'implements', 'class', 'use', 'namespace', 'abstract', 'clone', 'final',
+            'enum'],
 };
 
 CodeEditor.utils = { // These ones don't have hightlight, used as suggestions to autocomplete only...
@@ -5177,6 +5227,7 @@ CodeEditor.statements = {
 
 CodeEditor.symbols = {
     'JavaScript': ['<', '>', '[', ']', '{', '}', '(', ')', ';', '=', '|', '||', '&', '&&', '?', '??'],
+    'TypeScript': ['<', '>', '[', ']', '{', '}', '(', ')', ';', '=', '|', '||', '&', '&&', '?', '??'],
     'C': ['<', '>', '[', ']', '{', '}', '(', ')', ';', '=', '|', '||', '&', '&&', '?', '*', '-', '+'],
     'C++': ['<', '>', '[', ']', '{', '}', '(', ')', ';', '=', '|', '||', '&', '&&', '?', '::', '*', '-', '+'],
     'CMake': ['{', '}'],
@@ -5189,7 +5240,7 @@ CodeEditor.symbols = {
     'Batch': ['[', ']', '(', ')', '%'],
     'HTML': ['<', '>', '/'],
     'XML': ['<', '>', '/'],
-    'PHP': ['{', '}', '(', ')'],
+    'PHP': ['[', ']', '{', '}', '(', ')'],
 };
 
 CodeEditor.REGISTER_LANGUAGE = function( name, options = {}, def, rules )

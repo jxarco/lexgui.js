@@ -8,6 +8,14 @@ namespace Demo;
 use Exception;
 use DateTime;
 
+enum Suit
+{
+    case Hearts;
+    case Diamonds;
+    case Clubs;
+    case Spades;
+}
+
 class User implements JsonSerializable {
     private string $name;
     private int $age;

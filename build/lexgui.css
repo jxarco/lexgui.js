@@ -5437,8 +5437,9 @@ ul.lexassetscontent {
 .cm-bln.markdown { color: #a1d2f0; }  /* builtin */
 
 .cm-sym.php { color: #cf6dcf; }  /* symbol */
-.cm-mtd.php { color: #e0cc68 }   /* method */
-.cm-bln.php { color: #e0cc68; }  /* builtin */
+.cm-mtd.php { color: #ddce80 }   /* method */
+.cm-bln.php { color: #ddce80; }  /* builtin */
+.cm-var.php { color: #88bde9; }  /* variable */
 
 :root[data-theme="light"] .lexcodeeditor pre.active-line {
     background-color: #e4e0e0ab;

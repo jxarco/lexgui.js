@@ -63,6 +63,7 @@
             ["tags (Boolean)", "Enable highlighting of HTML/XML-style tags."],
             ["usePreprocessor (Boolean)", "Highlight tokens starting with `#`."],
             ["ignoreCase (Boolean)", "Treat keywords and identifiers as case-insensitive."],
+            ["icon (String|Object)", "Default LexGUI icon with CSS classes (per extension)"],
         ],
         ["def (Object)", "Collections of reserved words to categorize tokens. Each property is an array of words"],
         [
@@ -70,7 +71,7 @@
             ["utils", "Utility functions or helpers."],
             ["types", "Type identifiers (e.g. 'int', 'string')."],
             ["builtIn", "Built-in functions or constants."],
-            ["statementsAndDeclarations", "Control statements and declaration keywords."],
+            ["statements", "Control statements."],
             ["symbols", "Special symbols or operators."],
         ],
         ["rules (Array)", "List of token-matching rules for custom syntax highlighting."],
@@ -94,17 +95,18 @@
     // Example
     MAKE_HEADER("Example: Registering a Custom Language", "h3");
     MAKE_CODE(`@[cls]CodeEditor@.REGISTER_LANGUAGE(@"mylang"@, {
-    ext: @"ml"@,
+    ext: [ @"ml"@, @"mlb"@ ],
     singleLineComments: @true@,
     singleLineCommentToken: @"//"@,
     blockComments: @true@,
     blockCommentsTokens: [@"/*"@, @"*/"@],
     numbers: @true@,
-    ignoreCase: @true@
+    ignoreCase: @true@,
+    icon: { ml: @"Box fg-primary"@, mlb: @"Sphere violet"@ }
 }, {
     types: [@"int"@, @"float"@, @"string"@],
     builtIn: [@"print"@, @"len"@]
-    statementsAndDeclarations: [@"if"@, @"else"@, @"for"@, @"while"@],
+    statements: [@"if"@, @"else"@, @"for"@, @"while"@],
 }, [
     { test: ctx => ctx.inBlockComment, className: @"cm-com"@ },
     { test: (ctx, editor) => editor.@[mtd]_isKeyword@(ctx), className: @"cm-kwd"@ }
