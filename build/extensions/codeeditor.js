@@ -142,6 +142,9 @@ class ScrollBar {
     static SCROLLBAR_VERTICAL       = 1;
     static SCROLLBAR_HORIZONTAL     = 2;
 
+    static SCROLLBAR_VERTICAL_WIDTH = 10;
+    static SCROLLBAR_HORIZONTAL_HEIGHT = 10;
+
     constructor( editor, type ) {
 
         this.editor = editor;
@@ -299,6 +302,11 @@ class CodeEditor {
     static CODE_MAX_FONT_SIZE = 22;
 
     static LINE_GUTTER_WIDTH = 48;
+    static LINE_GUTTER_WIDTH = 48;
+
+    static RESIZE_SCROLLBAR_H = 1;
+    static RESIZE_SCROLLBAR_V = 2;
+    static RESIZE_SCROLLBAR_H_V = CodeEditor.RESIZE_SCROLLBAR_H | CodeEditor.RESIZE_SCROLLBAR_V;
 
     /**
      * @param {*} options
@@ -315,11 +323,17 @@ class CodeEditor {
 
         CodeEditor.__instances.push( this );
 
+        this.skipInfo = options.skipInfo ?? false;
+        this.disableEdition = options.disableEdition ?? false;
+        this.skipTabs = options.skipTabs ?? false;
+        this.useFileExplorer = ( options.fileExplorer ?? false ) && !this.skipTabs;
+        this.useAutoComplete = options.autocomplete ?? true;
+
         // File explorer
-        if( options.fileExplorer ?? false )
+        if( this.useFileExplorer )
         {
-            var [ explorerArea, codeArea ] = area.split({ sizes:[ "15%","85%" ] });
-            explorerArea.setLimitBox( 180, 20, 512 );
+            let [ explorerArea, editorArea ] = area.split({ sizes:[ "15%","85%" ] });
+            // explorerArea.setLimitBox( 180, 20, 512 );
             this.explorerArea = explorerArea;
 
             let panel = new LX.Panel();
@@ -370,35 +384,43 @@ class CodeEditor {
             explorerArea.attach( panel );
 
             // Update area
-            area = codeArea;
+            area = editorArea;
         }
 
-        this.base_area = area;
+        this.baseArea = area;
         this.area = new LX.Area( { className: "lexcodeeditor", height: "100%", skipAppend: true } );
 
-        this.skipInfo = options.skipInfo ?? false;
-        this.disableEdition = options.disableEdition ?? false;
-
-        this._tabStorage = {};
-        this.tabs = this.area.addTabs( { onclose: (name) => {
-            delete this.openedTabs[ name ];
-            if( Object.keys( this.openedTabs ).length < 2 )
-            {
-                clearInterval( this.blinker );
-                this.cursors.classList.remove( 'show' );
-            }
-        } } );
-
-        if( !this.disableEdition )
+        if( !this.skipTabs )
         {
-            this.tabs.root.addEventListener( 'dblclick', (e) => {
-                if( options.allowAddScripts ?? true )
+            this.tabs = this.area.addTabs( { onclose: (name) => {
+                delete this.openedTabs[ name ];
+                if( Object.keys( this.openedTabs ).length < 2 )
                 {
-                    e.preventDefault();
-                    this.addTab( "unnamed.js", true );
+                    clearInterval( this.blinker );
+                    this.cursors.classList.remove( 'show' );
                 }
-            } );
+            } } );
+
+            if( !this.disableEdition )
+            {
+                this.tabs.root.addEventListener( 'dblclick', (e) => {
+                    if( options.allowAddScripts ?? true )
+                    {
+                        e.preventDefault();
+                        this.addTab( "unnamed.js", true );
+                    }
+                } );
+            }
+
+            this.codeArea = this.tabs.area;
         }
+        else
+        {
+            this.codeArea = new LX.Area( { skipAppend: true } );
+            this.area.attach( this.codeArea );
+        }
+
+        this.codeArea.root.classList.add( 'lexcodearea' );
 
         // Full editor
         area.root.classList.add('codebasearea');
@@ -414,9 +436,6 @@ class CodeEditor {
             attributes: true,
             attributeFilter: ['class', 'style'],
         });
-
-        // Code area
-        this.tabs.area.root.classList.add( 'codetabsarea' );
 
         this.root = this.area.root;
         this.root.tabIndex = -1;
@@ -446,12 +465,12 @@ class CodeEditor {
 
         this.cursors = document.createElement( 'div' );
         this.cursors.className = 'cursors';
-        this.tabs.area.attach( this.cursors );
+        this.codeArea.attach( this.cursors );
 
         this.searchResultSelections = document.createElement( 'div' );
         this.searchResultSelections.id = 'search-selections';
         this.searchResultSelections.className = 'selections';
-        this.tabs.area.attach( this.searchResultSelections );
+        this.codeArea.attach( this.searchResultSelections );
 
         // Store here selections per cursor
         this.selections = {};
@@ -464,7 +483,7 @@ class CodeEditor {
 
         // Scroll stuff
         {
-            this.codeScroller = this.tabs.area.root;
+            this.codeScroller = this.codeArea.root;
             this.firstLineInViewport = 0;
             this.lineScrollMargin = new LX.vec2( 20, 20 ); // [ mUp, mDown ]
 
@@ -489,12 +508,14 @@ class CodeEditor {
                     {
                         if( this.visibleLinesViewport.y < (this.code.lines.length - 1) )
                         {
-                            const totalLinesInViewport = ((this.codeScroller.offsetHeight - 36) / this.lineHeight)|0;
+                            const totalLinesInViewport = ( ( this.codeScroller.offsetHeight ) / this.lineHeight )|0;
                             const scrollDownBoundary =
                                 ( Math.max( this.visibleLinesViewport.y - totalLinesInViewport, 0 ) - 1 ) * this.lineHeight;
 
                             if( scrollTop >= scrollDownBoundary )
+                            {
                                 this.processLines( CodeEditor.UPDATE_VISIBLE_LINES );
+                            }
                         }
                     }
                     // Scroll up...
@@ -502,7 +523,9 @@ class CodeEditor {
                     {
                         const scrollUpBoundary = parseInt( this.code.style.top );
                         if( scrollTop < scrollUpBoundary )
+                        {
                             this.processLines( CodeEditor.UPDATE_VISIBLE_LINES );
+                        }
                     }
 
                     lastScrollTopValue = scrollTop;
@@ -527,34 +550,31 @@ class CodeEditor {
             }
         }
 
-        // This is only the container, line numbers are in the same line div
+        // Line numbers and scrollbars
         {
+            // This is only the container, line numbers are in the same line div
             this.gutter = document.createElement( 'div' );
             this.gutter.className = "lexcodegutter";
             area.attach( this.gutter );
-        }
 
-        // Add custom vertical scroll bar
-        {
+            // Add custom vertical scroll bar
             this.vScrollbar = new ScrollBar( this, ScrollBar.SCROLLBAR_VERTICAL );
             area.attach( this.vScrollbar.root );
-        }
 
-        // Add custom horizontal scroll bar
-        {
+            // Add custom horizontal scroll bar
             this.hScrollbar = new ScrollBar( this, ScrollBar.SCROLLBAR_HORIZONTAL );
             area.attach( this.hScrollbar.root );
         }
 
+        // Add autocomplete, search boxes (IF edition enabled)
         if( !this.disableEdition )
         {
             // Add autocomplete box
             {
-                var box = document.createElement( 'div' );
+                const box = document.createElement( 'div' );
                 box.className = "autocomplete";
                 this.autocomplete = box;
-                this.tabs.area.attach( box );
-
+                this.codeArea.attach( box );
                 this.isAutoCompleteActive = false;
             }
 
@@ -578,7 +598,7 @@ class CodeEditor {
                 } );
 
                 this.searchbox = box;
-                this.tabs.area.attach( box );
+                this.codeArea.attach( box );
             }
 
             // Add search LINE box
@@ -600,7 +620,7 @@ class CodeEditor {
                 } );
 
                 this.searchlinebox = box;
-                this.tabs.area.attach( box );
+                this.codeArea.attach( box );
             }
         }
 
@@ -611,7 +631,9 @@ class CodeEditor {
 
             // Append all childs
             while( this.codeScroller.firstChild )
+            {
                 this.codeSizer.appendChild( this.codeScroller.firstChild );
+            }
 
             this.codeScroller.appendChild( this.codeSizer );
         }
@@ -627,7 +649,6 @@ class CodeEditor {
 
         // Code
 
-        this.useAutoComplete = options.autocomplete ?? true;
         this.highlight = options.highlight ?? 'Plain Text';
         this.onsave = options.onsave ?? ((code) => { console.log( code, "save" ) });
         this.onrun = options.onrun ?? ((code) => { this.runScript(code) });
@@ -640,6 +661,7 @@ class CodeEditor {
         this.defaultSingleLineCommentToken = '//';
         this.defaultBlockCommentTokens = [ '/*', '*/' ];
         this._lastTime = null;
+        this._tabStorage = {};
 
         this.pairKeys = {
             "\"": "\"",
@@ -680,465 +702,474 @@ class CodeEditor {
         }
 
         // Action keys
+        {
+            this.action( 'Escape', false, ( ln, cursor, e ) => {
+                if( this.hideAutoCompleteBox() )
+                    return;
+                if( this.hideSearchBox() )
+                    return;
+                // Remove selections and cursors
+                this.endSelection();
+                this._removeSecondaryCursors();
+            });
 
-        this.action( 'Escape', false, ( ln, cursor, e ) => {
-            if( this.hideAutoCompleteBox() )
-                return;
-            if( this.hideSearchBox() )
-                return;
-            // Remove selections and cursors
-            this.endSelection();
-            this._removeSecondaryCursors();
-        });
+            this.action( 'Backspace', false, ( ln, cursor, e ) => {
 
-        this.action( 'Backspace', false, ( ln, cursor, e ) => {
-
-            this._addUndoStep( cursor );
-
-            if( cursor.selection ) {
-                this.deleteSelection( cursor );
-                // Remove entire line when selecting with triple click
-                if( this._tripleClickSelection )
-                {
-                    this.actions['Backspace'].callback( ln, cursor, e );
-                    this.lineDown( cursor, true );
-                }
-            }
-            else {
-
-                var letter = this.getCharAtPos( cursor, -1 );
-                if( letter ) {
-
-                    var deleteFromPosition = cursor.position - 1;
-                    var numCharsDeleted = 1;
-
-                    // Delete full word
-                    if( e.shiftKey )
-                    {
-                        const [word, from, to] = this.getWordAtPos( cursor, -1 );
-
-                        if( word.length > 1 )
-                        {
-                            deleteFromPosition = from;
-                            numCharsDeleted = word.length;
-                        }
-                    }
-
-                    this.code.lines[ ln ] = sliceChars( this.code.lines[ ln ], deleteFromPosition, numCharsDeleted );
-                    this.processLine( ln );
-
-                    this.cursorToPosition( cursor, deleteFromPosition );
-
-                    if( this.useAutoComplete )
-                    {
-                        this.showAutoCompleteBox( 'foo', cursor );
-                    }
-                }
-                else if( this.code.lines[ ln - 1 ] != undefined ) {
-
-                    this.lineUp( cursor );
-                    e.cancelShift = true;
-                    this.actions[ 'End' ].callback( cursor.line, cursor, e );
-                    // Move line on top
-                    this.code.lines[ ln - 1 ] += this.code.lines[ ln ];
-                    this.code.lines.splice( ln, 1 );
-                    this.processLines();
-                }
-            }
-        });
-
-        this.action( 'Delete', false, ( ln, cursor, e ) => {
-
-            this._addUndoStep( cursor );
-
-            if( cursor.selection ) {
-                // Use 'Backspace' as it's the same callback...
-                this.actions['Backspace'].callback( ln, cursor, e );
-            }
-            else
-            {
-                var letter = this.getCharAtPos( cursor );
-                if( letter ) {
-                    this.code.lines[ ln ] = sliceChars( this.code.lines[ ln ], cursor.position );
-                    this.processLine( ln );
-                }
-                else if( this.code.lines[ ln + 1 ] != undefined ) {
-                    this.code.lines[ ln ] += this.code.lines[ ln + 1 ];
-                    this.code.lines.splice( ln + 1, 1 );
-                    this.processLines();
-                }
-            }
-        });
-
-        this.action( 'Tab', true, ( ln, cursor, e ) => {
-
-            if( this._skipTabs )
-            {
-                this._skipTabs--;
-                if( !this._skipTabs )
-                    delete this._skipTabs;
-            }
-            else if( this.isAutoCompleteActive )
-            {
-                this.autoCompleteWord();
-            }
-            else
-            {
                 this._addUndoStep( cursor );
 
-                if( e && e.shiftKey )
-                {
-                    this._removeSpaces( cursor );
-                }
-                else
-                {
-                    const indentSpaces = this.tabSpaces - (cursor.position % this.tabSpaces);
-                    this._addSpaces( indentSpaces );
-                }
-            }
-        }, "shiftKey");
-
-        this.action( 'Home', false, ( ln, cursor, e ) => {
-
-            let idx = firstNonspaceIndex( this.code.lines[ ln ] );
-
-            // We already are in the first non space index...
-            if( idx == cursor.position ) idx = 0;
-
-            const prestring = this.code.lines[ ln ].substring( 0, idx );
-            let lastX = cursor.position;
-
-            this.resetCursorPos( CodeEditor.CURSOR_LEFT, cursor );
-            if( idx > 0 )
-            {
-                this.cursorToString( cursor, prestring );
-            }
-            else
-            {
-                // No spaces, start from char 0
-                idx = 0;
-            }
-
-            this.setScrollLeft( 0 );
-            this.mergeCursors( ln );
-
-            if( e.shiftKey && !e.cancelShift )
-            {
-                // Get last selection range
                 if( cursor.selection )
                 {
-                    lastX += cursor.selection.chars;
-                }
-
-                if( !cursor.selection )
-                {
-                    this.startSelection( cursor );
-                }
-
-                var string = this.code.lines[ ln ].substring( idx, lastX );
-                if( cursor.selection.sameLine() )
-                {
-                    cursor.selection.selectInline( cursor, idx, cursor.line, this.measureString( string ) );
-                }
-                else
-                {
-                    this._processSelection( cursor, e );
-                }
-            } else if( !e.keepSelection )
-                this.endSelection();
-        });
-
-        this.action( 'End', false, ( ln, cursor, e ) => {
-
-            if( ( e.shiftKey || e._shiftKey ) && !e.cancelShift ) {
-
-                var string = this.code.lines[ ln ].substring( cursor.position );
-                if( !cursor.selection )
-                    this.startSelection( cursor );
-                if( cursor.selection.sameLine() )
-                    cursor.selection.selectInline( cursor, cursor.position, cursor.line, this.measureString( string ));
-                else
-                {
-                    this.resetCursorPos( CodeEditor.CURSOR_LEFT, cursor );
-                    this.cursorToString( cursor, this.code.lines[ ln ] );
-                    this._processSelection( cursor, e );
-                }
-            } else if( !e.keepSelection )
-                this.endSelection();
-
-            this.resetCursorPos( CodeEditor.CURSOR_LEFT, cursor );
-            this.cursorToString( cursor, this.code.lines[ ln ] );
-
-            var viewportSizeX = ( this.codeScroller.clientWidth + this.getScrollLeft() ) - CodeEditor.LINE_GUTTER_WIDTH; // Gutter offset
-            if( ( cursor.position * this.charWidth ) >= viewportSizeX )
-                this.setScrollLeft( this.code.lines[ ln ].length * this.charWidth );
-
-            // Merge cursors
-            this.mergeCursors( ln );
-        });
-
-        this.action( 'Enter', true, ( ln, cursor, e ) => {
-
-            // Add word
-            if( this.isAutoCompleteActive )
-            {
-                this.autoCompleteWord();
-                return;
-            }
-
-            if( e.ctrlKey )
-            {
-                this.onrun( this.getText() );
-                return;
-            }
-
-            this._addUndoStep( cursor, true );
-
-            var _c0 = this.getCharAtPos( cursor, -1 );
-            var _c1 = this.getCharAtPos( cursor );
-
-            this.code.lines.splice( cursor.line + 1, 0, "" );
-            this.code.lines[cursor.line + 1] = this.code.lines[ ln ].substr( cursor.position ); // new line (below)
-            this.code.lines[ ln ] = this.code.lines[ ln ].substr( 0, cursor.position ); // line above
-
-            this.lineDown( cursor, true );
-
-            // Check indentation
-            var spaces = firstNonspaceIndex( this.code.lines[ ln ]);
-            var tabs = Math.floor( spaces / this.tabSpaces );
-
-            if( _c0 == '{' && _c1 == '}' ) {
-                this.code.lines.splice( cursor.line, 0, "" );
-                this._addSpaceTabs( cursor, tabs + 1 );
-                this.code.lines[ cursor.line + 1 ] = " ".repeat(spaces) + this.code.lines[ cursor.line + 1 ];
-            } else {
-                this._addSpaceTabs( cursor, tabs );
-            }
-
-            this.processLines();
-        });
-
-        this.action( 'ArrowUp', false, ( ln, cursor, e ) => {
-
-            // Move cursor..
-            if( !this.isAutoCompleteActive )
-            {
-                if( e.shiftKey ) {
-                    if( !cursor.selection )
-                        this.startSelection( cursor );
-
-                    this.lineUp( cursor );
-
-                    var letter = this.getCharAtPos( cursor );
-                    if( !letter ) {
-                        this.cursorToPosition( cursor, this.code.lines[ cursor.line ].length );
-                    }
-
-                    this._processSelection( cursor, e, false );
-
-                } else {
-                    this.endSelection();
-                    this.lineUp( cursor );
-                    // Go to end of line if out of line
-                    var letter = this.getCharAtPos( cursor );
-                    if( !letter ) this.actions['End'].callback( cursor.line, cursor, e );
-                }
-            }
-            // Move up autocomplete selection
-            else
-            {
-                this._moveArrowSelectedAutoComplete('up');
-            }
-        });
-
-        this.action( 'ArrowDown', false, ( ln, cursor, e ) => {
-
-            // Move cursor..
-            if( !this.isAutoCompleteActive )
-            {
-                if( e.shiftKey ) {
-                    if( !cursor.selection )
-                        this.startSelection( cursor );
-                } else {
-                    this.endSelection();
-                }
-
-                const canGoDown = this.lineDown( cursor );
-                const letter = this.getCharAtPos( cursor );
-
-                // Go to end of line if out of range
-                if( !letter || !canGoDown ) {
-                    this.cursorToPosition( cursor, Math.max(this.code.lines[ cursor.line ].length, 0) );
-                }
-
-                if( e.shiftKey ) {
-                    this._processSelection( cursor, e );
-                }
-            }
-            // Move down autocomplete selection
-            else
-            {
-                this._moveArrowSelectedAutoComplete('down');
-            }
-        });
-
-        this.action( 'ArrowLeft', false, ( ln, cursor, e ) => {
-
-            // Nothing to do..
-            if( cursor.line == 0 && cursor.position == 0 )
-            return;
-
-            if( e.metaKey ) { // Apple devices (Command)
-                e.preventDefault();
-                this.actions[ 'Home' ].callback( ln, cursor, e );
-            }
-            else if( e.ctrlKey ) {
-                // Get next word
-                const [word, from, to] = this.getWordAtPos( cursor, -1 );
-                // If no length, we change line..
-                if( !word.length && this.lineUp( cursor, true ) ) {
-                    const cS = e.cancelShift, kS = e.keepSelection;
-                    e.cancelShift = true;
-                    e.keepSelection = true;
-                    this.actions[ 'End' ].callback( cursor.line, cursor, e );
-                    e.cancelShift = cS;
-                    e.keepSelection = kS;
-                }
-                var diff = Math.max( cursor.position - from, 1 );
-                var substr = word.substr( 0, diff );
-
-                // Selections...
-                if( e.shiftKey ) {
-                    if( !cursor.selection )
-                    this.startSelection( cursor );
-                }
-                else
-                    this.endSelection();
-
-                this.cursorToString( cursor, substr, true );
-
-                if( e.shiftKey )
-                    this._processSelection( cursor, e );
-            }
-            else {
-                var letter = this.getCharAtPos( cursor, -1 );
-                if( letter ) {
-                    if( e.shiftKey ) {
-                        if( !cursor.selection ) this.startSelection( cursor );
-                        this.cursorToLeft( letter, cursor );
-                        this._processSelection( cursor, e, false, CodeEditor.SELECTION_X );
-                    }
-                    else {
-                        if( !cursor.selection ) {
-                            this.cursorToLeft( letter, cursor );
-                            if( this.useAutoComplete && this.isAutoCompleteActive )
-                                this.showAutoCompleteBox( 'foo', cursor );
-                        }
-                        else {
-                            cursor.selection.invertIfNecessary();
-                            this.resetCursorPos( CodeEditor.CURSOR_LEFT_TOP, cursor );
-                            this.cursorToLine( cursor, cursor.selection.fromY, true );
-                            this.cursorToPosition( cursor, cursor.selection.fromX );
-                            this.endSelection();
-                        }
-                    }
-                }
-                else if( cursor.line > 0 ) {
-
-                    if( e.shiftKey && !cursor.selection ) this.startSelection( cursor );
-
-                    this.lineUp( cursor );
-
-                    e.cancelShift = e.keepSelection = true;
-                    this.actions[ 'End' ].callback( cursor.line, cursor, e );
-                    delete e.cancelShift; delete e.keepSelection;
-
-                    if( e.shiftKey ) this._processSelection( cursor, e, false );
-                }
-            }
-        });
-
-        this.action( 'ArrowRight', false, ( ln, cursor, e ) => {
-
-            // Nothing to do..
-            if( cursor.line == this.code.lines.length - 1 &&
-                cursor.position == this.code.lines[ cursor.line ].length )
-            return;
-
-            if( e.metaKey ) // Apple devices (Command)
-            {
-                e.preventDefault();
-                this.actions[ 'End' ].callback( ln, cursor );
-            }
-            else if( e.ctrlKey ) // Next word
-            {
-                // Get next word
-                const [ word, from, to ] = this.getWordAtPos( cursor );
-
-                // If no length, we change line..
-                if( !word.length ) this.lineDown( cursor, true );
-                var diff = cursor.position - from;
-                var substr = word.substr( diff );
-
-                // Selections...
-                if( e.shiftKey ) {
-                    if( !cursor.selection )
-                        this.startSelection( cursor );
-                }
-                else
-                    this.endSelection();
-
-                this.cursorToString( cursor, substr );
-
-                if( e.shiftKey )
-                    this._processSelection( cursor, e );
-            }
-            else // Next char
-            {
-                var letter = this.getCharAtPos( cursor );
-                if( letter ) {
-
-                    // Selecting chars
-                    if( e.shiftKey )
+                    this.deleteSelection( cursor );
+                    // Remove entire line when selecting with triple click
+                    if( this._tripleClickSelection )
                     {
-                        if( !cursor.selection )
-                            this.startSelection( cursor );
+                        this.actions['Backspace'].callback( ln, cursor, e );
+                        this.lineDown( cursor, true );
+                    }
+                }
+                else {
 
-                        this.cursorToRight( letter, cursor );
-                        this._processSelection( cursor, e, false, CodeEditor.SELECTION_X );
+                    var letter = this.getCharAtPos( cursor, -1 );
+                    if( letter )
+                    {
+                        var deleteFromPosition = cursor.position - 1;
+                        var numCharsDeleted = 1;
+
+                        // Delete full word
+                        if( e.shiftKey )
+                        {
+                            const [word, from, to] = this.getWordAtPos( cursor, -1 );
+
+                            if( word.length > 1 )
+                            {
+                                deleteFromPosition = from;
+                                numCharsDeleted = word.length;
+                            }
+                        }
+
+                        this.code.lines[ ln ] = sliceChars( this.code.lines[ ln ], deleteFromPosition, numCharsDeleted );
+                        this.processLine( ln );
+
+                        this.cursorToPosition( cursor, deleteFromPosition );
+
+                        if( this.useAutoComplete )
+                        {
+                            this.showAutoCompleteBox( 'foo', cursor );
+                        }
+                    }
+                    else if( this.code.lines[ ln - 1 ] != undefined )
+                    {
+                        this.lineUp( cursor );
+                        e.cancelShift = true;
+                        this.actions[ 'End' ].callback( cursor.line, cursor, e );
+                        // Move line on top
+                        this.code.lines[ ln - 1 ] += this.code.lines[ ln ];
+                        this.code.lines.splice( ln, 1 );
+                        this.processLines();
+                    }
+                }
+
+                this.resizeIfNecessary( cursor, true );
+            });
+
+            this.action( 'Delete', false, ( ln, cursor, e ) => {
+
+                this._addUndoStep( cursor );
+
+                if( cursor.selection )
+                {
+                    // Use 'Backspace' as it's the same callback...
+                    this.actions['Backspace'].callback( ln, cursor, e );
+                }
+                else
+                {
+                    var letter = this.getCharAtPos( cursor );
+                    if( letter )
+                    {
+                        this.code.lines[ ln ] = sliceChars( this.code.lines[ ln ], cursor.position );
+                        this.processLine( ln );
+                    }
+                    else if( this.code.lines[ ln + 1 ] != undefined )
+                    {
+                        this.code.lines[ ln ] += this.code.lines[ ln + 1 ];
+                        this.code.lines.splice( ln + 1, 1 );
+                        this.processLines();
+                    }
+                }
+
+                this.resizeIfNecessary( cursor, true );
+            });
+
+            this.action( 'Tab', true, ( ln, cursor, e ) => {
+
+                if( this._skipTabs )
+                {
+                    this._skipTabs--;
+                    if( !this._skipTabs )
+                        delete this._skipTabs;
+                }
+                else if( this.isAutoCompleteActive )
+                {
+                    this.autoCompleteWord();
+                }
+                else
+                {
+                    this._addUndoStep( cursor );
+
+                    if( e && e.shiftKey )
+                    {
+                        this._removeSpaces( cursor );
                     }
                     else
                     {
-                        if( !cursor.selection ) {
+                        const indentSpaces = this.tabSpaces - (cursor.position % this.tabSpaces);
+                        this._addSpaces( indentSpaces );
+                    }
+                }
+            }, "shiftKey");
+
+            this.action( 'Home', false, ( ln, cursor, e ) => {
+
+                let idx = firstNonspaceIndex( this.code.lines[ ln ] );
+
+                // We already are in the first non space index...
+                if( idx == cursor.position ) idx = 0;
+
+                const prestring = this.code.lines[ ln ].substring( 0, idx );
+                let lastX = cursor.position;
+
+                this.resetCursorPos( CodeEditor.CURSOR_LEFT, cursor );
+                if( idx > 0 )
+                {
+                    this.cursorToString( cursor, prestring );
+                }
+                else
+                {
+                    // No spaces, start from char 0
+                    idx = 0;
+                }
+
+                this.setScrollLeft( 0 );
+                this.mergeCursors( ln );
+
+                if( e.shiftKey && !e.cancelShift )
+                {
+                    // Get last selection range
+                    if( cursor.selection )
+                    {
+                        lastX += cursor.selection.chars;
+                    }
+
+                    if( !cursor.selection )
+                    {
+                        this.startSelection( cursor );
+                    }
+
+                    var string = this.code.lines[ ln ].substring( idx, lastX );
+                    if( cursor.selection.sameLine() )
+                    {
+                        cursor.selection.selectInline( cursor, idx, cursor.line, this.measureString( string ) );
+                    }
+                    else
+                    {
+                        this._processSelection( cursor, e );
+                    }
+                } else if( !e.keepSelection )
+                    this.endSelection();
+            });
+
+            this.action( 'End', false, ( ln, cursor, e ) => {
+
+                if( ( e.shiftKey || e._shiftKey ) && !e.cancelShift ) {
+
+                    var string = this.code.lines[ ln ].substring( cursor.position );
+                    if( !cursor.selection )
+                        this.startSelection( cursor );
+                    if( cursor.selection.sameLine() )
+                        cursor.selection.selectInline( cursor, cursor.position, cursor.line, this.measureString( string ));
+                    else
+                    {
+                        this.resetCursorPos( CodeEditor.CURSOR_LEFT, cursor );
+                        this.cursorToString( cursor, this.code.lines[ ln ] );
+                        this._processSelection( cursor, e );
+                    }
+                } else if( !e.keepSelection )
+                    this.endSelection();
+
+                this.resetCursorPos( CodeEditor.CURSOR_LEFT, cursor );
+                this.cursorToString( cursor, this.code.lines[ ln ] );
+
+                var viewportSizeX = ( this.codeScroller.clientWidth + this.getScrollLeft() ) - CodeEditor.LINE_GUTTER_WIDTH; // Gutter offset
+                if( ( cursor.position * this.charWidth ) >= viewportSizeX )
+                    this.setScrollLeft( this.code.lines[ ln ].length * this.charWidth );
+
+                // Merge cursors
+                this.mergeCursors( ln );
+            });
+
+            this.action( 'Enter', true, ( ln, cursor, e ) => {
+
+                // Add word
+                if( this.isAutoCompleteActive )
+                {
+                    this.autoCompleteWord();
+                    return;
+                }
+
+                if( e.ctrlKey )
+                {
+                    this.onrun( this.getText() );
+                    return;
+                }
+
+                this._addUndoStep( cursor, true );
+
+                var _c0 = this.getCharAtPos( cursor, -1 );
+                var _c1 = this.getCharAtPos( cursor );
+
+                this.code.lines.splice( cursor.line + 1, 0, "" );
+                this.code.lines[cursor.line + 1] = this.code.lines[ ln ].substr( cursor.position ); // new line (below)
+                this.code.lines[ ln ] = this.code.lines[ ln ].substr( 0, cursor.position ); // line above
+
+                this.lineDown( cursor, true );
+
+                // Check indentation
+                var spaces = firstNonspaceIndex( this.code.lines[ ln ]);
+                var tabs = Math.floor( spaces / this.tabSpaces );
+
+                if( _c0 == '{' && _c1 == '}' ) {
+                    this.code.lines.splice( cursor.line, 0, "" );
+                    this._addSpaceTabs( cursor, tabs + 1 );
+                    this.code.lines[ cursor.line + 1 ] = " ".repeat(spaces) + this.code.lines[ cursor.line + 1 ];
+                } else {
+                    this._addSpaceTabs( cursor, tabs );
+                }
+
+                this.processLines();
+            });
+
+            this.action( 'ArrowUp', false, ( ln, cursor, e ) => {
+
+                // Move cursor..
+                if( !this.isAutoCompleteActive )
+                {
+                    if( e.shiftKey ) {
+                        if( !cursor.selection )
+                            this.startSelection( cursor );
+
+                        this.lineUp( cursor );
+
+                        var letter = this.getCharAtPos( cursor );
+                        if( !letter ) {
+                            this.cursorToPosition( cursor, this.code.lines[ cursor.line ].length );
+                        }
+
+                        this._processSelection( cursor, e, false );
+
+                    } else {
+                        this.endSelection();
+                        this.lineUp( cursor );
+                        // Go to end of line if out of line
+                        var letter = this.getCharAtPos( cursor );
+                        if( !letter ) this.actions['End'].callback( cursor.line, cursor, e );
+                    }
+                }
+                // Move up autocomplete selection
+                else
+                {
+                    this._moveArrowSelectedAutoComplete('up');
+                }
+            });
+
+            this.action( 'ArrowDown', false, ( ln, cursor, e ) => {
+
+                // Move cursor..
+                if( !this.isAutoCompleteActive )
+                {
+                    if( e.shiftKey ) {
+                        if( !cursor.selection )
+                            this.startSelection( cursor );
+                    } else {
+                        this.endSelection();
+                    }
+
+                    const canGoDown = this.lineDown( cursor );
+                    const letter = this.getCharAtPos( cursor );
+
+                    // Go to end of line if out of range
+                    if( !letter || !canGoDown ) {
+                        this.cursorToPosition( cursor, Math.max(this.code.lines[ cursor.line ].length, 0) );
+                    }
+
+                    if( e.shiftKey ) {
+                        this._processSelection( cursor, e );
+                    }
+                }
+                // Move down autocomplete selection
+                else
+                {
+                    this._moveArrowSelectedAutoComplete('down');
+                }
+            });
+
+            this.action( 'ArrowLeft', false, ( ln, cursor, e ) => {
+
+                // Nothing to do..
+                if( cursor.line == 0 && cursor.position == 0 )
+                return;
+
+                if( e.metaKey ) { // Apple devices (Command)
+                    e.preventDefault();
+                    this.actions[ 'Home' ].callback( ln, cursor, e );
+                }
+                else if( e.ctrlKey ) {
+                    // Get next word
+                    const [word, from, to] = this.getWordAtPos( cursor, -1 );
+                    // If no length, we change line..
+                    if( !word.length && this.lineUp( cursor, true ) ) {
+                        const cS = e.cancelShift, kS = e.keepSelection;
+                        e.cancelShift = true;
+                        e.keepSelection = true;
+                        this.actions[ 'End' ].callback( cursor.line, cursor, e );
+                        e.cancelShift = cS;
+                        e.keepSelection = kS;
+                    }
+                    var diff = Math.max( cursor.position - from, 1 );
+                    var substr = word.substr( 0, diff );
+
+                    // Selections...
+                    if( e.shiftKey ) {
+                        if( !cursor.selection )
+                        this.startSelection( cursor );
+                    }
+                    else
+                        this.endSelection();
+
+                    this.cursorToString( cursor, substr, true );
+
+                    if( e.shiftKey )
+                        this._processSelection( cursor, e );
+                }
+                else {
+                    var letter = this.getCharAtPos( cursor, -1 );
+                    if( letter ) {
+                        if( e.shiftKey ) {
+                            if( !cursor.selection ) this.startSelection( cursor );
+                            this.cursorToLeft( letter, cursor );
+                            this._processSelection( cursor, e, false, CodeEditor.SELECTION_X );
+                        }
+                        else {
+                            if( !cursor.selection ) {
+                                this.cursorToLeft( letter, cursor );
+                                if( this.useAutoComplete && this.isAutoCompleteActive )
+                                    this.showAutoCompleteBox( 'foo', cursor );
+                            }
+                            else {
+                                cursor.selection.invertIfNecessary();
+                                this.resetCursorPos( CodeEditor.CURSOR_LEFT_TOP, cursor );
+                                this.cursorToLine( cursor, cursor.selection.fromY, true );
+                                this.cursorToPosition( cursor, cursor.selection.fromX );
+                                this.endSelection();
+                            }
+                        }
+                    }
+                    else if( cursor.line > 0 ) {
+
+                        if( e.shiftKey && !cursor.selection ) this.startSelection( cursor );
+
+                        this.lineUp( cursor );
+
+                        e.cancelShift = e.keepSelection = true;
+                        this.actions[ 'End' ].callback( cursor.line, cursor, e );
+                        delete e.cancelShift; delete e.keepSelection;
+
+                        if( e.shiftKey ) this._processSelection( cursor, e, false );
+                    }
+                }
+            });
+
+            this.action( 'ArrowRight', false, ( ln, cursor, e ) => {
+
+                // Nothing to do..
+                if( cursor.line == this.code.lines.length - 1 &&
+                    cursor.position == this.code.lines[ cursor.line ].length )
+                return;
+
+                if( e.metaKey ) // Apple devices (Command)
+                {
+                    e.preventDefault();
+                    this.actions[ 'End' ].callback( ln, cursor );
+                }
+                else if( e.ctrlKey ) // Next word
+                {
+                    // Get next word
+                    const [ word, from, to ] = this.getWordAtPos( cursor );
+
+                    // If no length, we change line..
+                    if( !word.length ) this.lineDown( cursor, true );
+                    var diff = cursor.position - from;
+                    var substr = word.substr( diff );
+
+                    // Selections...
+                    if( e.shiftKey ) {
+                        if( !cursor.selection )
+                            this.startSelection( cursor );
+                    }
+                    else
+                        this.endSelection();
+
+                    this.cursorToString( cursor, substr );
+
+                    if( e.shiftKey )
+                        this._processSelection( cursor, e );
+                }
+                else // Next char
+                {
+                    var letter = this.getCharAtPos( cursor );
+                    if( letter ) {
+
+                        // Selecting chars
+                        if( e.shiftKey )
+                        {
+                            if( !cursor.selection )
+                                this.startSelection( cursor );
+
                             this.cursorToRight( letter, cursor );
-                            if( this.useAutoComplete && this.isAutoCompleteActive )
-                                this.showAutoCompleteBox( 'foo', cursor );
+                            this._processSelection( cursor, e, false, CodeEditor.SELECTION_X );
                         }
                         else
                         {
-                            cursor.selection.invertIfNecessary();
-                            this.resetCursorPos( CodeEditor.CURSOR_LEFT_TOP, cursor );
-                            this.cursorToLine( cursor, cursor.selection.toY );
-                            this.cursorToPosition( cursor, cursor.selection.toX );
-                            this.endSelection();
+                            if( !cursor.selection ) {
+                                this.cursorToRight( letter, cursor );
+                                if( this.useAutoComplete && this.isAutoCompleteActive )
+                                    this.showAutoCompleteBox( 'foo', cursor );
+                            }
+                            else
+                            {
+                                cursor.selection.invertIfNecessary();
+                                this.resetCursorPos( CodeEditor.CURSOR_LEFT_TOP, cursor );
+                                this.cursorToLine( cursor, cursor.selection.toY );
+                                this.cursorToPosition( cursor, cursor.selection.toX );
+                                this.endSelection();
+                            }
                         }
                     }
-                }
-                else if( this.code.lines[ cursor.line + 1 ] !== undefined ) {
+                    else if( this.code.lines[ cursor.line + 1 ] !== undefined ) {
 
-                    if( e.shiftKey ) {
-                        if( !cursor.selection ) this.startSelection( cursor );
+                        if( e.shiftKey ) {
+                            if( !cursor.selection ) this.startSelection( cursor );
+                        }
+                        else this.endSelection();
+
+                        this.lineDown( cursor, true );
+
+                        if( e.shiftKey ) this._processSelection( cursor, e, false );
+
+                        this.hideAutoCompleteBox();
                     }
-                    else this.endSelection();
-
-                    this.lineDown( cursor, true );
-
-                    if( e.shiftKey ) this._processSelection( cursor, e, false );
-
-                    this.hideAutoCompleteBox();
                 }
-            }
-        });
+            });
+        }
 
         // Default code tab
 
@@ -1171,6 +1202,21 @@ class CodeEditor {
                 }
 
                 LX.emit( "@font-size", this.fontSize );
+
+                // Get final sizes for editor elements based on Tabs and status bar offsets
+                LX.doAsync( () => {
+                    this._verticalTopOffset = this.tabs?.root.getBoundingClientRect().height ?? 0;
+                    this._verticalBottomOffset = this.statusPanel?.root.getBoundingClientRect().height ?? 0;
+                    this._fullVerticalOffset = this._verticalTopOffset + this._verticalBottomOffset;
+
+                    this.gutter.style.marginTop = `${ this._verticalTopOffset }px`;
+                    this.gutter.style.height = `calc(100% - ${ this._fullVerticalOffset }px)`;
+                    this.vScrollbar.root.style.marginTop = `${ this.tabs?.root.getBoundingClientRect().height ?? 0 }px`;
+                    this.vScrollbar.root.style.height = `calc(100% - ${ this._fullVerticalOffset }px)`;
+                    this.hScrollbar.root.style.bottom = `${ this._verticalBottomOffset }px`;
+                    this.codeArea.root.style.height = `calc(100% - ${ this._verticalBottomOffset }px)`;
+                }, 50 );
+
             });
 
             window.editor = this;
@@ -1214,18 +1260,18 @@ class CodeEditor {
     onKeyPressed( e ) {
 
         // Toggle visibility of the file explorer
-        if( e.key == 'b' && e.ctrlKey && this.explorer )
+        if( e.key == 'b' && e.ctrlKey && this.useFileExplorer )
         {
             this.explorerArea.root.classList.toggle( "hidden" );
             if( this._lastBaseareaWidth )
             {
-                this.base_area.root.style.width = this._lastBaseareaWidth;
+                this.baseArea.root.style.width = this._lastBaseareaWidth;
                 delete this._lastBaseareaWidth;
 
             } else
             {
-                this._lastBaseareaWidth = this.base_area.root.style.width;
-                this.base_area.root.style.width = "100%";
+                this._lastBaseareaWidth = this.baseArea.root.style.width;
+                this.baseArea.root.style.width = "100%";
             }
         }
     }
@@ -1317,10 +1363,12 @@ class CodeEditor {
             this.processLine( lidx );
         }
 
-        this.resize( null, ( scrollWidth, scrollHeight ) => {
+        this.resize( CodeEditor.RESIZE_SCROLLBAR_H_V, null, ( scrollWidth, scrollHeight ) => {
             var viewportSizeX = ( this.codeScroller.clientWidth + this.getScrollLeft() ) - CodeEditor.LINE_GUTTER_WIDTH; // Gutter offset
             if( ( cursor.position * this.charWidth ) >= viewportSizeX )
+            {
                 this.setScrollLeft( this.code.lines[ lidx ].length * this.charWidth );
+            }
         } );
     }
 
@@ -1338,7 +1386,7 @@ class CodeEditor {
 
             // Add item in the explorer if used
 
-            if( this.explorer )
+            if( this.useFileExplorer || this.skipTabs )
             {
                 this._tabStorage[ name ] = {
                     lines: lines,
@@ -1346,8 +1394,12 @@ class CodeEditor {
                 };
 
                 const ext = CodeEditor.languages[ options.language ] ?. ext;
-                this.addExplorerItem( { id: name, skipVisibility: true, icon: this._getFileIcon( name, ext ) } );
-                this.explorer.innerTree.frefresh( name );
+
+                if( this.useFileExplorer )
+                {
+                    this.addExplorerItem( { id: name, skipVisibility: true, icon: this._getFileIcon( name, ext ) } );
+                    this.explorer.innerTree.frefresh( name );
+                }
             }
             else
             {
@@ -1462,7 +1514,9 @@ class CodeEditor {
 
         // Only the mainc cursor stores redo steps
         if( !cursor.isMain )
+        {
             return;
+        }
 
         this.code.redoSteps.push( {
             lines: LX.deepCopy( this.code.lines ),
@@ -1492,7 +1546,9 @@ class CodeEditor {
 
             // Generate new if needed
             if( !currentCursor )
+            {
                 currentCursor = this._addCursor();
+            }
 
             this.restoreCursor( currentCursor, step.cursors[ i ] );
         }
@@ -1515,6 +1571,7 @@ class CodeEditor {
         const icon = this._getFileIcon( null, ext );
 
         // Update tab icon
+        if( !this.skipTabs )
         {
             const tab = this.tabs.tabDOMs[ this.code.tabName ];
             tab.firstChild.remove();
@@ -1533,7 +1590,7 @@ class CodeEditor {
         }
 
         // Update explorer icon
-        if( this.explorer )
+        if( this.useFileExplorer )
         {
             const item = this.explorer.innerTree.data.children.filter( (v) => v.id === this.code.tabName )[ 0 ];
             console.assert( item != undefined );
@@ -1575,93 +1632,88 @@ class CodeEditor {
 
     _createStatusPanel() {
 
-        if( !this.skipInfo )
+        if( this.skipInfo )
         {
-            let panel = new LX.Panel({ className: "lexcodetabinfo flex flex-row", height: "auto" });
+            return;
+        }
 
-            let leftStatusPanel = new LX.Panel( { id: "FontSizeZoomStatusComponent", height: "auto" } );
-            leftStatusPanel.sameLine();
+        let panel = new LX.Panel({ className: "lexcodetabinfo flex flex-row", height: "auto" });
+
+        let leftStatusPanel = new LX.Panel( { id: "FontSizeZoomStatusComponent", height: "auto" } );
+        leftStatusPanel.sameLine();
+
+        if( this.skipTabs )
+        {
             leftStatusPanel.addButton( null, "ZoomOutButton", this._decreaseFontSize.bind( this ), { icon: "ZoomOut", width: "32px", title: "Zoom Out", tooltip: true } );
-            leftStatusPanel.addLabel( this.fontSize ?? 14, { fit: true, signal: "@font-size" });
-            leftStatusPanel.addButton( null, "ZoomInButton", this._increaseFontSize.bind( this ), { icon: "ZoomIn", width: "32px", title: "Zoom In", tooltip: true } );
-            leftStatusPanel.endLine( "justify-start" );
-            panel.attach( leftStatusPanel.root );
+        }
 
-            let rightStatusPanel = new LX.Panel( { height: "auto" } );
-            rightStatusPanel.sameLine();
-            rightStatusPanel.addLabel( this.code.title, { id: "EditorFilenameStatusComponent", fit: true, signal: "@tab-name" });
-            rightStatusPanel.addButton( null, "Ln 1, Col 1", this.showSearchLineBox.bind( this ), { id: "EditorSelectionStatusComponent", fit: true, signal: "@cursor-data" });
-            rightStatusPanel.addButton( null, "Spaces: " + this.tabSpaces, ( value, event ) => {
-                LX.addContextMenu( "Spaces", event, m => {
-                    const options = [ 2, 4, 8 ];
-                    for( const n of options )
-                        m.add( n, (v) => {
-                            this.tabSpaces = v;
-                            this.processLines();
-                            this._updateDataInfoPanel( "@tab-spaces", "Spaces: " + this.tabSpaces );
-                        } );
-                });
-            }, { id: "EditorIndentationStatusComponent", nameWidth: "15%", signal: "@tab-spaces" });
-            rightStatusPanel.addButton( "<b>{ }</b>", this.highlight, ( value, event ) => {
-                LX.addContextMenu( "Language", event, m => {
-                    for( const lang of Object.keys( CodeEditor.languages ) )
-                    {
-                        m.add( lang, v => {
-                            this._changeLanguage( v, null, true )
-                        } );
-                    }
-                });
-            }, { id: "EditorLanguageStatusComponent", nameWidth: "15%", signal: "@highlight" });
-            rightStatusPanel.endLine( "justify-end" );
-            panel.attach( rightStatusPanel.root );
+        leftStatusPanel.addButton( null, "ZoomOutButton", this._decreaseFontSize.bind( this ), { icon: "ZoomOut", width: "32px", title: "Zoom Out", tooltip: true } );
+        leftStatusPanel.addLabel( this.fontSize ?? 14, { fit: true, signal: "@font-size" });
+        leftStatusPanel.addButton( null, "ZoomInButton", this._increaseFontSize.bind( this ), { icon: "ZoomIn", width: "32px", title: "Zoom In", tooltip: true } );
+        leftStatusPanel.endLine( "justify-start" );
+        panel.attach( leftStatusPanel.root );
 
-            const itemVisibilityMap = {
-                "Font Size Zoom": true,
-                "Editor Filename": true,
-                "Editor Selection": true,
-                "Editor Indentation": true,
-                "Editor Language": true,
-            };
-
-            panel.root.addEventListener( "contextmenu", (e) => {
-
-                if( e.target && ( e.target.classList.contains( "lexpanel" ) || e.target.classList.contains( "lexinlinecomponents" ) ) )
+        let rightStatusPanel = new LX.Panel( { height: "auto" } );
+        rightStatusPanel.sameLine();
+        rightStatusPanel.addLabel( this.code.title, { id: "EditorFilenameStatusComponent", fit: true, signal: "@tab-name" });
+        rightStatusPanel.addButton( null, "Ln 1, Col 1", this.showSearchLineBox.bind( this ), { id: "EditorSelectionStatusComponent", fit: true, signal: "@cursor-data" });
+        rightStatusPanel.addButton( null, "Spaces: " + this.tabSpaces, ( value, event ) => {
+            LX.addContextMenu( "Spaces", event, m => {
+                const options = [ 2, 4, 8 ];
+                for( const n of options )
+                    m.add( n, (v) => {
+                        this.tabSpaces = v;
+                        this.processLines();
+                        this._updateDataInfoPanel( "@tab-spaces", "Spaces: " + this.tabSpaces );
+                    } );
+            });
+        }, { id: "EditorIndentationStatusComponent", nameWidth: "15%", signal: "@tab-spaces" });
+        rightStatusPanel.addButton( "<b>{ }</b>", this.highlight, ( value, event ) => {
+            LX.addContextMenu( "Language", event, m => {
+                for( const lang of Object.keys( CodeEditor.languages ) )
                 {
-                    return;
+                    m.add( lang, v => {
+                        this._changeLanguage( v, null, true )
+                    } );
                 }
+            });
+        }, { id: "EditorLanguageStatusComponent", nameWidth: "15%", signal: "@highlight" });
+        rightStatusPanel.endLine( "justify-end" );
+        panel.attach( rightStatusPanel.root );
 
-                const menuOptions = Object.keys( itemVisibilityMap ).map( ( itemName, idx ) => {
-                    const item = {
-                        name: itemName,
-                        icon: "Check",
-                        callback: () => {
-                            itemVisibilityMap[ itemName ] = !itemVisibilityMap[ itemName ];
-                            const b = panel.root.querySelector( `#${ itemName.replaceAll( " ", "" ) }StatusComponent` );
-                            console.assert( b, `${ itemName } has no status button!` );
-                            b.classList.toggle( "hidden", !itemVisibilityMap[ itemName ] );
-                        }
+        const itemVisibilityMap = {
+            "Font Size Zoom": true,
+            "Editor Filename": true,
+            "Editor Selection": true,
+            "Editor Indentation": true,
+            "Editor Language": true,
+        };
+
+        panel.root.addEventListener( "contextmenu", (e) => {
+
+            if( e.target && ( e.target.classList.contains( "lexpanel" ) || e.target.classList.contains( "lexinlinecomponents" ) ) )
+            {
+                return;
+            }
+
+            const menuOptions = Object.keys( itemVisibilityMap ).map( ( itemName, idx ) => {
+                const item = {
+                    name: itemName,
+                    icon: "Check",
+                    callback: () => {
+                        itemVisibilityMap[ itemName ] = !itemVisibilityMap[ itemName ];
+                        const b = panel.root.querySelector( `#${ itemName.replaceAll( " ", "" ) }StatusComponent` );
+                        console.assert( b, `${ itemName } has no status button!` );
+                        b.classList.toggle( "hidden", !itemVisibilityMap[ itemName ] );
                     }
-                    if( !itemVisibilityMap[ itemName ] ) delete item.icon;
-                    return item;
-                } );
-                new LX.DropdownMenu( e.target, menuOptions, { side: "top", align: "start" });
+                }
+                if( !itemVisibilityMap[ itemName ] ) delete item.icon;
+                return item;
             } );
+            new LX.DropdownMenu( e.target, menuOptions, { side: "top", align: "start" });
+        } );
 
-            return panel;
-        }
-        else
-        {
-            LX.doAsync( () => {
-
-                // Change css a little bit...
-                this.gutter.style.height = "calc(100% - 28px)";
-                this.root.querySelectorAll( '.code' ).forEach( e => e.style.height = "calc(100% - 6px)" );
-                this.root.querySelector( '.lexareatabscontent' ).style.height = "calc(100% - 23px)";
-                this.base_area.root.querySelector( '.lexcodescrollbar.vertical' ).style.height = "calc(100% - 27px)";
-                this.tabs.area.root.classList.add( 'no-code-info' );
-
-            }, 100 );
-        }
+        return panel;
     }
 
     _getFileIcon( name, extension, lang ) {
@@ -1681,12 +1733,12 @@ class CodeEditor {
             else
             {
                 const possibleExtensions = [].concat( extension );
-    
+
                 if( name )
                 {
                     const fileExtension = LX.getExtension( name );
                     const idx = possibleExtensions.indexOf( fileExtension );
-    
+
                     if( idx > -1)
                     {
                         extension = possibleExtensions[ idx ];
@@ -1829,21 +1881,24 @@ class CodeEditor {
 
         const tabIcon = this._getFileIcon( name );
 
-        if( this.explorer && !isNewTabButton )
+        if( this.useFileExplorer && !isNewTabButton )
         {
             this.addExplorerItem( { id: name, skipVisibility: true, icon: tabIcon } );
             this.explorer.innerTree.frefresh( name );
         }
 
-        this.tabs.add( name, code, {
-            selected: selected,
-            fixed: isNewTabButton,
-            title: code.title,
-            icon: tabIcon,
-            onSelect: this._onSelectTab.bind( this, isNewTabButton ),
-            onContextMenu: this._onContextMenuTab.bind( this, isNewTabButton ),
-            allowDelete: true
-        } );
+        if( !this.skipTabs )
+        {
+            this.tabs.add( name, code, {
+                selected: selected,
+                fixed: isNewTabButton,
+                title: code.title,
+                icon: tabIcon,
+                onSelect: this._onSelectTab.bind( this, isNewTabButton ),
+                onContextMenu: this._onContextMenuTab.bind( this, isNewTabButton ),
+                allowDelete: true
+            } );
+        }
 
         // Move into the sizer..
         this.codeSizer.appendChild( code );
@@ -1979,7 +2034,7 @@ class CodeEditor {
 
     processMouse( e ) {
 
-        if( !e.target.classList.contains('code') && !e.target.classList.contains('codetabsarea') ) return;
+        if( !e.target.classList.contains('code') && !e.target.classList.contains('lexcodearea') ) return;
         if( !this.code ) return;
 
         var cursor = this.getCurrentCursor();
@@ -2610,17 +2665,7 @@ class CodeEditor {
         this.processLine( lidx );
 
         // We are out of the viewport and max length is different? Resize scrollbars...
-        const maxLineLength = this.getMaxLineLength();
-        const numViewportChars = Math.floor( ( this.codeScroller.clientWidth - CodeEditor.LINE_GUTTER_WIDTH ) / this.charWidth );
-        if( maxLineLength >= numViewportChars && maxLineLength != this._lastMaxLineLength )
-        {
-            this.resize( maxLineLength, () => {
-                if( cursor.position > numViewportChars )
-                {
-                    this.setScrollLeft( cursor.position * this.charWidth );
-                }
-            } );
-        }
+        this.resizeIfNecessary( cursor );
 
         // Manage autocomplete
 
@@ -2909,7 +2954,7 @@ class CodeEditor {
         const lastScrollTop = this.getScrollTop();
         this.firstLineInViewport = ( mode ?? CodeEditor.KEEP_VISIBLE_LINES ) & CodeEditor.UPDATE_VISIBLE_LINES ?
                                     ( (lastScrollTop / this.lineHeight)|0 ) : this.firstLineInViewport;
-        const totalLinesInViewport = ((this.codeScroller.offsetHeight - 36) / this.lineHeight)|0;
+        const totalLinesInViewport = ( ( this.codeScroller.offsetHeight ) / this.lineHeight )|0;
         this.visibleLinesViewport = new LX.vec2(
             Math.max( this.firstLineInViewport - this.lineScrollMargin.x, 0 ),
             Math.min( this.firstLineInViewport + totalLinesInViewport + this.lineScrollMargin.y, this.code.lines.length )
@@ -3054,7 +3099,7 @@ class CodeEditor {
             }
 
             // Store current scopes
-            
+
             // Get some context about the scope from previous lines
             let contextTokens = [
                 ...this._getTokensFromLine( this.code.lines[ lineNumber ].substring( 0, lineString.indexOf( token ) ) )
@@ -3069,7 +3114,7 @@ class CodeEditor {
                 {
                     kLineString = kLineString.substr( closeIdx );
                 }
-                
+
                 contextTokens = [ ...this._getTokensFromLine( kLineString ), ...contextTokens ];
 
                 if( kLineString.length !== this.code.lines[ lineNumber - k ] )
@@ -3200,7 +3245,7 @@ class CodeEditor {
         }
         else // Update all lines at once
         {
-            
+
             return `<pre>${ ( gutterLineHtml + html + debugString ) }</pre>`;
         }
     }
@@ -4047,11 +4092,8 @@ class CodeEditor {
         }
 
         const currentScrollTop = this.getScrollTop();
-        const tabsHeight = this.tabs.root.getBoundingClientRect().height;
-        const statusPanelHeight = this.skipInfo ? 0 : this.statusPanel.root.getBoundingClientRect().height;
-        const scrollerHeight = this.codeScroller.offsetHeight;
-
-        var lastLine = ( ( scrollerHeight - tabsHeight - statusPanelHeight + currentScrollTop ) / this.lineHeight )|0;
+        const scrollerHeight = this.codeScroller.offsetHeight - this._fullVerticalOffset;
+        const lastLine = ( ( scrollerHeight + currentScrollTop ) / this.lineHeight )|0;
         if( cursor.line >= lastLine )
         {
             this.setScrollTop( currentScrollTop + this.lineHeight );
@@ -4334,24 +4376,28 @@ class CodeEditor {
         }, 20 );
     }
 
-    resize( pMaxLength, onResize ) {
+    resize( flag = CodeEditor.RESIZE_SCROLLBAR_H_V, pMaxLength, onResize ) {
 
         setTimeout( () => {
 
-            // Update max viewport
-            const maxLineLength = pMaxLength ?? this.getMaxLineLength();
-            const scrollWidth = maxLineLength * this.charWidth + CodeEditor.LINE_GUTTER_WIDTH;
+            let scrollWidth, scrollHeight;
 
-            const tabsHeight = this.tabs.root.getBoundingClientRect().height;
-            const statusPanelHeight = this.skipInfo ? 0 : this.statusPanel.root.getBoundingClientRect().height;
-            const scrollHeight = this.code.lines.length * this.lineHeight;
+            if( flag & CodeEditor.RESIZE_SCROLLBAR_H )
+            {
+                // Update max viewport
+                const maxLineLength = pMaxLength ?? this.getMaxLineLength();
+                this._lastMaxLineLength = maxLineLength;
+                scrollWidth = maxLineLength * this.charWidth + CodeEditor.LINE_GUTTER_WIDTH;
+                this.codeSizer.style.minWidth = scrollWidth + "px";
+            }
 
-            this._lastMaxLineLength = maxLineLength;
+            if( flag & CodeEditor.RESIZE_SCROLLBAR_V )
+            {
+                scrollHeight = this.code.lines.length * this.lineHeight + this._fullVerticalOffset;
+                this.codeSizer.style.minHeight = scrollHeight + "px";
+            }
 
-            this.codeSizer.style.minWidth = scrollWidth + "px";
-            this.codeSizer.style.minHeight = ( scrollHeight + tabsHeight + statusPanelHeight ) + "px";
-
-            this.resizeScrollBars();
+            this.resizeScrollBars( flag );
 
             if( onResize )
             {
@@ -4361,37 +4407,52 @@ class CodeEditor {
         }, 10 );
     }
 
-    resizeScrollBars() {
+    resizeIfNecessary( cursor, force ) {
 
-        const totalLinesInViewport = ((this.codeScroller.offsetHeight) / this.lineHeight)|0;
-
-        if( totalLinesInViewport >= this.code.lines.length )
-        {
-            this.codeScroller.classList.remove( 'with-vscrollbar' );
-            this.vScrollbar.root.classList.add( 'scrollbar-unused' );
-        }
-        else
-        {
-            this.codeScroller.classList.add( 'with-vscrollbar' );
-            this.vScrollbar.root.classList.remove( 'scrollbar-unused' );
-            this.vScrollbar.thumb.size = (totalLinesInViewport / this.code.lines.length);
-            this.vScrollbar.thumb.style.height = (this.vScrollbar.thumb.size * 100.0) + "%";
-        }
-
+        const maxLineLength = this.getMaxLineLength();
         const numViewportChars = Math.floor( ( this.codeScroller.clientWidth - CodeEditor.LINE_GUTTER_WIDTH ) / this.charWidth );
-        const maxLineLength = this._lastMaxLineLength;
-
-        if( numViewportChars >= maxLineLength )
+        if( force || ( maxLineLength >= numViewportChars && maxLineLength != this._lastMaxLineLength ) )
         {
-            this.codeScroller.classList.remove( 'with-hscrollbar' );
-            this.hScrollbar.root.classList.add( 'scrollbar-unused' );
+            this.resize( CodeEditor.RESIZE_SCROLLBAR_H, maxLineLength, () => {
+                if( cursor.position > numViewportChars )
+                {
+                    this.setScrollLeft( cursor.position * this.charWidth );
+                }
+            } );
         }
-        else
+    }
+
+    resizeScrollBars( flag = CodeEditor.RESIZE_SCROLLBAR_H_V ) {
+
+        if( flag & CodeEditor.RESIZE_SCROLLBAR_V )
         {
-            this.codeScroller.classList.add( 'with-hscrollbar' );
-            this.hScrollbar.root.classList.remove( 'scrollbar-unused' );
-            this.hScrollbar.thumb.size = (numViewportChars / maxLineLength);
-            this.hScrollbar.thumb.style.width = (this.hScrollbar.thumb.size * 100.0) + "%";
+            const totalLinesInViewport = (( this.codeScroller.offsetHeight ) / this.lineHeight)|0;
+            const needsVerticalScrollbar = ( this.code.lines.length >= totalLinesInViewport );
+            if( needsVerticalScrollbar )
+            {
+                this.vScrollbar.thumb.size = ( totalLinesInViewport / this.code.lines.length );
+                this.vScrollbar.thumb.style.height = (this.vScrollbar.thumb.size * 100.0) + "%";
+            }
+
+            this.vScrollbar.root.classList.toggle( 'hidden', !needsVerticalScrollbar );
+            this.hScrollbar.root.style.width = `calc(100% - ${ 48 + ( needsVerticalScrollbar ? ScrollBar.SCROLLBAR_VERTICAL_WIDTH : 0 ) }px)`; // 48 is the line gutter
+            this.codeArea.root.style.width = `calc(100% - ${ needsVerticalScrollbar ? ScrollBar.SCROLLBAR_VERTICAL_WIDTH : 0 }px)`;
+        }
+
+        if( flag & CodeEditor.RESIZE_SCROLLBAR_H )
+        {
+            const numViewportChars = Math.floor( ( this.codeScroller.clientWidth - CodeEditor.LINE_GUTTER_WIDTH ) / this.charWidth );
+            const maxLineLength = this._lastMaxLineLength;
+            const needsHorizontalScrollbar = maxLineLength >= numViewportChars;
+
+            if( needsHorizontalScrollbar )
+            {
+                this.hScrollbar.thumb.size = ( numViewportChars / maxLineLength );
+                this.hScrollbar.thumb.style.width = ( this.hScrollbar.thumb.size * 100.0 ) + "%";
+            }
+
+            this.hScrollbar.root.classList.toggle( 'hidden', !needsHorizontalScrollbar );
+            this.codeArea.root.style.height = `calc(100% - ${ this._verticalBottomOffset + ( needsHorizontalScrollbar ? ScrollBar.SCROLLBAR_HORIZONTAL_HEIGHT : 0 ) }px)`;
         }
     }
 

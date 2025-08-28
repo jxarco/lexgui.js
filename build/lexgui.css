@@ -4923,6 +4923,7 @@ ul.lexassetscontent {
     display: flex;
     position: relative;
     overflow: inherit;
+    background-color: light-dark(var(--global-color-secondary), var(--global-medium-background));
 }
 
 .codebasearea * {
@@ -4997,6 +4998,7 @@ ul.lexassetscontent {
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+    background-color: inherit;
 }
 
 .lexcodeeditor .lexareatabscontent {
@@ -5014,37 +5016,23 @@ ul.lexassetscontent {
 
 .lexcodegutter {
     width: 48px;
-    height: calc(100% - 65px);
-    background-color: light-dark(var(--global-color-secondary), var(--global-medium-background));
-    margin-top: 31px;
+    background-color: inherit;
     overflow: hidden;
     position: absolute;
     top: 0;
 }
 
-.lexcodeeditor .codetabsarea {
-    height: 100% !important;
-    background-color: light-dark(var(--global-color-secondary), var(--global-medium-background));
+.lexcodeeditor .lexcodearea {
+    width: 100%;
+    background-color: inherit;
     overflow: scroll;
 }
 
-.lexcodeeditor .codetabsarea.no-code-info {
-    height: calc(100% - 28px) !important;
-}
-
-.lexcodeeditor .codetabsarea::-webkit-scrollbar {
+.lexcodeeditor .lexcodearea::-webkit-scrollbar {
     display: none;
 }
 
-.lexcodeeditor .codetabsarea.with-vscrollbar {
-    width: 100% !important;
-}
-
-.lexcodeeditor .codetabsarea.with-hscrollbar {
-    height: calc(100% - 72px) !important;
-}
-
-.lexcodeeditor .codetabsarea.dragging {
+.lexcodeeditor .lexcodearea.dragging {
     background-color: var(--global-color-secondary);
 }
 
@@ -5143,6 +5131,10 @@ ul.lexassetscontent {
     z-index: 1;
 }
 
+.lexcodeeditor pre.active-line .line-gutter {
+    color: var(--global-text-primary);
+}
+
 .lexcodeeditor.no-gutter pre .line-gutter {
     opacity: 0;
 }
@@ -5188,31 +5180,21 @@ ul.lexassetscontent {
 
 .lexcodescrollbar {
     width: 10px;
-    height: calc(100% - 62px);
     position: absolute;
     background-color: transparent;
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    margin-top: 31px;
     z-index: 1 !important;
     right: 0px;
     pointer-events: none;
 }
 
 .lexcodescrollbar.horizontal {
-    width: calc(100% - 58px);
+    width: calc(100% - 48px);
     height: 10px;
-    bottom: 47px;
-    right: 10px;
-}
-
-.codebasearea:has(.codetabsarea.no-code-info) .lexcodescrollbar.horizontal {
     bottom: 0px;
-}
-
-.lexcodescrollbar.scrollbar-unused {
-    display: none;
+    left: 48px; /* gutter offset */
 }
 
 .lexcodescrollbar div {
