@@ -3211,7 +3211,6 @@ class CodeEditor {
                         continue;
                     }
 
-                    this.code.lineScopes[ occ.line ] = [ ...this._scopeStack ];
                     this.processLine( occ.line, false, true );
                 }
             }
