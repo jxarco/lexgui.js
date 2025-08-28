@@ -1240,10 +1240,10 @@ class CodeEditor {
 
                     this.gutter.style.marginTop = `${ this._verticalTopOffset }px`;
                     this.gutter.style.height = `calc(100% - ${ this._fullVerticalOffset }px)`;
-                    this.vScrollbar.root.style.marginTop = `${ this.tabs?.root.getBoundingClientRect().height ?? 0 }px`;
+                    this.vScrollbar.root.style.marginTop = `${ this._verticalTopOffset }px`;
                     this.vScrollbar.root.style.height = `calc(100% - ${ this._fullVerticalOffset }px)`;
                     this.hScrollbar.root.style.bottom = `${ this._verticalBottomOffset }px`;
-                    this.codeArea.root.style.height = `calc(100% - ${ this._verticalBottomOffset }px)`;
+                    this.codeArea.root.style.height = `calc(100% - ${ this._fullVerticalOffset }px)`;
                 }, 50 );
 
             });
@@ -4479,7 +4479,7 @@ class CodeEditor {
 
             if( flag & CodeEditor.RESIZE_SCROLLBAR_V )
             {
-                scrollHeight = this.code.lines.length * this.lineHeight + this._fullVerticalOffset;
+                scrollHeight = this.code.lines.length * this.lineHeight;
                 this.codeSizer.style.minHeight = scrollHeight + "px";
             }
 
@@ -4538,7 +4538,7 @@ class CodeEditor {
             }
 
             this.hScrollbar.root.classList.toggle( 'hidden', !needsHorizontalScrollbar );
-            this.codeArea.root.style.height = `calc(100% - ${ this._verticalBottomOffset + ( needsHorizontalScrollbar ? ScrollBar.SCROLLBAR_HORIZONTAL_HEIGHT : 0 ) }px)`;
+            this.codeArea.root.style.height = `calc(100% - ${ this._fullVerticalOffset + ( needsHorizontalScrollbar ? ScrollBar.SCROLLBAR_HORIZONTAL_HEIGHT : 0 ) }px)`;
         }
     }
 
