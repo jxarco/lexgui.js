@@ -418,6 +418,35 @@ class CodeEditor {
         {
             this.codeArea = new LX.Area( { skipAppend: true } );
             this.area.attach( this.codeArea );
+            this._loadFileButton = LX.makeElement( "button",
+                "grid absolute self-center z-100 p-3 rounded-full bg-secondary hover:bg-tertiary cursor-pointer border",
+                LX.makeIcon( "FolderOpen" ).innerHTML,
+                this.area,
+                {
+                    bottom: "8px"
+                }
+            );
+            this._loadFileButton.addEventListener( "click", e => {
+
+                const dropdownOptions = [];
+
+                for( const [ key, value ] of [ ...Object.entries( this.loadedTabs ).slice( 1 ), ...Object.entries( this._tabStorage ) ] )
+                {
+                    const icon = this._getFileIcon( key );
+                    const classes = icon ? icon.split( ' ' ) : [];
+                    dropdownOptions.push( {
+                        name: key,
+                        icon: classes[ 0 ],
+                        svgClass: classes.slice( 0 ).join( ' ' ),
+                        callback: (v) => {
+                            this.loadCode( v );
+                        }
+                    } );
+                }
+
+                new LX.DropdownMenu( this._loadFileButton, dropdownOptions, { side: "top", align: "center" });
+
+            } );
         }
 
         this.codeArea.root.classList.add( 'lexcodearea' );
@@ -1400,6 +1429,10 @@ class CodeEditor {
                     this.addExplorerItem( { id: name, skipVisibility: true, icon: this._getFileIcon( name, ext ) } );
                     this.explorer.innerTree.frefresh( name );
                 }
+                else
+                {
+
+                }
             }
             else
             {
@@ -1922,6 +1955,60 @@ class CodeEditor {
 
         // Bc it could be overrided..
         return name;
+    }
+
+    loadCode( name ) {
+
+        // Hide all others
+        this.codeSizer.querySelectorAll( ".code" ).forEach( c => c.classList.add( "hidden" ) );
+
+        // Already open...
+        if( this.openedTabs[ name ] )
+        {
+            let code = this.openedTabs[ name ]
+            code.classList.remove( "hidden" );
+            return;
+        }
+
+        let code = this.loadedTabs[ name ]
+        if( !code )
+        {
+            this.addTab( name, true );
+
+            // Unload lines from storage...
+            const tabData = this._tabStorage[ name ];
+            if( tabData )
+            {
+                this.code.lines = tabData.lines;
+
+                if( tabData.options.language )
+                {
+                    this._changeLanguage( tabData.options.language, null, true );
+                }
+                else
+                {
+                    this._changeLanguageFromExtension( LX.getExtension( name ) );
+                }
+
+                delete this._tabStorage[ name ];
+            }
+
+            return;
+        }
+
+        this.openedTabs[ name ] = code;
+
+        // Move into the sizer..
+        this.codeSizer.appendChild( code );
+
+        this.endSelection();
+
+        // Select as current...
+        this.code = code;
+        this.resetCursorPos( CodeEditor.CURSOR_LEFT_TOP );
+        this.processLines();
+        this._changeLanguageFromExtension( LX.getExtension( name ) );
+        this._updateDataInfoPanel( "@tab-name", code.tabName );
     }
 
     loadTab( name ) {

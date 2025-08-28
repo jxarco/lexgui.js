@@ -38,4 +38,4 @@ fn main() {
         n += 2;
     }
     println!("Prime");
-} 
+}

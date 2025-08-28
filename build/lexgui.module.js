@@ -1274,7 +1274,7 @@ class DropdownMenu {
         }
         else if( item.icon )
         {
-            const icon = LX.makeIcon( item.icon, { svgClass: disabled ? "fg-tertiary" : item.className } );
+            const icon = LX.makeIcon( item.icon, { svgClass: disabled ? "fg-tertiary" : item.svgClass ?? item.className } );
             menuItem.prepend( icon );
         }
         else if( item.checked == undefined && applyIconPadding ) // no checkbox, no icon, apply padding if there's checkbox or icon in other items
