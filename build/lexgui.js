@@ -14,7 +14,7 @@ console.warn( 'Script _build/lexgui.js_ is depracated and will be removed soon. 
 */
 
 const LX = {
-    version: "0.7.2",
+    version: "0.7.3",
     ready: false,
     extensions: [], // Store extensions used
     signals: {}, // Events and triggers
@@ -382,7 +382,7 @@ function _createCommandbar( root )
             const instances = LX.CodeEditor.getInstances();
             if( !instances.length || !instances[ 0 ].area.root.offsetHeight ) return;
 
-            const languages = instances[ 0 ].languages;
+            const languages = LX.CodeEditor.languages;
 
             for( let l of Object.keys( languages ) )
             {
@@ -1281,7 +1281,7 @@ class DropdownMenu {
         }
         else if( item.icon )
         {
-            const icon = LX.makeIcon( item.icon, { svgClass: disabled ? "fg-tertiary" : item.className } );
+            const icon = LX.makeIcon( item.icon, { svgClass: disabled ? "fg-tertiary" : item.svgClass ?? item.className } );
             menuItem.prepend( icon );
         }
         else if( item.checked == undefined && applyIconPadding ) // no checkbox, no icon, apply padding if there's checkbox or icon in other items

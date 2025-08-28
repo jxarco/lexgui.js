@@ -2,11 +2,18 @@
 
 ## dev
 
+## 0.7.3 (master)
+
+VideoEditor:
+- Minor Controls sizes refactor.
+- Fixed Controls event listeners.
+
 CodeEditor:
 - Improved scope detection.
 - Added basic symbols detection to feed autocomplete.
+- Fixed resizing and scrollbar issues.
 
-## 0.7.2 (master)
+## 0.7.2
 
 Fixed AssetView Filter select.
 Fixed tooltips on Dialog without modal.
