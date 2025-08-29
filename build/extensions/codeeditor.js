@@ -1208,7 +1208,7 @@ class CodeEditor {
         const onLoadAll = () => {
             // Create inspector panel when the initial state is complete
             // and we have at least 1 tab opened
-            this.statusPanel = this._createStatusPanel();
+            this.statusPanel = this._createStatusPanel( options );
             if( this.statusPanel )
             {
                 area.attach( this.statusPanel );
@@ -1663,7 +1663,7 @@ class CodeEditor {
         this._changeLanguage( 'Plain Text' );
     }
 
-    _createStatusPanel() {
+    _createStatusPanel( options ) {
 
         if( this.skipInfo )
         {
@@ -1715,12 +1715,23 @@ class CodeEditor {
         panel.attach( rightStatusPanel.root );
 
         const itemVisibilityMap = {
-            "Font Size Zoom": true,
-            "Editor Filename": true,
-            "Editor Selection": true,
-            "Editor Indentation": true,
-            "Editor Language": true,
+            "Font Size Zoom": options.statusShowFontSizeZoom ?? true,
+            "Editor Filename": options.statusShowEditorFilename ?? true,
+            "Editor Selection": options.statusShowEditorSelection ?? true,
+            "Editor Indentation": options.statusShowEditorIndentation ?? true,
+            "Editor Language": options.statusShowEditorLanguage ?? true,
         };
+
+        const _setVisibility = ( itemName ) => {
+            const b = panel.root.querySelector( `#${ itemName.replaceAll( " ", "" ) }StatusComponent` );
+            console.assert( b, `${ itemName } has no status button!` );
+            b.classList.toggle( "hidden", !itemVisibilityMap[ itemName ] );
+        }
+
+        for( const [ itemName, v ] of Object.entries( itemVisibilityMap ) )
+        {
+            _setVisibility( itemName );
+        }
 
         panel.root.addEventListener( "contextmenu", (e) => {
 
@@ -1735,9 +1746,7 @@ class CodeEditor {
                     icon: "Check",
                     callback: () => {
                         itemVisibilityMap[ itemName ] = !itemVisibilityMap[ itemName ];
-                        const b = panel.root.querySelector( `#${ itemName.replaceAll( " ", "" ) }StatusComponent` );
-                        console.assert( b, `${ itemName } has no status button!` );
-                        b.classList.toggle( "hidden", !itemVisibilityMap[ itemName ] );
+                        _setVisibility( itemName );
                     }
                 }
                 if( !itemVisibilityMap[ itemName ] ) delete item.icon;

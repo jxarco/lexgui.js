@@ -2,6 +2,10 @@
 
 ## dev
 
+CodeEditor:
+- Added support to togge status bar items by default.
+- Minor bugs fixed.
+
 ## 0.7.3 (master)
 
 VideoEditor:
