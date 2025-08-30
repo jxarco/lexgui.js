@@ -2,6 +2,8 @@
 
 ## dev
 
+## 0.7.4 (master)
+
 Added `LX.toKebabCase`.
 
 CodeEditor:
@@ -11,7 +13,7 @@ CodeEditor:
 - New autocomplete item icons based on Symbols.
 - Minor bugs fixed.
 
-## 0.7.3 (master)
+## 0.7.3
 
 VideoEditor:
 - Minor Controls sizes refactor.
