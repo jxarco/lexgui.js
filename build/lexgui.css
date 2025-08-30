@@ -5097,6 +5097,10 @@ ul.lexassetscontent {
     background-color: #db21212f !important;
 }
 
+.lexcodeeditor pre.debug {
+    background-color: #fffb002f !important;
+}
+
 .lexcodeeditor.disabled .lexareatab {
     cursor: default;
 }

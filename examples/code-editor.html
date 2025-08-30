@@ -24,6 +24,7 @@
 
     LX.CodeEditor.debugScopes = false;
     LX.CodeEditor.debugSymbols = false;
+    LX.CodeEditor.debugProcessedLines = false;
 
     // init library and get main area
     let area = await LX.init();
@@ -57,27 +58,35 @@
         // skipInfo: true,
         fileExplorer: fileExplorer,
         // statusShowFontSizeZoom: false,
-        // skipTabs: true
+        // skipTabs: true,
+        files: [
+            "../data/js_sample.js",
+            "../data/ts_sample.ts",
+            "../data/json_sample.json",
+            "../data/css_sample.css",
+            "../data/cpp_sample.cpp",
+            "../data/cpp_header_sample.hpp",
+            "../data/c_sample.c",
+            "../data/xml_sample.xml",
+            "../data/python_sample.py",
+            "../data/rust_sample.rs",
+            "../data/php_sample.php",
+            "../data/localhost.bat",
+            "../data/frag.wgsl",
+            "../changelog.md",
+            "../index.html",
+        ],
+        onFilesLoaded: ( instance, numFilesLoaded ) => {
+            console.log( `CodeEditor: ${ numFilesLoaded } files loaded!` );
+            instance.loadTab("js_sample.js");
+        }
     });
 
-    editor.loadFile("../data/js_sample.js");
-    editor.loadFile("../data/ts_sample.ts");
-    editor.loadFile("../data/json_sample.json");
-    editor.loadFile("../data/css_sample.css");
-    editor.loadFile("../data/cpp_sample.cpp");
-    editor.loadFile("../data/cpp_header_sample.hpp");
-    editor.loadFile("../data/c_sample.c");
-    editor.loadFile("../data/xml_sample.xml");
-    editor.loadFile("../data/python_sample.py");
-    editor.loadFile("../data/rust_sample.rs");
-    editor.loadFile("../data/animation.bml", { language: "JSON" });
-    editor.loadFile("../data/CMakeLists.txt", { language: "CMake" });
-    editor.loadFile("../data/php_sample.php");
-    editor.loadFile("../data/localhost.bat");
-    editor.loadFile("../changelog.md");
-    editor.loadFile("../index.html");
+    // editor.loadFile("../data/animation.bml", { language: "JSON" });
+    // editor.loadFile("../data/CMakeLists.txt", { language: "CMake" });
 
-    if (!fileExplorer) {
+    if( !fileExplorer )
+    {
         var ctx = canvas.getContext("2d");
         ctx.fillStyle = "#b7a9b1";
         ctx.font = "48px Monospace";

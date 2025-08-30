@@ -8,11 +8,7 @@ class Test {
     constructor() {
 
         var div = document.createElement('div');
-        div.style.width = "100px";
-        div.style.height = "100px";
         div.style.background = "red";
-        div.style.position = "absolute";
-        div.style.top = "0px";
 
         // single line comment
 
@@ -41,3 +37,5 @@ var ctx = canvas.getContext("2d");
 ctx.fillStyle = "#b7a9b1";
 ctx.font = "48px Monospace";
 ctx.strokeStyle = "#ff1999";
+
+testFunction();

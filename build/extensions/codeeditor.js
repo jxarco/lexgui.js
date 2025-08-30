@@ -151,7 +151,7 @@ class ScrollBar {
         this.type = type;
 
         this.root = document.createElement( 'div' );
-        this.root.className = "lexcodescrollbar";
+        this.root.className = "lexcodescrollbar hidden";
 
         if( type & ScrollBar.SCROLLBAR_VERTICAL )
             this.root.classList.add( 'vertical' );
@@ -966,11 +966,14 @@ class CodeEditor {
                 var spaces = firstNonspaceIndex( this.code.lines[ ln ]);
                 var tabs = Math.floor( spaces / this.tabSpaces );
 
-                if( _c0 == '{' && _c1 == '}' ) {
+                if( _c0 == '{' && _c1 == '}' )
+                {
                     this.code.lines.splice( cursor.line, 0, "" );
                     this._addSpaceTabs( cursor, tabs + 1 );
                     this.code.lines[ cursor.line + 1 ] = " ".repeat(spaces) + this.code.lines[ cursor.line + 1 ];
-                } else {
+                }
+                else
+                {
                     this._addSpaceTabs( cursor, tabs );
                 }
 
@@ -1206,6 +1209,7 @@ class CodeEditor {
         this.openedTabs = { };
 
         const onLoadAll = () => {
+
             // Create inspector panel when the initial state is complete
             // and we have at least 1 tab opened
             this.statusPanel = this._createStatusPanel( options );
@@ -1264,11 +1268,16 @@ class CodeEditor {
 
             for( let url of options.files )
             {
-                this.loadFile( url, { callback: () => {
+                this.loadFile( url, { callback: ( name, text ) => {
                     filesLoaded++;
                     if( filesLoaded == numFiles )
                     {
                         onLoadAll();
+
+                        if( options.onFilesLoaded )
+                        {
+                            options.onFilesLoaded( this, numFiles );
+                        }
                     }
                 }});
             }
@@ -1322,12 +1331,15 @@ class CodeEditor {
 
         this.cursorToLine( cursor, newLines.length ); // Already substracted 1
         this.cursorToPosition( cursor, lastLine.length );
-        this.processLines();
+
+        this.mustProcessLines = true;
 
         if( lang )
         {
             this._changeLanguage( lang );
         }
+
+        this._processLinesIfNecessary();
     }
 
     appendText( text, cursor ) {
@@ -1401,7 +1413,7 @@ class CodeEditor {
         } );
     }
 
-    loadFile( file, options = {} ) {
+    async loadFile( file, options = {} ) {
 
         const _innerAddTab = ( text, name, title ) => {
 
@@ -1429,10 +1441,6 @@ class CodeEditor {
                     this.addExplorerItem( { id: name, skipVisibility: true, icon: this._getFileIcon( name, ext ) } );
                     this.explorer.innerTree.frefresh( name );
                 }
-                else
-                {
-
-                }
             }
             else
             {
@@ -1448,17 +1456,19 @@ class CodeEditor {
 
             if( options.callback )
             {
-                options.callback( text );
+                options.callback( name, text );
             }
         };
 
         if( file.constructor == String )
         {
             let filename = file;
+
             LX.request({ url: filename, success: text => {
                 const name = filename.substring(filename.lastIndexOf( '/' ) + 1);
                 _innerAddTab( text, name, filename );
             } });
+
         }
         else // File Blob
         {
@@ -1598,7 +1608,8 @@ class CodeEditor {
         }
 
         this._updateDataInfoPanel( "@highlight", lang );
-        this.processLines();
+
+        this.mustProcessLines = true;
 
         const ext = langExtension ?? CodeEditor.languages[ lang ].ext;
         const icon = this._getFileIcon( null, ext );
@@ -1688,7 +1699,7 @@ class CodeEditor {
 
         let rightStatusPanel = new LX.Panel( { height: "auto" } );
         rightStatusPanel.sameLine();
-        rightStatusPanel.addLabel( this.code.title, { id: "EditorFilenameStatusComponent", fit: true, signal: "@tab-name" });
+        rightStatusPanel.addLabel( this.code?.title ?? "", { id: "EditorFilenameStatusComponent", fit: true, signal: "@tab-name" });
         rightStatusPanel.addButton( null, "Ln 1, Col 1", this.showSearchLineBox.bind( this ), { id: "EditorSelectionStatusComponent", fit: true, signal: "@cursor-data" });
         rightStatusPanel.addButton( null, "Spaces: " + this.tabSpaces, ( value, event ) => {
             LX.addContextMenu( "Spaces", event, m => {
@@ -1888,20 +1899,24 @@ class CodeEditor {
 
         // Create code content
         let code = document.createElement( 'div' );
-        code.className = 'code';
-        code.lines = [ "" ];
-        code.language = options.language ?? "Plain Text";
-        code.cursorState = {};
-        code.undoSteps = [];
-        code.redoSteps = [];
-        code.lineScopes = [];
-        code.lineSymbols = [];
-        code.symbolsTable = new Map();
-        code.tabName = name;
-        code.title = title ?? name;
-        code.tokens = {};
-        code.style.left = "0px";
-        code.style.top = "0px";
+        Object.assign( code, {
+            className: 'code',
+            lines: [ "" ],
+            language: options.language ?? "Plain Text",
+            cursorState: {},
+            undoSteps: [],
+            redoSteps: [],
+            lineScopes: [],
+            lineSymbols: [],
+            lineSignatures: [],
+            symbolsTable: new Map(),
+            tabName: name,
+            title: title ?? name,
+            tokens: {}
+        } );
+
+        code.style.left = "0px",
+        code.style.top = "0px",
 
         code.addEventListener( 'dragenter', function(e) {
             e.preventDefault();
@@ -1951,14 +1966,17 @@ class CodeEditor {
         {
             this.code = code;
             this.resetCursorPos( CodeEditor.CURSOR_LEFT_TOP );
-            this.processLines();
+            this.mustProcessLines = true;
         }
 
         if( options.language )
         {
             code.languageOverride = options.language;
             this._changeLanguage( code.languageOverride );
+            this.mustProcessLines = true;
         }
+
+        this._processLinesIfNecessary();
 
         this._updateDataInfoPanel( "@tab-name", name );
 
@@ -2002,6 +2020,8 @@ class CodeEditor {
                 delete this._tabStorage[ name ];
             }
 
+            this._processLinesIfNecessary();
+
             return;
         }
 
@@ -2014,9 +2034,12 @@ class CodeEditor {
 
         // Select as current...
         this.code = code;
+        this.mustProcessLines = true;
+
         this.resetCursorPos( CodeEditor.CURSOR_LEFT_TOP );
         this.processLines();
         this._changeLanguageFromExtension( LX.getExtension( name ) );
+        this._processLinesIfNecessary();
         this._updateDataInfoPanel( "@tab-name", code.tabName );
     }
 
@@ -2052,6 +2075,8 @@ class CodeEditor {
 
                 delete this._tabStorage[ name ];
             }
+
+            this._processLinesIfNecessary();
 
             return;
         }
@@ -3038,10 +3063,24 @@ class CodeEditor {
         return Math.max(...this.code.lines.map( v => v.length ));
     }
 
+    _processLinesIfNecessary() {
+        if( this.mustProcessLines )
+        {
+            this.mustProcessLines = false;
+            this.processLines();
+        }
+    }
+
     processLines( mode ) {
+
+        if( !this.code )
+        {
+            return;
+        }
 
         var htmlCode = "";
         this._blockCommentCache.length = 0;
+        this.mustProcessLines = false;
 
         // Reset all lines content
         this.code.innerHTML = "";
@@ -3089,13 +3128,6 @@ class CodeEditor {
 
     processLine( lineNumber, force, skipPropagation ) {
 
-        // Check if we are in block comment sections..
-        if( !force && this._inBlockCommentSection( lineNumber ) )
-        {
-            this.processLines();
-            return;
-        }
-
         if( this._scopeStack )
         {
             this.code.lineScopes[ lineNumber ] = [ ...this._scopeStack ];
@@ -3109,6 +3141,12 @@ class CodeEditor {
         const lang = CodeEditor.languages[ this.highlight ];
         const localLineNum =  this.toLocalLine( lineNumber );
         const lineString = this.code.lines[ lineNumber ];
+        if( lineString === undefined )
+        {
+            return;
+        }
+
+        this._lastProcessedLine = lineNumber;
 
         // multi-line strings not supported by now
         delete this._buildingString;
@@ -3141,6 +3179,18 @@ class CodeEditor {
         let lineInnerHtml = "";
         let pushedScope = false;
 
+        const newSignature = this._getLineSignatureFromTokens( tokensToEvaluate );
+        const cachedSignature = this.code.lineSignatures[ lineNumber ];
+        const mustUpdateScopes = ( cachedSignature !== newSignature ) && !force;
+        const blockComments = lang.blockComments ?? true;
+        const blockCommentsTokens = lang.blockCommentsTokens ?? this.defaultBlockCommentTokens;
+
+        // Reset scope stack if structural changes in current line
+        if( mustUpdateScopes )
+        {
+            this._scopeStack = [ { name: "", type: "global" } ];
+        }
+
         // Process all tokens
         for( let i = 0; i < tokensToEvaluate.length; ++i )
         {
@@ -3161,33 +3211,43 @@ class CodeEditor {
             }
 
             const token = tokensToEvaluate[ i ];
+            const tokenIndex = i;
+            const tokenStartIndex = this._currentTokenPositions[ tokenIndex ];;
 
-            if( lang.blockComments ?? true )
+            if( blockComments )
             {
-                const blockCommentsToken = ( lang.blockCommentsTokens ?? this.defaultBlockCommentTokens )[ 0 ];
-                if( token.substr( 0, blockCommentsToken.length ) == blockCommentsToken )
+                if( token.substr( 0, blockCommentsTokens[ 0 ].length ) == blockCommentsTokens[ 0 ] )
                 {
-                    this._buildingBlockComment = lineNumber;
+                    this._buildingBlockComment = [ lineNumber, tokenStartIndex ];
                 }
             }
 
-            // Pop current scope if necessary
+            // Compare line signature for structural changes
+            // to pop current scope if necessary
             if( token === "}" && this._scopeStack.length > 1 )
             {
                 this._scopeStack.pop();
             }
 
             lineInnerHtml += this._evaluateToken( {
-                token: token,
-                prev: prev,
+                token,
+                prev,
                 prevWithSpaces: tokensToEvaluate[ i - 1 ],
-                next: next,
+                next,
                 nextWithSpaces: tokensToEvaluate[ i + 1 ],
-                tokenIndex: i,
-                isFirstToken: (i == 0),
-                isLastToken: (i == tokensToEvaluate.length - 1),
+                tokenIndex,
+                isFirstToken: ( tokenIndex == 0 ),
+                isLastToken: ( tokenIndex == tokensToEvaluate.length - 1 ),
                 tokens: tokensToEvaluate
             } );
+
+            if( blockComments && this._buildingBlockComment != undefined
+                && token.substr( 0, blockCommentsTokens[ 1 ].length ) == blockCommentsTokens[ 1 ] )
+            {
+                const [ commentLineNumber, tokenPos ] = this._buildingBlockComment;
+                this._blockCommentCache.push( [ new LX.vec2( commentLineNumber, lineNumber ), new LX.vec2( tokenPos, tokenStartIndex ) ] );
+                delete this._buildingBlockComment;
+            }
 
             if( token !== "{" )
             {
@@ -3196,26 +3256,39 @@ class CodeEditor {
 
             // Store current scopes
 
-            // Get some context about the scope from previous lines
             let contextTokens = [
-                ...this._getTokensFromLine( this.code.lines[ lineNumber ].substring( 0, lineString.indexOf( token ) ) )
+                ...this._getTokensFromLine( this.code.lines[ lineNumber ].substring( 0, tokenStartIndex ) )
             ];
 
-            for( let k = 1; k < 50; k++ )
+            // Add token context from above lines in case we don't have information
+            // in the same line to get the scope data
+            if( !prev )
             {
-                let kLineString = this.code.lines[ lineNumber - k ];
-                if( !kLineString ) break;
-                const closeIdx = kLineString.lastIndexOf( '}' );
-                if( closeIdx > -1 )
+                for( let k = 1; k < 50; k++ )
                 {
-                    kLineString = kLineString.substr( closeIdx );
-                }
+                    let kLineString = this.code.lines[ lineNumber - k ];
+                    if( !kLineString )
+                    {
+                        break;
+                    }
 
-                contextTokens = [ ...this._getTokensFromLine( kLineString ), ...contextTokens ];
+                    const openIdx = kLineString.lastIndexOf( '{' );
+                    const closeIdx = kLineString.lastIndexOf( '}' );
+                    if( openIdx > -1 )
+                    {
+                        kLineString = kLineString.substr( openIdx );
+                    }
+                    else if( closeIdx > -1 )
+                    {
+                        kLineString = kLineString.substr( closeIdx );
+                    }
 
-                if( kLineString.length !== this.code.lines[ lineNumber - k ] )
-                {
-                    break;
+                    contextTokens = [ ...this._getTokensFromLine( kLineString ), ...contextTokens ];
+
+                    if( kLineString.length !== this.code.lines[ lineNumber - k ] )
+                    {
+                        break;
+                    }
                 }
             }
 
@@ -3258,28 +3331,111 @@ class CodeEditor {
                 }
             }
 
-            if( scopeType )
+            // Only push if it's not already reflected in the cached scopes
+            const lastScope = this._scopeStack.at( -1 );
+            if( lastScope?.lineNumber !== lineNumber )
             {
-                this._scopeStack.push( { name: scopeName ?? "", type: scopeType } );
-            }
-            else
-            {
-                this._scopeStack.push( { name: "", type: "anonymous" } ); // anonymous scope
+                this._scopeStack.push( { name: scopeName ?? "", type: scopeType ?? "anonymous", lineNumber } );
             }
 
             pushedScope = true;
         }
 
+        // Update scopes cache
+        this.code.lineScopes[ lineNumber ] = [ ...this._scopeStack ];
+
         const symbols = this._parseLineForSymbols( lineNumber, lineString, tokensToEvaluate, pushedScope );
-        return this._updateLine( force, lineNumber, lineInnerHtml, skipPropagation, symbols );
+
+        return this._updateLine( force, lineNumber, lineInnerHtml, skipPropagation, symbols, tokensToEvaluate );
     }
 
-    _processExtraLineIfNecessary( lineNumber, oldSymbols ) {
+    _getLineSignatureFromTokens( tokens ) {
+        const structuralChars = new Set( [ '{',  '}'] );
+        const sign = tokens.filter( t => structuralChars.has( t ) );
+        return sign.join( "_" );
+    }
 
-        if( ( (lineNumber + 1) === this.code.lines.length ) || !this.code.lineScopes[ lineNumber + 1 ] )
+    _updateBlockComments( section, lineNumber, tokens ) {
+
+        const lang = CodeEditor.languages[ this.highlight ];
+        const blockCommentsTokens = lang.blockCommentsTokens ?? this.defaultBlockCommentTokens;
+        const lineOpensBlock = ( section[ 0 ].x === lineNumber );
+        const lineClosesBlock = ( section[ 0 ].y === lineNumber );
+        const lineInsideBlock = ( section[ 0 ].x !== lineNumber ) && ( section[ 0 ].y !== lineNumber );
+
+        delete this._buildingBlockComment;
+
+        /*
+            Check if delimiters have been removed and process lines backwards/forward
+            until reaching new delimiters
+        */
+
+        if( lineOpensBlock )
         {
-            return;
+            const r = tokens.filter( t => t.substr( 0, blockCommentsTokens[ 0 ].length ) == blockCommentsTokens[ 0 ] );
+            if( !r.length )
+            {
+                this._buildingBlockComment = [ lineNumber - 1, 0 ];
+
+                this.mustProcessPreviousLine = ( tokens ) => {
+                    const idx = tokens.indexOf( blockCommentsTokens[ 0 ] );
+                    return ( idx === -1 );
+                }
+
+                this.processLine( lineNumber - 1, false, true );
+
+                section[ 0 ].x = this._lastProcessedLine;
+
+                const lastProcessedString = this.code.lines[ this._lastProcessedLine ];
+                const idx = lastProcessedString.indexOf( blockCommentsTokens[ 0 ] );
+                section[ 1 ].x = idx > 0 ? idx : 0;
+            }
+            else
+            {
+                const tokenIndex = tokens.indexOf( blockCommentsTokens[ 0 ] );
+                const tokenStartIndex = this._currentTokenPositions[ tokenIndex ];
+                section[ 1 ].x = tokenStartIndex;
+                console.log(tokenStartIndex)
+                // Process current line to update new sections
+                this.processLine( lineNumber, false, true );
+            }
         }
+        else if( lineClosesBlock )
+        {
+            const r = tokens.filter( t => t.substr( 0, blockCommentsTokens[ 1 ].length ) == blockCommentsTokens[ 1 ] );
+            if( !r.length )
+            {
+                this._buildingBlockComment = [ section[ 0 ].x, section[ 1 ].x ];
+
+                this.mustProcessNextLine = ( tokens ) => {
+                    const idx = tokens.indexOf( blockCommentsTokens[ 1 ] );
+                    return ( idx === -1 );
+                }
+
+                this.processLine( lineNumber + 1, false, true );
+
+                section[ 0 ].y = this._lastProcessedLine;
+
+                const lastProcessedString = this.code.lines[ this._lastProcessedLine ];
+                const idx = lastProcessedString.indexOf( blockCommentsTokens[ 1 ] );
+                section[ 1 ].y = idx > 0 ? idx : ( lastProcessedString.length - 1 );
+            }
+            else
+            {
+                const tokenIndex = tokens.indexOf( blockCommentsTokens[ 1 ] );
+                const tokenStartIndex = this._currentTokenPositions[ tokenIndex ];
+                section[ 1 ].y = tokenStartIndex;
+                // Process current line to update new sections
+                this.processLine( lineNumber, false, true );
+            }
+        }
+        else if( lineInsideBlock )
+        {
+            // Here it can't modify delimiters..
+        }
+    }
+
+    _processExtraLineIfNecessary( lineNumber, tokens, oldSymbols, skipPropagation ) {
 
         if( !this._scopeStack )
         {
@@ -3287,11 +3443,45 @@ class CodeEditor {
             return;
         }
 
-        // Only update scope stack if something changed when editing a single line
-        if( codeScopesEqual( this._scopeStack, this.code.lineScopes[ lineNumber + 1 ] ) )
+        // Update block comments if necessary
         {
-            // First check for occurrencies of the old symbols, to reprocess that lines
+            const commentBlockSection = this._inBlockCommentSection( lineNumber, 1e10, -1e10 );
+            if( tokens && commentBlockSection !== undefined )
+            {
+                this._updateBlockComments( commentBlockSection, lineNumber, tokens );
 
+                // Get again correct scope
+                this._scopeStack = [ ...this.code.lineScopes[ lineNumber ] ];
+            }
+        }
+
+        if( ( (lineNumber + 1) === this.code.lines.length ) || !this.code.lineScopes[ lineNumber + 1 ] )
+        {
+            return;
+        }
+
+        const newSignature = this._getLineSignatureFromTokens( tokens );
+        const cachedSignature = this.code.lineSignatures[ lineNumber ];
+        const mustUpdateScopes = ( cachedSignature !== newSignature );
+        const sameScopes = codeScopesEqual( this._scopeStack, this.code.lineScopes[ lineNumber + 1 ] );
+
+        // Only update scope stack if something changed when editing a single line
+        // Compare line signature for structural changes
+        if( ( mustUpdateScopes || this._scopesUpdated ) && ( !sameScopes && !skipPropagation ) )
+        {
+            if( mustUpdateScopes )
+            {
+                this._scopesUpdated = true;
+            }
+
+            this.code.lineScopes[ lineNumber + 1 ] = [ ...this._scopeStack ];
+            this.processLine( lineNumber + 1 );
+
+            delete this._scopesUpdated;
+        }
+        else if( sameScopes )
+        {
+            // In case of same scope, check for occurrencies of the old symbols, to reprocess that lines
             for( const sym of oldSymbols )
             {
                 const tableSymbol = this.code.symbolsTable.get( sym.name );
@@ -3310,20 +3500,15 @@ class CodeEditor {
                     this.processLine( occ.line, false, true );
                 }
             }
-
-            return;
         }
-
-        this.code.lineScopes[ lineNumber + 1 ] = [ ...this._scopeStack ];
-        this.processLine( lineNumber + 1 );
     }
 
-    _updateLine( force, lineNumber, html, skipPropagation, symbols = [] ) {
+    _updateLine( force, lineNumber, html, skipPropagation, symbols = [], tokens = [] ) {
 
         const gutterLineHtml = `<span class='line-gutter'>${ lineNumber + 1 }</span>`;
         const oldSymbols = this._updateLineSymbols( lineNumber, symbols );
-        const lineScope = CodeEditor.debugScopes ? this.code.lineScopes[ lineNumber ].map( s => `${ s.type }` ).join( ", " ) : "";
-        const lineSymbols = CodeEditor.debugSymbols ? this.code.lineSymbols[ lineNumber ].map( s => `${ s.name }(${ s.kind })` ).join( ", " ) : "";
+        const lineScope = CodeEditor.debugScopes && this.code.lineScopes[ lineNumber ] ? this.code.lineScopes[ lineNumber ].map( s => `${ s.type }` ).join( ", " ) : "";
+        const lineSymbols = CodeEditor.debugSymbols && this.code.lineSymbols[ lineNumber ] ? this.code.lineSymbols[ lineNumber ].map( s => `${ s.name }(${ s.kind })` ).join( ", " ) : "";
         const debugString = lineScope + ( lineScope.length ? " - " : "" ) + lineSymbols;
 
         if( !force ) // Single line update
@@ -3332,17 +3517,46 @@ class CodeEditor {
 
             if( !skipPropagation )
             {
-                this._processExtraLineIfNecessary( lineNumber, oldSymbols );
+                this._processExtraLineIfNecessary( lineNumber, tokens, oldSymbols, skipPropagation );
+            }
+
+            if( this.mustProcessNextLine )
+            {
+                if( this.mustProcessNextLine( tokens ) && ( ( lineNumber + 1 ) < this.code.lines.length ) )
+                {
+                    this.processLine( lineNumber + 1, false, true );
+                }
+                else
+                {
+                    delete this.mustProcessNextLine;
+                }
+            }
+
+            if( this.mustProcessPreviousLine )
+            {
+                if( this.mustProcessPreviousLine( tokens ) && ( ( lineNumber - 1 ) >= 0 ) )
+                {
+                    this.processLine( lineNumber - 1, false, true );
+                }
+                else
+                {
+                    delete this.mustProcessPreviousLine;
+                }
+            }
+
+            if( CodeEditor.debugProcessedLines )
+            {
+                this.code.childNodes[ lineNumber ]?.classList.add( "debug" );
             }
 
             this._setActiveLine( lineNumber );
             this._clearTmpVariables();
         }
-        else // Update all lines at once
-        {
 
-            return `<pre>${ ( gutterLineHtml + html + debugString ) }</pre>`;
-        }
+        this.code.lineSignatures[ lineNumber ] = this._getLineSignatureFromTokens( tokens );
+
+        // Update all lines at once
+        return force ? `<pre>${ ( gutterLineHtml + html + debugString ) }</pre>` : undefined;
     }
 
     /**
@@ -3352,7 +3566,7 @@ class CodeEditor {
 
         const scope = this._scopeStack.at( pushedScope ? -2 : -1 );
 
-        if( !scope )
+        if( !scope || this._inBlockCommentSection( lineNumber ) )
         {
             return [];
         }
@@ -3375,20 +3589,27 @@ class CodeEditor {
             [/^interface\s+([A-Za-z0-9_]+)/, "interface"],
             [/^type\s+([A-Za-z0-9_]+)/, "type"],
             [/^function\s+([A-Za-z0-9_]+)/, "method"],
+            [/^fn\s+([A-Za-z0-9_]+)/, "method"],
+            [/^def\s+([A-Za-z0-9_]+)/, "method"],
             [/^([A-Za-z0-9_]+)\s*=\s*\(?.*\)?\s*=>/, "method"] // arrow functions
         ];
+
+        // const reservedKeywords = [
+        //     ...CodeEditor.keywords[ this.highlight ],
+        //     ...CodeEditor.types[ this.highlight ],
+        //     ...CodeEditor.statements[ this.highlight ],
+        // ];
 
         {
             const nativeTypes = CodeEditor.nativeTypes[ this.highlight ];
             if( nativeTypes )
             {
-                const nativeTypes = ['int', 'float', 'double', 'bool', 'long', 'short', 'char', 'wchar_t', 'void'];
                 const regex = `^(?:${nativeTypes.join('|')})\\s+([A-Za-z0-9_]+)\s*[\(]+`;
                 topLevelRegexes.push( [ new RegExp( regex ), 'method' ] );
             }
 
             const declarationKeywords = CodeEditor.declarationKeywords[ this.highlight ] ?? [ "const", "let", "var" ];
-            const regex = `^(?:${declarationKeywords.join('|')})\\s+([A-Za-z0-9_]+)`;
+            const regex = `^(?:${ declarationKeywords.join('|') })\\s+([A-Za-z0-9_]+)`;
             topLevelRegexes.push( [ new RegExp( regex ), 'variable' ] );
         }
 
@@ -3405,6 +3626,7 @@ class CodeEditor {
         const usageRegexes = [
             [/new\s+([A-Za-z0-9_]+)\s*\(/, "constructor-call"],
             [/this.([A-Za-z_][A-Za-z0-9_]*)\s*\=/, "class-property"],
+           // [/(?!new\s)([A-Za-z0-9_]+)\s*\(/, "method-call"]
         ];
 
         for( let [ regex, kind ] of usageRegexes )
@@ -3414,6 +3636,18 @@ class CodeEditor {
             {
                 symbols.push( { name: m[ 1 ], kind, scope: scopeName, line: lineNumber } );
             }
+        }
+
+        // Detect method calls
+        const regex = /([A-Za-z0-9_]+)\s*\(/g;
+        let match;
+        while( match = regex.exec( text ) )
+        {
+            const name = match[ 1 ];
+            const before = text.slice( 0, match.index );
+            if( /(new|function|fn|def)\s+$/.test( before ) ) continue; // skip constructor calls
+            if( name === "constructor" ) continue; // skip constructor symbol
+            symbols.push( { name, kind: "method-call", scope: scopeName, line: lineNumber } );
         }
 
         // Stop after matches for top-level declarations and usage symbols
@@ -3434,6 +3668,7 @@ class CodeEditor {
             {
                 if( next === "(" && /^[a-zA-Z_]\w*$/.test( token ) && prev === undefined )
                 {
+                    if( token === "constructor" ) continue; // skip constructor symbol
                     symbols.push( { name: token, kind: "method", scope: scopeName, line: lineNumber } );
                 }
             }
@@ -3556,13 +3791,14 @@ class CodeEditor {
             let idx = 0;
             while( subtokens.value != undefined )
             {
-                const _pt = lineString.substring(idx, subtokens.value.index);
+                const _pt = lineString.substring( idx, subtokens.value.index );
                 if( _pt.length ) pushToken( _pt );
                 pushToken( subtokens.value[ 0 ] );
                 idx = subtokens.value.index + subtokens.value[ 0 ].length;
                 subtokens = iter.next();
-                if(!subtokens.value) {
-                    const _at = lineString.substring(idx);
+                if( !subtokens.value )
+                {
+                    const _at = lineString.substring( idx );
                     if( _at.length ) pushToken( _at );
                 }
             }
@@ -3673,10 +3909,12 @@ class CodeEditor {
 
         let { token, prev, next, tokenIndex, isFirstToken, isLastToken } = ctxData;
 
-        const lang = CodeEditor.languages[ this.highlight ],
-              highlight = this.highlight.replace( /\s/g, '' ).replaceAll( "+", "p" ).toLowerCase(),
-              customStringKeys = Object.assign( {}, this.stringKeys ),
-              lineNumber = this._currentLineNumber;
+        const lang = CodeEditor.languages[ this.highlight ];
+        const highlight = this.highlight.replace( /\s/g, '' ).replaceAll( "+", "p" ).toLowerCase();
+        const customStringKeys = Object.assign( {}, this.stringKeys );
+        const lineNumber = this._currentLineNumber;
+        const tokenStartIndex = this._currentTokenPositions[ tokenIndex ];
+        const inBlockComment = ( this._buildingBlockComment ?? this._inBlockCommentSection( lineNumber, tokenStartIndex, token.length ) !== undefined )
 
         var usePreviousTokenToCheckString = false;
 
@@ -3694,7 +3932,7 @@ class CodeEditor {
         // Manage strings
         this._stringEnded = false;
 
-        if( usePreviousTokenToCheckString || ( this._buildingBlockComment === undefined && ( lang.tags ?? false ? ( this._enclosedByTokens( token, tokenIndex, '<', '>' ) ) : true ) ) )
+        if( usePreviousTokenToCheckString || ( !inBlockComment && ( lang.tags ?? false ? ( this._enclosedByTokens( token, tokenIndex, '<', '>' ) ) : true ) ) )
         {
             const _checkIfStringEnded = t => {
                 const idx = Object.values( customStringKeys ).indexOf( t );
@@ -3720,9 +3958,9 @@ class CodeEditor {
 
         // Update context data for next tests
         ctxData.discardToken = false;
-        ctxData.inBlockComment = this._buildingBlockComment;
+        ctxData.inBlockComment = inBlockComment;
         ctxData.markdownHeader = this._markdownHeader;
-        ctxData.inString = this._buildingString;
+        ctxData.inString = ( this._buildingString !== undefined );
         ctxData.singleLineCommentToken = lang.singleLineCommentToken ?? this.defaultSingleLineCommentToken;
         ctxData.lang = lang;
         ctxData.scope = this._scopeStack.at( -1 );
@@ -3737,16 +3975,8 @@ class CodeEditor {
         // Get highlighting class based on language common and specific rules
         let tokenClass = this._getTokenHighlighting( ctxData, highlight );
 
-        const blockCommentsTokens = lang.blockCommentsTokens ?? this.defaultBlockCommentTokens;
-        if( ( lang.blockComments ?? true ) && this._buildingBlockComment != undefined
-            && token.substr( 0, blockCommentsTokens[ 1 ].length ) == blockCommentsTokens[ 1 ] )
-        {
-            this._blockCommentCache.push( new LX.vec2( this._buildingBlockComment, lineNumber ) );
-            delete this._buildingBlockComment;
-        }
-
         // We finished constructing a string
-        if( this._buildingString && ( this._stringEnded || isLastToken ) )
+        if( this._buildingString && ( this._stringEnded || isLastToken ) && !inBlockComment )
         {
             token = this._getCurrentString();
             tokenClass = "cm-str";
@@ -3810,17 +4040,30 @@ class CodeEditor {
         }
     }
 
-    _inBlockCommentSection( line ) {
+    _inBlockCommentSection( lineNumber, tokenPosition, tokenLength ) {
 
-        for( var section of this._blockCommentCache )
+        const lang = CodeEditor.languages[ this.highlight ];
+        const blockCommentsTokens = lang.blockCommentsTokens ?? this.defaultBlockCommentTokens;
+
+        for( let section of this._blockCommentCache )
         {
-            if( line >= section.x && line <= section.y )
+            const lineRange = section[ 0 ];
+            const posRange = section[ 1 ];
+
+            // Outside the lines range
+            const meetsLineRange = ( lineNumber >= lineRange.x && lineNumber <= lineRange.y );
+            if( !meetsLineRange )
             {
-                return true;
+                continue;
+            }
+
+            if( ( lineNumber != lineRange.x && lineNumber != lineRange.y ) || // Inside the block, not first nor last line
+                ( lineNumber == lineRange.x && tokenPosition >= posRange.x ) || // If first line, meet after token
+                ( lineNumber == lineRange.y && ( tokenPosition + tokenLength ) <= ( posRange.y + blockCommentsTokens[ 1 ].length ) ) )
+            {
+                return section;
             }
         }
-
-        return false;
     }
 
     _isKeyword( ctxData ) {
