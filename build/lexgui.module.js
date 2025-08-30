@@ -4820,6 +4820,17 @@ function toTitleCase( str )
 LX.toTitleCase = toTitleCase;
 
 /**
+ * @method toKebabCase
+ * @param {String} str
+ */
+function toKebabCase( str )
+{
+    return str.replace( /[A-Z]/g, m => "-" + m.toLowerCase() );
+}
+
+LX.toKebabCase = toKebabCase;
+
+/**
  * @method getSupportedDOMName
  * @description Convert a text string to a valid DOM name
  * @param {String} text Original text

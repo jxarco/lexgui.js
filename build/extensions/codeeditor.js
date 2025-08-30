@@ -5611,7 +5611,13 @@ CodeEditor.utils = { // These ones don't have hightlight, used as suggestions to
     'Python': ['abs', 'all', 'any', 'ascii', 'bin', 'bool', 'bytearray', 'bytes', 'callable', 'chr', 'classmethod', 'compile', 'complex', 'delattr', 'dict', 'dir', 'divmod',
               'enumerate', 'eval', 'exec', 'filter', 'float', 'format', 'frozenset', 'getattr', 'globals', 'hasattr', 'hash', 'help', 'hex', 'id', 'input', 'int', 'isinstance',
               'issubclass', 'iter', 'len', 'list', 'locals', 'map', 'max', 'memoryview', 'min', 'next', 'object', 'oct', 'open', 'ord', 'pow', 'print', 'property', 'range', 'repr',
-              'reversed', 'round', 'set', 'setattr', 'slice', 'sorted', 'staticmethod', 'str', 'sum', 'super', 'tuple', 'type', 'vars', 'zip']
+              'reversed', 'round', 'set', 'setattr', 'slice', 'sorted', 'staticmethod', 'str', 'sum', 'super', 'tuple', 'type', 'vars', 'zip'],
+    'CSS': [ ...Object.keys( document.body.style ).map( LX.toKebabCase ), 'block','inline','inline-block','flex','grid','none','inherit','initial','unset','revert','sticky','relative','absolute',
+            'fixed','static','auto','visible','hidden','scroll','clip','ellipsis','nowrap','wrap','break-word','solid','dashed','dotted','double','groove','ridge','inset','outset','left','right',
+            'center','top','bottom','start','end','justify','stretch','space-between','space-around','space-evenly','baseline','middle','normal','bold','lighter','bolder','italic','blur','uppercase',
+            'lowercase','capitalize','transparent','currentColor','pointer','default','move','grab','grabbing','not-allowed','none','cover','contain','repeat','no-repeat','repeat-x','repeat-y','round',
+            'space','linear-gradient','radial-gradient','conic-gradient','url','calc','min','max','clamp','red','blue','green','black','white','gray','silver','yellow','orange','purple','pink','cyan',
+            'magenta','lime','teal','navy','transparent','currentcolor','inherit','initial','unset','revert','none','auto','fit-content','min-content','max-content']
 };
 
 CodeEditor.types = {
