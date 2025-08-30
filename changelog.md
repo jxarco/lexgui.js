@@ -7,6 +7,7 @@ Added `LX.toKebabCase`.
 CodeEditor:
 - Added support to togge status bar items by default.
 - Scopes, symbols and block comments refactor to fix instabilities.
+- Improved method-calls, variable symbols detection.
 - New autocomplete item icons based on Symbols.
 - Minor bugs fixed.
 

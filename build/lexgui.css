@@ -5409,6 +5409,7 @@ ul.lexassetscontent {
 .cm-mtd.wgsl { color: #dfe093; }  /* method */
 .cm-sym.wgsl { color: #f9cb20; }  /* symbol */
 .cm-ppc.wgsl { color: #99caf1; }  /* preprocessor */
+.cm-bln.wgsl { color: #bebebe; }  /* builtin */
 
 .cm-sym.rust { color: #e7ded2; }  /* symbol */
 .cm-mtd.rust { color: #e0cc68 }   /* method */

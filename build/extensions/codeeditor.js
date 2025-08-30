@@ -3574,14 +3574,27 @@ class CodeEditor {
         const scopeName = scope.name;
         const scopeType = scope.type;
         const symbols = [];
+        const symbolsMap = new Map();
         const text = lineString.trim();
         const previousLineScope = this.code.lineScopes[ lineNumber - 1 ];
+
+        const _pushSymbol = ( s ) => {
+            const signature = `${ s.name }_${ s.kind }_${ s.scope }_${ s.line }`;
+            if( symbolsMap.has( signature ) )
+            {
+                return;
+            }
+            symbolsMap.set( signature, s );
+            symbols.push( s );
+        };
 
         // Don't make symbols from preprocessor lines
         if( text.startsWith( "#" ) )
         {
             return [];
         }
+
+        const nativeTypes = CodeEditor.nativeTypes[ this.highlight ];
 
         const topLevelRegexes = [
             [/^class\s+([A-Za-z0-9_]+)/, "class"],
@@ -3595,32 +3608,28 @@ class CodeEditor {
             [/^([A-Za-z0-9_]+)\s*=\s*\(?.*\)?\s*=>/, "method"] // arrow functions
         ];
 
-        // const reservedKeywords = [
-        //     ...CodeEditor.keywords[ this.highlight ],
-        //     ...CodeEditor.types[ this.highlight ],
-        //     ...CodeEditor.statements[ this.highlight ],
-        // ];
-
+        // Add regexes to detect methods, variables ( including "id : nativeType" )
         {
-            const nativeTypes = CodeEditor.nativeTypes[ this.highlight ];
             if( nativeTypes )
             {
-                const regex = `^(?:${nativeTypes.join('|')})\\s+([A-Za-z0-9_]+)\s*[\(]+`;
-                topLevelRegexes.push( [ new RegExp( regex ), 'method' ] );
+                topLevelRegexes.push( [ new RegExp( `^(?:${nativeTypes.join('|')})\\s+([A-Za-z0-9_]+)\s*[\(]+` ), 'method' ] );
+
+                if( this.highlight === "WGSL" )
+                {
+                    topLevelRegexes.push( [ new RegExp( `[A-Za-z0-9]+(\\s*)+:(\\s*)+(${nativeTypes.join('|')})` ), 'variable', ( m ) => m[ 0 ].split( ":" )[ 0 ].trim() ] );
+                }
             }
 
             const declarationKeywords = CodeEditor.declarationKeywords[ this.highlight ] ?? [ "const", "let", "var" ];
-            const regex = `^(?:${ declarationKeywords.join('|') })\\s+([A-Za-z0-9_]+)`;
-            topLevelRegexes.push( [ new RegExp( regex ), 'variable' ] );
+            topLevelRegexes.push( [ new RegExp( `^(?:${ declarationKeywords.join('|') })\\s+([A-Za-z0-9_]+)` ), 'variable' ] );
         }
 
-        for( let [ regex, kind ] of topLevelRegexes )
+        for( let [ regex, kind, fn ] of topLevelRegexes )
         {
             const m = text.match( regex );
             if( m )
             {
-                symbols.push( { name: m[ 1 ], kind, scope: scopeName, line: lineNumber } );
-                break;
+                _pushSymbol( { name: fn ? fn( m ) : m[ 1 ], kind, scope: scopeName, line: lineNumber } );
             }
         }
 
@@ -3629,12 +3638,12 @@ class CodeEditor {
             [/this.([A-Za-z_][A-Za-z0-9_]*)\s*\=/, "class-property"],
         ];
 
-        for( let [ regex, kind ] of usageRegexes )
+        for( let [ regex, kind, fn ] of usageRegexes )
         {
             const m = text.match( regex );
             if( m )
             {
-                symbols.push( { name: m[ 1 ], kind, scope: scopeName, line: lineNumber } );
+                _pushSymbol( { name: fn ? fn( m ) : m[ 1 ], kind, scope: scopeName, line: lineNumber } );
             }
         }
 
@@ -3646,9 +3655,9 @@ class CodeEditor {
             const name = match[ 1 ];
             const before = text.slice( 0, match.index );
             if( /(new|function|fn|def)\s+$/.test( before ) ) continue; // skip constructor calls
-            if( name === "constructor" ) continue; // skip constructor symbol
+            if( [ "constructor", "location", ...( nativeTypes ?? [] ) ].indexOf( name ) > -1 ) continue; // skip hardcoded non method symbol
             if( previousLineScope && previousLineScope.at( -1 )?.type === "class" ) continue; // skip class methods
-            symbols.push( { name, kind: "method-call", scope: scopeName, line: lineNumber } );
+            _pushSymbol( { name, kind: "method-call", scope: scopeName, line: lineNumber } );
         }
 
         // Stop after matches for top-level declarations and usage symbols
@@ -3670,14 +3679,14 @@ class CodeEditor {
                 if( next === "(" && /^[a-zA-Z_]\w*$/.test( token ) && prev === undefined )
                 {
                     if( token === "constructor" ) continue; // skip constructor symbol
-                    symbols.push( { name: token, kind: "method", scope: scopeName, line: lineNumber } );
+                    _pushSymbol( { name: token, kind: "method", scope: scopeName, line: lineNumber } );
                 }
             }
             else if( scopeType.startsWith("enum") )
             {
                 if( !isSymbol( token ) && !this._isNumber( token ) && !this._mustHightlightWord( token, CodeEditor.statements ) )
                 {
-                    symbols.push({ name: token, kind: "enum_value", scope: scopeName, line: lineNumber });
+                    _pushSymbol({ name: token, kind: "enum_value", scope: scopeName, line: lineNumber });
                 }
             }
         }
@@ -3863,6 +3872,22 @@ class CodeEditor {
                 }
 
                 dollarIdx = tokens.slice( offsetIdx ).indexOf( '$' );
+                offset = offsetIdx;
+            }
+        }
+        else if( this.highlight == 'WGSL' )
+        {
+            let offset = 0;
+            let atIdx = tokens.indexOf( '@' );
+
+            while( atIdx > -1 )
+            {
+                const offsetIdx = atIdx + offset;
+
+                tokens[ offsetIdx ] += ( tokens[ offsetIdx + 1 ] ?? "" );
+                tokens.splice( offsetIdx + 1, 1 );
+
+                atIdx = tokens.slice( offsetIdx ).indexOf( '$' );
                 offset = offsetIdx;
             }
         }
@@ -5047,8 +5072,6 @@ class CodeEditor {
 
             if( symbol )
             {
-                // debugger;
-
                 switch( symbol[ 0 ].kind )  // Get first occurrence
                 {
                     case "variable":
@@ -5565,7 +5588,8 @@ CodeEditor.languages = {
 };
 
 CodeEditor.nativeTypes = {
-    'C++': ['int', 'float', 'double', 'bool', 'long', 'short', 'char', 'wchar_t', 'void']
+    'C++': ['int', 'float', 'double', 'bool', 'long', 'short', 'char', 'wchar_t', 'void'],
+    'WGSL': ['bool', 'u32', 'i32', 'f16', 'f32', 'vec2', 'vec3', 'vec4', 'vec2f', 'vec3f', 'vec4f', 'mat2x2f', 'mat3x3f', 'mat4x4f', 'array', 'vec2u', 'vec3u', 'vec4u', 'ptr', 'sampler']
 };
 
 CodeEditor.declarationKeywords = {
@@ -5589,10 +5613,9 @@ CodeEditor.keywords = {
     'GLSL': ['true', 'false', 'function', 'int', 'float', 'vec2', 'vec3', 'vec4', 'mat2x2', 'mat3x3', 'mat4x4', 'struct'],
     'CSS': ['body', 'html', 'canvas', 'div', 'input', 'span', '.', 'table', 'tr', 'td', 'th', 'label', 'video', 'img', 'code', 'button', 'select', 'option', 'svg', 'media', 'all',
             'i', 'a', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'last-child', 'tbody', 'pre', 'monospace', 'font-face'],
-    'WGSL': ['var', 'let', 'true', 'false', 'fn', 'bool', 'u32', 'i32', 'f16', 'f32', 'vec2', 'vec3', 'vec4', 'vec2f', 'vec3f', 'vec4f', 'mat2x2f', 'mat3x3f', 'mat4x4f', 'array', 'atomic', 'struct',
-            'sampler', 'sampler_comparison', 'texture_depth_2d', 'texture_depth_2d_array', 'texture_depth_cube', 'texture_depth_cube_array', 'texture_depth_multisampled_2d',
-            'texture_external', 'texture_1d', 'texture_2d', 'texture_2d_array', 'texture_3d', 'texture_cube', 'texture_cube_array', 'texture_storage_1d', 'texture_storage_2d',
-            'texture_storage_2d_array', 'texture_storage_3d', 'vec2u', 'vec3u', 'vec4u', 'ptr'],
+    'WGSL': [...CodeEditor.nativeTypes["WGSL"], 'var', 'let', 'true', 'false', 'fn', 'atomic', 'struct', 'sampler_comparison', 'texture_depth_2d', 'texture_depth_2d_array', 'texture_depth_cube',
+            'texture_depth_cube_array', 'texture_depth_multisampled_2d', 'texture_external', 'texture_1d', 'texture_2d', 'texture_2d_array', 'texture_3d', 'texture_cube', 'texture_cube_array',
+            'texture_storage_1d', 'texture_storage_2d', 'texture_storage_2d_array', 'texture_storage_3d'],
     'Rust': ['as', 'const', 'crate', 'enum', 'extern', 'false', 'fn', 'impl', 'in', 'let', 'mod', 'move', 'mut', 'pub', 'ref', 'self', 'Self', 'static', 'struct', 'super', 'trait', 'true',
              'type', 'unsafe', 'use', 'where', 'abstract', 'become', 'box', 'final', 'macro', 'override', 'priv', 'typeof', 'unsized', 'virtual'],
     'Python': ['False', 'def', 'None', 'True', 'in', 'is', 'and', 'lambda', 'nonlocal', 'not', 'or'],
@@ -5612,12 +5635,13 @@ CodeEditor.utils = { // These ones don't have hightlight, used as suggestions to
               'enumerate', 'eval', 'exec', 'filter', 'float', 'format', 'frozenset', 'getattr', 'globals', 'hasattr', 'hash', 'help', 'hex', 'id', 'input', 'int', 'isinstance',
               'issubclass', 'iter', 'len', 'list', 'locals', 'map', 'max', 'memoryview', 'min', 'next', 'object', 'oct', 'open', 'ord', 'pow', 'print', 'property', 'range', 'repr',
               'reversed', 'round', 'set', 'setattr', 'slice', 'sorted', 'staticmethod', 'str', 'sum', 'super', 'tuple', 'type', 'vars', 'zip'],
-    'CSS': [ ...Object.keys( document.body.style ).map( LX.toKebabCase ), 'block','inline','inline-block','flex','grid','none','inherit','initial','unset','revert','sticky','relative','absolute',
-            'fixed','static','auto','visible','hidden','scroll','clip','ellipsis','nowrap','wrap','break-word','solid','dashed','dotted','double','groove','ridge','inset','outset','left','right',
-            'center','top','bottom','start','end','justify','stretch','space-between','space-around','space-evenly','baseline','middle','normal','bold','lighter','bolder','italic','blur','uppercase',
-            'lowercase','capitalize','transparent','currentColor','pointer','default','move','grab','grabbing','not-allowed','none','cover','contain','repeat','no-repeat','repeat-x','repeat-y','round',
-            'space','linear-gradient','radial-gradient','conic-gradient','url','calc','min','max','clamp','red','blue','green','black','white','gray','silver','yellow','orange','purple','pink','cyan',
-            'magenta','lime','teal','navy','transparent','currentcolor','inherit','initial','unset','revert','none','auto','fit-content','min-content','max-content']
+    'CSS': [ ...Object.keys( document.body.style ).map( LX.toKebabCase ), 'block', 'inline', 'inline-block', 'flex', 'grid', 'none', 'inherit', 'initial', 'unset', 'revert', 'sticky',
+            'relative', 'absolute', 'fixed', 'static', 'auto', 'visible', 'hidden', 'scroll', 'clip', 'ellipsis', 'nowrap', 'wrap', 'break-word', 'solid', 'dashed', 'dotted', 'double',
+            'groove', 'ridge', 'inset', 'outset', 'left', 'right', 'center', 'top', 'bottom', 'start', 'end', 'justify', 'stretch', 'space-between', 'space-around', 'space-evenly',
+            'baseline', 'middle', 'normal', 'bold', 'lighter', 'bolder', 'italic', 'blur', 'uppercase', 'lowercase', 'capitalize', 'transparent', 'currentColor', 'pointer', 'default',
+            'move', 'grab', 'grabbing', 'not-allowed', 'none', 'cover', 'contain', 'repeat', 'no-repeat', 'repeat-x', 'repeat-y', 'round', 'space', 'linear-gradient', 'radial-gradient',
+            'conic-gradient', 'url', 'calc', 'min', 'max', 'clamp', 'red', 'blue', 'green', 'black', 'white', 'gray', 'silver', 'yellow', 'orange', 'purple', 'pink', 'cyan', 'magenta',
+            'lime', 'teal', 'navy', 'transparent', 'currentcolor', 'inherit', 'initial', 'unset', 'revert', 'none', 'auto', 'fit-content', 'min-content', 'max-content']
 };
 
 CodeEditor.types = {
@@ -5638,6 +5662,7 @@ CodeEditor.builtIn = {
     'JavaScript': ['document', 'console', 'window', 'navigator', 'performance'],
     'CSS': ['*', '!important'],
     'C++': ['vector', 'list', 'map'],
+    'WGSL': ['@vertex', '@fragment'],
     'HTML': ['type', 'xmlns', 'PUBLIC', 'http-equiv', 'src', 'style', 'lang', 'href', 'rel', 'content', 'xml', 'alt'], // attributes
     'Markdown': ['type', 'src', 'style', 'lang', 'href', 'rel', 'content', 'valign', 'alt'], // attributes
     'PHP': ['echo', 'print'],
