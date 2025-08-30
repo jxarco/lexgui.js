@@ -4058,8 +4058,10 @@ class CodeEditor {
             }
 
             if( ( lineNumber != lineRange.x && lineNumber != lineRange.y ) || // Inside the block, not first nor last line
-                ( lineNumber == lineRange.x && tokenPosition >= posRange.x ) || // If first line, meet after token
-                ( lineNumber == lineRange.y && ( tokenPosition + tokenLength ) <= ( posRange.y + blockCommentsTokens[ 1 ].length ) ) )
+                ( lineNumber == lineRange.x && tokenPosition >= posRange.x &&
+                    (( lineNumber == lineRange.y && ( tokenPosition + tokenLength ) <= ( posRange.y + blockCommentsTokens[ 1 ].length ) ) || lineNumber !== lineRange.y) ) ||
+                ( lineNumber == lineRange.y && ( ( tokenPosition + tokenLength ) <= ( posRange.y + blockCommentsTokens[ 1 ].length ) ) ) &&
+                    (( lineNumber == lineRange.x && tokenPosition >= posRange.x ) || lineNumber !== lineRange.x) )
             {
                 return section;
             }
