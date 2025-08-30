@@ -3575,6 +3575,7 @@ class CodeEditor {
         const scopeType = scope.type;
         const symbols = [];
         const text = lineString.trim();
+        const previousLineScope = this.code.lineScopes[ lineNumber - 1 ];
 
         // Don't make symbols from preprocessor lines
         if( text.startsWith( "#" ) )
@@ -3626,7 +3627,6 @@ class CodeEditor {
         const usageRegexes = [
             [/new\s+([A-Za-z0-9_]+)\s*\(/, "constructor-call"],
             [/this.([A-Za-z_][A-Za-z0-9_]*)\s*\=/, "class-property"],
-           // [/(?!new\s)([A-Za-z0-9_]+)\s*\(/, "method-call"]
         ];
 
         for( let [ regex, kind ] of usageRegexes )
@@ -3647,6 +3647,7 @@ class CodeEditor {
             const before = text.slice( 0, match.index );
             if( /(new|function|fn|def)\s+$/.test( before ) ) continue; // skip constructor calls
             if( name === "constructor" ) continue; // skip constructor symbol
+            if( previousLineScope && previousLineScope.at( -1 )?.type === "class" ) continue; // skip class methods
             symbols.push( { name, kind: "method-call", scope: scopeName, line: lineNumber } );
         }
 
@@ -5008,8 +5009,6 @@ class CodeEditor {
             ...Array.from( CodeEditor.utils[ this.highlight ] ?? [] )
         ];
 
-        suggestions = suggestions.concat( Object.keys(this.code.tokens).filter( a => a != word ) );
-
         const scopeStack = [ ...this.code.lineScopes[ cursor.line ] ];
         const scope = scopeStack.at( -1 );
         if( scope.type.startsWith( "enum" ) )
@@ -5023,10 +5022,8 @@ class CodeEditor {
             suggestions = suggestions.concat( otherValues.slice( 0, -1 ) );
         }
 
-        const prefix = word.toLowerCase();
-
         // Remove 1/2 char words and duplicates...
-        suggestions = Array.from( new Set( suggestions )).filter( s => s.length > 2 && s.toLowerCase().includes( prefix ) );
+        suggestions = Array.from( new Set( suggestions )).filter( s => s.length > 2 && s.toLowerCase().includes( word.toLowerCase() ) );
 
         // Order...
 
@@ -5036,21 +5033,51 @@ class CodeEditor {
             return 2; // worst
         }
 
-        suggestions = suggestions.sort( ( a, b ) => scoreSuggestion( a, prefix ) - scoreSuggestion( b, prefix ) || a.localeCompare( b ) );
+        suggestions = suggestions.sort( ( a, b ) => ( scoreSuggestion( a, word ) - scoreSuggestion( b, word ) ) || a.localeCompare( b ) );
 
         for( let s of suggestions )
         {
-            var pre = document.createElement( 'pre' );
+            const pre = document.createElement( 'pre' );
             this.autocomplete.appendChild( pre );
 
-            var icon = "Type";
-            if( this._mustHightlightWord( s, CodeEditor.utils ) )
-                icon = "Box";
-            else if( this._mustHightlightWord( s, CodeEditor.types ) )
-                icon = "Code";
+            const symbol = this.code.symbolsTable.get( s );
 
-            pre.appendChild( LX.makeIcon( icon, { iconClass: "mr-1", svgClass: "xs" } ) );
+            let iconName = "CaseLower";
+            let iconClass = "foo";
 
+            if( symbol )
+            {
+                // debugger;
+
+                switch( symbol[ 0 ].kind )  // Get first occurrence
+                {
+                    case "variable":
+                        iconName = "Cuboid";
+                        iconClass = "lightblue";
+                        break;
+                    case "method":
+                        iconName = "Box";
+                        iconClass = "heliotrope";
+                        break;
+                    case "class":
+                        iconName = "CircleNodes";
+                        iconClass = "orange";
+                        break;
+                }
+            }
+            else
+            {
+                if( this._mustHightlightWord( s, CodeEditor.utils ) )
+                    iconName = "ToolCase";
+                else if( this._mustHightlightWord( s, CodeEditor.types ) )
+                {
+                    iconName = "Type";
+                    iconClass = "lightblue";
+                }
+            }
+
+            pre.appendChild( LX.makeIcon( iconName, { iconClass: "mr-1", svgClass: "sm " + iconClass } ) );
+s
             pre.addEventListener( 'click', () => {
                 this.autoCompleteWord( s );
             } );

@@ -5320,6 +5320,10 @@ ul.lexassetscontent {
     background-color: var(--global-color-accent);
 }
 
+.lexcodeeditor .autocomplete pre.selected svg {
+    color: white !important;
+}
+
 .lexcodeeditor .autocomplete pre span {
     cursor: inherit;
 }
