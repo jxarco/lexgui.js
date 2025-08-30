@@ -1232,6 +1232,7 @@ class CodeEditor {
                     const s = getComputedStyle( r );
                     this.fontSize = parseInt( s.getPropertyValue( "--code-editor-font-size" ) );
                     this.charWidth = this._measureChar( "a", true );
+                    this.processLines();
                 }
 
                 LX.emit( "@font-size", this.fontSize );
@@ -1868,6 +1869,8 @@ class CodeEditor {
         {
             this._changeLanguageFromExtension( LX.getExtension( name ) );
         }
+
+        this.processLines();
     }
 
     _onContextMenuTab( isNewTabButton, event, name,  ) {
