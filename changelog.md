@@ -2,6 +2,8 @@
 
 ## dev
 
+## 0.7.5 (master)
+
 CodeEditor:
 - Hotfixed issue not processing lines in some cases.
 - Minor restyle tabs and added options for closing tabs.
@@ -14,7 +16,7 @@ VideoEditor:
 Added `options.event` to Dropdown to offset position based on event position.
 Added some more CSS classes.
 
-## 0.7.4 (master)
+## 0.7.4
 
 Added `LX.toKebabCase`.
 
