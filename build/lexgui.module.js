@@ -1092,6 +1092,7 @@ class DropdownMenu {
         this.alignOffset = options.alignOffset ?? 0;
         this.avoidCollisions = options.avoidCollisions ?? true;
         this.onBlur = options.onBlur;
+        this.event = options.event;
         this.inPlace = false;
 
         this.root = document.createElement( "div" );
@@ -1382,11 +1383,11 @@ class DropdownMenu {
     _adjustPosition() {
 
         const position = [ 0, 0 ];
+        const rect = this._trigger.getBoundingClientRect();
 
         // Place menu using trigger position and user options
+        if( !this.event )
         {
-            const rect = this._trigger.getBoundingClientRect();
-
             let alignWidth = true;
 
             switch( this.side )
@@ -1428,11 +1429,11 @@ class DropdownMenu {
             if( alignWidth ) { position[ 0 ] += this.alignOffset; }
             else { position[ 1 ] += this.alignOffset; }
         }
-
-        if( this.avoidCollisions )
+        // Offset position based on event
+        else
         {
-            position[ 0 ] = LX.clamp( position[ 0 ], 0, window.innerWidth - this.root.offsetWidth - this._windowPadding );
-            position[ 1 ] = LX.clamp( position[ 1 ], 0, window.innerHeight - this.root.offsetHeight - this._windowPadding );
+            position[ 0 ] = this.event.x;
+            position[ 1 ] = this.event.y;
         }
 
         if( this._parent instanceof HTMLDialogElement )
@@ -1440,6 +1441,12 @@ class DropdownMenu {
             let parentRect = this._parent.getBoundingClientRect();
             position[ 0 ] -= parentRect.x;
             position[ 1 ] -= parentRect.y;
+        }
+
+        if( this.avoidCollisions )
+        {
+            position[ 0 ] = LX.clamp( position[ 0 ], 0, window.innerWidth - this.root.offsetWidth - this._windowPadding );
+            position[ 1 ] = LX.clamp( position[ 1 ], 0, window.innerHeight - this.root.offsetHeight - this._windowPadding );
         }
 
         this.root.style.left = `${ position[ 0 ] }px`;

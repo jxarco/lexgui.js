@@ -11,6 +11,7 @@ CodeEditor:
 VideoEditor:
 - Added callback functions when change start/end values.
 
+Added `options.event` to Dropdown to offset position based on event position.
 Added some more CSS classes.
 
 ## 0.7.4 (master)
