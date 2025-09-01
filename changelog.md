@@ -2,6 +2,17 @@
 
 ## dev
 
+CodeEditor:
+- Hotfixed issue not processing lines in some cases.
+- Minor restyle tabs and added options for closing tabs.
+- Support for `options.onCreateFile` callback to modify new file options.
+- Replaced old context menus for new Dropdowns.
+
+VideoEditor:
+- Added callback functions when change start/end values.
+
+Added some more CSS classes.
+
 ## 0.7.4 (master)
 
 Added `LX.toKebabCase`.

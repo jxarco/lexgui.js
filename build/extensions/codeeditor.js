@@ -338,7 +338,7 @@ class CodeEditor {
 
             let panel = new LX.Panel();
 
-            panel.addTitle( "EXPLORER" );
+            panel.addTitle( options.explorerName ?? "EXPLORER" );
 
             let sceneData = {
                 'id': 'WORKSPACE',
@@ -403,11 +403,11 @@ class CodeEditor {
 
             if( !this.disableEdition )
             {
-                this.tabs.root.addEventListener( 'dblclick', (e) => {
+                this.tabs.root.parentElement.addEventListener( 'dblclick', (e) => {
                     if( options.allowAddScripts ?? true )
                     {
                         e.preventDefault();
-                        this.addTab( "unnamed.js", true );
+                        this._onCreateNewFile();
                     }
                 } );
             }
@@ -1258,7 +1258,9 @@ class CodeEditor {
 
         if( options.allowAddScripts ?? true )
         {
-            this.addTab("+", false, "New File");
+            this.onCreateFile = options.onCreateFile;
+
+            this.addTab( "+", false, "Create file" );
         }
 
         if( options.files )
@@ -1829,10 +1831,23 @@ class CodeEditor {
 
         this.processFocus( false );
 
-        LX.addContextMenu( null, e, m => {
-            m.add( "Create", this.addTab.bind( this, "unnamed.js", true, "", { language: "JavaScript" } ) );
-            m.add( "Load", this.loadTabFromFile.bind( this, "unnamed.js", true ) );
-        });
+        new LX.DropdownMenu( e.target, [
+            { name: "Create file", icon: "FilePlus", callback: this._onCreateNewFile.bind( this ) },
+            { name: "Load file", icon: "FileUp", callback: this.loadTabFromFile.bind( this ) },
+        ], { side: "bottom", align: "start" });
+    }
+
+    _onCreateNewFile() {
+
+        let options = {};
+
+        if( this.onCreateFile )
+        {
+            options = this.onCreateFile( this );
+        }
+
+        const name = options.name ?? "unnamed.js";
+        this.addTab( name, true, name, { language: options.language ?? "JavaScript" } );
     }
 
     _onSelectTab( isNewTabButton, event, name ) {
@@ -1876,13 +1891,31 @@ class CodeEditor {
     _onContextMenuTab( isNewTabButton, event, name,  ) {
 
         if( isNewTabButton )
+        {
             return;
+        }
 
-        LX.addContextMenu( null, event, m => {
-            m.add( "Close", () => { this.tabs.delete( name ) } );
-            // m.add( "" );
-            // m.add( "Rename", () => { console.warn( "TODO" )} );
-        });
+        new LX.DropdownMenu( event.target, [
+            { name: "Close", kbd: "MWB", callback: () => { this.tabs.delete( name ) } },
+            { name: "Close Others", callback: () => {
+                for( const [ key, data ] of Object.entries( this.tabs.tabs ) )
+                {
+                    if( key === '+' || key === name ) continue;
+                    this.tabs.delete( key )
+                }
+            } },
+            { name: "Close All", callback: () => {
+                for( const [ key, data ] of Object.entries( this.tabs.tabs ) )
+                {
+                    if( key === '+' ) continue;
+                    this.tabs.delete( key )
+                }
+            } },
+            null,
+            { name: "Copy Path", icon: "Copy", callback: () => {
+                navigator.clipboard.writeText( this.openedTabs[ name ].path ?? "" );
+            } }
+        ], { side: "bottom", align: "start", event });
     }
 
     addTab( name, selected, title, options = {} ) {
@@ -1903,6 +1936,7 @@ class CodeEditor {
         // Create code content
         let code = document.createElement( 'div' );
         Object.assign( code, {
+            path: options.path ?? "",
             className: 'code',
             lines: [ "" ],
             language: options.language ?? "Plain Text",
@@ -2135,7 +2169,7 @@ class CodeEditor {
         document.body.appendChild( input );
         input.click();
         input.addEventListener('change', e => {
-            if (e.target.files[ 0 ])
+            if( e.target.files[ 0 ] )
             {
                 this.loadFile( e.target.files[ 0 ] );
             }

@@ -57,6 +57,7 @@
         // disableEdition: true,
         // skipInfo: true,
         fileExplorer: fileExplorer,
+        explorerName: "EXPLORER",
         // statusShowFontSizeZoom: false,
         // skipTabs: true,
         files: [
@@ -79,6 +80,9 @@
         onFilesLoaded: ( instance, numFilesLoaded ) => {
             console.log( `CodeEditor: ${ numFilesLoaded } files loaded!` );
             instance.loadTab("js_sample.js");
+        },
+        xonCreateFile: ( instance ) => {
+            return { name: "new_shader.wgsl", language: "WGSL" }
         }
     });
 
