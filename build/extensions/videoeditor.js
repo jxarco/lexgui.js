@@ -530,7 +530,10 @@ class VideoEditor {
                     this.isResizing = true;
                 }
             });
-        });        
+        });
+        
+        this.onChangeStart = null;
+        this.onChangeEnd = null;
     }
 
     resizeCropArea(event) {
@@ -714,6 +717,10 @@ class VideoEditor {
         if(this.onSetTime) {
             this.onSetTime(t);
         }
+        
+        if(this.onChangeStart) {
+            this.onChangeStart(t);
+        }
     }
 
     _setEndValue ( x ) {
@@ -732,6 +739,10 @@ class VideoEditor {
         this.controlsPanelRight.refresh();
         if(this.onSetTime) {
             this.onSetTime(t);
+        }
+
+        if(this.onChangeEnd) {
+            this.onChangeEnd(t);
         }
     }
 
