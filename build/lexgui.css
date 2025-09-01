@@ -4933,33 +4933,37 @@ ul.lexassetscontent {
 .codebasearea .lexareatabs {
     padding: 0px;
     margin: 0px;
+    gap: 0;
+    background-color: var(--global-color-primary);
 }
 
 .codebasearea .lexareatab {
     padding: 5px;
     border-radius: 0px !important;
     margin: 0px !important;
-    border: 1px solid #91909036;
-    border-right: none;
-    border-bottom: none;
-    background-color: var(--global-color-primary) !important;
+    border: none;
+    background-color: var(--global-color-secondary) !important;
+    border-bottom: 1px solid transparent;
     transition: none;
     display: flex !important;
 }
 
 .codebasearea .lexareatab:hover {
-    background-color: var(--global-color-secondary) !important;
+    background-color: var(--global-color-tertiary) !important;
+}
+
+.codebasearea .lexareatab:first-child {
+    border-top-left-radius: 8px !important;
 }
 
 .codebasearea .lexareatab:last-child {
-    border-right: 1px solid #91909036;
+    border-top-right-radius: 8px !important;
 }
 
 .codebasearea .lexareatab.selected {
-    background-color: var(--global-color-secondary) !important;
-    color: var(--global-text-secondary) !important;
-    border-top: 1px solid var(--global-color-accent);
-    border-bottom: none;
+    background-color: light-dark(var(--global-color-secondary), var(--global-medium-background)) !important;
+    border-bottom: 1px solid var(--global-color-accent);
+    color: var(--global-text-primary) !important;
 }
 
 .codebasearea .lexareatab i {
@@ -6105,6 +6109,10 @@ ul.lexassetscontent {
 .items-center { place-items: center }
 .items-end { place-items: end }
 
+.align-items-start { align-items: start }
+.align-items-center { align-items: center }
+.align-items-end { align-items: end }
+
 .justify-start { justify-content: start }
 .justify-center { justify-content: center }
 .justify-end { justify-content: end }
@@ -6316,6 +6324,8 @@ ul.lexassetscontent {
 .font-bold { font-weight: 700 }
 .font-extrabold { font-weight: 800 }
 
+.font-code { font-family: var(--global-code-font) }
+
 .tracking-tighter { letter-spacing: -0.05em }
 .tracking-tight { letter-spacing: -0.025em }
 .tracking-normal { letter-spacing: 0em }
@@ -6357,7 +6367,6 @@ ul.lexassetscontent {
 .w-15 { width: 3.75rem }
 .w-16 { width: 4rem }     /* 64px */
 .w-32 { width: 8rem }     /* 128px */
-
 
 .h-full { height: 100% }
 .h-screen { height: 100vh }
