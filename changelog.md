@@ -5,6 +5,10 @@
 The last color scheme applied (dark|light) is now stored.
 Added `LX.setSystemTheme()` to revert back auto color scheme mode.
 
+Sidebar:
+- Fixed checkbox change order in Checkbox entries.
+- Added swap value to entry callback parameters (2nd).
+
 ## 0.7.5 (master)
 
 CodeEditor:

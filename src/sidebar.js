@@ -591,8 +591,7 @@ class Sidebar {
                     return;
                 }
 
-                const f = options.callback;
-                if( f ) f.call( this, key, item.value, e );
+                let value = undefined;
 
                 if( isCollapsable )
                 {
@@ -602,13 +601,17 @@ class Sidebar {
                 {
                     item.value = !item.value;
                     item.checkbox.set( item.value, true );
+                    value = item.value;
                 }
-
-                if( options.swap && !( e.target instanceof HTMLInputElement ) )
+                else if( options.swap && !( e.target instanceof HTMLInputElement ) )
                 {
                     const swapInput = itemDom.querySelector( "input" );
                     swapInput.checked = !swapInput.checked;
+                    value = swapInput.checked;
                 }
+
+                const f = options.callback;
+                if( f ) f.call( this, key, value ?? entry, e );
 
                 // Manage selected
                 if( this.displaySelected && !options.skipSelection )
