@@ -244,11 +244,13 @@ LX.deepCopy = deepCopy;
  * @method setTheme
  * @description Set dark or light theme
  * @param {String} colorScheme Name of the scheme
+ * @param {Boolean} storeLocal Store in localStorage
  */
-function setTheme( colorScheme )
+function setTheme( colorScheme, storeLocal = true )
 {
     colorScheme = ( colorScheme == "light" ) ? "light" : "dark";
     document.documentElement.setAttribute( "data-theme", colorScheme );
+    if( storeLocal ) localStorage.setItem( "lxColorScheme", colorScheme );
     LX.emit( "@on_new_color_scheme", colorScheme );
 }
 
@@ -276,6 +278,26 @@ function switchTheme()
 }
 
 LX.switchTheme = switchTheme;
+
+/**
+ * @method setSystemTheme
+ * @description Sets back the system theme
+ */
+function setSystemTheme()
+{
+    const currentTheme = ( window.matchMedia && window.matchMedia( "(prefers-color-scheme: light)" ).matches ) ? "light" : "dark";
+    setTheme( currentTheme );
+    localStorage.removeItem( "lxColorScheme" );
+
+    // Reapply listener
+    if( this._mqlPrefersDarkScheme )
+    {
+        this._mqlPrefersDarkScheme.removeEventListener( "change", this._onChangeSystemTheme );
+        this._mqlPrefersDarkScheme.addEventListener( "change", this._onChangeSystemTheme );
+    }
+}
+
+LX.setSystemTheme = setSystemTheme;
 
 /**
  * @method setThemeColor

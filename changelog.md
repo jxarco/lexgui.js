@@ -2,6 +2,9 @@
 
 ## dev
 
+The last color scheme applied (dark|light) is now stored.
+Added `LX.setSystemTheme()` to revert back auto color scheme mode.
+
 ## 0.7.5 (master)
 
 CodeEditor:

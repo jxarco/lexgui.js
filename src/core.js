@@ -538,16 +538,30 @@ async function init( options = { } )
         this.main_area = new LX.Area( { id: options.id ?? 'mainarea' } );
     }
 
-    if( ( options.autoTheme ?? true ) )
+    // Initial or automatic changes don't force color scheme
+    // to be stored in localStorage
+
+    this._onChangeSystemTheme = function( event ) {
+        const storedcolorScheme = localStorage.getItem( "lxColorScheme" );
+        if( storedcolorScheme ) return;
+        LX.setTheme( event.matches ? "dark" : "light", false );
+    }
+
+    this._mqlPrefersDarkScheme = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
+
+    const storedcolorScheme = localStorage.getItem( "lxColorScheme" );
+    if( storedcolorScheme )
     {
-        if( window.matchMedia && window.matchMedia( "(prefers-color-scheme: light)" ).matches )
+        LX.setTheme( storedcolorScheme );
+    }
+    else if( this._mqlPrefersDarkScheme && ( options.autoTheme ?? true ) )
+    {
+        if( window.matchMedia( "(prefers-color-scheme: light)" ).matches )
         {
-            LX.setTheme( "light" );
+            LX.setTheme( "light", false );
         }
 
-        window.matchMedia( "(prefers-color-scheme: dark)" ).addEventListener( "change", event => {
-            LX.setTheme( event.matches ? "dark" : "light" );
-        });
+        this._mqlPrefersDarkScheme.addEventListener( "change", this._onChangeSystemTheme );
     }
 
     return this.main_area;

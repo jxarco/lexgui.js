@@ -536,16 +536,30 @@ async function init( options = { } )
         this.main_area = new LX.Area( { id: options.id ?? 'mainarea' } );
     }
 
-    if( ( options.autoTheme ?? true ) )
+    // Initial or automatic changes don't force color scheme
+    // to be stored in localStorage
+
+    this._onChangeSystemTheme = function( event ) {
+        const storedcolorScheme = localStorage.getItem( "lxColorScheme" );
+        if( storedcolorScheme ) return;
+        LX.setTheme( event.matches ? "dark" : "light", false );
+    };
+
+    this._mqlPrefersDarkScheme = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
+
+    const storedcolorScheme = localStorage.getItem( "lxColorScheme" );
+    if( storedcolorScheme )
     {
-        if( window.matchMedia && window.matchMedia( "(prefers-color-scheme: light)" ).matches )
+        LX.setTheme( storedcolorScheme );
+    }
+    else if( this._mqlPrefersDarkScheme && ( options.autoTheme ?? true ) )
+    {
+        if( window.matchMedia( "(prefers-color-scheme: light)" ).matches )
         {
-            LX.setTheme( "light" );
+            LX.setTheme( "light", false );
         }
 
-        window.matchMedia( "(prefers-color-scheme: dark)" ).addEventListener( "change", event => {
-            LX.setTheme( event.matches ? "dark" : "light" );
-        });
+        this._mqlPrefersDarkScheme.addEventListener( "change", this._onChangeSystemTheme );
     }
 
     return this.main_area;
@@ -4971,11 +4985,13 @@ LX.deepCopy = deepCopy;
  * @method setTheme
  * @description Set dark or light theme
  * @param {String} colorScheme Name of the scheme
+ * @param {Boolean} storeLocal Store in localStorage
  */
-function setTheme( colorScheme )
+function setTheme( colorScheme, storeLocal = true )
 {
     colorScheme = ( colorScheme == "light" ) ? "light" : "dark";
     document.documentElement.setAttribute( "data-theme", colorScheme );
+    if( storeLocal ) localStorage.setItem( "lxColorScheme", colorScheme );
     LX.emit( "@on_new_color_scheme", colorScheme );
 }
 
@@ -5003,6 +5019,26 @@ function switchTheme()
 }
 
 LX.switchTheme = switchTheme;
+
+/**
+ * @method setSystemTheme
+ * @description Sets back the system theme
+ */
+function setSystemTheme()
+{
+    const currentTheme = ( window.matchMedia && window.matchMedia( "(prefers-color-scheme: light)" ).matches ) ? "light" : "dark";
+    setTheme( currentTheme );
+    localStorage.removeItem( "lxColorScheme" );
+
+    // Reapply listener
+    if( this._mqlPrefersDarkScheme )
+    {
+        this._mqlPrefersDarkScheme.removeEventListener( "change", this._onChangeSystemTheme );
+        this._mqlPrefersDarkScheme.addEventListener( "change", this._onChangeSystemTheme );
+    }
+}
+
+LX.setSystemTheme = setSystemTheme;
 
 /**
  * @method setThemeColor
