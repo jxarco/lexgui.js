@@ -11,6 +11,7 @@ Sidebar:
 
 CodeEditor:
 - Added support to use different name for URL/Path loaded files.
+- Added support to load initial files async using `options.filesAsync` list.
 
 ## 0.7.5 (master)
 

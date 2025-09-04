@@ -319,6 +319,25 @@ class CodeEditor {
 
     constructor( area, options = {} ) {
 
+        if( options.filesAsync )
+        {
+            options.files = [ ...options.filesAsync ];
+
+            return (async () => {
+                await this._init( area, options );
+                // Constructors return `this` implicitly, but this is an IIFE, so
+                // return `this` explicitly (else we'd return an empty object).
+                return this;
+            })();
+        }
+        else
+        {
+            this._init( area, options );
+        }
+    }
+
+    async _init( area, options ) {
+
         window.editor = this;
 
         CodeEditor.__instances.push( this );
@@ -1259,7 +1278,6 @@ class CodeEditor {
         if( options.allowAddScripts ?? true )
         {
             this.onCreateFile = options.onCreateFile;
-
             this.addTab( "+", false, "Create file" );
         }
 
@@ -1267,14 +1285,14 @@ class CodeEditor {
         {
             console.assert( options.files.constructor === Array, "_files_ must be an Array!" );
             const numFiles = options.files.length;
+            const loadAsync = ( options.filesAsync !== undefined );
             let filesLoaded = 0;
-
             for( let url of options.files )
             {
                 const finalUrl = url.constructor === Array ? url[ 0 ] : url;
                 const finalFileName = url.constructor === Array ? url[ 1 ] : url;
 
-                this.loadFile( finalUrl, { filename: finalFileName, callback: ( name, text ) => {
+                await this.loadFile( finalUrl, { filename: finalFileName, async: loadAsync, callback: ( name, text ) => {
                     filesLoaded++;
                     if( filesLoaded == numFiles )
                     {
@@ -1282,7 +1300,7 @@ class CodeEditor {
 
                         if( options.onFilesLoaded )
                         {
-                            options.onFilesLoaded( this, numFiles );
+                            options.onFilesLoaded( this.loadedTabs, numFiles );
                         }
                     }
                 }});
@@ -1424,15 +1442,12 @@ class CodeEditor {
         const _innerAddTab = ( text, name, title ) => {
 
             // Remove Carriage Return in some cases and sub tabs using spaces
-            text = text.replaceAll( '\r', '' );
-            text = text.replaceAll( /\t|\\t/g, ' '.repeat( this.tabSpaces ) );
+            text = text.replaceAll( '\r', '' ).replaceAll( /\t|\\t/g, ' '.repeat( this.tabSpaces ) );
 
             // Set current text and language
-
             const lines = text.split( '\n' );
 
             // Add item in the explorer if used
-
             if( this.useFileExplorer || this.skipTabs )
             {
                 this._tabStorage[ name ] = {
@@ -1468,13 +1483,20 @@ class CodeEditor {
 
         if( file.constructor == String )
         {
-            let filename = file;
+            const filename = file;
+            const name = options.filename ?? filename.substring(filename.lastIndexOf( '/' ) + 1);
 
-            LX.request({ url: filename, success: text => {
-                const name = options.filename ?? filename.substring(filename.lastIndexOf( '/' ) + 1);
-                _innerAddTab( text, name,  options.filename ?? filename );
-            } });
-
+            if( options.async ?? false )
+            {
+                const text = await this._requestFileAsync( filename, "text" );
+                _innerAddTab( text, name, options.filename ?? filename );
+            }
+            else
+            {
+                LX.request({ url: filename, success: text => {
+                    _innerAddTab( text, name, options.filename ?? filename );
+                } });
+            }
         }
         else // File Blob
         {
@@ -5604,6 +5626,36 @@ s
         delete this._markdownHeader;
         delete this._lastResult;
         delete this._scopeStack;
+    }
+
+    async _requestFileAsync( url, dataType, nocache ) {
+        return new Promise( (resolve, reject) => {
+            dataType = dataType ?? "arraybuffer";
+            const mimeType = dataType === "arraybuffer" ? "application/octet-stream" : undefined;
+            var xhr = new XMLHttpRequest();
+            xhr.open( 'GET', url, true );
+            xhr.responseType = dataType;
+            if( mimeType )
+                xhr.overrideMimeType( mimeType );
+            if( nocache )
+                xhr.setRequestHeader('Cache-Control', 'no-cache');
+            xhr.onload = function(load)
+            {
+                var response = this.response;
+                if( this.status != 200)
+                {
+                    var err = "Error " + this.status;
+                    reject(err);
+                    return;
+                }
+                resolve( response );
+            };
+            xhr.onerror = function(err) {
+                reject(err);
+            };
+            xhr.send();
+            return xhr;
+        });
     }
 }
 
