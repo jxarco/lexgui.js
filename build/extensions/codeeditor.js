@@ -1271,7 +1271,10 @@ class CodeEditor {
 
             for( let url of options.files )
             {
-                this.loadFile( url, { callback: ( name, text ) => {
+                const finalUrl = url.constructor === Array ? url[ 0 ] : url;
+                const finalFileName = url.constructor === Array ? url[ 1 ] : url;
+
+                this.loadFile( finalUrl, { filename: finalFileName, callback: ( name, text ) => {
                     filesLoaded++;
                     if( filesLoaded == numFiles )
                     {
@@ -1468,8 +1471,8 @@ class CodeEditor {
             let filename = file;
 
             LX.request({ url: filename, success: text => {
-                const name = filename.substring(filename.lastIndexOf( '/' ) + 1);
-                _innerAddTab( text, name, filename );
+                const name = options.filename ?? filename.substring(filename.lastIndexOf( '/' ) + 1);
+                _innerAddTab( text, name,  options.filename ?? filename );
             } });
 
         }

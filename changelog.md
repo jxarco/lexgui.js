@@ -9,6 +9,9 @@ Sidebar:
 - Fixed checkbox change order in Checkbox entries.
 - Added swap value to entry callback parameters (2nd).
 
+CodeEditor:
+- Added support to use different name for URL/Path loaded files.
+
 ## 0.7.5 (master)
 
 CodeEditor:
