@@ -1290,7 +1290,7 @@ class CodeEditor {
             for( let url of options.files )
             {
                 const finalUrl = url.constructor === Array ? url[ 0 ] : url;
-                const finalFileName = url.constructor === Array ? url[ 1 ] : url;
+                const finalFileName = url.constructor === Array ? url[ 1 ] : undefined;
 
                 await this.loadFile( finalUrl, { filename: finalFileName, async: loadAsync, callback: ( name, text ) => {
                     filesLoaded++;
