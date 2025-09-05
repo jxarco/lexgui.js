@@ -1858,13 +1858,9 @@ class CodeEditor {
         this.processFocus( false );
 
         const dmOptions = [
-            { name: "Create file", icon: "FilePlus", callback: this._onCreateNewFile.bind( this ) }
+            { name: "Create file", icon: "FilePlus", callback: this._onCreateNewFile.bind( this ) },
+            { name: "Load file", icon: "FileUp", disabled: !this.allowLoadingFiles, callback: this.loadTabFromFile.bind( this ) }
         ];
-
-        if( this.allowLoadingFiles )
-        {
-            dmOptions.push( { name: "Load file", icon: "FileUp", callback: this.loadTabFromFile.bind( this ) } );
-        }
 
         new LX.DropdownMenu( e.target, dmOptions, { side: "bottom", align: "start" });
     }
