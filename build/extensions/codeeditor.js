@@ -1872,7 +1872,7 @@ class CodeEditor {
         }
 
         const name = options.name ?? "unnamed.js";
-        this.addTab( name, true, name, { language: options.language ?? "JavaScript" } );
+        this.addTab( name, true, name, { indexOffset: options.indexOffset, language: options.language ?? "JavaScript" } );
     }
 
     _onSelectTab( isNewTabButton, event, name ) {
@@ -2015,7 +2015,8 @@ class CodeEditor {
                 icon: tabIcon,
                 onSelect: this._onSelectTab.bind( this, isNewTabButton ),
                 onContextMenu: this._onContextMenuTab.bind( this, isNewTabButton ),
-                allowDelete: true
+                allowDelete: true,
+                indexOffset: options.indexOffset
             } );
         }
 

@@ -2,6 +2,9 @@
 
 ## dev
 
+CodeEditor:
+- Passing `indexOffset` in onCreateFile callback is now supported.
+
 ## 0.7.6 (master)
 
 The last color scheme applied (dark|light) is now stored.
