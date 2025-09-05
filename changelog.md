@@ -2,6 +2,8 @@
 
 ## dev
 
+## 0.7.6 (master)
+
 The last color scheme applied (dark|light) is now stored.
 Added `LX.setSystemTheme()` to revert back auto color scheme mode.
 Callbacks are now not skipped in Form Component, instead return validation errors `callback(value, errors, event)`.
@@ -15,7 +17,7 @@ CodeEditor:
 - Added support to use different name for URL/Path loaded files.
 - Added support to load initial files async using `options.filesAsync` list.
 
-## 0.7.5 (master)
+## 0.7.5
 
 CodeEditor:
 - Hotfixed issue not processing lines in some cases.

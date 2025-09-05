@@ -6337,7 +6337,11 @@ ul.lexassetscontent {
 
 .uppercase { text-transform: uppercase }
 .capitalize { text-transform: capitalize }
+
 .decoration-none { text-decoration: none }
+.text-underline { text-decoration: underline }
+
+.hover\:text-underline:hover { text-decoration: underline }
 
 /* Width / Height */
 

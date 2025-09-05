@@ -14,7 +14,7 @@ console.warn( 'Script _build/lexgui.js_ is depracated and will be removed soon. 
 */
 
 const LX = {
-    version: "0.7.5",
+    version: "0.7.6",
     ready: false,
     extensions: [], // Store extensions used
     signals: {}, // Events and triggers
@@ -543,16 +543,30 @@ async function init( options = { } )
         this.main_area = new LX.Area( { id: options.id ?? 'mainarea' } );
     }
 
-    if( ( options.autoTheme ?? true ) )
+    // Initial or automatic changes don't force color scheme
+    // to be stored in localStorage
+
+    this._onChangeSystemTheme = function( event ) {
+        const storedcolorScheme = localStorage.getItem( "lxColorScheme" );
+        if( storedcolorScheme ) return;
+        LX.setTheme( event.matches ? "dark" : "light", false );
+    };
+
+    this._mqlPrefersDarkScheme = window.matchMedia ? window.matchMedia("(prefers-color-scheme: dark)") : null;
+
+    const storedcolorScheme = localStorage.getItem( "lxColorScheme" );
+    if( storedcolorScheme )
     {
-        if( window.matchMedia && window.matchMedia( "(prefers-color-scheme: light)" ).matches )
+        LX.setTheme( storedcolorScheme );
+    }
+    else if( this._mqlPrefersDarkScheme && ( options.autoTheme ?? true ) )
+    {
+        if( window.matchMedia( "(prefers-color-scheme: light)" ).matches )
         {
-            LX.setTheme( "light" );
+            LX.setTheme( "light", false );
         }
 
-        window.matchMedia( "(prefers-color-scheme: dark)" ).addEventListener( "change", event => {
-            LX.setTheme( event.matches ? "dark" : "light" );
-        });
+        this._mqlPrefersDarkScheme.addEventListener( "change", this._onChangeSystemTheme );
     }
 
     return this.main_area;
@@ -2552,8 +2566,9 @@ class Tabs {
         });
 
         // Attach content
-        tabEl.childIndex = ( this.root.childElementCount - 1 );
-        this.root.appendChild( tabEl );
+        const indexOffset = options.indexOffset ?? -1;
+        tabEl.childIndex = ( this.root.childElementCount + indexOffset );
+        this.root.insertChildAtIndex( tabEl, tabEl.childIndex + 1 );
         this.area.attach( contentEl );
         this.tabDOMs[ name ] = tabEl;
         this.tabs[ name ] = content;
@@ -4978,11 +4993,13 @@ LX.deepCopy = deepCopy;
  * @method setTheme
  * @description Set dark or light theme
  * @param {String} colorScheme Name of the scheme
+ * @param {Boolean} storeLocal Store in localStorage
  */
-function setTheme( colorScheme )
+function setTheme( colorScheme, storeLocal = true )
 {
     colorScheme = ( colorScheme == "light" ) ? "light" : "dark";
     document.documentElement.setAttribute( "data-theme", colorScheme );
+    if( storeLocal ) localStorage.setItem( "lxColorScheme", colorScheme );
     LX.emit( "@on_new_color_scheme", colorScheme );
 }
 
@@ -5010,6 +5027,26 @@ function switchTheme()
 }
 
 LX.switchTheme = switchTheme;
+
+/**
+ * @method setSystemTheme
+ * @description Sets back the system theme
+ */
+function setSystemTheme()
+{
+    const currentTheme = ( window.matchMedia && window.matchMedia( "(prefers-color-scheme: light)" ).matches ) ? "light" : "dark";
+    setTheme( currentTheme );
+    localStorage.removeItem( "lxColorScheme" );
+
+    // Reapply listener
+    if( this._mqlPrefersDarkScheme )
+    {
+        this._mqlPrefersDarkScheme.removeEventListener( "change", this._onChangeSystemTheme );
+        this._mqlPrefersDarkScheme.addEventListener( "change", this._onChangeSystemTheme );
+    }
+}
+
+LX.setSystemTheme = setSystemTheme;
 
 /**
  * @method setThemeColor
@@ -8993,7 +9030,7 @@ class TextInput extends BaseComponent {
 
         this.valid = ( v ) => {
             v = v ?? this.value();
-            if( !v.length || wValue.pattern == "" ) return true;
+            if( ( wValue.pattern ?? "" ) == "" ) return true;
             const regexp = new RegExp( wValue.pattern );
             return regexp.test( v );
         };
@@ -9732,19 +9769,21 @@ class Form extends BaseComponent {
 
         const primaryButton = new LX.Button( null, options.primaryActionName ?? "Submit", ( value, event ) => {
 
+            const errors = [];
+
             for( let entry in data )
             {
                 let entryData = data[ entry ];
 
                 if( !entryData.textComponent.valid() )
                 {
-                    return;
+                    errors.push( { type: "input_not_valid", entry } );
                 }
             }
 
             if( callback )
             {
-                callback( container.formData, event );
+                callback( container.formData, errors, event );
             }
         }, { width: "100%", minWidth: "0", buttonClass: options.primaryButtonClass ?? "contrast" } );
 
@@ -15949,8 +15988,7 @@ class Sidebar {
                     return;
                 }
 
-                const f = options.callback;
-                if( f ) f.call( this, key, item.value, e );
+                let value = undefined;
 
                 if( isCollapsable )
                 {
@@ -15960,13 +15998,17 @@ class Sidebar {
                 {
                     item.value = !item.value;
                     item.checkbox.set( item.value, true );
+                    value = item.value;
                 }
-
-                if( options.swap && !( e.target instanceof HTMLInputElement ) )
+                else if( options.swap && !( e.target instanceof HTMLInputElement ) )
                 {
                     const swapInput = itemDom.querySelector( "input" );
                     swapInput.checked = !swapInput.checked;
+                    value = swapInput.checked;
                 }
+
+                const f = options.callback;
+                if( f ) f.call( this, key, value ?? entry, e );
 
                 // Manage selected
                 if( this.displaySelected && !options.skipSelection )
