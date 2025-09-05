@@ -1163,7 +1163,7 @@ class TextInput extends BaseComponent {
 
         this.valid = ( v ) => {
             v = v ?? this.value();
-            if( !v.length || wValue.pattern == "" ) return true;
+            if( ( wValue.pattern ?? "" ) == "" ) return true;
             const regexp = new RegExp( wValue.pattern );
             return regexp.test( v );
         };
@@ -1902,19 +1902,21 @@ class Form extends BaseComponent {
 
         const primaryButton = new LX.Button( null, options.primaryActionName ?? "Submit", ( value, event ) => {
 
+            const errors = [];
+
             for( let entry in data )
             {
                 let entryData = data[ entry ];
 
                 if( !entryData.textComponent.valid() )
                 {
-                    return;
+                    errors.push( { type: "input_not_valid", entry } )
                 }
             }
 
             if( callback )
             {
-                callback( container.formData, event );
+                callback( container.formData, errors, event );
             }
         }, { width: "100%", minWidth: "0", buttonClass: options.primaryButtonClass ?? "contrast" } );
 
