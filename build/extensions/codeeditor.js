@@ -348,6 +348,7 @@ class CodeEditor {
         this.useFileExplorer = ( options.fileExplorer ?? false ) && !this.skipTabs;
         this.useAutoComplete = options.autocomplete ?? true;
         this.allowClosingTabs = options.allowClosingTabs ?? true;
+        this.allowLoadingFiles = options.allowLoadingFiles ?? true;
 
         // File explorer
         if( this.useFileExplorer )
@@ -411,7 +412,7 @@ class CodeEditor {
 
         if( !this.skipTabs )
         {
-            this.tabs = this.area.addTabs( { allowClosingTabs: this.allowClosingTabs, onclose: (name) => {
+            this.tabs = this.area.addTabs( { onclose: (name) => {
                 delete this.openedTabs[ name ];
                 if( Object.keys( this.openedTabs ).length < 2 )
                 {
@@ -1856,10 +1857,16 @@ class CodeEditor {
 
         this.processFocus( false );
 
-        new LX.DropdownMenu( e.target, [
-            { name: "Create file", icon: "FilePlus", callback: this._onCreateNewFile.bind( this ) },
-            { name: "Load file", icon: "FileUp", callback: this.loadTabFromFile.bind( this ) },
-        ], { side: "bottom", align: "start" });
+        const dmOptions = [
+            { name: "Create file", icon: "FilePlus", callback: this._onCreateNewFile.bind( this ) }
+        ];
+
+        if( this.allowLoadingFiles )
+        {
+            dmOptions.push( { name: "Load file", icon: "FileUp", callback: this.loadTabFromFile.bind( this ) } );
+        }
+
+        new LX.DropdownMenu( e.target, dmOptions, { side: "bottom", align: "start" });
     }
 
     _onCreateNewFile() {
@@ -2015,7 +2022,7 @@ class CodeEditor {
                 icon: tabIcon,
                 onSelect: this._onSelectTab.bind( this, isNewTabButton ),
                 onContextMenu: this._onContextMenuTab.bind( this, isNewTabButton ),
-                allowDelete: true,
+                allowDelete: this.allowClosingTabs,
                 indexOffset: options.indexOffset
             } );
         }
@@ -2156,7 +2163,7 @@ class CodeEditor {
             icon: tabIcon,
             onSelect: this._onSelectTab.bind( this, isNewTabButton ),
             onContextMenu: this._onContextMenuTab.bind( this, isNewTabButton ),
-            allowDelete: true
+            allowDelete: this.allowClosingTabs
         });
 
         // Move into the sizer..
