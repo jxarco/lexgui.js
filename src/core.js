@@ -2578,8 +2578,9 @@ class Tabs {
         });
 
         // Attach content
-        tabEl.childIndex = ( this.root.childElementCount - 1 );
-        this.root.appendChild( tabEl );
+        const indexOffset = options.indexOffset ?? -1;
+        tabEl.childIndex = ( this.root.childElementCount + indexOffset );
+        this.root.insertChildAtIndex( tabEl, tabEl.childIndex + 1 );
         this.area.attach( contentEl );
         this.tabDOMs[ name ] = tabEl;
         this.tabs[ name ] = content;

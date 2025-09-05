@@ -5,6 +5,7 @@
 The last color scheme applied (dark|light) is now stored.
 Added `LX.setSystemTheme()` to revert back auto color scheme mode.
 Callbacks are now not skipped in Form Component, instead return validation errors `callback(value, errors, event)`.
+Added support for `options.indexOffset (default -1 to append last)` on adding tabs to Tabs Area class.
 
 Sidebar:
 - Fixed checkbox change order in Checkbox entries.
