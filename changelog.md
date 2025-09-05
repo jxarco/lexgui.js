@@ -4,6 +4,8 @@
 
 CodeEditor:
 - Passing `indexOffset` in onCreateFile callback is now supported.
+- Added support `options.allowClosingTabs`.
+- Docs updated.
 
 ## 0.7.6 (master)
 

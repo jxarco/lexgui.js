@@ -347,6 +347,7 @@ class CodeEditor {
         this.skipTabs = options.skipTabs ?? false;
         this.useFileExplorer = ( options.fileExplorer ?? false ) && !this.skipTabs;
         this.useAutoComplete = options.autocomplete ?? true;
+        this.allowClosingTabs = options.allowClosingTabs ?? true;
 
         // File explorer
         if( this.useFileExplorer )
@@ -377,8 +378,7 @@ class CodeEditor {
                             this.loadTab( event.node.id );
                             break;
                         case LX.TreeEvent.NODE_DELETED:
-                            this.tabs.delete( event.node.id );
-                            delete this.loadedTabs[ event.node.id ];
+                            this.closeTab( event.node.id );
                             break;
                         // case LX.TreeEvent.NODE_CONTEXTMENU:
                         //     LX.addContextMenu( event.multiple ? "Selected Nodes" : event.node.id, event.value, m => {
@@ -411,7 +411,7 @@ class CodeEditor {
 
         if( !this.skipTabs )
         {
-            this.tabs = this.area.addTabs( { onclose: (name) => {
+            this.tabs = this.area.addTabs( { allowClosingTabs: this.allowClosingTabs, onclose: (name) => {
                 delete this.openedTabs[ name ];
                 if( Object.keys( this.openedTabs ).length < 2 )
                 {
@@ -1921,19 +1921,19 @@ class CodeEditor {
         }
 
         new LX.DropdownMenu( event.target, [
-            { name: "Close", kbd: "MWB", callback: () => { this.tabs.delete( name ) } },
-            { name: "Close Others", callback: () => {
+            { name: "Close", kbd: "MWB", disabled: !this.allowClosingTabs, callback: () => { this.closeTab( name ) } },
+            { name: "Close Others", disabled: !this.allowClosingTabs, callback: () => {
                 for( const [ key, data ] of Object.entries( this.tabs.tabs ) )
                 {
                     if( key === '+' || key === name ) continue;
-                    this.tabs.delete( key )
+                    this.closeTab( key )
                 }
             } },
-            { name: "Close All", callback: () => {
+            { name: "Close All", disabled: !this.allowClosingTabs, callback: () => {
                 for( const [ key, data ] of Object.entries( this.tabs.tabs ) )
                 {
                     if( key === '+' ) continue;
-                    this.tabs.delete( key )
+                    this.closeTab( key )
                 }
             } },
             null,
@@ -2173,6 +2173,11 @@ class CodeEditor {
     }
 
     closeTab( name, eraseAll ) {
+
+        if( !this.allowClosingTabs )
+        {
+            return;
+        }
 
         this.tabs.delete( name );
 
