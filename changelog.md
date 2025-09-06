@@ -6,6 +6,7 @@ CodeEditor:
 - Passing `indexOffset` in onCreateFile callback is now supported.
 - Added support `options.allowClosingTabs`.
 - Added support `options.allowLoadingFiles`.
+- Set new args for: `options.onFilesLoaded( editorInstance, loadedTabs, numFilesLoaded )`.
 - Docs updated.
 
 ## 0.7.6 (master)

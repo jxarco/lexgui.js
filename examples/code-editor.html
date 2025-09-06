@@ -77,7 +77,7 @@
             "../changelog.md",
             "../index.html",
         ],
-        onFilesLoaded: ( instance, numFilesLoaded ) => {
+        onFilesLoaded: ( instance, loadedTabs, numFilesLoaded ) => {
             console.log( `CodeEditor: ${ numFilesLoaded } files loaded!` );
             instance.loadTab("js_sample.js");
         },

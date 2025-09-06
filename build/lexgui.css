@@ -777,7 +777,6 @@ a svg, svg path {
     font-size: var(--global-font-size-lg);
     color: var(--global-text-secondary);
     cursor: pointer;
-    margin-right: 0.4em;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;

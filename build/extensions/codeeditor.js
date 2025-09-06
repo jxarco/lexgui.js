@@ -1301,7 +1301,7 @@ class CodeEditor {
 
                         if( options.onFilesLoaded )
                         {
-                            options.onFilesLoaded( this.loadedTabs, numFiles );
+                            options.onFilesLoaded( this, this.loadedTabs, numFiles );
                         }
                     }
                 }});
