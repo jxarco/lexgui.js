@@ -7,6 +7,7 @@ CodeEditor:
 - Added support `options.allowClosingTabs` and `options.allowLoadingFiles`.
 - Added support for new events `options.onCtrlSpace` and `options.onCreateStatusPanel`.
 - Set new args for: `options.onFilesLoaded( editorInstance, loadedTabs, numFilesLoaded )`.
+- Delete word until cursor position is now Ctrl+Backspace instead of Shift+Backspace.
 - Docs updated.
 
 ## 0.7.6 (master)

@@ -789,14 +789,14 @@ class CodeEditor {
                         var numCharsDeleted = 1;
 
                         // Delete full word
-                        if( e.shiftKey )
+                        if( e.ctrlKey )
                         {
                             const [word, from, to] = this.getWordAtPos( cursor, -1 );
 
                             if( word.length > 1 )
                             {
                                 deleteFromPosition = from;
-                                numCharsDeleted = word.length;
+                                numCharsDeleted = word.length - ( to - cursor.position );
                             }
                         }
 
