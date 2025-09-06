@@ -2656,10 +2656,17 @@ class CodeEditor {
                 e.preventDefault();
                 this.selectAll();
                 return true;
+            case 'b': // k+b comment block
+                e.preventDefault();
+                if( this.state.keyChain == 'k' ) {
+                    this._commentLines( cursor, true );
+                    return true;
+                }
+                return false;
             case 'c': // k+c, comment line
                 e.preventDefault();
                 if( this.state.keyChain == 'k' ) {
-                    this._commentLines();
+                    this._commentLines( cursor );
                     return true;
                 }
                 return false;
@@ -2686,7 +2693,7 @@ class CodeEditor {
             case 'u': // k+u, uncomment line
                 e.preventDefault();
                 if( this.state.keyChain == 'k' ) {
-                    this._uncommentLines();
+                    this._uncommentLines( cursor );
                     return true;
                 }
                 return false;
@@ -3006,32 +3013,77 @@ class CodeEditor {
         this.hideAutoCompleteBox();
     }
 
-    _commentLines() {
+    _commentLines( cursor, useCommentBlock ) {
+
+        const lang = CodeEditor.languages[ this.highlight ];
 
         this.state.keyChain = null;
 
+        cursor = cursor ?? this.getCurrentCursor();
+
         if( cursor.selection )
         {
-            var cursor = this.getCurrentCursor();
+            if( !( ( useCommentBlock ? lang.blockComments : lang.singleLineComments ) ?? true ) )
+            {
+                return;
+            }
+
             this._addUndoStep( cursor, true );
 
-            const selectedLines = this.code.lines.slice( cursor.selection.fromY, cursor.selection.toY );
+            const selectedLines = this.code.lines.slice( cursor.selection.fromY, cursor.selection.toY + 1 );
             const minIdx = Math.min(...selectedLines.map( v => {
                 var idx = firstNonspaceIndex( v );
                 return idx < 0 ? 1e10 : idx;
             } ));
 
-            for( var i = cursor.selection.fromY; i <= cursor.selection.toY; ++i )
+            if( useCommentBlock )
             {
-                this._commentLine( cursor, i, minIdx );
+                const tokens = ( lang.blockCommentsTokens ?? this.defaultBlockCommentTokens );
+
+                const fromString = this.code.lines[ cursor.selection.fromY ];
+                let fromIdx = firstNonspaceIndex( fromString );
+                if( fromIdx == -1 )
+                {
+                    fromIdx = 0;
+                }
+
+                this.code.lines[ cursor.selection.fromY ] = [
+                    fromString.substring( 0, fromIdx ),
+                    tokens[ 0 ] + " ",
+                    fromString.substring( fromIdx )
+                ].join( '' );
+
+                this.code.lines[ cursor.selection.toY ] += " " + tokens[ 1 ];
+
+                cursor.selection.fromX += ( tokens[ 0 ].length + 1 );
+                this._processSelection( cursor );
+            }
+            else
+            {
+                for( let i = cursor.selection.fromY; i <= cursor.selection.toY; ++i )
+                {
+                    this._commentLine( cursor, i, minIdx, false );
+                }
+
+                const token = ( lang.singleLineCommentToken ?? this.defaultSingleLineCommentToken ) + ' ';
+                this.cursorToString( cursor, token );
+
+                cursor.selection.fromX += token.length;
+                cursor.selection.toX += token.length;
+                this._processSelection( cursor );
             }
         }
         else
         {
-            for( let cursor of this.cursors.children )
+            if( !( lang.singleLineComments ?? true ) )
             {
-                this._addUndoStep( cursor, true );
-                this._commentLine( cursor, cursor.line );
+                return;
+            }
+
+            for( const cr of this.cursors.children )
+            {
+                this._addUndoStep( cr, true );
+                this._commentLine( cr, cr.line );
             }
         }
 
@@ -3039,33 +3091,37 @@ class CodeEditor {
         this._hideActiveLine();
     }
 
-    _commentLine( cursor, line, minNonspaceIdx ) {
+    _commentLine( cursor, line, minNonspaceIdx, updateCursor = true ) {
 
         const lang = CodeEditor.languages[ this.highlight ];
-
-        if( !( lang.singleLineComments ?? true ))
+        if( !( lang.singleLineComments ?? true ) )
             return;
 
         const token = ( lang.singleLineCommentToken ?? this.defaultSingleLineCommentToken ) + ' ';
         const string = this.code.lines[ line ];
 
         let idx = firstNonspaceIndex( string );
-        if( idx > -1 )
+        if( idx == -1 )
         {
-            // Update idx using min of the selected lines (if necessary..)
-            idx = minNonspaceIdx ?? idx;
+            return;
+        }
 
-            this.code.lines[ line ] = [
-                string.substring( 0, idx ),
-                token,
-                string.substring( idx )
-            ].join( '' );
+        // Update idx using min of the selected lines (if necessary..)
+        idx = minNonspaceIdx ?? idx;
 
+        this.code.lines[ line ] = [
+            string.substring( 0, idx ),
+            token,
+            string.substring( idx )
+        ].join( '' );
+
+        if( updateCursor )
+        {
             this.cursorToString( cursor, token );
         }
     }
 
-    _uncommentLines() {
+    _uncommentLines( cursor ) {
 
         this.state.keyChain = null;
 
@@ -4644,6 +4700,8 @@ class CodeEditor {
 
         if( state.selection )
         {
+            this.endSelection();
+
             this.startSelection( cursor );
 
             cursor.selection.load( state.selection );

@@ -8,6 +8,7 @@ CodeEditor:
 - Added support for new events `options.onCtrlSpace` and `options.onCreateStatusPanel`.
 - Set new args for: `options.onFilesLoaded( editorInstance, loadedTabs, numFilesLoaded )`.
 - Delete word until cursor position is now Ctrl+Backspace instead of Shift+Backspace.
+- Fixed some comment lines issues. Added Comment block using Ctrl+K+B.
 - Docs updated.
 
 ## 0.7.6 (master)
