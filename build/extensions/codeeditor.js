@@ -349,6 +349,13 @@ class CodeEditor {
         this.useAutoComplete = options.autocomplete ?? true;
         this.allowClosingTabs = options.allowClosingTabs ?? true;
         this.allowLoadingFiles = options.allowLoadingFiles ?? true;
+        this.highlight = options.highlight ?? 'Plain Text';
+
+        // Editor callbacks
+        this.onSave = options.onSave ?? options.onsave;  // LEGACY onsave
+        this.onRun = options.onRun ?? options.onrun;     // LEGACY onrun
+        this.onCtrlSpace = options.onCtrlSpace;
+        this.onCreateStatusPanel = options.onCreateStatusPanel;
 
         // File explorer
         if( this.useFileExplorer )
@@ -698,10 +705,6 @@ class CodeEditor {
 
         // Code
 
-        this.highlight = options.highlight ?? 'Plain Text';
-        this.onSave = options.onSave ?? options.onsave;  // LEGACY onsave
-        this.onRun = options.onRun ?? options.onrun;     // LEGACY onrun
-        this.onCtrlSpace = options.onCtrlSpace;
         this.actions = {};
         this.cursorBlinkRate = 550;
         this.tabSpaces = 4;
@@ -1712,6 +1715,11 @@ class CodeEditor {
         }
 
         let panel = new LX.Panel({ className: "lexcodetabinfo flex flex-row", height: "auto" });
+
+        if( this.onCreateStatusPanel )
+        {
+            this.onCreateStatusPanel( panel );
+        }
 
         let leftStatusPanel = new LX.Panel( { id: "FontSizeZoomStatusComponent", height: "auto" } );
         leftStatusPanel.sameLine();

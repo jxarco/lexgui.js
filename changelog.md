@@ -5,7 +5,7 @@
 CodeEditor:
 - Passing `indexOffset` in onCreateFile callback is now supported.
 - Added support `options.allowClosingTabs` and `options.allowLoadingFiles`.
-- Added support for new event `options.onCtrlSpace`.
+- Added support for new events `options.onCtrlSpace` and `options.onCreateStatusPanel`.
 - Set new args for: `options.onFilesLoaded( editorInstance, loadedTabs, numFilesLoaded )`.
 - Docs updated.
 
