@@ -699,8 +699,9 @@ class CodeEditor {
         // Code
 
         this.highlight = options.highlight ?? 'Plain Text';
-        this.onsave = options.onsave ?? ((code) => { console.log( code, "save" ) });
-        this.onrun = options.onrun ?? ((code) => { this.runScript(code) });
+        this.onSave = options.onSave ?? options.onsave;  // LEGACY onsave
+        this.onRun = options.onRun ?? options.onrun;     // LEGACY onrun
+        this.onCtrlSpace = options.onCtrlSpace;
         this.actions = {};
         this.cursorBlinkRate = 550;
         this.tabSpaces = 4;
@@ -967,7 +968,7 @@ class CodeEditor {
 
                 if( e.ctrlKey )
                 {
-                    this.onrun( this.getText() );
+                    this.onRun( this.getText() );
                     return;
                 }
 
@@ -2672,7 +2673,7 @@ class CodeEditor {
                 return true;
             case 's': // save
                 e.preventDefault();
-                this.onsave( this.getText() );
+                this.onSave( this.getText() );
                 return true;
             case 'u': // k+u, uncomment line
                 e.preventDefault();
@@ -2697,6 +2698,13 @@ class CodeEditor {
                 e.preventDefault();
                 this._decreaseFontSize();
                 return true;
+            case ' ': // custom event
+                if( this.onCtrlSpace )
+                {
+                    e.preventDefault();
+                    this.onCtrlSpace( cursor );
+                    return true;
+                }
             }
         }
 
