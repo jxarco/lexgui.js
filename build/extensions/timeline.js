@@ -261,7 +261,6 @@ class Timeline {
     */
     updateLeftPanel( ) {
 
-        const scrollTop = this.trackTreesPanel ? this.trackTreesPanel.root.scrollTop : 0;
         this.leftPanel.clear();
 
         const panel = this.leftPanel;
@@ -326,7 +325,7 @@ class Timeline {
             }
         });
 
-        this.trackTreesPanel.root.scrollTop = scrollTop;
+        this.trackTreesPanel.root.scrollTop = this.currentScrollInPixels;
 
         if( this.leftPanel.parent.root.classList.contains("hidden") || !this.root.parentElement ){
             return;
@@ -731,6 +730,41 @@ class Timeline {
 
         this.secondsPerPixel = 1 / this.pixelsPerSecond;
         this.visualOriginTime += this.currentTime - this.xToTime(xCurrentTime);
+    }
+
+    /**
+     * @method setScroll
+     * not delta from last state, but full scroll amount.
+     * @param {Number} scrollY either pixels or [0,1]
+     * @param {Bool} normalized if true, scrollY is in range[0,1] being 1 fully scrolled. Otherwised scrollY represents pixels
+     * @returns 
+     */ 
+    
+    setScroll( scrollY, normalized = true ){
+        if ( !this.trackTreesPanel ){
+            this.currentScroll = 0;
+            this.currentScrollInPixels = 0;
+            return;
+        }
+
+        const r = this.trackTreesPanel.root;
+        if (r.scrollHeight > r.clientHeight){
+            if ( normalized ){
+                this.currentScroll = scrollY;
+                this.currentScrollInPixels = scrollY * (r.scrollHeight - r.clientHeight);
+            }else{
+                this.currentScroll = scrollY / (r.scrollHeight - r.clientHeight);
+                this.currentScrollInPixels = scrollY;
+            }
+        }
+        else{
+            this.currentScroll = 0;
+            this.currentScrollInPixels = 0;
+        }
+
+        // automatically calls event. 
+        this.trackTreesPanel.root.scrollTop = this.currentScrollInPixels;
+
     }
 
     /**
