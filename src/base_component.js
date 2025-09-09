@@ -3355,7 +3355,7 @@ class RangeInput extends BaseComponent {
         container.appendChild( slider );
 
         slider.addEventListener( "input", e => {
-            this.set( isRangeValue ? [ e.target.valueAsNumber, ogValue[ 1 ] ] : e.target.valueAsNumber, false, e );
+            this.set( isRangeValue ? [ Math.min(e.target.valueAsNumber, ogValue[ 1 ]), ogValue[ 1 ] ] : e.target.valueAsNumber, false, e );
         }, { passive: false });
 
         // If its a range value, we need to update the slider using the thumbs
@@ -3421,7 +3421,7 @@ class RangeInput extends BaseComponent {
             container.appendChild( maxSlider );
 
             maxSlider.addEventListener( "input", e => {
-                ogValue[ 1 ] = +e.target.valueAsNumber;
+                ogValue[ 1 ] = Math.max(value, +e.target.valueAsNumber);
                 this.set( [ value, ogValue[ 1 ] ], false, e );
             }, { passive: false });
         }
