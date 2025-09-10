@@ -3142,6 +3142,7 @@ class ContextMenu {
             }
             else if( (rect.top + rect.height) > window.innerHeight )
             {
+                div.style.marginTop = "";
                 top = (window.innerHeight - rect.height - margin);
             }
         }
