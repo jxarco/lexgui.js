@@ -306,7 +306,7 @@ class AssetView {
         }
         else
         {
-            this.toolsPanel = area.addPanel({ className: 'flex flex-col overflow-hidden' });
+            this.toolsPanel = area.addPanel({ className: 'flex flex-col overflow-hidden', height:"auto" });
             this.contentPanel = area.addPanel({ className: 'lexassetcontentpanel flex flex-col overflow-hidden' });
         }
 
@@ -318,14 +318,14 @@ class AssetView {
                 { name: "Ascending", icon: "SortAsc", callback: () => this._sortData( null, AssetView.CONTENT_SORT_ASC ) },
                 { name: "Descending", icon: "SortDesc", callback: () => this._sortData( null, AssetView.CONTENT_SORT_DESC ) }
             ], { side: "right", align: "start" });
-        }
+        };
 
         const _onChangeView = ( value, event ) => {
             new LX.DropdownMenu( event.target, [
                 { name: "Grid", icon: "LayoutGrid", callback: () => this._setContentLayout( AssetView.LAYOUT_GRID ) },
                 { name: "List", icon: "LayoutList", callback: () => this._setContentLayout( AssetView.LAYOUT_LIST ) }
             ], { side: "right", align: "start" });
-        }
+        };
 
         const _onChangePage = ( value, event ) => {
             if( !this.allowNextPage )
@@ -341,7 +341,7 @@ class AssetView {
             {
                 this._refreshContent();
             }
-        }
+        };
 
         this.toolsPanel.refresh = () => {
             this.toolsPanel.clear();
@@ -359,9 +359,11 @@ class AssetView {
             this.toolsPanel.addText(null, textString, null, {
                 inputClass: "nobg", disabled: true, signal: "@on_page_change", maxWidth: "16ch" }
             );
+            this.toolsPanel.endLine();
 
             if( !this.skipBrowser )
             {
+                this.toolsPanel.sameLine();
                 this.toolsPanel.addComboButtons( null, [
                     {
                         value: "Left",
@@ -396,10 +398,10 @@ class AssetView {
                     inputClass: "nobg", disabled: true, signal: "@on_folder_change",
                     style: { fontWeight: "600", fontSize: "15px" }
                 });
-            }
 
-            this.toolsPanel.endLine();
-        }
+                this.toolsPanel.endLine();
+            }
+        };
 
         this.toolsPanel.refresh();
 
