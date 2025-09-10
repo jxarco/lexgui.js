@@ -193,7 +193,6 @@ class Timeline {
             this.setTime(value);
         }, {
             units: "s",
-            signal: "@on_set_time_" + this.uniqueID,
             step: 0.01, min: 0, precision: 3,
             skipSlider: true,
             skipReset: true,
@@ -205,7 +204,6 @@ class Timeline {
         }, {
             units: "s",
             step: 0.01, min: 0,
-            signal: "@on_set_duration_" + this.uniqueID,
             skipReset: true,
             nameWidth: "auto"
         });
@@ -693,7 +691,7 @@ class Timeline {
         this.duration = this.animationClip.duration = v; 
 
         if(updateHeader) {
-            LX.emit( "@on_set_duration_" + this.uniqueID, + this.duration.toFixed(2)); // skipcallback = true
+            this.header.components["Duration"].set( +this.duration.toFixed(2), true ); // skipcallback = true
         }
 
         if( this.onSetDuration && !skipCallback ) 
@@ -702,7 +700,7 @@ class Timeline {
 
     setTime(time, skipCallback = false ){
         this.currentTime = Math.max(0,Math.min(time,this.duration));
-        LX.emit( "@on_set_time_" + this.uniqueID, +this.currentTime.toFixed(2)); // skipcallback = true
+        this.header.components["Current Time"].set( +this.currentTime.toFixed(2), true ); // skipcallback = true
 
         if(this.onSetTime && !skipCallback)
             this.onSetTime(this.currentTime);
@@ -1601,9 +1599,7 @@ class KeyFramesTimeline extends Timeline {
      */
     changeSelectedItems( itemsToAdd = null, itemsToRemove = null, skipCallback = false ) {
 
-        // TODO: maybe make this un-functions more general
-        this.deselectAllKeyFrames();
-        this.unHoverAll();
+        this.deselectAllElements();
         
         const tracks = this.animationClip.tracks;
         const tracksPerGroup = this.animationClip.tracksPerGroup;
@@ -3253,9 +3249,7 @@ class ClipsTimeline extends Timeline {
      */
     changeSelectedItems( ) {
 
-        // TODO: maybe make this un-functions more general
-        this.deselectAllClips();
-        this.unHoverAll();
+        this.deselectAllElements();
 
         this.selectedItems = this.animationClip.tracks.slice();
 
