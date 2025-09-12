@@ -2,6 +2,10 @@
 
 ## dev
 
+Fixed RangeInput double-slider issue where the min slider could go past the max slider.
+Fixed legacy ContextMenu reposition bug.
+Fixed contents not being displayed correctly in AssetView.
+
 CodeEditor:
 - Passing `indexOffset` in onCreateFile callback is now supported.
 - Added support for:
@@ -19,6 +23,9 @@ CodeEditor:
 - Fixed horizontal scrolling in mobile devices.
 - Fixed "End" action on Apple devices.
 - Docs updated.
+
+Timeline:
+- Added setScroll function.
 
 ## 0.7.6 (master)
 
