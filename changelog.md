@@ -4,11 +4,20 @@
 
 CodeEditor:
 - Passing `indexOffset` in onCreateFile callback is now supported.
-- Added support `options.allowClosingTabs` and `options.allowLoadingFiles`.
-- Added support for new events `options.onCtrlSpace` and `options.onCreateStatusPanel`.
+- Added support for:
+  - `options.allowClosingTabs` and `options.allowLoadingFiles`.
+  - `options.onCtrlSpace` and `options.onCreateStatusPanel`.
+  - `options.customSuggestions` list for autocomplete.
+  - `options.defaultTab` to decide wheter add default tab at initialization.
+  - `options.newTabOptions` array to use a custom Dropdown on click "New tab +" button.
+  - `options.onNewTab` function to skip default action on click "New tab +" button.
+  - `options.onContextMenu` function to add custom actions on opening CM at any content.
 - Set new args for: `options.onFilesLoaded( editorInstance, loadedTabs, numFilesLoaded )`.
 - Delete word until cursor position is now Ctrl+Backspace instead of Shift+Backspace.
+- `CodeEditor.addTab` now supports passing `options.codeLines` to start with some content.
 - Fixed some comment lines issues. Added Comment block using Ctrl+K+B.
+- Fixed horizontal scrolling in mobile devices.
+- Fixed "End" action on Apple devices.
 - Docs updated.
 
 ## 0.7.6 (master)
