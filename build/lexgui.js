@@ -14,7 +14,7 @@ console.warn( 'Script _build/lexgui.js_ is depracated and will be removed soon. 
 */
 
 const LX = {
-    version: "0.7.6",
+    version: "0.7.7",
     ready: false,
     extensions: [], // Store extensions used
     signals: {}, // Events and triggers
@@ -3130,6 +3130,7 @@ class ContextMenu {
             }
             else if( (rect.top + rect.height) > window.innerHeight )
             {
+                div.style.marginTop = "";
                 top = (window.innerHeight - rect.height - margin);
             }
         }
@@ -11222,7 +11223,7 @@ class RangeInput extends BaseComponent {
         container.appendChild( slider );
 
         slider.addEventListener( "input", e => {
-            this.set( isRangeValue ? [ e.target.valueAsNumber, ogValue[ 1 ] ] : e.target.valueAsNumber, false, e );
+            this.set( isRangeValue ? [ Math.min(e.target.valueAsNumber, ogValue[ 1 ]), ogValue[ 1 ] ] : e.target.valueAsNumber, false, e );
         }, { passive: false });
 
         // If its a range value, we need to update the slider using the thumbs
@@ -11288,7 +11289,7 @@ class RangeInput extends BaseComponent {
             container.appendChild( maxSlider );
 
             maxSlider.addEventListener( "input", e => {
-                ogValue[ 1 ] = +e.target.valueAsNumber;
+                ogValue[ 1 ] = Math.max(value, +e.target.valueAsNumber);
                 this.set( [ value, ogValue[ 1 ] ], false, e );
             }, { passive: false });
         }
@@ -16427,7 +16428,7 @@ class AssetView {
         }
         else
         {
-            this.toolsPanel = area.addPanel({ className: 'flex flex-col overflow-hidden' });
+            this.toolsPanel = area.addPanel({ className: 'flex flex-col overflow-hidden', height:"auto" });
             this.contentPanel = area.addPanel({ className: 'lexassetcontentpanel flex flex-col overflow-hidden' });
         }
 
@@ -16480,9 +16481,11 @@ class AssetView {
             this.toolsPanel.addText(null, textString, null, {
                 inputClass: "nobg", disabled: true, signal: "@on_page_change", maxWidth: "16ch" }
             );
+            this.toolsPanel.endLine();
 
             if( !this.skipBrowser )
             {
+                this.toolsPanel.sameLine();
                 this.toolsPanel.addComboButtons( null, [
                     {
                         value: "Left",
@@ -16517,9 +16520,9 @@ class AssetView {
                     inputClass: "nobg", disabled: true, signal: "@on_folder_change",
                     style: { fontWeight: "600", fontSize: "15px" }
                 });
-            }
 
-            this.toolsPanel.endLine();
+                this.toolsPanel.endLine();
+            }
         };
 
         this.toolsPanel.refresh();

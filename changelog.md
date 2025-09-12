@@ -2,6 +2,8 @@
 
 ## dev
 
+## 0.7.7 (master)
+
 Fixed RangeInput double-slider issue where the min slider could go past the max slider.
 Fixed legacy ContextMenu reposition bug.
 Fixed contents not being displayed correctly in AssetView.
@@ -27,7 +29,7 @@ CodeEditor:
 Timeline:
 - Added setScroll function.
 
-## 0.7.6 (master)
+## 0.7.6
 
 The last color scheme applied (dark|light) is now stored.
 Added `LX.setSystemTheme()` to revert back auto color scheme mode.
