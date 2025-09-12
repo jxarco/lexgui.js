@@ -193,7 +193,6 @@ class Timeline {
             this.setTime(value);
         }, {
             units: "s",
-            signal: "@on_set_time_" + this.uniqueID,
             step: 0.01, min: 0, precision: 3,
             skipSlider: true,
             skipReset: true,
@@ -205,7 +204,6 @@ class Timeline {
         }, {
             units: "s",
             step: 0.01, min: 0,
-            signal: "@on_set_duration_" + this.uniqueID,
             skipReset: true,
             nameWidth: "auto"
         });
@@ -261,7 +259,6 @@ class Timeline {
     */
     updateLeftPanel( ) {
 
-        const scrollTop = this.trackTreesPanel ? this.trackTreesPanel.root.scrollTop : 0;
         this.leftPanel.clear();
 
         const panel = this.leftPanel;
@@ -326,7 +323,7 @@ class Timeline {
             }
         });
 
-        this.trackTreesPanel.root.scrollTop = scrollTop;
+        this.trackTreesPanel.root.scrollTop = this.currentScrollInPixels;
 
         if( this.leftPanel.parent.root.classList.contains("hidden") || !this.root.parentElement ){
             return;
@@ -694,7 +691,7 @@ class Timeline {
         this.duration = this.animationClip.duration = v; 
 
         if(updateHeader) {
-            LX.emit( "@on_set_duration_" + this.uniqueID, + this.duration.toFixed(2)); // skipcallback = true
+            this.header.components["Duration"].set( +this.duration.toFixed(2), true ); // skipcallback = true
         }
 
         if( this.onSetDuration && !skipCallback ) 
@@ -703,7 +700,7 @@ class Timeline {
 
     setTime(time, skipCallback = false ){
         this.currentTime = Math.max(0,Math.min(time,this.duration));
-        LX.emit( "@on_set_time_" + this.uniqueID, +this.currentTime.toFixed(2)); // skipcallback = true
+        this.header.components["Current Time"].set( +this.currentTime.toFixed(2), true ); // skipcallback = true
 
         if(this.onSetTime && !skipCallback)
             this.onSetTime(this.currentTime);
@@ -731,6 +728,41 @@ class Timeline {
 
         this.secondsPerPixel = 1 / this.pixelsPerSecond;
         this.visualOriginTime += this.currentTime - this.xToTime(xCurrentTime);
+    }
+
+    /**
+     * @method setScroll
+     * not delta from last state, but full scroll amount.
+     * @param {Number} scrollY either pixels or [0,1]
+     * @param {Bool} normalized if true, scrollY is in range[0,1] being 1 fully scrolled. Otherwised scrollY represents pixels
+     * @returns 
+     */ 
+    
+    setScroll( scrollY, normalized = true ){
+        if ( !this.trackTreesPanel ){
+            this.currentScroll = 0;
+            this.currentScrollInPixels = 0;
+            return;
+        }
+
+        const r = this.trackTreesPanel.root;
+        if (r.scrollHeight > r.clientHeight){
+            if ( normalized ){
+                this.currentScroll = scrollY;
+                this.currentScrollInPixels = scrollY * (r.scrollHeight - r.clientHeight);
+            }else{
+                this.currentScroll = scrollY / (r.scrollHeight - r.clientHeight);
+                this.currentScrollInPixels = scrollY;
+            }
+        }
+        else{
+            this.currentScroll = 0;
+            this.currentScrollInPixels = 0;
+        }
+
+        // automatically calls event. 
+        this.trackTreesPanel.root.scrollTop = this.currentScrollInPixels;
+
     }
 
     /**
@@ -1567,9 +1599,7 @@ class KeyFramesTimeline extends Timeline {
      */
     changeSelectedItems( itemsToAdd = null, itemsToRemove = null, skipCallback = false ) {
 
-        // TODO: maybe make this un-functions more general
-        this.deselectAllKeyFrames();
-        this.unHoverAll();
+        this.deselectAllElements();
         
         const tracks = this.animationClip.tracks;
         const tracksPerGroup = this.animationClip.tracksPerGroup;
@@ -3219,9 +3249,7 @@ class ClipsTimeline extends Timeline {
      */
     changeSelectedItems( ) {
 
-        // TODO: maybe make this un-functions more general
-        this.deselectAllClips();
-        this.unHoverAll();
+        this.deselectAllElements();
 
         this.selectedItems = this.animationClip.tracks.slice();
 

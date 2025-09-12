@@ -173,6 +173,10 @@
     MAKE_CLASS_METHOD( ".setScale", "Set the scale (pixelsPerSecond) of the timeline. Usually called when the user zooms in/out.", [
         ["scale", "Number"]
     ] );
+    MAKE_CLASS_METHOD( ".setScroll", "Set the scroll of the timeline to the specified value. If normalized is false, scroll is treated as pixels. Otherwise a value in the range [0,1] where 1 is fully scrolled, is expected. Defaults to true", [
+        ["scroll", "Number"],
+        ["normalized", "Boolean"]
+    ] );
     MAKE_CLASS_METHOD( ".setState", "Set whether the animation is playing (true) or paused (false).", [
         ["state", "Number"],
         ["skipCallback", "Boolean"]
