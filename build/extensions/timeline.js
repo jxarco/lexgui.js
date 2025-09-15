@@ -131,13 +131,51 @@ class Timeline {
         }
         this.resize(this.size);
 
-        // update color theme
-        this.updateTheme();
-        LX.addSignal( "@on_new_color_scheme", (el, value) => {
-            // Retrieve again the color using LX.getThemeColor, which checks the applied theme
-            this.updateTheme();
-        } );
+        /**
+         * updates theme (light - dark) based on LX's current theme
+         */
+        function updateTheme( ){
+            Timeline.BACKGROUND_COLOR = LX.getThemeColor("global-blur-background");
+            Timeline.TRACK_COLOR_PRIMARY = LX.getThemeColor("global-color-primary");
+            Timeline.TRACK_COLOR_SECONDARY = LX.getThemeColor("global-color-secondary");
+            Timeline.TRACK_COLOR_TERCIARY = LX.getThemeColor("global-color-terciary");
+            Timeline.TRACK_COLOR_QUATERNARY = LX.getThemeColor("global-color-quaternary");
+            Timeline.FONT = LX.getThemeColor("global-font");
+            Timeline.FONT_COLOR_PRIMARY = LX.getThemeColor("global-text-primary");
+            Timeline.FONT_COLOR_TERTIARY = LX.getThemeColor("global-text-tertiary");
+            Timeline.FONT_COLOR_QUATERNARY = LX.getThemeColor("global-text-quaternary");
+            
+            Timeline.KEYFRAME_COLOR = LX.getThemeColor("lxTimeline-keyframe");
+            Timeline.KEYFRAME_COLOR_SELECTED = Timeline.KEYFRAME_COLOR_HOVERED = LX.getThemeColor("lxTimeline-keyframe-selected");
+            Timeline.KEYFRAME_COLOR_LOCK = LX.getThemeColor("lxTimeline-keyframe-locked");
+            Timeline.KEYFRAME_COLOR_EDITED = LX.getThemeColor("lxTimeline-keyframe-edited");
+            Timeline.KEYFRAME_COLOR_INACTIVE = LX.getThemeColor("lxTimeline-keyframe-inactive");
+        }
+
+        this.updateTheme = updateTheme.bind(this);
+        LX.addSignal( "@on_new_color_scheme", this.updateTheme );
     }
+    
+    // makes it ready to be deleted
+    clear(){
+        if( this.header ){
+            this.header.clear();
+        }
+
+        if( this.leftPanel ){
+            this.leftPanel.clear();
+        }
+
+        if( this.updateTheme ){
+            let signals = LX.signals[ "@on_new_color_scheme" ] ?? [];
+            for( let i =0; i < signals.length; ++i ){
+                if( signals[i] == this.updateTheme ){
+                    signals.splice(i, 1);
+                }
+            }
+        }
+    }
+
 
     /**
      * @method updateHeader
@@ -1248,28 +1286,6 @@ class Timeline {
         this.resize();        
         this.updateLeftPanel();
     }
-
-    /**
-     * updates theme (light - dark) based on LX's current theme
-     */
-    updateTheme( ){
-        Timeline.BACKGROUND_COLOR = LX.getThemeColor("global-blur-background");
-        Timeline.TRACK_COLOR_PRIMARY = LX.getThemeColor("global-color-primary");
-        Timeline.TRACK_COLOR_SECONDARY = LX.getThemeColor("global-color-secondary");
-        Timeline.TRACK_COLOR_TERCIARY = LX.getThemeColor("global-color-terciary");
-        Timeline.TRACK_COLOR_QUATERNARY = LX.getThemeColor("global-color-quaternary");
-        Timeline.FONT = LX.getThemeColor("global-font");
-        Timeline.FONT_COLOR_PRIMARY = LX.getThemeColor("global-text-primary");
-        Timeline.FONT_COLOR_TERTIARY = LX.getThemeColor("global-text-tertiary");
-        Timeline.FONT_COLOR_QUATERNARY = LX.getThemeColor("global-text-quaternary");
-        
-        Timeline.KEYFRAME_COLOR = LX.getThemeColor("lxTimeline-keyframe");
-        Timeline.KEYFRAME_COLOR_SELECTED = Timeline.KEYFRAME_COLOR_HOVERED = LX.getThemeColor("lxTimeline-keyframe-selected");
-        Timeline.KEYFRAME_COLOR_LOCK = LX.getThemeColor("lxTimeline-keyframe-locked");
-        Timeline.KEYFRAME_COLOR_EDITED = LX.getThemeColor("lxTimeline-keyframe-edited");
-        Timeline.KEYFRAME_COLOR_INACTIVE =LX.getThemeColor("lxTimeline-keyframe-inactive");
-    }
-
 
     // ----- BASE FUNCTIONS -----
     /**
