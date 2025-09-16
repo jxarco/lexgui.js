@@ -16423,7 +16423,9 @@ class AssetView {
         }
         else
         {
+            area.root.classList.add( "flex", "flex-col" );
             this.toolsPanel = area.addPanel({ className: 'flex flex-col overflow-hidden', height:"auto" });
+            this.toolsPanel.root.style.flex = "none";
             this.contentPanel = area.addPanel({ className: 'lexassetcontentpanel flex flex-col overflow-hidden' });
         }
 

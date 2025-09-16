@@ -2,12 +2,16 @@
 
 ## dev
 
+Fixed undesired scroll in AssetView.
 Support for Dropdown RadioGroup item option `closeOnClick` (default true).
 Minor fixes Dropdown RadioGroup.
 
 CodeEditor:
 - Added support for `options.onSelectTab` function to call when selecting tabs.
 - Minor fixes.
+
+Timeline:
+- Add `Timeline.clear()` function.
 
 ## 0.7.7 (master)
 
