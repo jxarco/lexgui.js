@@ -2,6 +2,8 @@
 
 ## dev
 
+Support for Dropdown RadioGroup item option `closeOnClick` (default true).
+
 CodeEditor:
 - Added support for `options.onSelectTab` function to call when selecting tabs.
 - Minor fixes.

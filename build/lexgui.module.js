@@ -1325,7 +1325,7 @@ class DropdownMenu {
         else
         {
             menuItem.addEventListener( "click", () => {
-                const f = item[ 'callback' ];
+                const f = item.callback;
                 if( f )
                 {
                     f.call( this, key, menuItem );
@@ -1337,7 +1337,10 @@ class DropdownMenu {
                     this._trigger[ radioName ] = key;
                 }
 
-                this.destroy( true );
+                if( item.closeOnClick ?? true )
+                {
+                    this.destroy( true );
+                }
             } );
         }
 
