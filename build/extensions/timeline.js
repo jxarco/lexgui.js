@@ -2026,7 +2026,7 @@ class KeyFramesTimeline extends Timeline {
                         if ( !e.track ){ return; }
                         const values = new Float32Array( e.track.dim );
                         values.fill(0);
-                        this.addKeyFrames( e.track, values, [this.currentTime] );
+                        this.addKeyFrames( e.track.trackIdx, values, [this.currentTime] );
                     }
                 }
             );
