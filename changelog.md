@@ -2,6 +2,10 @@
 
 ## dev
 
+CodeEditor:
+- Added support for `options.onSelectTab` function to call when selecting tabs.
+- Minor fixes.
+
 ## 0.7.7 (master)
 
 Fixed RangeInput double-slider issue where the min slider could go past the max slider.

@@ -360,6 +360,7 @@ class CodeEditor {
         this.onCreateStatusPanel = options.onCreateStatusPanel;
         this.onContextMenu = options.onContextMenu;
         this.onNewTab = options.onNewTab;
+        this.onSelectTab = options.onSelectTab;
 
         // File explorer
         if( this.useFileExplorer )
@@ -1928,9 +1929,16 @@ class CodeEditor {
 
         this._removeSecondaryCursors();
 
-        var cursor = this.getCurrentCursor( true );
-        this.saveCursor( cursor, this.code.cursorState );
+        const cursor = this.getCurrentCursor( true );
+        const lastCode = this.code;
+
+        if( lastCode )
+        {
+            this.saveCursor( cursor, lastCode.cursorState );
+        }
+
         this.code = this.loadedTabs[ name ];
+
         this.restoreCursor( cursor, this.code.cursorState );
 
         this.endSelection();
@@ -1949,6 +1957,11 @@ class CodeEditor {
         }
 
         this.processLines();
+
+        if( !isNewTabButton && this.onSelectTab )
+        {
+            this.onSelectTab( name, this );
+        }
     }
 
     _onContextMenuTab( isNewTabButton, event, name,  ) {
@@ -2036,6 +2049,10 @@ class CodeEditor {
         this.loadedTabs[ name ] = code;
         this.openedTabs[ name ] = code;
 
+        const lastCode = this.code;
+
+        this.code = code;
+
         const tabIcon = this._getFileIcon( name );
 
         if( this.useFileExplorer && !isNewTabButton )
@@ -2063,13 +2080,6 @@ class CodeEditor {
 
         this.endSelection();
 
-        if( selected )
-        {
-            this.code = code;
-            this.resetCursorPos( CodeEditor.CURSOR_LEFT_TOP );
-            this.mustProcessLines = true;
-        }
-
         if( options.language )
         {
             code.languageOverride = options.language;
@@ -2081,6 +2091,16 @@ class CodeEditor {
         {
             code.lines = options.codeLines;
             this.mustProcessLines = true;
+        }
+
+        if( selected )
+        {
+            this.resetCursorPos( CodeEditor.CURSOR_LEFT_TOP );
+            this.mustProcessLines = true;
+        }
+        else
+        {
+            this.code = lastCode;
         }
 
         this._processLinesIfNecessary();
