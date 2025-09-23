@@ -2,6 +2,8 @@
 
 ## dev
 
+## 0.7.8 (master)
+
 Renamed AssetView "List" view to "Compact". Added better "List" view option.
 Fixed undesired scroll in AssetView.
 Support for Dropdown RadioGroup item option `closeOnClick` (default true).
@@ -16,7 +18,7 @@ CodeEditor:
 Timeline:
 - Add `Timeline.clear()` function.
 
-## 0.7.7 (master)
+## 0.7.7
 
 Fixed RangeInput double-slider issue where the min slider could go past the max slider.
 Fixed legacy ContextMenu reposition bug.
