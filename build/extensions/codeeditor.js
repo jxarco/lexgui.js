@@ -1337,6 +1337,13 @@ class CodeEditor {
         }
     }
 
+    // Clear signals
+    clear() {
+        console.assert( this.rightStatusPanel && this.leftStatusPanel, "No panels to clear." );
+        this.rightStatusPanel.clear();
+        this.leftStatusPanel.clear();
+    }
+
     static getInstances()
     {
         return CodeEditor.__instances;
@@ -1740,7 +1747,7 @@ class CodeEditor {
             this.onCreateStatusPanel( panel, this );
         }
 
-        let leftStatusPanel = new LX.Panel( { id: "FontSizeZoomStatusComponent", height: "auto" } );
+        let leftStatusPanel = this.leftStatusPanel = new LX.Panel( { id: "FontSizeZoomStatusComponent", height: "auto" } );
         leftStatusPanel.sameLine();
 
         if( this.skipTabs )
@@ -1754,7 +1761,7 @@ class CodeEditor {
         leftStatusPanel.endLine( "justify-start" );
         panel.attach( leftStatusPanel.root );
 
-        let rightStatusPanel = new LX.Panel( { height: "auto" } );
+        let rightStatusPanel = this.rightStatusPanel = new LX.Panel( { height: "auto" } );
         rightStatusPanel.sameLine();
         rightStatusPanel.addLabel( this.code?.title ?? "", { id: "EditorFilenameStatusComponent", fit: true, signal: "@tab-name" });
         rightStatusPanel.addButton( null, "Ln 1, Col 1", this.showSearchLineBox.bind( this ), { id: "EditorSelectionStatusComponent", fit: true, signal: "@cursor-data" });
