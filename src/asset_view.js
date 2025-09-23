@@ -734,7 +734,7 @@ class AssetView {
 
         const previewActions = [...this.previewActions];
 
-        if( !previewActions.length )
+        if( !previewActions.length && file.type !== "folder" )
         {
             // By default
             previewActions.push({

@@ -4178,7 +4178,7 @@ class CodeEditor {
         const customStringKeys = Object.assign( {}, this.stringKeys );
         const lineNumber = this._currentLineNumber;
         const tokenStartIndex = this._currentTokenPositions[ tokenIndex ];
-        const inBlockComment = ( this._buildingBlockComment ?? this._inBlockCommentSection( lineNumber, tokenStartIndex, token.length ) !== undefined )
+        const inBlockComment = ( this._buildingBlockComment ?? this._inBlockCommentSection( lineNumber, tokenStartIndex, token.length ) ) !== undefined;
 
         var usePreviousTokenToCheckString = false;
 
