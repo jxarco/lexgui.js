@@ -2,6 +2,7 @@
 
 ## dev
 
+Renamed AssetView "List" view to "Compact". Added better "List" view option.
 Fixed undesired scroll in AssetView.
 Support for Dropdown RadioGroup item option `closeOnClick` (default true).
 Minor fixes Dropdown RadioGroup.

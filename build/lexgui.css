@@ -4614,11 +4614,17 @@ ul.lexassetscontent {
     overflow: auto;
 }
 
-.lexassetscontent.list {
+.lexassetscontent.compact {
     width: 100%;
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     column-gap: 0.5rem;
+}
+
+.lexassetscontent.list {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 .lexassetscontent li {
@@ -4670,7 +4676,7 @@ ul.lexassetscontent {
     opacity: 1;
 }
 
-.lexassetscontent.list li {
+.lexassetscontent.list li, .lexassetscontent.compact li {
     width: 100%;
     height: 1.8em;
     border-top: 0px;
@@ -4755,7 +4761,7 @@ ul.lexassetscontent {
     z-index: 1;
 }
 
-.lexassetscontent.list li .lexassettitle {
+.lexassetscontent.list li .lexassettitle, .lexassetscontent.compact li .lexassettitle {
     width: 100%;
     height: 100%;
     text-align: left;
@@ -4774,13 +4780,13 @@ ul.lexassetscontent {
     display: none;
 }
 
-.lexassetscontent.list li .lexassetinfo {
+.lexassetscontent.list li .lexassetinfo, .lexassetscontent.compact li .lexassetinfo {
     display: block;
     right: 6px;
     z-index: 1;
 }
 
-.lexassetscontent.list li:has(.lexcheckbox) .lexassetinfo {
+.lexassetscontent.list li:has(.lexcheckbox) .lexassetinfo, .lexassetscontent.compact li:has(.lexcheckbox) .lexassetinfo {
     display: block;
     right: 32px;
     z-index: 1;
@@ -4794,7 +4800,7 @@ ul.lexassetscontent {
     height: 1.15em;
 }
 
-.lexassetscontent.list li .lexcheckbox {
+.lexassetscontent.list li .lexcheckbox, .lexassetscontent.compact li .lexcheckbox {
     right: 3px;
     top: 3px;
 }
@@ -4819,7 +4825,7 @@ ul.lexassetscontent {
     transition: all 0.2s;
 }
 
-.lexassetscontent.list img {
+.lexassetscontent.list img, .lexassetscontent.compact img {
     width: unset;
     object-fit: contain;
     float: left;
@@ -4831,7 +4837,7 @@ ul.lexassetscontent {
     transform: translateY(-6px);
 }
 
-.lexassetscontent.list li.folder img {
+.lexassetscontent.list li.folder img, .lexassetscontent.compact li.folder img {
     transform: scale(0.9);
 }
 

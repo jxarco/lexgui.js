@@ -44,7 +44,8 @@ LX.AssetViewEvent = AssetViewEvent;
 class AssetView {
 
     static LAYOUT_GRID          = 0;
-    static LAYOUT_LIST          = 1;
+    static LAYOUT_COMPACT       = 1;
+    static LAYOUT_LIST          = 2;
 
     static CONTENT_SORT_ASC     = 0;
     static CONTENT_SORT_DESC    = 1;
@@ -325,7 +326,8 @@ class AssetView {
         const _onChangeView = ( value, event ) => {
             new LX.DropdownMenu( event.target, [
                 { name: "Grid", icon: "LayoutGrid", callback: () => this._setContentLayout( AssetView.LAYOUT_GRID ) },
-                { name: "List", icon: "LayoutList", callback: () => this._setContentLayout( AssetView.LAYOUT_LIST ) }
+                { name: "Compact", icon: "LayoutList", callback: () => this._setContentLayout( AssetView.LAYOUT_COMPACT ) },
+                { name: "List", icon: "List", callback: () => this._setContentLayout( AssetView.LAYOUT_LIST ) }
             ], { side: "right", align: "start" });
         };
 
@@ -435,11 +437,13 @@ class AssetView {
     _refreshContent( searchValue, filter ) {
 
         const isGridLayout = ( this.layout == AssetView.LAYOUT_GRID ); // default
+        const isCompactLayout = ( this.layout == AssetView.LAYOUT_COMPACT );
+        const isListLayout = ( this.layout == AssetView.LAYOUT_LIST );
 
         this.filter = filter ?? ( this.filter ?? "None" );
         this.searchValue = searchValue ?? (this.searchValue ?? "");
         this.content.innerHTML = "";
-        this.content.className = (isGridLayout ? "lexassetscontent" : "lexassetscontent list");
+        this.content.className = `lexassetscontent${ isCompactLayout ? " compact" : ( isListLayout ? " list" : "" ) }`;
         let that = this;
 
         const _addItem = function(item) {
@@ -452,6 +456,11 @@ class AssetView {
             itemEl.className = "lexassetitem " + item.type.toLowerCase();
             itemEl.tabIndex = -1;
             that.content.appendChild( itemEl );
+
+            if( item.lastModified && !item.lastModifiedDate )
+            {
+                item.lastModifiedDate = that._lastModifiedToStringDate( item.lastModified );
+            }
 
             if( !that.useNativeTitle )
             {
@@ -574,13 +583,16 @@ class AssetView {
                 }
             }
 
-            if( !isFolder )
+            // Add item type info
+            let itemInfoHtml = type;
+
+            if( isListLayout )
             {
-                let info = document.createElement('span');
-                info.className = "lexassetinfo";
-                info.innerText = type;
-                itemEl.appendChild(info);
+                if( item.bytesize ) itemInfoHtml += ` | ${ LX.formatBytes( item.bytesize ) }`;
+                if( item.lastModifiedDate ) itemInfoHtml += ` | ${ item.lastModifiedDate }`;
             }
+
+            LX.makeContainer( [ "auto", "auto" ], "lexassetinfo", itemInfoHtml, itemEl );
 
             itemEl.addEventListener('click', function( e ) {
                 e.stopImmediatePropagation();
@@ -723,11 +735,11 @@ class AssetView {
         const options = { disabled: true };
 
         this.previewPanel.addText("Filename", file.id, null, options);
-        if( file.lastModified ) this.previewPanel.addText("Last Modified", new Date( file.lastModified ).toLocaleString(), null, options);
+        if( file.lastModifiedDate ) this.previewPanel.addText("Last Modified", file.lastModifiedDate, null, options);
         if( file._path || file.src ) this.previewPanel.addText("URL", file._path ? file._path : file.src, null, options);
         this.previewPanel.addText("Path", this.path.join('/'), null, options);
         this.previewPanel.addText("Type", file.type, null, options);
-        if( file.bytesize ) this.previewPanel.addText("Size", (file.bytesize/1024).toPrecision(3) + " KBs", null, options);
+        if( file.bytesize ) this.previewPanel.addText("Size", LX.formatBytes( file.bytesize ), null, options);
         if( file.type == "folder" ) this.previewPanel.addText("Files", file.children ? file.children.length.toString() : "0", null, options);
 
         this.previewPanel.addSeparator();
@@ -774,7 +786,8 @@ class AssetView {
                     "id": file.name,
                     "src": e.currentTarget.result,
                     "extension": ext,
-                    "lastModified": file.lastModified
+                    "lastModified": file.lastModified,
+                    "lastModifiedDate": this._lastModifiedToStringDate( file.lastModified )
                 };
 
                 switch(ext)
@@ -886,6 +899,11 @@ class AssetView {
         }
 
         this._processData( this.data );
+    }
+
+    _lastModifiedToStringDate( lm ) {
+        const d = new Date( lm ).toLocaleString();
+        return d.substring( 0, d.indexOf( ',' ) );
     }
 }
 
