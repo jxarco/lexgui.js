@@ -4922,7 +4922,7 @@ ul.lexassetscontent {
     display: flex;
     position: relative;
     overflow: inherit;
-    background-color: light-dark(var(--global-color-secondary), var(--global-medium-background));
+    background-color: var(--global-color-secondary);
 }
 
 .codebasearea * {
@@ -5009,7 +5009,7 @@ ul.lexassetscontent {
 }
 
 .lexcodetabinfo {
-    background-color: light-dark(var(--global-color-secondary), var(--global-medium-background));
+    background-color: var(--global-color-secondary);
     position: absolute;
     z-index: 3;
     bottom: 0px;
