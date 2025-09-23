@@ -5254,7 +5254,6 @@ ul.lexassetscontent {
 
 .lexcodeeditor .searchbox {
     background-color: var(--global-color-secondary);
-    /* width: 256px; */
     position: absolute;
     right: 6px;
     top: 26px;
@@ -5266,10 +5265,6 @@ ul.lexassetscontent {
     transform: translateY(-96px);
     opacity: 0;
     transition: transform 0.2s ease-in, opacity 0.2s ease-in;
-}
-
-.lexcodeeditor .searchbox.gotoline {
-    width: 124px;
 }
 
 .lexcodeeditor .searchbox.opened {

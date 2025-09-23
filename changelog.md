@@ -8,6 +8,7 @@ Minor fixes Dropdown RadioGroup.
 
 CodeEditor:
 - Added support for `options.onSelectTab` function to call when selecting tabs.
+- Added close button to search line box.
 - Minor fixes.
 
 Timeline:

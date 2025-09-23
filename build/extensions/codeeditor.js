@@ -672,16 +672,18 @@ class CodeEditor {
 
             // Add search LINE box
             {
-                var box = document.createElement( 'div' );
-                box.className = "searchbox gotoline";
+                const box = document.createElement( 'div' );
+                box.className = "searchbox";
 
-                var searchPanel = new LX.Panel();
+                const searchPanel = new LX.Panel();
                 box.appendChild( searchPanel.root );
 
+                searchPanel.sameLine( 2 );
                 searchPanel.addText( null, "", ( value, event ) => {
                     input.value = ":" + value.replaceAll( ':', '' );
                     this.goToLine( input.value.slice( 1 ) );
                 }, { placeholder: "Go to line", trigger: "input" } );
+                searchPanel.addButton( null, "x", this.hideSearchLineBox.bind( this ), { icon: "X", title: "Close", tooltip: true } );
 
                 let input = box.querySelector( 'input' );
                 input.addEventListener( 'keyup', e => {
