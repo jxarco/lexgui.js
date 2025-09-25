@@ -360,6 +360,7 @@ class CodeEditor {
         this.onCreateStatusPanel = options.onCreateStatusPanel;
         this.onContextMenu = options.onContextMenu;
         this.onNewTab = options.onNewTab;
+        this.onSelectTab = options.onSelectTab;
 
         // File explorer
         if( this.useFileExplorer )
@@ -671,16 +672,18 @@ class CodeEditor {
 
             // Add search LINE box
             {
-                var box = document.createElement( 'div' );
-                box.className = "searchbox gotoline";
+                const box = document.createElement( 'div' );
+                box.className = "searchbox";
 
-                var searchPanel = new LX.Panel();
+                const searchPanel = new LX.Panel();
                 box.appendChild( searchPanel.root );
 
+                searchPanel.sameLine( 2 );
                 searchPanel.addText( null, "", ( value, event ) => {
                     input.value = ":" + value.replaceAll( ':', '' );
                     this.goToLine( input.value.slice( 1 ) );
                 }, { placeholder: "Go to line", trigger: "input" } );
+                searchPanel.addButton( null, "x", this.hideSearchLineBox.bind( this ), { icon: "X", title: "Close", tooltip: true } );
 
                 let input = box.querySelector( 'input' );
                 input.addEventListener( 'keyup', e => {
@@ -1334,6 +1337,13 @@ class CodeEditor {
         }
     }
 
+    // Clear signals
+    clear() {
+        console.assert( this.rightStatusPanel && this.leftStatusPanel, "No panels to clear." );
+        this.rightStatusPanel.clear();
+        this.leftStatusPanel.clear();
+    }
+
     static getInstances()
     {
         return CodeEditor.__instances;
@@ -1737,7 +1747,7 @@ class CodeEditor {
             this.onCreateStatusPanel( panel, this );
         }
 
-        let leftStatusPanel = new LX.Panel( { id: "FontSizeZoomStatusComponent", height: "auto" } );
+        let leftStatusPanel = this.leftStatusPanel = new LX.Panel( { id: "FontSizeZoomStatusComponent", height: "auto" } );
         leftStatusPanel.sameLine();
 
         if( this.skipTabs )
@@ -1751,7 +1761,7 @@ class CodeEditor {
         leftStatusPanel.endLine( "justify-start" );
         panel.attach( leftStatusPanel.root );
 
-        let rightStatusPanel = new LX.Panel( { height: "auto" } );
+        let rightStatusPanel = this.rightStatusPanel = new LX.Panel( { height: "auto" } );
         rightStatusPanel.sameLine();
         rightStatusPanel.addLabel( this.code?.title ?? "", { id: "EditorFilenameStatusComponent", fit: true, signal: "@tab-name" });
         rightStatusPanel.addButton( null, "Ln 1, Col 1", this.showSearchLineBox.bind( this ), { id: "EditorSelectionStatusComponent", fit: true, signal: "@cursor-data" });
@@ -1928,9 +1938,16 @@ class CodeEditor {
 
         this._removeSecondaryCursors();
 
-        var cursor = this.getCurrentCursor( true );
-        this.saveCursor( cursor, this.code.cursorState );
+        const cursor = this.getCurrentCursor( true );
+        const lastCode = this.code;
+
+        if( lastCode )
+        {
+            this.saveCursor( cursor, lastCode.cursorState );
+        }
+
         this.code = this.loadedTabs[ name ];
+
         this.restoreCursor( cursor, this.code.cursorState );
 
         this.endSelection();
@@ -1949,6 +1966,11 @@ class CodeEditor {
         }
 
         this.processLines();
+
+        if( !isNewTabButton && this.onSelectTab )
+        {
+            this.onSelectTab( name, this );
+        }
     }
 
     _onContextMenuTab( isNewTabButton, event, name,  ) {
@@ -2036,6 +2058,10 @@ class CodeEditor {
         this.loadedTabs[ name ] = code;
         this.openedTabs[ name ] = code;
 
+        const lastCode = this.code;
+
+        this.code = code;
+
         const tabIcon = this._getFileIcon( name );
 
         if( this.useFileExplorer && !isNewTabButton )
@@ -2063,13 +2089,6 @@ class CodeEditor {
 
         this.endSelection();
 
-        if( selected )
-        {
-            this.code = code;
-            this.resetCursorPos( CodeEditor.CURSOR_LEFT_TOP );
-            this.mustProcessLines = true;
-        }
-
         if( options.language )
         {
             code.languageOverride = options.language;
@@ -2081,6 +2100,16 @@ class CodeEditor {
         {
             code.lines = options.codeLines;
             this.mustProcessLines = true;
+        }
+
+        if( selected )
+        {
+            this.resetCursorPos( CodeEditor.CURSOR_LEFT_TOP );
+            this.mustProcessLines = true;
+        }
+        else
+        {
+            this.code = lastCode;
         }
 
         this._processLinesIfNecessary();
@@ -4158,7 +4187,7 @@ class CodeEditor {
         const customStringKeys = Object.assign( {}, this.stringKeys );
         const lineNumber = this._currentLineNumber;
         const tokenStartIndex = this._currentTokenPositions[ tokenIndex ];
-        const inBlockComment = ( this._buildingBlockComment ?? this._inBlockCommentSection( lineNumber, tokenStartIndex, token.length ) !== undefined )
+        const inBlockComment = ( this._buildingBlockComment ?? this._inBlockCommentSection( lineNumber, tokenStartIndex, token.length ) ) !== undefined;
 
         var usePreviousTokenToCheckString = false;
 

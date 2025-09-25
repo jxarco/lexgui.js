@@ -6,7 +6,7 @@
 */
 
 const LX = {
-    version: "0.7.7",
+    version: "0.7.8",
     ready: false,
     extensions: [], // Store extensions used
     signals: {}, // Events and triggers
@@ -1251,7 +1251,7 @@ class DropdownMenu {
         }
 
         const menuItem = document.createElement('div');
-        menuItem.className = "lexdropdownmenuitem" + ( item.name ? "" : " label" ) + ( item.disabled ?? false ? " disabled" : "" ) + ( ` ${ item.className ?? "" }` );
+        menuItem.className = "lexdropdownmenuitem" + ( ( item.name || item.options ) ? "" : " label" ) + ( item.disabled ?? false ? " disabled" : "" ) + ( ` ${ item.className ?? "" }` );
         menuItem.dataset["id"] = pKey;
         menuItem.innerHTML = `<span>${ key }</span>`;
         menuItem.tabIndex = "1";
@@ -1337,7 +1337,7 @@ class DropdownMenu {
         else
         {
             menuItem.addEventListener( "click", () => {
-                const f = item[ 'callback' ];
+                const f = item.callback;
                 if( f )
                 {
                     f.call( this, key, menuItem );
@@ -1349,7 +1349,11 @@ class DropdownMenu {
                     this._trigger[ radioName ] = key;
                 }
 
-                this.destroy( true );
+                // If has options, it's a radio group label, so don't close the menu
+                if( !item.options && ( item.closeOnClick ?? true ) )
+                {
+                    this.destroy( true );
+                }
             } );
         }
 
@@ -1387,8 +1391,6 @@ class DropdownMenu {
 
         if( item.options )
         {
-            this._addSeparator();
-
             console.assert( this._trigger[ item.name ] && "An item of the radio group must be selected!" );
             this._radioGroup = {
                 name: item.name,

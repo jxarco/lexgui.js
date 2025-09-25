@@ -14,7 +14,7 @@ console.warn( 'Script _build/lexgui.js_ is depracated and will be removed soon. 
 */
 
 const LX = {
-    version: "0.7.7",
+    version: "0.7.8",
     ready: false,
     extensions: [], // Store extensions used
     signals: {}, // Events and triggers
@@ -1246,7 +1246,7 @@ class DropdownMenu {
         }
 
         const menuItem = document.createElement('div');
-        menuItem.className = "lexdropdownmenuitem" + ( item.name ? "" : " label" ) + ( item.disabled ?? false ? " disabled" : "" ) + ( ` ${ item.className ?? "" }` );
+        menuItem.className = "lexdropdownmenuitem" + ( ( item.name || item.options ) ? "" : " label" ) + ( item.disabled ?? false ? " disabled" : "" ) + ( ` ${ item.className ?? "" }` );
         menuItem.dataset["id"] = pKey;
         menuItem.innerHTML = `<span>${ key }</span>`;
         menuItem.tabIndex = "1";
@@ -1332,7 +1332,7 @@ class DropdownMenu {
         else
         {
             menuItem.addEventListener( "click", () => {
-                const f = item[ 'callback' ];
+                const f = item.callback;
                 if( f )
                 {
                     f.call( this, key, menuItem );
@@ -1344,7 +1344,11 @@ class DropdownMenu {
                     this._trigger[ radioName ] = key;
                 }
 
-                this.destroy( true );
+                // If has options, it's a radio group label, so don't close the menu
+                if( !item.options && ( item.closeOnClick ?? true ) )
+                {
+                    this.destroy( true );
+                }
             } );
         }
 
@@ -1382,8 +1386,6 @@ class DropdownMenu {
 
         if( item.options )
         {
-            this._addSeparator();
-
             console.assert( this._trigger[ item.name ] && "An item of the radio group must be selected!" );
             this._radioGroup = {
                 name: item.name,
@@ -6616,6 +6618,22 @@ Object.assign(LX, {
         setTimeout( function(){ URL.revokeObjectURL( url ); }, 1000*60 ); //wait one minute to revoke url
     }
 });
+
+/**
+ * @method formatBytes
+ * @param {Number} bytes
+ **/
+function formatBytes( bytes )
+{
+    if( bytes === 0 ) return "0 B";
+    const k = 1024;
+    const sizes = [ "B", "KB", "MB", "GB", "TB" ];
+    const i = Math.floor( Math.log( bytes ) / Math.log( k ) );
+    const value = bytes / Math.pow( k, i );
+    return value.toFixed( 2 ) + " " + sizes[ i ];
+}
+
+LX.formatBytes = formatBytes;
 
 /**
  * @method compareThreshold
@@ -16166,7 +16184,8 @@ LX.AssetViewEvent = AssetViewEvent;
 class AssetView {
 
     static LAYOUT_GRID          = 0;
-    static LAYOUT_LIST          = 1;
+    static LAYOUT_COMPACT       = 1;
+    static LAYOUT_LIST          = 2;
 
     static CONTENT_SORT_ASC     = 0;
     static CONTENT_SORT_DESC    = 1;
@@ -16428,7 +16447,9 @@ class AssetView {
         }
         else
         {
+            area.root.classList.add( "flex", "flex-col" );
             this.toolsPanel = area.addPanel({ className: 'flex flex-col overflow-hidden', height:"auto" });
+            this.toolsPanel.root.style.flex = "none";
             this.contentPanel = area.addPanel({ className: 'lexassetcontentpanel flex flex-col overflow-hidden' });
         }
 
@@ -16445,7 +16466,8 @@ class AssetView {
         const _onChangeView = ( value, event ) => {
             new LX.DropdownMenu( event.target, [
                 { name: "Grid", icon: "LayoutGrid", callback: () => this._setContentLayout( AssetView.LAYOUT_GRID ) },
-                { name: "List", icon: "LayoutList", callback: () => this._setContentLayout( AssetView.LAYOUT_LIST ) }
+                { name: "Compact", icon: "LayoutList", callback: () => this._setContentLayout( AssetView.LAYOUT_COMPACT ) },
+                { name: "List", icon: "List", callback: () => this._setContentLayout( AssetView.LAYOUT_LIST ) }
             ], { side: "right", align: "start" });
         };
 
@@ -16555,11 +16577,13 @@ class AssetView {
     _refreshContent( searchValue, filter ) {
 
         const isGridLayout = ( this.layout == AssetView.LAYOUT_GRID ); // default
+        const isCompactLayout = ( this.layout == AssetView.LAYOUT_COMPACT );
+        const isListLayout = ( this.layout == AssetView.LAYOUT_LIST );
 
         this.filter = filter ?? ( this.filter ?? "None" );
         this.searchValue = searchValue ?? (this.searchValue ?? "");
         this.content.innerHTML = "";
-        this.content.className = (isGridLayout ? "lexassetscontent" : "lexassetscontent list");
+        this.content.className = `lexassetscontent${ isCompactLayout ? " compact" : ( isListLayout ? " list" : "" ) }`;
         let that = this;
 
         const _addItem = function(item) {
@@ -16572,6 +16596,11 @@ class AssetView {
             itemEl.className = "lexassetitem " + item.type.toLowerCase();
             itemEl.tabIndex = -1;
             that.content.appendChild( itemEl );
+
+            if( item.lastModified && !item.lastModifiedDate )
+            {
+                item.lastModifiedDate = that._lastModifiedToStringDate( item.lastModified );
+            }
 
             if( !that.useNativeTitle )
             {
@@ -16694,13 +16723,16 @@ class AssetView {
                 }
             }
 
-            if( !isFolder )
+            // Add item type info
+            let itemInfoHtml = type;
+
+            if( isListLayout )
             {
-                let info = document.createElement('span');
-                info.className = "lexassetinfo";
-                info.innerText = type;
-                itemEl.appendChild(info);
+                if( item.bytesize ) itemInfoHtml += ` | ${ LX.formatBytes( item.bytesize ) }`;
+                if( item.lastModifiedDate ) itemInfoHtml += ` | ${ item.lastModifiedDate }`;
             }
+
+            LX.makeContainer( [ "auto", "auto" ], "lexassetinfo", itemInfoHtml, itemEl );
 
             itemEl.addEventListener('click', function( e ) {
                 e.stopImmediatePropagation();
@@ -16843,18 +16875,18 @@ class AssetView {
         const options = { disabled: true };
 
         this.previewPanel.addText("Filename", file.id, null, options);
-        if( file.lastModified ) this.previewPanel.addText("Last Modified", new Date( file.lastModified ).toLocaleString(), null, options);
+        if( file.lastModifiedDate ) this.previewPanel.addText("Last Modified", file.lastModifiedDate, null, options);
         if( file._path || file.src ) this.previewPanel.addText("URL", file._path ? file._path : file.src, null, options);
         this.previewPanel.addText("Path", this.path.join('/'), null, options);
         this.previewPanel.addText("Type", file.type, null, options);
-        if( file.bytesize ) this.previewPanel.addText("Size", (file.bytesize/1024).toPrecision(3) + " KBs", null, options);
+        if( file.bytesize ) this.previewPanel.addText("Size", LX.formatBytes( file.bytesize ), null, options);
         if( file.type == "folder" ) this.previewPanel.addText("Files", file.children ? file.children.length.toString() : "0", null, options);
 
         this.previewPanel.addSeparator();
 
         const previewActions = [...this.previewActions];
 
-        if( !previewActions.length )
+        if( !previewActions.length && file.type !== "folder" )
         {
             // By default
             previewActions.push({
@@ -16894,7 +16926,8 @@ class AssetView {
                     "id": file.name,
                     "src": e.currentTarget.result,
                     "extension": ext,
-                    "lastModified": file.lastModified
+                    "lastModified": file.lastModified,
+                    "lastModifiedDate": this._lastModifiedToStringDate( file.lastModified )
                 };
 
                 switch(ext)
@@ -17006,6 +17039,11 @@ class AssetView {
         }
 
         this._processData( this.data );
+    }
+
+    _lastModifiedToStringDate( lm ) {
+        const d = new Date( lm ).toLocaleString();
+        return d.substring( 0, d.indexOf( ',' ) );
     }
 }
 
