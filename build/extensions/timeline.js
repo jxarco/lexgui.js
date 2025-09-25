@@ -64,7 +64,8 @@ class Timeline {
         this.pixelsPerSecond = 300;
         this.secondsPerPixel = 1 / this.pixelsPerSecond;
         this.animationClip = this.instantiateAnimationClip();
-        this.trackHeight = 25;
+
+        this.trackHeight = 32;
         this.timeSeparators = [0.01, 0.1, 0.5, 1, 5];
 
         this.boxSelection = false;
@@ -301,7 +302,7 @@ class Timeline {
 
         const panel = this.leftPanel;
         
-        panel.sameLine( 2 );
+        panel.sameLine();
         let titleComponent = panel.addTitle( "Tracks", { style: { background: "none"}, className: "fg-secondary text-lg px-4"} );
         let title = titleComponent.root;
         
@@ -341,6 +342,18 @@ class Timeline {
                     } 
                     break;
                 case LX.TreeEvent.NODE_CARETCHANGED:
+                   if ( !this.trackTreesComponent ){ return;}
+                    /* hack
+                        On NODE_CARETCHANGED, the html are regenerated. TrackHeight need to be forced on the htmls again.
+                        This event is called BEFORE the regeneration, so a setTimeout of 1ms is called.
+                        To avoid a flicker, hide the element while it is changing and show it again afterwards
+                    */
+                    this.trackTreesComponent.root.classList.add("hidden");
+                    setTimeout( ()=>{
+                        this.setTrackHeight(this.trackHeight);
+                        this.trackTreesComponent.root.classList.remove("hidden");
+                    }, 1);
+
                     break;
             }
         }});
@@ -362,12 +375,30 @@ class Timeline {
         });
 
         this.trackTreesPanel.root.scrollTop = this.currentScrollInPixels;
+        this.setTrackHeight( this.trackHeight );
 
         if( this.leftPanel.parent.root.classList.contains("hidden") || !this.root.parentElement ){
             return;
         }
 
         this.resizeCanvas();
+    }
+
+    setTrackHeight( trackHeight ){
+        // ul list has a "gap" of 0.25rem. Compute pixel count of 0.25 rem
+        const gapSize = parseFloat(getComputedStyle(document.documentElement).fontSize) * 0.25; 
+
+        this.trackHeight = trackHeight = Math.max(gapSize, trackHeight);
+        
+        if ( !this.trackTreesComponent ){
+            return;
+        }
+
+        trackHeight -= gapSize;
+        const tracks = this.trackTreesComponent.root.querySelector("ul").children;
+        for( let i = 0; i < tracks.length; ++i ){
+            tracks[i].style.height = trackHeight + "px";
+        }
     }
 
     /**
@@ -583,11 +614,6 @@ class Timeline {
         const scrollableHeight = this.trackTreesComponent.root.scrollHeight;
         // tree has gaps of 0.25rem (4px) inbetween entries but not in the beginning nor ending. Move half gap upwards.
         const treeOffset = this.lastTrackTreesComponentOffset = this.trackTreesComponent.innerTree.domEl.offsetTop - this.canvas.offsetTop -2;
-
-        if ( this.trackTreesPanel.root.scrollHeight > 0 ){
-            const ul = this.trackTreesComponent.innerTree.domEl.children[0];
-            this.trackHeight = ul.children.length < 1 ? 25 : ((ul.offsetHeight+4) / ul.children.length);
-        }
         
         //zoom
         let startTime = this.visualOriginTime; //seconds
@@ -1418,6 +1444,9 @@ class KeyFramesTimeline extends Timeline {
         this.defaultCurves = true; // whn a track with dim == 1 has no curves attribute, defaultCurves will be used instead. If true, track is rendered using curves
         this.defaultCurvesRange = [0,1]; // whn a track with dim == 1 has no curves attribute, defaultCurves will be used instead. If true, track is rendered using curves
 
+        this.keyframeSize = this.trackHeight * 0.5; // height of keyframe
+        this.keyframeSizeHovered = this.trackHeight * 0.5 + 5;
+
         if(this.animationClip) {
             this.setAnimationClip(this.animationClip);
         }
@@ -1751,6 +1780,16 @@ class KeyFramesTimeline extends Timeline {
         return null;
     }
 
+    /**
+     * 
+     * @param {number} size pixels, height of keyframe
+     * @param {number} sizeHovered optional, size in pixels when hovered 
+     */
+    setKeyframeSize( size, sizeHovered = null ){
+        this.keyframeSizeHovered = sizeHovered ?? size;
+        this.keyframeSize = size;
+    }
+
     onMouseUp( e, time )  {
 
         let track = e.track;
@@ -1957,7 +1996,8 @@ class KeyFramesTimeline extends Timeline {
         else if(track) {
 
             this.unHoverAll();
-            let keyFrameIndex = this.getCurrentKeyFrame( track, this.xToTime( localX ), this.secondsPerPixel * 5 );
+            const thresholdPixels = track.curves? this.keyframeSize : (Math.SQRT2 * this.keyframeSize);
+            let keyFrameIndex = this.getCurrentKeyFrame( track, this.xToTime( localX ), this.secondsPerPixel * thresholdPixels * 0.5 );
             if(keyFrameIndex > -1 ) {
                 if(track && track.locked)
                     return;
@@ -2075,9 +2115,21 @@ class KeyFramesTimeline extends Timeline {
         const visibleElements = this.getVisibleItems(); 
 
         let offset = scrollY;
+
+        // compute track from which to start rendering (avoid rendering unseen tracks)
+        let startElIdx = 0;
+        if ( offset < -this.lastTrackTreesComponentOffset ){ // offset 0 = (0 of canvas) + track-Tree-Offset. This renders tracks under the time zone
+            startElIdx = Math.floor( -(offset + this.lastTrackTreesComponentOffset) / this.trackHeight ); // how many tracks to skip
+            offset += startElIdx * this.trackHeight;
+        }
+        
         ctx.translate(0, offset);
 
-        for(let t = 0; t < visibleElements.length; t++) {
+        // compute track to end rendering (avoid rendering unseen tracks)
+        let endElIdx = startElIdx + Math.ceil( ( ctx.canvas.height - this.lastTrackTreesComponentOffset - offset ) / this.trackHeight );
+        endElIdx = endElIdx > visibleElements.length ? visibleElements.length : endElIdx;
+        
+        for(let t = startElIdx; t < endElIdx; t++) {
             const track = visibleElements[t].treeData.trackData;
             
             if (track){ 
@@ -2088,7 +2140,6 @@ class KeyFramesTimeline extends Timeline {
                 }
             }
             
-            offset += trackHeight;
             ctx.translate(0, trackHeight);
         }
          
@@ -2115,6 +2166,8 @@ class KeyFramesTimeline extends Timeline {
         const keyframes = track.times;         
         const startTime = this.visualTimeRange[0];
         const endTime = this.visualTimeRange[1] + 0.0000001;
+        const defaultPointSize =  Math.SQRT2 * this.keyframeSize * 0.5; // pythagoras with equal sides h2 = c2 + c2 = 2 * c2
+        const hoverPointSize = Math.SQRT2 * this.keyframeSizeHovered * 0.5;
 
         for(let j = 0; j < keyframes.length; ++j)
         {
@@ -2124,7 +2177,7 @@ class KeyFramesTimeline extends Timeline {
             }
 
             let keyframePosX = this.timeToX( time );
-            let size = trackHeight * 0.3;
+            let size = defaultPointSize;
             
             if(!this.active || track.active == false) {
                 ctx.fillStyle = Timeline.KEYFRAME_COLOR_INACTIVE;
@@ -2133,7 +2186,7 @@ class KeyFramesTimeline extends Timeline {
                 ctx.fillStyle = Timeline.KEYFRAME_COLOR_LOCK;
             }
             else if(track.hovered[j]) {
-                size = trackHeight * 0.45;
+                size = hoverPointSize;
                 ctx.fillStyle = Timeline.KEYFRAME_COLOR_HOVERED;
             }
             else if(track.selected[j]) {
@@ -2166,8 +2219,8 @@ class KeyFramesTimeline extends Timeline {
         ctx.globalAlpha = 1;
         const keyframes = track.times;
         const values = track.values;
-        const defaultPointSize = 5;
-        const hoverPointSize = 7;
+        const defaultPointSize = this.keyframeSize * 0.5; // radius
+        const hoverPointSize = this.keyframeSizeHovered * 0.5; // radius
         const valueRange = track.curvesRange; //[min, max]
         const displayRange = trackHeight - defaultPointSize * 2;
         const startTime = this.visualTimeRange[0];
@@ -2179,7 +2232,7 @@ class KeyFramesTimeline extends Timeline {
         if ( keyframes.length > 1){
             let startPosX = this.timeToX( keyframes[0] );
             let startValue = values[0];                
-            startValue = ((startValue - valueRange[0]) / (valueRange[1] - valueRange[0])) * (-displayRange) + (trackHeight - defaultPointSize); // normalize and offset
+            startValue = LX.clamp((startValue - valueRange[0]) / (valueRange[1] - valueRange[0]), 0,1) * (-displayRange) + (trackHeight - defaultPointSize); // normalize and offset
             ctx.moveTo( startPosX, startValue );
 
             for(let j = 1; j < keyframes.length; ++j){
@@ -2187,7 +2240,7 @@ class KeyFramesTimeline extends Timeline {
                 let time = keyframes[j];
                 let keyframePosX = this.timeToX( time );
                 let value = values[j];                
-                value = ((value - valueRange[0]) / (valueRange[1] - valueRange[0])) * (-displayRange) + (trackHeight - defaultPointSize); // normalize and offset
+                value = LX.clamp((value - valueRange[0]) / (valueRange[1] - valueRange[0]), 0,1) * (-displayRange) + (trackHeight - defaultPointSize); // normalize and offset
     
                 if( time < startTime ){
                     ctx.moveTo( keyframePosX, value ); 
@@ -2199,7 +2252,7 @@ class KeyFramesTimeline extends Timeline {
                     let dt = keyframePosX - lastKeyframePosX;
                     if ( dt > 0 ){
                         let lastValue = values[j-1];
-                        lastValue = ((lastValue - valueRange[0]) / (valueRange[1] - valueRange[0])) * (-displayRange) + (trackHeight - defaultPointSize); // normalize and offset
+                        lastValue = LX.clamp((lastValue - valueRange[0]) / (valueRange[1] - valueRange[0]), 0,1) * (-displayRange) + (trackHeight - defaultPointSize); // normalize and offset
                         let f = (this.timeToX( endTime ) - lastKeyframePosX) / dt;
                         ctx.lineTo( lastKeyframePosX + dt * f, lastValue * (1-f) + value * f ); 
                     }
@@ -2239,7 +2292,7 @@ class KeyFramesTimeline extends Timeline {
                 ctx.fillStyle = Timeline.KEYFRAME_COLOR
             
             let value = values[j];
-            value = ((value - valueRange[0]) / (valueRange[1] - valueRange[0])) *(-displayRange) + (trackHeight - defaultPointSize); // normalize and offset
+            value = LX.clamp((value - valueRange[0]) / (valueRange[1] - valueRange[0]), 0,1) *(-displayRange) + (trackHeight - defaultPointSize); // normalize, clamp and offset
 
             ctx.beginPath();
             ctx.arc( keyframePosX, value, size, 0, Math.PI * 2);
