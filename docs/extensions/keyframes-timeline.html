@@ -203,10 +203,16 @@ panel.@[mtd]attach@(kfTimeline.root);` );
     MAKE_HEADER( "Methods", "h2", "" );
     MAKE_PARAGRAPH(`Check ${INLINE_CODE("Timeline")} for the list of inherited methods. If a method appears on both lists, the ${INLINE_CODE("KeyFramesTimeline")} takes precedence.`);
 
+    MAKE_CLASS_METHOD( ".setKeyframeSize", `Sets keyframe size (height), in pixels. Optionally, a size for hovered keyframes can be specified (defaults to ${INLINE_CODE("size")})`, [
+        ["size", "Number"],
+        ["hoveredSize", "Number"],
+    ], "" );
+
     MAKE_CLASS_METHOD( ".setTracksGroup", "Group tracks. A track can only be in one group.", [
         ["groupId", "String"],
         ["trackIndices", "Array Number"],
     ], "" );
+
     MAKE_CLASS_METHOD( ".getTracksGroup", "Returns an array of object, each being a track of the group.", [
         ["groupId", "String"],
     ], "Array Tracks" );
