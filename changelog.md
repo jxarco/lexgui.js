@@ -2,6 +2,9 @@
 
 ## dev
 
+CodeEditor:
+- Fixed remove old selections on Select All.
+
 ## 0.7.8 (master)
 
 Renamed AssetView "List" view to "Compact". Added better "List" view option.

@@ -4612,6 +4612,8 @@ class CodeEditor {
 
     selectAll() {
 
+        this.endSelection();
+
         // Use main cursor
         this._removeSecondaryCursors();
 
