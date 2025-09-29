@@ -4,6 +4,7 @@
 
 CodeEditor:
 - Fixed remove old selections on Select All.
+- Fixed Find next occurrence cursors (ctrl+D).
 
 ## 0.7.8 (master)
 
