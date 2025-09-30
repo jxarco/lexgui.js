@@ -34,7 +34,7 @@ class TimeBar {
   
         this.markerWidth = options.markerWidth ?? 8;
         this.markerHeight = options.markerHeight ?? (this.canvas.height * 0.5);
-        this.offset = options.offset || (this.markerWidth*0.5 + 8);
+        this.offset = options.offset || (this.markerWidth*0.5 + 5);
 
         // dimensions of line (not canvas)
         this.lineWidth = this.canvas.width - this.offset * 2;
@@ -147,7 +147,7 @@ class TimeBar {
         ctx.fillStyle = ctx.strokeStyle = options.fillColor || '#111' // "#FFF";
 
 
-        y -= this.offset + 4;
+        y -= this.offset + 8;
         // Current time ball grab
         ctx.fillStyle = options.fillColor || '#e5e5e5';
         ctx.beginPath();
