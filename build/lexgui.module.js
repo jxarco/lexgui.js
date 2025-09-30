@@ -15348,7 +15348,12 @@ class Menubar {
         }
 
         const _b = button.querySelector('a');
-        _b.addEventListener("click", (e) => {
+
+        _b.addEventListener( "mousedown", (e) => {
+            e.preventDefault();
+        });
+
+        _b.addEventListener( "mouseup", (e) => {
             if( callback && !disabled )
             {
                 callback.call( this, _b, e );
