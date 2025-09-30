@@ -2,6 +2,8 @@
 
 ## dev
 
+Allow wheel/middle click in menubar buttons.
+
 CodeEditor:
 - Fixed remove old selections on Select All.
 - Fixed Find next occurrence cursors (ctrl+D).

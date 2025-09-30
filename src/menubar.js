@@ -76,17 +76,26 @@ class Menubar {
                 } });
             };
 
-            entry.addEventListener("click", () => {
+            entry.addEventListener("mousedown", (e) => {
+                e.preventDefault();
+            });
+
+            entry.addEventListener("mouseup", (e) => {
+
+                e.preventDefault();
+
                 const f = item[ 'callback' ];
                 if( f )
                 {
-                    f.call( this, key, entry );
+                    f.call( this, key, entry, e );
                     return;
                 }
 
                 _showEntry();
 
                 this.focused = true;
+
+                return false;
             });
 
             entry.addEventListener( "mouseover", (e) => {
