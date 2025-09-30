@@ -186,6 +186,9 @@
         ["loopState", "Number"],
         ["skipCallback", "Boolean"]
     ] );
+    MAKE_CLASS_METHOD( ".setTrackHeight", "Set track height, in pixels.", [
+        ["height", "Number"]
+    ], "" );
 
     MAKE_CLASS_METHOD( ".getVisibleItems", `Returns a reference to the track tree elements. Each element has a ${INLINE_CODE(".treeData.trackData")}.`, [ ], "HTMLCollection" );
 
