@@ -1337,16 +1337,16 @@ class DropdownMenu {
         else
         {
             menuItem.addEventListener( "click", () => {
-                const f = item.callback;
-                if( f )
-                {
-                    f.call( this, key, menuItem );
-                }
-
                 const radioName = menuItem.getAttribute( "data-radioname" );
                 if( radioName )
                 {
                     this._trigger[ radioName ] = key;
+                }
+
+                const f = item.callback;
+                if( f )
+                {
+                    f.call( this, key, menuItem, radioName );
                 }
 
                 // If has options, it's a radio group label, so don't close the menu

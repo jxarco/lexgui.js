@@ -3,6 +3,7 @@
 ## dev
 
 Allow wheel/middle click in menubar buttons.
+Pass RadioGroup name as argument to radio option callback.
 
 CodeEditor:
 - Fixed remove old selections on Select All.
