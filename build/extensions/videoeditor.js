@@ -318,7 +318,7 @@ class VideoEditor {
 
         this.playing = false;
         this.requestId = null;
-
+        this.videoReady = false;
         this.currentTime = this.startTime = 0;
         this.startTimeString = "0:0";
         this.endTimeString = "0:0";
@@ -349,7 +349,7 @@ class VideoEditor {
         this.dragOffsetY = 0;
         // Create video element and load it
         let video = this.video = options.video ?? document.createElement( 'video' );
-        this.video.loop = true;
+        this.loop = options.loop ?? false;
         
         if(options.src) {
             this.video.src = options.src;
@@ -397,7 +397,10 @@ class VideoEditor {
             this.controlsPanelLeft.addButton('', "", (v) => {
                 this.playing = !this.playing;
                 if(this.playing) {
-                    this.video.play();
+                    if( this.video.currentTime + 0.000001 >= this.endTime) {
+                        this.video.currentTime = this.startTime;
+                    }
+                    this.video.play()
                 }
                 else {
                     this.video.pause();
@@ -447,13 +450,16 @@ class VideoEditor {
                 event.preventDefault();
                 event.stopPropagation();
 
-                if(!this.playing) {
+                this.playing = !this.playing;
+                if(this.playing) {
+                    if( this.video.currentTime + 0.000001 >= this.endTime) {
+                        this.video.currentTime = this.startTime;
+                    }
                     this.video.play();
                 }
                 else {
                     this.video.pause();
                 }
-                this.playing = !this.playing;
                 this.controlsPanelLeft.refresh();
             }
         }
@@ -610,15 +616,41 @@ class VideoEditor {
     }
 
     async _loadVideo( options = {} ) {
+        this.videoReady = false;
         while(this.video.duration === Infinity || isNaN(this.video.duration) || !this.timebar) {
             await new Promise(r => setTimeout(r, 1000));
             this.video.currentTime = 10000000 * Math.random();
         }
+        this.video.currentTime = 0.01; // BUG: some videos will not play unless this line is present 
         
+        // Duration can change if the video is dynamic (stream). This function is to ensure to load all buffer data
+        const forceLoadChunks =  () => {    
+            const state = this.videoReady;
+            if(this.video.readyState > 3) {
+                this.videoReady = true;
+            }
+            if(!state) {
+                this.video.currentTime = this.video.duration;
+            }
+        }
+
+        this.video.addEventListener( "canplaythrough", forceLoadChunks, {passive :true} );
+
+        this.video.ondurationchange = (v) => {
+            if( this.video.duration != this.endTime ) {
+
+                this.video.currentTime = this.startTime;
+                console.log("duration changed from", this.endTime, " to ", this.video.duration);
+                this.endTime = this.video.duration;
+                const x = this._timeToX(this.endTime);
+                this._setEndValue(x);
+            }
+            this.video.currentTime = this.startTime;
+        }
+ 
         this.timebar.startX = this.timebar.position.x;
         this.timebar.endX = this.timebar.position.x + this.timebar.lineWidth;
 
-        this.video.currentTime = 0.01; // BUG: some videos will not play unless this line is present 
         this.endTime = this.video.duration;
         
         this._setEndValue(this.timebar.endX);
@@ -660,8 +692,16 @@ class VideoEditor {
             this.onDraw();
         }
         if(this.playing) {
-            if(this.video.currentTime >= this.endTime) {
-                this.video.currentTime = this.startTime;
+            if( this.video.currentTime + 0.000001 >= this.endTime) {
+                this.video.pause();
+                if(!this.loop) {
+                    this.playing = false;
+                    this.controlsPanelLeft.refresh();
+                }
+                else {
+                    this.video.currentTime = this.startTime;
+                    this.video.play();
+                }
             }
             const x = this._timeToX(this.video.currentTime);
             this._setCurrentValue(x, false);
