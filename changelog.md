@@ -8,6 +8,12 @@ Pass RadioGroup name as argument to radio option callback.
 CodeEditor:
 - Fixed remove old selections on Select All.
 - Fixed Find next occurrence cursors (ctrl+D).
+- Added `CodeEditor.setCustomSuggestions(Array)`.
+
+VideoEditor:
+- Time marker ball improved to be showed above trim markers.
+- Force to load all chunks of the video.
+- Loop video manually done to fix sync.
 
 ## 0.7.8 (master)
 

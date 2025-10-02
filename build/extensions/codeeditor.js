@@ -1479,6 +1479,16 @@ class CodeEditor
         } );
     }
 
+    setCustomSuggestions( suggestions )
+    {
+        if( !suggestions || suggestions.constructor !== Array )
+        {
+            return;
+        }
+
+        this.customSuggestions = suggestions;
+    }
+
     async loadFile( file, options = {} )
     {
         const _innerAddTab = ( text, name, title ) => {
