@@ -2,6 +2,8 @@
 
 ## dev
 
+## 0.7.9 (master)
+
 Allow wheel/middle click in menubar buttons.
 Pass RadioGroup name as argument to radio option callback.
 
@@ -15,7 +17,7 @@ VideoEditor:
 - Force to load all chunks of the video.
 - Loop video manually done to fix sync.
 
-## 0.7.8 (master)
+## 0.7.8
 
 Renamed AssetView "List" view to "Compact". Added better "List" view option.
 Fixed undesired scroll in AssetView.

@@ -14,7 +14,7 @@ console.warn( 'Script _build/lexgui.js_ is depracated and will be removed soon. 
 */
 
 const LX = {
-    version: "0.7.8",
+    version: "0.7.9",
     ready: false,
     extensions: [], // Store extensions used
     signals: {}, // Events and triggers
@@ -1332,16 +1332,16 @@ class DropdownMenu {
         else
         {
             menuItem.addEventListener( "click", () => {
-                const f = item.callback;
-                if( f )
-                {
-                    f.call( this, key, menuItem );
-                }
-
                 const radioName = menuItem.getAttribute( "data-radioname" );
                 if( radioName )
                 {
                     this._trigger[ radioName ] = key;
+                }
+
+                const f = item.callback;
+                if( f )
+                {
+                    f.call( this, key, menuItem, radioName );
                 }
 
                 // If has options, it's a radio group label, so don't close the menu
@@ -15169,17 +15169,26 @@ class Menubar {
                 } });
             };
 
-            entry.addEventListener("click", () => {
+            entry.addEventListener("mousedown", (e) => {
+                e.preventDefault();
+            });
+
+            entry.addEventListener("mouseup", (e) => {
+
+                e.preventDefault();
+
                 const f = item[ 'callback' ];
                 if( f )
                 {
-                    f.call( this, key, entry );
+                    f.call( this, key, entry, e );
                     return;
                 }
 
                 _showEntry();
 
                 this.focused = true;
+
+                return false;
             });
 
             entry.addEventListener( "mouseover", (e) => {
@@ -15346,7 +15355,12 @@ class Menubar {
         }
 
         const _b = button.querySelector('a');
-        _b.addEventListener("click", (e) => {
+
+        _b.addEventListener( "mousedown", (e) => {
+            e.preventDefault();
+        });
+
+        _b.addEventListener( "mouseup", (e) => {
             if( callback && !disabled )
             {
                 callback.call( this, _b, e );

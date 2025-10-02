@@ -7,7 +7,7 @@
 */
 
 const LX = {
-    version: "0.7.8",
+    version: "0.7.9",
     ready: false,
     extensions: [], // Store extensions used
     signals: {}, // Events and triggers
