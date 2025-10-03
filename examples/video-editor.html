@@ -21,6 +21,155 @@
 
     import { LX } from 'lexgui';
     import { VideoEditor } from 'lexgui/extensions/videoeditor.js';
+
+    class Window {
+      constructor( timeline, options = {} ) {
+          this.timeline = timeline;
+          this.timeline.padding = 0;
+
+          this.start = options.start != undefined ? options.start : 0.0; // sec
+          this.end = options.end || 3.0;   // sec
+          this.center = options.center != undefined ? options.center : this.start
+
+          this.canvas = this.timeline.canvas;
+          this.windowHeight = options.windowHeight || this.canvas.height - 15;
+          this.handleWidth = options.handleWidth || 6;
+          
+          this.allowDragging = options.dragging ?? false;
+          this.dragging = false;
+          this.dragOffset = 0;
+          this.resizingLeft = false;
+          this.resizingRight = false;
+      }
+
+      draw() {
+          const ctx = this.canvas.getContext('2d');
+          let startX = Math.max( this.timeline.startX, this.timeline.timeToX(this.start) );
+          let endX = Math.min( this.timeline.endX, this.timeline.timeToX(this.end) );
+          const width = endX - startX;
+
+          // Window background
+          ctx.fillStyle = "rgba(200, 200, 255, 0.15)";
+          ctx.roundRect(startX , this.canvas.height / 2 - this.windowHeight / 2, width, this.windowHeight, 5);
+          ctx.fill();
+          // Border
+          ctx.strokeStyle = "rgba(200, 200, 255, 0.5)";
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.roundRect(startX, this.canvas.height / 2 - this.windowHeight / 2, width, this.windowHeight, 5);
+          ctx.stroke();
+
+          // Handlers
+          const offsetW = 2;
+          const offsetH = 8;
+          if( startX > this.timeline.startX ) {
+            ctx.fillStyle = "whitesmoke"//"#579aff";
+            ctx.fillRect(startX, this.canvas.height / 2 - this.windowHeight / 2, this.handleWidth, this.windowHeight);
+            ctx.fillStyle = "#579aff";
+            ctx.fillRect(startX + this.handleWidth/2 - offsetW/2, this.canvas.height / 2 - this.windowHeight / 2 + offsetH / 2 , offsetW, this.windowHeight - offsetH);
+          }
+          if( endX < this.timeline.endX ) {
+            ctx.fillStyle = "whitesmoke"//"#579aff";
+            ctx.fillRect(endX - this.handleWidth, this.canvas.height / 2 - this.windowHeight / 2, this.handleWidth, this.windowHeight);
+            ctx.fillStyle = "#579aff";   
+            ctx.fillRect(endX - this.handleWidth/2 - offsetW/2, this.canvas.height / 2 - this.windowHeight / 2 + offsetH / 2, offsetW, this.windowHeight - offsetH);       
+          }
+      }
+
+      onMouse( e ) {
+          switch(e.type) {
+              case "mousedown":
+                  this.onMouseDown( e );
+                  break;
+              case "mousemove":
+                  this.onMouseMove( e );
+                  break;
+              case "mouseup":
+                  this.onMouseUp( e );
+                  break;
+          }
+      }
+
+      onMouseDown( e ) {
+          const x = e.offsetX;
+          const startX = this.timeline.timeToX(this.start);
+          const endX = this.timeline.timeToX(this.end);
+
+          if( x >= startX && x <= startX + this.handleWidth ) {
+              this.resizingLeft = true;
+              e.cancelBubble = true;
+          }
+          else if( x >= endX - this.handleWidth && x <= endX ) {
+              this.resizingRight = true;
+              e.cancelBubble = true;
+          }
+          else if( this.allowDragging &&  x >= startX && x <= endX ) {
+              this.dragging = true;
+              this.dragOffset = x - startX;
+              e.cancelBubble = true;
+          }
+      }
+
+      onMouseMove( e ) {
+          const x = e.offsetX;
+          let startX = this.timeline.timeToX(this.start);
+          let endX = this.timeline.timeToX(this.end);
+          const centerX = this.timeline.timeToX(this.center);
+          if( this.resizingLeft ) {
+              startX = Math.min( centerX, Math.max( this.timeline.startX, x ) );//Math.max(startX - 0.1, (x - this.timeline.padding) / (this.canvas.width - 2 * this.timeline.padding) * this.timeline.endX);
+              this.start = this.timeline.xToTime( startX );
+          }
+          else if( this.resizingRight ) {
+              endX = Math.max( centerX, Math.min( this.timeline.endX, x ) ); //Math.min(endX + 0.1, (x - this.timeline.padding) / (this.canvas.width - 2 * this.timeline.padding) * this.timeline.endX);
+              this.end = this.timeline.xToTime( endX );
+          }
+          else if( this.dragging ) {
+            const time = this.timeline.xToTime( x - this.dragOffset );
+            this.moveWindow( time )
+          }
+          else {
+              const x = e.offsetX;
+              const startX = this.timeline.timeToX(this.start);
+              const endX = this.timeline.timeToX(this.end);
+
+              if( x >= startX && x <= startX + this.handleWidth ) {
+                  this.canvas.style.cursor = "col-resize";
+                  e.cancelBubble = true;
+              }
+              else if( x >= endX - this.handleWidth && x <= endX ) {
+                  this.canvas.style.cursor = "col-resize";
+                  e.cancelBubble = true;
+              }
+              return;
+          }
+          e.cancelBubble = true;
+          this.timeline._draw();
+      }
+
+      onMouseUp( e ) {
+          this.dragging = false;
+          this.resizingLeft = false;
+          this.resizingRight = false;
+      }
+
+      moveWindow( time ) {
+
+          const leftOffset = this.start - this.center;
+          const rightOffset = this.end - this.center;
+
+          // const startX = this.timeline.timeToX( time + leftOffset );
+          // const endX = this.timeline.timeToX( rightOffset );
+
+          // const windowLength = this.end - this.start;
+          
+          // newStart = Math.max(0, Math.min(this.timeline.endX - windowLength, startX));
+          this.start = time + leftOffset;
+          this.end = time + rightOffset;
+          this.center = time;
+      }
+
+  }
+
     // init library and get main area
     let area = await LX.init();
 
@@ -33,9 +182,9 @@
     video.src = "../data/video.mp4";
     videoArea.attach(video);
 
-    const videoEditor = new LX.VideoEditor(leftArea, { videoArea, video, crop: true })
-    videoEditor._loadVideo();
-    
+    const videoEditor = new LX.VideoEditor(leftArea, { videoArea, video, crop: true, loop: true })
+    videoEditor.loadVideo();
+
     const canvas = document.createElement('canvas');
     canvas.width = video.clientWidth;
     canvas.height = video.clientHeight;

@@ -41,7 +41,8 @@
     video.src = "../data/video.mp4";
     videoArea.attach(video);
     const videoEditor = new LX.VideoEditor(topArea, { videoArea, video, controlsArea })
-    videoEditor._loadVideo();
+    videoEditor.loadVideo();
+    
     /* Add canvas above video */
     const canvas = document.createElement('canvas');
     canvas.width = video.clientWidth;
