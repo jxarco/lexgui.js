@@ -390,7 +390,7 @@ class VideoEditor {
         this.startTimeString = "0:0";
         this.endTimeString = "0:0";
         this._updateTime = true;
-        
+        this.speed = options.speed || 1; 
         this.mainArea = area;
 
         let videoArea = null;
@@ -476,7 +476,33 @@ class VideoEditor {
                 this.controlsPanelLeft.refresh();
             }, { width: '40px', icon: (this.playing ? 'Pause@solid' : 'Play@solid'), className: "justify-center"});
 
-            this.controlsPanelLeft.addLabel(this.startTimeString, {width: 100});
+            let dialog = null;
+            const btn = this.controlsPanelLeft.addButton('', '', (v) => {
+                
+                if(dialog) {
+                    dialog.close();
+                    dialog = null;
+                    return;
+                }
+
+                dialog = new LX.Dialog("", p => {
+                    
+                    p.addNumber("Speed", this.speed, (v) => {
+                        this.speed = v;
+                        if( this.onChangeSpeed ) {
+                            this.onChangeSpeed( v );
+                        }
+                    }, {min:-2.5, max: 2.5, step: 0.01})
+                }, {  position: [ `${btn.root.offsetLeft - 50}`, `${this.controlsPanelLeft.root.offsetTop - 80}px`], size: ["50px", "auto"], onBeforeClose: () => dialog = null })
+            }, { width: '40px', title: 'speed', icon: "Timer@solid", className: "justify-center" } );
+            
+            this.controlsPanelLeft.addButton('', 'Loop', (v) => {
+                this.loop = !this.loop;
+                
+                this.controlsPanelLeft.refresh();
+            }, { width: '40px', title: 'loop', icon: ( 'Repeat@solid'), className: `justify-center`, buttonClass: `${(this.loop ? 'bg-accent' : '')}`});
+
+            this.controlsPanelLeft.addLabel(this.startTimeString, {width: "100px"});
             this.controlsPanelLeft.endLine();
 
             let availableWidth = leftArea.root.clientWidth - controlsLeft.root.clientWidth;
@@ -485,7 +511,8 @@ class VideoEditor {
 
         this.controlsPanelLeft.refresh();
         controlsLeft.root.style.minWidth = 'fit-content';
-        controlsLeft.root.classList.add(); controlsLeft.attach(this.controlsPanelLeft);
+       // controlsLeft.root.classList.add();
+        controlsLeft.attach(this.controlsPanelLeft);
 
         // Create right controls panel (ens time)
         this.controlsPanelRight = new LX.Panel({className: 'lexcontrolspanel'});
