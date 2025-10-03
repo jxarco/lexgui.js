@@ -476,24 +476,28 @@ class VideoEditor {
                 this.controlsPanelLeft.refresh();
             }, { width: '40px', icon: (this.playing ? 'Pause@solid' : 'Play@solid'), className: "justify-center"});
 
-            let dialog = null;
+            if(this.speedDialog) {
+                this.speedDialog.close();
+            }
+            this.speedDialog = null;
             const btn = this.controlsPanelLeft.addButton('', '', (v) => {
                 
-                if(dialog) {
-                    dialog.close();
-                    dialog = null;
+                if(this.speedDialog) {
+                    this.speedDialog.close();
+                    this.speedDialog = null;
                     return;
                 }
 
-                dialog = new LX.Dialog("", p => {
+                this.speedDialog = new LX.Dialog("", p => {
                     
                     p.addNumber("Speed", this.speed, (v) => {
                         this.speed = v;
+                        this.video.playbackRate = v;
                         if( this.onChangeSpeed ) {
                             this.onChangeSpeed( v );
                         }
-                    }, {min:-2.5, max: 2.5, step: 0.01})
-                }, {  position: [ `${btn.root.offsetLeft - 50}`, `${this.controlsPanelLeft.root.offsetTop - 80}px`], size: ["50px", "auto"], onBeforeClose: () => dialog = null })
+                    }, {min: 0, max: 2.5, step: 0.01, nameWidth: "50px"})
+                }, {  position: [ `${btn.root.offsetLeft - 20}`, `${this.controlsPanelLeft.root.offsetTop - 80}px`], size: ["50px", "auto"], onBeforeClose: () => this.speedDialog = null })
             }, { width: '40px', title: 'speed', icon: "Timer@solid", className: "justify-center" } );
             
             this.controlsPanelLeft.addButton('', 'Loop', (v) => {
