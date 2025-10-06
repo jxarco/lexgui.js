@@ -6363,6 +6363,7 @@ ul.lexassetscontent {
 .w-full { width: 100% }
 .w-screen { width: 100vw }
 .w-auto { width: auto }
+.w-fit-content { width: fit-content }
 
 .w-2\/3 { width: 66.666% }
 .w-1\/2 { width: 50% }
