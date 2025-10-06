@@ -2,6 +2,8 @@
 
 ## dev
 
+Added Popover documentation.
+
 ## 0.7.9 (master)
 
 Allow wheel/middle click in menubar buttons.
