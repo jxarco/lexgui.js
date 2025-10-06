@@ -3,6 +3,7 @@
 ## dev
 
 Added Popover documentation.
+Added support for video elements in AssetView.
 
 ## 0.7.9 (master)
 
