@@ -49,10 +49,10 @@ const starterTheme = LX.getTheme();
 
 // Header
 {
-    const header = LX.makeContainer( [ null, "auto" ], "flex flex-col border-top border-bottom gap-2 px-10 py-8", `
+    const header = LX.makeContainer( [ null, "auto" ], "flex flex-col border-top border-bottom gap-3 px-10 py-8 items-center", `
         <a>Get started with LexGUI.js <span class="text-sm fg-secondary">${ LX.version }</span></a>
-        <h1>Build your application interface</h1>
-        <p class="font-light" style="max-width:32rem">A set of beautifully-designed, accessible components.
+        <h1 style="font-size:2.5rem">Build your application interface</h1>
+        <p class="font-light text-xl text-center" style="max-width:48rem">A set of beautifully-designed, accessible components.
         No complex frameworks. Pure JavaScript and CSS. Open Source.</p>
     `, area );
 
@@ -302,6 +302,64 @@ const starterTheme = LX.getTheme();
                 // confirmContent: "Are your sure??"
              });
             panel.merge();
+        }
+    }
+
+    // Examples
+    {
+        const examplesContainer = LX.makeContainer( [ null, "auto" ], "grid grid-cols-4 gap-3 bg-primary rounded-lg p-6 overflow-hidden" );
+        tabs.add( "Examples", examplesContainer, { xselected: true } );
+
+        {
+            const panel = new LX.Panel( { className: "rounded-lg border p-4 flex flex-col gap-4" } );
+            panel.addColor("Background", "#b7a9b1", null);
+            panel.addText("Text", "LexGUI.js @jxarco", null, {placeholder: "e.g. ColorPicker", icon: "Type"});
+            panel.addColor("Font Color", "#303b8d", null);
+            panel.addNumber("Font Size", 36, null, { min: 1, max: 48, step: 1, units: "px"});
+            panel.addSelect("Font Family", ["Arial", "GeistSans", "Monospace", "CascadiaCode"], "GeistSans");
+            panel.addRange("Threshold Range", [2, 7], (v) => console.log(v), { min: 0, max: 10, step: 1, className: "accent" });
+            panel.addVector2("2D Position", [300, 350], null, { min: 0, max: 1024 });
+
+            examplesContainer.appendChild( panel.root );
+        }
+
+        {
+            const panel = new LX.Panel( { className: "p-4 flex flex-col gap-4" } );
+            panel.addColor("Background", "#b7a9b1", null);
+            panel.addText("Text", "LexGUI.js @jxarco", null, {placeholder: "e.g. ColorPicker", icon: "Type"});
+            panel.addColor("Font Color", "#303b8d", null);
+            panel.addNumber("Font Size", 36, null, { min: 1, max: 48, step: 1, units: "px"});
+            panel.addSelect("Font Family", ["Arial", "GeistSans", "Monospace", "CascadiaCode"], "GeistSans");
+            panel.addRange("Threshold Range", [2, 7], (v) => console.log(v), { min: 0, max: 10, step: 1, className: "accent" });
+            panel.addVector2("2D Position", [300, 350], null, { min: 0, max: 1024 });
+
+            examplesContainer.appendChild( panel.root );
+        }
+
+        {
+            const panel = new LX.Panel( { className: "p-4 flex flex-col gap-4" } );
+            panel.addColor("Background", "#b7a9b1", null);
+            panel.addText("Text", "LexGUI.js @jxarco", null, {placeholder: "e.g. ColorPicker", icon: "Type"});
+            panel.addColor("Font Color", "#303b8d", null);
+            panel.addNumber("Font Size", 36, null, { min: 1, max: 48, step: 1, units: "px"});
+            panel.addSelect("Font Family", ["Arial", "GeistSans", "Monospace", "CascadiaCode"], "GeistSans");
+            panel.addRange("Threshold Range", [2, 7], (v) => console.log(v), { min: 0, max: 10, step: 1, className: "accent" });
+            panel.addVector2("2D Position", [300, 350], null, { min: 0, max: 1024 });
+
+            examplesContainer.appendChild( panel.root );
+        }
+
+        {
+            const panel = new LX.Panel( { className: "p-4 flex flex-col gap-4" } );
+            panel.addColor("Background", "#b7a9b1", null);
+            panel.addText("Text", "LexGUI.js @jxarco", null, {placeholder: "e.g. ColorPicker", icon: "Type"});
+            panel.addColor("Font Color", "#303b8d", null);
+            panel.addNumber("Font Size", 36, null, { min: 1, max: 48, step: 1, units: "px"});
+            panel.addSelect("Font Family", ["Arial", "GeistSans", "Monospace", "CascadiaCode"], "GeistSans");
+            panel.addRange("Threshold Range", [2, 7], (v) => console.log(v), { min: 0, max: 10, step: 1, className: "accent" });
+            panel.addVector2("2D Position", [300, 350], null, { min: 0, max: 1024 });
+
+            examplesContainer.appendChild( panel.root );
         }
     }
 
