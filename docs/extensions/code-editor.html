@@ -159,7 +159,7 @@
                 ["skipInfo", "Boolean", "Show or hide the editor status bar panel at the bottom (Zoom, Line, Column, etc.)", "false"],
                 ["skipTabs", "Boolean", "Don't use tab-style editor for showing opened files", "false"],
             ].map( v => {
-                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] ? v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] : "—" ];
             } )
         }, {});
     }
