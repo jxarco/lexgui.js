@@ -2596,9 +2596,11 @@ class Tabs {
 
             if( isSelected && this.thumb )
             {
+                this.thumb.classList.add( "no-transition" );
                 this.thumb.style.transform = "translate( " + ( tabEl.childIndex * tabEl.offsetWidth ) + "px )";
                 this.thumb.style.width = ( tabEl.offsetWidth ) + "px";
                 this.thumb.item = tabEl;
+                this.thumb.classList.remove( "no-transition" );
             }
 
         }, 10 );

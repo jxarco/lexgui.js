@@ -2,6 +2,7 @@
 
 ## dev
 
+Removed Fit-Tabs thumb CSS transition on `Tabs.add`.
 Added support for video elements in AssetView.
 Updated AssetView documentation.
 Added Popover documentation.
