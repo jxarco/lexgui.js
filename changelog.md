@@ -2,8 +2,9 @@
 
 ## dev
 
-Added Popover documentation.
 Added support for video elements in AssetView.
+Updated AssetView documentation.
+Added Popover documentation.
 
 Timeline:
 - Added `Timeline.setKeyframeSize` and `Timeline.setTrackHeight`.
