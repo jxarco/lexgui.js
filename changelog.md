@@ -5,6 +5,11 @@
 Added Popover documentation.
 Added support for video elements in AssetView.
 
+Timeline:
+- Added `Timeline.setKeyframeSize` and `Timeline.setTrackHeight`.
+- Curve keyframes are visually clamped to the tracks' boundaries.
+- Fixed `Add Keyframe` option in context menu.
+
 ## 0.7.9 (master)
 
 Allow wheel/middle click in menubar buttons.
