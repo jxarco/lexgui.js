@@ -10,6 +10,7 @@ Fixed `LX.codeSnippet` linesAdded/Removed options.
 
 CodeEditor:
 - Added support to `options.callback` to call when the editor is completely loaded.
+- Docs updated.
 
 Timeline:
 - Added `Timeline.setKeyframeSize` and `Timeline.setTrackHeight`.
