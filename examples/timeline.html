@@ -48,15 +48,17 @@
         const types = { KEYFRAMES: 0, CLIPS: 1, CURVES: 2};
         let position = [250, 350];
         let trackName = "";
+        let kfTimeline = null;
 
         let panel = new LX.Panel();
         panel = rightArea.addPanel(panel);        
-        fillPanel( panel );
-
+        
         let activeTimeline = null
         createKeyframeTimeline( bottomTabs );
         createClipsTimeline( bottomTabs );
         createCurvesTimeline( bottomTabs );
+        
+        fillPanel( panel );
 
         LX.doAsync( activeTimeline.resize.bind( activeTimeline ) );
 
@@ -144,8 +146,17 @@
                     track.edited[keyframe] = true;
                 }
             }, { min: 0, max: 1024 });
-            panel.branch_open = true;
             panel.merge();
+
+            panel.addRange("Keyframe Size", kfTimeline.keyframeSize / kfTimeline.trackHeight, (v,e)=>{
+                kfTimeline.keyframeSize = v * kfTimeline.trackHeight;
+            }, { step: 0.001, min: 0, max: 1 });
+
+            panel.addNumber("Track Height", kfTimeline.trackHeight, (v,e)=>{
+                let ratio = kfTimeline.keyframeSize / kfTimeline.trackHeight;
+                kfTimeline.setTrackHeight(v);
+                kfTimeline.setKeyframeSize( kfTimeline.trackHeight * ratio, kfTimeline.trackHeight * ratio + 6 );
+            }, { step: 1, min: parseFloat(getComputedStyle(document.documentElement).fontSize) * 0.25 });
         }
 
 
@@ -206,7 +217,7 @@
             keyframesPanel.onresize = () => {
                 kfTimeline.resize();
             }
-            let kfTimeline = new LX.KeyFramesTimeline('Keyframes Timeline', {
+            kfTimeline = new LX.KeyFramesTimeline('Keyframes Timeline', {
                 disableNewTracks: true,
                 onCreateBeforeTopBar: (panel) => {
                     panel.addSelect("Animation", ["Anim 1", "Anim 2", "Anim 3"], "Anim 1", ()=> {})
@@ -224,25 +235,24 @@
             kfTimeline.show();
             
             
-            kfTimeline.onSelectKeyFrame = (data, currentSelection) => {
-                if(data.multipleSelection) {
+            kfTimeline.onSelectKeyFrame = (currentSelection) => {
+                if(kfTimeline.lastKeyFramesSelected.length > 1) {
                     rightArea.hide();
                     return;
                 }
                 rightArea.show();
-                trackName = data.track.id ;
-                if(  data.track.groupId != "Font" || data.track.id != "position") {
+                const track = kfTimeline.animationClip.tracks[currentSelection[0]];
+                trackName = track.id ;
+                if( track.groupId != "Font" || track.id != "position") {
                     return
                 }
-                const id = data.track.trackIdx;
-                let values = kfTimeline.animationClip.tracks[id].values;
-                const dim = kfTimeline.animationClip.tracks[id].dim;
+                const idx = track.trackIdx;
+                let values = track.values;
+                const dim = track.dim;
                 
-                //currentSelection == [track.name, track.idx, frameIdx, track.clipIdx, track.times[frameIdx]]
                 const keyFrameIndex = currentSelection[1];
                 position = values.slice(keyFrameIndex * dim, keyFrameIndex * dim + dim);
                 fillPanel(panel);
-                //kfTimeline.animationClip.tracks[currentSelection[0][0]];
             }
             
             kfTimeline.onSetTime = ( time ) => {
