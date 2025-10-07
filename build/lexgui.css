@@ -252,6 +252,11 @@ body {
     box-sizing: border-box;
 }
 
+.no-transition,
+.no-transition * {
+  transition: none !important;
+}
+
 blockquote, dd, dl, figure, h1, h2, h3, h4, h5, h6, hr, p, pre {
     margin: 0;
 }
@@ -4711,7 +4716,7 @@ ul.lexassetscontent {
 }
 
 .lexassetscontent li.script {
-    border-color: rgb(104, 129, 195);
+    border-color: rgb(207, 127, 36);
 }
 
 .lexassetscontent li.json {
@@ -4728,6 +4733,10 @@ ul.lexassetscontent {
 
 .lexassetscontent li.sigml {
     border-color: rgb(154, 188, 101);
+}
+
+.lexassetscontent li.video {
+    border-color: rgb(84, 119, 214);
 }
 
 .lexassetscontent li:hover {
@@ -4823,6 +4832,12 @@ ul.lexassetscontent {
     height: 100%;
     object-fit: cover;
     transition: all 0.2s;
+}
+
+.lexassetscontent li video {
+    z-index: 1;
+    object-fit: cover;
+    height: calc(100% - 24px);
 }
 
 .lexassetscontent.list img, .lexassetscontent.compact img {
@@ -6348,6 +6363,7 @@ ul.lexassetscontent {
 .w-full { width: 100% }
 .w-screen { width: 100vw }
 .w-auto { width: auto }
+.w-fit-content { width: fit-content }
 
 .w-2\/3 { width: 66.666% }
 .w-1\/2 { width: 50% }

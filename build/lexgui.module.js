@@ -2577,9 +2577,11 @@ class Tabs {
 
             if( isSelected && this.thumb )
             {
+                this.thumb.classList.add( "no-transition" );
                 this.thumb.style.transform = "translate( " + ( tabEl.childIndex * tabEl.offsetWidth ) + "px )";
                 this.thumb.style.width = ( tabEl.offsetWidth ) + "px";
                 this.thumb.item = tabEl;
+                this.thumb.classList.remove( "no-transition" );
             }
 
         }, 10 );
@@ -5535,47 +5537,49 @@ function makeCodeSnippet( code, size, options = { } )
         disableEdition: true,
         allowAddScripts: false,
         name: options.tabName,
-        // showTab: options.showTab ?? true
+        callback: () =>
+        {
+            if( options.linesAdded )
+            {
+                const code = editor.root.querySelector( ".code" );
+                for( let l of options.linesAdded )
+                {
+                    if( l.constructor == Number )
+                    {
+                        code.childNodes[ l - 1 ].classList.add( "added" );
+                    }
+                    else if( l.constructor == Array ) // It's a range
+                    {
+                        for( let i = ( l[ 0 ] - 1 ); i <= ( l[ 1 ] - 1 ); i++ )
+                        {
+                            code.childNodes[ i ].classList.add( "added" );
+                        }
+                    }
+                }
+            }
+
+            if( options.linesRemoved )
+            {
+                const code = editor.root.querySelector( ".code" );
+                for( let l of options.linesRemoved )
+                {
+                    if( l.constructor == Number )
+                    {
+                        code.childNodes[ l - 1 ].classList.add( "removed" );
+                    }
+                    else if( l.constructor == Array ) // It's a range
+                    {
+                        for( let i = ( l[ 0 ] - 1 ); i <= ( l[ 1 ] - 1 ); i++ )
+                        {
+                            code.childNodes[ i ].classList.add( "removed" );
+                        }
+                    }
+                }
+            }
+        }
     } );
+
     editor.setText( code, options.language ?? "Plain Text" );
-
-    if( options.linesAdded )
-    {
-        const code = editor.root.querySelector( ".code" );
-        for( let l of options.linesAdded )
-        {
-            if( l.constructor == Number )
-            {
-                code.childNodes[ l - 1 ].classList.add( "added" );
-            }
-            else if( l.constructor == Array ) // It's a range
-            {
-                for( let i = ( l[ 0 ] - 1 ); i <= ( l[ 1 ] - 1 ); i++ )
-                {
-                    code.childNodes[ i ].classList.add( "added" );
-                }
-            }
-        }
-    }
-
-    if( options.linesRemoved )
-    {
-        const code = editor.root.querySelector( ".code" );
-        for( let l of options.linesRemoved )
-        {
-            if( l.constructor == Number )
-            {
-                code.childNodes[ l - 1 ].classList.add( "removed" );
-            }
-            else if( l.constructor == Array ) // It's a range
-            {
-                for( let i = ( l[ 0 ] - 1 ); i <= ( l[ 1 ] - 1 ); i++ )
-                {
-                    code.childNodes[ i ].classList.add( "removed" );
-                }
-            }
-        }
-    }
 
     if( options.windowMode )
     {
@@ -5600,6 +5604,7 @@ function makeCodeSnippet( code, size, options = { } )
     }
 
     snippet.appendChild( area.root );
+
     return snippet;
 }
 
@@ -16588,13 +16593,13 @@ class AssetView {
         const isListLayout = ( this.layout == AssetView.LAYOUT_LIST );
 
         this.filter = filter ?? ( this.filter ?? "None" );
-        this.searchValue = searchValue ?? (this.searchValue ?? "");
+        this.searchValue = searchValue ?? ( this.searchValue ?? "" );
         this.content.innerHTML = "";
         this.content.className = `lexassetscontent${ isCompactLayout ? " compact" : ( isListLayout ? " list" : "" ) }`;
         let that = this;
 
-        const _addItem = function(item) {
-
+        const _addItem = function( item )
+        {
             const type = item.type.charAt( 0 ).toUpperCase() + item.type.slice( 1 );
             const extension = LX.getExtension( item.id );
             const isFolder = type === "Folder";
@@ -16613,10 +16618,11 @@ class AssetView {
             {
                 let desc = document.createElement( 'span' );
                 desc.className = 'lexitemdesc';
-                desc.innerHTML = "File: " + item.id + "<br>Type: " + type;
+                desc.id = `floatingTitle_${ item.id }`;
+                desc.innerHTML = `File: ${ item.id }<br>Type: ${ type }`;
                 that.content.appendChild( desc );
 
-                itemEl.addEventListener("mousemove", e => {
+                itemEl.addEventListener( "mousemove", e => {
 
                     if( !isGridLayout )
                     {
@@ -16644,23 +16650,7 @@ class AssetView {
 
                     desc.style.left = ( localOffsetX ) + "px";
                     desc.style.top = ( localOffsetY - 36 ) + "px";
-                });
-
-                itemEl.addEventListener("mouseenter", () => {
-                    if( isGridLayout )
-                    {
-                        desc.style.display = "unset";
-                    }
-                });
-
-                itemEl.addEventListener("mouseleave", () => {
-                    if( isGridLayout )
-                    {
-                        setTimeout( () => {
-                            desc.style.display = "none";
-                        }, 100 );
-                    }
-                });
+                } );
             }
             else
             {
@@ -16695,26 +16685,43 @@ class AssetView {
 
             if( !that.skipPreview )
             {
-                let preview = null;
-                const hasImage = item.src && (['png', 'jpg'].indexOf( LX.getExtension( item.src ) ) > -1 || item.src.includes("data:image/") ); // Support b64 image as src
-
-                if( hasImage || isFolder || !isGridLayout)
+                if( item.type === "video" )
                 {
+                    const itemVideo = LX.makeElement( "video", "absolute left-0 top-0 w-full border-none pointer-events-none", "", itemEl );
+                    itemVideo.setAttribute( "disablePictureInPicture", false );
+                    itemVideo.setAttribute( "disableRemotePlayback", false );
+                    itemVideo.setAttribute( "loop", true );
+                    itemVideo.setAttribute( "async", true );
+                    itemVideo.style.transition = "opacity 0.2s ease-out";
+                    itemVideo.style.opacity = item.preview ? "0" : "1";
+                    itemVideo.src = item.src;
+                    itemVideo.volume = item.videoVolume ?? 0.4;
+                }
+
+                let preview = null;
+
+                const previewSrc    = item.preview ?? item.src;
+                const hasImage      = previewSrc && (['png', 'jpg'].indexOf( LX.getExtension( previewSrc ) ) > -1 || previewSrc.includes("data:image/") ); // Support b64 image as src
+
+                if( hasImage || isFolder || !isGridLayout )
+                {
+                    const defaultPreviewPath    = `${ that.rootPath }images/file.png`;
+                    const defaultFolderPath     = `${ that.rootPath }images/folder.png`;
+
                     preview = document.createElement('img');
-                    let real_src = item.unknown_extension ? that.rootPath + "images/file.png" : (isFolder ? that.rootPath + "images/folder.png" : item.src);
-                    preview.src = (isGridLayout || isFolder ? real_src : that.rootPath + "images/file.png");
+                    let realSrc = item.unknownExtension ? defaultPreviewPath : ( isFolder ? defaultFolderPath : previewSrc );
+                    preview.src = ( isGridLayout || isFolder ? realSrc : defaultPreviewPath );
                     itemEl.appendChild( preview );
                 }
                 else
                 {
-                    preview = document.createElement('svg');
+                    preview = document.createElement( 'svg' );
                     preview.className = "asset-file-preview";
-                    itemEl.appendChild(preview);
+                    itemEl.appendChild( preview );
 
-                    let textEl = document.createElement('text');
-                    preview.appendChild(textEl);
-                    // If no extension, e.g. Clip, use the type...
-                    textEl.innerText = (!extension || extension == item.id) ? item.type.toUpperCase() : ("." + extension.toUpperCase());
+                    let textEl = document.createElement( 'text' );
+                    textEl.innerText = ( !extension || extension == item.id ) ? item.type.toUpperCase() : ( `.${ extension.toUpperCase() }` ); // If no extension, e.g. Clip, use the type...
+                    preview.appendChild( textEl );
 
                     var newLength = textEl.innerText.length;
                     var charsPerLine = 2.5;
@@ -16725,7 +16732,7 @@ class AssetView {
                     {
                         var newFontSize = newEmSize * textBaseSize;
                         textEl.style.fontSize = newFontSize + "px";
-                        preview.style.paddingTop = "calc(50% - " + (textEl.offsetHeight * 0.5 + 10) + "px)";
+                        preview.style.paddingTop = "calc(50% - " + ( textEl.offsetHeight * 0.5 + 10 ) + "px)";
                     }
                 }
             }
@@ -16806,6 +16813,42 @@ class AssetView {
             itemEl.addEventListener("dragstart", function( e ) {
                 e.preventDefault();
             }, false );
+
+            itemEl.addEventListener( "mouseenter", ( e ) => {
+
+                if( !that.useNativeTitle && isGridLayout )
+                {
+                    const desc = that.content.querySelector( `#floatingTitle_${ item.id }` );
+                    if( desc ) desc.style.display = "unset";
+                }
+
+                if( item.type !== "video" ) return;
+                e.preventDefault();
+                const video = itemEl.querySelector( "video" );
+                video.style.opacity = "1";
+                video.play();
+            } );
+
+            itemEl.addEventListener( "mouseleave", ( e ) => {
+
+                if( !that.useNativeTitle && isGridLayout )
+                {
+                    setTimeout( () => {
+                        const desc = that.content.querySelector( `#floatingTitle_${ item.id }` );
+                        if( desc ) desc.style.display = "none";
+                    }, 100 );
+                }
+
+                if( item.type !== "video" ) return;
+                e.preventDefault();
+                const video = itemEl.querySelector( "video" );
+                video.pause();
+                video.currentTime = 0;
+                if( item.preview )
+                {
+                    video.style.opacity = "0";
+                }
+            } );
 
             return itemEl;
         };
@@ -16951,7 +16994,7 @@ class AssetView {
                     item.type = "mesh"; break;
                 default:
                     item.type = ext;
-                    item.unknown_extension = true;
+                    item.unknownExtension = true;
                     break;
                 }
 

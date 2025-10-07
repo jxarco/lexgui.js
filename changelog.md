@@ -2,6 +2,21 @@
 
 ## dev
 
+Removed Fit-Tabs thumb CSS transition on `Tabs.add`.
+Added support for video elements in AssetView.
+Updated AssetView documentation.
+Added Popover documentation.
+Fixed `LX.codeSnippet` linesAdded/Removed options.
+
+CodeEditor:
+- Added support to `options.callback` to call when the editor is completely loaded.
+- Docs updated.
+
+Timeline:
+- Added `Timeline.setKeyframeSize` and `Timeline.setTrackHeight`.
+- Curve keyframes are visually clamped to the tracks' boundaries.
+- Fixed `Add Keyframe` option in context menu.
+
 ## 0.7.9 (master)
 
 Allow wheel/middle click in menubar buttons.
