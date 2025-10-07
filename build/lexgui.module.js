@@ -7537,21 +7537,25 @@ class Area {
         let [ area1, area2 ] = this.sections;
         this.splitExtended = true;
 
+        area1.root.classList.add( `maximize-${ this.type }` );
+        area2.root.classList.add( `minimize-${ this.type }` );
+        area2.root.classList.add( `fadeout-${ this.type }` );
+        area2.root.classList.remove( `fadein-${ this.type }` );
+
         if( this.type == "vertical" )
         {
             this.offset = area2.root.offsetHeight;
-            area2.root.classList.add("fadeout-vertical");
             this._moveSplit( -Infinity, true );
-
         }
         else
         {
             this.offset = area2.root.offsetWidth - 8; // Force some height here...
-            area2.root.classList.add("fadeout-horizontal");
             this._moveSplit( -Infinity, true, 8 );
         }
 
-        LX.doAsync( () => this.propagateEvent('onresize'), 150 );
+        LX.doAsync( () => {
+            this.propagateEvent( 'onresize' );
+        }, 100 );
     }
 
     /**
@@ -7561,23 +7565,24 @@ class Area {
     reduce() {
 
         if( !this.splitExtended )
-        return;
+        {
+            return;
+        }
 
         this.splitExtended = false;
-        let [area1, area2] = this.sections;
 
-        if( this.type == "vertical")
-        {
-            area2.root.classList.add("fadein-vertical");
-            this._moveSplit(this.offset);
-        }
-        else
-        {
-            area2.root.classList.add("fadein-horizontal");
-            this._moveSplit(this.offset);
-        }
+        let [ area1, area2 ] = this.sections;
 
-        LX.doAsync( () => this.propagateEvent('onresize'), 150 );
+        area1.root.classList.add( `minimize-${ this.type }` );
+        area2.root.classList.add( `maximize-${ this.type }` );
+        area2.root.classList.add( `fadein-${ this.type }` );
+        area2.root.classList.remove( `fadeout-${ this.type }` );
+
+        this._moveSplit( this.offset );
+
+        LX.doAsync( () => {
+            this.propagateEvent( 'onresize' );
+        }, 100 );
     }
 
     /**

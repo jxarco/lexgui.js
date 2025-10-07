@@ -5,6 +5,7 @@
 Removed Fit-Tabs thumb CSS transition on `Tabs.add`.
 Added Popover documentation.
 Fixed `LX.codeSnippet` linesAdded/Removed options.
+Fixed `Area.extend()` and `Area.reduce()` transitions.
 
 AssetView:
 - Added support for video elements.
@@ -20,6 +21,11 @@ Timeline:
 - Added `Timeline.setKeyframeSize` and `Timeline.setTrackHeight`.
 - Curve keyframes are visually clamped to the tracks' boundaries.
 - Fixed `Add Keyframe` option in context menu.
+
+VideoEditor:
+- Minor functions refactor.
+- Speed and loop buttons added to video controls.
+- Fixed resize controls area bug.
 
 ## 0.7.9 (master)
 

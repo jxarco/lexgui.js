@@ -26,7 +26,7 @@
     let area = await LX.init();
 
     // split main area
-    var [leftArea, rightArea] = area.split({ sizes: ["75%", "25%"] });
+    var [ leftArea, rightArea ] = area.split({ sizes: ["75%", "25%"], minimizable: true });
 
     // Get new content area to fill it
     const leftTabs = leftArea.addTabs();
