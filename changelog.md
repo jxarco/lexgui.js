@@ -3,10 +3,14 @@
 ## dev
 
 Removed Fit-Tabs thumb CSS transition on `Tabs.add`.
-Added support for video elements in AssetView.
-Updated AssetView documentation.
 Added Popover documentation.
 Fixed `LX.codeSnippet` linesAdded/Removed options.
+
+AssetView:
+- Added support for video elements.
+- Fixed support for images using url with params.
+- Added more supported image extensions.
+- Updated documentation.
 
 CodeEditor:
 - Added support to `options.callback` to call when the editor is completely loaded.

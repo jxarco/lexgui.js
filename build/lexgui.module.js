@@ -16685,15 +16685,15 @@ class AssetView {
 
             if( !that.skipPreview )
             {
-                if( item.type === "video" )
+                if( item.type === 'video' )
                 {
-                    const itemVideo = LX.makeElement( "video", "absolute left-0 top-0 w-full border-none pointer-events-none", "", itemEl );
-                    itemVideo.setAttribute( "disablePictureInPicture", false );
-                    itemVideo.setAttribute( "disableRemotePlayback", false );
-                    itemVideo.setAttribute( "loop", true );
-                    itemVideo.setAttribute( "async", true );
-                    itemVideo.style.transition = "opacity 0.2s ease-out";
-                    itemVideo.style.opacity = item.preview ? "0" : "1";
+                    const itemVideo = LX.makeElement( 'video', 'absolute left-0 top-0 w-full border-none pointer-events-none', '', itemEl );
+                    itemVideo.setAttribute( 'disablePictureInPicture', false );
+                    itemVideo.setAttribute( 'disableRemotePlayback', false );
+                    itemVideo.setAttribute( 'loop', true );
+                    itemVideo.setAttribute( 'async', true );
+                    itemVideo.style.transition = 'opacity 0.2s ease-out';
+                    itemVideo.style.opacity = item.preview ? '0' : '1';
                     itemVideo.src = item.src;
                     itemVideo.volume = item.videoVolume ?? 0.4;
                 }
@@ -16701,7 +16701,13 @@ class AssetView {
                 let preview = null;
 
                 const previewSrc    = item.preview ?? item.src;
-                const hasImage      = previewSrc && (['png', 'jpg'].indexOf( LX.getExtension( previewSrc ) ) > -1 || previewSrc.includes("data:image/") ); // Support b64 image as src
+                const hasImage = previewSrc && (
+                    (() => {
+                        const ext = LX.getExtension( previewSrc.split( '?' )[ 0 ].split( '#' )[ 0 ]); // get final source without url parameters/anchors
+                        return ext ? ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'avif'].includes( ext.toLowerCase() ) : false;
+                    })()
+                    || previewSrc.startsWith( 'data:image/' )
+                );
 
                 if( hasImage || isFolder || !isGridLayout )
                 {
@@ -16716,7 +16722,7 @@ class AssetView {
                 else
                 {
                     preview = document.createElement( 'svg' );
-                    preview.className = "asset-file-preview";
+                    preview.className = 'asset-file-preview';
                     itemEl.appendChild( preview );
 
                     let textEl = document.createElement( 'text' );
@@ -16731,8 +16737,8 @@ class AssetView {
                     if( newEmSize < 1 )
                     {
                         var newFontSize = newEmSize * textBaseSize;
-                        textEl.style.fontSize = newFontSize + "px";
-                        preview.style.paddingTop = "calc(50% - " + ( textEl.offsetHeight * 0.5 + 10 ) + "px)";
+                        textEl.style.fontSize = newFontSize + 'px';
+                        preview.style.paddingTop = `calc(50% - ${ ( textEl.offsetHeight * 0.5 + 10 ) }px)`;
                     }
                 }
             }
@@ -16746,7 +16752,7 @@ class AssetView {
                 if( item.lastModifiedDate ) itemInfoHtml += ` | ${ item.lastModifiedDate }`;
             }
 
-            LX.makeContainer( [ "auto", "auto" ], "lexassetinfo", itemInfoHtml, itemEl );
+            LX.makeContainer( [ 'auto', 'auto' ], 'lexassetinfo', itemInfoHtml, itemEl );
 
             itemEl.addEventListener('click', function( e ) {
                 e.stopImmediatePropagation();
@@ -16758,10 +16764,10 @@ class AssetView {
                 {
                     if( !e.shiftKey )
                     {
-                        that.content.querySelectorAll('.lexassetitem').forEach( i => i.classList.remove('selected') );
+                        that.content.querySelectorAll( '.lexassetitem').forEach( i => i.classList.remove( 'selected' ) );
                     }
 
-                    this.classList.add('selected');
+                    this.classList.add( 'selected' );
                     that.selectedItem = item;
 
                     if( !that.skipPreview )
