@@ -30,7 +30,7 @@
     // Split main area
     let [leftArea, rightArea] = area.split({ sizes: ["75%", "25%"], minimizable: true });
     let [topArea, bottomArea] = leftArea.split({ sizes: ["80%", null], minimizable: false, resize: false, type: "vertical" });
-    let [controlsArea, buttonsArea] = bottomArea.split({ sizes: ["50%", null], minimizable: false, resize: false, type: "vertical" });
+    let [controlsArea, buttonsArea] = bottomArea.split({ sizes: ["50%", null], minimizable: false, type: "vertical" });
     area.extend();
 
     /* Create video area with a menubar */
@@ -73,7 +73,7 @@
         icon: "Info",
         name: "Properties",
         callback: (v, e) => {
-            if (area.split_extended) {
+            if (area.splitExtended) {
                 area.reduce();
             }
             else {
@@ -93,8 +93,7 @@
     /* Create right panel */
     let panel = new LX.Panel({ id: "Properties" });
     panel = rightArea.addPanel({ id: "Properties" });
-    createBlendShapesInspector({ "Name 1": 0, "Name 2": 0, "Name 3": 0.5, "Name 4": 0, "Name 5": 1, },
-        { inspector: panel });
+    createBlendShapesInspector({ "Name 1": 0, "Name 2": 0, "Name 3": 0.5, "Name 4": 0, "Name 5": 1, }, { inspector: panel });
 
     /* Functions */
     function createBlendShapesInspector(bsNames, options = {}) {

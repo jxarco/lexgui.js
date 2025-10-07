@@ -480,24 +480,25 @@ class VideoEditor {
                 this.speedDialog.close();
             }
             this.speedDialog = null;
-            const btn = this.controlsPanelLeft.addButton('', '', (v) => {
+            const btn = this.controlsPanelLeft.addButton('', '', (v, e) => {
                 
-                if(this.speedDialog) {
-                    this.speedDialog.close();
-                    this.speedDialog = null;
-                    return;
-                }
-
-                this.speedDialog = new LX.Dialog("", p => {
-                    
-                    p.addNumber("Speed", this.speed, (v) => {
-                        this.speed = v;
-                        this.video.playbackRate = v;
-                        if( this.onChangeSpeed ) {
-                            this.onChangeSpeed( v );
-                        }
-                    }, {min: 0, max: 2.5, step: 0.01, nameWidth: "50px"})
-                }, {  position: [ `${btn.root.offsetLeft - 20}`, `${this.controlsPanelLeft.root.offsetTop - 80}px`], size: ["50px", "auto"], onBeforeClose: () => this.speedDialog = null })
+                // if(this.speedDialog) {
+                //     this.speedDialog.close();
+                //     this.speedDialog = null;
+                //     return;
+                // }
+                
+                const panel = new LX.Panel();
+                panel.addNumber("Speed", this.speed, (v) => {
+                    this.speed = v;
+                    this.video.playbackRate = v;
+                    if( this.onChangeSpeed ) {
+                        this.onChangeSpeed( v );
+                    }
+                }, {min: 0, max: 2.5, step: 0.01, nameWidth: "50px"})
+                
+                new LX.Popover( e.target, [ panel ], { align: "start", side: "top", sideOffset: 12 } );
+              
             }, { width: '40px', title: 'speed', icon: "Timer@solid", className: "justify-center" } );
             
             this.controlsPanelLeft.addButton('', 'Loop', (v) => {
@@ -566,15 +567,19 @@ class VideoEditor {
         window.addEventListener( "keyup", this.onKeyUp);
 
         videoArea.onresize = (v) => {
-            bottomArea.setSize([v.width, 40]);
+            if( bottomArea.parentArea ) {
+                bottomArea.setSize([bottomArea.parentArea.root.clientWidth, 40]);
+            }
 
             const ratio = this.video.clientHeight / this.video.videoHeight;
             this.cropArea.style.height = this.video.clientHeight + "px";
             this.cropArea.style.width = this.video.videoWidth * ratio + "px";
         }
 
+
         timeBarArea.onresize = (v) => {
-            let availableWidth = this.controlsArea.root.clientWidth - controlsLeft.root.clientWidth - controlsRight.root.clientWidth;
+            let availableWidth = this.controlsArea.root.clientWidth - controlsLeft.root.clientWidth - controlsRight.root.clientWidth - 20;
+            // let availableWidth = this.controlsArea.root.clientWidth - controlsLeft.root.clientWidth;
             this.timebar.resize([availableWidth, v.height]);
         }
 
