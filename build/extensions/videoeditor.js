@@ -579,7 +579,6 @@ class VideoEditor {
 
         timeBarArea.onresize = (v) => {
             let availableWidth = this.controlsArea.root.clientWidth - controlsLeft.root.clientWidth - controlsRight.root.clientWidth - 20;
-            // let availableWidth = this.controlsArea.root.clientWidth - controlsLeft.root.clientWidth;
             this.timebar.resize([availableWidth, v.height]);
         }
 
