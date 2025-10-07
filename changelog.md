@@ -2,6 +2,8 @@
 
 ## dev
 
+## 0.7.10 (master)
+
 Removed Fit-Tabs thumb CSS transition on `Tabs.add`.
 Added Popover documentation.
 Fixed `LX.codeSnippet` linesAdded/Removed options.
@@ -27,7 +29,7 @@ VideoEditor:
 - Speed and loop buttons added to video controls.
 - Fixed resize controls area bug.
 
-## 0.7.9 (master)
+## 0.7.9
 
 Allow wheel/middle click in menubar buttons.
 Pass RadioGroup name as argument to radio option callback.
