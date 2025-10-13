@@ -7,8 +7,8 @@ import { LX } from './core.js';
 
 class Menubar {
 
-    constructor( items, options = {} ) {
-
+    constructor( items, options = {} )
+    {
         this.root = document.createElement( "div" );
         this.root.className = "lexmenubar";
 
@@ -25,8 +25,8 @@ class Menubar {
         this.createEntries();
     }
 
-    _resetMenubar( focus ) {
-
+    _resetMenubar( focus )
+    {
         this.root.querySelectorAll(".lexmenuentry").forEach( e => {
             e.classList.remove( 'selected' );
             delete e.dataset[ "built" ];
@@ -46,8 +46,8 @@ class Menubar {
      * @method createEntries
      */
 
-    createEntries() {
-
+    createEntries()
+    {
         for( let item of this.items )
         {
             let key = item.name;
@@ -125,23 +125,21 @@ class Menubar {
     */
     getSubitem( item, tokens )
     {
-        let path = tokens[ 0 ];
-
-        for( let i = 0; i < item.length; i++ )
+        for( const s of item )
         {
-            if ( item[ i ]?.name != path )
+            if ( s?.name != tokens[ 0 ] )
             {
                 continue;
             }
 
             if( tokens.length == 1 )
             {
-                return item[ i ];
+                return s;
             }
-            else if ( item[ i ].submenu )
+            else if ( s.submenu )
             {
                 tokens.shift();
-                return this.getSubitem( item[ i ].submenu, tokens );
+                return this.getSubitem( s.submenu, tokens );
             }
         }
     }
@@ -221,8 +219,8 @@ class Menubar {
      * @param {Object} options
      */
 
-    setButtonImage( name, src, callback, options = {} ) {
-
+    setButtonImage( name, src, callback, options = {} )
+    {
         if( !name )
         {
             throw( "Set Button Name!" );
@@ -231,14 +229,14 @@ class Menubar {
         let button = this.buttons[ name ];
         if( button )
         {
-            button.querySelector('img').src = src;
+            button.querySelector( 'img' ).src = src;
             return;
         }
 
         // Otherwise, create it
-        button = document.createElement('div');
+        button = document.createElement( 'div' );
         const disabled = options.disabled ?? false;
-        button.className = "lexmenubutton main" + (disabled ? " disabled" : "");
+        button.className = "lexmenubutton main" + ( disabled ? " disabled" : "" );
         button.title = name;
         button.innerHTML = "<a><image src='" + src + "' class='lexicon' style='height:32px;'></a>";
 
@@ -262,11 +260,11 @@ class Menubar {
 
         const _b = button.querySelector('a');
 
-        _b.addEventListener( "mousedown", (e) => {
+        _b.addEventListener( "mousedown", e => {
             e.preventDefault();
         });
 
-        _b.addEventListener( "mouseup", (e) => {
+        _b.addEventListener( "mouseup", e => {
             if( callback && !disabled )
             {
                 callback.call( this, _b, e );
@@ -283,8 +281,8 @@ class Menubar {
      * float: center (Default), right
      */
 
-    addButtons( buttons, options = {} ) {
-
+    addButtons( buttons, options = {} )
+    {
         if( !buttons )
         {
             throw( "No buttons to add!" );
@@ -311,9 +309,8 @@ class Menubar {
             }
         }
 
-        for( let i = 0; i < buttons.length; ++i )
+        for( const data of buttons )
         {
-            const data = buttons[ i ];
             const title = data.title;
             const button = new LX.Button( title, data.label, data.callback, {
                 title,
