@@ -113,7 +113,8 @@ class Menubar {
      * @param {String} name
      */
 
-    getButton( name ) {
+    getButton( name )
+    {
         return this.buttons[ name ];
     }
 
@@ -122,47 +123,38 @@ class Menubar {
      * @param {Object} item: parent item
      * @param {Array} tokens: split path strings
     */
-    getSubitem( item, tokens ) {
-
-        let subitem = null;
+    getSubitem( item, tokens )
+    {
         let path = tokens[ 0 ];
-    
+
         for( let i = 0; i < item.length; i++ )
         {
-            if ( !item[ i ] )
+            if ( item[ i ]?.name != path )
             {
                 continue;
             }
-    
-            if( item[ i ].name == path )
+
+            if( tokens.length == 1 )
             {
-                if( tokens.length == 1 )
-                {
-                    subitem = item[ i ];
-                    return subitem;
-                }
-                else if ( item[ i ].submenu )
-                {
-                    tokens.splice( 0, 1 );
-                    return this.getSubitem( item[ i ].submenu, tokens );
-                }
-    
+                return item[ i ];
+            }
+            else if ( item[ i ].submenu )
+            {
+                tokens.shift();
+                return this.getSubitem( item[ i ].submenu, tokens );
             }
         }
-    
-        return null;
     }
 
     /**
      * @method getItem
      * @param {String} path
     */
-    getItem( path ) {
-
-        // process path
-        const tokens = path.split("/");
-
-        return this.getSubitem(this.items, tokens)
+    getItem( path )
+    {
+        // Process path
+        const tokens = path.split( '/' );
+        return this.getSubitem( this.items, tokens );
     }
 
     /**
@@ -173,8 +165,8 @@ class Menubar {
      * @param {Object} options
      */
 
-    setButtonIcon( name, icon, callback, options = {} ) {
-
+    setButtonIcon( name, icon, callback, options = {} )
+    {
         if( !name )
         {
             throw( "Set Button Name!" );

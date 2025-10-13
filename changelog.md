@@ -2,6 +2,8 @@
 
 ## dev
 
+Fixed `Menubar.getSubItem`.
+
 ## 0.7.10 (master)
 
 Removed Fit-Tabs thumb CSS transition on `Tabs.add`.
