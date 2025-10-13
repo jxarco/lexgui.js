@@ -126,24 +126,31 @@ class Menubar {
 
         let subitem = null;
         let path = tokens[ 0 ];
-
+    
         for( let i = 0; i < item.length; i++ )
         {
-            if( item[ i ][ path ] )
+            if ( !item[ i ] )
+            {
+                continue;
+            }
+    
+            if( item[ i ].name == path )
             {
                 if( tokens.length == 1 )
                 {
                     subitem = item[ i ];
                     return subitem;
                 }
-                else
+                else if ( item[ i ].submenu )
                 {
                     tokens.splice( 0, 1 );
-                    return this.getSubitem( item[ i ][ path ], tokens );
+                    return this.getSubitem( item[ i ].submenu, tokens );
                 }
-
+    
             }
         }
+    
+        return null;
     }
 
     /**
