@@ -1799,7 +1799,8 @@ class KeyFramesTimeline extends Timeline {
         if(e.shiftKey) {
             // Manual multiple selection
             if(!discard && track) {
-                const keyFrameIdx = this.getCurrentKeyFrame( track, this.xToTime( localX ), this.secondsPerPixel * 5 );   
+                const thresholdPixels = track.curves? (this.keyframeSize*0.5) : (Math.SQRT2 * this.keyframeSize);
+                const keyFrameIdx = this.getCurrentKeyFrame( track, this.xToTime( localX ), this.secondsPerPixel * thresholdPixels );   
                 if ( keyFrameIdx > -1 ){
                     track.selected[keyFrameIdx] ?
                         this.deselectKeyFrame(track.trackIdx, keyFrameIdx) :
@@ -1833,7 +1834,8 @@ class KeyFramesTimeline extends Timeline {
                 this.deselectAllKeyFrames();         
             }
             if (track){
-                const keyFrameIndex = this.getCurrentKeyFrame( track, this.xToTime( localX ), this.secondsPerPixel * 5 );
+                const thresholdPixels = track.curves? (this.keyframeSize*0.5) : (Math.SQRT2 * this.keyframeSize);
+                const keyFrameIndex = this.getCurrentKeyFrame( track, this.xToTime( localX ), this.secondsPerPixel * thresholdPixels );
                 if( keyFrameIndex > -1 ) {
                     this.processSelectionKeyFrame( track.trackIdx, keyFrameIndex, false ); // Settings this as multiple so time is not being set
                 }  
@@ -1996,8 +1998,8 @@ class KeyFramesTimeline extends Timeline {
         else if(track) {
 
             this.unHoverAll();
-            const thresholdPixels = track.curves? this.keyframeSize : (Math.SQRT2 * this.keyframeSize);
-            let keyFrameIndex = this.getCurrentKeyFrame( track, this.xToTime( localX ), this.secondsPerPixel * thresholdPixels * 0.5 );
+            const thresholdPixels = track.curves? (this.keyframeSize*0.5) : (Math.SQRT2 * this.keyframeSize);
+            let keyFrameIndex = this.getCurrentKeyFrame( track, this.xToTime( localX ), this.secondsPerPixel * thresholdPixels );
             if(keyFrameIndex > -1 ) {
                 if(track && track.locked)
                     return;
