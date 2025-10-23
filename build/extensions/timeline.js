@@ -382,6 +382,9 @@ class Timeline {
         }
 
         this.resizeCanvas();
+
+        this.setScroll( this.currentScroll ); // avoid scroll bugs
+
     }
 
     setTrackHeight( trackHeight ){
@@ -1675,7 +1678,6 @@ class KeyFramesTimeline extends Timeline {
                 }
             }
         }
-
         
         this.updateLeftPanel();
 
