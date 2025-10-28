@@ -4,6 +4,14 @@
 
 Fixed `Menubar.getSubItem`.
 
+Timeline:
+- Adjust scroll if left panel size changes.
+- Keyframe selection now uses the correct keyframeSize values.
+
+NodeTree Component:
+- Item actions are now standard buttons instead of icons.
+- Fix select when filter is present.
+
 ## 0.7.10 (master)
 
 Removed Fit-Tabs thumb CSS transition on `Tabs.add`.
