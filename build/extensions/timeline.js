@@ -1778,7 +1778,7 @@ class KeyFramesTimeline extends Timeline {
         if(e.shiftKey) {
             // Manual multiple selection
             if(!discard && track) {
-                const thresholdPixels = track.curves? (this.keyframeSize*0.5) : (Math.SQRT2 * this.keyframeSize);
+                const thresholdPixels = this.keyframeSize * 0.5; // radius of circle (curves) or rotated square (keyframes)
                 const keyFrameIdx = this.getCurrentKeyFrame( track, this.xToTime( localX ), this.secondsPerPixel * thresholdPixels );   
                 if ( keyFrameIdx > -1 ){
                     track.selected[keyFrameIdx] ?
@@ -1813,7 +1813,7 @@ class KeyFramesTimeline extends Timeline {
                 this.deselectAllKeyFrames();         
             }
             if (track){
-                const thresholdPixels = track.curves? (this.keyframeSize*0.5) : (Math.SQRT2 * this.keyframeSize);
+                const thresholdPixels = this.keyframeSize * 0.5; // radius of circle (curves) or rotated square (keyframes)
                 const keyFrameIndex = this.getCurrentKeyFrame( track, this.xToTime( localX ), this.secondsPerPixel * thresholdPixels );
                 if( keyFrameIndex > -1 ) {
                     this.processSelectionKeyFrame( track.trackIdx, keyFrameIndex, false ); // Settings this as multiple so time is not being set
@@ -1977,7 +1977,7 @@ class KeyFramesTimeline extends Timeline {
         else if(track) {
 
             this.unHoverAll();
-            const thresholdPixels = track.curves? (this.keyframeSize*0.5) : (Math.SQRT2 * this.keyframeSize);
+            const thresholdPixels = this.keyframeSize * 0.5; // radius of circle (curves) or rotated square (keyframes)
             let keyFrameIndex = this.getCurrentKeyFrame( track, this.xToTime( localX ), this.secondsPerPixel * thresholdPixels );
             if(keyFrameIndex > -1 ) {
                 if(track && track.locked)
