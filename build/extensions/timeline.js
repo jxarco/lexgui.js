@@ -6,6 +6,9 @@ if(!LX) {
 
 LX.extensions.push( 'Timeline' );
 
+LX.registerIcon("TimelineLock", '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" d="M7 11V7a4 4 0 0 1 9 0v4 M5,11h13 a2 2 0 0 1 2 2 v7 a2 2 0 0 1 -2 2 h-13 a2 2 0 0 1 -2 -2 v-7 a2 2 0 0 1 2 -2 M12 16 v2"/></svg>' );
+LX.registerIcon("TimelineLockOpen", '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" d="M14 11V7a4 4 0 0 1 9 0v2 M3,11h13 a2 2 0 0 1 2 2 v7 a2 2 0 0 1 -2 2 h-13 a2 2 0 0 1 -2 -2 v-7 a2 2 0 0 1 2 -2 M8 17 h3"/></svg>' );
+
 /**
  * @class Timeline
  * @description Agnostic timeline, do not impose any timeline content. Renders to a canvas
@@ -1335,25 +1338,12 @@ class Timeline {
             const track = this.selectedItems[ i ];
             treeTracks.push({'trackData': track, 'id': track.id, 'skipVisibility': this.skipVisibility, visible: track.active, 'children':[], actions : this.skipLock ? null : [{
                 'name':'Lock edition',
-                'icon': (track.locked ? 'Lock' : 'LockOpen'),
-                'swap': (track.locked ? 'LockOpen' : 'Lock'),
-                'callback': (node, el) => {
-                    let value = el.classList.contains('Lock');
-                    
-                    if(value) {
-                        el.title = 'Lock edition';
-                        el.classList.remove('Lock');
-                        el.classList.add('LockOpen');    
-                    }
-                    else {
-                        el.title = 'Unlock edition';
-                        el.classList.remove('LockOpen');
-                        el.classList.add('Lock');                                 
-                    }
-
-                    node.trackData.locked = !value;
+                'icon': (track.locked ? 'TimelineLock' : 'TimelineLockOpen'),
+                'swap': (track.locked ? 'TimelineLockOpen' : 'TimelineLock'),
+                'callback': (node, swapValue, event) => {
+                    node.trackData.locked = !node.trackData.locked;
                     if(this.onLockTrack){
-                        this.onLockTrack(el, node.trackData, node)
+                        this.onLockTrack(node.trackData, node);
                     }
                 }
             }]});
@@ -1469,25 +1459,12 @@ class KeyFramesTimeline extends Timeline {
                 const track = itemTracks[j];
                 nodes.push({'trackData': track, 'id': track.id, 'skipVisibility': this.skipVisibility, visible: track.active, 'children':[], actions : this.skipLock ? null : [{
                     'name':'Lock edition',
-                    'icon': (track.locked ? 'Lock' : 'LockOpen'),
-                    'swap': (track.locked ? 'LockOpen' : 'Lock'),
-                    'callback': (node, el) => {
-                        let value = el.classList.contains('Lock');
-                     
-                        if(value) {
-                            el.title = 'Lock edition';
-                            el.classList.remove('Lock');
-                            el.classList.add('LockOpen');    
-                        }
-                        else {
-                            el.title = 'Unlock edition';
-                            el.classList.remove('LockOpen');
-                            el.classList.add('Lock');                                 
-                        }
-
-                        node.trackData.locked = !value;
+                    'icon': (track.locked ? 'TimelineLock' : 'TimelineLockOpen'),
+                    'swap': (track.locked ? 'TimelineLockOpen' : 'TimelineLock'),
+                    'callback': (node, swapValue, event) => {
+                        node.trackData.locked = !node.trackData.locked;
                         if(this.onLockTrack){
-                            this.onLockTrack(el, node.trackData, node)
+                            this.onLockTrack(node.trackData, node);
                         }
                     }
                 }]});
@@ -2170,8 +2147,8 @@ class KeyFramesTimeline extends Timeline {
         const keyframes = track.times;         
         const startTime = this.visualTimeRange[0];
         const endTime = this.visualTimeRange[1] + 0.0000001;
-        const defaultPointSize =  Math.SQRT2 * this.keyframeSize * 0.5; // pythagoras with equal sides h2 = c2 + c2 = 2 * c2
-        const hoverPointSize = Math.SQRT2 * this.keyframeSizeHovered * 0.5;
+        const defaultPointSize = this.keyframeSize / Math.SQRT2; // pythagoras with equal sides h2 = c2 + c2 = 2 * c2
+        const hoverPointSize = this.keyframeSizeHovered / Math.SQRT2;
 
         for(let j = 0; j < keyframes.length; ++j)
         {

@@ -928,16 +928,21 @@ class NodeTree {
             for( let i = 0; i < node.actions.length; ++i )
             {
                 const action = node.actions[ i ];
-                const actionIcon = LX.makeIcon( action.icon, { title: action.name } );
-                actionIcon.addEventListener("click", function( e ) {
-                    if( action.callback )
-                    {
-                        action.callback( node, actionIcon );
-                        e.stopPropagation();
+                const actionBtn = new LX.Button( null, "", ( swapValue, event ) => {
+                    event.stopPropagation();
+                    if ( action.callback ){
+                        action.callback( node, swapValue, event );
                     }
-                });
-
-                inputContainer.appendChild( actionIcon );
+                }, { icon: action.icon, swap: action.swap, title: action.name, hideName:true, className: "p-0 m-0", buttonClass: "p-0 m-0 bg-none" } );
+                actionBtn.root.style.minWidth = "fit-content";
+                actionBtn.root.style.margin = "0"; // adding classes does not work
+                actionBtn.root.style.padding = "0"; // adding classes does not work
+                const _btn = actionBtn.root.querySelector("button");
+                _btn.style.minWidth = "fit-content";
+                _btn.style.margin = "0"; // adding classes does not work
+                _btn.style.padding = "0"; // adding classes does not work
+    
+                inputContainer.appendChild( actionBtn.root );
             }
         }
 
@@ -1016,7 +1021,11 @@ class NodeTree {
     }
 
     select( id ) {
-
+        const nodeFilter = this.domEl.querySelector( ".lexnodetreefilter" );
+        if ( nodeFilter ){
+            nodeFilter.value = "";
+        }
+    
         this.refresh( null, id );
 
         this.domEl.querySelectorAll( ".selected" ).forEach( i => i.classList.remove( "selected" ) );
