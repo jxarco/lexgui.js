@@ -102,6 +102,10 @@
         ["itemsRemoved", "Array of Numbers"],
     ] );
 
+    MAKE_CLASS_METHOD( "onTrackTreeEvent", `Triggered after an event of the tree in the left panel, which displays the visible tracks`, [
+        ["event", "LX.TreeEvent"]
+    ] );
+
     MAKE_CLASS_METHOD( "onSelectTrack", `Triggered after calling ${INLINE_CODE("selectTrack")}.`, [
         ["track", "Object"]
     ] );

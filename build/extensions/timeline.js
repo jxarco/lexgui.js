@@ -359,6 +359,10 @@ class Timeline {
 
                     break;
             }
+
+            if ( this.onTrackTreeEvent ){
+                this.onTrackTreeEvent(e);
+            }
         }});
         // setting a name in the addTree function adds an undesired node
         this.trackTreesComponent.name = "tracksTrees";
