@@ -1037,6 +1037,12 @@ class NodeTree {
 
         this.domEl.querySelectorAll( ".selected" ).forEach( i => i.classList.remove( "selected" ) );
 
+        // Unselect
+        if ( !id ){
+            this.selected.length = 0;
+            return;
+        }
+
         // Element should exist, since tree was refreshed to show it
         const el = this.domEl.querySelector( "#" + id );
         console.assert(  el, "NodeTree: Can't select node " + id );
