@@ -307,8 +307,8 @@ panel.@[mtd]attach@(kfTimeline.root);` );
 
     let keyControls = baseControls.slice();
     keyControls[1].push(
-        ["ctrlKey + horizontal drag", "move selected keyframes (if any)"],
-        ["altKey + vertical drag", `change value of selected keyframes. Only applicable to tracks with dim = 1 and their ${INLINE_CODE("curves")} attribute set to ${INLINE_CODE("true")}`]
+        ["ctrlKey + left click + horizontal drag", "move selected keyframes (if any)"],
+        ["altKey + left click + vertical drag", `change value of selected keyframes. Only applicable to tracks with dim = 1 and their ${INLINE_CODE("curves")} attribute set to ${INLINE_CODE("true")}`]
     );
     MAKE_CODE_BULLET_LIST( keyControls );
 
