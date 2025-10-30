@@ -650,10 +650,11 @@ class TreeEvent {
     static NODE_VISIBILITY      = 7;
     static NODE_CARETCHANGED    = 8;
 
-    constructor( type, node, value ) {
+    constructor( type, node, value, event ) {
         this.type = type || TreeEvent.NONE;
         this.node = node;
         this.value = value;
+        this.event = event;
         this.multiple = false; // Multiple selection
         this.panel = null;
     }

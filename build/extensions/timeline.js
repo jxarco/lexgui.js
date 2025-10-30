@@ -344,26 +344,20 @@ class Timeline {
                         this.setTrackState( e.node.trackData.trackIdx, e.value );
                     } 
                     break;
-                case LX.TreeEvent.NODE_CARETCHANGED:
-                   if ( !this.trackTreesComponent ){ return;}
-                    /* hack
-                        On NODE_CARETCHANGED, the html are regenerated. TrackHeight need to be forced on the htmls again.
-                        This event is called BEFORE the regeneration, so a setTimeout of 1ms is called.
-                        To avoid a flicker, hide the element while it is changing and show it again afterwards
-                    */
-                    this.trackTreesComponent.root.classList.add("hidden");
-                    setTimeout( ()=>{
-                        this.setTrackHeight(this.trackHeight);
-                        this.trackTreesComponent.root.classList.remove("hidden");
-                    }, 1);
-
-                    break;
             }
 
             if ( this.onTrackTreeEvent ){
                 this.onTrackTreeEvent(e);
             }
         }});
+
+        const that = this;
+        this.trackTreesComponent.innerTree._refresh = this.trackTreesComponent.innerTree.refresh;
+        this.trackTreesComponent.innerTree.refresh = function( newData, selectedId ){
+            this._refresh( newData, selectedId );
+            that.setTrackHeight( that.trackHeight );
+        }
+
         // setting a name in the addTree function adds an undesired node
         this.trackTreesComponent.name = "tracksTrees";
         p.components[this.trackTreesComponent.name] = this.trackTreesComponent;

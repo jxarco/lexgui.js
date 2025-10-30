@@ -8524,7 +8524,7 @@ class NodeTree {
                 node.closed = false;
                 if( that.onevent )
                 {
-                    const event = new LX.TreeEvent( LX.TreeEvent.NODE_CARETCHANGED, node, node.closed );
+                    const event = new LX.TreeEvent( LX.TreeEvent.NODE_CARETCHANGED, node, node.closed, e );
                     that.onevent( event );
                 }
                 that.frefresh( node.id );
@@ -8532,14 +8532,14 @@ class NodeTree {
 
             if( that.onevent )
             {
-                const event = new LX.TreeEvent(LX.TreeEvent.NODE_SELECTED, e.shiftKey ? this.selected : node );
+                const event = new LX.TreeEvent( LX.TreeEvent.NODE_SELECTED, node, this.selected, e );
                 event.multiple = e.shiftKey;
                 that.onevent( event );
             }
         });
-
-        item.addEventListener("dblclick", function() {
-
+    
+        item.addEventListener("dblclick", function(e) {
+    
             if( that.options.rename ?? true )
             {
                 // Trigger rename
@@ -8549,7 +8549,7 @@ class NodeTree {
 
             if( that.onevent )
             {
-                const event = new LX.TreeEvent( LX.TreeEvent.NODE_DBLCLICKED, node );
+                const event = new LX.TreeEvent( LX.TreeEvent.NODE_DBLCLICKED, node, null, e );
                 that.onevent( event );
             }
         });
@@ -8563,10 +8563,10 @@ class NodeTree {
                 return;
             }
 
-            const event = new LX.TreeEvent(LX.TreeEvent.NODE_CONTEXTMENU, this.selected.length > 1 ? this.selected : node, e);
+            const event = new LX.TreeEvent( LX.TreeEvent.NODE_CONTEXTMENU, node, this.selected, e );
             event.multiple = this.selected.length > 1;
 
-            LX.addContextMenu( event.multiple ? "Selected Nodes" : event.node.id, event.value, m => {
+            LX.addContextMenu( event.multiple ? "Selected Nodes" : event.node.id, event.event, m => {
                 event.panel = m;
             });
 
@@ -8615,7 +8615,7 @@ class NodeTree {
 
                     if( ok && that.onevent )
                     {
-                        const event = new LX.TreeEvent( LX.TreeEvent.NODE_DELETED, node, e );
+                        const event = new LX.TreeEvent( LX.TreeEvent.NODE_DELETED, node, [node], null );
                         that.onevent( event );
                     }
 
@@ -8648,7 +8648,7 @@ class NodeTree {
                 // Send event now so we have the info in selected array..
                 if( nodesDeleted.length && that.onevent )
                 {
-                    const event = new LX.TreeEvent( LX.TreeEvent.NODE_DELETED, nodesDeleted.length > 1 ? nodesDeleted : node, e );
+                    const event = new LX.TreeEvent( LX.TreeEvent.NODE_DELETED, node, nodesDeleted, e );
                     event.multiple = nodesDeleted.length > 1;
                     that.onevent( event );
                 }
@@ -8690,7 +8690,7 @@ class NodeTree {
 
                 if( that.onevent )
                 {
-                    const event = new LX.TreeEvent(LX.TreeEvent.NODE_RENAMED, node, this.value);
+                    const event = new LX.TreeEvent(LX.TreeEvent.NODE_RENAMED, node, this.value, e);
                     that.onevent( event );
                 }
 
@@ -8764,7 +8764,7 @@ class NodeTree {
                 // Trigger node dragger event
                 if( that.onevent )
                 {
-                    const event = new LX.TreeEvent(LX.TreeEvent.NODE_DRAGGED, dragged, target);
+                    const event = new LX.TreeEvent(LX.TreeEvent.NODE_DRAGGED, dragged, target, e);
                     that.onevent( event );
                 }
 
@@ -8805,7 +8805,7 @@ class NodeTree {
 
                 if( that.onevent )
                 {
-                    const event = new LX.TreeEvent(LX.TreeEvent.NODE_CARETCHANGED, node, node.closed);
+                    const event = new LX.TreeEvent(LX.TreeEvent.NODE_CARETCHANGED, node, node.closed, e);
                     that.onevent( event );
                 }
                 that.frefresh( node.id );
@@ -8848,7 +8848,7 @@ class NodeTree {
                 // Trigger visibility event
                 if( that.onevent )
                 {
-                    const event = new LX.TreeEvent( LX.TreeEvent.NODE_VISIBILITY, node, node.visible );
+                    const event = new LX.TreeEvent( LX.TreeEvent.NODE_VISIBILITY, node, node.visible, event );
                     that.onevent( event );
                 }
             }, { icon: node.visible ? "Eye" : "EyeOff", swap: node.visible ? "EyeOff" : "Eye", title: "Toggle visible", className: "p-0 m-0", buttonClass: "bg-none" } );
