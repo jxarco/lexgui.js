@@ -8842,13 +8842,13 @@ class NodeTree {
 
         if( !node.skipVisibility ?? false )
         {
-            const visibilityBtn = new LX.Button( null, "", ( swapValue, event ) => {
-                event.stopPropagation();
+            const visibilityBtn = new LX.Button( null, "", ( swapValue, e ) => {
+                e.stopPropagation();
                 node.visible = node.visible === undefined ? false : !node.visible;
                 // Trigger visibility event
                 if( that.onevent )
                 {
-                    const event = new LX.TreeEvent( LX.TreeEvent.NODE_VISIBILITY, node, node.visible, event );
+                    const event = new LX.TreeEvent( LX.TreeEvent.NODE_VISIBILITY, node, node.visible, e );
                     that.onevent( event );
                 }
             }, { icon: node.visible ? "Eye" : "EyeOff", swap: node.visible ? "EyeOff" : "Eye", title: "Toggle visible", className: "p-0 m-0", buttonClass: "bg-none" } );
