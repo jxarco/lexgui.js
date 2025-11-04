@@ -341,7 +341,7 @@ class Timeline {
                     break;
                 case LX.TreeEvent.NODE_VISIBILITY:   
                     if (e.node.trackData){
-                        this.setTrackState( e.node.trackData.trackIdx, e.value );
+                        this.setTrackState( e.node.trackData.trackIdx, e.value, false, false ); // do not update left panel
                     } 
                     break;
             }
@@ -1210,15 +1210,46 @@ class Timeline {
     * @method setTrackState
     * @param {int} trackIdx 
     * @param {boolean} isEnbaled
+    * @param {boolean} skipCallback onSetTrackState
+    * @param {boolean} updateTrackTree updates eye icon of the track, if it is visible in the timeline
     */
-    setTrackState(trackIdx, isEnbaled = true, skipCallback = false) {
+    setTrackState(trackIdx, isEnbaled = true, skipCallback = false, updateTrackTree = true ) {
         const track = this.animationClip.tracks[trackIdx];
             
         const oldState = track.active;
         track.active = isEnbaled;
 
-        if(this.onSetTrackState && !skipCallback)
+        if ( this.onSetTrackState && !skipCallback ){
             this.onSetTrackState(track, oldState);
+        }
+
+        if ( updateTrackTree && !this.skipVisibility ){ 
+            // TODO: a bit of an overkill. Maybe searching the node in the tree is less expensive 
+            this.updateLeftPanel(); 
+        }
+    }
+
+    /**
+     * 
+     * @param {int} trackIdx 
+     * @param {boolean} isLocked 
+     * @param {boolean} skipCallback onSetTrackLock
+     * @param {boolean} updateTrackTree updates lock icon of the track, if it is visible in the timeline
+     */
+    setTrackLock(trackIdx, isLocked = false, skipCallback = false, updateTrackTree = true ){
+        const track = this.animationClip.tracks[trackIdx];
+
+        const oldState = track.locked;
+        track.locked = isLocked;
+
+        if ( this.onSetTrackLock && !skipCallback ){
+            this.onSetTrackLock( track, oldState );
+        }
+
+        if ( updateTrackTree && !this.skipLock ){ 
+            // TODO: a bit of an overkill. Maybe searching the node in the tree is less expensive 
+            this.updateLeftPanel(); 
+        }
     }
 
     /**
@@ -1339,10 +1370,7 @@ class Timeline {
                 'icon': (track.locked ? 'TimelineLock' : 'TimelineLockOpen'),
                 'swap': (track.locked ? 'TimelineLockOpen' : 'TimelineLock'),
                 'callback': (node, swapValue, event) => {
-                    node.trackData.locked = !node.trackData.locked;
-                    if(this.onLockTrack){
-                        this.onLockTrack(node.trackData, node);
-                    }
+                    this.setTrackLock( node.trackData.trackIdx, !node.trackData.locked, false, false ); // do not update left panel
                 }
             }]});
         }
@@ -1460,10 +1488,7 @@ class KeyFramesTimeline extends Timeline {
                     'icon': (track.locked ? 'TimelineLock' : 'TimelineLockOpen'),
                     'swap': (track.locked ? 'TimelineLockOpen' : 'TimelineLock'),
                     'callback': (node, swapValue, event) => {
-                        node.trackData.locked = !node.trackData.locked;
-                        if(this.onLockTrack){
-                            this.onLockTrack(node.trackData, node);
-                        }
+                        this.setTrackLock( node.trackData.trackIdx, !node.trackData.locked, false, false ); // do not update left panel
                     }
                 }]});
             }
@@ -2333,6 +2358,11 @@ class KeyFramesTimeline extends Timeline {
             values = track.values,
             stride = track.dim,
             threshold = this.optimizeThreshold;
+        
+        if ( track.locked ){
+            return;
+        }
+
         let cmpFunction = (v, p, n, t) => { return Math.abs(v - p) >= t || Math.abs(v - n) >= t };
         let lastSavedIndex = 0;
         const lastIndex = times.length-1;
@@ -2675,7 +2705,7 @@ class KeyFramesTimeline extends Timeline {
 
     pasteKeyFrameValue( track, index ) {
 
-        if(this.clipboard.value.type != track.type){
+        if(track.locked || this.clipboard.value.type != track.type){
             return;
         }
 
@@ -2720,6 +2750,10 @@ class KeyFramesTimeline extends Timeline {
             const values = clipboardInfo.values;
             const track = this.animationClip.tracks[trackIdx];
 
+            if( track.locked ){
+                continue;
+            }
+
             this.saveState(track.trackIdx, trackCount++);
             this.historySaveEnabler = false;
             this.addKeyFrames( track.trackIdx, values, times, -globalStart + pasteTime, KeyFramesTimeline.ADDKEY_VALUESINARRAYS  );
@@ -2749,7 +2783,7 @@ class KeyFramesTimeline extends Timeline {
     addKeyFrames( trackIdx, newValues, newTimes, timeOffset = 0, flags = 0x00 ){
         const track = this.animationClip.tracks[trackIdx];
 
-        if ( !newTimes.length ){ return; }
+        if ( !newTimes.length || track.locked ){ return null; }
 
         const valueDim = track.dim;
         const trackTimes = track.times;
@@ -2839,6 +2873,7 @@ class KeyFramesTimeline extends Timeline {
             return; 
         }
 
+        const tracks = this.animationClip.tracks;
         const firstTrack = this.lastKeyFramesSelected[0][0];
         let trackToRemove = firstTrack;
         let toDelete = []; // indices to delete of the same track
@@ -2848,6 +2883,12 @@ class KeyFramesTimeline extends Timeline {
         const numSelected = this.lastKeyFramesSelected.length; 
         for( let i = 0; i < numSelected; ++i ){
             const [trackIdx, frameIdx] = this.lastKeyFramesSelected[i];
+
+            if ( tracks[trackIdx].locked ){
+                tracks[trackIdx].selected[frameIdx] = false; // unselect 
+                continue;
+            }
+            
             if ( trackToRemove != trackIdx ){
                 this.saveState(trackToRemove, trackToRemove != firstTrack);
 
@@ -2859,7 +2900,7 @@ class KeyFramesTimeline extends Timeline {
                 toDelete.length = 0;
             }
  
-            toDelete.push(frameIdx)
+            toDelete.push( frameIdx );
         }
 
         this.saveState(trackToRemove, trackToRemove != firstTrack);
@@ -2874,7 +2915,7 @@ class KeyFramesTimeline extends Timeline {
     deleteKeyFrames( trackIdx, indices, skipCallback = false ){
         const track = this.animationClip.tracks[trackIdx];
 
-        if ( !indices.length ){ 
+        if ( !indices.length || track.locked ){ 
             return false; 
         }
 
@@ -3123,12 +3164,12 @@ class KeyFramesTimeline extends Timeline {
 
         const track =  this.animationClip.tracks[trackIdx];
 
-        if(track.locked ){
-            return;
-        }
-
         this.unHoverAll();
         this.deselectAllKeyFrames();
+        
+        if( track.locked ){
+            return;
+        }
 
         this.saveState(track.trackIdx);
 
