@@ -7,10 +7,18 @@ Fixed `Menubar.getSubItem`.
 Timeline:
 - Adjust scroll if left panel size changes.
 - Keyframe selection now uses the correct keyframeSize values.
+- Added `onTrackTreeEvent`.
+- On curve tracks, `Alt` key now saves state before modifying keyframes.
+- Fixed tracks resize on refresh.
 
 NodeTree Component:
 - Item actions are now standard buttons instead of icons.
 - Fix select when filter is present.
+- Allow null id to unselect all.
+
+TreeEvent:
+- Added event attribute to store mouse/keyboard/system.
+- Homogenised calls to TreeEvent so node, value and event are consistent.
 
 ## 0.7.10 (master)
 
