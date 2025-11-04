@@ -6,11 +6,10 @@
     MAKE_LINE_BREAK();
 
     {
-        const area = new LX.Area( { skipAppend: true, height: "auto" } );
+        const area = new LX.Area( { skipAppend: true, height: "auto", className: "flex flex-col gap-4" } );
         content.appendChild( area.root );
 
-        const code = `
-  import { LX } from 'lexgui';
+        const code = `import { LX } from 'lexgui';
 
   class Test {
 
@@ -32,32 +31,49 @@
               multiple line block comment
           */
       }
-  }
-  `;
+  }`;
 
-        const snippet = LX.makeCodeSnippet(code, ["780px", "auto"], {
-            tabName: "script.js",
-            language: "JavaScript",
-            linesAdded: [2, [10, 12]],
-            linesRemoved: [14, 16],
-            xlineNumbers: false,
-            windowMode: true
-        });
-        area.attach( snippet );
+        let snippet = null;
+        let lineNumbers = true;
+        let windowMode = true;
+
+        const panel = area.addPanel({className: "flex flex-row justify-center"});
+        panel.addToggle( null, true, ( v ) => { lineNumbers = v; generateSnippet(); }, { label: "Line Numbers", width: "fit-content", className: "contrast" } );
+        LX.makeContainer( [`auto`, "0.75rem"], "mx-2 border-right border-colored fg-quaternary self-center items-center", "", panel );
+        panel.addToggle( null, true, ( v ) => { windowMode = v; generateSnippet(); }, { label: "Window Mode", width: "fit-content", className: "contrast" } );
+
+        const generateSnippet = () =>
+        {
+            if( snippet ) snippet.remove();
+
+            snippet = LX.makeCodeSnippet(code, ["780px", "auto"], {
+                tabName: "script.js",
+                language: "JavaScript",
+                linesAdded: [2, [10, 12]],
+                linesRemoved: [14, 16],
+                lineNumbers,
+                windowMode
+            });
+
+            area.attach( snippet );
+        }
+
+        generateSnippet();        
         
         area.root.className += " items-center p-4 border rounded-lg shadow-lg bg-secondary overflow-hidden";
     }
 
     MAKE_HEADER("Quick Usage", "h2");
     MAKE_CODE(`@const@ snippet = @[cls]LX@.@[mtd]makeCodeSnippet@(
-  @"function foo() { return 42; }"@,
-  [@400@, @200@],
+  code,
+  [@"780px"@, @"auto"@],
   {
     language: @"JavaScript"@,
     windowMode: @true@,
-    lineNumbers: @false@,
+    lineNumbers: @true@,
     tabName: @"example.js"@,
-    linesAdded: [@2@]
+    linesAdded: [@2@, [@10@, @12@]],
+    linesRemoved: [@14@, @16@],
   }
 );
 document.body.@[mtd]appendChild@(snippet);`, "js");

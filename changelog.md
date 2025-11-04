@@ -2,15 +2,54 @@
 
 ## dev
 
+## 0.7.11 (master)
+
+Fixed `Menubar.getSubItem`.
+
+Timeline:
+- Adjust scroll if left panel size changes.
+- Keyframe selection now uses the correct keyframeSize values.
+- Added `onTrackTreeEvent`.
+- On curve tracks, `Alt` key now saves state before modifying keyframes.
+- Fixed tracks resize on refresh.
+
+NodeTree Component:
+- Item actions are now standard buttons instead of icons.
+- Fix select when filter is present.
+- Allow null id to unselect all.
+
+TreeEvent:
+- Added event attribute to store mouse/keyboard/system.
+- Homogenised calls to TreeEvent so node, value and event are consistent.
+
+## 0.7.10
+
+Removed Fit-Tabs thumb CSS transition on `Tabs.add`.
 Added Popover documentation.
-Added support for video elements in AssetView.
+Fixed `LX.codeSnippet` linesAdded/Removed options.
+Fixed `Area.extend()` and `Area.reduce()` transitions.
+
+AssetView:
+- Added support for video elements.
+- Fixed support for images using url with params.
+- Added more supported image extensions.
+- Updated documentation.
+
+CodeEditor:
+- Added support to `options.callback` to call when the editor is completely loaded.
+- Docs updated.
 
 Timeline:
 - Added `Timeline.setKeyframeSize` and `Timeline.setTrackHeight`.
 - Curve keyframes are visually clamped to the tracks' boundaries.
 - Fixed `Add Keyframe` option in context menu.
 
-## 0.7.9 (master)
+VideoEditor:
+- Minor functions refactor.
+- Speed and loop buttons added to video controls.
+- Fixed resize controls area bug.
+
+## 0.7.9
 
 Allow wheel/middle click in menubar buttons.
 Pass RadioGroup name as argument to radio option callback.

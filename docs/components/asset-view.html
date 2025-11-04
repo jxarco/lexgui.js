@@ -96,22 +96,32 @@ assetView.@[mtd]load@(assetData);
     MAKE_HEADER("API Reference", "h2");
     MAKE_CLASS_CONSTRUCTOR("class LX.AssetView", [ [ "options", "Object = {}" ] ]);
     MAKE_LINE_BREAK();
+    MAKE_PARAGRAPH(`Where ${ INLINE_CODE( "options" ) } can include the following:`);
+    MAKE_LINE_BREAK();
 
-    MAKE_PARAGRAPH( `Where you can use the following options:` );
-
-    MAKE_CODE_BULLET_LIST( [
-        ["layout", "Number", "Layout appearance of the assets (AssetView.LAYOUT_CONTENT|AssetView.LAYOUT_LIST)"],
-        ["rootPath", "String", "Override default rootPath for internal data"],
-        ["skipBrowser", "Boolean", "Skip creation of the file explorer [false]"],
-        ["skipPreview", "Boolean", "Skip creation of the preview section [false]"],
-        ["useNativeTitle", "Boolean", "Use native element titles instead of custom Lexgui hover titles [false]"],
-        ["onlyFolders", "Boolean", "[true]"],
-        ["allowMultipleSelection", "Boolean", "Allow multiple asset selection [true]"],
-        ["previewActions", "Array", "Customize the asset preview actions"],
-        ["contextMenu", "Array", "Customize the asset context menu actions"],
-        ["allowedTypes", "Array", "Asset allowed types (strings)"],
-        ["onRefreshContent", "Function", "Function to call when the content is refreshed"],
-    ] );
+    {
+        const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
+        const panel = area.addPanel();
+        content.appendChild( area.root );
+        panel.addTable( null, {
+            head: [ "Option", "Type", "Description", "Default" ],
+            body: [
+                ["layout", `<span class='cursor-pointer' title='"LAYOUT_GRID" | "LAYOUT_COMPACT" | "LAYOUT_LIST"'>Enum</span>`, `Layout appearance of the assets`, "AssetView.LAYOUT_GRID"],
+                ["rootPath", "String", "Override default rootPath for internal data"],
+                ["skipBrowser", "Boolean", "Skip creation of the file explorer", "false"],
+                ["skipPreview", "Boolean", "Skip creation of the preview section", "false"],
+                ["useNativeTitle", "Boolean", "Use native element titles instead of custom Lexgui hover titles", "false"],
+                ["onlyFolders", "Boolean", "Use onlyFolders option in TreeComponent", "true"],
+                ["allowMultipleSelection", "Boolean", "Allow multiple asset selection", "true"],
+                ["previewActions", "Array", "Customize asset preview actions { name, callback, type (opt.), path (opt.) }"],
+                ["contextMenu", "Array", "Customize the asset context menu actions"],
+                ["allowedTypes", "Array", "Asset allowed types (strings)"],
+                ["onRefreshContent", "Function", "Function to call when the content is refreshed"],
+            ].map( v => {
+                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] ? v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] : "—" ];
+            } )
+        }, {});
+    }
 
     MAKE_HEADER( "Methods", "h3", "methods" );
 

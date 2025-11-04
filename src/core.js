@@ -6,7 +6,7 @@
 */
 
 const LX = {
-    version: "0.7.9",
+    version: "0.7.11",
     ready: false,
     extensions: [], // Store extensions used
     signals: {}, // Events and triggers
@@ -650,10 +650,11 @@ class TreeEvent {
     static NODE_VISIBILITY      = 7;
     static NODE_CARETCHANGED    = 8;
 
-    constructor( type, node, value ) {
+    constructor( type, node, value, event ) {
         this.type = type || TreeEvent.NONE;
         this.node = node;
         this.value = value;
+        this.event = event;
         this.multiple = false; // Multiple selection
         this.panel = null;
     }
@@ -2596,9 +2597,11 @@ class Tabs {
 
             if( isSelected && this.thumb )
             {
+                this.thumb.classList.add( "no-transition" );
                 this.thumb.style.transform = "translate( " + ( tabEl.childIndex * tabEl.offsetWidth ) + "px )";
                 this.thumb.style.width = ( tabEl.offsetWidth ) + "px";
                 this.thumb.item = tabEl;
+                this.thumb.classList.remove( "no-transition" );
             }
 
         }, 10 );
