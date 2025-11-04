@@ -2,6 +2,8 @@
 
 ## dev
 
+## 0.7.11 (master)
+
 Fixed `Menubar.getSubItem`.
 
 Timeline:
@@ -20,7 +22,7 @@ TreeEvent:
 - Added event attribute to store mouse/keyboard/system.
 - Homogenised calls to TreeEvent so node, value and event are consistent.
 
-## 0.7.10 (master)
+## 0.7.10
 
 Removed Fit-Tabs thumb CSS transition on `Tabs.add`.
 Added Popover documentation.

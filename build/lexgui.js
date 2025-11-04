@@ -14,7 +14,7 @@ console.warn( 'Script _build/lexgui.js_ is depracated and will be removed soon. 
 */
 
 const LX = {
-    version: "0.7.10",
+    version: "0.7.11",
     ready: false,
     extensions: [], // Store extensions used
     signals: {}, // Events and triggers
@@ -654,10 +654,11 @@ class TreeEvent {
     static NODE_VISIBILITY      = 7;
     static NODE_CARETCHANGED    = 8;
 
-    constructor( type, node, value ) {
+    constructor( type, node, value, event ) {
         this.type = type || TreeEvent.NONE;
         this.node = node;
         this.value = value;
+        this.event = event;
         this.multiple = false; // Multiple selection
         this.panel = null;
     }
@@ -7952,8 +7953,8 @@ class BaseComponent {
         BaseComponent.PROGRESS
     ];
 
-    constructor( type, name, value, options = {} ) {
-
+    constructor( type, name, value, options = {} )
+    {
         this.type = type;
         this.name = name;
         this.options = options;
@@ -8051,13 +8052,14 @@ class BaseComponent {
         this.options = options;
     }
 
-    static _dispatchEvent( element, type, data, bubbles, cancelable ) {
+    static _dispatchEvent( element, type, data, bubbles, cancelable )
+    {
         let event = new CustomEvent( type, { 'detail': data, 'bubbles': bubbles, 'cancelable': cancelable } );
         element.dispatchEvent( event );
     }
 
-    _addResetProperty( container, callback ) {
-
+    _addResetProperty( container, callback )
+    {
         const domEl = LX.makeIcon( "Undo2", { iconClass: "ml-0 mr-1 px-1", title: "Reset" } );
         domEl.style.display = "none";
         domEl.addEventListener( "click", callback );
@@ -8065,7 +8067,8 @@ class BaseComponent {
         return domEl;
     }
 
-    _canPaste() {
+    _canPaste()
+    {
         let pasteAllowed = this.type === BaseComponent.CUSTOM ?
             ( navigator.clipboard.customIdx !== undefined && this.customIdx == navigator.clipboard.customIdx ) : navigator.clipboard.type === this.type;
 
@@ -8079,8 +8082,8 @@ class BaseComponent {
         return pasteAllowed;
     }
 
-    _trigger( event, callback, scope = this ) {
-
+    _trigger( event, callback, scope = this )
+    {
         if( !callback )
         {
             return;
@@ -8089,8 +8092,8 @@ class BaseComponent {
         callback.call( scope, event.value, event.domEvent, event.name );
     }
 
-    value() {
-
+    value()
+    {
         if( this.onGetValue )
         {
             return this.onGetValue();
@@ -8099,8 +8102,8 @@ class BaseComponent {
         console.warn( "Can't get value of " + this.typeName() );
     }
 
-    set( value, skipCallback, event ) {
-
+    set( value, skipCallback, event )
+    {
         if( this.onSetValue )
         {
             let resetButton = this.root.querySelector( ".lexcomponentname .lexicon" );
@@ -8108,12 +8111,13 @@ class BaseComponent {
             {
                 resetButton.style.display = ( value != this.value() ? "block" : "none" );
 
-                const equalInitial = value.constructor === Array ? (function arraysEqual(a, b) {
-                    if (a === b) return true;
-                    if (a == null || b == null) return false;
-                    if (a.length !== b.length) return false;
-                    for (var i = 0; i < a.length; ++i) {
-                        if (a[ i ] !== b[ i ]) return false;
+                const equalInitial = value.constructor === Array ? (function arraysEqual( a, b ) {
+                    if( a === b ) return true;
+                    if( a == null || b == null ) return false;
+                    if( a.length !== b.length ) return false;
+                    for( var i = 0; i < a.length; ++i )
+                    {
+                        if( a[ i ] !== b[ i ] ) return false;
                     }
                     return true;
                 })( value, this._initialValue ) : ( value == this._initialValue );
@@ -8124,11 +8128,11 @@ class BaseComponent {
             return this.onSetValue( value, skipCallback ?? false, event );
         }
 
-        console.warn("Can't set value of " + this.typeName());
+        console.warn( `Can't set value of ${ this.typeName() }`);
     }
 
-    oncontextmenu( e ) {
-
+    oncontextmenu( e )
+    {
         if( BaseComponent.NO_CONTEXT_TYPES.includes( this.type ) )
         {
             return;
@@ -8140,14 +8144,16 @@ class BaseComponent {
         });
     }
 
-    copy() {
+    copy()
+    {
         navigator.clipboard.type = this.type;
         navigator.clipboard.customIdx = this.customIdx;
         navigator.clipboard.data = this.value();
         navigator.clipboard.writeText( navigator.clipboard.data );
     }
 
-    paste() {
+    paste()
+    {
         if( !this._canPaste() )
         {
             return;
@@ -8156,8 +8162,8 @@ class BaseComponent {
         this.set( navigator.clipboard.data );
     }
 
-    typeName() {
-
+    typeName()
+    {
         switch( this.type )
         {
             case BaseComponent.TEXT: return "Text";
@@ -8209,8 +8215,8 @@ function ADD_CUSTOM_COMPONENT( customComponentName, options = {} )
 {
     let customIdx = LX.guidGenerator();
 
-    LX.Panel.prototype[ 'add' + customComponentName ] = function( name, instance, callback ) {
-
+    LX.Panel.prototype[ 'add' + customComponentName ] = function( name, instance, callback )
+    {
         const userParams = Array.from( arguments ).slice( 3 );
 
         let component = new BaseComponent( BaseComponent.CUSTOM, name, null, options );
@@ -8396,8 +8402,8 @@ LX.ADD_CUSTOM_COMPONENT = ADD_CUSTOM_COMPONENT;
 
 class NodeTree {
 
-    constructor( domEl, data, options ) {
-
+    constructor( domEl, data, options )
+    {
         this.domEl = domEl;
         this.data = data;
         this.onevent = options.onevent;
@@ -8419,8 +8425,8 @@ class NodeTree {
         }
     }
 
-    _createItem( parent, node, level = 0, selectedId ) {
-
+    _createItem( parent, node, level = 0, selectedId )
+    {
         const that = this;
         const nodeFilterInput = this.domEl.querySelector( ".lexnodetreefilter" );
 
@@ -8446,7 +8452,7 @@ class NodeTree {
         if( this.options.onlyFolders )
         {
             let hasFolders = false;
-            node.children.forEach( c => hasFolders |= (c.type == 'folder') );
+            node.children.forEach( c => hasFolders |= ( c.type == 'folder' ) );
             isParent = !!hasFolders;
         }
 
@@ -8526,7 +8532,7 @@ class NodeTree {
                 node.closed = false;
                 if( that.onevent )
                 {
-                    const event = new LX.TreeEvent( LX.TreeEvent.NODE_CARETCHANGED, node, node.closed );
+                    const event = new LX.TreeEvent( LX.TreeEvent.NODE_CARETCHANGED, node, node.closed, e );
                     that.onevent( event );
                 }
                 that.frefresh( node.id );
@@ -8534,13 +8540,13 @@ class NodeTree {
 
             if( that.onevent )
             {
-                const event = new LX.TreeEvent(LX.TreeEvent.NODE_SELECTED, e.shiftKey ? this.selected : node );
+                const event = new LX.TreeEvent( LX.TreeEvent.NODE_SELECTED, node, this.selected, e );
                 event.multiple = e.shiftKey;
                 that.onevent( event );
             }
         });
 
-        item.addEventListener("dblclick", function() {
+        item.addEventListener("dblclick", function(e) {
 
             if( that.options.rename ?? true )
             {
@@ -8551,7 +8557,7 @@ class NodeTree {
 
             if( that.onevent )
             {
-                const event = new LX.TreeEvent( LX.TreeEvent.NODE_DBLCLICKED, node );
+                const event = new LX.TreeEvent( LX.TreeEvent.NODE_DBLCLICKED, node, null, e );
                 that.onevent( event );
             }
         });
@@ -8565,10 +8571,10 @@ class NodeTree {
                 return;
             }
 
-            const event = new LX.TreeEvent(LX.TreeEvent.NODE_CONTEXTMENU, this.selected.length > 1 ? this.selected : node, e);
+            const event = new LX.TreeEvent( LX.TreeEvent.NODE_CONTEXTMENU, node, this.selected, e );
             event.multiple = this.selected.length > 1;
 
-            LX.addContextMenu( event.multiple ? "Selected Nodes" : event.node.id, event.value, m => {
+            LX.addContextMenu( event.multiple ? "Selected Nodes" : event.node.id, event.event, m => {
                 event.panel = m;
             });
 
@@ -8617,7 +8623,7 @@ class NodeTree {
 
                     if( ok && that.onevent )
                     {
-                        const event = new LX.TreeEvent( LX.TreeEvent.NODE_DELETED, node, e );
+                        const event = new LX.TreeEvent( LX.TreeEvent.NODE_DELETED, node, [ node ], null );
                         that.onevent( event );
                     }
 
@@ -8650,7 +8656,7 @@ class NodeTree {
                 // Send event now so we have the info in selected array..
                 if( nodesDeleted.length && that.onevent )
                 {
-                    const event = new LX.TreeEvent( LX.TreeEvent.NODE_DELETED, nodesDeleted.length > 1 ? nodesDeleted : node, e );
+                    const event = new LX.TreeEvent( LX.TreeEvent.NODE_DELETED, node, nodesDeleted, e );
                     event.multiple = nodesDeleted.length > 1;
                     that.onevent( event );
                 }
@@ -8692,7 +8698,7 @@ class NodeTree {
 
                 if( that.onevent )
                 {
-                    const event = new LX.TreeEvent(LX.TreeEvent.NODE_RENAMED, node, this.value);
+                    const event = new LX.TreeEvent( LX.TreeEvent.NODE_RENAMED, node, this.value, e );
                     that.onevent( event );
                 }
 
@@ -8766,7 +8772,7 @@ class NodeTree {
                 // Trigger node dragger event
                 if( that.onevent )
                 {
-                    const event = new LX.TreeEvent(LX.TreeEvent.NODE_DRAGGED, dragged, target);
+                    const event = new LX.TreeEvent( LX.TreeEvent.NODE_DRAGGED, dragged, target, e );
                     that.onevent( event );
                 }
 
@@ -8807,7 +8813,7 @@ class NodeTree {
 
                 if( that.onevent )
                 {
-                    const event = new LX.TreeEvent(LX.TreeEvent.NODE_CARETCHANGED, node, node.closed);
+                    const event = new LX.TreeEvent( LX.TreeEvent.NODE_CARETCHANGED, node, node.closed, e );
                     that.onevent( event );
                 }
                 that.frefresh( node.id );
@@ -8824,28 +8830,34 @@ class NodeTree {
             for( let i = 0; i < node.actions.length; ++i )
             {
                 const action = node.actions[ i ];
-                const actionIcon = LX.makeIcon( action.icon, { title: action.name } );
-                actionIcon.addEventListener("click", function( e ) {
+                const actionBtn = new LX.Button( null, "", ( swapValue, event ) => {
+                    event.stopPropagation();
                     if( action.callback )
                     {
-                        action.callback( node, actionIcon );
-                        e.stopPropagation();
+                        action.callback( node, swapValue, event );
                     }
-                });
+                }, { icon: action.icon, swap: action.swap, title: action.name, hideName:true, className: "p-0 m-0", buttonClass: "p-0 m-0 bg-none" } );
+                actionBtn.root.style.minWidth = "fit-content";
+                actionBtn.root.style.margin = "0"; // adding classes does not work
+                actionBtn.root.style.padding = "0"; // adding classes does not work
+                const _btn = actionBtn.root.querySelector("button");
+                _btn.style.minWidth = "fit-content";
+                _btn.style.margin = "0"; // adding classes does not work
+                _btn.style.padding = "0"; // adding classes does not work
 
-                inputContainer.appendChild( actionIcon );
+                inputContainer.appendChild( actionBtn.root );
             }
         }
 
         if( !node.skipVisibility ?? false )
         {
-            const visibilityBtn = new LX.Button( null, "", ( swapValue, event ) => {
-                event.stopPropagation();
+            const visibilityBtn = new LX.Button( null, "", ( swapValue, e ) => {
+                e.stopPropagation();
                 node.visible = node.visible === undefined ? false : !node.visible;
                 // Trigger visibility event
                 if( that.onevent )
                 {
-                    const event = new LX.TreeEvent( LX.TreeEvent.NODE_VISIBILITY, node, node.visible );
+                    const event = new LX.TreeEvent( LX.TreeEvent.NODE_VISIBILITY, node, node.visible, e );
                     that.onevent( event );
                 }
             }, { icon: node.visible ? "Eye" : "EyeOff", swap: node.visible ? "EyeOff" : "Eye", title: "Toggle visible", className: "p-0 m-0", buttonClass: "bg-none" } );
@@ -8901,21 +8913,34 @@ class NodeTree {
     }
 
     /* Refreshes the tree and focuses current element */
-    frefresh( id ) {
-
+    frefresh( id )
+    {
         this.refresh();
-        var el = this.domEl.querySelector( "#" + id );
+        var el = this.domEl.querySelector( `#${ id }` );
         if( el )
         {
             el.focus();
         }
     }
 
-    select( id ) {
+    select( id )
+    {
+        const nodeFilter = this.domEl.querySelector( ".lexnodetreefilter" );
+        if( nodeFilter )
+        {
+            nodeFilter.value = "";
+        }
 
         this.refresh( null, id );
 
         this.domEl.querySelectorAll( ".selected" ).forEach( i => i.classList.remove( "selected" ) );
+
+        // Unselect
+        if( !id )
+        {
+            this.selected.length = 0;
+            return;
+        }
 
         // Element should exist, since tree was refreshed to show it
         const el = this.domEl.querySelector( "#" + id );
@@ -8926,8 +8951,8 @@ class NodeTree {
         el.focus();
     }
 
-    deleteNode( node ) {
-
+    deleteNode( node )
+    {
         const dataAsArray = ( this.data.constructor === Array );
 
         // Can be either Array or Object type data
@@ -8963,10 +8988,10 @@ LX.NodeTree = NodeTree;
  * @description Blank Component
  */
 
-class Blank extends BaseComponent {
-
-    constructor( width, height ) {
-
+class Blank extends BaseComponent
+{
+    constructor( width, height )
+    {
         super( BaseComponent.BLANK );
 
         this.root.style.width = width ?? "auto";
@@ -8981,10 +9006,10 @@ LX.Blank = Blank;
  * @description Title Component
  */
 
-class Title extends BaseComponent {
-
-    constructor( name, options = {} ) {
-
+class Title extends BaseComponent
+{
+    constructor( name, options = {} )
+    {
         console.assert( name, "Can't create Title Component without text!" );
 
         // Note: Titles are not registered in Panel.components by now
@@ -9025,10 +9050,10 @@ LX.Title = Title;
  * @description TextInput Component
  */
 
-class TextInput extends BaseComponent {
-
-    constructor( name, value, callback, options = {} ) {
-
+class TextInput extends BaseComponent
+{
+    constructor( name, value, callback, options = {} )
+    {
         super( BaseComponent.TEXT, name, String( value ), options );
 
         this.onGetValue = () => {
@@ -9115,7 +9140,7 @@ class TextInput extends BaseComponent {
                 });
             }
 
-            wValue.addEventListener( "mousedown", function( e ){
+            wValue.addEventListener( "mousedown", function( e ) {
                 e.stopImmediatePropagation();
                 e.stopPropagation();
             });
@@ -9165,10 +9190,10 @@ LX.TextInput = TextInput;
  * @description TextArea Component
  */
 
-class TextArea extends BaseComponent {
-
-    constructor( name, value, callback, options = {} ) {
-
+class TextArea extends BaseComponent
+{
+    constructor( name, value, callback, options = {} )
+    {
         super( BaseComponent.TEXTAREA, name, value, options );
 
         this.onGetValue = () => {
@@ -9266,10 +9291,10 @@ LX.TextArea = TextArea;
  * @description Button Component
  */
 
-class Button extends BaseComponent {
-
-    constructor( name, value, callback, options = {} ) {
-
+class Button extends BaseComponent
+{
+    constructor( name, value, callback, options = {} )
+    {
         super( BaseComponent.BUTTON, name, null, options );
 
         this.onGetValue = () => {
@@ -9488,10 +9513,10 @@ LX.Button = Button;
  * @description ComboButtons Component
  */
 
-class ComboButtons extends BaseComponent {
-
-    constructor( name, values, options = {} ) {
-
+class ComboButtons extends BaseComponent
+{
+    constructor( name, values, options = {} )
+    {
         const shouldSelect = !( options.noSelection ?? false );
         let shouldToggle = shouldSelect && ( options.toggle ?? false );
 
@@ -9649,10 +9674,10 @@ LX.ComboButtons = ComboButtons;
  * @description Card Component
  */
 
-class Card extends BaseComponent {
-
-    constructor( name, options = {} ) {
-
+class Card extends BaseComponent
+{
+    constructor( name, options = {} )
+    {
         options.hideName = true;
 
         super( BaseComponent.CARD, name, null, options );
@@ -9712,10 +9737,10 @@ LX.Card = Card;
  * @description Form Component
  */
 
-class Form extends BaseComponent {
-
-    constructor( name, data, callback, options = {} ) {
-
+class Form extends BaseComponent
+{
+    constructor( name, data, callback, options = {} )
+    {
         if( data.constructor != Object )
         {
             console.error( "Form data must be an Object" );
@@ -9827,10 +9852,10 @@ LX.Form = Form;
  * @description Select Component
  */
 
-class Select extends BaseComponent {
-
-    constructor( name, values, value, callback, options = {} ) {
-
+class Select extends BaseComponent
+{
+    constructor( name, values, value, callback, options = {} )
+    {
         super( BaseComponent.SELECT, name, value, options );
 
         this.onGetValue = () => {
@@ -10239,10 +10264,10 @@ LX.Select = Select;
  * @description Curve Component
  */
 
-class Curve extends BaseComponent {
-
-    constructor( name, values, callback, options = {} ) {
-
+class Curve extends BaseComponent
+{
+    constructor( name, values, callback, options = {} )
+    {
         let defaultValues = JSON.parse( JSON.stringify( values ) );
 
         super( BaseComponent.CURVE, name, defaultValues, options );
@@ -10300,10 +10325,10 @@ LX.Curve = Curve;
  * @description Dial Component
  */
 
-class Dial extends BaseComponent {
-
-    constructor( name, values, callback, options = {} ) {
-
+class Dial extends BaseComponent
+{
+    constructor( name, values, callback, options = {} )
+    {
         let defaultValues = JSON.parse( JSON.stringify( values ) );
 
         super( BaseComponent.DIAL, name, defaultValues, options );
@@ -10357,10 +10382,10 @@ LX.Dial = Dial;
  * @description Layers Component
  */
 
-class Layers extends BaseComponent {
-
-    constructor( name, value, callback, options = {} ) {
-
+class Layers extends BaseComponent
+{
+    constructor( name, value, callback, options = {} )
+    {
         super( BaseComponent.LAYERS, name, value, options );
 
         this.onGetValue = () => {
@@ -10441,10 +10466,10 @@ LX.Layers = Layers;
  * @description ItemArray Component
  */
 
-class ItemArray extends BaseComponent {
-
-    constructor( name, values = [], callback, options = {} ) {
-
+class ItemArray extends BaseComponent
+{
+    constructor( name, values = [], callback, options = {} )
+    {
         options.nameWidth = "100%";
 
         super( BaseComponent.ARRAY, name, null, options );
@@ -10559,10 +10584,10 @@ LX.ItemArray = ItemArray;
  * @description List Component
  */
 
-class List extends BaseComponent {
-
-    constructor( name, values, value, callback, options = {} ) {
-
+class List extends BaseComponent
+{
+    constructor( name, values, value, callback, options = {} )
+    {
         super( BaseComponent.LIST, name, value, options );
 
         this.onGetValue = () => {
@@ -10659,10 +10684,10 @@ LX.List = List;
  * @description Tags Component
  */
 
-class Tags extends BaseComponent {
-
-    constructor( name, value, callback, options = {} ) {
-
+class Tags extends BaseComponent
+{
+    constructor( name, value, callback, options = {} )
+    {
         value = value.replace( /\s/g, '' ).split( ',' );
 
         let defaultValue = [].concat( value );
@@ -10748,10 +10773,10 @@ LX.Tags = Tags;
  * @description Checkbox Component
  */
 
-class Checkbox extends BaseComponent {
-
-    constructor( name, value, callback, options = {} ) {
-
+class Checkbox extends BaseComponent
+{
+    constructor( name, value, callback, options = {} )
+    {
         if( !name && !options.label )
         {
             throw( "Set Component Name or at least a label!" );
@@ -10831,10 +10856,10 @@ LX.Checkbox = Checkbox;
  * @description Toggle Component
  */
 
-class Toggle extends BaseComponent {
-
-    constructor( name, value, callback, options = {} ) {
-
+class Toggle extends BaseComponent
+{
+    constructor( name, value, callback, options = {} )
+    {
         if( !name && !options.label )
         {
             throw( "Set Component Name or at least a label!" );
@@ -10915,10 +10940,10 @@ LX.Toggle = Toggle;
  * @description RadioGroup Component
  */
 
-class RadioGroup extends BaseComponent {
-
-    constructor( name, label, values, callback, options = {} ) {
-
+class RadioGroup extends BaseComponent
+{
+    constructor( name, label, values, callback, options = {} )
+    {
         super( BaseComponent.RADIO, name, null, options );
 
         let currentIndex = null;
@@ -10994,10 +11019,10 @@ LX.RadioGroup = RadioGroup;
  * @description ColorInput Component
  */
 
-class ColorInput extends BaseComponent {
-
-    constructor( name, value, callback, options = {} ) {
-
+class ColorInput extends BaseComponent
+{
+    constructor( name, value, callback, options = {} )
+    {
         value = value ?? "#000000";
 
         const useAlpha = options.useAlpha ??
@@ -11117,10 +11142,10 @@ LX.ColorInput = ColorInput;
  * @description RangeInput Component
  */
 
-class RangeInput extends BaseComponent {
-
-    constructor( name, value, callback, options = {} ) {
-
+class RangeInput extends BaseComponent
+{
+    constructor( name, value, callback, options = {} )
+    {
         const ogValue = LX.deepCopy( value );
 
         super( BaseComponent.RANGE, name, LX.deepCopy( ogValue ), options );
@@ -11331,10 +11356,10 @@ LX.RangeInput = RangeInput;
  * @description NumberInput Component
  */
 
-class NumberInput extends BaseComponent {
-
-    constructor( name, value, callback, options = {} ) {
-
+class NumberInput extends BaseComponent
+{
+    constructor( name, value, callback, options = {} )
+    {
         super( BaseComponent.NUMBER, name, value, options );
 
         this.onGetValue = () => {
@@ -11553,10 +11578,10 @@ LX.NumberInput = NumberInput;
  * @description Vector Component
  */
 
-class Vector extends BaseComponent {
-
-    constructor( numComponents, name, value, callback, options = {} ) {
-
+class Vector extends BaseComponent
+{
+    constructor( numComponents, name, value, callback, options = {} )
+    {
         numComponents = LX.clamp( numComponents, 2, 4 );
         value = value ?? new Array( numComponents ).fill( 0 );
 
@@ -11803,10 +11828,10 @@ LX.Vector = Vector;
  * @description SizeInput Component
  */
 
-class SizeInput extends BaseComponent {
-
-    constructor( name, value, callback, options = {} ) {
-
+class SizeInput extends BaseComponent
+{
+    constructor( name, value, callback, options = {} )
+    {
         super( BaseComponent.SIZE, name, value, options );
 
         this.onGetValue = () => {
@@ -11891,10 +11916,10 @@ LX.SizeInput = SizeInput;
  * @description OTPInput Component
  */
 
-class OTPInput extends BaseComponent {
-
-    constructor( name, value, callback, options = {} ) {
-
+class OTPInput extends BaseComponent
+{
+    constructor( name, value, callback, options = {} )
+    {
         const pattern = options.pattern ?? "xxx-xxx";
         const patternSize = ( pattern.match(/x/g) || [] ).length;
 
@@ -12049,10 +12074,10 @@ LX.OTPInput = OTPInput;
  * @description Pad Component
  */
 
-class Pad extends BaseComponent {
-
-    constructor( name, value, callback, options = {} ) {
-
+class Pad extends BaseComponent
+{
+    constructor( name, value, callback, options = {} )
+    {
         super( BaseComponent.PAD, name, null, options );
 
         this.onGetValue = () => {
@@ -12169,10 +12194,10 @@ LX.Pad = Pad;
  * @description Progress Component
  */
 
-class Progress extends BaseComponent {
-
-    constructor( name, value, options = {} ) {
-
+class Progress extends BaseComponent
+{
+    constructor( name, value, options = {} )
+    {
         super( BaseComponent.PROGRESS, name, value, options );
 
         this.onGetValue = () => {
@@ -12306,10 +12331,10 @@ LX.Progress = Progress;
  * @description FileInput Component
  */
 
-class FileInput extends BaseComponent {
-
-    constructor( name, callback, options = { } ) {
-
+class FileInput extends BaseComponent
+{
+    constructor( name, callback, options = { } )
+    {
         super( BaseComponent.FILE, name, null, options );
 
         let local = options.local ?? true;
@@ -12391,10 +12416,10 @@ LX.FileInput = FileInput;
  * @description Tree Component
  */
 
-class Tree extends BaseComponent {
-
-    constructor( name, data, options = {} ) {
-
+class Tree extends BaseComponent
+{
+    constructor( name, data, options = {} )
+    {
         options.hideName = true;
 
         super( BaseComponent.TREE, name, null, options );
@@ -12473,10 +12498,10 @@ LX.Tree = Tree;
  * @description TabSections Component
  */
 
-class TabSections extends BaseComponent {
-
-    constructor( name, tabs, options = {} ) {
-
+class TabSections extends BaseComponent
+{
+    constructor( name, tabs, options = {} )
+    {
         options.hideName = true;
 
         super( BaseComponent.TABS, name, null, options );
@@ -12580,10 +12605,10 @@ LX.TabSections = TabSections;
  * @description Counter Component
  */
 
-class Counter extends BaseComponent {
-
-    constructor( name, value, callback, options = { } ) {
-
+class Counter extends BaseComponent
+{
+    constructor( name, value, callback, options = { } )
+    {
         super( BaseComponent.COUNTER, name, value, options );
 
         this.onGetValue = () => {
@@ -12650,10 +12675,10 @@ LX.Counter = Counter;
  * @description Table Component
  */
 
-class Table extends BaseComponent {
-
-    constructor( name, data, options = { } ) {
-
+class Table extends BaseComponent
+{
+    constructor( name, data, options = { } )
+    {
         if( !data )
         {
             throw( "Data is needed to create a table!" );
@@ -12686,12 +12711,12 @@ class Table extends BaseComponent {
         data.body = data.body ?? [];
         data.checkMap = { };
         data.colVisibilityMap = { };
-        data.head.forEach( (col, index) => { data.colVisibilityMap[ index ] = true; });
+        data.head.forEach( ( col, index ) => { data.colVisibilityMap[ index ] = true; });
         this.data = data;
 
-        const compareFn = ( idx, order, a, b) => {
-            if (a[idx] < b[idx]) return -order;
-            else if (a[idx] > b[idx]) return order;
+        const compareFn = ( idx, order, a, b ) => {
+            if( a[ idx ] < b[ idx ] ) return -order;
+            else if( a[ idx ] > b[ idx ] ) return order;
             return 0;
         };
 
@@ -12861,10 +12886,10 @@ class Table extends BaseComponent {
                             icon: "Check",
                             callback: () => {
                                 data.colVisibilityMap[ idx ] = !data.colVisibilityMap[ idx ];
-                                const cells = table.querySelectorAll(`tr > *:nth-child(${idx + this.rowOffsetCount + 1})`);
-                                cells.forEach(cell => {
-                                    cell.style.display = (cell.style.display === "none") ? "" : "none";
-                                });
+                                const cells = table.querySelectorAll( `tr > *:nth-child(${idx + this.rowOffsetCount + 1})` );
+                                cells.forEach( cell => {
+                                    cell.style.display = ( cell.style.display === "none" ) ? "" : "none";
+                                } );
                             }
                         };
                         if( !data.colVisibilityMap[ idx ] ) delete item.icon;
@@ -12959,9 +12984,9 @@ class Table extends BaseComponent {
                                 name: "Hide", icon: "EyeOff", callback: () => {
                                     data.colVisibilityMap[ idx ] = false;
                                     const cells = table.querySelectorAll(`tr > *:nth-child(${idx + this.rowOffsetCount + 1})`);
-                                    cells.forEach(cell => {
-                                        cell.style.display = (cell.style.display === "none") ? "" : "none";
-                                    });
+                                    cells.forEach( cell => {
+                                        cell.style.display = ( cell.style.display === "none" ) ? "" : "none";
+                                    } );
                                 }
                             }
                         );
@@ -13333,10 +13358,10 @@ class Table extends BaseComponent {
                 const idx = parseInt( v );
                 if( !data.colVisibilityMap[ idx ] )
                 {
-                    const cells = table.querySelectorAll(`tr > *:nth-child(${idx + this.rowOffsetCount + 1})`);
-                    cells.forEach(cell => {
-                        cell.style.display = (cell.style.display === "none") ? "" : "none";
-                    });
+                    const cells = table.querySelectorAll( `tr > *:nth-child(${idx + this.rowOffsetCount + 1})` );
+                    cells.forEach( cell => {
+                        cell.style.display = ( cell.style.display === "none" ) ? "" : "none";
+                    } );
                 }
             }
         };
@@ -13346,8 +13371,8 @@ class Table extends BaseComponent {
         LX.doAsync( this.onResize.bind( this ) );
     }
 
-    getSelectedRows() {
-
+    getSelectedRows()
+    {
         const selectedRows = [];
 
         for( const row of this.data.body )
@@ -13362,8 +13387,8 @@ class Table extends BaseComponent {
         return selectedRows;
     }
 
-    _setCentered( v ) {
-
+    _setCentered( v )
+    {
         if( v.constructor == Boolean )
         {
             const container = this.root.querySelector( ".lextable" );
@@ -13396,10 +13421,10 @@ LX.Table = Table;
  * @description DatePicker Component
  */
 
-class DatePicker extends BaseComponent {
-
-    constructor( name, dateValue, callback, options = { } ) {
-
+class DatePicker extends BaseComponent
+{
+    constructor( name, dateValue, callback, options = { } )
+    {
         super( BaseComponent.DATE, name, null, options );
 
         const dateAsRange = ( dateValue?.constructor === Array );
@@ -13514,10 +13539,10 @@ LX.DatePicker = DatePicker;
  * @description Map2D Component
  */
 
-class Map2D extends BaseComponent {
-
-    constructor( name, points, callback, options = {} ) {
-
+class Map2D extends BaseComponent
+{
+    constructor( name, points, callback, options = {} )
+    {
         super( BaseComponent.MAP2D, name, null, options );
 
         this.onGetValue = () => {
@@ -13561,13 +13586,13 @@ LX.Map2D = Map2D;
  * @description Rate Component
  */
 
-class Rate extends BaseComponent {
-
-    constructor( name, value, callback, options = {} ) {
-
+class Rate extends BaseComponent
+{
+    constructor( name, value, callback, options = {} )
+    {
         const allowHalf = options.allowHalf ?? false;
 
-        if( !allowHalf)
+        if( !allowHalf )
         {
             value = Math.floor( value );
         }
@@ -15110,8 +15135,8 @@ LX.Branch = Branch;
 
 class Menubar {
 
-    constructor( items, options = {} ) {
-
+    constructor( items, options = {} )
+    {
         this.root = document.createElement( "div" );
         this.root.className = "lexmenubar";
 
@@ -15128,8 +15153,8 @@ class Menubar {
         this.createEntries();
     }
 
-    _resetMenubar( focus ) {
-
+    _resetMenubar( focus )
+    {
         this.root.querySelectorAll(".lexmenuentry").forEach( e => {
             e.classList.remove( 'selected' );
             delete e.dataset[ "built" ];
@@ -15149,8 +15174,8 @@ class Menubar {
      * @method createEntries
      */
 
-    createEntries() {
-
+    createEntries()
+    {
         for( let item of this.items )
         {
             let key = item.name;
@@ -15216,7 +15241,8 @@ class Menubar {
      * @param {String} name
      */
 
-    getButton( name ) {
+    getButton( name )
+    {
         return this.buttons[ name ];
     }
 
@@ -15225,26 +15251,23 @@ class Menubar {
      * @param {Object} item: parent item
      * @param {Array} tokens: split path strings
     */
-    getSubitem( item, tokens ) {
-
-        let subitem = null;
-        let path = tokens[ 0 ];
-
-        for( let i = 0; i < item.length; i++ )
+    getSubitem( item, tokens )
+    {
+        for( const s of item )
         {
-            if( item[ i ][ path ] )
+            if ( s?.name != tokens[ 0 ] )
             {
-                if( tokens.length == 1 )
-                {
-                    subitem = item[ i ];
-                    return subitem;
-                }
-                else
-                {
-                    tokens.splice( 0, 1 );
-                    return this.getSubitem( item[ i ][ path ], tokens );
-                }
+                continue;
+            }
 
+            if( tokens.length == 1 )
+            {
+                return s;
+            }
+            else if ( s.submenu )
+            {
+                tokens.shift();
+                return this.getSubitem( s.submenu, tokens );
             }
         }
     }
@@ -15253,12 +15276,11 @@ class Menubar {
      * @method getItem
      * @param {String} path
     */
-    getItem( path ) {
-
-        // process path
-        const tokens = path.split("/");
-
-        return this.getSubitem(this.items, tokens)
+    getItem( path )
+    {
+        // Process path
+        const tokens = path.split( '/' );
+        return this.getSubitem( this.items, tokens );
     }
 
     /**
@@ -15269,8 +15291,8 @@ class Menubar {
      * @param {Object} options
      */
 
-    setButtonIcon( name, icon, callback, options = {} ) {
-
+    setButtonIcon( name, icon, callback, options = {} )
+    {
         if( !name )
         {
             throw( "Set Button Name!" );
@@ -15325,8 +15347,8 @@ class Menubar {
      * @param {Object} options
      */
 
-    setButtonImage( name, src, callback, options = {} ) {
-
+    setButtonImage( name, src, callback, options = {} )
+    {
         if( !name )
         {
             throw( "Set Button Name!" );
@@ -15335,14 +15357,14 @@ class Menubar {
         let button = this.buttons[ name ];
         if( button )
         {
-            button.querySelector('img').src = src;
+            button.querySelector( 'img' ).src = src;
             return;
         }
 
         // Otherwise, create it
-        button = document.createElement('div');
+        button = document.createElement( 'div' );
         const disabled = options.disabled ?? false;
-        button.className = "lexmenubutton main" + (disabled ? " disabled" : "");
+        button.className = "lexmenubutton main" + ( disabled ? " disabled" : "" );
         button.title = name;
         button.innerHTML = "<a><image src='" + src + "' class='lexicon' style='height:32px;'></a>";
 
@@ -15366,11 +15388,11 @@ class Menubar {
 
         const _b = button.querySelector('a');
 
-        _b.addEventListener( "mousedown", (e) => {
+        _b.addEventListener( "mousedown", e => {
             e.preventDefault();
         });
 
-        _b.addEventListener( "mouseup", (e) => {
+        _b.addEventListener( "mouseup", e => {
             if( callback && !disabled )
             {
                 callback.call( this, _b, e );
@@ -15387,8 +15409,8 @@ class Menubar {
      * float: center (Default), right
      */
 
-    addButtons( buttons, options = {} ) {
-
+    addButtons( buttons, options = {} )
+    {
         if( !buttons )
         {
             throw( "No buttons to add!" );
@@ -15415,9 +15437,8 @@ class Menubar {
             }
         }
 
-        for( let i = 0; i < buttons.length; ++i )
+        for( const data of buttons )
         {
-            const data = buttons[ i ];
             const title = data.title;
             const button = new LX.Button( title, data.label, data.callback, {
                 title,
