@@ -7,7 +7,7 @@
 */
 
 const LX = {
-    version: "0.7.10",
+    version: "0.7.11",
     ready: false,
     extensions: [], // Store extensions used
     signals: {}, // Events and triggers
@@ -647,10 +647,11 @@ class TreeEvent {
     static NODE_VISIBILITY      = 7;
     static NODE_CARETCHANGED    = 8;
 
-    constructor( type, node, value ) {
+    constructor( type, node, value, event ) {
         this.type = type || TreeEvent.NONE;
         this.node = node;
         this.value = value;
+        this.event = event;
         this.multiple = false; // Multiple selection
         this.panel = null;
     }
@@ -8537,9 +8538,9 @@ class NodeTree {
                 that.onevent( event );
             }
         });
-    
+
         item.addEventListener("dblclick", function(e) {
-    
+
             if( that.options.rename ?? true )
             {
                 // Trigger rename
@@ -8615,7 +8616,7 @@ class NodeTree {
 
                     if( ok && that.onevent )
                     {
-                        const event = new LX.TreeEvent( LX.TreeEvent.NODE_DELETED, node, [node], null );
+                        const event = new LX.TreeEvent( LX.TreeEvent.NODE_DELETED, node, [ node ], null );
                         that.onevent( event );
                     }
 
@@ -8690,7 +8691,7 @@ class NodeTree {
 
                 if( that.onevent )
                 {
-                    const event = new LX.TreeEvent(LX.TreeEvent.NODE_RENAMED, node, this.value, e);
+                    const event = new LX.TreeEvent( LX.TreeEvent.NODE_RENAMED, node, this.value, e );
                     that.onevent( event );
                 }
 
@@ -8764,7 +8765,7 @@ class NodeTree {
                 // Trigger node dragger event
                 if( that.onevent )
                 {
-                    const event = new LX.TreeEvent(LX.TreeEvent.NODE_DRAGGED, dragged, target, e);
+                    const event = new LX.TreeEvent( LX.TreeEvent.NODE_DRAGGED, dragged, target, e );
                     that.onevent( event );
                 }
 
@@ -8805,7 +8806,7 @@ class NodeTree {
 
                 if( that.onevent )
                 {
-                    const event = new LX.TreeEvent(LX.TreeEvent.NODE_CARETCHANGED, node, node.closed, e);
+                    const event = new LX.TreeEvent( LX.TreeEvent.NODE_CARETCHANGED, node, node.closed, e );
                     that.onevent( event );
                 }
                 that.frefresh( node.id );
@@ -8824,7 +8825,8 @@ class NodeTree {
                 const action = node.actions[ i ];
                 const actionBtn = new LX.Button( null, "", ( swapValue, event ) => {
                     event.stopPropagation();
-                    if ( action.callback ){
+                    if( action.callback )
+                    {
                         action.callback( node, swapValue, event );
                     }
                 }, { icon: action.icon, swap: action.swap, title: action.name, hideName:true, className: "p-0 m-0", buttonClass: "p-0 m-0 bg-none" } );
@@ -8835,7 +8837,7 @@ class NodeTree {
                 _btn.style.minWidth = "fit-content";
                 _btn.style.margin = "0"; // adding classes does not work
                 _btn.style.padding = "0"; // adding classes does not work
-    
+
                 inputContainer.appendChild( actionBtn.root );
             }
         }
@@ -8921,13 +8923,14 @@ class NodeTree {
         {
             nodeFilter.value = "";
         }
-    
+
         this.refresh( null, id );
 
         this.domEl.querySelectorAll( ".selected" ).forEach( i => i.classList.remove( "selected" ) );
 
         // Unselect
-        if ( !id ){
+        if( !id )
+        {
             this.selected.length = 0;
             return;
         }
@@ -9130,7 +9133,7 @@ class TextInput extends BaseComponent
                 });
             }
 
-            wValue.addEventListener( "mousedown", function( e ){
+            wValue.addEventListener( "mousedown", function( e ) {
                 e.stopImmediatePropagation();
                 e.stopPropagation();
             });
