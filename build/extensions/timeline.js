@@ -344,22 +344,20 @@ class Timeline {
                         this.setTrackState( e.node.trackData.trackIdx, e.value );
                     } 
                     break;
-                case LX.TreeEvent.NODE_CARETCHANGED:
-                   if ( !this.trackTreesComponent ){ return;}
-                    /* hack
-                        On NODE_CARETCHANGED, the html are regenerated. TrackHeight need to be forced on the htmls again.
-                        This event is called BEFORE the regeneration, so a setTimeout of 1ms is called.
-                        To avoid a flicker, hide the element while it is changing and show it again afterwards
-                    */
-                    this.trackTreesComponent.root.classList.add("hidden");
-                    setTimeout( ()=>{
-                        this.setTrackHeight(this.trackHeight);
-                        this.trackTreesComponent.root.classList.remove("hidden");
-                    }, 1);
+            }
 
-                    break;
+            if ( this.onTrackTreeEvent ){
+                this.onTrackTreeEvent(e);
             }
         }});
+
+        const that = this;
+        this.trackTreesComponent.innerTree._refresh = this.trackTreesComponent.innerTree.refresh;
+        this.trackTreesComponent.innerTree.refresh = function( newData, selectedId ){
+            this._refresh( newData, selectedId );
+            that.setTrackHeight( that.trackHeight );
+        }
+
         // setting a name in the addTree function adds an undesired node
         this.trackTreesComponent.name = "tracksTrees";
         p.components[this.trackTreesComponent.name] = this.trackTreesComponent;
@@ -1831,7 +1829,7 @@ class KeyFramesTimeline extends Timeline {
         let localY = e.localY;
         let track = e.track;
 
-        if(e.ctrlKey && this.lastKeyFramesSelected.length) { // move keyframes
+        if( (e.ctrlKey || e.altKey) && this.lastKeyFramesSelected.length) { // move keyframes
             this.movingKeys = true;
             this.canvas.style.cursor = "grab";  
             this.canvas.classList.add('grabbing');
@@ -1839,31 +1837,28 @@ class KeyFramesTimeline extends Timeline {
             // Set pre-move state
             this.moveKeyMinTime = Infinity;
             const tracks = this.animationClip.tracks;
-            for(let selectedKey of this.lastKeyFramesSelected) {
+            let lastTrackIdx = -1; 
+            for(let selectedKey of this.lastKeyFramesSelected) { // WARNING assumes lasKeyFramesSelected is sorted, so all keyframes of the same track are grouped
                 let [trackIdx, keyIndex, keyTime] = selectedKey;
                 const track = tracks[trackIdx];
-                
-                // save track states only once
-                if (this.moveKeyMinTime < Infinity){
-                    let state = this.historyUndo[this.historyUndo.length-1];
-                    let s = 0;
-                    for( s = 0; s < state.length; ++s){
-                        if ( state[s].trackIdx == track.trackIdx ){ break; }
-                    }
-                    if( s == state.length ){
-                        this.saveState(track.trackIdx, true);
-                    }
-                }else{
-                    this.saveState(track.trackIdx, false);               
-                }
 
                 selectedKey[2] = track.times[keyIndex]; // update original time just in case 
-                this.moveKeyMinTime = Math.min( this.moveKeyMinTime, selectedKey[2] );
+                
+                if ( lastTrackIdx != trackIdx ){ 
+                    // save track states only once
+                    if (this.moveKeyMinTime < Infinity){
+                        this.saveState(track.trackIdx, true);
+                    }else{
+                        this.saveState(track.trackIdx, false);               
+                    }
+                    this.moveKeyMinTime = Math.min( this.moveKeyMinTime, selectedKey[2] );
+                    lastTrackIdx = trackIdx;
+                }
+
             }
             
             this.timeBeforeMove = this.xToTime( localX );
-        }
-        else if( e.altKey ){ // if only altkey, do not grab timeline
+
             this.grabbing = false;
             this.grabbingTimeBar = false;
         }
@@ -1938,38 +1933,36 @@ class KeyFramesTimeline extends Timeline {
                     }
                 }
             }
-            if ( !e.altKey || !(e.buttons & 0x01) ){
+            
+            // Track.dim == 1:  move keyframes vertically (change values instead of time) 
+            // RELIES ON SORTED ARRAY OF lastKeyFramesSelected
+            if ( e.altKey && e.buttons & 0x01 ){
+                const tracks = this.animationClip.tracks;
+                let lastTrackChanged = -1;
+                for( let i = 0; i < this.lastKeyFramesSelected.length; ++i ){
+                    const [trackIdx, keyIndex, originalKeyTime] = this.lastKeyFramesSelected[i];
+                    track = tracks[trackIdx];
+                    if(track.locked || track.dim != 1 || !track.curves){
+                        continue;
+                    }
+    
+                    let value = track.values[keyIndex];
+                    let delta = e.deltay * this.keyValuePerPixel * (track.curvesRange[1]-track.curvesRange[0]); 
+                    track.values[keyIndex] = Math.max(track.curvesRange[0], Math.min(track.curvesRange[1], value - delta)); // invert delta because of screen y
+                    track.edited[keyIndex] = true;
+    
+                    if ( this.onUpdateTrack && track.trackIdx != lastTrackChanged && lastTrackChanged > -1){ // do it only once all keyframes of the same track have been modified
+                        this.onUpdateTrack( [track.trackIdx] );
+                    }
+                    lastTrackChanged = track.trackIdx;
+                }
+                if( this.onUpdateTrack && lastTrackChanged > -1 ){ // do the last update, once the last track has been processed
+                    this.onUpdateTrack( [track.trackIdx] );
+                }
                 return;
             }
         }
 
-        // Track.dim == 1:  move keyframes vertically (change values instead of time) 
-        // RELIES ON SORTED ARRAY OF lastKeyFramesSelected
-        if ( e.altKey && e.buttons & 0x01 ){
-            const tracks = this.animationClip.tracks;
-            let lastTrackChanged = -1;
-            for( let i = 0; i < this.lastKeyFramesSelected.length; ++i ){
-                const [trackIdx, keyIndex, originalKeyTime] = this.lastKeyFramesSelected[i];
-                track = tracks[trackIdx];
-                if(track.locked || track.dim != 1 || !track.curves){
-                    continue;
-                }
-
-                let value = track.values[keyIndex];
-                let delta = e.deltay * this.keyValuePerPixel * (track.curvesRange[1]-track.curvesRange[0]); 
-                track.values[keyIndex] = Math.max(track.curvesRange[0], Math.min(track.curvesRange[1], value - delta)); // invert delta because of screen y
-                track.edited[keyIndex] = true;
-
-                if ( this.onUpdateTrack && track.trackIdx != lastTrackChanged && lastTrackChanged > -1){ // do it only once all keyframes of the same track have been modified
-                    this.onUpdateTrack( [track.trackIdx] );
-                }
-                lastTrackChanged = track.trackIdx;
-            }
-            if( this.onUpdateTrack && lastTrackChanged > -1 ){ // do the last update, once the last track has been processed
-                this.onUpdateTrack( [track.trackIdx] );
-            }
-            return;
-        }
 
         if( this.grabbing && e.button != 2) {
 
