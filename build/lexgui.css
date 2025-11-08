@@ -2753,7 +2753,6 @@ input[type=number] {
     font-size: var(--global-font-size);
     font-family: var(--global-font);
     line-height: 23px;
-    margin-left: -2px;
 }
 
 .lextree .lextreeitem {
