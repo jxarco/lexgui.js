@@ -2,6 +2,8 @@
 
 ## dev
 
+## 0.7.12 (master)
+
 Added support column actions in Table Component.
 
 Timeline:
@@ -13,7 +15,7 @@ Timeline:
 NodeTree:
 - Fixed styling of actions button inputs.
 
-## 0.7.11 (master)
+## 0.7.11
 
 Fixed `Menubar.getSubItem`.
 
