@@ -12698,6 +12698,7 @@ class Table extends BaseComponent
         this.filter = options.filter ?? false;
         this.customFilters = options.customFilters ?? false;
         this._toggleColumns = options.toggleColumns ?? false;
+        this._sortColumns = options.sortColumns ?? true;
         this._currentFilter = options.filterValue;
 
         data.head = data.head ?? [];
@@ -12964,28 +12965,62 @@ class Table extends BaseComponent
                         th.classList.add( "centered" );
                     }
 
-                    const menuOptions = [
-                        { name: "Asc", icon: "ArrowUpAZ", callback: sortFn.bind( this, idx, 1 ) },
-                        { name: "Desc", icon: "ArrowDownAZ", callback: sortFn.bind( this, idx, -1 ) }
-                    ];
+                    const menuOptions = [];
 
-                    if( this._toggleColumns )
+                    if( options.columnActions )
                     {
-                        menuOptions.push(
-                            null,
+                        for( let action of options.columnActions )
+                        {
+                            if( !action.name )
                             {
-                                name: "Hide", icon: "EyeOff", callback: () => {
-                                    data.colVisibilityMap[ idx ] = false;
-                                    const cells = table.querySelectorAll(`tr > *:nth-child(${idx + this.rowOffsetCount + 1})`);
-                                    cells.forEach( cell => {
-                                        cell.style.display = ( cell.style.display === "none" ) ? "" : "none";
-                                    } );
-                                }
+                                console.warn( "Invalid column action (missing name):", action );
+                                continue;
                             }
+
+                            menuOptions.push( { name: action.name, icon: action.icon, className: action.className, callback: () => {
+                                const colRows = this.data.body.map( row => [ row[ idx ] ] );
+                                const mustRefresh = action.callback( colRows, table );
+                                if( mustRefresh )
+                                {
+                                    this.refresh();
+                                }
+                            } } );
+                        }
+                    }
+
+                    if( this._sortColumns )
+                    {
+                        if(  menuOptions.length > 0 )
+                        {
+                            menuOptions.push( null );
+                        }
+
+                        menuOptions.push(
+                            { name: "Asc", icon: "ArrowUpAZ", callback: sortFn.bind( this, idx, 1 ) },
+                            { name: "Desc", icon: "ArrowDownAZ", callback: sortFn.bind( this, idx, -1 ) }
                         );
                     }
 
+                    if( this._toggleColumns )
+                    {
+                        if(  menuOptions.length > 0 )
+                        {
+                            menuOptions.push( null );
+                        }
+
+                        menuOptions.push( {
+                            name: "Hide", icon: "EyeOff", callback: () => {
+                                data.colVisibilityMap[ idx ] = false;
+                                const cells = table.querySelectorAll(`tr > *:nth-child(${idx + this.rowOffsetCount + 1})`);
+                                cells.forEach( cell => {
+                                    cell.style.display = ( cell.style.display === "none" ) ? "" : "none";
+                                } );
+                            }
+                        } );
+                    }
+
                     th.addEventListener( 'click', event => {
+                        if( menuOptions.length === 0 ) return;
                         new LX.DropdownMenu( event.target, menuOptions, { side: "bottom", align: "start" });
                     });
 

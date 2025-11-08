@@ -2,6 +2,8 @@
 
 ## dev
 
+Added support column actions in Table Component.
+
 Timeline:
 - Added `setTrackLock` method.
 - Renamed `onLockTrack` to `onSetTrackLock`.

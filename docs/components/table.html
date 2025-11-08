@@ -36,6 +36,9 @@
                     { name: "Status", options: ["Backlog", "Todo", "In Progress", "Done", "Canceled"] },
                     { name: "Priority", options: ["Low", "Medium", "High"] },
                 ],
+                columnActions: [
+                    { name: "Delete", icon: "Trash2", className: "fg-error", callback: () => {} },
+                ],
                 rowActions: [
                     { icon: "Edit", title: "Edit Row" },
                     "delete",
@@ -75,11 +78,13 @@
             body: [
                 ["head", "Array", "Table headers (each of the headers per column)", "—"],
                 ["body", "Array", "Table body (data per row for each column)", "—"],
+                ["columnActions", "Array", `Allow to add actions per column ${INLINE_CODE("action: { name, icon, callback }")}`, "—"],
                 ["rowActions", "Array", `Allow to add actions per row ${INLINE_CODE("action: { icon, callback }")}`, "—"],
                 ["onMenuAction", "Function", `Function callback to fill the "menu" context`, "—"],
                 ["selectable", "Boolean", "Each row can be selected", "false"],
                 ["sortable", "Boolean", "Rows can be sorted by the user manually", "false"],
                 ["centered", "Boolean/Array", "Center text within columns. true for all, Array for center selected cols", "—"],
+                ["sortColumns", "Boolean", "Columns can be sorted", "true"],
                 ["toggleColumns", "Boolean", "Columns visibility can be toggled", "false"],
                 ["filter", "String", "Name of the column to filter by text input (if any)", "false"],
                 ["filterValue", "String", "Initial filter value", "—"],
