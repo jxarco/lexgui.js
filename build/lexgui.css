@@ -257,6 +257,11 @@ body {
     box-sizing: border-box;
 }
 
+.no-transition,
+.no-transition * {
+  transition: none !important;
+}
+
 blockquote, dd, dl, figure, h1, h2, h3, h4, h5, h6, hr, p, pre {
     margin: 0;
 }
@@ -2753,7 +2758,6 @@ input[type=number] {
     font-size: var(--global-font-size);
     font-family: var(--global-font);
     line-height: 23px;
-    margin-left: -2px;
 }
 
 .lextree .lextreeitem {
@@ -4476,28 +4480,40 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     margin-left: 12px;
 }
 
+/* Height, Width transitions */
+
+.lexarea .minimize-vertical, .lexarea .maximize-vertical {
+    transition: height 0.1s ease-out;
+}
+
+.lexarea .minimize-horizontal, .lexarea .maximize-horizontal {
+    transition: width 0.1s ease-out;
+}
+
+/* Opacity transitions */
+
 .lexarea .fadein-vertical {
     animation-name: fadein;
+    animation-duration: 0.1s;
     animation-fill-mode: forwards;
 }
 
 .lexarea .fadeout-vertical {
     animation-name: fadeout;
-    animation-duration: 0.25s;
+    animation-duration: 0.1s;
     animation-fill-mode: forwards;
-    transition: height;
 }
 
 .lexarea .fadein-horizontal {
     animation-name: fadein;
+    animation-duration: 0.1s;
     animation-fill-mode: forwards;
 }
 
 .lexarea .fadeout-horizontal {
     animation-name: fadeout;
-    animation-duration: 0.25s;
+    animation-duration: 0.1s;
     animation-fill-mode: forwards;
-    transition: width;
 }
 
 @keyframes fadein {
@@ -6393,6 +6409,7 @@ ul.lexassetscontent {
 .w-full { width: 100% }
 .w-screen { width: 100vw }
 .w-auto { width: auto }
+.w-fit-content { width: fit-content }
 
 .w-2\/3 { width: 66.666% }
 .w-1\/2 { width: 50% }

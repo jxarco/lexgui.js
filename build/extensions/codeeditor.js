@@ -1299,6 +1299,10 @@ class CodeEditor
                     this.codeArea.root.style.height = `calc(100% - ${ this._fullVerticalOffset }px)`;
                 }, 50 );
 
+                if( options.callback )
+                {
+                    options.callback.call( this, this );
+                }
             });
 
             window.editor = this;

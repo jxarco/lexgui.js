@@ -135,21 +135,22 @@
                 ["allowClosingTabs", "Boolean", "Enables/Disables closing tabs", "true"],
                 ["allowLoadingFiles", "Boolean", "Enables/Disables loading tabs from file", "true"],
                 ["autocomplete", "Boolean", "Toggle using autocomplete tool", "true"],
-                ["customSuggestions", "Array", "Custom word list for autocomplete", "—"],
+                ["callback", "Function", "Function to call when the editor is fully loaded"],
+                ["customSuggestions", "Array", "Custom word list for autocomplete"],
                 ["defaultTab", "Boolean", "Toggles the addition of the default tab", "true"],
                 ["disableEdition", "Boolean", "Disables the edition of code (To make code snippets)", "false"],
                 ["files", "Array", "List of files to load on start the editor"],
                 ["filesAsync", "Array", "List of files to load asynchronally on start the editor"],
                 ["fileExplorer", "Boolean", "Create a file explorer for the editor", "false"],
                 ["highlight", "String", "Default highlighting", `"Plain Text"`],
-                ["name", "String", "If defined, name of the default code tab", "—"],
-                ["newTabOptions", "Array", "To use a custom Dropdown on click _New tab +_ button", "—"],
-                ["onContextMenu", "Function", "Function to add custom actions on opening CM at any content", "—"],
-                ["onCtrlSpace", "Function", "Code to call when pressing <code class='inline'>Ctrl+Space</code> in the editor", "—"],
-                ["onCreateStatusPanel", "Function", "Code to call when the status bar is created to add custom elements", "—"],
-                ["onNewTab", "Function", "Function to skip default action on click _New tab +_ button", "—"],
-                ["onSave", "Function", "Code to call when pressing <code class='inline'>Ctrl+S</code> in the editor", "—"],
-                ["onRun", "Function", "Code to call when pressing <code class='inline'>Ctrl+Enter</code> in the editor", "—"],
+                ["name", "String", "If defined, name of the default code tab"],
+                ["newTabOptions", "Array", "To use a custom Dropdown on click _New tab +_ button"],
+                ["onContextMenu", "Function", "Function to add custom actions on opening CM at any content"],
+                ["onCtrlSpace", "Function", "Code to call when pressing <code class='inline'>Ctrl+Space</code> in the editor"],
+                ["onCreateStatusPanel", "Function", "Code to call when the status bar is created to add custom elements"],
+                ["onNewTab", "Function", "Function to skip default action on click _New tab +_ button"],
+                ["onSave", "Function", "Code to call when pressing <code class='inline'>Ctrl+S</code> in the editor"],
+                ["onRun", "Function", "Code to call when pressing <code class='inline'>Ctrl+Enter</code> in the editor"],
                 ["statusShowEditorFilename", "Boolean", "Show Filename in info status bar", "true"],
                 ["statusShowEditorIndentation", "Boolean", "Show Indentation in info status bar", "true"],
                 ["statusShowEditorLanguage", "Boolean", "Show Language in info status bar", "true"],
@@ -158,7 +159,7 @@
                 ["skipInfo", "Boolean", "Show or hide the editor status bar panel at the bottom (Zoom, Line, Column, etc.)", "false"],
                 ["skipTabs", "Boolean", "Don't use tab-style editor for showing opened files", "false"],
             ].map( v => {
-                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] ? v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] : "—" ];
             } )
         }, {});
     }

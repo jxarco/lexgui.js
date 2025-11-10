@@ -635,13 +635,13 @@
                 switch (event.type) {
                     case LX.TreeEvent.NODE_SELECTED:
                         if (event.multiple)
-                            console.log("Selected: ", event.node);
+                            console.log("Selected: ", event.value);
                         else
                             console.log(event.node.id + " selected");
                         break;
                     case LX.TreeEvent.NODE_DELETED:
                         if (event.multiple)
-                            console.log("Deleted: ", event.node);
+                            console.log("Deleted: ", event.value);
                         else
                             console.log(event.node.id + " deleted");
                         break;

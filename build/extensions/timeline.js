@@ -6,6 +6,9 @@ if(!LX) {
 
 LX.extensions.push( 'Timeline' );
 
+LX.registerIcon("TimelineLock", '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" d="M7 11V7a4 4 0 0 1 9 0v4 M5,11h13 a2 2 0 0 1 2 2 v7 a2 2 0 0 1 -2 2 h-13 a2 2 0 0 1 -2 -2 v-7 a2 2 0 0 1 2 -2 M12 16 v2"/></svg>' );
+LX.registerIcon("TimelineLockOpen", '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" d="M14 11V7a4 4 0 0 1 9 0v2 M3,11h13 a2 2 0 0 1 2 2 v7 a2 2 0 0 1 -2 2 h-13 a2 2 0 0 1 -2 -2 v-7 a2 2 0 0 1 2 -2 M8 17 h3"/></svg>' );
+
 /**
  * @class Timeline
  * @description Agnostic timeline, do not impose any timeline content. Renders to a canvas
@@ -14,8 +17,8 @@ LX.extensions.push( 'Timeline' );
 class Timeline {
 
     /**
-     * @param {string} name = string unique id
-     * @param {object} options = {skipLock, skipVisibility}
+     * @param {String} name = string unique id
+     * @param {Object} options = {skipLock, skipVisibility}
      */
     constructor( id, options = {} ) {
 
@@ -101,6 +104,7 @@ class Timeline {
         this.canvasArea = right;
         this.canvasArea.root.classList.add("lextimelinearea");
 
+        this.selectedTracks = []; // [track, track] contains selected (highlighted) tracks. That is, tracks with .isSelected == true. Elements in array are not ordered. Only visible tracks should be selected
         this.selectedItems = []; // [trackInfo, "groupId"], contains the visible items (tracks or groups) of the timeline
         this.leftPanel = left.addPanel( { className: 'lextimelinepanel', width: "100%", height: "100%" } );
         this.trackTreesPanel = null;
@@ -180,7 +184,6 @@ class Timeline {
 
     /**
      * @method updateHeader
-     * @param {*}  
      */
 
     updateHeader() {
@@ -312,8 +315,7 @@ class Timeline {
                 if ( this.onAddNewTrackButton ){
                     this.onAddNewTrackButton();
                 }else{
-                    const trackIdx = this.addNewTrack();
-                    this.changeSelectedItems( [trackIdx] );
+                    this.addNewTrack();
                 }
             }, { hideName: true, title: "Add Track", icon: "Plus" });
         }
@@ -332,31 +334,37 @@ class Timeline {
         this.trackTreesComponent = p.addTree(null, treeTracks, {filter: false, rename: false, draggable: false, onevent: (e) => {
             switch(e.type) {
                 case LX.TreeEvent.NODE_SELECTED:
+                    if ( !e.event.shiftKey ){
+                        this.deselectAllTracks( false ); // no need to update left panel
+                    }
                     if (e.node.trackData){
-                        this.selectTrack(e.node.trackData.trackIdx);
+                        const flag = e.event.shiftKey? !e.node.trackData.isSelected : true;
+                        this.setTrackSelection( e.node.trackData.trackIdx, flag, false, false ); // do callback, do not update left panel
                     }
                     break;
                 case LX.TreeEvent.NODE_VISIBILITY:   
                     if (e.node.trackData){
-                        this.setTrackState( e.node.trackData.trackIdx, e.value );
+                        this.setTrackState( e.node.trackData.trackIdx, e.value, false, false ); // do not update left panel
                     } 
                     break;
-                case LX.TreeEvent.NODE_CARETCHANGED:
-                   if ( !this.trackTreesComponent ){ return;}
-                    /* hack
-                        On NODE_CARETCHANGED, the html are regenerated. TrackHeight need to be forced on the htmls again.
-                        This event is called BEFORE the regeneration, so a setTimeout of 1ms is called.
-                        To avoid a flicker, hide the element while it is changing and show it again afterwards
-                    */
-                    this.trackTreesComponent.root.classList.add("hidden");
-                    setTimeout( ()=>{
-                        this.setTrackHeight(this.trackHeight);
-                        this.trackTreesComponent.root.classList.remove("hidden");
-                    }, 1);
+            }
 
-                    break;
+            if ( this.onTrackTreeEvent ){
+                this.onTrackTreeEvent(e);
             }
         }});
+
+        const that = this;
+        this.trackTreesComponent.innerTree._refresh = this.trackTreesComponent.innerTree.refresh;
+        this.trackTreesComponent.innerTree.refresh = function( newData, selectedId ){
+            this._refresh( newData, selectedId );
+            that.setTrackHeight( that.trackHeight );
+        }
+
+        if ( this.selectedTracks.length ){
+            this._updateTrackTreeSelection(); // select visible tracks
+        }
+
         // setting a name in the addTree function adds an undesired node
         this.trackTreesComponent.name = "tracksTrees";
         p.components[this.trackTreesComponent.name] = this.trackTreesComponent;
@@ -382,6 +390,9 @@ class Timeline {
         }
 
         this.resizeCanvas();
+
+        this.setScroll( this.currentScroll ); // avoid scroll bugs
+
     }
 
     setTrackHeight( trackHeight ){
@@ -402,7 +413,7 @@ class Timeline {
     }
 
     /**
-     * @param {object} options options for the new track 
+     * @param {Object} options options for the new track 
      *  { id: string, active: bool, locked: bool, } 
      * @returns 
      */
@@ -421,8 +432,8 @@ class Timeline {
     /**
      * Finds tracks (wholy and partially) inside the range minY maxY.
      * (Full) Canvas local coordinates.
-     * @param {number} minY 
-     * @param {number} maxY 
+     * @param {Number} minY 
+     * @param {Number} maxY 
      * @returns array of trackDatas
      */
     getTracksInRange( minY, maxY ) {
@@ -462,14 +473,14 @@ class Timeline {
     /**
      * @method setAnimationClip
      * @param {*} animation 
-     * @param {boolean} needsToProcess
-     * @param {obj} processOptions 
+     * @param {Boolean} needsToProcess
+     * @param {Object} processOptions 
      * [KeyFrameTimeline] - each track should contain an attribute "dim" to indicate the value dimension (e.g. vector3 -> dim=3). Otherwise dimensions will be infered from track's values and times. Default is 1
      */
     setAnimationClip( animation, needsToProcess = true ) {
 
         this.deselectAllElements();
-        this.deselectAllTracks();
+        this.deselectAllTracks( false ); // no need to update left panel yet
 
         this.selectedItems = [];
 
@@ -798,7 +809,7 @@ class Timeline {
      * @method setScroll
      * not delta from last state, but full scroll amount.
      * @param {Number} scrollY either pixels or [0,1]
-     * @param {Bool} normalized if true, scrollY is in range[0,1] being 1 fully scrolled. Otherwised scrollY represents pixels
+     * @param {Boolean} normalized if true, scrollY is in range[0,1] being 1 fully scrolled. Otherwised scrollY represents pixels
      * @returns 
      */ 
     
@@ -926,7 +937,6 @@ class Timeline {
             this.movingKeys = false;
             this.timeBeforeMove = null;
             this.boxSelection = false; // after mouseup
-            this.deselectAllTracks();
         }
     
 
@@ -1053,7 +1063,7 @@ class Timeline {
     
     /**
      * @method changeState
-     * @param {bool} skipCallback defaults false
+     * @param {Boolean} skipCallback defaults false
      * @description change play/pause state
      **/
     changeState(skipCallback = false) {
@@ -1061,8 +1071,8 @@ class Timeline {
     }
     /**
      * @method setState
-     * @param {bool} state
-     * @param {bool} skipCallback defaults false
+     * @param {Boolean} state
+     * @param {Boolean} skipCallback defaults false
      * @description change play/pause state
      **/
     setState(state, skipCallback = false) {
@@ -1077,8 +1087,8 @@ class Timeline {
 
     /**
      * @method setLoopMode
-     * @param {bool} loopState 
-     * @param {bool} skipCallback defaults false
+     * @param {Boolean} loopState 
+     * @param {Boolean} skipCallback defaults false
      * @description change loop mode of the timeline
      */
     setLoopMode(loopState, skipCallback = false){
@@ -1112,11 +1122,14 @@ class Timeline {
     }
 
     /**
-     * @param {*} itemsToAdd [ trackIdx ], array of numbers identifying tracks by their index
-     * @param {*} itemsToRemove [ trackIdx ], array of numbers identifying tracks by their index
+     * @param {Array} itemsToAdd [ trackIdx ], array of numbers identifying tracks by their index
+     * @param {Array} itemsToRemove [ trackIdx ], array of numbers identifying tracks by their index
      */
     changeSelectedItems( itemsToAdd = null, itemsToRemove = null, skipCallback = false ) {
 
+        this.deselectAllElements();
+        this.deselectAllTracks( false ); // no need to update left panel. It is going to be rebuilt anyways
+       
         const tracks = this.animationClip.tracks;
 
         if ( itemsToRemove ){
@@ -1140,7 +1153,6 @@ class Timeline {
             }
         }
 
-        
         this.updateLeftPanel();
 
         if(this.onItemSelected && !skipCallback){
@@ -1150,7 +1162,7 @@ class Timeline {
 
     /**
      * It will find the first occurrence of trackId in animationClip.tracks
-     * @param {string} trackId 
+     * @param {String} trackId 
      * @returns 
      */
     getTrack( trackId ){
@@ -1164,29 +1176,10 @@ class Timeline {
     }
 
     /**
-     * Only affects render visualisation
-    * @method selectTrack
-    * @param {int} trackIdx
-    * // NOTE: to select a track from outside of the timeline, a this.trackTreesComponent.innerTree.select(item) needs to be called.
-    */
-    selectTrack( trackIdx ) {
-
-        if( !this.animationClip ){
-            return;
-        }
-
-        this.deselectAllTracks();
-        
-        let track = this.animationClip.tracks[ trackIdx ];
-        track.isSelected = true;
-        
-        if( this.onSelectTrack ){
-            this.onSelectTrack(track);
-        }
-    }
-
-    // Only affects render visualisation
-    deselectAllTracks() {
+     * @param {Boolean} updateTrackTree whether the track tree needs a refresh 
+     * @returns 
+     */
+    deselectAllTracks( updateTrackTree = true ) {
 
         if( !this.animationClip ){
             return;
@@ -1196,6 +1189,70 @@ class Timeline {
         for(let i = 0; i < tracks.length; i++){
             tracks[ i ].isSelected = false;
         }
+
+        this.selectedTracks.length = 0;
+
+        if ( updateTrackTree ){
+            this._updateTrackTreeSelection();
+        }
+    }
+
+    /**
+     * @param {Int} trackIdx 
+     * @param {Boolean} isSelected new "selected" state of the track
+     * @param {Boolean} skipCallback whether to call onSetTrackSelection
+     * @param {Boolean} updateTrackTree whether track tree panel needs a refresh
+     * @returns 
+     */
+    setTrackSelection( trackIdx, isSelected, skipCallback = false, updateTrackTree = true ){
+        const track = this.animationClip.tracks[ trackIdx ];
+        const oldValue = track.isSelected;
+        track.isSelected = isSelected;
+        
+        const idx = this.selectedTracks.indexOf( track );
+        if ( ( idx == -1 && !isSelected ) || ( idx > -1 && isSelected ) ){
+            return; 
+        }
+
+        if ( idx == -1 ){
+            this.selectedTracks.push( track );
+        }else{
+            this.selectedTracks.splice( idx, 1 );
+        }
+
+        if( this.onSetTrackSelection && !skipCallback ){
+            this.onSetTrackSelection(track, oldValue );
+        }
+
+        if ( updateTrackTree ){
+            this._updateTrackTreeSelection();
+        }
+    }
+
+    /**
+     * updates trackTreesComponent's nodes, to match the selectedTracks
+     */
+    _updateTrackTreeSelection(){
+        const data = this.trackTreesComponent.innerTree.data;
+        const selected = this.trackTreesComponent.innerTree.selected;
+        selected.length = 0;
+
+        const addToSelection = (nodes) =>{
+            for( let i = 0; i < nodes.length; ++i ){
+                if ( nodes[i].trackData && nodes[i].trackData.isSelected ){
+                    selected.push( nodes[i] );
+                }
+                if ( nodes[i].children ){
+                    addToSelection( nodes[i].children );
+                }
+            }
+        }
+
+        // update innerTree (visible) selected nodes
+        if ( this.selectedTracks.length ){    
+            addToSelection( data );
+        }
+        this.trackTreesComponent.innerTree.refresh();
     }
 
     deselectAllElements(){
@@ -1204,22 +1261,53 @@ class Timeline {
 
     /**
     * @method setTrackState
-    * @param {int} trackIdx 
-    * @param {boolean} isEnbaled
+    * @param {Int} trackIdx 
+    * @param {Boolean} isEnbaled
+    * @param {Boolean} skipCallback onSetTrackState
+    * @param {Boolean} updateTrackTree updates eye icon of the track, if it is visible in the timeline
     */
-    setTrackState(trackIdx, isEnbaled = true, skipCallback = false) {
+    setTrackState(trackIdx, isEnbaled = true, skipCallback = false, updateTrackTree = true ) {
         const track = this.animationClip.tracks[trackIdx];
             
         const oldState = track.active;
         track.active = isEnbaled;
 
-        if(this.onSetTrackState && !skipCallback)
+        if ( this.onSetTrackState && !skipCallback ){
             this.onSetTrackState(track, oldState);
+        }
+
+        if ( updateTrackTree && !this.skipVisibility ){ 
+            // TODO: a bit of an overkill. Maybe searching the node in the tree is less expensive 
+            this.updateLeftPanel(); 
+        }
     }
 
     /**
-     * @param {Number} trackIdx index of track in the animation (not local index) 
-     * @param {Bool} combineWithPrevious whether to create a new entry or unify changes into a single undo entry
+     * 
+     * @param {Int} trackIdx 
+     * @param {Boolean} isLocked 
+     * @param {Boolean} skipCallback onSetTrackLock
+     * @param {Boolean} updateTrackTree updates lock icon of the track, if it is visible in the timeline
+     */
+    setTrackLock(trackIdx, isLocked = false, skipCallback = false, updateTrackTree = true ){
+        const track = this.animationClip.tracks[trackIdx];
+
+        const oldState = track.locked;
+        track.locked = isLocked;
+
+        if ( this.onSetTrackLock && !skipCallback ){
+            this.onSetTrackLock( track, oldState );
+        }
+
+        if ( updateTrackTree && !this.skipLock ){ 
+            // TODO: a bit of an overkill. Maybe searching the node in the tree is less expensive 
+            this.updateLeftPanel(); 
+        }
+    }
+
+    /**
+     * @param {Int} trackIdx index of track in the animation (not local index) 
+     * @param {Boolean} combineWithPrevious whether to create a new entry or unify changes into a single undo entry
      */
     saveState( trackIdx, combineWithPrevious = false ) {
         if ( !this.historySaveEnabler ){ return; }
@@ -1332,26 +1420,10 @@ class Timeline {
             const track = this.selectedItems[ i ];
             treeTracks.push({'trackData': track, 'id': track.id, 'skipVisibility': this.skipVisibility, visible: track.active, 'children':[], actions : this.skipLock ? null : [{
                 'name':'Lock edition',
-                'icon': (track.locked ? 'Lock' : 'LockOpen'),
-                'swap': (track.locked ? 'LockOpen' : 'Lock'),
-                'callback': (node, el) => {
-                    let value = el.classList.contains('Lock');
-                    
-                    if(value) {
-                        el.title = 'Lock edition';
-                        el.classList.remove('Lock');
-                        el.classList.add('LockOpen');    
-                    }
-                    else {
-                        el.title = 'Unlock edition';
-                        el.classList.remove('LockOpen');
-                        el.classList.add('Lock');                                 
-                    }
-
-                    node.trackData.locked = !value;
-                    if(this.onLockTrack){
-                        this.onLockTrack(el, node.trackData, node)
-                    }
+                'icon': (track.locked ? 'TimelineLock' : 'TimelineLockOpen'),
+                'swap': (track.locked ? 'TimelineLockOpen' : 'TimelineLock'),
+                'callback': (node, swapValue, event) => {
+                    this.setTrackLock( node.trackData.trackIdx, !node.trackData.locked, false, false ); // do not update left panel
                 }
             }]});
         }
@@ -1361,7 +1433,7 @@ class Timeline {
 
     /**
      * 
-     * @param {obj} options set some values for the track instance (groups and trackIdx not included)
+     * @param {Object} options set some values for the track instance (groups and trackIdx not included)
      * @returns 
      */
     instantiateTrack(options = {}, clone = false) { 
@@ -1370,7 +1442,7 @@ class Timeline {
             id: options.id ?? ( Math.floor(performance.now().toString()) + "_" + Math.floor(Math.random() * 0xffff) ), //must be unique, at least inside a group
             active: options.active ?? true,
             locked: options.locked ?? false,
-            isSelected: false, // render only        
+            isSelected: false, // render and lexgui tree
             trackIdx: -1,
             data: options.data ?? null // user defined data
         }
@@ -1378,7 +1450,7 @@ class Timeline {
 
     /**
      * Generates an animationClip using either the parameters set in the animation argument or using default values
-     * @param {obj} animation data with which to generate an animationClip 
+     * @param {Object} animation data with which to generate an animationClip 
      * @returns 
      */
     instantiateAnimationClip(options, clone = false) {
@@ -1430,8 +1502,8 @@ class KeyFramesTimeline extends Timeline {
 
     static ADDKEY_VALUESINARRAYS = 0x01; // addkeyframes as [ [k0v0, k0v1...], [k1v0, k1v1...] ] instead of [k0v0,k0v1,k1v0,k1v1]
     /**
-     * @param {string} name unique string
-     * @param {object} options = {animationClip, selectedItems, x, y, width, height, canvas, trackHeight}
+     * @param {String} name unique string
+     * @param {Object} options = {animationClip, selectedItems, x, y, width, height, canvas, trackHeight}
      */
     constructor(name, options = {}) {
 
@@ -1466,26 +1538,10 @@ class KeyFramesTimeline extends Timeline {
                 const track = itemTracks[j];
                 nodes.push({'trackData': track, 'id': track.id, 'skipVisibility': this.skipVisibility, visible: track.active, 'children':[], actions : this.skipLock ? null : [{
                     'name':'Lock edition',
-                    'icon': (track.locked ? 'Lock' : 'LockOpen'),
-                    'swap': (track.locked ? 'LockOpen' : 'Lock'),
-                    'callback': (node, el) => {
-                        let value = el.classList.contains('Lock');
-                     
-                        if(value) {
-                            el.title = 'Lock edition';
-                            el.classList.remove('Lock');
-                            el.classList.add('LockOpen');    
-                        }
-                        else {
-                            el.title = 'Unlock edition';
-                            el.classList.remove('LockOpen');
-                            el.classList.add('Lock');                                 
-                        }
-
-                        node.trackData.locked = !value;
-                        if(this.onLockTrack){
-                            this.onLockTrack(el, node.trackData, node)
-                        }
+                    'icon': (track.locked ? 'TimelineLock' : 'TimelineLockOpen'),
+                    'swap': (track.locked ? 'TimelineLockOpen' : 'TimelineLock'),
+                    'callback': (node, swapValue, event) => {
+                        this.setTrackLock( node.trackData.trackIdx, !node.trackData.locked, false, false ); // do not update left panel
                     }
                 }]});
             }
@@ -1505,7 +1561,7 @@ class KeyFramesTimeline extends Timeline {
 
     /**
      * OVERRIDE
-     * @param {obj} options track information that wants to be set to the new track
+     * @param {Object} options track information that wants to be set to the new track
      *  id, dim, values, times, selected, edited, hovered
      * @returns 
      */
@@ -1550,7 +1606,7 @@ class KeyFramesTimeline extends Timeline {
 
     /**
      * Generates an animationClip using either the parameters set in the animation argument or using default values
-     * @param {obj} animation data with which to generate an animationClip 
+     * @param {Object} animation data with which to generate an animationClip 
      * @returns 
      */
     instantiateAnimationClip(animation, clone = false) {
@@ -1639,12 +1695,13 @@ class KeyFramesTimeline extends Timeline {
 
     /**
      * OVERRIDE
-     * @param {*} itemsToAdd [ trackIdx, "groupId" ], array of strings and/or number identifying groups and/or tracks
-     * @param {*} itemsToRemove [ trackIdx, "groupId" ], array of strings and/or number identifying groups and/or tracks
+     * @param {Array} itemsToAdd [ trackIdx, "groupId" ], array of strings and/or number identifying groups and/or tracks
+     * @param {Array} itemsToRemove [ trackIdx, "groupId" ], array of strings and/or number identifying groups and/or tracks
      */
     changeSelectedItems( itemsToAdd = null, itemsToRemove = null, skipCallback = false ) {
 
         this.deselectAllElements();
+        this.deselectAllTracks( false ); // no need to update left panel. It is going to be rebuilt anyways
         
         const tracks = this.animationClip.tracks;
         const tracksPerGroup = this.animationClip.tracksPerGroup;
@@ -1675,7 +1732,6 @@ class KeyFramesTimeline extends Timeline {
                 }
             }
         }
-
         
         this.updateLeftPanel();
 
@@ -1685,8 +1741,8 @@ class KeyFramesTimeline extends Timeline {
     }
 
     /**
-     * @param {string} groupId unique identifier
-     * @param {array} groupTracks [ "trackID", trackIdx ] array of strings and/or numbers of the existing tracks to include in this group. A track can only be part of 1 group
+     * @param {String} groupId unique identifier
+     * @param {Array} groupTracks [ "trackID", trackIdx ] array of strings and/or numbers of the existing tracks to include in this group. A track can only be part of 1 group
      *  if groupTracks == null, groupId is removed from the list
      */
     setTracksGroup( groupId, groupTracks = null ){
@@ -1754,7 +1810,7 @@ class KeyFramesTimeline extends Timeline {
     }
 
     /**
-     * @param {string} groupId
+     * @param {String} groupId
      * @returns array of tracks or null 
      */
     getTracksGroup( groupId ){
@@ -1763,8 +1819,8 @@ class KeyFramesTimeline extends Timeline {
 
     /**
      * OVERRIDE
-     * @param {string} trackId 
-     * @param {string} groupId optionl. If not set, it will find the first occurrence of trackId in animationClip.tracks
+     * @param {String} trackId 
+     * @param {String} groupId optionl. If not set, it will find the first occurrence of trackId in animationClip.tracks
      * @returns 
      */
     getTrack( trackId, groupId = null ){
@@ -1782,8 +1838,8 @@ class KeyFramesTimeline extends Timeline {
 
     /**
      * 
-     * @param {number} size pixels, height of keyframe
-     * @param {number} sizeHovered optional, size in pixels when hovered 
+     * @param {Number} size pixels, height of keyframe
+     * @param {Number} sizeHovered optional, size in pixels when hovered 
      */
     setKeyframeSize( size, sizeHovered = null ){
         this.keyframeSizeHovered = sizeHovered ?? size;
@@ -1799,7 +1855,8 @@ class KeyFramesTimeline extends Timeline {
         if(e.shiftKey) {
             // Manual multiple selection
             if(!discard && track) {
-                const keyFrameIdx = this.getCurrentKeyFrame( track, this.xToTime( localX ), this.secondsPerPixel * 5 );   
+                const thresholdPixels = this.keyframeSize * 0.5; // radius of circle (curves) or rotated square (keyframes)
+                const keyFrameIdx = this.getCurrentKeyFrame( track, this.xToTime( localX ), this.secondsPerPixel * thresholdPixels );   
                 if ( keyFrameIdx > -1 ){
                     track.selected[keyFrameIdx] ?
                         this.deselectKeyFrame(track.trackIdx, keyFrameIdx) :
@@ -1833,7 +1890,8 @@ class KeyFramesTimeline extends Timeline {
                 this.deselectAllKeyFrames();         
             }
             if (track){
-                const keyFrameIndex = this.getCurrentKeyFrame( track, this.xToTime( localX ), this.secondsPerPixel * 5 );
+                const thresholdPixels = this.keyframeSize * 0.5; // radius of circle (curves) or rotated square (keyframes)
+                const keyFrameIndex = this.getCurrentKeyFrame( track, this.xToTime( localX ), this.secondsPerPixel * thresholdPixels );
                 if( keyFrameIndex > -1 ) {
                     this.processSelectionKeyFrame( track.trackIdx, keyFrameIndex, false ); // Settings this as multiple so time is not being set
                 }  
@@ -1850,7 +1908,7 @@ class KeyFramesTimeline extends Timeline {
         let localY = e.localY;
         let track = e.track;
 
-        if(e.ctrlKey && this.lastKeyFramesSelected.length) { // move keyframes
+        if( (e.ctrlKey || e.altKey) && this.lastKeyFramesSelected.length) { // move keyframes
             this.movingKeys = true;
             this.canvas.style.cursor = "grab";  
             this.canvas.classList.add('grabbing');
@@ -1858,31 +1916,28 @@ class KeyFramesTimeline extends Timeline {
             // Set pre-move state
             this.moveKeyMinTime = Infinity;
             const tracks = this.animationClip.tracks;
-            for(let selectedKey of this.lastKeyFramesSelected) {
+            let lastTrackIdx = -1; 
+            for(let selectedKey of this.lastKeyFramesSelected) { // WARNING assumes lasKeyFramesSelected is sorted, so all keyframes of the same track are grouped
                 let [trackIdx, keyIndex, keyTime] = selectedKey;
                 const track = tracks[trackIdx];
-                
-                // save track states only once
-                if (this.moveKeyMinTime < Infinity){
-                    let state = this.historyUndo[this.historyUndo.length-1];
-                    let s = 0;
-                    for( s = 0; s < state.length; ++s){
-                        if ( state[s].trackIdx == track.trackIdx ){ break; }
-                    }
-                    if( s == state.length ){
-                        this.saveState(track.trackIdx, true);
-                    }
-                }else{
-                    this.saveState(track.trackIdx, false);               
-                }
 
                 selectedKey[2] = track.times[keyIndex]; // update original time just in case 
-                this.moveKeyMinTime = Math.min( this.moveKeyMinTime, selectedKey[2] );
+                
+                if ( lastTrackIdx != trackIdx ){ 
+                    // save track states only once
+                    if (this.moveKeyMinTime < Infinity){
+                        this.saveState(track.trackIdx, true);
+                    }else{
+                        this.saveState(track.trackIdx, false);               
+                    }
+                    this.moveKeyMinTime = Math.min( this.moveKeyMinTime, selectedKey[2] );
+                    lastTrackIdx = trackIdx;
+                }
+
             }
             
             this.timeBeforeMove = this.xToTime( localX );
-        }
-        else if( e.altKey ){ // if only altkey, do not grab timeline
+
             this.grabbing = false;
             this.grabbingTimeBar = false;
         }
@@ -1957,38 +2012,36 @@ class KeyFramesTimeline extends Timeline {
                     }
                 }
             }
-            if ( !e.altKey || !(e.buttons & 0x01) ){
+            
+            // Track.dim == 1:  move keyframes vertically (change values instead of time) 
+            // RELIES ON SORTED ARRAY OF lastKeyFramesSelected
+            if ( e.altKey && e.buttons & 0x01 ){
+                const tracks = this.animationClip.tracks;
+                let lastTrackChanged = -1;
+                for( let i = 0; i < this.lastKeyFramesSelected.length; ++i ){
+                    const [trackIdx, keyIndex, originalKeyTime] = this.lastKeyFramesSelected[i];
+                    track = tracks[trackIdx];
+                    if(track.locked || track.dim != 1 || !track.curves){
+                        continue;
+                    }
+    
+                    let value = track.values[keyIndex];
+                    let delta = e.deltay * this.keyValuePerPixel * (track.curvesRange[1]-track.curvesRange[0]); 
+                    track.values[keyIndex] = Math.max(track.curvesRange[0], Math.min(track.curvesRange[1], value - delta)); // invert delta because of screen y
+                    track.edited[keyIndex] = true;
+    
+                    if ( this.onUpdateTrack && track.trackIdx != lastTrackChanged && lastTrackChanged > -1){ // do it only once all keyframes of the same track have been modified
+                        this.onUpdateTrack( [track.trackIdx] );
+                    }
+                    lastTrackChanged = track.trackIdx;
+                }
+                if( this.onUpdateTrack && lastTrackChanged > -1 ){ // do the last update, once the last track has been processed
+                    this.onUpdateTrack( [track.trackIdx] );
+                }
                 return;
             }
         }
 
-        // Track.dim == 1:  move keyframes vertically (change values instead of time) 
-        // RELIES ON SORTED ARRAY OF lastKeyFramesSelected
-        if ( e.altKey && e.buttons & 0x01 ){
-            const tracks = this.animationClip.tracks;
-            let lastTrackChanged = -1;
-            for( let i = 0; i < this.lastKeyFramesSelected.length; ++i ){
-                const [trackIdx, keyIndex, originalKeyTime] = this.lastKeyFramesSelected[i];
-                track = tracks[trackIdx];
-                if(track.locked || track.dim != 1 || !track.curves){
-                    continue;
-                }
-
-                let value = track.values[keyIndex];
-                let delta = e.deltay * this.keyValuePerPixel * (track.curvesRange[1]-track.curvesRange[0]); 
-                track.values[keyIndex] = Math.max(track.curvesRange[0], Math.min(track.curvesRange[1], value - delta)); // invert delta because of screen y
-                track.edited[keyIndex] = true;
-
-                if ( this.onUpdateTrack && track.trackIdx != lastTrackChanged && lastTrackChanged > -1){ // do it only once all keyframes of the same track have been modified
-                    this.onUpdateTrack( [track.trackIdx] );
-                }
-                lastTrackChanged = track.trackIdx;
-            }
-            if( this.onUpdateTrack && lastTrackChanged > -1 ){ // do the last update, once the last track has been processed
-                this.onUpdateTrack( [track.trackIdx] );
-            }
-            return;
-        }
 
         if( this.grabbing && e.button != 2) {
 
@@ -1996,8 +2049,8 @@ class KeyFramesTimeline extends Timeline {
         else if(track) {
 
             this.unHoverAll();
-            const thresholdPixels = track.curves? this.keyframeSize : (Math.SQRT2 * this.keyframeSize);
-            let keyFrameIndex = this.getCurrentKeyFrame( track, this.xToTime( localX ), this.secondsPerPixel * thresholdPixels * 0.5 );
+            const thresholdPixels = this.keyframeSize * 0.5; // radius of circle (curves) or rotated square (keyframes)
+            let keyFrameIndex = this.getCurrentKeyFrame( track, this.xToTime( localX ), this.secondsPerPixel * thresholdPixels );
             if(keyFrameIndex > -1 ) {
                 if(track && track.locked)
                     return;
@@ -2166,8 +2219,8 @@ class KeyFramesTimeline extends Timeline {
         const keyframes = track.times;         
         const startTime = this.visualTimeRange[0];
         const endTime = this.visualTimeRange[1] + 0.0000001;
-        const defaultPointSize =  Math.SQRT2 * this.keyframeSize * 0.5; // pythagoras with equal sides h2 = c2 + c2 = 2 * c2
-        const hoverPointSize = Math.SQRT2 * this.keyframeSizeHovered * 0.5;
+        const defaultPointSize = this.keyframeSize / Math.SQRT2; // pythagoras with equal sides h2 = c2 + c2 = 2 * c2
+        const hoverPointSize = this.keyframeSizeHovered / Math.SQRT2;
 
         for(let j = 0; j < keyframes.length; ++j)
         {
@@ -2326,7 +2379,7 @@ class KeyFramesTimeline extends Timeline {
 
     /**
      * updates an existing track with new values and times.
-     * @param {Integer} trackIdx index of track in the animationClip 
+     * @param {Int} trackIdx index of track in the animationClip 
      * @param {*} newTrack object with two arrays: values and times. These will be set to the selected track
      * @returns 
      */
@@ -2348,8 +2401,8 @@ class KeyFramesTimeline extends Timeline {
      * removes equivalent sequential keys either because of equal times or values
      * (0,0,0,0,1,1,1,0,0,0,0,0,0,0) --> (0,0,1,1,0,0)
      * @param {Int} trackIdx index of track in the animation
-     * @param {Bool} onlyEqualTime if true, removes only keyframes with equal times. Otherwise, values are ALSO compared through the class threshold
-     * @param {Bool} skipCallback if false, triggers "onOptimizeTracks" after optimizing
+     * @param {Boolean} onlyEqualTime if true, removes only keyframes with equal times. Otherwise, values are ALSO compared through the class threshold
+     * @param {Boolean} skipCallback if false, triggers "onOptimizeTracks" after optimizing
      */
     optimizeTrack(trackIdx, onlyEqualTime = false, skipCallback = false ) {
         if ( !this.animationClip ){ return; }
@@ -2359,6 +2412,11 @@ class KeyFramesTimeline extends Timeline {
             values = track.values,
             stride = track.dim,
             threshold = this.optimizeThreshold;
+        
+        if ( track.locked ){
+            return;
+        }
+
         let cmpFunction = (v, p, n, t) => { return Math.abs(v - p) >= t || Math.abs(v - n) >= t };
         let lastSavedIndex = 0;
         const lastIndex = times.length-1;
@@ -2701,7 +2759,7 @@ class KeyFramesTimeline extends Timeline {
 
     pasteKeyFrameValue( track, index ) {
 
-        if(this.clipboard.value.type != track.type){
+        if(track.locked || this.clipboard.value.type != track.type){
             return;
         }
 
@@ -2746,6 +2804,10 @@ class KeyFramesTimeline extends Timeline {
             const values = clipboardInfo.values;
             const track = this.animationClip.tracks[trackIdx];
 
+            if( track.locked ){
+                continue;
+            }
+
             this.saveState(track.trackIdx, trackCount++);
             this.historySaveEnabler = false;
             this.addKeyFrames( track.trackIdx, values, times, -globalStart + pasteTime, KeyFramesTimeline.ADDKEY_VALUESINARRAYS  );
@@ -2763,11 +2825,11 @@ class KeyFramesTimeline extends Timeline {
 
     /**
      * 
-     * @param {int} trackIdx 
-     * @param {array} newValues array of values for each keyframe. It should be a flat array of size track.dim*numKeyframes. Check ADDKEY_VALUESINARRAYS flag
-     * @param {array of numbers} newTimes must be ordered ascendently
-     * @param {number} timeOffset 
-     * @param {int} flags     
+     * @param {Int} trackIdx 
+     * @param {Array} newValues array of values for each keyframe. It should be a flat array of size track.dim*numKeyframes. Check ADDKEY_VALUESINARRAYS flag
+     * @param {Array of numbers} newTimes must be ordered ascendently
+     * @param {Number} timeOffset 
+     * @param {Int} flags     
      *      KeyFramesTimeline.ADDKEY_VALUESINARRAYS: if set, newValues is an array of arrays, one for each entry [ [1,2,3], [5,6,7] ]. Times is still a flat array of values [ 0, 0.2 ]
  
      * @returns 
@@ -2775,7 +2837,7 @@ class KeyFramesTimeline extends Timeline {
     addKeyFrames( trackIdx, newValues, newTimes, timeOffset = 0, flags = 0x00 ){
         const track = this.animationClip.tracks[trackIdx];
 
-        if ( !newTimes.length ){ return; }
+        if ( !newTimes.length || track.locked ){ return null; }
 
         const valueDim = track.dim;
         const trackTimes = track.times;
@@ -2865,6 +2927,7 @@ class KeyFramesTimeline extends Timeline {
             return; 
         }
 
+        const tracks = this.animationClip.tracks;
         const firstTrack = this.lastKeyFramesSelected[0][0];
         let trackToRemove = firstTrack;
         let toDelete = []; // indices to delete of the same track
@@ -2874,6 +2937,12 @@ class KeyFramesTimeline extends Timeline {
         const numSelected = this.lastKeyFramesSelected.length; 
         for( let i = 0; i < numSelected; ++i ){
             const [trackIdx, frameIdx] = this.lastKeyFramesSelected[i];
+
+            if ( tracks[trackIdx].locked ){
+                tracks[trackIdx].selected[frameIdx] = false; // unselect 
+                continue;
+            }
+            
             if ( trackToRemove != trackIdx ){
                 this.saveState(trackToRemove, trackToRemove != firstTrack);
 
@@ -2885,7 +2954,7 @@ class KeyFramesTimeline extends Timeline {
                 toDelete.length = 0;
             }
  
-            toDelete.push(frameIdx)
+            toDelete.push( frameIdx );
         }
 
         this.saveState(trackToRemove, trackToRemove != firstTrack);
@@ -2900,7 +2969,7 @@ class KeyFramesTimeline extends Timeline {
     deleteKeyFrames( trackIdx, indices, skipCallback = false ){
         const track = this.animationClip.tracks[trackIdx];
 
-        if ( !indices.length ){ 
+        if ( !indices.length || track.locked ){ 
             return false; 
         }
 
@@ -2949,9 +3018,9 @@ class KeyFramesTimeline extends Timeline {
 
     /**
      * Binary search. Relies on track.times being a sorted array
-     * @param {object} track 
-     * @param {number} time 
-     * @param {number} mode on of the possible values 
+     * @param {Object} track 
+     * @param {Number} time 
+     * @param {Number} mode on of the possible values 
      *  - -1 = nearest frame with t[f] <= time 
      *  - 0 = nearest frame 
      *  - 1 = nearest frame with t[f] >= time
@@ -2993,9 +3062,9 @@ class KeyFramesTimeline extends Timeline {
 
     /**
      * get the nearest keyframe to "time" given a maximum threshold. 
-     * @param {object} track 
-     * @param {number} time 
-     * @param {number} threshold must be positive value
+     * @param {Object} track 
+     * @param {Number} time 
+     * @param {Number} threshold must be positive value
      * @returns returns a postive/zero value if there is a frame inside the threshold range. Otherwise, -1
      */
     getCurrentKeyFrame( track, time, threshold = 0.0 ) {
@@ -3013,10 +3082,10 @@ class KeyFramesTimeline extends Timeline {
 
     /**
      * Returns the interval of frames between minTime and maxTime (both included)
-     * @param {object} track 
-     * @param {number} minTime 
-     * @param {number} maxTime 
-     * @param {number} threshold must be positive value 
+     * @param {Object} track 
+     * @param {Number} minTime 
+     * @param {Number} maxTime 
+     * @param {Number} threshold must be positive value 
      * @returns an array with two values [ minFrame, maxFrame ]. Otherwise null 
      */
     getKeyFramesInRange( track, minTime, maxTime, threshold = 0.0 ) {
@@ -3149,12 +3218,12 @@ class KeyFramesTimeline extends Timeline {
 
         const track =  this.animationClip.tracks[trackIdx];
 
-        if(track.locked ){
-            return;
-        }
-
         this.unHoverAll();
         this.deselectAllKeyFrames();
+        
+        if( track.locked ){
+            return;
+        }
 
         this.saveState(track.trackIdx);
 
@@ -3180,8 +3249,8 @@ class ClipsTimeline extends Timeline {
     static CLONEREASON_TRACKCLONE = 4;
 
     /**
-     * @param {string} name 
-     * @param {object} options = {animationClip, selectedItems, x, y, width, height, canvas, trackHeight}
+     * @param {String} name 
+     * @param {Object} options = {animationClip, selectedItems, x, y, width, height, canvas, trackHeight}
      */
     constructor(name, options = {}) {
 
@@ -3196,7 +3265,7 @@ class ClipsTimeline extends Timeline {
 
     /**
      * Generates an animationClip using either the parameters set in the animation argument or using default values
-     * @param {obj} animation data with which to generate an animationClip 
+     * @param {Object} animation data with which to generate an animationClip 
      * @returns 
      */
     instantiateAnimationClip(animation, clone = false) {
@@ -3218,7 +3287,7 @@ class ClipsTimeline extends Timeline {
 
     /**
      * 
-     * @param {obj} options set some values for the track instance (groups and trackIdx not included)
+     * @param {Object} options set some values for the track instance (groups and trackIdx not included)
      * @returns 
     */
     instantiateTrack(options = {}, clone = false) {
@@ -3319,6 +3388,7 @@ class ClipsTimeline extends Timeline {
     changeSelectedItems( ) {
 
         this.deselectAllElements();
+        this.deselectAllTracks( false ); // no need to update left 
 
         this.selectedItems = this.animationClip.tracks.slice();
 
@@ -3950,10 +4020,10 @@ class ClipsTimeline extends Timeline {
 
    /**
     * 
-    * @param {obj} clip  clip to be added
-    * @param {int} trackIdx (optional) track where to put the clip. -1 will find the first free slot. ***WARNING*** Must call getClipsInRange, before calling this function with a valid trackdIdx
-    * @param {float} offsetTime (optional) offset time of current time
-    * @param {float} searchStartTrackIdx (optional) if trackIdx is set to -1, this idx will be used as the starting point to find a valid track
+    * @param {Object} clip  clip to be added
+    * @param {Int} trackIdx (optional) track where to put the clip. -1 will find the first free slot. ***WARNING*** Must call getClipsInRange, before calling this function with a valid trackdIdx
+    * @param {Number} offsetTime (optional) offset time of current time
+    * @param {Number} searchStartTrackIdx (optional) if trackIdx is set to -1, this idx will be used as the starting point to find a valid track
     * @returns  a zero/positive value if successful. Otherwise, -1
     */
     addClip( clip, trackIdx = -1, offsetTime = 0, searchStartTrackIdx = 0 ) {
@@ -4200,8 +4270,8 @@ class ClipsTimeline extends Timeline {
     /**
      * User defined. Used when copying and pasting
      * @param {Array of clips} clipsToClone array of original clips. Do not modify clips in this array
-     * @param {float} timeOffset Value of time that should be added (or subtracted) from the timing attributes 
-     * @param {int} reason Flag to signal the reason of the clone
+     * @param {Number} timeOffset Value of time that should be added (or subtracted) from the timing attributes 
+     * @param {Int} reason Flag to signal the reason of the clone
      * @returns {Array of clips}
      */
     cloneClips( clipsToClone, timeOffset, reason = 0 ){

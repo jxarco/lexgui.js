@@ -102,18 +102,23 @@
         ["itemsRemoved", "Array of Numbers"],
     ] );
 
-    MAKE_CLASS_METHOD( "onSelectTrack", `Triggered after calling ${INLINE_CODE("selectTrack")}.`, [
-        ["track", "Object"]
+    MAKE_CLASS_METHOD( "onTrackTreeEvent", `Triggered after an event of the tree in the left panel, which displays the visible tracks`, [
+        ["event", "LX.TreeEvent"]
     ] );
 
-    MAKE_CLASS_METHOD( "onSetTrackState", `Triggered after calling ${INLINE_CODE("setTrackState")} or clicking in the eye icon (active) of the track.`, [
+    MAKE_CLASS_METHOD( "onSetTrackSelection", `Triggered after calling ${INLINE_CODE("setTrackSelection")}.`, [
         ["track", "Object"],
         ["previousState", "Boolean"],
     ] );
 
-    MAKE_CLASS_METHOD( "onLockTrack", `Triggered after clicking in the lock icon of the track.`, [
+    MAKE_CLASS_METHOD( "onSetTrackState", `Triggered after calling ${INLINE_CODE("setTrackState")} or clicking on the eye icon (active) of the track.`, [
         ["track", "Object"],
         ["previousState", "Boolean"],
+    ] );
+
+    MAKE_CLASS_METHOD( "onSetTrackLock", `Triggered after calling ${INLINE_CODE("setTrackLock")} or clicking on the lock icon of the track.`, [
+        ["track", "Object"],
+        ["previousState", "Boolean"]
     ] );
           
     MAKE_HEADER( "Properties", "h2", "" );
@@ -199,10 +204,28 @@
         ["itemsToAdd", "Array of Numbers"],
         ["itemsToRemove", "Array of Numbers"]
     ] );
-    MAKE_CLASS_METHOD( ".setTrackState", `Set whether the track should be active or not.`, [
+    MAKE_CLASS_METHOD( ".setTrackSelection", `Set whether the track should be selected (highlighted) or not.\
+    ${INLINE_CODE("updateTrackTree")} refreshes the track of tree of the timeline. If multiple ${INLINE_CODE("setTrackSelection")} are to be called, set ${INLINE_CODE("updateTrackTree")} only on the last call.`, [
+        ["trackIdx", "Numbers"],
+        ["isSelected", "Boolean"],
+        ["skipCallback", "Boolean"],
+        ["updateTrackTree", "Boolean"],
+    ] );
+    
+    MAKE_CLASS_METHOD( ".setTrackState", `Set whether the track should be active or not.\
+    ${INLINE_CODE("updateTrackTree")} changes the eye icon of the track, if it is visible in the timeline. If multiple ${INLINE_CODE("setTrackState")} are to be called, set ${INLINE_CODE("updateTrackTree")} only on the last call.`, [
         ["trackIdx", "Numbers"],
         ["isEnabled", "Boolean"],
         ["skipCallback", "Boolean"],
+        ["updateTrackTree", "Boolean"],
+    ] );
+    
+    MAKE_CLASS_METHOD( ".setTrackLock", `Set whether the track should be locked or not. Locked tracks cannot be edited (adding or deleting keyframes).\
+        ${INLINE_CODE("updateTrackTree")} changes the lock icon of the track, if it is visible in the timeline. If multiple ${INLINE_CODE("setTrackLock")} are to be called, set ${INLINE_CODE("updateTrackTree")} only on the last call.`, [
+        ["trackIdx", "Numbers"],
+        ["isLocked", "Boolean"],
+        ["skipCallback", "Boolean"],
+        ["updateTrackTree", "Boolean"],
     ] );
     
     MAKE_CLASS_METHOD( ".saveState", `Saves the current state of the track into the history.`, [
