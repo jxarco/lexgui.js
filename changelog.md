@@ -2,7 +2,20 @@
 
 ## dev
 
-## 0.7.11 (master)
+## 0.7.12 (master)
+
+Added support column actions in Table Component.
+
+Timeline:
+- Added `setTrackLock` method.
+- Renamed `onLockTrack` to `onSetTrackLock`.
+- Added `updateTrackTree` parameter to `setTrackState` and `deselectAllTracks`.
+- Renamed `selectTrack` to `setTrackSelection`.
+
+NodeTree:
+- Fixed styling of actions button inputs.
+
+## 0.7.11
 
 Fixed `Menubar.getSubItem`.
 
