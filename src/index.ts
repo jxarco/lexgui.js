@@ -31,6 +31,7 @@ export * from "./components/Map2D";
 
 // Composite Components
 export * from "./components/ContextMenu";
+export * from "./components/DropdownMenu";
 export * from "./components/Tabs";
 export * from "./components/Popover";
 export * from "./components/Skeleton";
