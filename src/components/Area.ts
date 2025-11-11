@@ -1,28 +1,29 @@
 // area.js @jxarco
-import { LX } from './core.js';
+import { LX } from './Core';
+import { ContextMenu } from './ContextMenu';
+import { Menubar } from './Menubar';
 
-class AreaOverlayButtons {
+export class AreaOverlayButtons {
 
-    /**
-     * @constructor AreaOverlayButtons
-     */
+    area: Area;
+    options: any;
+    buttons: any;
 
-    constructor( area, buttonsArray, options = {} ) {
-
+    constructor( area: Area, buttonsArray: any[], options = {} )
+    {
         this.area = area;
         this.options = options;
-
         this.buttons = {};
 
         this._buildButtons( buttonsArray, options );
     }
 
-    _buildButtons( buttonsArray, options ) {
-
+    _buildButtons( buttonsArray: any[], options: any = {} )
+    {
         options.className = "lexoverlaybuttons";
 
         let overlayPanel = this.area.addPanel( options );
-        let overlayGroup = null;
+        let overlayGroup: any = null;
 
         const container = document.createElement( "div" );
         container.className = "lexoverlaybuttonscontainer";
@@ -53,9 +54,9 @@ class AreaOverlayButtons {
             container.className += ` ${ floatClass }`;
         }
 
-        const _addButton = ( b, group, last ) => {
+        const _addButton = ( b: any, group?: any, last?: boolean ) => {
 
-            const _options = {
+            const _options : any = {
                 width: "auto",
                 selectable: b.selectable,
                 selected: b.selected,
@@ -80,7 +81,7 @@ class AreaOverlayButtons {
             }
 
             let callback = b.callback;
-            let component = null;
+            let component: any = null;
 
             if( b.options )
             {
@@ -88,13 +89,13 @@ class AreaOverlayButtons {
             }
             else
             {
-                component = overlayPanel.addButton( null, b.name, function( value, event ) {
+                component = overlayPanel.addButton( null, b.name, function( value: any, event: any ) {
                     if( b.selectable )
                     {
                         if( b.group )
                         {
                             let _prev = b.selected;
-                            b.group.forEach( sub => sub.selected = false );
+                            b.group.forEach( ( sub: any ) => sub.selected = false );
                             b.selected = !_prev;
                         }
                         else
@@ -156,7 +157,7 @@ class AreaOverlayButtons {
             if( float )
             {
                 var height = 0;
-                overlayPanel.root.childNodes.forEach( c => { height += c.offsetHeight; } );
+                overlayPanel.root.childNodes.forEach( ( c: HTMLElement ) => { height += c.offsetHeight; } );
 
                 if( container.className.includes( "middle" ) )
                 {
@@ -171,7 +172,7 @@ class AreaOverlayButtons {
     }
 }
 
-class Area {
+export class Area {
 
     /**
      * @constructor Area
@@ -188,7 +189,30 @@ class Area {
      * layout: Layout to automatically split the area
      */
 
-    constructor( options = {} ) {
+    offset: number = 0;
+    root: any;
+    size: any[];
+    resize: boolean = false;
+    sections: any[] = [];
+    panels: any[] = [];
+
+    minWidth: number = 0;
+    minHeight: number = 0;
+    maxWidth: number = Infinity;
+    maxHeight: Number = Infinity;
+    
+    layout: any;
+    type?: string;
+    parentArea?: Area;
+    splitBar?: any;
+    splitExtended?: boolean;
+    overlayButtons?: AreaOverlayButtons;
+    onresize?: any;
+    
+    _autoVerticalResizeObserver?: ResizeObserver;
+    _root: any;
+
+    constructor( options: any = {} ) {
 
         var root = document.createElement( 'div' );
         root.className = "lexarea";
@@ -201,29 +225,26 @@ class Area {
             root.className += " " + options.className;
         }
 
-        var width = options.width || "100%";
-        var height = options.height || "100%";
+        var width: any = options.width || "100%";
+        var height: any = options.height || "100%";
 
         // This has default options..
         this.setLimitBox( options.minWidth, options.minHeight, options.maxWidth, options.maxHeight );
 
         if( width.constructor == Number )
         {
-            width += "px";
+            width = `${ width }px`;
         }
         if( height.constructor == Number )
         {
-            height += "px";
+            height = `${ height }px`;
         }
 
         root.style.width = width;
         root.style.height = height;
 
-        this.offset = 0;
         this.root = root;
         this.size = [ this.root.offsetWidth, this.root.offsetHeight ];
-        this.sections = [];
-        this.panels = [];
 
         let lexroot = document.getElementById("lexroot");
         if( lexroot && !options.skipAppend )
@@ -306,7 +327,7 @@ class Area {
                 const that = this;
                 let lastMousePosition = [ 0, 0 ];
 
-                function innerMouseDown( e )
+                function innerMouseDown( e: MouseEvent )
                 {
                     const doc = that.root.ownerDocument;
                     doc.addEventListener( 'mousemove', innerMouseMove );
@@ -319,30 +340,30 @@ class Area {
                     that.splitBar.classList.add( 'nocursor' );
                 }
 
-                function innerMouseMove( e )
+                function innerMouseMove( e: MouseEvent )
                 {
                     switch( that.type )
                     {
                         case "right":
                             var dt = ( lastMousePosition[ 0 ] - e.x );
-                            var size = ( that.root.offsetWidth + dt );
+                            var size: number = ( that.root.offsetWidth + dt );
                             that.root.style.width = size + "px";
                             break;
                         case "left":
                             var dt = ( lastMousePosition[ 0 ] - e.x );
-                            var size = Math.min(document.body.clientWidth - LX.DEFAULT_SPLITBAR_SIZE, (that.root.offsetWidth - dt));
+                            var size: number = Math.min(document.body.clientWidth - LX.DEFAULT_SPLITBAR_SIZE, (that.root.offsetWidth - dt));
                             that.root.style.width = size + "px";
                             that.splitBar.style.left = size + LX.DEFAULT_SPLITBAR_SIZE/2 + "px";
                             break;
                         case "top":
                             var dt = ( lastMousePosition[ 1 ] - e.y );
-                            var size = Math.min(document.body.clientHeight - LX.DEFAULT_SPLITBAR_SIZE, (that.root.offsetHeight - dt));
+                            var size: number = Math.min(document.body.clientHeight - LX.DEFAULT_SPLITBAR_SIZE, (that.root.offsetHeight - dt));
                             that.root.style.height = size + "px";
                             that.splitBar.style.top = size + LX.DEFAULT_SPLITBAR_SIZE/2 + "px";
                             break;
                         case "bottom":
                             var dt = ( lastMousePosition[ 1 ] - e.y );
-                            var size = ( that.root.offsetHeight + dt );
+                            var size: number = ( that.root.offsetHeight + dt );
                             that.root.style.height = size + "px";
                             break;
                     }
@@ -359,7 +380,7 @@ class Area {
                     }
                 }
 
-                function innerMouseUp( e )
+                function innerMouseUp( e: MouseEvent )
                 {
                     const doc = that.root.ownerDocument;
                     doc.removeEventListener( 'mousemove', innerMouseMove );
@@ -376,7 +397,7 @@ class Area {
      * @param {Element} content child to append to area (e.g. a Panel)
      */
 
-    attach( content ) {
+    attach( content: any ) {
 
         // Append to last split section if area has been split
         if( this.sections.length )
@@ -402,7 +423,7 @@ class Area {
      * @param {Array} layout
      */
 
-    setLayout( layout ) {
+    setLayout( layout: any ) {
 
         this.layout = LX.deepCopy( layout );
 
@@ -412,7 +433,7 @@ class Area {
             return;
         }
 
-        const _splitArea = ( area, layout ) => {
+        const _splitArea = ( area: Area, layout: any ) => {
 
             if( layout.className )
             {
@@ -446,7 +467,7 @@ class Area {
      * sizes: "Allow the area to be minimized [false]
      */
 
-    split( options = {} ) {
+    split( options: any = {} ) {
 
         if( this.sections.length )
         {
@@ -469,7 +490,7 @@ class Area {
             if( size.constructor == Number )
             {
                 size += margin;
-                size += "px";
+                size = `${ size }px`;
             }
 
             sizes[ 1 ] = "calc( 100% - " + size + " )";
@@ -631,8 +652,9 @@ class Area {
         {
             // Listen resize event on first area
             this._autoVerticalResizeObserver = new ResizeObserver( entries => {
-                for ( const entry of entries )
+                for ( const e of entries )
                 {
+                    const entry : any = e;
                     const size = entry.target.getComputedSize();
                     area2.root.style.height = "calc(100% - " + ( size.height ) + "px )";
                 }
@@ -647,16 +669,16 @@ class Area {
             this.splitExtended = false;
 
             // Keep state of the animation when ends...
-            area2.root.addEventListener('animationend', e => {
+            area2.root.addEventListener('animationend', ( e: any ) => {
                 const opacity = getComputedStyle( area2.root ).opacity;
                 area2.root.classList.remove( e.animationName + "-" + type );
                 area2.root.style.opacity = opacity;
                 LX.flushCss( area2.root );
             });
 
-            this.splitBar.addEventListener("contextmenu", e => {
+            this.splitBar.addEventListener("contextmenu", ( e: any ) => {
                 e.preventDefault();
-                LX.addContextMenu(null, e, c => {
+                LX.addContextMenu(null, e, ( c: ContextMenu ) => {
                     c.add("Extend", { disabled: this.splitExtended, callback: () => { this.extend() } });
                     c.add("Reduce", { disabled: !this.splitExtended, callback: () => { this.reduce() } });
                 });
@@ -688,7 +710,7 @@ class Area {
 
         const that = this;
 
-        function innerMouseDown( e )
+        function innerMouseDown( e: MouseEvent )
         {
             const doc = that.root.ownerDocument;
             doc.addEventListener( 'mousemove', innerMouseMove );
@@ -697,7 +719,7 @@ class Area {
             e.preventDefault();
         }
 
-        function innerMouseMove( e )
+        function innerMouseMove( e: MouseEvent )
         {
             const rect = that.root.getBoundingClientRect();
             if( ( ( e.x ) < rect.x || ( e.x ) > ( rect.x + rect.width ) ) ||
@@ -719,7 +741,7 @@ class Area {
             e.preventDefault();
         }
 
-        function innerMouseUp( e )
+        function innerMouseUp( e: MouseEvent )
         {
             const doc = that.root.ownerDocument;
             doc.removeEventListener( 'mousemove', innerMouseMove );
@@ -750,18 +772,19 @@ class Area {
     * @method resize
     * Resize element
     */
-    setSize( size ) {
+    setSize( size: any[] ) {
 
         let [ width, height ] = size;
 
         if( width != undefined && width.constructor == Number )
         {
-            width += "px";
+            
+           width = `${ width }px`;
         }
 
         if( height != undefined && height.constructor == Number )
         {
-            height += "px";
+            height = `${ height }px`;
         }
 
         if( width )
@@ -867,7 +890,7 @@ class Area {
     * @method toggle
     * Toggle element if it is hidden
     */
-    toggle( force ) {
+    toggle( force: boolean ) {
         this.root.classList.toggle("hidden", force);
     }
 
@@ -875,7 +898,7 @@ class Area {
      * @method propagateEvent
      */
 
-    propagateEvent( eventName ) {
+    propagateEvent( eventName: string ) {
 
         for( let i = 0; i < this.sections.length; i++ )
         {
@@ -896,7 +919,7 @@ class Area {
      * Options to create a Panel
      */
 
-    addPanel( options ) {
+    addPanel( options: any ) {
         let panel = new LX.Panel( options );
         this.attach( panel );
         this.panels.push( panel );
@@ -911,9 +934,9 @@ class Area {
      * sticky: Fix menubar at the top [true]
      */
 
-    addMenubar( items, options = {} ) {
+    addMenubar( items: any[], options: any = {} ) {
 
-        let menubar = new LX.Menubar( items, options );
+        let menubar = new Menubar( items, options );
 
         LX.menubars.push( menubar );
 
@@ -944,7 +967,7 @@ class Area {
      * side: Side to attach the sidebar (left|right) [left]
      */
 
-    addSidebar( callback, options = {} ) {
+    addSidebar( callback: any, options: any = {} ) {
 
         let sidebar = new LX.Sidebar( { callback, ...options } );
 
@@ -986,7 +1009,7 @@ class Area {
      * float: Where to put the buttons (h: horizontal, v: vertical, t: top, m: middle, b: bottom, l: left, c: center, r: right) [htc]
      */
 
-    addOverlayButtons( buttons, options = {} ) {
+    addOverlayButtons( buttons: any[], options: any = {} ) {
 
         // Add to last split section if area has been split
         if( this.sections.length )
@@ -1011,13 +1034,13 @@ class Area {
      * parentClass: Add extra class to tab buttons container
      */
 
-    addTabs( options = {} ) {
+    addTabs( options: any = {} ) {
 
         const tabs = new LX.Tabs( this, options );
 
         if( options.folding )
         {
-            this.parentArea._disableSplitResize();
+            this.parentArea?._disableSplitResize();
             // Compensate split bar...
             this.root.style.paddingTop = "4px";
         }
@@ -1025,7 +1048,7 @@ class Area {
         return tabs;
     }
 
-    _moveSplit( dt, forceAnimation = false, forceWidth = 0 ) {
+    _moveSplit( dt: number, forceAnimation: boolean = false, forceWidth: number = 0 ) {
 
         if( !this.type )
         {
@@ -1127,7 +1150,7 @@ class Area {
         delete this.splitBar;
     }
 
-    _update( newSize, propagate = true ) {
+    _update( newSize?: any[], propagate: boolean = true ) {
 
         if( !newSize )
         {
@@ -1148,7 +1171,3 @@ class Area {
         }
     }
 };
-
-LX.Area = Area;
-
-export { Area };

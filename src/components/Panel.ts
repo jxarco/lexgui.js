@@ -1,11 +1,27 @@
 // panel.js @jxarco
-import { LX } from './core.js';
+import { LX } from './Core';
+import { Branch } from './Branch';
 
 /**
  * @class Panel
  */
 
-class Panel {
+export class Panel {
+
+    root: any;
+    branches: Branch[];
+    components: Record<string, any>;
+    signals: any[];
+    queuedContainer: any;
+
+    _branchOpen: boolean;
+    _currentBranch: any;
+    _queue: any[]; // Append components in other locations
+    _inlineComponentsLeft: number;
+    _inlineQueuedContainer: any;
+    _inlineExtraClass: string|null;
+    _inlineContainer: any;
+    _inlineComponents: any[];
 
     /**
      * @param {Object} options
@@ -16,7 +32,7 @@ class Panel {
      * style: CSS Style object to be applied to the panel
      */
 
-    constructor( options = {} ) {
+    constructor( options: any = {} ) {
 
         var root = document.createElement('div');
         root.className = "lexpanel";
@@ -37,6 +53,7 @@ class Panel {
 
         this.root = root;
         this.branches = [];
+        this.signals = [];
         this.components = {};
 
         this._branchOpen = false;
@@ -44,14 +61,16 @@ class Panel {
         this._queue = []; // Append components in other locations
         this._inlineComponentsLeft = -1;
         this._inlineQueuedContainer = null;
+        this._inlineExtraClass = null;
+        this._inlineComponents = [];
     }
 
-    get( name ) {
+    get( name: string ) {
 
         return this.components[ name ];
     }
 
-    getValue( name ) {
+    getValue( name: string ) {
 
         let component = this.components[ name ];
 
@@ -63,7 +82,7 @@ class Panel {
         return component.value();
     }
 
-    setValue( name, value, skipCallback ) {
+    setValue( name: string, value: any, skipCallback?: boolean ) {
 
         let component = this.components[ name ];
 
@@ -80,7 +99,7 @@ class Panel {
      * @param {Element} content child element to append to panel
      */
 
-    attach( content ) {
+    attach( content: any ) {
 
         console.assert( content, "No content to attach!" );
         content.parent = this;
@@ -116,7 +135,7 @@ class Panel {
         {
             for( let w = 0; w < this.signals.length; w++ )
             {
-                let c = Object.values(this.signals[ w ])[ 0 ];
+                let c: any = Object.values(this.signals[ w ])[ 0 ];
                 let signal = c.options.signal;
                 for( let i = 0; i < LX.signals[signal].length; i++ )
                 {
@@ -139,7 +158,7 @@ class Panel {
      * @description Next N components will be in the same line. If no number, it will inline all until calling nextLine()
      */
 
-    sameLine( numberOfComponents, className ) {
+    sameLine( numberOfComponents: number, className?: string ) {
 
         this._inlineQueuedContainer = this.queuedContainer;
         this._inlineComponentsLeft = ( numberOfComponents ?? Infinity );
@@ -152,7 +171,7 @@ class Panel {
      * @description Stop inlining components. Use it only if the number of components to be inlined is NOT specified.
      */
 
-    endLine( className ) {
+    endLine( className?: string|null ) {
 
         className = className ?? this._inlineExtraClass;
 
@@ -215,9 +234,9 @@ class Panel {
             this._inlineQueuedContainer.appendChild( this._inlineContainer );
         }
 
-        delete this._inlineComponents;
-        delete this._inlineContainer;
-        delete this._inlineExtraClass;
+        this._inlineComponents = [];
+        this._inlineContainer = null;
+        this._inlineExtraClass = null;
     }
 
     /**
@@ -231,7 +250,7 @@ class Panel {
      * filter: Allow filter components in branch by name [false]
      */
 
-    branch( name, options = {} ) {
+    branch( name: string, options: any = {} ) {
 
         if( this._branchOpen )
         {
@@ -263,7 +282,7 @@ class Panel {
         this._currentBranch = null;
     }
 
-    _pick( arg, def ) {
+    _pick( arg: any, def: any ) {
         return (typeof arg == 'undefined' ? def : arg);
     }
 
@@ -271,7 +290,7 @@ class Panel {
         Panel Components
     */
 
-    _attachComponent( component, options = {} ) {
+    _attachComponent( component: any, options: any = {} ) {
 
         if( component.name != undefined )
         {
@@ -288,7 +307,7 @@ class Panel {
             this.signals.push( { [ component.options.signal ]: component } )
         }
 
-        const _insertComponent = el => {
+        const _insertComponent = ( el: HTMLElement ) => {
             if( options.container )
             {
                 options.container.appendChild( el );
@@ -316,7 +335,7 @@ class Panel {
             }
         };
 
-        const _storeComponent = el => {
+        const _storeComponent = ( el: HTMLElement ) => {
 
             if( !this.queuedContainer )
             {
@@ -332,11 +351,6 @@ class Panel {
         // Process inline components
         if( this._inlineComponentsLeft > 0 && !options.skipInlineCount )
         {
-            if( !this._inlineComponents )
-            {
-                this._inlineComponents = [];
-            }
-
             // Store component and its container
             _storeComponent( component.root );
 
@@ -356,7 +370,7 @@ class Panel {
         return component;
     }
 
-    _addFilter( placeholder, options = {} ) {
+    _addFilter( placeholder: string, options: any = {} ) {
 
         options.placeholder = placeholder.constructor == String ? placeholder : "Filter properties..";
         options.skipComponent = options.skipComponent ?? true;
@@ -386,7 +400,7 @@ class Panel {
         return element;
     }
 
-    _searchComponents( branchName, value ) {
+    _searchComponents( branchName: string, value: string ) {
 
         for( let b of this.branches )
         {
@@ -416,7 +430,7 @@ class Panel {
                 if( !emptyFilter )
                 {
                     if(!w.name) continue;
-                    const filterWord = value.toLowerCase();
+                    // const filterWord = value.toLowerCase();
                     const name = w.name.toLowerCase();
                     if(!name.includes(value)) continue;
                 }
@@ -438,7 +452,7 @@ class Panel {
      * @param {String} name if null, return current branch
      */
 
-    getBranch( name ) {
+    getBranch( name: string ) {
 
         if( name )
         {
@@ -453,7 +467,7 @@ class Panel {
      * @param {HTMLElement} domEl container to append elements to
      */
 
-    queue( domEl ) {
+    queue( domEl: any ) {
 
         if( !domEl && this._currentBranch)
         {
@@ -512,7 +526,7 @@ class Panel {
      * @param {Number} height
      */
 
-    addBlank( width, height ) {
+    addBlank( width: number, height: number ) {
         const component = new LX.Blank( width, height );
         return this._attachComponent( component );
     }
@@ -528,7 +542,7 @@ class Panel {
      * style: CSS to override
      */
 
-    addTitle( name, options = {} ) {
+    addTitle( name: string, options: any = {} ) {
         const component = new LX.Title( name, options );
         return this._attachComponent( component );
     }
@@ -554,7 +568,7 @@ class Panel {
      * justifyName: Justify name content
      */
 
-    addText( name, value, callback, options = {} ) {
+    addText( name: string|null, value: string, callback: any, options: any = {} ) {
         const component = new LX.TextInput( name, value, callback, options );
         return this._attachComponent( component );
     }
@@ -576,7 +590,7 @@ class Panel {
      * fitHeight: Height adapts to text
      */
 
-    addTextArea( name, value, callback, options = {} ) {
+    addTextArea( name: string|null, value: string, callback: any, options: any = {} ) {
         const component = new LX.TextArea( name, value, callback, options );
         return this._attachComponent( component );
     }
@@ -587,7 +601,7 @@ class Panel {
      * @param {Object} options Text options
      */
 
-    addLabel( value, options = {} ) {
+    addLabel( value: string, options: any = {} ) {
         options.disabled = true;
         options.inputClass = ( options.inputClass ?? "" ) + " nobg";
         const component = this.addText( null, value, null, options );
@@ -613,7 +627,7 @@ class Panel {
      * mustConfirm: User must confirm trigger in a popover
      */
 
-    addButton( name, value, callback, options = {} ) {
+    addButton( name: string|null, value: string, callback: any, options: any = {} ) {
         const component = new LX.Button( name, value, callback, options );
         return this._attachComponent( component );
     }
@@ -630,7 +644,7 @@ class Panel {
      * toggle: Buttons can be toggled insted of selecting only one
      */
 
-    addComboButtons( name, values, options = {} ) {
+    addComboButtons( name: string, values: any[], options: any = {} ) {
         const component = new LX.ComboButtons( name, values, options );
         return this._attachComponent( component );
     }
@@ -646,7 +660,7 @@ class Panel {
      * callback (Function): function to call on click
      */
 
-    addCard( name, options = {} ) {
+    addCard( name: string, options: any = {} ) {
         const component = new LX.Card( name, options );
         return this._attachComponent( component );
     }
@@ -665,7 +679,7 @@ class Panel {
      * skipLabels: Do not show input field labels [false]
      */
 
-    addForm( name, data, callback, options = {} ) {
+    addForm( name: string, data: any, callback: any, options: any = {} ) {
         const component = new LX.Form( name, data, callback, options );
         return this._attachComponent( component );
     }
@@ -677,13 +691,13 @@ class Panel {
      * @param {Object} options
      */
 
-    addContent( name, element, options = {} ) {
+    addContent( name: string, element: any, options: any = {} ) {
 
         console.assert( element, "Empty content!" );
 
         if( element.constructor == String )
         {
-            const tmp = document.createElement( "div" );
+            const tmp: any = document.createElement( "div" );
             tmp.innerHTML = element;
 
             if( tmp.childElementCount > 1 )
@@ -712,7 +726,7 @@ class Panel {
      * hideName: Don't use name as label [false]
      */
 
-    async addImage( name, url, options = {} ) {
+    async addImage( name: string, url: string, options: any = {} ) {
 
         console.assert( url, "Empty src/url for Image!" );
 
@@ -749,7 +763,7 @@ class Panel {
      * emptyMsg: Custom message to show when no filtered results
      */
 
-    addSelect( name, values, value, callback, options = {} ) {
+    addSelect( name: string, values: any[], value: string, callback: any, options: any = {} ) {
         const component = new LX.Select( name, values, value, callback, options );
         return this._attachComponent( component );
     }
@@ -770,7 +784,7 @@ class Panel {
      * moveOutAction: Clamp or delete points moved out of the curve (LX.CURVE_MOVEOUT_CLAMP, LX.CURVE_MOVEOUT_DELETE)
     */
 
-    addCurve( name, values, callback, options = {} ) {
+    addCurve( name: string, values: any[], callback: any, options: any = {} ) {
         const component = new LX.Curve( name, values, callback, options );
         return this._attachComponent( component );
     }
@@ -791,7 +805,7 @@ class Panel {
      * moveOutAction: Clamp or delete points moved out of the curve (LX.CURVE_MOVEOUT_CLAMP, LX.CURVE_MOVEOUT_DELETE)
     */
 
-    addDial( name, values, callback, options = {} ) {
+    addDial( name: string, values: any[], callback: any, options: any = {} ) {
         const component = new LX.Dial( name, values, callback, options );
         return this._attachComponent( component );
     }
@@ -804,7 +818,7 @@ class Panel {
      * @param {Object} options:
      */
 
-    addLayers( name, value, callback, options = {} ) {
+    addLayers( name: string, value: number, callback: any, options: any = {} ) {
         const component = new LX.Layers( name, value, callback, options );
         return this._attachComponent( component );
     }
@@ -818,7 +832,7 @@ class Panel {
      * innerValues (Array): Use select mode and use values as options
      */
 
-    addArray( name, values = [], callback, options = {} ) {
+    addArray( name: string, values: any[] = [], callback: any, options: any = {} ) {
         const component = new LX.ItemArray( name, values, callback, options );
         return this._attachComponent( component );
     }
@@ -833,7 +847,7 @@ class Panel {
      * hideName: Don't use name as label [false]
      */
 
-    addList( name, values, value, callback, options = {} ) {
+    addList( name: string, values: any[], value: any, callback: any, options: any = {} ) {
         const component = new LX.List( name, values, value, callback, options );
         return this._attachComponent( component );
     }
@@ -847,7 +861,7 @@ class Panel {
      * hideName: Don't use name as label [false]
      */
 
-    addTags( name, value, callback, options = {} ) {
+    addTags( name: string, value: string, callback: any, options: any = {} ) {
         const component = new LX.Tags( name, value, callback, options );
         return this._attachComponent( component );
     }
@@ -864,7 +878,7 @@ class Panel {
      * className: Extra classes to customize style
      */
 
-    addCheckbox( name, value, callback, options = {} ) {
+    addCheckbox( name: string, value: boolean, callback: any, options: any = {} ) {
         const component = new LX.Checkbox( name, value, callback, options );
         return this._attachComponent( component );
     }
@@ -881,7 +895,7 @@ class Panel {
      * className: Customize colors
      */
 
-    addToggle( name, value, callback, options = {} ) {
+    addToggle( name: string, value: boolean, callback: any, options: any = {} ) {
         const component = new LX.Toggle( name, value, callback, options );
         return this._attachComponent( component );
     }
@@ -898,7 +912,7 @@ class Panel {
      * selected: Index of the default selected option
      */
 
-    addRadioGroup( name, label, values, callback, options = {} ) {
+    addRadioGroup( name: string, label: string, values: any[], callback: any, options: any = {} ) {
         const component = new LX.RadioGroup( name, label, values, callback, options );
         return this._attachComponent( component );
     }
@@ -913,7 +927,7 @@ class Panel {
      * useRGB: The callback returns color as Array (r, g, b) and not hex [false]
      */
 
-    addColor( name, value, callback, options = {} ) {
+    addColor( name: string, value: any, callback: any, options: any = {} ) {
         const component = new LX.ColorInput( name, value, callback, options );
         return this._attachComponent( component );
     }
@@ -933,7 +947,7 @@ class Panel {
      * min, max: Min and Max values for the input
      */
 
-    addRange( name, value, callback, options = {} ) {
+    addRange( name: string, value: number, callback: any, options: any = {} ) {
         const component = new LX.RangeInput( name, value, callback, options );
         return this._attachComponent( component );
     }
@@ -955,14 +969,14 @@ class Panel {
      * onRelease: Callback function on mouse up
      */
 
-    addNumber( name, value, callback, options = {} ) {
+    addNumber( name: string, value: number, callback: any, options: any = {} ) {
         const component = new LX.NumberInput( name, value, callback, options );
         return this._attachComponent( component );
     }
 
     static VECTOR_COMPONENTS = { 0: 'x', 1: 'y', 2: 'z', 3: 'w' };
 
-    _addVector( numComponents, name, value, callback, options = {} ) {
+    _addVector( numComponents: number, name: string, value: any[], callback: any, options: any = {} ) {
         const component = new LX.Vector( numComponents, name, value, callback, options );
         return this._attachComponent( component );
     }
@@ -980,15 +994,15 @@ class Panel {
      * onRelease: Callback function on mouse is released
      */
 
-    addVector2( name, value, callback, options ) {
+    addVector2( name: string, value: any[], callback: any, options: any ) {
         return this._addVector( 2, name, value, callback, options );
     }
 
-    addVector3( name, value, callback, options ) {
+    addVector3( name: string, value: any[], callback: any, options: any ) {
         return this._addVector( 3, name, value, callback, options );
     }
 
-    addVector4( name, value, callback, options ) {
+    addVector4( name: string, value: any[], callback: any, options: any ) {
         return this._addVector( 4, name, value, callback, options );
     }
 
@@ -1003,7 +1017,7 @@ class Panel {
      * units: Unit as string added to the end of the value
      */
 
-    addSize( name, value, callback, options = {} ) {
+    addSize( name: string, value: any, callback: any, options: any = {} ) {
         const component = new LX.SizeInput( name, value, callback, options );
         return this._attachComponent( component );
     }
@@ -1019,7 +1033,7 @@ class Panel {
      * pattern: OTP numeric pattern
      */
 
-    addOTP( name, value, callback, options = {} ) {
+    addOTP( name: string, value: string, callback: any, options: any = {} ) {
         const component = new LX.OTPInput( name, value, callback, options );
         return this._attachComponent( component );
     }
@@ -1037,7 +1051,7 @@ class Panel {
      * onRelease: Callback function on mouse up
      */
 
-    addPad( name, value, callback, options = {} ) {
+    addPad( name: string, value: any[], callback: any, options: any = {} ) {
         const component = new LX.Pad( name, value, callback, options );
         return this._attachComponent( component );
     }
@@ -1054,7 +1068,7 @@ class Panel {
      * callback: Function called on change value
      */
 
-    addProgress( name, value, options = {} ) {
+    addProgress( name: string, value: number, options: any = {} ) {
         const component = new LX.Progress( name, value, options );
         return this._attachComponent( component );
     }
@@ -1070,7 +1084,7 @@ class Panel {
      * type: type to read as [text (Default), buffer, bin, url]
      */
 
-    addFile( name, callback, options = { } ) {
+    addFile( name: string, callback: any, options: any = {} ) {
         const component = new LX.FileInput( name, callback, options );
         return this._attachComponent( component );
     }
@@ -1086,7 +1100,7 @@ class Panel {
      * onevent(tree_event): Called when node is selected, dbl clicked, contextmenu opened, changed visibility, parent or name
      */
 
-    addTree( name, data, options = {} ) {
+    addTree( name: string, data: any, options: any = {} ) {
         const component = new LX.Tree( name, data, options );
         return this._attachComponent( component );
     }
@@ -1107,7 +1121,7 @@ class Panel {
      * showNames: Show tab name only in horizontal tabs
      */
 
-    addTabSections( name, tabs, options = {} ) {
+    addTabSections( name: string, tabs: any[], options: any = {} ) {
         const component = new LX.TabSections( name, tabs, options );
         return this._attachComponent( component );
     }
@@ -1124,7 +1138,7 @@ class Panel {
      * label: Text to show below the counter
      */
 
-    addCounter( name, value, callback, options = { } ) {
+    addCounter( name: string, value: number, callback: any, options: any = {} ) {
         const component = new LX.Counter( name, value, callback, options );
         return this._attachComponent( component );
     }
@@ -1148,7 +1162,7 @@ class Panel {
      * customFilters: Add selectors to filter by specific option values
      */
 
-    addTable( name, data, options = { } ) {
+    addTable( name: string, data: any, options: any = {} ) {
         const component = new LX.Table( name, data, options );
         return this._attachComponent( component );
     }
@@ -1165,7 +1179,7 @@ class Panel {
      * fromToday: Allow dates only from current day
      */
 
-    addDate( name, dateValue, callback, options = { } ) {
+    addDate( name: string, dateValue: string, callback: any, options: any = {} ) {
         const component = new LX.DatePicker( name, dateValue, callback, options );
         return this._attachComponent( component );
     }
@@ -1178,7 +1192,7 @@ class Panel {
      * @param {Object} options:
      */
 
-    addMap2D( name, points, callback, options = { } ) {
+    addMap2D( name: string, points: any[], callback: any, options: any = {} ) {
         const component = new LX.Map2D( name, points, callback, options );
         return this._attachComponent( component );
     }
@@ -1191,12 +1205,10 @@ class Panel {
      * @param {Object} options:
      */
 
-    addRate( name, value, callback, options = { } ) {
+    addRate( name: string, value: number, callback: any, options: any = {} ) {
         const component = new LX.Rate( name, value, callback, options );
         return this._attachComponent( component );
     }
 }
 
 LX.Panel = Panel;
-
-export { Panel };

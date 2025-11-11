@@ -1,20 +1,26 @@
 // ContextMenu.js @jxarco
-import { LX } from './core.js';
+import { LX } from './Core';
 
 /**
  * @class ContextMenu
  */
 
-class ContextMenu {
+export class ContextMenu {
 
-    constructor( event, title, options = {} ) {
+    root: any;
+    items: any[];
+    colors: any;
 
-        // remove all context menus
+    _parent: any;
+
+    constructor( event: any, title: string, options: any = {} )
+    {
+        // Remove all context menus
         document.body.querySelectorAll( ".lexcontextmenu" ).forEach( e => e.remove() );
 
         this.root = document.createElement( "div" );
         this.root.className = "lexcontextmenu";
-        this.root.addEventListener("mouseleave", function() {
+        this.root.addEventListener("mouseleave", function(this: HTMLElement) { // TOCHECK
             this.remove();
         });
 
@@ -23,7 +29,7 @@ class ContextMenu {
 
         if( title )
         {
-            const item = {};
+            let item: Record<string, any> = {};
             item[ title ] = [];
             item[ "className" ] = "cmtitle";
             item[ "icon" ] = options.icon;
@@ -55,8 +61,8 @@ class ContextMenu {
         this.root.style.top = `${ position[ 1 ] }px`;
     }
 
-    _adjustPosition( div, margin, useAbsolute = false ) {
-
+    _adjustPosition( div: HTMLElement, margin: number, useAbsolute = false )
+    {
         let rect = div.getBoundingClientRect();
         let left = parseInt( div.style.left );
         let top = parseInt( div.style.top );
@@ -102,9 +108,9 @@ class ContextMenu {
         div.style.top = `${ top }px`;
     }
 
-    _createSubmenu( o, k, c, d ) {
-
-        this.root.querySelectorAll( ".lexcontextmenu" ).forEach( cm => cm.remove() );
+    _createSubmenu( o: any, k: string, c: any, d: number )
+    {
+        this.root.querySelectorAll( ".lexcontextmenu" ).forEach( ( m: HTMLElement ) => m.remove() );
 
         let contextmenu = document.createElement('div');
         contextmenu.className = "lexcontextmenu";
@@ -125,8 +131,8 @@ class ContextMenu {
         this._adjustPosition( contextmenu, 6 );
     }
 
-    _createEntry( o, k, c, d ) {
-
+    _createEntry( o: any, k: string, c: any, d: number )
+    {
         const hasSubmenu = o[ k ].length;
         let entry = document.createElement('div');
         entry.className = "lexmenuboxentry" + (o[ 'className' ] ? " " + o[ 'className' ] : "" );
@@ -175,7 +181,9 @@ class ContextMenu {
             }
 
             if( LX.OPEN_CONTEXTMENU_ENTRY == 'click' )
+            {
                 this._createSubmenu( o, k, entry, ++d );
+            }
         });
 
         if( !hasSubmenu )
@@ -189,9 +197,8 @@ class ContextMenu {
         if( LX.OPEN_CONTEXTMENU_ENTRY == 'mouseover' )
         {
             entry.addEventListener("mouseover", e => {
-                if(entry.built)
-                    return;
-                entry.built = true;
+                if( entry.dataset["built"] == "true" ) return;
+                entry.dataset["built"] = "true";
                 this._createSubmenu( o, k, entry, ++d );
                 e.stopPropagation();
             });
@@ -199,17 +206,18 @@ class ContextMenu {
 
         entry.addEventListener("mouseleave", () => {
             d = -1; // Reset depth
-            c.querySelectorAll(".lexcontextmenu").forEach(e => e.remove());
+            c.querySelectorAll(".lexcontextmenu").forEach( ( m: HTMLElement ) => m.remove() );
         });
     }
 
-    onCreate() {
+    onCreate()
+    {
         LX.doAsync( () => this._adjustPosition( this.root, 6 ) );
     }
 
-    add( path, options = {} ) {
-
-        if(options.constructor == Function)
+    add( path: string, options: any = {} )
+    {
+        if( options.constructor == Function )
             options = { callback: options };
 
         // process path
@@ -222,12 +230,12 @@ class ContextMenu {
 
         let idx = 0;
 
-        const insert = (token, list) => {
-            if(token == undefined) return;
+        const insert = ( token: string|undefined, list: any ) => {
+            if( token == undefined ) return;
 
             let found = null;
-            list.forEach( o => {
-                const keys = Object.keys(o);
+            list.forEach( ( o: any ) => {
+                const keys = Object.keys( o );
                 const key = keys.find( t => t == token );
                 if(key) found = o[ key ];
             } );
@@ -238,7 +246,7 @@ class ContextMenu {
             }
             else
             {
-                let item = {};
+                let item: Record<string, any> = {};
                 item[ token ] = [];
                 const nextToken = tokens[ idx++ ];
                 // Check if last token -> add callback
@@ -259,7 +267,7 @@ class ContextMenu {
 
         // Set parents
 
-        const setParent = _item => {
+        const setParent = ( _item: any ) => {
 
             let key = Object.keys( _item )[ 0 ];
             let children = _item[ key ];
@@ -269,9 +277,9 @@ class ContextMenu {
                 return;
             }
 
-            if( children.find( c => Object.keys(c)[ 0 ] == key ) == null )
+            if( children.find( ( c: any ) => Object.keys(c)[ 0 ] == key ) == null )
             {
-                const parent = {};
+                let parent: Record<string, any> = {};
                 parent[ key ] = [];
                 parent[ 'className' ] = "cmtitle";
                 _item[ key ].unshift( parent );
@@ -308,10 +316,12 @@ class ContextMenu {
         }
     }
 
-    setColor( token, color ) {
-
-        if(color[ 0 ] !== '#')
-            color = LX.rgbToHex(color);
+    setColor( token: string, color: any )
+    {
+        if( color[ 0 ] !== '#' )
+        {
+            color = LX.rgbToHex( color );
+        }
 
         this.colors[ token ] = color;
     }
@@ -319,7 +329,7 @@ class ContextMenu {
 
 LX.ContextMenu = ContextMenu;
 
-function addContextMenu( title, event, callback, options )
+function addContextMenu( title: string, event: any, callback: any, options: any = {} )
 {
     const menu = new ContextMenu( event, title, options );
 
@@ -334,5 +344,3 @@ function addContextMenu( title, event, callback, options )
 }
 
 LX.addContextMenu = addContextMenu;
-
-export { ContextMenu, addContextMenu };

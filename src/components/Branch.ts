@@ -1,13 +1,27 @@
 // branch.js @jxarco
-import { LX } from './core.js';
+import { LX } from './Core';
+import { Panel } from './Panel';
+import { ContextMenu } from './ContextMenu';
 
 /**
  * @class Branch
  */
 
-class Branch {
+export class Branch {
 
-    constructor( name, options = {} ) {
+    name: string;
+    components: any[];
+    closed: boolean;
+
+    root: any;
+    content: any;
+    grabber: any;
+    panel: Panel|null;
+
+    onclick: () => void;
+    oncontextmenu: ( e: any ) => void;
+
+    constructor( name: string, options: any = {} ) {
 
         this.name = name;
 
@@ -29,9 +43,10 @@ class Branch {
         this.closed = options.closed ?? false;
         this.root = root;
         this.components = [];
+        this.panel = null;
 
         // Create element
-        var title = document.createElement( 'div' );
+        const title: any = document.createElement( 'div' );
         title.className = "lexbranchtitle";
 
         if( options.icon )
@@ -65,30 +80,30 @@ class Branch {
             }, 10 );
         }
 
-        this.onclick = function( e ) {
+        this.onclick = function() {
             // e.stopPropagation();
-            this.classList.toggle( "closed" );
-            this.parentElement.classList.toggle( "closed" );
+            title.classList.toggle( "closed" );
+            title.parentElement.classList.toggle( "closed" );
 
             that.content.toggleAttribute( "hidden" );
             that.grabber.toggleAttribute( "hidden" );
 
-            LX.emit( "@on_branch_closed", this.classList.contains( "closed" ) );
+            LX.emit( "@on_branch_closed", title.classList.contains( "closed" ) );
         };
 
-        this.oncontextmenu = function( e ) {
+        this.oncontextmenu = function( e: any ) {
 
             e.preventDefault();
             e.stopPropagation();
 
-            if( this.parentElement.classList.contains("dialog") )
+            if( title.parentElement.classList.contains("dialog") )
             {
                 return;
             }
 
-            LX.addContextMenu("Dock", e, p => {
+            LX.addContextMenu("Dock", e, ( m: ContextMenu ) => {
                 e.preventDefault();
-                p.add( 'Floating', that._onMakeFloating.bind( that ) );
+                m.add( 'Floating', that._onMakeFloating.bind( that ) );
             }, { icon: "WindowRestore" });
         };
 
@@ -98,7 +113,7 @@ class Branch {
 
     _onMakeFloating() {
 
-        const dialog = new LX.Dialog( this.name, p => {
+        const dialog = new LX.Dialog( this.name, ( p: Panel ) => {
             // Add components
             for( let w of this.components )
             {
@@ -151,7 +166,7 @@ class Branch {
 
         let that = this;
 
-        function innerMouseDown( e )
+        function innerMouseDown( e: MouseEvent )
         {
             var doc = that.root.ownerDocument;
             doc.addEventListener("mouseup", innerMouseUp);
@@ -163,7 +178,7 @@ class Branch {
             document.body.classList.add('nocursor');
         }
 
-        function innerMouseMove(e)
+        function innerMouseMove( e: MouseEvent )
         {
             let dt = e.movementX;
 
@@ -174,7 +189,7 @@ class Branch {
             }
         }
 
-        function innerMouseUp(e)
+        function innerMouseUp( e: MouseEvent )
         {
             that._updateComponents();
 
@@ -225,5 +240,3 @@ class Branch {
 };
 
 LX.Branch = Branch;
-
-export { Branch };

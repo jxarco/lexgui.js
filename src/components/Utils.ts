@@ -1,9 +1,14 @@
 // utils.js @jxarco
-import { LX } from './core.js';
+import { LX } from "./Core";
+import { Panel } from "./Panel";
 
-function clamp( num, min, max ) { return Math.min( Math.max( num, min ), max ); }
-function round( number, precision ) { return precision == 0 ? Math.floor( number ) : +(( number ).toFixed( precision ?? 2 ).replace( /([0-9]+(\.[0-9]+[1-9])?)(\.?0+$)/, '$1' )); }
-function remapRange( oldValue, oldMin, oldMax, newMin, newMax ) { return ((( oldValue - oldMin ) * ( newMax - newMin )) / ( oldMax - oldMin )) + newMin; }
+function clamp( num: number, min: number, max: number ) { return Math.min( Math.max( num, min ), max ); }
+function round( number: number, precision?: number ) { return precision == 0 ? Math.floor( number ) : +(( number ).toFixed( precision ?? 2 ).replace( /([0-9]+(\.[0-9]+[1-9])?)(\.?0+$)/, '$1' )); }
+function remapRange( oldValue: number,
+    oldMin: number,
+    oldMax: number,
+    newMin: number,
+    newMax: number ) { return ((( oldValue - oldMin ) * ( newMax - newMin )) / ( oldMax - oldMin )) + newMin; }
 
 LX.clamp = clamp;
 LX.round = round;
@@ -40,7 +45,7 @@ let ASYNC_ENABLED = true;
  * @param {Function} fn Function to call
  * @param {Number} ms Time to wait until calling the function (in milliseconds)
  */
-function doAsync( fn, ms ) {
+function doAsync( fn: () => void, ms: number ) {
     if( ASYNC_ENABLED )
     {
         setTimeout( fn, ms ?? 0 );
@@ -59,7 +64,7 @@ LX.doAsync = doAsync;
  * the pending CSS changes (which it does to ensure the value obtained is accurate).
  * @param {HTMLElement} element
  */
-function flushCss( element )
+function flushCss( element: HTMLElement )
 {
     element.offsetHeight;
 }
@@ -70,7 +75,7 @@ LX.flushCss = flushCss;
  * @method deleteElement
  * @param {HTMLElement} element
  */
-function deleteElement( element )
+function deleteElement( element: HTMLElement )
 {
     if( element ) element.remove();
 }
@@ -81,7 +86,7 @@ LX.deleteElement = deleteElement;
  * @method toCamelCase
  * @param {String} str
  */
-function toCamelCase( str )
+function toCamelCase( str: string )
 {
     return str.toLowerCase().replace(/[^a-zA-Z0-9]+(.)/g, (_, chr) => chr.toUpperCase());
 }
@@ -92,7 +97,7 @@ LX.toCamelCase = toCamelCase;
  * @method toTitleCase
  * @param {String} str
  */
-function toTitleCase( str )
+function toTitleCase( str: string )
 {
     return str.replace(/-/g, " ").toLowerCase().replace(/\b\w/g, char => char.toUpperCase());
 }
@@ -103,7 +108,7 @@ LX.toTitleCase = toTitleCase;
  * @method toKebabCase
  * @param {String} str
  */
-function toKebabCase( str )
+function toKebabCase( str: string )
 {
     return str.replace( /[A-Z]/g, m => "-" + m.toLowerCase() );
 }
@@ -115,7 +120,7 @@ LX.toKebabCase = toKebabCase;
  * @description Convert a text string to a valid DOM name
  * @param {String} text Original text
  */
-function getSupportedDOMName( text )
+function getSupportedDOMName( text: string )
 {
     console.assert( typeof text == "string", "getSupportedDOMName: Text is not a string!" );
 
@@ -141,7 +146,7 @@ LX.getSupportedDOMName = getSupportedDOMName;
  * @description Ask if LexGUI is using a specific extension
  * @param {String} extensionName Name of the LexGUI extension
  */
-function has( extensionName )
+function has( extensionName: string )
 {
     return ( LX.extensions.indexOf( extensionName ) > -1 );
 }
@@ -153,7 +158,7 @@ LX.has = has;
  * @description Get a extension from a path/url/filename
  * @param {String} name
  */
-function getExtension( name )
+function getExtension( name: string )
 {
     return name.includes('.') ? name.split('.').pop() : null;
 }
@@ -165,7 +170,7 @@ LX.getExtension = getExtension;
  * @description Cleans any DOM element string to get only the text
  * @param {String} html
  */
-function stripHTML( html )
+function stripHTML( html: string )
 {
     const div = document.createElement( "div" );
     div.innerHTML = html;
@@ -180,7 +185,7 @@ LX.stripHTML = stripHTML;
  * @param {Number|String} size
  * @param {Number} total
  */
-function parsePixelSize( size, total )
+function parsePixelSize( size: number|string, total: number )
 {
     // Assuming pixels..
     if( size.constructor === Number )
@@ -233,7 +238,7 @@ LX.parsePixelSize = parsePixelSize;
  * @description Create a deep copy with no references from an object
  * @param {Object} obj
  */
-function deepCopy( obj )
+function deepCopy( obj: any )
 {
     return JSON.parse( JSON.stringify( obj ) )
 }
@@ -246,12 +251,12 @@ LX.deepCopy = deepCopy;
  * @param {String} colorScheme Name of the scheme
  * @param {Boolean} storeLocal Store in localStorage
  */
-function setTheme( colorScheme, storeLocal = true )
+function setTheme( colorScheme: string, storeLocal: boolean = true )
 {
     colorScheme = ( colorScheme == "light" ) ? "light" : "dark";
     document.documentElement.setAttribute( "data-theme", colorScheme );
     if( storeLocal ) localStorage.setItem( "lxColorScheme", colorScheme );
-    LX.emit( "@on_new_color_scheme", colorScheme );
+    LX.emitSignal( "@on_new_color_scheme", colorScheme );
 }
 
 LX.setTheme = setTheme;
@@ -290,10 +295,10 @@ function setSystemTheme()
     localStorage.removeItem( "lxColorScheme" );
 
     // Reapply listener
-    if( this._mqlPrefersDarkScheme )
+    if( LX._mqlPrefersDarkScheme )
     {
-        this._mqlPrefersDarkScheme.removeEventListener( "change", this._onChangeSystemTheme );
-        this._mqlPrefersDarkScheme.addEventListener( "change", this._onChangeSystemTheme );
+        LX._mqlPrefersDarkScheme.removeEventListener( "change", LX._onChangeSystemTheme );
+        LX._mqlPrefersDarkScheme.addEventListener( "change", LX._onChangeSystemTheme );
     }
 }
 
@@ -305,9 +310,9 @@ LX.setSystemTheme = setSystemTheme;
  * @param {String} colorName Name of the theme variable
  * @param {String} color Color in rgba/hex
  */
-function setThemeColor( colorName, color )
+function setThemeColor( colorName: string, color: string )
 {
-    const r = document.querySelector( ':root' );
+    const r: any = document.querySelector( ':root' );
     r.style.setProperty( '--' + colorName, color );
 }
 
@@ -318,14 +323,15 @@ LX.setThemeColor = setThemeColor;
  * @description Get the value for one of the main theme variables
  * @param {String} colorName Name of the theme variable
  */
-function getThemeColor( colorName )
+function getThemeColor( colorName: string )
 {
-    const r = getComputedStyle( document.querySelector( ':root' ) );
-    const value = r.getPropertyValue( '--' + colorName );
+    const r: any = document.querySelector( ':root' );
+    const s = getComputedStyle( r );
+    const value = s.getPropertyValue( '--' + colorName );
 
     if( value.includes( "light-dark" ) )
     {
-        const currentScheme = r.getPropertyValue( "color-scheme" );
+        const currentScheme = s.getPropertyValue( "color-scheme" );
 
         if( currentScheme == "light" )
         {
@@ -350,7 +356,7 @@ function switchSpacing()
 {
     const currentSpacing = document.documentElement.getAttribute( "data-spacing" ) ?? "default";
     document.documentElement.setAttribute( "data-spacing", ( currentSpacing == "default" ) ? "compact" : "default" );
-    LX.emit( "@on_new_spacing_layout", currentSpacing );
+    LX.emitSignal( "@on_new_spacing_layout", currentSpacing );
 }
 
 LX.switchSpacing = switchSpacing;
@@ -360,13 +366,13 @@ LX.switchSpacing = switchSpacing;
  * @description Convert an image to a base64 string
  * @param {Image} img
  */
-function getBase64Image( img )
+function getBase64Image( img: ImageBitmap )
 {
     const canvas = document.createElement( 'canvas' );
     canvas.width = img.width;
     canvas.height = img.height;
     const ctx = canvas.getContext( '2d' );
-    ctx.drawImage( img, 0, 0 );
+    if( ctx ) ctx.drawImage( img, 0, 0 );
     return canvas.toDataURL( 'image/png' );
 }
 
@@ -377,7 +383,7 @@ LX.getBase64Image = getBase64Image;
  * @description Convert a hexadecimal string to a valid RGB color
  * @param {String} hex Hexadecimal color
  */
-function hexToRgb( hex )
+function hexToRgb( hex: string )
 {
     const hexPattern = /^#(?:[A-Fa-f0-9]{3,4}|[A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})$/;
     if( !hexPattern.test( hex ) )
@@ -408,11 +414,11 @@ LX.hexToRgb = hexToRgb;
 /**
  * @method hexToHsv
  * @description Convert a hexadecimal string to HSV (0..360|0..1|0..1)
- * @param {String} hexStr Hexadecimal color
+ * @param {String} hex Hexadecimal color
  */
-function hexToHsv( hexStr )
+function hexToHsv( hex: string )
 {
-    const rgb = hexToRgb( hexStr );
+    const rgb = hexToRgb( hex );
     return rgbToHsv( rgb );
 }
 
@@ -424,7 +430,7 @@ LX.hexToHsv = hexToHsv;
  * @param {Object} rgb Object containing RGB color
  * @param {Number} scale Use 255 for 0..255 range or 1 for 0..1 range
  */
-function rgbToHex( rgb, scale = 255 )
+function rgbToHex( rgb: any, scale = 255 )
 {
     const rgbArray = [ rgb.r, rgb.g, rgb.b ];
     if( rgb.a != undefined ) rgbArray.push( rgb.a );
@@ -446,7 +452,7 @@ LX.rgbToHex = rgbToHex;
  * @description Convert a RGB color (0..1) to a CSS color format
  * @param {Object} rgb Object containing RGB color
  */
-function rgbToCss( rgb )
+function rgbToCss( rgb: any )
 {
     return { r: Math.floor( rgb.r * 255 ), g: Math.floor( rgb.g * 255 ), b: Math.floor( rgb.b * 255 ), a: rgb.a };
 }
@@ -458,7 +464,7 @@ LX.rgbToCss = rgbToCss;
  * @description Convert a RGB color (0..1) array to HSV (0..360|0..1|0..1)
  * @param {Object} rgb Array containing R, G, B
  */
-function rgbToHsv( rgb )
+function rgbToHsv( rgb: any )
 {
     let { r, g, b, a } = rgb;
     a = a ?? 1;
@@ -486,10 +492,10 @@ LX.rgbToHsv = rgbToHsv;
 
 /**
  * @method hsvToRgb
- * @description Convert an HSV color (0..360|0..1|0..1) array to RGB (0..1|0..255)
- * @param {Array} hsv Array containing H, S, V
+ * @description Convert an HSV color (0..360|0..1|0..1) to RGB (0..1|0..255)
+ * @param {Object} hsv containing H, S, V
  */
-function hsvToRgb( hsv )
+function hsvToRgb( hsv: any )
 {
     const { h, s, v, a } = hsv;
     const c = v * s;
@@ -514,7 +520,7 @@ LX.hsvToRgb = hsvToRgb;
  * @description Get an instance of Date() from a Date in String format (DD/MM/YYYY)
  * @param {String} dateString
  */
-function dateFromDateString( dateString )
+function dateFromDateString( dateString: string )
 {
     const tokens = dateString.split( '/' );
     const day = parseInt( tokens[ 0 ] );
@@ -528,10 +534,10 @@ LX.dateFromDateString = dateFromDateString;
 /**
  * @method measureRealWidth
  * @description Measure the pixel width of a text
- * @param {Number} value Text to measure
+ * @param {String} value Text to measure
  * @param {Number} paddingPlusMargin Padding offset
  */
-function measureRealWidth( value, paddingPlusMargin = 8 )
+function measureRealWidth( value: string, paddingPlusMargin = 8 )
 {
     var i = document.createElement( "span" );
     i.className = "lexinputmeasure";
@@ -571,7 +577,7 @@ LX.guidGenerator = guidGenerator;
  * maxLength (Number): Text maximum length
  * asRegExp (Boolean): Return pattern as Regular Expression instance
  */
-function buildTextPattern( options = {} )
+function buildTextPattern( options: any = {} )
 {
     let patterns = [];
     if ( options.lowercase ) patterns.push("(?=.*[a-z])");
@@ -600,15 +606,15 @@ LX.buildTextPattern = buildTextPattern;
  * onDragStart (Function): Called when drag event starts
  * updateLayers (Function): Update Zindex of elements to update layers
  */
-function makeDraggable( domEl, options = { } )
+function makeDraggable( domEl: any, options: any = {} )
 {
     let offsetX = 0;
     let offsetY = 0;
-    let currentTarget = null;
+    let currentTarget: any = null;
     let targetClass = options.targetClass;
     let dragMargin = options.dragMargin ?? 3;
 
-    let _computePosition = ( e, top, left ) => {
+    let _computePosition = ( e: any, top?: number, left?: number ) => {
         const nullRect = { x: 0, y: 0, width: 0, height: 0 };
         const parentRect = domEl.parentElement ? domEl.parentElement.getBoundingClientRect() : nullRect;
         const isFixed = ( domEl.style.position == "fixed" );
@@ -629,7 +635,7 @@ function makeDraggable( domEl, options = { } )
     let id = LX.guidGenerator();
     domEl[ 'draggable-id' ] = id;
 
-    const defaultMoveFunc = e => {
+    const defaultMoveFunc = ( e: any ) => {
         if( !currentTarget )
         {
             return;
@@ -638,7 +644,7 @@ function makeDraggable( domEl, options = { } )
         _computePosition( e );
     };
 
-    const customMoveFunc = e => {
+    const customMoveFunc = ( e: Event ) => {
         if( !currentTarget )
         {
             return;
@@ -653,12 +659,12 @@ function makeDraggable( domEl, options = { } )
     let onMove = options.onMove ? customMoveFunc : defaultMoveFunc;
     let onDragStart = options.onDragStart;
 
-    domEl.setAttribute( 'draggable', true );
-    domEl.addEventListener( "mousedown", function( e ) {
+    domEl.setAttribute( "draggable", "true" );
+    domEl.addEventListener( "mousedown", function( e: any ) {
         currentTarget = ( e.target.classList.contains( targetClass ) || !targetClass ) ? e.target : null;
     } );
 
-    domEl.addEventListener( "dragstart", function( e ) {
+    domEl.addEventListener( "dragstart", function( e: any ) {
         e.preventDefault();
         e.stopPropagation();
         e.stopImmediatePropagation();
@@ -671,8 +677,11 @@ function makeDraggable( domEl, options = { } )
         // Remove image when dragging
         var img = new Image();
         img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAUEBAAAACwAAAAAAQABAAACAkQBADs=';
-        e.dataTransfer.setDragImage( img, 0, 0 );
-        e.dataTransfer.effectAllowed = "move";
+        if( e.dataTransfer )
+        {
+            e.dataTransfer.setDragImage( img, 0, 0 );
+            e.dataTransfer.effectAllowed = "move";
+        }
 
         const rect = e.target.getBoundingClientRect();
         const parentRect = currentTarget.parentElement.getBoundingClientRect();
@@ -722,7 +731,7 @@ LX.makeDraggable = makeDraggable;
  * @param {Element} parent: Element where the content will be appended (default is domEl.parent)
  * @param {Object} options
  */
-function makeCollapsible( domEl, content, parent, options = { } )
+function makeCollapsible( domEl: any, content: any, parent: any, options: any = {} )
 {
     domEl.classList.add( "collapsible" );
 
@@ -733,17 +742,17 @@ function makeCollapsible( domEl, content, parent, options = { } )
     actionIcon.style.marginLeft = "auto";
     actionIcon.style.marginRight = "0.2rem";
 
-    actionIcon.addEventListener( "click", function( e ) {
+    actionIcon.addEventListener( "click", function( e: any ) {
         e.preventDefault();
         e.stopPropagation();
-        if( this.dataset[ "collapsed" ] )
+        if( LX.dataset[ "collapsed" ] )
         {
-            delete this.dataset[ "collapsed" ];
+            delete LX.dataset[ "collapsed" ];
             content.style.display = "block";
         }
         else
         {
-            this.dataset[ "collapsed" ] = true;
+            LX.dataset[ "collapsed" ] = true;
             content.style.display = "none";
         }
     } );
@@ -772,7 +781,7 @@ LX.makeCollapsible = makeCollapsible;
  * tabName (String):
  * className (String): Extra class to customize snippet
  */
-function makeCodeSnippet( code, size, options = { } )
+function makeCodeSnippet( code: string, size: any[], options: any = {} )
 {
     if( !LX.has('CodeEditor') )
     {
@@ -795,8 +804,9 @@ function makeCodeSnippet( code, size, options = { } )
             if( options.linesAdded )
             {
                 const code = editor.root.querySelector( ".code" );
-                for( let l of options.linesAdded )
+                for( let ls of options.linesAdded )
                 {
+                    const l: number|number[] = ls;
                     if( l.constructor == Number )
                     {
                         code.childNodes[ l - 1 ].classList.add( "added" );
@@ -814,8 +824,9 @@ function makeCodeSnippet( code, size, options = { } )
             if( options.linesRemoved )
             {
                 const code = editor.root.querySelector( ".code" );
-                for( let l of options.linesRemoved )
+                for( let ls of options.linesRemoved )
                 {
+                    const l: number|number[] = ls;
                     if( l.constructor == Number )
                     {
                         code.childNodes[ l - 1 ].classList.add( "removed" );
@@ -869,9 +880,9 @@ LX.makeCodeSnippet = makeCodeSnippet;
  * @param {Array} keys
  * @param {String} extraClass
  */
-function makeKbd( keys, useSpecialKeys = true, extraClass = "" )
+function makeKbd( keys: string[], useSpecialKeys: boolean = true, extraClass: string = "" )
 {
-    const specialKeys = {
+    const specialKeys: Record<string, string> = {
         "Ctrl": '⌃',
         "Enter": '↩',
         "Shift": '⇧',
@@ -907,7 +918,7 @@ LX.makeKbd = makeKbd;
  * maxItems: Max items until ellipsis is used to overflow
  * separatorIcon: Customize separator icon
  */
-function makeBreadcrumb( items, options = {} )
+function makeBreadcrumb( items: any[], options: any = {} )
 {
     const breadcrumb = LX.makeContainer( ["auto", "auto"], "flex flex-row gap-1" );
 
@@ -945,7 +956,7 @@ function makeBreadcrumb( items, options = {} )
         if( item.items !== undefined )
         {
             const bDropdownTrigger = LX.makeContainer( ["auto", "auto"], `${ lastElement ? "" : "fg-secondary" }` );
-            bDropdownTrigger.listen( "click", (e) => {
+            bDropdownTrigger.listen( "click", ( e: any ) => {
                 new LX.DropdownMenu( e.target, item.items, { side: "bottom", align: "start" });
             } );
             bDropdownTrigger.append( itemTitle );
@@ -984,14 +995,14 @@ LX.makeBreadcrumb = makeBreadcrumb;
  * variant
  * ...Any Lucide icon options
  */
-function makeIcon( iconName, options = { } )
+function makeIcon( iconName: string, options: any = {} )
 {
-    let svg = null;
+    let svg: any = null;
 
-    const _createIconFromSVG = ( svg ) => {
+    const _createIconFromSVG = ( svg: any ) => {
         if( options.svgClass && options.svgClass.length )
         {
-            options.svgClass.split( " " ).forEach( c => svg.classList.add( c ) );
+            options.svgClass.split( " " ).forEach( ( c: string ) => svg.classList.add( c ) );
         }
         const icon = document.createElement( "a" );
         icon.title = options.title ?? "";
@@ -1008,13 +1019,14 @@ function makeIcon( iconName, options = { } )
         options.variant = parts[ 1 ];
     }
 
-    let data = LX.ICONS[ iconName ];
+    let data: any = LX.ICONS[ iconName ];
+    const lucide = (window as any).lucide;
     const lucideData = lucide[ iconName ] ?? lucide[ LX.LucideIconAlias[ iconName ] ];
 
     if( data )
     {
         // Resolve alias
-        if( data.constructor == String )
+        if( data.constructor != Array )
         {
             data = LX.ICONS[ data ];
         }
@@ -1033,12 +1045,12 @@ function makeIcon( iconName, options = { } )
             if( data[ 5 ] )
             {
                 const classes = data[ 5 ].svgClass;
-                classes?.split( ' ' ).forEach( c => {
+                classes?.split( ' ' ).forEach( ( c: string ) => {
                     svg.classList.add( c );
                 } );
 
                 const attrs = data[ 5 ].svgAttributes;
-                attrs?.split( ' ' ).forEach( attr => {
+                attrs?.split( ' ' ).forEach( ( attr: string ) => {
                     const t = attr.split( '=' );
                     svg.setAttribute( t[ 0 ], t[ 1 ] );
                 } );
@@ -1052,12 +1064,12 @@ function makeIcon( iconName, options = { } )
             if( data[ 5 ] )
             {
                 const classes = data[ 5 ].pathClass;
-                classes?.split( ' ' ).forEach( c => {
+                classes?.split( ' ' ).forEach( ( c: string ) => {
                     path.classList.add( c );
                 } );
 
                 const attrs = data[ 5 ].pathAttributes;
-                attrs?.split( ' ' ).forEach( attr => {
+                attrs?.split( ' ' ).forEach( ( attr: string ) => {
                     const t = attr.split( '=' );
                     path.setAttribute( t[ 0 ], t[ 1 ] );
                 } );
@@ -1086,9 +1098,9 @@ LX.makeIcon = makeIcon;
  * @param {String} variant
  * @param {Array} aliases
  */
-function registerIcon( iconName, svgString, variant = "none", aliases = [] )
+function registerIcon( iconName: string, svgString: string, variant: string = "none", aliases: string[] = [] )
 {
-    const svg = new DOMParser().parseFromString( svgString, 'image/svg+xml' ).documentElement;
+    const svg: any = new DOMParser().parseFromString( svgString, 'image/svg+xml' ).documentElement;
     const path = svg.querySelector( "path" );
     const viewBox = svg.getAttribute( "viewBox" ).split( ' ' );
     const pathData = path.getAttribute( 'd' );
@@ -1152,7 +1164,7 @@ LX.registerIcon = registerIcon;
  * @param {String} name
  * @param {Function} callback
  */
-function registerCommandbarEntry( name, callback )
+function registerCommandbarEntry( name: string, callback: any )
 {
     LX.extraCommandbarEntries.push( { name, callback } );
 }
@@ -1173,7 +1185,7 @@ LX.registerCommandbarEntry = registerCommandbarEntry;
  * draggable: Dialog can be dragged [false]
  */
 
-function message( text, title, options = {} )
+function message( text: string, title: string, options: any = {} )
 {
     if( !text )
     {
@@ -1182,7 +1194,7 @@ function message( text, title, options = {} )
 
     options.modal = true;
 
-    return new LX.Dialog( title, p => {
+    return new LX.Dialog( title, ( p: Panel ) => {
         p.addTextArea( null, text, null, { disabled: true, fitHeight: true  } );
     }, options );
 }
@@ -1200,7 +1212,7 @@ LX.message = message;
  * size (Array): [width, height]
  */
 
-function popup( text, title, options = {} )
+function popup( text: string, title: string, options: any = {} )
 {
     if( !text )
     {
@@ -1211,7 +1223,7 @@ function popup( text, title, options = {} )
     options.class = "lexpopup";
 
     const time = options.timeout || 3000;
-    const dialog = new LX.Dialog( title, p => {
+    const dialog = new LX.Dialog( title, ( p: Panel ) => {
         p.addTextArea( null, text, null, { disabled: true, fitHeight: true } );
     }, options );
 
@@ -1237,20 +1249,20 @@ LX.popup = popup;
  * required: Input has to be filled [true]. Default: false
  */
 
-function prompt( text, title, callback, options = {} )
+function prompt( text: string, title: string, callback: (value: any) => void, options: any = {} )
 {
     options.modal = true;
     options.className = "prompt";
 
     let value = "";
 
-    const dialog = new LX.Dialog( title, p => {
+    const dialog = new LX.Dialog( title, ( p: Panel ) => {
 
         p.addTextArea( null, text, null, { disabled: true, fitHeight: true } );
 
         if( options.input ?? true )
         {
-            p.addText( null, options.input || value, v => value = v, { placeholder: "..." } );
+            p.addText( null, options.input || value, ( v: string ) => value = v, { placeholder: "..." } );
         }
 
         p.sameLine( 2 );
@@ -1266,7 +1278,7 @@ function prompt( text, title, callback, options = {} )
             }
             else
             {
-                if( callback ) callback.call( this, value );
+                if( callback ) callback.call( LX, value );
                 dialog.close();
             }
         }, { buttonClass: "primary" });
@@ -1295,53 +1307,54 @@ LX.prompt = prompt;
  * timeout: Time in which the toast closed automatically, in ms. -1 means persistent. [3000]
  */
 
-function toast( title, description, options = {} )
+function toast( title: string, description: string, options: any = {} )
 {
     if( !title )
     {
         throw( "The toast needs at least a title!" );
     }
 
-    console.assert( this.notifications );
+    const nots = LX.notifications;
+    console.assert( nots );
 
-    const toast = document.createElement( "li" );
+    const toast: any = document.createElement( "li" );
     toast.className = "lextoast";
-    this.notifications.prepend( toast );
+    nots.prepend( toast );
 
     const [ positionVertical, positionHorizontal ] = options.position ? options.position.split( "-" ) : [ "bottom", "right" ];
 
     // Reset style
-    this.notifications.style.right = "unset";
-    this.notifications.style.left = "unset";
-    this.notifications.style.top = "unset";
-    this.notifications.style.bottom = "unset";
-    this.notifications.style.placeSelf = "unset";
+    nots.style.right = "unset";
+    nots.style.left = "unset";
+    nots.style.top = "unset";
+    nots.style.bottom = "unset";
+    nots.style.placeSelf = "unset";
 
     switch( positionVertical )
     {
         case "top":
             toast.style.translate = "0 -30px";
-            this.notifications.style.top = "1rem";
-            this.notifications.style.flexDirection = "column";
+            nots.style.top = "1rem";
+            nots.style.flexDirection = "column";
             break;
         case "bottom":
             toast.style.translate = "0 calc(100% + 30px)";
-            this.notifications.style.top = "auto";
-            this.notifications.style.bottom = "1rem";
-            this.notifications.style.flexDirection = "column-reverse";
+            nots.style.top = "auto";
+            nots.style.bottom = "1rem";
+            nots.style.flexDirection = "column-reverse";
             break;
     }
 
     switch( positionHorizontal )
     {
         case "left":
-            this.notifications.style.left = "1rem";
+            nots.style.left = "1rem";
             break;
         case "center":
-            this.notifications.style.placeSelf = "center";
+            nots.style.placeSelf = "center";
             break;
         case "right":
-            this.notifications.style.right = "1rem";
+            nots.style.right = "1rem";
             break;
     }
 
@@ -1350,10 +1363,10 @@ function toast( title, description, options = {} )
 
     LX.doAsync( () => {
 
-        if( this.notifications.offsetWidth > this.notifications.iWidth )
+        if( nots.offsetWidth > nots.iWidth )
         {
-            this.notifications.iWidth = Math.min( this.notifications.offsetWidth, 480 );
-            this.notifications.style.width = this.notifications.iWidth + "px";
+            nots.iWidth = Math.min( nots.offsetWidth, 480 );
+            nots.style.width = nots.iWidth + "px";
         }
 
         toast.dataset[ "open" ] = true;
@@ -1379,20 +1392,18 @@ function toast( title, description, options = {} )
     if( options.action )
     {
         const panel = new LX.Panel();
-        panel.addButton(null, options.action.name ?? "Accept", options.action.callback.bind( this, toast ), { width: "auto", maxWidth: "150px", className: "right", buttonClass: "border" });
+        panel.addButton(null, options.action.name ?? "Accept", options.action.callback.bind( LX, toast ), { width: "auto", maxWidth: "150px", className: "right", buttonClass: "border" });
         toast.appendChild( panel.root.childNodes[ 0 ] );
     }
 
-    const that = this;
-
     toast.close = function() {
-        this.dataset[ "open" ] = false;
+        this.dataset[ "open" ] = "false";
         LX.doAsync( () => {
             this.remove();
-            if( !that.notifications.childElementCount )
+            if( !LX.notifications.childElementCount )
             {
-                that.notifications.style.width = "unset";
-                that.notifications.iWidth = 0;
+                LX.notifications.style.width = "unset";
+                LX.notifications.iWidth = 0;
             }
         }, 500 );
     };
@@ -1427,7 +1438,7 @@ LX.toast = toast;
  * asElement: Returns the badge as HTMLElement [false]
  */
 
-function badge( text, className, options = {} )
+function badge( text: string, className: string, options: any = {} )
 {
     const container = document.createElement( "div" );
     container.innerHTML = text;
@@ -1472,7 +1483,7 @@ LX.badge = badge;
  * @param {Object} overrideStyle
  */
 
-function makeElement( htmlType, className, innerHTML, parent, overrideStyle = {} )
+function makeElement( htmlType: string, className: string, innerHTML: string, parent: any, overrideStyle = {} )
 {
     const element = document.createElement( htmlType );
     element.className = className ?? ""
@@ -1505,7 +1516,7 @@ LX.makeElement = makeElement;
  * @param {Object} overrideStyle
  */
 
-function makeContainer( size, className, innerHTML, parent, overrideStyle = {} )
+function makeContainer( size: any[], className: string, innerHTML: string, parent: any, overrideStyle = {} )
 {
     const container = LX.makeElement( "div", "lexcontainer " + ( className ?? "" ), innerHTML, parent, overrideStyle );
     container.style.width = size && size[ 0 ] ? size[ 0 ] : "100%";
@@ -1528,19 +1539,19 @@ LX.makeContainer = makeContainer;
  * callback: Callback function to execute when the tooltip is shown
  */
 
-function asTooltip( trigger, content, options = {} )
+function asTooltip( trigger: any, content: any, options: any = {} )
 {
     console.assert( trigger, "You need a trigger to generate a tooltip!" );
 
     trigger.dataset[ "disableTooltip" ] = !( options.active ?? true );
 
-    let tooltipDom = null;
+    let tooltipDom: any = null;
 
     const _offset = options.offset;
     const _offsetX = options.offsetX ?? ( _offset ?? 0 );
     const _offsetY = options.offsetY ?? ( _offset ?? 6 );
 
-    trigger.addEventListener( "mouseenter", function(e) {
+    trigger.addEventListener( "mouseenter", function( e: any ) {
 
         if( trigger.dataset[ "disableTooltip" ] == "true" )
         {
@@ -1555,7 +1566,7 @@ function asTooltip( trigger, content, options = {} )
         const tooltipParent = nestedDialog ?? LX.root;
 
         // Remove other first
-        LX.root.querySelectorAll( ".lextooltip" ).forEach( e => e.remove() );
+        LX.root.querySelectorAll( ".lextooltip" ).forEach( ( e: HTMLElement ) => e.remove() );
 
         // Append new tooltip
         tooltipParent.appendChild( tooltipDom );
@@ -1565,7 +1576,7 @@ function asTooltip( trigger, content, options = {} )
             const position = [ 0, 0 ];
             const offsetX = parseFloat( trigger.dataset[ "tooltipOffsetX" ] ?? _offsetX );
             const offsetY = parseFloat( trigger.dataset[ "tooltipOffsetY" ] ?? _offsetY );
-            const rect = this.getBoundingClientRect();
+            const rect = trigger.getBoundingClientRect();
             let alignWidth = true;
 
             switch( options.side ?? "top" )
@@ -1612,7 +1623,7 @@ function asTooltip( trigger, content, options = {} )
         } );
     } );
 
-    trigger.addEventListener( "mouseleave", function(e) {
+    trigger.addEventListener( "mouseleave", function( e: any ) {
         if( tooltipDom )
         {
             tooltipDom.remove();
@@ -1634,7 +1645,7 @@ Object.assign(LX, {
     * @param {Object} request object with all the parameters like data (for sending forms), dataType, success, error
     * @param {Function} on_complete
     **/
-    request( request ) {
+    request( request: any ) {
 
         var dataType = request.dataType || "text";
         if(dataType == "json") //parse it locally
@@ -1724,7 +1735,7 @@ Object.assign(LX, {
     * @param {Function} onComplete
     * @param {Function} onError
     **/
-    requestText( url, onComplete, onError ) {
+    requestText( url: string, onComplete: (r: Response, rq: XMLHttpRequest) => void, onError: (e: ProgressEvent) => void ) {
         return this.request({ url: url, dataType:"text", success: onComplete, error: onError });
     },
 
@@ -1735,7 +1746,7 @@ Object.assign(LX, {
     * @param {Function} onComplete
     * @param {Function} onError
     **/
-    requestJSON( url, onComplete, onError ) {
+    requestJSON( url: string, onComplete: (r: Response, rq: XMLHttpRequest) => void, onError: (e: ProgressEvent) => void ) {
         return this.request({ url: url, dataType:"json", success: onComplete, error: onError });
     },
 
@@ -1746,7 +1757,7 @@ Object.assign(LX, {
     * @param {Function} onComplete
     * @param {Function} onError
     **/
-    requestBinary( url, onComplete, onError ) {
+    requestBinary( url: string, onComplete: (r: Response, rq: XMLHttpRequest) => void, onError: (e: ProgressEvent) => void ) {
         return this.request({ url: url, dataType:"binary", success: onComplete, error: onError });
     },
 
@@ -1758,7 +1769,8 @@ Object.assign(LX, {
     * @param {Function} onError
     * @param {Function} onProgress (if several files are required, onProgress is called after every file is added to the DOM)
     **/
-    requireScript( url, onComplete, onError, onProgress, version ) {
+    requireScript( url: any, onComplete: (r: any[]) => void, 
+            onError: (e: ProgressEvent, src: string, n: string) => void, onProgress: (src: string, n: string) => void, version?: string ) {
 
         if(!url)
             throw("invalid URL");
@@ -1767,18 +1779,17 @@ Object.assign(LX, {
             url = [url];
 
         var total = url.length;
-        var size = total;
-        var loaded_scripts = [];
+        var loaded_scripts: any[] = [];
 
-        for( var i in url)
+        for( var i in url )
         {
-            var script = document.createElement('script');
+            var script: any = document.createElement('script');
             script.num = i;
             script.type = 'text/javascript';
             script.src = url[ i ] + ( version ? "?version=" + version : "" );
             script.original_src = url[ i ];
             script.async = false;
-            script.onload = function( e ) {
+            script.onload = function( e: any ) {
                 total--;
                 loaded_scripts.push(this);
                 if(total)
@@ -1792,29 +1803,29 @@ Object.assign(LX, {
                     onComplete( loaded_scripts );
             };
             if(onError)
-                script.onerror = function(err) {
+                script.onerror = function(err: any) {
                     onError(err, this.original_src, this.num );
                 }
             document.getElementsByTagName('head')[ 0 ].appendChild(script);
         }
     },
 
-    loadScriptSync( url ) {
+    loadScriptSync( url: string ) {
         return new Promise((resolve, reject) => {
             const script = document.createElement( "script" );
             script.src = url;
             script.async = false;
-            script.onload = () => resolve();
+            script.onload = () => resolve(1);
             script.onerror = () => reject(new Error(`Failed to load ${url}`));
             document.head.appendChild( script );
         });
     },
 
-    downloadURL( url, filename ) {
+    downloadURL( url: string, filename: string ) {
 
         const fr = new FileReader();
 
-        const _download = function(_url) {
+        const _download = function( _url: string ) {
             var link = document.createElement('a');
             link.href = _url;
             link.download = filename;
@@ -1825,10 +1836,10 @@ Object.assign(LX, {
 
         if( url.includes('http') )
         {
-            LX.request({ url: url, dataType: 'blob', success: (f) => {
+            LX.request({ url: url, dataType: 'blob', success: ( f: File ) => {
                 fr.readAsDataURL( f );
-                fr.onload = e => {
-                    _download(e.currentTarget.result);
+                fr.onload = ( e: any ) => {
+                    _download( e.currentTarget.result );
                 };
             } });
         }else
@@ -1838,14 +1849,15 @@ Object.assign(LX, {
 
     },
 
-    downloadFile: function( filename, data, dataType ) {
-        if(!data)
+    downloadFile: function( filename: string, data: any, dataType: string )
+    {
+        if( !data )
         {
             console.warn("No file provided to download");
             return;
         }
 
-        if(!dataType)
+        if( !dataType )
         {
             if(data.constructor === String )
                 dataType = 'text/plain';
@@ -1854,7 +1866,7 @@ Object.assign(LX, {
         }
 
         var file = null;
-        if(data.constructor !== File && data.constructor !== Blob)
+        if( data.constructor !== File && data.constructor !== Blob )
             file = new Blob( [ data ], {type : dataType});
         else
             file = data;
@@ -1864,9 +1876,9 @@ Object.assign(LX, {
         element.setAttribute('href', url);
         element.setAttribute('download', filename );
         element.style.display = 'none';
-        document.body.appendChild(element);
+        document.body.appendChild( element );
         element.click();
-        document.body.removeChild(element);
+        document.body.removeChild( element );
         setTimeout( function(){ URL.revokeObjectURL( url ); }, 1000*60 ); //wait one minute to revoke url
     }
 });
@@ -1875,7 +1887,7 @@ Object.assign(LX, {
  * @method formatBytes
  * @param {Number} bytes
  **/
-function formatBytes( bytes )
+function formatBytes( bytes: number )
 {
     if( bytes === 0 ) return "0 B";
     const k = 1024;
@@ -1889,11 +1901,8 @@ LX.formatBytes = formatBytes;
 
 /**
  * @method compareThreshold
- * @param {String} url
- * @param {Function} onComplete
- * @param {Function} onError
  **/
-function compareThreshold( v, p, n, t )
+function compareThreshold( v: number, p: number, n: number, t: number )
 {
     return Math.abs( v - p ) >= t || Math.abs( v - n ) >= t;
 }
@@ -1902,11 +1911,8 @@ LX.compareThreshold = compareThreshold;
 
 /**
  * @method compareThresholdRange
- * @param {String} url
- * @param {Function} onComplete
- * @param {Function} onError
  **/
-function compareThresholdRange( v0, v1, t0, t1 )
+function compareThresholdRange( v0: number, v1: number, t0: number, t1: number )
 {
     return v0 >= t0 && v0 <= t1 || v1 >= t0 && v1 <= t1 || v0 <= t0 && v1 >= t1;
 }
@@ -1915,11 +1921,8 @@ LX.compareThresholdRange = compareThresholdRange;
 
 /**
  * @method getControlPoints
- * @param {String} url
- * @param {Function} onComplete
- * @param {Function} onError
  **/
-function getControlPoints( x0, y0, x1, y1, x2, y2, t )
+function getControlPoints( x0: number, y0: number, x1: number, y1: number, x2: number, y2: number, t: number )
 {
     //  x0,y0,x1,y1 are the coordinates of the end (knot) pts of this segment
     //  x2,y2 is the next knot -- not connected here but needed to calculate p2
@@ -1952,10 +1955,10 @@ LX.getControlPoints = getControlPoints;
  * @param {Array} pts
  * @param {Number} t
  **/
-function drawSpline( ctx, pts, t )
+function drawSpline( ctx: CanvasRenderingContext2D, pts: any[], t: number )
 {
     ctx.save();
-    var cp = [];   // array of control points, as x0,y0,x1,y1,...
+    var cp: any[] = [];   // array of control points, as x0,y0,x1,y1,...
     var n = pts.length;
 
     // Draw an open curve, not connected at the ends

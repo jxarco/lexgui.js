@@ -1,7 +1,7 @@
 // icons.js @jxarco
-import { LX } from './core.js';
+import { LX } from './Core';
 
-const RAW_ICONS = {
+const RAW_ICONS: Record<string, any> = {
     // Internals
     "Abc": [24, 24, [], "regular", "M17 15q-.425 0-.712-.288T16 14v-4q0-.425.288-.712T17 9h3q.425 0 .713.288T21 10v1h-1.5v-.5h-2v3h2V13H21v1q0 .425-.288.713T20 15zm-7.5 0V9h4q.425 0 .713.288T14.5 10v1q0 .425-.288.713T13.5 12q.425 0 .713.288T14.5 13v1q0 .425-.288.713T13.5 15zm1.5-3.75h2v-.75h-2zm0 2.25h2v-.75h-2zM3 15v-5q0-.425.288-.712T4 9h3q.425 0 .713.288T8 10v5H6.5v-1.5h-2V15zm1.5-3h2v-1.5h-2z"],
     "Clone": [512, 512, [], "regular", "M64 464l224 0c8.8 0 16-7.2 16-16l0-64 48 0 0 64c0 35.3-28.7 64-64 64L64 512c-35.3 0-64-28.7-64-64L0 224c0-35.3 28.7-64 64-64l64 0 0 48-64 0c-8.8 0-16 7.2-16 16l0 224c0 8.8 7.2 16 16 16zM224 304l224 0c8.8 0 16-7.2 16-16l0-224c0-8.8-7.2-16-16-16L224 48c-8.8 0-16 7.2-16 16l0 224c0 8.8 7.2 16 16 16zm-64-16l0-224c0-35.3 28.7-64 64-64L448 0c35.3 0 64 28.7 64 64l0 224c0 35.3-28.7 64-64 64l-224 0c-35.3 0-64-28.7-64-64z"],
@@ -155,12 +155,12 @@ const RAW_ICONS = {
 // Generate Alias icons
 
 LX.ICONS = (() => {
-    const aliasIcons = {};
+    const aliasIcons: Record<string, any> = {};
 
     for( let i in RAW_ICONS )
     {
         const aliases = RAW_ICONS[ i ][ 2 ];
-        aliases.forEach( a => aliasIcons[ a ] = i );
+        aliases.forEach( ( a: string ) => aliasIcons[ a ] = i );
     }
 
     return { ...RAW_ICONS, ...aliasIcons };

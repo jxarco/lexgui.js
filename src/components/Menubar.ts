@@ -1,13 +1,26 @@
 // menubar.js @jxarco
-import { LX } from './core.js';
+import { LX } from './Core';
 
 /**
  * @class Menubar
  */
 
-class Menubar {
+export class Menubar {
 
-    constructor( items, options = {} )
+    root: any;
+    siblingArea: any;
+    buttonContainer?: any;
+
+    items: any[] = [];
+    buttons: Record<string, any> = {};
+    icons: any = {};
+    shorts: any = {};
+
+    focused: boolean = false;
+
+    _currentDropdown?: any;
+
+    constructor( items: any[], options: any = {} )
     {
         this.root = document.createElement( "div" );
         this.root.className = "lexmenubar";
@@ -17,17 +30,14 @@ class Menubar {
             this.root.style.justifyContent = options.float;
         }
 
-        this.buttons = [ ];
-        this.icons = { };
-        this.shorts = { };
         this.items = items ?? [];
 
         this.createEntries();
     }
 
-    _resetMenubar( focus )
+    _resetMenubar( focus?: boolean )
     {
-        this.root.querySelectorAll(".lexmenuentry").forEach( e => {
+        this.root.querySelectorAll(".lexmenuentry").forEach( ( e: HTMLElement ) => {
             e.classList.remove( 'selected' );
             delete e.dataset[ "built" ];
         } );
@@ -63,7 +73,7 @@ class Menubar {
             entry.className = "lexmenuentry";
             entry.id = pKey;
             entry.innerHTML = "<span>" + key + "</span>";
-            entry.tabIndex = "1";
+            entry.tabIndex = 1;
 
             this.root.appendChild( entry );
 
@@ -113,7 +123,7 @@ class Menubar {
      * @param {String} name
      */
 
-    getButton( name )
+    getButton( name: string )
     {
         return this.buttons[ name ];
     }
@@ -123,7 +133,7 @@ class Menubar {
      * @param {Object} item: parent item
      * @param {Array} tokens: split path strings
     */
-    getSubitem( item, tokens )
+    getSubitem( item: any, tokens: any[] ): any
     {
         for( const s of item )
         {
@@ -148,7 +158,7 @@ class Menubar {
      * @method getItem
      * @param {String} path
     */
-    getItem( path )
+    getItem( path: string )
     {
         // Process path
         const tokens = path.split( '/' );
@@ -163,7 +173,7 @@ class Menubar {
      * @param {Object} options
      */
 
-    setButtonIcon( name, icon, callback, options = {} )
+    setButtonIcon( name: string, icon: string, callback: any, options: any = {} )
     {
         if( !name )
         {
@@ -219,7 +229,7 @@ class Menubar {
      * @param {Object} options
      */
 
-    setButtonImage( name, src, callback, options = {} )
+    setButtonImage( name: string, src: string, callback: any, options: any = {} )
     {
         if( !name )
         {
@@ -260,11 +270,11 @@ class Menubar {
 
         const _b = button.querySelector('a');
 
-        _b.addEventListener( "mousedown", e => {
+        _b.addEventListener( "mousedown", ( e: MouseEvent ) => {
             e.preventDefault();
         });
 
-        _b.addEventListener( "mouseup", e => {
+        _b.addEventListener( "mouseup", ( e: MouseEvent ) => {
             if( callback && !disabled )
             {
                 callback.call( this, _b, e );
@@ -281,7 +291,7 @@ class Menubar {
      * float: center (Default), right
      */
 
-    addButtons( buttons, options = {} )
+    addButtons( buttons: any[], options: any = {} )
     {
         if( !buttons )
         {
@@ -330,7 +340,3 @@ class Menubar {
         }
     }
 };
-
-LX.Menubar = Menubar;
-
-export { Menubar };
