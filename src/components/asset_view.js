@@ -223,7 +223,7 @@ class AssetView {
 
         push_parents_id( data );
 
-        LX.emit( "@on_folder_change", this.path.reverse().join('/') );
+        LX.emitSignal( "@on_folder_change", this.path.reverse().join('/') );
     }
 
     /**
@@ -270,7 +270,7 @@ class AssetView {
                             this._refreshContent();
 
                             this.path = ['@'];
-                            LX.emit("@on_folder_change", this.path.join('/'));
+                            LX.emitSignal("@on_folder_change", this.path.join('/'));
                         }
                         break;
                     case LX.TreeEvent.NODE_DRAGGED:
@@ -748,7 +748,7 @@ class AssetView {
         this.allowNextPage = filteredData.length - 1 > AssetView.MAX_PAGE_ELEMENTS;
 
         const textString = "Page " + this.contentPage + " / " + ((((filteredData.length - 1) / AssetView.MAX_PAGE_ELEMENTS )|0) + 1);
-        LX.emit( "@on_page_change", textString );
+        LX.emitSignal( "@on_page_change", textString );
 
         if( this.onRefreshContent )
         {

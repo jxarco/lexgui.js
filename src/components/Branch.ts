@@ -89,7 +89,7 @@ export class Branch {
             that.content.toggleAttribute( "hidden" );
             that.grabber.toggleAttribute( "hidden" );
 
-            LX.emit( "@on_branch_closed", title.classList.contains( "closed" ) );
+            LX.emitSignal( "@on_branch_closed", title.classList.contains( "closed" ) );
         };
 
         this.oncontextmenu = function( e: any ) {

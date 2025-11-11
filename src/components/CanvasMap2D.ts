@@ -1,10 +1,12 @@
 // CanvasMap2D.js @jxarco
-import { LX } from './core.js';
+
+import { LX } from './Namespace';
+import { vec2 } from './Vec2';
 
 // Based on LGraphMap2D from @tamats (jagenjo)
 // https://github.com/jagenjo/litescene.js
-class CanvasMap2D {
-
+export class CanvasMap2D
+{
     static COLORS = [ [255, 0, 0], [0, 255, 0], [0, 0, 255], [0, 128, 128], [128, 0, 128], [128, 128, 0], [255, 128, 0], [255, 0, 128], [0, 128, 255], [128, 0, 255] ];
     static GRID_SIZE = 64;
 
@@ -18,21 +20,35 @@ class CanvasMap2D {
      * size
      */
 
-    constructor( initialPoints, callback, options = {} ) {
+    canvas: HTMLCanvasElement;
+    imageCanvas: HTMLCanvasElement | null = null;
+    root: any;
+    circular: boolean;
+    showNames: boolean;
+    size: number[];
+    points: any[];
+    callback: any;
+    weights: number[] = [];
+    weightsObj: any = {};
+    currentPosition: vec2 = new vec2( 0.0, 0.0 );
+    circleCenter: number[] = [ 0, 0 ];
+    circleRadius: number = 1;
+    margin: number = 8;
+    dragging: boolean = false;
 
+    _valuesChanged: boolean = true;
+    _selectedPoint: any = null;
+    _precomputedWeightsGridSize: number = 0;
+    _precomputedWeights: Float32Array | null = null
+
+    constructor( initialPoints: any, callback: any, options: any = {} )
+    {
         this.circular = options.circular ?? false;
         this.showNames = options.showNames ?? true;
         this.size = options.size ?? [ 200, 200 ];
 
         this.points = initialPoints ?? [];
         this.callback = callback;
-        this.weights = [];
-        this.weightsObj = {};
-        this.currentPosition = new LX.vec2( 0.0, 0.0 );
-        this.circleCenter = [ 0, 0 ];
-        this.circleRadius = 1;
-        this.margin = 8;
-        this.dragging = false;
 
         this._valuesChanged = true;
         this._selectedPoint = null;
@@ -44,7 +60,7 @@ class CanvasMap2D {
 
         const that = this;
 
-        function innerMouseDown( e )
+        function innerMouseDown( e: MouseEvent )
         {
             var doc = that.root.ownerDocument;
             doc.addEventListener("mouseup", innerMouseUp);
@@ -56,7 +72,7 @@ class CanvasMap2D {
             return true;
         }
 
-        function innerMouseMove( e )
+        function innerMouseMove( e: MouseEvent )
         {
             if( !that.dragging )
             {
@@ -66,7 +82,7 @@ class CanvasMap2D {
             const margin = that.margin;
             const rect = that.root.getBoundingClientRect();
 
-            let pos = new LX.vec2();
+            let pos = new vec2();
             pos.set( e.x - rect.x - that.size[ 0 ] * 0.5, e.y - rect.y - that.size[ 1 ] * 0.5 );
             var cpos = that.currentPosition;
             cpos.set(
@@ -76,7 +92,7 @@ class CanvasMap2D {
 
             if( that.circular )
             {
-                const center = new LX.vec2( 0, 0 );
+                const center = new vec2( 0, 0 );
                 const dist = cpos.dst( center );
                 if( dist > 1 )
                 {
@@ -84,7 +100,7 @@ class CanvasMap2D {
                 }
             }
 
-            that.renderToCanvas( that.canvas.getContext( "2d", { willReadFrequently: true } ), that.canvas );
+            that.renderToCanvas( that.canvas.getContext( "2d", { willReadFrequently: true } ) );
 
             that.computeWeights( cpos );
 
@@ -96,7 +112,7 @@ class CanvasMap2D {
             return true;
         }
 
-        function innerMouseUp( e )
+        function innerMouseUp( e: MouseEvent )
         {
             that.dragging = false;
 
@@ -111,7 +127,7 @@ class CanvasMap2D {
         this.root.appendChild( this.canvas );
 
         const ctx = this.canvas.getContext( "2d", { willReadFrequently: true } );
-        this.renderToCanvas( ctx, this.canvas );
+        this.renderToCanvas( ctx );
     }
 
     /**
@@ -122,8 +138,8 @@ class CanvasMap2D {
      * and that give us the weight for every point
      */
 
-    computeWeights( p ) {
-
+    computeWeights( p: vec2 )
+    {
         if( !this.points.length )
         {
             return;
@@ -145,7 +161,7 @@ class CanvasMap2D {
         const gridSize = CanvasMap2D.GRID_SIZE;
 
         let totalInside = 0;
-        let pos2 = new LX.vec2();
+        let pos2 = new vec2();
 
         for( var y = 0; y < gridSize; ++y )
         {
@@ -180,15 +196,15 @@ class CanvasMap2D {
      * We store point index and distance in this._precomputedWeights. This is done only when the points set change
      */
 
-    precomputeWeights() {
-
+    precomputeWeights()
+    {
         this._valuesChanged = false;
 
         const numPoints = this.points.length;
         const gridSize = CanvasMap2D.GRID_SIZE;
         const totalNums = 2 * gridSize * gridSize;
 
-        let position = new LX.vec2();
+        let position = new vec2();
 
         if( !this._precomputedWeights || this._precomputedWeights.length != totalNums )
         {
@@ -209,7 +225,7 @@ class CanvasMap2D {
                 {
                     position.set( ( x / gridSize ) * 2 - 1, ( y / gridSize ) * 2 - 1 );
 
-                    let pointPosition = new LX.vec2();
+                    let pointPosition = new vec2();
                     pointPosition.fromArray( this.points[ i ].pos );
                     let dist = position.dst( pointPosition );
                     if( dist > minDistance )
@@ -234,8 +250,8 @@ class CanvasMap2D {
      * @param {LX.vec2} p
      */
 
-    precomputeWeightsToImage( p ) {
-
+    precomputeWeightsToImage( p: vec2 )
+    {
         if( !this.points.length )
         {
             return null;
@@ -256,6 +272,10 @@ class CanvasMap2D {
 
         canvas.width = canvas.height = gridSize;
         var ctx = canvas.getContext( "2d", { willReadFrequently: true } );
+        if( !ctx )
+        {
+            return;
+        }
 
         var weights = this.weights;
         weights.length = this.points.length;
@@ -266,7 +286,7 @@ class CanvasMap2D {
 
         let totalInside = 0;
         let pixels = ctx.getImageData( 0, 0, gridSize, gridSize );
-        let pos2 = new LX.vec2();
+        let pos2 = new vec2();
 
         for( var y = 0; y < gridSize; ++y )
         {
@@ -302,7 +322,8 @@ class CanvasMap2D {
         return canvas;
     }
 
-    addPoint( name, pos ) {
+    addPoint( name: string, pos: number[] | null = null )
+    {
         if( this.findPoint( name ) )
         {
             console.warn("CanvasMap2D.addPoint: There is already a point with that name" );
@@ -311,7 +332,7 @@ class CanvasMap2D {
 
         if( !pos )
         {
-            pos = [ this.currentPosition[ 0 ], this.currentPosition[ 1 ] ];
+            pos = [ this.currentPosition.x, this.currentPosition.y ];
         }
 
         pos[ 0 ] = LX.clamp( pos[ 0 ], -1, 1 );
@@ -323,8 +344,9 @@ class CanvasMap2D {
         return point;
     }
 
-    removePoint( name ) {
-        const removeIdx = this.points.findIndex( (p) => p.name == name );
+    removePoint( name: string )
+    {
+        const removeIdx = this.points.findIndex( ( p ) => p.name == name );
         if( removeIdx > -1 )
         {
             this.points.splice( removeIdx, 1 );
@@ -332,18 +354,24 @@ class CanvasMap2D {
         }
     }
 
-    findPoint( name ) {
+    findPoint( name: string )
+    {
         return this.points.find( p => p.name == name );
     }
 
-    clear() {
+    clear()
+    {
         this.points.length = 0;
         this._precomputedWeights = null;
-        this._canvas = null;
         this._selectedPoint = null;
     }
 
-    renderToCanvas( ctx, canvas ) {
+    renderToCanvas( ctx: CanvasRenderingContext2D | null )
+    {
+        if( !ctx )
+        {
+            return;
+        }
 
         const margin = this.margin;
         const w = this.size[ 0 ];
@@ -433,5 +461,3 @@ class CanvasMap2D {
 }
 
 LX.CanvasMap2D = CanvasMap2D;
-
-export { CanvasMap2D };

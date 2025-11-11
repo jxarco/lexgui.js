@@ -1,14 +1,14 @@
-// Toggle.ts @jxarco
+// Checkbox.ts @jxarco
 
 import { LX } from './Namespace';
 import { BaseComponent, ComponentType } from './BaseComponent';
 
 /**
- * @class Toggle
- * @description Toggle Component
+ * @class Checkbox
+ * @description Checkbox Component
  */
 
-export class Toggle extends BaseComponent
+export class Checkbox extends BaseComponent
 {
     constructor( name: string, value: boolean, callback: any, options: any = {} )
     {
@@ -17,10 +17,10 @@ export class Toggle extends BaseComponent
             throw( "Set Component Name or at least a label!" );
         }
 
-        super( ComponentType.TOGGLE, name, value, options );
+        super( ComponentType.CHECKBOX, name, value, options );
 
         this.onGetValue = () => {
-            return toggle.checked;
+            return value;
         };
 
         this.onSetValue = ( newValue, skipCallback, event ) => {
@@ -30,10 +30,10 @@ export class Toggle extends BaseComponent
                 return;
             }
 
-            toggle.checked = value = newValue;
+            checkbox.checked = value = newValue;
 
             // Update suboptions menu
-            this.root.querySelector( ".lextogglesubmenu" )?.toggleAttribute( 'hidden', !newValue );
+            this.root.querySelector( ".lexcheckboxsubmenu" )?.toggleAttribute( 'hidden', !newValue );
 
             if( !skipCallback )
             {
@@ -46,32 +46,31 @@ export class Toggle extends BaseComponent
             container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth })`;
         };
 
-        var container = document.createElement('div');
-        container.className = "lextogglecont";
+        var container = document.createElement( "div" );
+        container.className = "lexcheckboxcont";
         this.root.appendChild( container );
 
-        let toggle: any = document.createElement('input');
-        toggle.type = "checkbox";
-        toggle.className = "lextoggle " + ( options.className ?? "" );
-        toggle.checked = value;
-        toggle.iValue = value;
-        toggle.disabled = options.disabled ?? false;
-        container.appendChild( toggle );
+        let checkbox = document.createElement( "input" );
+        checkbox.type = "checkbox";
+        checkbox.className = "lexcheckbox " + ( options.className ?? "primary" );
+        checkbox.checked = value;
+        checkbox.disabled = options.disabled ?? false;
+        container.appendChild( checkbox );
 
-        let valueName = document.createElement( 'span' );
-        valueName.className = "toggletext";
+        let valueName = document.createElement( "span" );
+        valueName.className = "checkboxtext";
         valueName.innerHTML = options.label ?? "On";
         container.appendChild( valueName );
 
-        toggle.addEventListener( "change" , ( e: InputEvent ) => {
-            this.set( toggle.checked, false, e );
+        checkbox.addEventListener( "change" , e => {
+            this.set( checkbox.checked, false, e );
         });
 
         if( options.suboptions )
         {
-            let suboptions = document.createElement('div');
-            suboptions.className = "lextogglesubmenu";
-            suboptions.toggleAttribute( 'hidden', !toggle.checked );
+            let suboptions = document.createElement( "div" );
+            suboptions.className = "lexcheckboxsubmenu";
+            suboptions.toggleAttribute( "hidden", !checkbox.checked );
 
             const suboptionsPanel = new LX.Panel();
             suboptionsPanel.queue( suboptions );
@@ -85,4 +84,4 @@ export class Toggle extends BaseComponent
     }
 }
 
-LX.Toggle = Toggle;
+LX.Checkbox = Checkbox;

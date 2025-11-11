@@ -1283,7 +1283,7 @@ class CodeEditor
                     this.processLines();
                 }
 
-                LX.emit( "@font-size", this.fontSize );
+                LX.emitSignal( "@font-size", this.fontSize );
 
                 // Get final sizes for editor elements based on Tabs and status bar offsets
                 LX.doAsync( () => {
@@ -5802,7 +5802,7 @@ class CodeEditor
                 value = "";
             }
 
-            LX.emit( signal, value );
+            LX.emitSignal( signal, value );
         }
     }
 
@@ -5860,7 +5860,7 @@ class CodeEditor
         this.processLines();
 
         // Emit event
-        LX.emit( "@font-size", this.fontSize );
+        LX.emitSignal( "@font-size", this.fontSize );
     }
 
     _applyFontSizeOffset( offset = 0 )

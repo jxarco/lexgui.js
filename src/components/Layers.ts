@@ -1,0 +1,90 @@
+// Layers.ts @jxarco
+
+import { LX } from './Namespace';
+import { BaseComponent, ComponentType } from './BaseComponent';
+
+/**
+ * @class Layers
+ * @description Layers Component
+ */
+
+export class Layers extends BaseComponent
+{
+    setLayers: ( val: number ) => void;
+
+    constructor( name: string, value: number, callback: any, options: any = {} )
+    {
+        super( ComponentType.LAYERS, name, value, options );
+
+        this.onGetValue = () => {
+            return value;
+        };
+
+        this.onSetValue = ( newValue, skipCallback, event ) => {
+            value = newValue;
+            this.setLayers( value );
+            if( !skipCallback )
+            {
+                this._trigger( new LX.IEvent(name, value, event), callback );
+            }
+        };
+
+        this.onResize = ( rect ) => {
+            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
+            container.style.width = `calc( 100% - ${ realNameWidth })`;
+        };
+
+        const container = document.createElement( "div" );
+        container.className = "lexlayers";
+        this.root.appendChild( container );
+
+        const maxBits = options.maxBits ?? 16;
+
+        this.setLayers = ( val ) =>  {
+
+            container.innerHTML = "";
+
+            let binary = val.toString( 2 );
+            let nbits = binary.length;
+
+            // fill zeros
+            for( let i = 0; i < ( maxBits - nbits ); ++i )
+            {
+                binary = '0' + binary;
+            }
+
+            for( let bit = 0; bit < maxBits; ++bit )
+            {
+                let layer: any = document.createElement( "div" );
+                layer.className = "lexlayer";
+
+                if( val != undefined )
+                {
+                    const valueBit = binary[ maxBits - bit - 1 ];
+                    if( valueBit != undefined && valueBit == '1' )
+                    {
+                        layer.classList.add( "selected" );
+                    }
+                }
+
+                layer.innerText = bit + 1;
+                layer.title = "Bit " + bit + ", value " + ( 1 << bit );
+                container.appendChild( layer );
+
+                layer.addEventListener( "click", ( e: any ) => {
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
+                    e.target.classList.toggle( "selected" );
+                    const newValue = val ^ ( 1 << bit );
+                    this.set( newValue, false, e );
+                } );
+            }
+        };
+
+        this.setLayers( value );
+
+        LX.doAsync( this.onResize.bind( this ) );
+    }
+}
+
+LX.Layers = Layers;

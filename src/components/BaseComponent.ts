@@ -55,7 +55,7 @@ export enum ComponentType
 export class BaseComponent {
 
     type: ComponentType;
-    name: string;
+    name: string | null;
     customName?: string;
     options: any;
     root: any;
@@ -76,7 +76,7 @@ export class BaseComponent {
         ComponentType.PROGRESS
     ];
 
-    constructor( type: ComponentType, name: string, value: any, options: any = {} )
+    constructor( type: ComponentType, name: string | null, value: any, options: any = {} )
     {
         this.type = type;
         this.name = name;
@@ -177,7 +177,7 @@ export class BaseComponent {
         this.options = options;
     }
 
-    static _dispatchEvent( element: any, type: any, data: any, bubbles: any, cancelable: any )
+    static _dispatchEvent( element: any, type: any, data?: any, bubbles?: any, cancelable?: any )
     {
         let event = new CustomEvent( type, { 'detail': data, 'bubbles': bubbles, 'cancelable': cancelable } );
         element.dispatchEvent( event );
