@@ -259,7 +259,7 @@ export class Panel {
         }
 
         // Create new branch
-        var branch = new LX.Branch( name, options );
+        var branch = new Branch( name, options );
         branch.panel = this;
 
         // Declare new open

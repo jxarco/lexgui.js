@@ -1,15 +1,38 @@
-// ColorPicker.js @jxarco
-import { LX } from './core.js';
+// ColorPicker.ts @jxarco
+
+import { LX } from './Namespace';
+import { Color } from './Color';
+import { TextInput } from './TextInput';
 
 /**
  * @class ColorPicker
  */
 
-class ColorPicker {
+export class ColorPicker {
 
     static currentPicker = false;
 
-    constructor( hexValue, options = {} ) {
+    root: any;
+
+    colorModel: string;
+    useAlpha: boolean;
+    callback: any;
+
+    markerHalfSize: number;
+    markerSize: number;
+    currentColor: Color;
+    labelComponent: TextInput;
+
+    colorPickerBackground: any;
+    intSatMarker: any;
+    colorPickerTracker: any;
+    alphaTracker: any;
+    hueMarker: any;
+    alphaMarker: any;
+
+    onPopover: any;
+
+    constructor( hexValue: string, options: any = {} ) {
 
         this.colorModel = options.colorModel ?? "Hex";
         this.useAlpha = options.useAlpha ?? false;
@@ -40,9 +63,9 @@ class ColorPicker {
         this.intSatMarker.style.backgroundColor = this.currentColor.hex;
         this.colorPickerBackground.appendChild( this.intSatMarker );
 
-        let pickerRect = null;
+        let pickerRect: any = null;
 
-        let innerMouseDown = e => {
+        let innerMouseDown = ( e: MouseEvent ) => {
             var doc = this.root.ownerDocument;
             doc.addEventListener( 'mousemove', innerMouseMove );
             doc.addEventListener( 'mouseup', innerMouseUp );
@@ -60,7 +83,7 @@ class ColorPicker {
             pickerRect = this.colorPickerBackground.getBoundingClientRect();
         }
 
-        let innerMouseMove = e => {
+        let innerMouseMove = ( e: MouseEvent ) => {
             const dX = e.movementX;
             const dY = e.movementY;
             const mouseX = e.x - pickerRect.x;
@@ -83,7 +106,7 @@ class ColorPicker {
             e.preventDefault();
         }
 
-        let innerMouseUp = e => {
+        let innerMouseUp = ( e: MouseEvent ) => {
             var doc = this.root.ownerDocument;
             doc.removeEventListener( 'mousemove', innerMouseMove );
             doc.removeEventListener( 'mouseup', innerMouseUp );
@@ -94,7 +117,8 @@ class ColorPicker {
 
         const hueAlphaContainer = LX.makeContainer( ["100%", "auto"], "flex flex-row gap-1 items-center", "", this.root );
 
-        if( window.EyeDropper )
+        const EyeDropper = ( window as any ).EyeDropper;
+        if( EyeDropper )
         {
             hueAlphaContainer.appendChild( new LX.Button(null, "eyedrop",  async () => {
                 const eyeDropper = new EyeDropper();
@@ -119,7 +143,7 @@ class ColorPicker {
         this.hueMarker.style.backgroundColor = `rgb(${ hueColor.css.r }, ${ hueColor.css.g }, ${ hueColor.css.b })`;
         this.colorPickerTracker.appendChild( this.hueMarker );
 
-        const _fromHueX = ( hueX ) => {
+        const _fromHueX = ( hueX: number ) => {
             this.hueMarker.style.left = hueX + "px";
             this.currentColor.hsv.h = LX.remapRange( hueX, 0, this.colorPickerTracker.offsetWidth - this.markerSize, 0, 360 );
 
@@ -129,9 +153,9 @@ class ColorPicker {
             this._updateColorValue();
         };
 
-        let hueTrackerRect = null;
+        let hueTrackerRect: any = null;
 
-        let innerMouseDownHue = e => {
+        let innerMouseDownHue = ( e: MouseEvent ) => {
             const doc = this.root.ownerDocument;
             doc.addEventListener( 'mousemove', innerMouseMoveHue );
             doc.addEventListener( 'mouseup', innerMouseUpHue );
@@ -145,7 +169,7 @@ class ColorPicker {
             hueTrackerRect = this.colorPickerTracker.getBoundingClientRect();
         }
 
-        let innerMouseMoveHue = e => {
+        let innerMouseMoveHue = ( e: MouseEvent ) => {
             const dX = e.movementX;
             const mouseX = e.x - hueTrackerRect.x;
 
@@ -159,7 +183,7 @@ class ColorPicker {
             e.preventDefault();
         }
 
-        let innerMouseUpHue = e => {
+        let innerMouseUpHue = ( e: MouseEvent ) => {
             var doc = this.root.ownerDocument;
             doc.removeEventListener( 'mousemove', innerMouseMoveHue );
             doc.removeEventListener( 'mouseup', innerMouseUpHue );
@@ -181,7 +205,7 @@ class ColorPicker {
             this.alphaMarker.style.backgroundColor = `rgb(${ this.currentColor.css.r }, ${ this.currentColor.css.g }, ${ this.currentColor.css.b },${ this.currentColor.css.a })`;
             this.alphaTracker.appendChild( this.alphaMarker );
 
-            const _fromAlphaX = ( alphaX ) => {
+            const _fromAlphaX = ( alphaX: number ) => {
                 this.alphaMarker.style.left = alphaX + "px";
                 this.currentColor.hsv.a = LX.remapRange( alphaX, 0, this.alphaTracker.offsetWidth - this.markerSize, 0, 1 );
                 this._updateColorValue();
@@ -189,9 +213,9 @@ class ColorPicker {
                 this.alphaMarker.style.backgroundColor = `rgb(${ this.currentColor.css.r }, ${ this.currentColor.css.g }, ${ this.currentColor.css.b },${ this.currentColor.css.a })`;
             };
 
-            let alphaTrackerRect = null;
+            let alphaTrackerRect: any = null;
 
-            let innerMouseDownAlpha = e => {
+            let innerMouseDownAlpha = ( e: MouseEvent ) => {
                 const doc = this.root.ownerDocument;
                 doc.addEventListener( 'mousemove', innerMouseMoveAlpha );
                 doc.addEventListener( 'mouseup', innerMouseUpAlpha );
@@ -203,7 +227,7 @@ class ColorPicker {
                 alphaTrackerRect = this.alphaTracker.getBoundingClientRect();
             }
 
-            let innerMouseMoveAlpha = e => {
+            let innerMouseMoveAlpha = ( e: MouseEvent ) => {
                 const dX = e.movementX;
                 const mouseX = e.x - alphaTrackerRect.x;
 
@@ -217,7 +241,7 @@ class ColorPicker {
                 e.preventDefault();
             }
 
-            let innerMouseUpAlpha = e => {
+            let innerMouseUpAlpha = ( e: MouseEvent ) => {
                 var doc = this.root.ownerDocument;
                 doc.removeEventListener( 'mousemove', innerMouseMoveAlpha );
                 doc.removeEventListener( 'mouseup', innerMouseUpAlpha );
@@ -230,7 +254,7 @@ class ColorPicker {
         // Info display
         const colorLabel = LX.makeContainer( ["100%", "auto"], "flex flex-row gap-1", "", this.root );
 
-        colorLabel.appendChild( new LX.Select( null, [ "CSS", "Hex", "HSV", "RGB" ], this.colorModel, v => {
+        colorLabel.appendChild( new LX.Select( null, [ "CSS", "Hex", "HSV", "RGB" ], this.colorModel, ( v: any ) => {
             this.colorModel = v;
             this._updateColorValue( null, true );
         } ).root );
@@ -251,7 +275,7 @@ class ColorPicker {
 
             }, { swap: "Check", icon: "Copy", buttonClass: "bg-none", className: "ml-auto", title: "Copy" } );
 
-            copyButtonComponent.root.querySelector( ".swap-on svg" ).addClass( "fg-success" );
+            copyButtonComponent.root.querySelector( ".swap-on svg" ).classList.add( "fg-success" );
 
             colorLabel.appendChild( copyButtonComponent.root );
         }
@@ -277,17 +301,17 @@ class ColorPicker {
         }
     }
 
-    _svToPosition( s, v ) {
+    _svToPosition( s: number, v: number ) {
         this.intSatMarker.style.left = `${ LX.remapRange( s, 0, 1, -this.markerHalfSize, this.colorPickerBackground.offsetWidth - this.markerHalfSize ) }px`;
         this.intSatMarker.style.top = `${ LX.remapRange( 1 - v, 0, 1, -this.markerHalfSize, this.colorPickerBackground.offsetHeight - this.markerHalfSize ) }px`;
     }
 
-    _positionToSv( left, top ) {
+    _positionToSv( left: number, top: number ) {
         this.currentColor.hsv.s = LX.remapRange( left, -this.markerHalfSize, this.colorPickerBackground.offsetWidth - this.markerHalfSize, 0, 1 );
         this.currentColor.hsv.v = 1 - LX.remapRange( top, -this.markerHalfSize, this.colorPickerBackground.offsetHeight - this.markerHalfSize, 0, 1 );
     }
 
-    _updateColorValue( newHexValue, skipCallback = false ) {
+    _updateColorValue( newHexValue?: string|null, skipCallback: boolean = false ) {
 
         this.currentColor.set( newHexValue ?? this.currentColor.hsv );
 
@@ -303,7 +327,7 @@ class ColorPicker {
             this.alphaTracker.style.color = `rgb(${ this.currentColor.css.r }, ${ this.currentColor.css.g }, ${ this.currentColor.css.b })`;
         }
 
-        const toFixed = ( s, n = 2) => { return s.toFixed( n ).replace( /([0-9]+(\.[0-9]+[1-9])?)(\.?0+$)/, '$1' ) };
+        const toFixed = ( s: number, n: number = 2) => { return s.toFixed( n ).replace( /([0-9]+(\.[0-9]+[1-9])?)(\.?0+$)/, '$1' ) };
 
         if( this.colorModel == "CSS" )
         {
@@ -330,7 +354,7 @@ class ColorPicker {
         }
     }
 
-    fromHexColor( hexColor ) {
+    fromHexColor( hexColor: string ) {
 
         this.currentColor.setHex( hexColor );
 
@@ -347,5 +371,3 @@ class ColorPicker {
 };
 
 LX.ColorPicker = ColorPicker;
-
-export { ColorPicker };

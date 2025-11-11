@@ -3,6 +3,7 @@
 import { LX } from './Namespace';
 import { ContextMenu } from './ContextMenu';
 import { Menubar } from './Menubar';
+import { Sidebar } from './Sidebar';
 
 export class AreaOverlayButtons {
 
@@ -655,9 +656,8 @@ export class Area {
         {
             // Listen resize event on first area
             this._autoVerticalResizeObserver = new ResizeObserver( entries => {
-                for ( const e of entries )
+                for ( const entry of entries )
                 {
-                    const entry : any = e;
                     const size = LX.getComputedSize( entry.target );
                     area2.root.style.height = "calc(100% - " + ( size.height ) + "px )";
                 }
@@ -972,7 +972,7 @@ export class Area {
 
     addSidebar( callback: any, options: any = {} ) {
 
-        let sidebar = new LX.Sidebar( { callback, ...options } );
+        let sidebar = new Sidebar( { callback, ...options } );
 
         if( callback )
         {

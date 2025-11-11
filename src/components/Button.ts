@@ -11,8 +11,6 @@ import { BaseComponent, ComponentType } from './BaseComponent';
 class Button extends BaseComponent
 {
     setState: ( v: any, b?: boolean ) => void;
-    onResize: ( r: any ) => void;
-
     swap?: ( b?: boolean ) => void;
 
     constructor( name: string, value: string, callback: any, options: any = {} )

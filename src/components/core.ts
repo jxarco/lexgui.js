@@ -113,10 +113,9 @@ LX.init = async function( options: any = {} )
     this.OPEN_CONTEXTMENU_ENTRY = 'click';
 
     this.componentResizeObserver = new ResizeObserver( entries => {
-        for ( const e of entries )
+        for ( const entry of entries )
         {
-            const entry : any = e;
-            const c = entry.target?.jsInstance;
+            const c = ( entry.target as any )?.jsInstance;
             if( c && c.onResize )
             {
                 c.onResize( entry.contentRect );
@@ -568,7 +567,7 @@ LX.setCommandbarState = function( value: boolean, resetEntries: boolean = true )
     }
 }
 
-// // Js native overrides
+// Js native overrides
 
 // Object.defineProperty(String.prototype, 'lastChar', {
 //     get: function() { return this[ this.length - 1 ]; },
@@ -584,24 +583,4 @@ LX.setCommandbarState = function( value: boolean, resetEntries: boolean = true )
 
 // Element.prototype.addClass = function( className ) {
 //     if( className ) this.classList.add( className );
-// }
-
-// Element.prototype.getParentArea = function() {
-//     let parent = this.parentElement;
-//     while( parent ) {
-//         if( parent.classList.contains( "lexarea" ) ) { return parent; }
-//         parent = parent.parentElement;
-//     }
-// }
-
-// Element.prototype.listen = function( eventName, callback, callbackName ) {
-//     callbackName = callbackName ?? ( "_on" + eventName );
-//     this[ callbackName ] = callback;
-//     this.addEventListener( eventName, callback );
-// }
-
-// Element.prototype.ignore = function( eventName, callbackName ) {
-//     callbackName = callbackName ?? ( "_on" + eventName );
-//     const callback = this[ callbackName ];
-//     this.removeEventListener( eventName, callback );
 // }

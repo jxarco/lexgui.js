@@ -65,6 +65,7 @@ export class BaseComponent {
     onSetValue?: ( v: any, b?: boolean, e?: any ) => void;
     onGetValue?: () => any;
     onAllowPaste?: ( b: boolean ) => boolean;
+    onResize: ( r?: any ) => void;
 
     _initialValue: any;
 
@@ -84,6 +85,8 @@ export class BaseComponent {
 
         const root: any = document.createElement( 'div' );
         root.className = "lexcomponent";
+
+        this.onResize = () => {};
 
         if( options.id )
         {

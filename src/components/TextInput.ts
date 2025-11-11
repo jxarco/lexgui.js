@@ -1,4 +1,4 @@
-// Button.ts @jxarco
+// TextInput.ts @jxarco
 
 import { LX } from './Namespace';
 import { BaseComponent, ComponentType } from './BaseComponent';
@@ -8,10 +8,9 @@ import { BaseComponent, ComponentType } from './BaseComponent';
  * @description TextInput Component
  */
 
-class TextInput extends BaseComponent
+export class TextInput extends BaseComponent
 {
     valid: ( s: string ) => boolean;
-    onResize: ( r: any ) => void;
 
     _lastValueTriggered?: any;
 

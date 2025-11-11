@@ -1,11 +1,13 @@
-// sidebar.js @jxarco
-import { LX } from './core.js';
+// Sidebar.ts @jxarco
+
+import { LX } from './Namespace';
+import { Area } from './Area';
 
 /**
  * @class Sidebar
  */
 
-class Sidebar {
+export class Sidebar {
 
     /**
      * @param {Object} options
@@ -30,34 +32,56 @@ class Sidebar {
      * onFooterPressed: Function to call when footer is pressed
      */
 
-    constructor( options = {} ) {
+    root: any;
+    callback: any;
+
+    items: any[] = [];
+    icons: any = {};
+    groups: any = {};
+
+    side: string;
+    collapsable: boolean;
+    collapsed: boolean;
+    filterString: string;
+    filter: any; // DOM Element
+    header: any;
+    content: any;
+    footer: any;
+    resizeObserver: ResizeObserver|undefined = undefined;
+    siblingArea: Area|undefined = undefined;
+    currentGroup: any;
+    collapseQueue: any;
+    collapseContainer: any;
+
+    _collapseWidth: string;
+
+    private _displaySelected: boolean = true;
+
+    get displaySelected(): boolean {
+        return this._displaySelected;
+    }
+
+    set displaySelected( v: boolean ) {
+        this._displaySelected = v;
+        if (!v)
+        {
+            this.root.querySelectorAll(".lexsidebarentry")
+                .forEach((e: HTMLElement) => e.classList.remove("selected"));
+        }
+    }
+
+    constructor( options: any = {} ) {
+
+        const mobile = navigator && /Android|iPhone/i.test( navigator.userAgent );
 
         this.root = document.createElement( "div" );
         this.root.className = "lexsidebar " + ( options.className ?? "" );
         this.callback = options.callback ?? null;
-
         this._displaySelected = options.displaySelected ?? false;
-
-        Object.defineProperty( Sidebar.prototype, "displaySelected", {
-            get: function() { return this._displaySelected; },
-            set: function( v ) {
-                this._displaySelected = v;
-                if( !this._displaySelected )
-                {
-                    this.root.querySelectorAll(".lexsidebarentry").forEach( e => e.classList.remove( 'selected' ) );
-                }
-            },
-            enumerable: true,
-            configurable: true
-        });
-
-        const mobile = navigator && /Android|iPhone/i.test( navigator.userAgent );
-
         this.side = options.side ?? "left";
         this.collapsable = options.collapsable ?? true;
         this._collapseWidth = ( options.collapseToIcons ?? true ) ? "58px" : "0px";
         this.collapsed = options.collapsed ?? mobile;
-
         this.filterString = "";
 
         LX.doAsync( () => {
@@ -68,7 +92,7 @@ class Sidebar {
             this.resizeObserver = new ResizeObserver( entries => {
                 for ( const entry of entries )
                 {
-                    this.siblingArea.setSize( [ "calc(100% - " + ( entry.contentRect.width ) + "px )", null ] );
+                    this.siblingArea?.setSize( [ "calc(100% - " + ( entry.contentRect.width ) + "px )", null ] );
                 }
             });
 
@@ -85,8 +109,8 @@ class Sidebar {
                 this.resizeObserver.observe( this.root.parentElement );
 
                 LX.doAsync( () => {
-                    this.resizeObserver.unobserve( this.root.parentElement );
-                    this.root.querySelectorAll( ".lexsidebarentrycontent" ).forEach( e => e.dataset[ "disableTooltip" ] = !this.collapsed );
+                    this.resizeObserver?.unobserve( this.root.parentElement );
+                    this.root.querySelectorAll( ".lexsidebarentrycontent" ).forEach( ( e: HTMLElement ) => e.dataset[ "disableTooltip" ] = `${ !this.collapsed }` );
                 }, 10 );
             }
 
@@ -114,7 +138,7 @@ class Sidebar {
                     sheetSidebarOptions.collapsable = false;
                     area.addSidebar( this.callback, sheetSidebarOptions );
 
-                    icon.addEventListener( "click", e => {
+                    icon.addEventListener( "click", ( e: MouseEvent ) => {
                         e.preventDefault();
                         e.stopPropagation();
                         new LX.Sheet("256px", [ area ], { side: this.side } );
@@ -122,7 +146,7 @@ class Sidebar {
                 }
                 else
                 {
-                    icon.addEventListener( "click", e => {
+                    icon.addEventListener( "click", ( e: MouseEvent ) => {
                         e.preventDefault();
                         e.stopPropagation();
                         this.toggleCollapsed();
@@ -134,7 +158,7 @@ class Sidebar {
         // Entry filter
         if( ( options.filter ?? false ) )
         {
-            const filterTextInput = new LX.TextInput(null, "", (value, event) => {
+            const filterTextInput = new LX.TextInput(null, "", ( value: string, event: InputEvent) => {
                 this.filterString = value;
                 this.update();
             }, { inputClass: "outline", placeholder: "Search...", icon: "Search", className: "lexsidebarfilter" });
@@ -164,15 +188,10 @@ class Sidebar {
             ( this.footer?.offsetHeight ?? 0 );
             this.content.style.height = `calc(100% - ${ contentOffset }px)`;
         } );
-
         resizeObserver.observe( this.root );
-
-        this.items = [ ];
-        this.icons = { };
-        this.groups = { };
     }
 
-    _generateDefaultHeader( options ) {
+    _generateDefaultHeader( options: any = {} ) {
 
         const header = document.createElement( 'div' );
 
@@ -230,7 +249,7 @@ class Sidebar {
         return header;
     }
 
-    _generateDefaultFooter( options ) {
+    _generateDefaultFooter( options: any = {} ) {
 
         const footer = document.createElement( 'div' );
 
@@ -288,7 +307,7 @@ class Sidebar {
      * @param {Boolean} force: Force collapsed state
      */
 
-    toggleCollapsed( force ) {
+    toggleCollapsed( force?: boolean ) {
 
         if( !this.collapsable )
         {
@@ -318,8 +337,8 @@ class Sidebar {
 
         LX.doAsync( () => {
             this.root.classList.toggle( "collapsed", this.collapsed );
-            this.resizeObserver.unobserve( this.root.parentElement );
-            this.root.querySelectorAll( ".lexsidebarentrycontent" ).forEach( e => e.dataset[ "disableTooltip" ] = !this.collapsed );
+            this.resizeObserver?.unobserve( this.root.parentElement );
+            this.root.querySelectorAll( ".lexsidebarentrycontent" ).forEach( ( e: HTMLElement ) => e.dataset[ "disableTooltip" ] = `${ !this.collapsed }` );
         }, 250 );
     }
 
@@ -340,7 +359,7 @@ class Sidebar {
      * @param {Object} action: { icon, callback }
      */
 
-    group( groupName, action ) {
+    group( groupName: string, action: any ) {
 
         this.currentGroup = groupName;
 
@@ -357,7 +376,7 @@ class Sidebar {
      * icon: Entry icon
      */
 
-    add( path, options = {} ) {
+    add( path: string, options: any = {} ) {
 
         if( options.constructor == Function )
         {
@@ -373,7 +392,7 @@ class Sidebar {
 
         let idx = 0;
 
-        const _insertEntry = ( token, list ) => {
+        const _insertEntry = ( token: string, list: any[] ) => {
 
             if( token == undefined )
             {
@@ -381,7 +400,7 @@ class Sidebar {
             }
 
             let found = null;
-            list.forEach( o => {
+            list.forEach( ( o: any ) => {
                 const keys = Object.keys( o );
                 const key = keys.find( t => t == token );
                 if( key ) found = o[ key ];
@@ -393,7 +412,7 @@ class Sidebar {
             }
             else
             {
-                let item = {};
+                let item: Record<string, any> = {};
                 item[ token ] = [];
                 const nextToken = tokens[ idx++ ];
                 // Check if last token -> add callback
@@ -416,7 +435,7 @@ class Sidebar {
      * @param {String} name Element name to select
      */
 
-    select( name ) {
+    select( name: string ) {
 
         let pKey = LX.getSupportedDOMName( name );
 
@@ -492,7 +511,7 @@ class Sidebar {
                     {
                         const groupActionIcon = LX.makeIcon( this.groups[ item.group ].icon, { svgClass: "sm" } )
                         groupEntry.appendChild( groupActionIcon );
-                        groupActionIcon.addEventListener( "click", e => {
+                        groupActionIcon.addEventListener( "click", ( e: MouseEvent ) => {
                             if( this.groups[ item.group ].callback )
                             {
                                 this.groups[ item.group ].callback( item.group, e );
@@ -543,7 +562,7 @@ class Sidebar {
             {
                 item.value = options.value ?? false;
                 const panel = new LX.Panel();
-                item.checkbox = panel.addCheckbox(null, item.value, (value, event) => {
+                item.checkbox = panel.addCheckbox(null, item.value, ( value: boolean, event: InputEvent ) => {
                     event.preventDefault();
                     event.stopPropagation();
                     const f = options.callback;
@@ -566,7 +585,7 @@ class Sidebar {
                 if( options.swap )
                 {
                     itemDom.classList.add( "swap", "inline-grid" );
-                    itemDom.querySelector( "a" ).classList.add( "swap-off" );
+                    itemDom.querySelector( "a" )?.classList.add( "swap-off" );
 
                     const input = document.createElement( "input" );
                     input.className = "p-0 border-0";
@@ -585,7 +604,7 @@ class Sidebar {
 
             const isCollapsable = options.collapsable != undefined ? options.collapsable : ( options.collapsable || item[ key ].length );
 
-            entry.addEventListener("click", ( e ) => {
+            entry.addEventListener("click", ( e: any ) => {
                 if( e.target && e.target.classList.contains( "lexcheckbox" ) )
                 {
                     return;
@@ -595,7 +614,7 @@ class Sidebar {
 
                 if( isCollapsable )
                 {
-                    itemDom.querySelector( ".collapser" ).click();
+                    ( itemDom.querySelector( ".collapser" ) as any )?.click();
                 }
                 else if( item.checkbox )
                 {
@@ -605,7 +624,7 @@ class Sidebar {
                 }
                 else if( options.swap && !( e.target instanceof HTMLInputElement ) )
                 {
-                    const swapInput = itemDom.querySelector( "input" );
+                    const swapInput: any = itemDom.querySelector( "input" );
                     swapInput.checked = !swapInput.checked;
                     value = swapInput.checked;
                 }
@@ -616,7 +635,7 @@ class Sidebar {
                 // Manage selected
                 if( this.displaySelected && !options.skipSelection )
                 {
-                    this.root.querySelectorAll(".lexsidebarentry").forEach( e => e.classList.remove( 'selected' ) );
+                    this.root.querySelectorAll(".lexsidebarentry").forEach( ( e: HTMLElement ) => e.classList.remove( 'selected' ) );
                     entry.classList.add( "selected" );
                 }
             });
@@ -626,7 +645,7 @@ class Sidebar {
                 const actionIcon = LX.makeIcon( options.action.icon ?? "Ellipsis", { title: options.action.name } );
                 itemDom.appendChild( actionIcon );
 
-                actionIcon.addEventListener( "click", (e) => {
+                actionIcon.addEventListener( "click", ( e: MouseEvent ) => {
                     e.preventDefault();
                     e.stopImmediatePropagation();
                     const f = options.action.callback;
@@ -686,7 +705,7 @@ class Sidebar {
                     const actionIcon = LX.makeIcon( suboptions.action.icon ?? "Ellipsis", { title: suboptions.action.name } );
                     subentry.appendChild( actionIcon );
 
-                    actionIcon.addEventListener( "click", (e) => {
+                    actionIcon.addEventListener( "click", ( e: MouseEvent ) => {
                         e.preventDefault();
                         e.stopImmediatePropagation();
                         const f = suboptions.action.callback;
@@ -706,7 +725,7 @@ class Sidebar {
 
                 subentryContainer.appendChild( subentry );
 
-                subentry.addEventListener("click", (e) => {
+                subentry.addEventListener("click", ( e: MouseEvent ) => {
 
                     const f = suboptions.callback;
                     if( f ) f.call( this, subkey, subentry, e );
@@ -714,7 +733,7 @@ class Sidebar {
                     // Manage selected
                     if( this.displaySelected && !suboptions.skipSelection )
                     {
-                        this.root.querySelectorAll(".lexsidebarentry").forEach( e => e.classList.remove( 'selected' ) );
+                        this.root.querySelectorAll(".lexsidebarentry").forEach( ( e: HTMLElement ) => e.classList.remove( 'selected' ) );
                         subentry.classList.add( "selected" );
                     }
                 });
@@ -724,5 +743,3 @@ class Sidebar {
 };
 
 LX.Sidebar = Sidebar;
-
-export { Sidebar };

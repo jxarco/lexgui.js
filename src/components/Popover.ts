@@ -1,15 +1,28 @@
 // Popover.js @jxarco
-import { LX } from './core.js';
+import { LX } from './Namespace';
 
 /**
  * @class Popover
  */
 
-class Popover {
+export class Popover {
 
-    static activeElement = false;
+    static activeElement: any = null;
 
-    constructor( trigger, content, options = {} ) {
+    root: any;
+    side: string = "bottom";
+    align: string = "center";
+    sideOffset: number = 0;
+    alignOffset: number = 0;
+    avoidCollisions: boolean = true;
+    reference: any;
+    
+    _windowPadding: number = 4;
+    _trigger: any;
+    _parent: any;
+    _onClick: any;
+
+    constructor( trigger: any, content: any, options: any = {} ) {
 
         if( Popover.activeElement )
         {
@@ -25,11 +38,10 @@ class Popover {
             trigger.active = this;
         }
 
-        this._windowPadding = 4;
-        this.side = options.side ?? "bottom";
-        this.align = options.align ?? "center";
-        this.sideOffset = options.sideOffset ?? 0;
-        this.alignOffset = options.alignOffset ?? 0;
+        this.side = options.side ?? this.side;
+        this.align = options.align ?? this.align;
+        this.sideOffset = options.sideOffset ?? this.sideOffset;
+        this.alignOffset = options.alignOffset ?? this.alignOffset;
         this.avoidCollisions = options.avoidCollisions ?? true;
         this.reference = options.reference;
 
@@ -51,7 +63,7 @@ class Popover {
 
         this._parent.appendChild( this.root );
 
-        this.root.addEventListener( "keydown", (e) => {
+        this.root.addEventListener( "keydown", ( e: KeyboardEvent ) => {
             if( e.key == "Escape" )
             {
                 e.preventDefault();
@@ -63,7 +75,7 @@ class Popover {
         if( content )
         {
             content = [].concat( content );
-            content.forEach( e => {
+            content.forEach( ( e: any ) => {
                 const domNode = e.root ?? e;
                 this.root.appendChild( domNode );
                 if( e.onPopover )
@@ -82,7 +94,7 @@ class Popover {
             {
                 this.root.focus();
 
-                this._onClick = e => {
+                this._onClick = ( e: Event ) => {
                     if( e.target && ( this.root.contains( e.target ) || e.target == this._trigger ) )
                     {
                         return;
@@ -188,5 +200,3 @@ class Popover {
 };
 
 LX.Popover = Popover;
-
-export { Popover };
