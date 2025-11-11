@@ -3,6 +3,7 @@ Architecture:
 
 API:
 - LX.emit -> LX.emitSignal
+- Element.insertChildAtIndex -> LX.insertChildAtIndex
 
 Styling:
 - More TW classes

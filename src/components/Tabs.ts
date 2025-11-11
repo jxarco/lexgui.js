@@ -1,15 +1,29 @@
-// Tabs.js @jxarco
-import { LX } from './core.js';
+// Tabs.ts @jxarco
+
+import { LX } from './Namespace';
+import { Area } from './Area';
 
 /**
  * @class Tabs
  */
 
-class Tabs {
+export class Tabs {
 
     static TAB_ID   = 0;
 
-    constructor( area, options = {} ) {
+    root: any;
+    area: Area;
+    tabs: any = {};
+    tabDOMs: any = {};
+    thumb?: any;
+
+    selected: any = null;
+    folding: boolean = false;
+    folded: boolean = false;
+
+    onclose: ( s: string ) => void;
+
+    constructor( area: Area, options: any = {} ) {
 
         this.onclose = options.onclose;
 
@@ -19,27 +33,27 @@ class Tabs {
         const folding = options.folding ?? false;
         if( folding ) container.classList.add("folding");
 
-        let that = this;
+        let that: any = this;
 
-        container.addEventListener("dragenter", function( e ) {
+        container.addEventListener("dragenter", function( e: any ) {
             e.preventDefault(); // Prevent default action (open as link for some elements)
             this.classList.add("dockingtab");
         });
 
-        container.addEventListener("dragleave", function( e ) {
+        container.addEventListener("dragleave", function( e: any ) {
             e.preventDefault(); // Prevent default action (open as link for some elements)
             if ( this.contains( e.relatedTarget ) ) return; // Still inside
             this.classList.remove("dockingtab");
         });
 
-        container.addEventListener("drop", function( e ) {
+        container.addEventListener("drop", function( e: any ) {
             e.preventDefault(); // Prevent default action (open as link for some elements)
 
             const tabId = e.dataTransfer.getData( "source" );
-            const tabDom = document.getElementById( tabId );
+            const tabDom: any = document.getElementById( tabId );
             if( !tabDom ) return;
 
-            const sourceContainer = tabDom.parentElement;
+            const sourceContainer: any = tabDom.parentElement;
             const target = e.target;
             const rect = target.getBoundingClientRect();
 
@@ -58,7 +72,7 @@ class Tabs {
 
             {
                 // Update childIndex for fit mode tabs in source container
-                sourceContainer.childNodes.forEach( (c, idx) => c.childIndex = ( idx - 1 ) );
+                sourceContainer.childNodes.forEach( (c: any, idx: number) => c.childIndex = ( idx - 1 ) );
 
                 // If needed, set last tab of source container active
                 const sourceAsFit = (/true/).test( e.dataTransfer.getData( "fit" ) );
@@ -74,7 +88,7 @@ class Tabs {
             }
 
             // Update childIndex for fit mode tabs in target container
-            this.childNodes.forEach( (c, idx) => c.childIndex = ( idx - 1 ) );
+            this.childNodes.forEach( ( c: any, idx: number ) => c.childIndex = ( idx - 1 ) );
 
             const content = document.getElementById( tabId + "_content" );
             that.area.attach( content );
@@ -93,7 +107,7 @@ class Tabs {
         const [ tabButtons, content ] = area.split({ type: 'vertical', sizes: options.sizes ?? "auto", resize: false, top: 2 });
         tabButtons.attach( container );
 
-        if( options.parentClass )
+        if( options.parentClass && container.parentElement )
         {
             container.parentElement.className += ` ${ options.parentClass }`;
         }
@@ -108,8 +122,6 @@ class Tabs {
 
         this.selected = null;
         this.root = container;
-        this.tabs = {};
-        this.tabDOMs = {};
 
         if( options.fit )
         {
@@ -141,7 +153,7 @@ class Tabs {
 
             if( folding == "up" )
             {
-                area.root.insertChildAtIndex( area.sections[ 1 ].root, 0 );
+                LX.insertChildAtIndex( area.root, area.sections[ 1 ].root, 0 );
             }
 
             // Listen resize event on parent area
@@ -149,7 +161,7 @@ class Tabs {
                 for (const entry of entries)
                 {
                     const bb = entry.contentRect;
-                    const sibling = area.parentArea.sections[ 0 ].root;
+                    const sibling = area.parentArea?.sections[ 0 ].root;
                     const addOffset = true; // hardcoded...
                     sibling.style.height = "calc(100% - " + ((addOffset ? 42 : 0) + bb.height) + "px )";
                 }
@@ -160,16 +172,16 @@ class Tabs {
         }
     }
 
-    add( name, content, options = {} ) {
+    add( name: string, content: any, options: any = {} ) {
 
         let isSelected = options.selected ?? false;
 
         if( isSelected )
         {
-            this.root.querySelectorAll( 'span' ).forEach( s => s.classList.remove( 'selected' ) );
+            this.root.querySelectorAll( 'span' ).forEach( ( s: HTMLElement ) => s.classList.remove( 'selected' ) );
             const pseudoParent = this.area.root.querySelector( ":scope > .pseudoparent-tabs" );
             const contentRoot = pseudoParent ?? this.area.root;
-            contentRoot.querySelectorAll( ':scope > .lextabcontent' ).forEach( c => c.style.display = 'none' );
+            contentRoot.querySelectorAll( ':scope > .lextabcontent' ).forEach( ( s: HTMLElement ) => s.style.display = 'none' );
         }
 
         isSelected = !Object.keys( this.tabs ).length && !this.folding ? true : isSelected;
@@ -195,7 +207,7 @@ class Tabs {
         }
 
         // Create tab
-        let tabEl = document.createElement( 'span' );
+        let tabEl: any = document.createElement( 'span' );
         tabEl.dataset[ "name" ] = name;
         tabEl.className = "lexareatab flex flex-row gap-1" + ( isSelected ? " selected" : "" );
         tabEl.innerHTML = ( options.icon ?? "" ) + name;
@@ -209,7 +221,7 @@ class Tabs {
         if( options.badge )
         {
             const asChild = options.badge.asChild ?? false;
-            const badgeOptions = { };
+            const badgeOptions: any = {};
 
             if( asChild )
             {
@@ -224,7 +236,7 @@ class Tabs {
             this.selected = name;
         }
 
-        tabEl.addEventListener("click", e => {
+        tabEl.addEventListener("click", ( e: MouseEvent ) => {
 
             e.preventDefault();
             e.stopPropagation();
@@ -235,15 +247,15 @@ class Tabs {
             {
                 // For folding tabs
                 const lastValue = tabEl.selected;
-                tabEl.parentElement.querySelectorAll( 'span' ).forEach( s => s.selected = false );
+                tabEl.parentElement.querySelectorAll( 'span' ).forEach( ( s: any ) => s.selected = false );
                 tabEl.selected = !lastValue;
                 // Manage selected
-                tabEl.parentElement.querySelectorAll( 'span' ).forEach( s => s.classList.remove( 'selected' ));
+                tabEl.parentElement.querySelectorAll( 'span' ).forEach( ( s: any ) => s.classList.remove( 'selected' ));
                 tabEl.classList.toggle('selected', ( scope.folding && tabEl.selected ));
                 // Manage visibility
                 const pseudoParent = scope.area.root.querySelector( ":scope > .pseudoparent-tabs" );
                 const contentRoot = pseudoParent ?? scope.area.root;
-                contentRoot.querySelectorAll( ':scope > .lextabcontent' ).forEach( c => c.style.display = 'none' );
+                contentRoot.querySelectorAll( ':scope > .lextabcontent' ).forEach( ( s: any ) => s.style.display = 'none' );
                 contentEl.style.display = contentEl.originalDisplay;
                 scope.selected = tabEl.dataset.name;
             }
@@ -267,7 +279,7 @@ class Tabs {
             }
         });
 
-        tabEl.addEventListener("contextmenu", e => {
+        tabEl.addEventListener("contextmenu", ( e: any ) => {
             e.preventDefault();
             e.stopPropagation();
 
@@ -279,14 +291,14 @@ class Tabs {
 
         if( options.allowDelete ?? false )
         {
-            tabEl.addEventListener("mousedown", e => {
+            tabEl.addEventListener("mousedown", ( e: MouseEvent ) => {
                 if( e.button == LX.MOUSE_MIDDLE_CLICK )
                 {
                     e.preventDefault();
                 }
             });
 
-            tabEl.addEventListener("mouseup", e => {
+            tabEl.addEventListener("mouseup", ( e: MouseEvent ) => {
                 e.preventDefault();
                 e.stopPropagation();
                 if( e.button == LX.MOUSE_MIDDLE_CLICK )
@@ -297,7 +309,7 @@ class Tabs {
         }
 
         tabEl.setAttribute( 'draggable', true );
-        tabEl.addEventListener( 'dragstart', e => {
+        tabEl.addEventListener( 'dragstart', ( e: any ) => {
             const sourceAsFit = !!this.thumb;
             if( tabEl.parentElement.childNodes.length == ( sourceAsFit ? 2 : 1 ) ){
                 e.preventDefault();
@@ -310,7 +322,7 @@ class Tabs {
         // Attach content
         const indexOffset = options.indexOffset ?? -1;
         tabEl.childIndex = ( this.root.childElementCount + indexOffset );
-        this.root.insertChildAtIndex( tabEl, tabEl.childIndex + 1 );
+        LX.insertChildAtIndex( this.root, tabEl, tabEl.childIndex + 1 );
         this.area.attach( contentEl );
         this.tabDOMs[ name ] = tabEl;
         this.tabs[ name ] = content;
@@ -334,7 +346,7 @@ class Tabs {
         }, 10 );
     }
 
-    select( name ) {
+    select( name: string ) {
 
         if(!this.tabDOMs[ name ] )
         return;
@@ -342,7 +354,7 @@ class Tabs {
         this.tabDOMs[ name ].click();
     }
 
-    delete( name ) {
+    delete( name: string ) {
 
         if( this.selected == name )
         {
@@ -379,5 +391,3 @@ class Tabs {
 }
 
 LX.Tabs = Tabs;
-
-export { Tabs };

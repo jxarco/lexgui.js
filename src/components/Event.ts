@@ -1,13 +1,19 @@
-// Event.js @jxarco
-import { LX } from './core.js';
+// Event.ts @jxarco
+
+import { LX } from './Namespace';
+import { Panel } from './Panel';
 
 /*
 *   Events and Signals
 */
 
-class IEvent {
+export class IEvent {
 
-    constructor( name, value, domEvent ) {
+    name: any;
+    value: any;
+    domEvent: any;
+
+    constructor( name: string, value: any, domEvent:any ) {
         this.name = name;
         this.value = value;
         this.domEvent = domEvent;
@@ -16,7 +22,7 @@ class IEvent {
 
 LX.IEvent = IEvent;
 
-class TreeEvent {
+export class TreeEvent {
 
     static NONE                 = 0;
     static NODE_SELECTED        = 1;
@@ -28,13 +34,18 @@ class TreeEvent {
     static NODE_VISIBILITY      = 7;
     static NODE_CARETCHANGED    = 8;
 
-    constructor( type, node, value, event ) {
+    type: number = TreeEvent.NONE;
+    node: any;
+    value: any;
+    event: any;
+    multiple : boolean = false; // Multiple selection
+    panel: Panel|null = null;
+
+    constructor( type: number, node: any, value: any, event: any ) {
         this.type = type || TreeEvent.NONE;
         this.node = node;
         this.value = value;
         this.event = event;
-        this.multiple = false; // Multiple selection
-        this.panel = null;
     }
 
     string() {
@@ -54,5 +65,3 @@ class TreeEvent {
 };
 
 LX.TreeEvent = TreeEvent;
-
-export { IEvent, TreeEvent };

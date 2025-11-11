@@ -1,5 +1,6 @@
-// menubar.js @jxarco
-import { LX } from './Core';
+// Menubar.ts @jxarco
+
+import { LX } from './Namespace';
 
 /**
  * @class Menubar

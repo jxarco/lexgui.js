@@ -1,5 +1,6 @@
-// utils.js @jxarco
-import { LX } from "./Core";
+// Utils.ts @jxarco
+
+import { LX } from './Namespace';
 import { Panel } from "./Panel";
 
 function clamp( num: number, min: number, max: number ) { return Math.min( Math.max( num, min ), max ); }
@@ -1993,3 +1994,21 @@ function drawSpline( ctx: CanvasRenderingContext2D, pts: any[], t: number )
 }
 
 LX.drawSpline = drawSpline;
+
+function insertChildAtIndex( parent: HTMLElement, child: HTMLElement, index: number = Infinity ) {
+    if ( index >= parent.children.length ) parent.appendChild( child );
+    else parent.insertBefore( child, parent.children[index] );
+}
+
+LX.insertChildAtIndex = insertChildAtIndex;
+
+// Since we use "box-sizing: border-box" now,
+// it's all included in offsetWidth/offsetHeight
+function getComputedSize( el: HTMLElement ) {
+    return {
+        width: el.offsetWidth,
+        height: el.offsetHeight
+    }
+}
+
+LX.getComputedSize = getComputedSize;

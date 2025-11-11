@@ -1,9 +1,12 @@
-// skeleton.js @jxarco
-import { LX } from './core.js';
+// Skeleton.ts @jxarco
 
-class Skeleton {
+import { LX } from './Namespace';
 
-    constructor( elements ) {
+export class Skeleton {
+
+    root: any;
+
+    constructor( elements: any[] ) {
 
         this.root = LX.makeContainer( [ "auto", "auto" ], "flex flex-row lexskeleton" );
 
@@ -14,7 +17,7 @@ class Skeleton {
         else
         {
             // Force array
-            elements = [].concat( elements );
+            elements = [].concat( ( elements as any ) );
 
             for( let e of elements )
             {
@@ -35,5 +38,3 @@ class Skeleton {
 }
 
 LX.Skeleton = Skeleton;
-
-export { Skeleton };

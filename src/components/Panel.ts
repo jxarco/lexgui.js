@@ -1,5 +1,6 @@
-// panel.js @jxarco
-import { LX } from './Core';
+// Panel.ts @jxarco
+
+import { LX } from './Namespace';
 import { Branch } from './Branch';
 
 /**

@@ -33,7 +33,7 @@ export default {
             // }
         ],
     plugins: [
-        css(), // allows importing lexgui.css if needed
+        css(),
         typescript({
             tsconfig: './tsconfig.json',
             clean: true

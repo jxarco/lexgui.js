@@ -1,5 +1,6 @@
-// area.js @jxarco
-import { LX } from './Core';
+// Area.ts @jxarco
+
+import { LX } from './Namespace';
 import { ContextMenu } from './ContextMenu';
 import { Menubar } from './Menubar';
 
@@ -171,6 +172,8 @@ export class AreaOverlayButtons {
         _refreshPanel();
     }
 }
+
+LX.AreaOverlayButtons = AreaOverlayButtons;
 
 export class Area {
 
@@ -655,7 +658,7 @@ export class Area {
                 for ( const e of entries )
                 {
                     const entry : any = e;
-                    const size = entry.target.getComputedSize();
+                    const size = LX.getComputedSize( entry.target );
                     area2.root.style.height = "calc(100% - " + ( size.height ) + "px )";
                 }
             });
@@ -1171,3 +1174,5 @@ export class Area {
         }
     }
 };
+
+LX.Area = Area;

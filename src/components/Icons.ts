@@ -1,5 +1,6 @@
-// icons.js @jxarco
-import { LX } from './Core';
+// Icons.ts @jxarco
+
+import { LX } from './Namespace';
 
 const RAW_ICONS: Record<string, any> = {
     // Internals

@@ -1,11 +1,12 @@
-// Footer.js @jxarco
-import { LX } from './core.js';
+// Footer.ts @jxarco
+
+import { LX } from './Namespace';
 
 /**
  * @class Footer
  */
 
-class Footer {
+export class Footer {
     /**
      * @param {Object} options:
      * columns: Array with data per column { title, items: [ { title, link } ]  }
@@ -13,7 +14,10 @@ class Footer {
      * socials: Array with data per item { title, link, icon }
      * className: Extra class to customize
     */
-    constructor( options = {} ) {
+
+    root: any;
+
+    constructor( options: any = {} ) {
 
         const root = document.createElement( "footer" );
         root.className = "lexfooter" + ` ${ options.className ?? "" }`;
@@ -95,12 +99,13 @@ class Footer {
         parent.appendChild( root );
 
         // Set always at bottom
-        root.previousElementSibling.style.flexGrow = "1";
+        if( root.previousElementSibling )
+        {
+            ( root.previousElementSibling as any ).style.flexGrow = "1";
+        }
 
         this.root = root;
     }
 }
 
 LX.Footer = Footer;
-
-export { Footer };

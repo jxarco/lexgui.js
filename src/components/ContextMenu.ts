@@ -1,5 +1,6 @@
-// ContextMenu.js @jxarco
-import { LX } from './Core';
+// ContextMenu.ts @jxarco
+
+import { LX } from './Namespace';
 
 /**
  * @class ContextMenu
