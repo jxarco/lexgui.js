@@ -1,12 +1,12 @@
 // Core.ts @jxarco
 
 import { LX } from './Namespace';
-import { Area } from './components/Area';
-import { Panel } from './components/Panel';
-import { BaseComponent, ComponentType } from './components/BaseComponent';
-import { IEvent } from './components/Event';
-import { TextInput } from './components/TextInput';
-import { ContextMenu } from './components/ContextMenu';
+import { Area } from '../components/Area';
+import { Panel } from '../components/Panel';
+import { BaseComponent, ComponentType } from '../components/BaseComponent';
+import { IEvent } from '../components/Event';
+import { TextInput } from '../components/TextInput';
+import { ContextMenu } from '../components/ContextMenu';
 
 /**
  * @method init

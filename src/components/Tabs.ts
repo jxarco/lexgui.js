@@ -1,6 +1,6 @@
 // Tabs.ts @jxarco
 
-import { LX } from './../Namespace';
+import { LX } from './../core/Namespace';
 import { Area } from './Area';
 
 /**

@@ -1,6 +1,6 @@
 // Tour.ts @jxarco
 
-import { LX } from './../Namespace';
+import { LX } from './../core/Namespace';
 import { Popover } from './Popover';
 import { Panel } from './Panel';
 

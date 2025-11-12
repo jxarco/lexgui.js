@@ -1,6 +1,6 @@
 // Audio.ts @jxarco
 
-import { LX } from './../Namespace';
+import { LX } from './../core/Namespace';
 import { BaseComponent, ComponentType } from '../components/BaseComponent';
 import { IEvent } from '../components/Event';
 import { Panel } from '../components/Panel';

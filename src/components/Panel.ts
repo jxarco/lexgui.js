@@ -1,6 +1,6 @@
 // Panel.ts @jxarco
 
-import { LX } from './../Namespace';
+import { LX } from './../core/Namespace';
 import { Branch } from './Branch';
 import { BaseComponent, ComponentType } from './BaseComponent';
 import { TextInput } from './TextInput';

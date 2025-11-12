@@ -1,9 +1,9 @@
 // Utils.ts @jxarco
 
-import { LX } from './../Namespace';
-import { Area } from "./Area";
-import { Panel } from "./Panel";
-import { vec2 } from './Vec2';
+import { LX } from './Namespace';
+import { Area } from "../components/Area";
+import { Panel } from "../components/Panel";
+import { vec2 } from '../components/Vec2';
 
 function clamp( num: number, min: number, max: number ) { return Math.min( Math.max( num, min ), max ); }
 function round( number: number, precision?: number ) { return precision == 0 ? Math.floor( number ) : +(( number ).toFixed( precision ?? 2 ).replace( /([0-9]+(\.[0-9]+[1-9])?)(\.?0+$)/, '$1' )); }

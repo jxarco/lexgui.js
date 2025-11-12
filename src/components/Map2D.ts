@@ -1,6 +1,6 @@
 // Map2D.ts @jxarco
 
-import { LX } from './../Namespace';
+import { LX } from './../core/Namespace';
 import { BaseComponent, ComponentType } from './BaseComponent';
 import { CanvasMap2D } from './CanvasMap2D';
 import { Button } from './Button';

@@ -1,6 +1,6 @@
 // Sidebar.ts @jxarco
 
-import { LX } from './../Namespace';
+import { LX } from './../core/Namespace';
 import { Area } from './Area';
 import { Panel } from './Panel';
 import { TextInput } from './TextInput';

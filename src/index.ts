@@ -1,6 +1,8 @@
-// Utils
-export * from "./Namespace";
-export * from "./components/Utils";
+// Core Utilities
+export * from "./core/Namespace";
+export * from "./core/Utils";
+
+// Components Utilities
 export * from "./components/Vec2";
 export * from "./components/Icons";
 export * from "./components/Event";
@@ -58,4 +60,4 @@ export * from "./components/PocketDialog";
 export * from "./components/Footer";
 
 // Core
-export * from "./Core";
+export * from "./core/Core";

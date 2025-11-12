@@ -1,6 +1,6 @@
 // CalendarRange.ts @jxarco
 
-import { LX } from './../Namespace';
+import { LX } from './../core/Namespace';
 import { Calendar } from './Calendar';
 
 export class CalendarRange {

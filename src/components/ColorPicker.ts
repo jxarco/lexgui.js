@@ -1,6 +1,6 @@
 // ColorPicker.ts @jxarco
 
-import { LX } from './../Namespace';
+import { LX } from './../core/Namespace';
 import { Color } from './Color';
 import { TextInput } from './TextInput';
 import { Button } from './Button';
