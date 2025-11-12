@@ -85,9 +85,9 @@ export class Form extends BaseComponent
         if( options.secondaryActionName || options.secondaryActionCallback )
         {
             const secondaryButton = new Button( null, options.secondaryActionName ?? "Cancel", ( value: any, event: MouseEvent ) => {
-                if( callback )
+                if( options.secondaryActionCallback )
                 {
-                    callback( container.formData, event );
+                    options.secondaryActionCallback( container.formData, event );
                 }
             }, { width: "100%", minWidth: "0", buttonClass: options.secondaryButtonClass ?? "primary" } );
 
