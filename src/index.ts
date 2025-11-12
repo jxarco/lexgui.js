@@ -50,6 +50,7 @@ export * from "./components/DropdownMenu";
 export * from "./components/Tabs";
 export * from "./components/Popover";
 export * from "./components/Skeleton";
+export * from "./components/Tour";
 export * from "./components/Footer";
 
 // Core

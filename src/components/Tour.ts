@@ -1,9 +1,12 @@
-// tour.js @jxarco
-import { LX } from './core.js';
+// Tour.ts @jxarco
 
-class Tour {
+import { LX } from './../Namespace';
+import { Popover } from './Popover';
+import { Panel } from './Panel';
 
-    static ACTIVE_TOURS = [];
+export class Tour
+{
+    static ACTIVE_TOURS: any[] = [];
 
     /**
      * @constructor Tour
@@ -16,10 +19,21 @@ class Tour {
      * radius: Radius for the tour step highlight [8]
      */
 
-    constructor( steps, options = {} ) {
+    steps: any[];
+    currentStep: number = 0;
+    useModal: boolean;
+    offset: number;
+    horizontalOffset: number;
+    verticalOffset: number;
+    radius: number;
+    tourContainer: any;
+    tourMask: HTMLElement | undefined = undefined;
 
+    _popover: Popover | null = null;
+
+    constructor( steps: any[], options: any = {} )
+    {
         this.steps = steps || [];
-        this.currentStep = 0;
 
         this.useModal = options.useModal ?? true;
         this.offset = options.offset ?? 8;
@@ -35,7 +49,6 @@ class Tour {
             document.body.appendChild( this.tourContainer );
 
             window.addEventListener( "resize", () => {
-
                 for( const tour of Tour.ACTIVE_TOURS )
                 {
                     tour._showStep( 0 );
@@ -48,14 +61,11 @@ class Tour {
      * @method begin
      */
 
-    begin() {
-
+    begin()
+    {
         this.currentStep = 0;
-
         this.tourContainer.style.display = "block";
-
         Tour.ACTIVE_TOURS.push( this );
-
         this._showStep( 0 );
     }
 
@@ -63,11 +73,11 @@ class Tour {
      * @method stop
      */
 
-    stop() {
-
+    stop()
+    {
         if( this.useModal )
         {
-            this.tourMask.remove();
+            this.tourMask?.remove();
             this.tourMask = undefined;
         }
 
@@ -84,8 +94,8 @@ class Tour {
     }
 
     // Show the current step of the tour
-    _showStep( stepOffset = 1 ) {
-
+    _showStep( stepOffset = 1 )
+    {
         this.currentStep += stepOffset;
 
         const step = this.steps[ this.currentStep ];
@@ -107,8 +117,8 @@ class Tour {
 
     // Generate mask for the specific step reference
     // using a fullscreen SVG with "rect" elements
-    _generateMask( reference ) {
-
+    _generateMask( reference: HTMLElement )
+    {
         this.tourContainer.innerHTML = ""; // Clear previous content
 
         this.tourMask = LX.makeContainer( ["100%", "100%"], "tour-mask" );
@@ -117,13 +127,14 @@ class Tour {
         const svg = document.createElementNS( "http://www.w3.org/2000/svg", "svg" );
         svg.style.width = "100%";
         svg.style.height = "100%";
-        this.tourMask.appendChild( svg );
+        this.tourMask?.appendChild( svg );
 
         const clipPath = document.createElementNS( "http://www.w3.org/2000/svg", "clipPath" );
         clipPath.setAttribute( "id", "svgTourClipPath" );
         svg.appendChild( clipPath );
 
-        function ceilAndShiftRect( p, s ) {
+        function ceilAndShiftRect( p: number, s: number ): [ number, number ]
+        {
             const cp = Math.ceil( p );
             const delta = cp - p;
             const ds = s - delta;
@@ -140,10 +151,10 @@ class Tour {
         // Left
         {
             const rect = document.createElementNS( "http://www.w3.org/2000/svg", "rect" );
-            rect.setAttribute( "x", 0 );
-            rect.setAttribute( "y", 0 );
-            rect.setAttribute( "width", Math.max( 0, boundingX - hOffset ) );
-            rect.setAttribute( "height", window.innerHeight );
+            rect.setAttribute( "x", "0" );
+            rect.setAttribute( "y", "0" );
+            rect.setAttribute( "width", `${ Math.max( 0, boundingX - hOffset ) }` );
+            rect.setAttribute( "height", `${ window.innerHeight }` );
             rect.setAttribute( "stroke", "none" );
             clipPath.appendChild( rect );
         }
@@ -151,10 +162,10 @@ class Tour {
         // Top
         {
             const rect = document.createElementNS( "http://www.w3.org/2000/svg", "rect" );
-            rect.setAttribute( "x", boundingX - hOffset );
-            rect.setAttribute( "y", 0 );
-            rect.setAttribute( "width", Math.max( 0, boundingWidth + hOffset * 2 ) );
-            rect.setAttribute( "height", Math.max( 0, boundingY - vOffset ) );
+            rect.setAttribute( "x", `${ boundingX - hOffset }` );
+            rect.setAttribute( "y", "0" );
+            rect.setAttribute( "width", `${ Math.max( 0, boundingWidth + hOffset * 2 ) }` );
+            rect.setAttribute( "height", `${ Math.max( 0, boundingY - vOffset ) }` );
             rect.setAttribute( "stroke", "none" );
             clipPath.appendChild( rect );
         }
@@ -162,10 +173,10 @@ class Tour {
         // Bottom
         {
             const rect = document.createElementNS( "http://www.w3.org/2000/svg", "rect" );
-            rect.setAttribute( "x", boundingX - hOffset );
-            rect.setAttribute( "y", boundingY + boundingHeight + vOffset );
-            rect.setAttribute( "width", Math.max( 0, boundingWidth + hOffset * 2 ) );
-            rect.setAttribute( "height", Math.max( 0, window.innerHeight - boundingY - boundingHeight - vOffset ) );
+            rect.setAttribute( "x", `${ boundingX - hOffset }` );
+            rect.setAttribute( "y", `${ boundingY + boundingHeight + vOffset }` );
+            rect.setAttribute( "width", `${ Math.max( 0, boundingWidth + hOffset * 2 ) }` );
+            rect.setAttribute( "height", `${ Math.max( 0, window.innerHeight - boundingY - boundingHeight - vOffset ) }` );
             rect.setAttribute( "stroke", "none" );
             clipPath.appendChild( rect );
         }
@@ -173,10 +184,10 @@ class Tour {
         // Right
         {
             const rect = document.createElementNS( "http://www.w3.org/2000/svg", "rect" );
-            rect.setAttribute( "x", boundingX + boundingWidth + hOffset );
-            rect.setAttribute( "y", 0 );
-            rect.setAttribute( "width", Math.max( 0, window.innerWidth - boundingX - boundingWidth ) );
-            rect.setAttribute( "height", Math.max( 0, window.innerHeight ) );
+            rect.setAttribute( "x", `${ boundingX + boundingWidth + hOffset }` );
+            rect.setAttribute( "y", "0" );
+            rect.setAttribute( "width", `${ Math.max( 0, window.innerWidth - boundingX - boundingWidth ) }` );
+            rect.setAttribute( "height", `${ Math.max( 0, window.innerHeight ) }` );
             rect.setAttribute( "stroke", "none" );
             clipPath.appendChild( rect );
         }
@@ -196,16 +207,16 @@ class Tour {
         // Reference Mask
         {
             const rectWhite = document.createElementNS( "http://www.w3.org/2000/svg", "rect" );
-            rectWhite.setAttribute( "width", boundingWidth + hOffset * 2 + 2 );
-            rectWhite.setAttribute( "height", boundingHeight + vOffset * 2 + 2);
+            rectWhite.setAttribute( "width", `${ boundingWidth + hOffset * 2 + 2 }` );
+            rectWhite.setAttribute( "height", `${ boundingHeight + vOffset * 2 + 2 }` );
             rectWhite.setAttribute( "stroke", "none" );
             rectWhite.setAttribute( "fill", "white" );
             referenceMask.appendChild( rectWhite );
 
             const rectBlack = document.createElementNS( "http://www.w3.org/2000/svg", "rect" );
-            rectBlack.setAttribute( "rx", this.radius );
-            rectBlack.setAttribute( "width", boundingWidth + hOffset * 2 + 2);
-            rectBlack.setAttribute( "height", boundingHeight + vOffset * 2 + 2);
+            rectBlack.setAttribute( "rx", `${ this.radius }` );
+            rectBlack.setAttribute( "width", `${ boundingWidth + hOffset * 2 + 2 }` );
+            rectBlack.setAttribute( "height", `${ boundingHeight + vOffset * 2 + 2 }` );
             rectBlack.setAttribute( "stroke", "none" );
             rectBlack.setAttribute( "fill", "black" );
             referenceMask.appendChild( rectBlack );
@@ -213,8 +224,8 @@ class Tour {
     }
 
     // Create the container with the user hints
-    _createHighlight( step, previousStep, nextStep ) {
-
+    _createHighlight( step: any, previousStep: any, nextStep: any )
+    {
         const popoverContainer = LX.makeContainer( ["auto", "auto"], "tour-step-container" );
 
         {
@@ -247,7 +258,7 @@ class Tour {
         }
 
         const footerButtons = LX.makeContainer( ["50%", "auto"], "text-md", "", footer );
-        const footerPanel = new LX.Panel();
+        const footerPanel = new Panel();
 
         let numButtons = 1;
 
@@ -287,7 +298,7 @@ class Tour {
         const alignOffset = ( step.align === "start" || step.align === "end" ? sideOffset : 0 );
 
         this._popover?.destroy();
-        this._popover = new LX.Popover( null, [ popoverContainer ], {
+        this._popover = new Popover( null, [ popoverContainer ], {
             reference: step.reference,
             side: step.side,
             align: step.align,
@@ -298,5 +309,3 @@ class Tour {
 };
 
 LX.Tour = Tour;
-
-export { Tour };
