@@ -8,7 +8,7 @@ import { BaseComponent, ComponentType } from './BaseComponent';
  * @description Button Component
  */
 
-class Button extends BaseComponent
+export class Button extends BaseComponent
 {
     setState: ( v: any, b?: boolean ) => void;
     swap?: ( b?: boolean ) => void;

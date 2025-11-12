@@ -126,4 +126,6 @@ class DatePicker extends BaseComponent
     }
 }
 
+LX.Calendar = Calendar;
+LX.CalendarRange = CalendarRange;
 LX.DatePicker = DatePicker;

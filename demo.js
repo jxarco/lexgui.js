@@ -262,13 +262,13 @@ const starterTheme = LX.getTheme();
             panel.addSelect("Font Family", ["Arial", "GeistSans", "Monospace", "CascadiaCode"], "GeistSans");
             panel.addRange("Threshold Range", [2, 7], (v) => console.log(v), { min: 0, max: 10, step: 1, className: "accent" });
             panel.addVector2("2D Position", [300, 350], null, { min: 0, max: 1024 });
-            // const opacityValues = [
-            //     [0.2, 0.3146875],
-            //     [0.417313915857606, 0.8946875000000003],
-            //     [0.5495145631067961, 0.6746875],
-            //     [1, 1]
-            // ];
-            // panel.addCurve("Opacity", opacityValues);
+            const opacityValues = [
+                [0.2, 0.3146875],
+                [0.417313915857606, 0.8946875000000003],
+                [0.5495145631067961, 0.6746875],
+                [1, 1]
+            ];
+            panel.addCurve("Opacity", opacityValues);
             panel.addSize("Resolution", [1280, 720], null, { units: "p", precision: 0 });
             panel.merge();
 
@@ -556,46 +556,46 @@ const starterTheme = LX.getTheme();
             <p class="fg-tertiary">Here's a list of your tasks for this month!</p>
         `, tasksContainer );
 
-        // const tableComponent = new LX.Table(null, {
-        //     head: [ "Name", "Status", "Priority", "Date", "ID" ],
-        //     body: [
-        //         [ "Alice", "In Progress", "High", "20/06/2025", 1 ],
-        //         [ "Bob", "Backlog", "Medium", "11/04/2025", 2 ],
-        //         [ "Prince", "Canceled", "Low", "13/05/2025", 3 ],
-        //         [ "Sean", "Done", "High", "28/07/2025", 4 ],
-        //         [ "Carter", "In Progress", "Medium", "20/03/2025", 5 ],
-        //         [ "James", "Backlog", "Low", "10/02/2025", 6 ],
-        //         [ "Mickey", "Todo", "Low", "08/01/2025", 7 ],
-        //         [ "Charlie", "Canceled", "Low", "23/05/2025", 8 ],
-        //         [ "Potato", "Todo", "High", "15/07/2025", 9 ]
-        //     ]
-        // }, {
-        //     selectable: true,
-        //     sortable: true,
-        //     toggleColumns: true,
-        //     filter: "Name",
-        //     customFilters: [
-        //         { name: "Status", options: ["Backlog", "Todo", "In Progress", "Done", "Canceled"] },
-        //         { name: "Priority", options: ["Low", "Medium", "High"] },
-        //         { name: "ID", type: "range", min: 0, max: 9, step: 1, units: "hr" },
-        //         { name: "Date", type: "date", xdefault: ["23/07/2025", "29/07/2025"] },
-        //     ],
-        //     rowActions: [
-        //         { icon: "Edit", title: "Edit Row" },
-        //         "delete",
-        //         "menu"
-        //     ],
-        //     onMenuAction: (index, tableData) => {
-        //         return [
-        //             { name: "Export" },
-        //             { name: "Make a copy" },
-        //             { name: "Favourite" },
-        //             null,
-        //             { name: "Delete", icon: "Trash2", className: "fg-error" },
-        //         ]
-        //     }
-        // });
-        // tasksContainer.appendChild( tableComponent.root );
+        const tableComponent = new LX.Table(null, {
+            head: [ "Name", "Status", "Priority", "Date", "ID" ],
+            body: [
+                [ "Alice", "In Progress", "High", "20/06/2025", 1 ],
+                [ "Bob", "Backlog", "Medium", "11/04/2025", 2 ],
+                [ "Prince", "Canceled", "Low", "13/05/2025", 3 ],
+                [ "Sean", "Done", "High", "28/07/2025", 4 ],
+                [ "Carter", "In Progress", "Medium", "20/03/2025", 5 ],
+                [ "James", "Backlog", "Low", "10/02/2025", 6 ],
+                [ "Mickey", "Todo", "Low", "08/01/2025", 7 ],
+                [ "Charlie", "Canceled", "Low", "23/05/2025", 8 ],
+                [ "Potato", "Todo", "High", "15/07/2025", 9 ]
+            ]
+        }, {
+            selectable: true,
+            sortable: true,
+            toggleColumns: true,
+            filter: "Name",
+            customFilters: [
+                { name: "Status", options: ["Backlog", "Todo", "In Progress", "Done", "Canceled"] },
+                { name: "Priority", options: ["Low", "Medium", "High"] },
+                { name: "ID", type: "range", min: 0, max: 9, step: 1, units: "hr" },
+                { name: "Date", type: "date", xdefault: ["23/07/2025", "29/07/2025"] },
+            ],
+            rowActions: [
+                { icon: "Edit", title: "Edit Row" },
+                "delete",
+                "menu"
+            ],
+            onMenuAction: (index, tableData) => {
+                return [
+                    { name: "Export" },
+                    { name: "Make a copy" },
+                    { name: "Favourite" },
+                    null,
+                    { name: "Delete", icon: "Trash2", className: "fg-error" },
+                ]
+            }
+        });
+        tasksContainer.appendChild( tableComponent.root );
     }
 
     // Code
