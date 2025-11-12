@@ -1,15 +1,21 @@
-// Sheet.js @jxarco
-import { LX } from './core.js';
+// Sheet.ts @jxarco
+
+import { LX } from './../Namespace';
 
 /**
  * @class Sheet
  */
 
-class Sheet {
+export class Sheet
+{
+    side: string = "left";
+    root: any;
 
-    constructor( size, content, options = {} ) {
+    _onClick: any;
 
-        this.side = options.side ?? "left";
+    constructor( size: string, content: any, options: any = {} )
+    {
+        this.side = options.side ?? this.side;
 
         this.root = document.createElement( "div" );
         this.root.dataset["side"] = this.side;
@@ -18,7 +24,7 @@ class Sheet {
         this.root.className = "lexsheet fixed z-1000 bg-primary";
         document.body.appendChild( this.root );
 
-        this.root.addEventListener( "keydown", (e) => {
+        this.root.addEventListener( "keydown", ( e: KeyboardEvent ) => {
             if( e.key == "Escape" )
             {
                 e.preventDefault();
@@ -30,7 +36,7 @@ class Sheet {
         if( content )
         {
             content = [].concat( content );
-            content.forEach( e => {
+            content.forEach( ( e: any ) => {
                 const domNode = e.root ?? e;
                 this.root.appendChild( domNode );
                 if( e.onSheet )
@@ -47,24 +53,24 @@ class Sheet {
             switch( this.side )
             {
                 case "left":
-                    this.root.style.left = 0;
+                    this.root.style.left = "0";
                     this.root.style.width = size;
                     this.root.style.height = "100%";
                     break;
                 case "right":
-                    this.root.style.right = 0;
+                    this.root.style.right = "0";
                     this.root.style.width = size;
                     this.root.style.height = "100%";
                     break;
                 case "top":
-                    this.root.style.left = 0;
-                    this.root.style.top = 0;
+                    this.root.style.left = "0";
+                    this.root.style.top = "0";
                     this.root.style.width = "100%";
                     this.root.style.height = size;
                     break;
                 case "bottom":
-                    this.root.style.left = 0;
-                    this.root.style.bottom = 0;
+                    this.root.style.left = "0";
+                    this.root.style.bottom = "0";
                     this.root.style.width = "100%";
                     this.root.style.height = size;
                     break;
@@ -76,7 +82,7 @@ class Sheet {
 
             this.root.focus();
 
-            this._onClick = e => {
+            this._onClick = ( e: any ) => {
                 if( e.target && ( this.root.contains( e.target ) ) )
                 {
                     return;
@@ -89,8 +95,8 @@ class Sheet {
         }, 10 );
     }
 
-    destroy() {
-
+    destroy()
+    {
         document.documentElement.setAttribute( "data-scale", "" );
 
         document.body.removeEventListener( "mousedown", this._onClick, true );
@@ -103,5 +109,3 @@ class Sheet {
 };
 
 LX.Sheet = Sheet;
-
-export { Sheet };
