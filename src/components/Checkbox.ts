@@ -2,6 +2,8 @@
 
 import { LX } from './Namespace';
 import { BaseComponent, ComponentType } from './BaseComponent';
+import { IEvent } from './Event';
+import { Panel } from './Panel';
 
 /**
  * @class Checkbox
@@ -10,7 +12,7 @@ import { BaseComponent, ComponentType } from './BaseComponent';
 
 export class Checkbox extends BaseComponent
 {
-    constructor( name: string, value: boolean, callback: any, options: any = {} )
+    constructor( name: string | null, value: boolean, callback: any, options: any = {} )
     {
         if( !name && !options.label )
         {
@@ -37,7 +39,7 @@ export class Checkbox extends BaseComponent
 
             if( !skipCallback )
             {
-                this._trigger( new LX.IEvent( name, newValue, event ), callback );
+                this._trigger( new IEvent( name, newValue, event ), callback );
             }
         };
 
@@ -72,7 +74,7 @@ export class Checkbox extends BaseComponent
             suboptions.className = "lexcheckboxsubmenu";
             suboptions.toggleAttribute( "hidden", !checkbox.checked );
 
-            const suboptionsPanel = new LX.Panel();
+            const suboptionsPanel = new Panel();
             suboptionsPanel.queue( suboptions );
             options.suboptions.call(this, suboptionsPanel);
             suboptionsPanel.clearQueue();

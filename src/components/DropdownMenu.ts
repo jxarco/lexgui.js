@@ -1,6 +1,7 @@
 // DropdownMenu.ts @jxarco
 
 import { LX } from './Namespace';
+import { Checkbox } from './Checkbox';
 
 /**
  * @class DropdownMenu
@@ -250,7 +251,7 @@ export class DropdownMenu
 
         if( item.checked != undefined )
         {
-            const checkbox = new LX.Checkbox( pKey + "_entryChecked", item.checked, ( v: boolean ) => {
+            const checkbox = new Checkbox( pKey + "_entryChecked", item.checked, ( v: boolean ) => {
                 const f = item[ 'callback' ];
                 item.checked = v;
                 if( f )

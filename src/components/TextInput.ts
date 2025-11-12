@@ -2,6 +2,7 @@
 
 import { LX } from './Namespace';
 import { BaseComponent, ComponentType } from './BaseComponent';
+import { IEvent } from './Event';
 
 /**
  * @class TextInput
@@ -14,7 +15,7 @@ export class TextInput extends BaseComponent
 
     _lastValueTriggered?: any;
 
-    constructor( name: string, value: string, callback: any, options: any = {} )
+    constructor( name: string | null, value?: string, callback?: any, options: any = {} )
     {
         super( ComponentType.TEXT, name, String( value ), options );
 
@@ -35,7 +36,7 @@ export class TextInput extends BaseComponent
 
             if( !skipCallback )
             {
-                this._trigger( new LX.IEvent( name, newValue, event ), callback );
+                this._trigger( new IEvent( name, newValue, event ), callback );
             }
         };
 

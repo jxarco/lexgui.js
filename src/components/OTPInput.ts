@@ -2,6 +2,7 @@
 
 import { LX } from './Namespace';
 import { BaseComponent, ComponentType } from './BaseComponent';
+import { IEvent } from './Event';
 
 /**
  * @class OTPInput
@@ -35,7 +36,7 @@ export class OTPInput extends BaseComponent
 
             if( !skipCallback )
             {
-                this._trigger( new LX.IEvent( name, +newValue, event ), callback );
+                this._trigger( new IEvent( name, +newValue, event ), callback );
             }
         };
 

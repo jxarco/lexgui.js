@@ -1,7 +1,9 @@
 // Utils.ts @jxarco
 
 import { LX } from './Namespace';
+import { Area } from "./Area";
 import { Panel } from "./Panel";
+import { vec2 } from './Vec2';
 
 function clamp( num: number, min: number, max: number ) { return Math.min( Math.max( num, min ), max ); }
 function round( number: number, precision?: number ) { return precision == 0 ? Math.floor( number ) : +(( number ).toFixed( precision ?? 2 ).replace( /([0-9]+(\.[0-9]+[1-9])?)(\.?0+$)/, '$1' )); }
@@ -619,7 +621,7 @@ function makeDraggable( domEl: any, options: any = {} )
         const nullRect = { x: 0, y: 0, width: 0, height: 0 };
         const parentRect = domEl.parentElement ? domEl.parentElement.getBoundingClientRect() : nullRect;
         const isFixed = ( domEl.style.position == "fixed" );
-        const fixedOffset = isFixed ? new LX.vec2( parentRect.x, parentRect.y ) : new LX.vec2();
+        const fixedOffset = isFixed ? new vec2( parentRect.x, parentRect.y ) : new vec2();
         left = left ?? e.clientX - offsetX - parentRect.x;
         top = top ?? e.clientY - offsetY - parentRect.y;
         domEl.style.left = LX.clamp( left, dragMargin + fixedOffset.x, fixedOffset.x + parentRect.width - domEl.offsetWidth - dragMargin ) + 'px';
@@ -687,7 +689,7 @@ function makeDraggable( domEl: any, options: any = {} )
         const rect = e.target.getBoundingClientRect();
         const parentRect = currentTarget.parentElement.getBoundingClientRect();
         const isFixed = ( currentTarget.style.position == "fixed" );
-        const fixedOffset = isFixed ? new LX.vec2( parentRect.x, parentRect.y ) : new LX.vec2();
+        const fixedOffset = isFixed ? new vec2( parentRect.x, parentRect.y ) : new vec2();
         offsetX = e.clientX - rect.x - fixedOffset.x;
         offsetY = e.clientY - rect.y - fixedOffset.y;
 
@@ -794,7 +796,7 @@ function makeCodeSnippet( code: string, size: any[], options: any = {} )
     snippet.className = "lexcodesnippet " + ( options.className ?? "" );
     snippet.style.width = size ? size[ 0 ] : "auto";
     snippet.style.height = size ? size[ 1 ] : "auto";
-    const area = new LX.Area( { noAppend: true } );
+    const area = new Area( { noAppend: true } );
     let editor = new LX.CodeEditor( area, {
         skipInfo: true,
         disableEdition: true,
@@ -958,7 +960,7 @@ function makeBreadcrumb( items: any[], options: any = {} )
         {
             const bDropdownTrigger = LX.makeContainer( ["auto", "auto"], `${ lastElement ? "" : "fg-secondary" }` );
             bDropdownTrigger.listen( "click", ( e: any ) => {
-                new LX.DropdownMenu( e.target, item.items, { side: "bottom", align: "start" });
+                LX.addDropdownMenu( e.target, item.items, { side: "bottom", align: "start" });
             } );
             bDropdownTrigger.append( itemTitle );
             breadcrumbItem.appendChild( bDropdownTrigger );
@@ -1392,7 +1394,7 @@ function toast( title: string, description: string, options: any = {} )
 
     if( options.action )
     {
-        const panel = new LX.Panel();
+        const panel = new Panel();
         panel.addButton(null, options.action.name ?? "Accept", options.action.callback.bind( LX, toast ), { width: "auto", maxWidth: "150px", className: "right", buttonClass: "border" });
         toast.appendChild( panel.root.childNodes[ 0 ] );
     }

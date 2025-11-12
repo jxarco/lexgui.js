@@ -2,6 +2,8 @@
 
 import { LX } from './Namespace';
 import { BaseComponent, ComponentType } from './BaseComponent';
+import { TextInput } from './TextInput';
+import { Button } from './Button';
 
 /**
  * @class Form
@@ -66,11 +68,11 @@ export class Form extends BaseComponent
 
             if( !( options.skipLabels ?? false ) )
             {
-                const label = new LX.TextInput( null, entryData.label ?? entry, null, { disabled: true, inputClass: "formlabel nobg" } );
+                const label = new TextInput( null, entryData.label ?? entry, null, { disabled: true, inputClass: "formlabel nobg" } );
                 container.appendChild( label.root );
             }
 
-            entryData.textComponent = new LX.TextInput( null, entryData.constructor == Object ? entryData.value : entryData, ( value: string ) => {
+            entryData.textComponent = new TextInput( null, entryData.constructor == Object ? entryData.value : entryData, ( value: string ) => {
                 container.formData[ entry ] = value;
             }, entryData );
             container.appendChild( entryData.textComponent.root );
@@ -82,7 +84,7 @@ export class Form extends BaseComponent
 
         if( options.secondaryActionName || options.secondaryActionCallback )
         {
-            const secondaryButton = new LX.Button( null, options.secondaryActionName ?? "Cancel", ( value: any, event: MouseEvent ) => {
+            const secondaryButton = new Button( null, options.secondaryActionName ?? "Cancel", ( value: any, event: MouseEvent ) => {
                 if( callback )
                 {
                     callback( container.formData, event );
@@ -92,7 +94,7 @@ export class Form extends BaseComponent
             buttonContainer.appendChild( secondaryButton.root );
         }
 
-        const primaryButton = new LX.Button( null, options.primaryActionName ?? "Submit", ( value: any, event: MouseEvent ) => {
+        const primaryButton = new Button( null, options.primaryActionName ?? "Submit", ( value: any, event: MouseEvent ) => {
 
             const errors = [];
 

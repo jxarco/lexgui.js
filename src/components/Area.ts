@@ -4,6 +4,8 @@ import { LX } from './Namespace';
 import { ContextMenu } from './ContextMenu';
 import { Menubar } from './Menubar';
 import { Sidebar } from './Sidebar';
+import { Panel } from './Panel';
+import { Tabs } from './Tabs';
 
 export class AreaOverlayButtons {
 
@@ -923,7 +925,7 @@ export class Area {
      */
 
     addPanel( options: any ) {
-        let panel = new LX.Panel( options );
+        let panel = new Panel( options );
         this.attach( panel );
         this.panels.push( panel );
         return panel;
@@ -1039,7 +1041,7 @@ export class Area {
 
     addTabs( options: any = {} ) {
 
-        const tabs = new LX.Tabs( this, options );
+        const tabs = new Tabs( this, options );
 
         if( options.folding )
         {

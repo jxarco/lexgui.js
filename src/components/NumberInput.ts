@@ -2,6 +2,7 @@
 
 import { LX } from './Namespace';
 import { BaseComponent, ComponentType } from './BaseComponent';
+import { IEvent } from './Event';
 
 /**
  * @class NumberInput
@@ -12,7 +13,7 @@ export class NumberInput extends BaseComponent
 {
     setLimits: ( newMin: number | null, newMax: number | null, newStep: number | null ) => void;
 
-    constructor( name: string, value: number, callback: any, options: any = {} )
+    constructor( name: string | null, value: number, callback: any, options: any = {} )
     {
         super( ComponentType.NUMBER, name, value, options );
 
@@ -39,7 +40,7 @@ export class NumberInput extends BaseComponent
 
             if( !skipCallback )
             {
-                this._trigger( new LX.IEvent( name, value, event ), callback );
+                this._trigger( new IEvent( name, value, event ), callback );
             }
         };
 

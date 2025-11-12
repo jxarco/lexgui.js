@@ -2,6 +2,7 @@
 
 import { LX } from './Namespace';
 import { BaseComponent, ComponentType } from './BaseComponent';
+import { Panel } from './Panel';
 
 /**
  * @class TabSections
@@ -88,7 +89,7 @@ export class TabSections extends BaseComponent
             if( tab.onCreate )
             {
                 // Push to tab space
-                const creationPanel = new LX.Panel();
+                const creationPanel = new Panel();
                 creationPanel.queue( infoContainer );
                 tab.onCreate.call( this, creationPanel, infoContainer );
                 creationPanel.clearQueue();

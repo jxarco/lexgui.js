@@ -2,6 +2,8 @@
 
 import { LX } from './Namespace';
 import { Area } from './Area';
+import { Panel } from './Panel';
+import { TextInput } from './TextInput';
 
 /**
  * @class Sidebar
@@ -132,7 +134,7 @@ export class Sidebar {
                 if( mobile )
                 {
                     // create an area and append a sidebar:
-                    const area = new LX.Area({ skipAppend: true });
+                    const area = new Area({ skipAppend: true });
                     const sheetSidebarOptions = LX.deepCopy( options );
                     sheetSidebarOptions.collapsed = false;
                     sheetSidebarOptions.collapsable = false;
@@ -158,7 +160,7 @@ export class Sidebar {
         // Entry filter
         if( ( options.filter ?? false ) )
         {
-            const filterTextInput = new LX.TextInput(null, "", ( value: string, event: InputEvent) => {
+            const filterTextInput = new TextInput(null, "", ( value: string, event: InputEvent) => {
                 this.filterString = value;
                 this.update();
             }, { inputClass: "outline", placeholder: "Search...", icon: "Search", className: "lexsidebarfilter" });
@@ -561,7 +563,7 @@ export class Sidebar {
             if( options.type == "checkbox" )
             {
                 item.value = options.value ?? false;
-                const panel = new LX.Panel();
+                const panel = new Panel();
                 item.checkbox = panel.addCheckbox(null, item.value, ( value: boolean, event: InputEvent ) => {
                     event.preventDefault();
                     event.stopPropagation();

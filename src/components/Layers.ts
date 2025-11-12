@@ -2,6 +2,7 @@
 
 import { LX } from './Namespace';
 import { BaseComponent, ComponentType } from './BaseComponent';
+import { IEvent } from './Event';
 
 /**
  * @class Layers
@@ -25,7 +26,7 @@ export class Layers extends BaseComponent
             this.setLayers( value );
             if( !skipCallback )
             {
-                this._trigger( new LX.IEvent(name, value, event), callback );
+                this._trigger( new IEvent(name, value, event), callback );
             }
         };
 

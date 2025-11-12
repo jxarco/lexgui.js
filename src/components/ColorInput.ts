@@ -2,7 +2,9 @@
 
 import { LX } from './Namespace';
 import { BaseComponent, ComponentType } from './BaseComponent';
+import { IEvent } from './Event';
 import { ColorPicker } from './ColorPicker';
+import { TextInput } from './TextInput';
 import { Color } from './Color';
 import { Popover } from './Popover';
 
@@ -25,7 +27,7 @@ export class ColorInput extends BaseComponent
         const useAlpha = options.useAlpha ??
             ( ( value.constructor === Object && 'a' in value ) || ( value.constructor === String && [ 5, 9 ].includes( value.length ) ) );
 
-        const componentColor = new LX.Color( value );
+        const componentColor = new Color( value );
 
         // Force always hex internally
         value = useAlpha ? componentColor.hex : componentColor.hex.substr( 0, 7 );
@@ -33,13 +35,13 @@ export class ColorInput extends BaseComponent
         super( ComponentType.COLOR, name, value, options );
 
         this.onGetValue = () => {
-            const currentColor = new LX.Color( value );
+            const currentColor = new Color( value );
             return options.useRGB ? currentColor.rgb : value;
         };
 
         this.onSetValue = ( newValue, skipCallback, event ) => {
 
-            const newColor = new LX.Color( newValue );
+            const newColor = new Color( newValue );
 
             colorSampleRGB.style.color = value = newColor.hex.substr( 0, 7 );
 
@@ -67,7 +69,7 @@ export class ColorInput extends BaseComponent
                     }
                 }
 
-                this._trigger( new LX.IEvent( name, retValue, event ), callback );
+                this._trigger( new IEvent( name, retValue, event ), callback );
             }
         };
 
@@ -80,7 +82,7 @@ export class ColorInput extends BaseComponent
         container.className = "lexcolor";
         this.root.appendChild( container );
 
-        this.picker = new LX.ColorPicker( value, {
+        this.picker = new ColorPicker( value, {
             colorModel: options.useRGB ? "RGB" : "Hex",
             useAlpha,
             onChange: ( color: Color ) => {
@@ -96,7 +98,7 @@ export class ColorInput extends BaseComponent
                 return;
             }
 
-            this._popover = new LX.Popover( sampleContainer, [ this.picker ] );
+            this._popover = new Popover( sampleContainer, [ this.picker ] );
         } );
 
         let colorSampleRGB = document.createElement( 'div' );
@@ -118,7 +120,7 @@ export class ColorInput extends BaseComponent
             colorSampleRGB.style.width = "18px";
         }
 
-        const textComponent = new LX.TextInput( null, value, ( v: string ) => {
+        const textComponent = new TextInput( null, value, ( v: string ) => {
             this._skipTextUpdate = true;
             this.set( v );
             delete this._skipTextUpdate;

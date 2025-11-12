@@ -2,7 +2,11 @@
 
 import { LX } from './Namespace';
 import { BaseComponent, ComponentType } from './BaseComponent';
+import { Panel } from './Panel';
 import { Button } from './Button';
+import { TextInput } from './TextInput';
+import { Popover } from './Popover';
+import { CalendarRange } from './CalendarRange';
 
 /**
  * @class Table
@@ -88,7 +92,7 @@ export class Table extends BaseComponent
                 filterOptions.trigger = "input";
                 filterOptions.inputClass = "outline";
 
-                let filter = new LX.TextInput(null, this._currentFilter ?? "", ( v: string ) => {
+                let filter = new TextInput(null, this._currentFilter ?? "", ( v: string ) => {
                     this._currentFilter = v;
                     this.refresh();
                 }, filterOptions );
@@ -103,7 +107,7 @@ export class Table extends BaseComponent
 
                 for( let f of this.customFilters )
                 {
-                    f.component = new LX.Button(null, icon.innerHTML + f.name, ( v: any ) => {
+                    f.component = new Button(null, icon.innerHTML + f.name, ( v: any ) => {
 
                         const spanName = f.component.root.querySelector( "span" );
 
@@ -126,13 +130,13 @@ export class Table extends BaseComponent
                                 }
                                 return item;
                             } );
-                            new LX.DropdownMenu( f.component.root, menuOptions, { side: "bottom", align: "start" });
+                            LX.addDropdownMenu( f.component.root, menuOptions, { side: "bottom", align: "start" });
                         }
                         else if( f.type == "range" )
                         {
                             console.assert( f.min != undefined && f.max != undefined, "Range filter needs min and max values!" );
                             const container = LX.makeContainer( ["240px", "auto"], "text-md" );
-                            const panel = new LX.Panel();
+                            const panel: any = new Panel();
                             LX.makeContainer( ["100%", "auto"], "px-3 p-2 pb-0 text-md font-medium", f.name, container );
 
                             f.start = f.start ?? f.min;
@@ -165,12 +169,12 @@ export class Table extends BaseComponent
                             }
                             panel.refresh();
                             container.appendChild( panel.root );
-                            new LX.Popover( f.component.root, [ container ], { side: "bottom" } );
+                            new Popover( f.component.root, [ container ], { side: "bottom" } );
                         }
                         else if( f.type == "date" )
                         {
                             const container = LX.makeContainer( ["auto", "auto"], "text-md" );
-                            const panel = new LX.Panel();
+                            const panel: any = new Panel();
                             LX.makeContainer( ["100%", "auto"], "px-3 p-2 pb-0 text-md font-medium", f.name, container );
 
                             panel.refresh = () => {
@@ -184,7 +188,7 @@ export class Table extends BaseComponent
                                     f.default = [ todayStringDate, todayStringDate ];
                                 }
 
-                                const calendar = new LX.CalendarRange( f.value, {
+                                const calendar = new CalendarRange( f.value, {
                                     onChange: ( dateRange: any ) => {
                                         f.value = dateRange;
                                         spanName.innerHTML = icon.innerHTML + f.name + ( separatorHtml + LX.badge( `${ calendar.getFullDate() }`, "bg-tertiary fg-secondary text-sm border-0" ) );
@@ -197,14 +201,14 @@ export class Table extends BaseComponent
                             }
                             panel.refresh();
                             container.appendChild( panel.root );
-                            new LX.Popover( f.component.root, [ container ], { side: "bottom" } );
+                            new Popover( f.component.root, [ container ], { side: "bottom" } );
                         }
 
                     }, { buttonClass: "px-2 primary dashed" } );
                     headerContainer.appendChild( f.component.root );
                 }
 
-                this._resetCustomFiltersBtn = new LX.Button(null, "resetButton", () => {
+                this._resetCustomFiltersBtn = new Button(null, "resetButton", () => {
                     this.activeCustomFilters = {};
                     this._resetCustomFiltersBtn?.root.classList.add( "hidden" );
                     for( let f of this.customFilters ?? [] )
@@ -229,7 +233,7 @@ export class Table extends BaseComponent
             if( this._toggleColumns )
             {
                 const icon = LX.makeIcon( "Settings2" );
-                const toggleColumnsBtn = new LX.Button( "toggleColumnsBtn", icon.innerHTML + "View", ( value: any, e: any ) => {
+                const toggleColumnsBtn = new Button( "toggleColumnsBtn", icon.innerHTML + "View", ( value: any, e: any ) => {
                     const menuOptions = data.head.map( ( colName: string, idx: number ) => {
                         const item: any = {
                             name: colName,
@@ -245,7 +249,7 @@ export class Table extends BaseComponent
                         if( !data.colVisibilityMap[ idx ] ) delete item.icon;
                         return item;
                     } );
-                    new LX.DropdownMenu( e.target, menuOptions, { side: "bottom", align: "end" });
+                    LX.addDropdownMenu( e.target, menuOptions, { side: "bottom", align: "end" });
                 }, { hideName: true } );
                 headerContainer.appendChild( toggleColumnsBtn.root );
                 toggleColumnsBtn.root.style.marginLeft = "auto";
@@ -377,7 +381,7 @@ export class Table extends BaseComponent
 
                     th.addEventListener( 'click', ( e: MouseEvent ) => {
                         if( menuOptions.length === 0 ) return;
-                        new LX.DropdownMenu( e.target, menuOptions, { side: "bottom", align: "start" });
+                        LX.addDropdownMenu( e.target, menuOptions, { side: "bottom", align: "start" });
                     });
 
                     hrow.appendChild( th );
@@ -696,7 +700,7 @@ export class Table extends BaseComponent
                                     const menuOptions = options.onMenuAction( r, data );
                                     console.assert( menuOptions.length, "Add items to the Menu Action Dropdown!" );
 
-                                    new LX.DropdownMenu( e.target, menuOptions, { side: "bottom", align: "end" });
+                                    LX.addDropdownMenu( e.target, menuOptions, { side: "bottom", align: "end" });
                                 });
                             }
                             else // custom actions

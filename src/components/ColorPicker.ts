@@ -3,6 +3,8 @@
 import { LX } from './Namespace';
 import { Color } from './Color';
 import { TextInput } from './TextInput';
+import { Button } from './Button';
+import { Select } from './Select';
 
 /**
  * @class ColorPicker
@@ -120,7 +122,7 @@ export class ColorPicker {
         const EyeDropper = ( window as any ).EyeDropper;
         if( EyeDropper )
         {
-            hueAlphaContainer.appendChild( new LX.Button(null, "eyedrop",  async () => {
+            hueAlphaContainer.appendChild( new Button(null, "eyedrop",  async () => {
                 const eyeDropper = new EyeDropper();
                 try {
                     const result = await eyeDropper.open();
@@ -254,22 +256,22 @@ export class ColorPicker {
         // Info display
         const colorLabel = LX.makeContainer( ["100%", "auto"], "flex flex-row gap-1", "", this.root );
 
-        colorLabel.appendChild( new LX.Select( null, [ "CSS", "Hex", "HSV", "RGB" ], this.colorModel, ( v: any ) => {
+        colorLabel.appendChild( new Select( null, [ "CSS", "Hex", "HSV", "RGB" ], this.colorModel, ( v: any ) => {
             this.colorModel = v;
             this._updateColorValue( null, true );
         } ).root );
 
-        this.labelComponent = new LX.TextInput( null, "", null, { inputClass: "bg-none", fit: true, disabled: true } );
+        this.labelComponent = new TextInput( null, "", null, { inputClass: "bg-none", fit: true, disabled: true } );
         colorLabel.appendChild( this.labelComponent.root );
 
         // Copy button
         {
-            const copyButtonComponent = new LX.Button(null, "copy",  async () => {
+            const copyButtonComponent = new Button( null, "copy",  async () => {
                 navigator.clipboard.writeText( this.labelComponent.value() );
                 copyButtonComponent.root.querySelector( "input[type='checkbox']" ).style.pointerEvents = "none";
 
                 LX.doAsync( () => {
-                    copyButtonComponent.swap( true );
+                    if( copyButtonComponent.swap ) copyButtonComponent.swap( true );
                     copyButtonComponent.root.querySelector( "input[type='checkbox']" ).style.pointerEvents = "auto";
                 }, 3000 );
 

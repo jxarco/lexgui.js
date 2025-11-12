@@ -55,7 +55,7 @@ export enum ComponentType
 export class BaseComponent {
 
     type: ComponentType;
-    name: string | null;
+    name: string | null | undefined;
     customName?: string;
     options: any;
     root: any;
@@ -76,7 +76,7 @@ export class BaseComponent {
         ComponentType.PROGRESS
     ];
 
-    constructor( type: ComponentType, name: string | null, value: any, options: any = {} )
+    constructor( type: ComponentType, name?: string | null | undefined, value?: any, options: any = {} )
     {
         this.type = type;
         this.name = name;
@@ -332,7 +332,8 @@ export class BaseComponent {
         console.error( `Unknown Component type: ${ this.type }` );
     }
 
-    refresh() {
+    refresh( value?: any )
+    {
 
     }
 }

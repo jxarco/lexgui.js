@@ -3,6 +3,7 @@
 import { LX } from './Namespace';
 import { BaseComponent, ComponentType } from './BaseComponent';
 import { Panel } from './Panel';
+import { Button } from './Button';
 
 /**
  * @class FileInput
@@ -66,7 +67,7 @@ export class FileInput extends BaseComponent
         {
             let settingsDialog: any = null;
 
-            const settingButton = new LX.Button(null, "", () => {
+            const settingButton = new Button(null, "", () => {
 
                 if( settingsDialog )
                 {

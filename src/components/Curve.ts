@@ -2,6 +2,7 @@
 
 import { LX } from './Namespace';
 import { BaseComponent, ComponentType } from './BaseComponent';
+import { IEvent } from './Event';
 import { CanvasCurve } from './CanvasCurve';
 
 /**
@@ -28,7 +29,7 @@ export class Curve extends BaseComponent
             curveInstance.redraw();
             if( !skipCallback )
             {
-                this._trigger( new LX.IEvent( name, curveInstance.element.value, event ), callback );
+                this._trigger( new IEvent( name, curveInstance.element.value, event ), callback );
             }
         };
 
@@ -42,12 +43,12 @@ export class Curve extends BaseComponent
         this.root.appendChild( container );
 
         options.callback = ( v: any[], e: MouseEvent ) => {
-            this._trigger( new LX.IEvent( name, v, e ), callback );
+            this._trigger( new IEvent( name, v, e ), callback );
         };
 
         options.name = name;
 
-        let curveInstance = new LX.CanvasCurve( values, options );
+        let curveInstance = new CanvasCurve( values, options );
         container.appendChild( curveInstance.element );
         this.curveInstance = curveInstance;
 

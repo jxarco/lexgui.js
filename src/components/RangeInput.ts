@@ -2,6 +2,7 @@
 
 import { LX } from './Namespace';
 import { BaseComponent, ComponentType } from './BaseComponent';
+import { IEvent } from './Event';
 
 /**
  * @class RangeInput
@@ -96,7 +97,7 @@ export class RangeInput extends BaseComponent
                     finalValue = ( ( +slider.max ) - value + ( +slider.min ) );
                 }
 
-                this._trigger( new LX.IEvent( name, finalValue, event ), callback );
+                this._trigger( new IEvent( name, finalValue, event ), callback );
             }
         };
 

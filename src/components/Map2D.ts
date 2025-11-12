@@ -3,6 +3,7 @@
 import { LX } from './Namespace';
 import { BaseComponent, ComponentType } from './BaseComponent';
 import { CanvasMap2D } from './CanvasMap2D';
+import { Button } from './Button';
 import { Popover } from './Popover';
 
 /**
@@ -26,7 +27,7 @@ export class Map2D extends BaseComponent
         this.onSetValue = ( newValue, skipCallback, event ) => {
             // if( !skipCallback )
             // {
-            //     this._trigger( new LX.IEvent( name, curveInstance.element.value, event ), callback );
+            //     this._trigger( new IEvent( name, curveInstance.element.value, event ), callback );
             // }
         };
 
@@ -42,8 +43,8 @@ export class Map2D extends BaseComponent
         this.map2d = new CanvasMap2D( points, callback, options );
 
         const calendarIcon = LX.makeIcon( "SquareMousePointer" );
-        const calendarButton = new LX.Button( null, "Open Map", () => {
-            this._popover = new LX.Popover( calendarButton.root, [ this.map2d ] );
+        const calendarButton = new Button( null, "Open Map", () => {
+            this._popover = new Popover( calendarButton.root, [ this.map2d ] );
         }, { buttonClass: `flex flex-row px-3 fg-secondary justify-between` } );
 
         calendarButton.root.querySelector( "button" ).appendChild( calendarIcon );

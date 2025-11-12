@@ -2,6 +2,40 @@
 
 import { LX } from './Namespace';
 import { Branch } from './Branch';
+import { BaseComponent, ComponentType } from './BaseComponent';
+import { TextInput } from './TextInput';
+import { Title } from './Title';
+import { Button } from './Button';
+import { ComboButtons } from './ComboButtons';
+import { Card } from './Card';
+import { Form } from './Form';
+import { TextArea } from './TextArea';
+import { Select } from './Select';
+import { Curve } from './Curve';
+import { Dial } from './Dial';
+import { Layers } from './Layers';
+import { ArrayInput } from './ArrayInput';
+import { List } from './List';
+import { Tags } from './Tags';
+import { Checkbox } from './Checkbox';
+import { Toggle } from './Toggle';
+import { RadioGroup } from './RadioGroup';
+import { ColorInput } from './ColorInput';
+import { RangeInput } from './RangeInput';
+import { NumberInput } from './NumberInput';
+import { Vector } from './Vector';
+import { Map2D } from './Map2D';
+import { Table } from './Table';
+import { FileInput } from './FileInput';
+import { DatePicker } from './DatePicker';
+import { Rate } from './Rate';
+import { TabSections } from './TabSections';
+import { Tree } from './NodeTree';
+import { Counter } from './Counter';
+import { Progress } from './Progress';
+import { OTPInput } from './OTPInput';
+import { Pad } from './Pad';
+import { SizeInput } from './SizeInput';
 
 /**
  * @class Panel
@@ -377,7 +411,7 @@ export class Panel {
         options.skipComponent = options.skipComponent ?? true;
         options.skipInlineCount = true;
 
-        let component = new LX.TextInput( null, null, null, options )
+        let component = new TextInput( null, undefined, null, options )
         const element = component.root;
         element.className += " lexfilter";
 
@@ -507,7 +541,7 @@ export class Panel {
         var element = document.createElement('div');
         element.className = "lexseparator";
 
-        let component = new LX.BaseComponent( LX.BaseComponent.SEPARATOR );
+        let component = new BaseComponent( ComponentType.SEPARATOR );
         component.root = element;
 
         if( this._currentBranch )
@@ -522,17 +556,6 @@ export class Panel {
     }
 
     /**
-     * @method addBlank
-     * @param {Number} width
-     * @param {Number} height
-     */
-
-    addBlank( width: number, height: number ) {
-        const component = new LX.Blank( width, height );
-        return this._attachComponent( component );
-    }
-
-    /**
      * @method addTitle
      * @param {String} name Title name
      * @param {Object} options:
@@ -544,7 +567,7 @@ export class Panel {
      */
 
     addTitle( name: string, options: any = {} ) {
-        const component = new LX.Title( name, options );
+        const component = new Title( name, options );
         return this._attachComponent( component );
     }
 
@@ -570,7 +593,7 @@ export class Panel {
      */
 
     addText( name: string|null, value: string, callback: any, options: any = {} ) {
-        const component = new LX.TextInput( name, value, callback, options );
+        const component = new TextInput( name, value, callback, options );
         return this._attachComponent( component );
     }
 
@@ -592,7 +615,7 @@ export class Panel {
      */
 
     addTextArea( name: string|null, value: string, callback: any, options: any = {} ) {
-        const component = new LX.TextArea( name, value, callback, options );
+        const component = new TextArea( name, value, callback, options );
         return this._attachComponent( component );
     }
 
@@ -606,7 +629,7 @@ export class Panel {
         options.disabled = true;
         options.inputClass = ( options.inputClass ?? "" ) + " nobg";
         const component = this.addText( null, value, null, options );
-        component.type = LX.BaseComponent.LABEL;
+        component.type = ComponentType.LABEL;
         return component;
     }
 
@@ -629,7 +652,7 @@ export class Panel {
      */
 
     addButton( name: string|null, value: string, callback: any, options: any = {} ) {
-        const component = new LX.Button( name, value, callback, options );
+        const component = new Button( name, value, callback, options );
         return this._attachComponent( component );
     }
 
@@ -646,7 +669,7 @@ export class Panel {
      */
 
     addComboButtons( name: string, values: any[], options: any = {} ) {
-        const component = new LX.ComboButtons( name, values, options );
+        const component = new ComboButtons( name, values, options );
         return this._attachComponent( component );
     }
 
@@ -662,7 +685,7 @@ export class Panel {
      */
 
     addCard( name: string, options: any = {} ) {
-        const component = new LX.Card( name, options );
+        const component = new Card( name, options );
         return this._attachComponent( component );
     }
 
@@ -681,7 +704,7 @@ export class Panel {
      */
 
     addForm( name: string, data: any, callback: any, options: any = {} ) {
-        const component = new LX.Form( name, data, callback, options );
+        const component = new Form( name, data, callback, options );
         return this._attachComponent( component );
     }
 
@@ -713,7 +736,7 @@ export class Panel {
 
         options.hideName = true;
 
-        let component = new LX.BaseComponent( LX.BaseComponent.CONTENT, name, null, options );
+        let component = new BaseComponent( ComponentType.CONTENT, name, null, options );
         component.root.appendChild( element );
 
         return this._attachComponent( component );
@@ -740,7 +763,7 @@ export class Panel {
         Object.assign( img.style, options.style ?? {} );
         container.appendChild( img );
 
-        let component = new LX.BaseComponent( LX.BaseComponent.IMAGE, name, null, options );
+        let component = new BaseComponent( ComponentType.IMAGE, name, null, options );
         component.root.appendChild( container );
 
         // await img.decode();
@@ -764,8 +787,8 @@ export class Panel {
      * emptyMsg: Custom message to show when no filtered results
      */
 
-    addSelect( name: string, values: any[], value: string, callback: any, options: any = {} ) {
-        const component = new LX.Select( name, values, value, callback, options );
+    addSelect( name: string | null, values: any[], value: string, callback: any, options: any = {} ) {
+        const component = new Select( name, values, value, callback, options );
         return this._attachComponent( component );
     }
 
@@ -786,7 +809,7 @@ export class Panel {
     */
 
     addCurve( name: string, values: any[], callback: any, options: any = {} ) {
-        const component = new LX.Curve( name, values, callback, options );
+        const component = new Curve( name, values, callback, options );
         return this._attachComponent( component );
     }
 
@@ -807,7 +830,7 @@ export class Panel {
     */
 
     addDial( name: string, values: any[], callback: any, options: any = {} ) {
-        const component = new LX.Dial( name, values, callback, options );
+        const component = new Dial( name, values, callback, options );
         return this._attachComponent( component );
     }
 
@@ -820,7 +843,7 @@ export class Panel {
      */
 
     addLayers( name: string, value: number, callback: any, options: any = {} ) {
-        const component = new LX.Layers( name, value, callback, options );
+        const component = new Layers( name, value, callback, options );
         return this._attachComponent( component );
     }
 
@@ -834,7 +857,7 @@ export class Panel {
      */
 
     addArray( name: string, values: any[] = [], callback: any, options: any = {} ) {
-        const component = new LX.ItemArray( name, values, callback, options );
+        const component = new ArrayInput( name, values, callback, options );
         return this._attachComponent( component );
     }
 
@@ -849,7 +872,7 @@ export class Panel {
      */
 
     addList( name: string, values: any[], value: any, callback: any, options: any = {} ) {
-        const component = new LX.List( name, values, value, callback, options );
+        const component = new List( name, values, value, callback, options );
         return this._attachComponent( component );
     }
 
@@ -863,7 +886,7 @@ export class Panel {
      */
 
     addTags( name: string, value: string, callback: any, options: any = {} ) {
-        const component = new LX.Tags( name, value, callback, options );
+        const component = new Tags( name, value, callback, options );
         return this._attachComponent( component );
     }
 
@@ -879,8 +902,8 @@ export class Panel {
      * className: Extra classes to customize style
      */
 
-    addCheckbox( name: string, value: boolean, callback: any, options: any = {} ) {
-        const component = new LX.Checkbox( name, value, callback, options );
+    addCheckbox( name: string | null, value: boolean, callback: any, options: any = {} ) {
+        const component = new Checkbox( name, value, callback, options );
         return this._attachComponent( component );
     }
 
@@ -897,7 +920,7 @@ export class Panel {
      */
 
     addToggle( name: string, value: boolean, callback: any, options: any = {} ) {
-        const component = new LX.Toggle( name, value, callback, options );
+        const component = new Toggle( name, value, callback, options );
         return this._attachComponent( component );
     }
 
@@ -914,7 +937,7 @@ export class Panel {
      */
 
     addRadioGroup( name: string, label: string, values: any[], callback: any, options: any = {} ) {
-        const component = new LX.RadioGroup( name, label, values, callback, options );
+        const component = new RadioGroup( name, label, values, callback, options );
         return this._attachComponent( component );
     }
 
@@ -929,7 +952,7 @@ export class Panel {
      */
 
     addColor( name: string, value: any, callback: any, options: any = {} ) {
-        const component = new LX.ColorInput( name, value, callback, options );
+        const component = new ColorInput( name, value, callback, options );
         return this._attachComponent( component );
     }
 
@@ -949,7 +972,7 @@ export class Panel {
      */
 
     addRange( name: string, value: number, callback: any, options: any = {} ) {
-        const component = new LX.RangeInput( name, value, callback, options );
+        const component = new RangeInput( name, value, callback, options );
         return this._attachComponent( component );
     }
 
@@ -970,15 +993,15 @@ export class Panel {
      * onRelease: Callback function on mouse up
      */
 
-    addNumber( name: string, value: number, callback: any, options: any = {} ) {
-        const component = new LX.NumberInput( name, value, callback, options );
+    addNumber( name: string | null, value: number, callback: any, options: any = {} ) {
+        const component = new NumberInput( name, value, callback, options );
         return this._attachComponent( component );
     }
 
     static VECTOR_COMPONENTS = { 0: 'x', 1: 'y', 2: 'z', 3: 'w' };
 
     _addVector( numComponents: number, name: string, value: any[], callback: any, options: any = {} ) {
-        const component = new LX.Vector( numComponents, name, value, callback, options );
+        const component = new Vector( numComponents, name, value, callback, options );
         return this._attachComponent( component );
     }
 
@@ -1019,7 +1042,7 @@ export class Panel {
      */
 
     addSize( name: string, value: any, callback: any, options: any = {} ) {
-        const component = new LX.SizeInput( name, value, callback, options );
+        const component = new SizeInput( name, value, callback, options );
         return this._attachComponent( component );
     }
 
@@ -1035,7 +1058,7 @@ export class Panel {
      */
 
     addOTP( name: string, value: string, callback: any, options: any = {} ) {
-        const component = new LX.OTPInput( name, value, callback, options );
+        const component = new OTPInput( name, value, callback, options );
         return this._attachComponent( component );
     }
 
@@ -1053,7 +1076,7 @@ export class Panel {
      */
 
     addPad( name: string, value: any[], callback: any, options: any = {} ) {
-        const component = new LX.Pad( name, value, callback, options );
+        const component = new Pad( name, value, callback, options );
         return this._attachComponent( component );
     }
 
@@ -1070,7 +1093,7 @@ export class Panel {
      */
 
     addProgress( name: string, value: number, options: any = {} ) {
-        const component = new LX.Progress( name, value, options );
+        const component = new Progress( name, value, options );
         return this._attachComponent( component );
     }
 
@@ -1086,7 +1109,7 @@ export class Panel {
      */
 
     addFile( name: string, callback: any, options: any = {} ) {
-        const component = new LX.FileInput( name, callback, options );
+        const component = new FileInput( name, callback, options );
         return this._attachComponent( component );
     }
 
@@ -1102,7 +1125,7 @@ export class Panel {
      */
 
     addTree( name: string, data: any, options: any = {} ) {
-        const component = new LX.Tree( name, data, options );
+        const component = new Tree( name, data, options );
         return this._attachComponent( component );
     }
 
@@ -1123,7 +1146,7 @@ export class Panel {
      */
 
     addTabSections( name: string, tabs: any[], options: any = {} ) {
-        const component = new LX.TabSections( name, tabs, options );
+        const component = new TabSections( name, tabs, options );
         return this._attachComponent( component );
     }
 
@@ -1140,7 +1163,7 @@ export class Panel {
      */
 
     addCounter( name: string, value: number, callback: any, options: any = {} ) {
-        const component = new LX.Counter( name, value, callback, options );
+        const component = new Counter( name, value, callback, options );
         return this._attachComponent( component );
     }
 
@@ -1164,7 +1187,7 @@ export class Panel {
      */
 
     addTable( name: string, data: any, options: any = {} ) {
-        const component = new LX.Table( name, data, options );
+        const component = new Table( name, data, options );
         return this._attachComponent( component );
     }
 
@@ -1181,7 +1204,7 @@ export class Panel {
      */
 
     addDate( name: string, dateValue: string, callback: any, options: any = {} ) {
-        const component = new LX.DatePicker( name, dateValue, callback, options );
+        const component = new DatePicker( name, dateValue, callback, options );
         return this._attachComponent( component );
     }
 
@@ -1194,7 +1217,7 @@ export class Panel {
      */
 
     addMap2D( name: string, points: any[], callback: any, options: any = {} ) {
-        const component = new LX.Map2D( name, points, callback, options );
+        const component = new Map2D( name, points, callback, options );
         return this._attachComponent( component );
     }
 
@@ -1207,7 +1230,7 @@ export class Panel {
      */
 
     addRate( name: string, value: number, callback: any, options: any = {} ) {
-        const component = new LX.Rate( name, value, callback, options );
+        const component = new Rate( name, value, callback, options );
         return this._attachComponent( component );
     }
 }

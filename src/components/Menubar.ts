@@ -1,6 +1,7 @@
 // Menubar.ts @jxarco
 
 import { LX } from './Namespace';
+import { Button } from './Button';
 
 /**
  * @class Menubar
@@ -191,7 +192,7 @@ export class Menubar {
         }
 
         // Otherwise, create it
-        button = new LX.Button( name, null, callback, {
+        button = new Button( name, undefined, callback, {
             title: name,
             buttonClass: "lexmenubutton main bg-none",
             disabled: options.disabled,
@@ -323,7 +324,7 @@ export class Menubar {
         for( const data of buttons )
         {
             const title = data.title;
-            const button = new LX.Button( title, data.label, data.callback, {
+            const button = new Button( title, data.label, data.callback, {
                 title,
                 buttonClass: "bg-none",
                 disabled: data.disabled,

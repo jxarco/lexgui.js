@@ -2,6 +2,7 @@
 
 import { LX } from './Namespace';
 import { BaseComponent, ComponentType } from './BaseComponent';
+import { IEvent } from './Event';
 
 /**
  * @class Card
@@ -58,7 +59,7 @@ export class Card extends BaseComponent
         {
             container.style.cursor = "pointer";
             container.addEventListener("click", ( e ) => {
-                this._trigger( new LX.IEvent( name, null, e ), options.callback );
+                this._trigger( new IEvent( name, null, e ), options.callback );
             });
         }
     }

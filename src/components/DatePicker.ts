@@ -2,6 +2,8 @@
 
 import { LX } from './Namespace';
 import { BaseComponent, ComponentType } from './BaseComponent';
+import { IEvent } from './Event';
+import { Button } from './Button';
 import { Calendar } from './Calendar';
 import { CalendarRange } from './CalendarRange';
 import { Popover } from './Popover';
@@ -11,7 +13,7 @@ import { Popover } from './Popover';
  * @description DatePicker Component
  */
 
-class DatePicker extends BaseComponent
+export class DatePicker extends BaseComponent
 {
     calendar: Calendar | CalendarRange;
 
@@ -46,7 +48,7 @@ class DatePicker extends BaseComponent
 
             if( !skipCallback )
             {
-                this._trigger( new LX.IEvent( name, newValue, event ), callback );
+                this._trigger( new IEvent( name, newValue, event ), callback );
             }
         }
 
@@ -60,7 +62,7 @@ class DatePicker extends BaseComponent
 
         if( !dateAsRange )
         {
-            this.calendar = new LX.Calendar( dateValue, {
+            this.calendar = new Calendar( ( dateValue as string ), {
                 onChange: ( date: any ) => {
                     const newDateString = `${ date.day }/${ date.month }/${ date.year }`;
                     this.set( newDateString );
@@ -70,7 +72,7 @@ class DatePicker extends BaseComponent
         }
         else
         {
-            this.calendar = new LX.CalendarRange( dateValue, {
+            this.calendar = new CalendarRange( ( dateValue as string[] ), {
                 onChange: ( dateRange: any ) => {
                     this.set( dateRange );
                 },
@@ -90,8 +92,8 @@ class DatePicker extends BaseComponent
             const d0 = dateAsRange ? dts[ 0 ] : currentDate;
 
             const calendarIcon = LX.makeIcon( "Calendar" );
-            const calendarButton = new LX.Button( null, d0, () => {
-                this._popover = new LX.Popover( calendarButton.root, [ this.calendar ] );
+            const calendarButton = new Button( null, d0, () => {
+                this._popover = new Popover( calendarButton.root, [ this.calendar ] );
             }, { buttonClass: `flex flex-row px-3 ${ emptyDate ? "" : "fg-tertiary" } justify-between` } );
             calendarButton.root.querySelector( "button" ).appendChild( calendarIcon );
             calendarButton.root.style.width = "100%";
@@ -104,8 +106,8 @@ class DatePicker extends BaseComponent
 
                 const d1 = dts[ 1 ];
                 const calendarIcon = LX.makeIcon( "Calendar" );
-                const calendarButton = new LX.Button( null, d1, () => {
-                    this._popover = new LX.Popover( calendarButton.root, [ this.calendar ] );
+                const calendarButton = new Button( null, d1, () => {
+                    this._popover = new Popover( calendarButton.root, [ this.calendar ] );
                 }, { buttonClass: `flex flex-row px-3 ${ emptyDate ? "" : "fg-tertiary" } justify-between` } );
                 calendarButton.root.querySelector( "button" ).appendChild( calendarIcon );
                 calendarButton.root.style.width = "100%";

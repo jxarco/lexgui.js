@@ -76,7 +76,7 @@ export class CalendarRange {
 
         };
 
-        this.fromCalendar = new LX.Calendar( this.from, {
+        this.fromCalendar = new Calendar( this.from, {
             skipNextMonth: true,
             onChange,
             onPreviousMonth: () => {
@@ -85,7 +85,7 @@ export class CalendarRange {
             range
         });
 
-        this.toCalendar = new LX.Calendar( this.to, {
+        this.toCalendar = new Calendar( this.to, {
             skipPrevMonth: true,
             onChange,
             onNextMonth: () => {

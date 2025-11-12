@@ -2,6 +2,7 @@
 
 import { LX } from './Namespace';
 import { BaseComponent, ComponentType } from './BaseComponent';
+import { IEvent } from './Event';
 
 /**
  * @class Tags
@@ -28,7 +29,7 @@ export class Tags extends BaseComponent
             this.generateTags( arrayValue );
             if( !skipCallback )
             {
-                this._trigger( new LX.IEvent( name, arrayValue, event ), callback );
+                this._trigger( new IEvent( name, arrayValue, event ), callback );
             }
         };
 

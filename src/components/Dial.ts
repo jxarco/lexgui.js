@@ -49,12 +49,12 @@ export class Dial extends BaseComponent
         this.root.appendChild( container );
 
         options.callback = ( v: any, e: MouseEvent ) => {
-            this._trigger( new LX.IEvent( name, v, e ), callback );
+            this._trigger( new IEvent( name, v, e ), callback );
         };
 
         options.name = name;
 
-        let dialInstance = new LX.CanvasDial( this, values, options );
+        let dialInstance = new CanvasDial( values, options );
         container.appendChild( dialInstance.element );
         this.dialInstance = dialInstance;
 

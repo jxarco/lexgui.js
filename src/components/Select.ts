@@ -2,6 +2,10 @@
 
 import { LX } from './Namespace';
 import { BaseComponent, ComponentType } from './BaseComponent';
+import { Button } from './Button';
+import { TextInput } from './TextInput';
+import { Panel } from './Panel';
+import { IEvent } from './Event';
 
 /**
  * @class Select
@@ -12,7 +16,7 @@ export class Select extends BaseComponent
 {
     _lastPlacement: boolean[] = [ false, false ];
 
-    constructor( name: string, values: any[], value: any, callback: any, options: any = {} )
+    constructor( name: string | null, values: any[], value: any, callback: any, options: any = {} )
     {
         super( ComponentType.SELECT, name, value, options );
 
@@ -53,7 +57,7 @@ export class Select extends BaseComponent
             if( suboptionsFunc )
             {
                 suboptions.innerHTML = "";
-                const suboptionsPanel = new LX.Panel();
+                const suboptionsPanel = new Panel();
                 suboptionsPanel.queue( suboptions );
                 suboptionsFunc.call(this, suboptionsPanel);
                 suboptionsPanel.clearQueue();
@@ -64,7 +68,7 @@ export class Select extends BaseComponent
 
             if( !skipCallback )
             {
-                this._trigger( new LX.IEvent( name, value, event ), callback );
+                this._trigger( new IEvent( name, value, event ), callback );
             }
         };
 
@@ -165,7 +169,7 @@ export class Select extends BaseComponent
             }
         };
 
-        let selectedOption = new LX.Button( null, value, ( value: any, event: any ) => {
+        let selectedOption = new Button( null, value, ( value: any, event: any ) => {
             if( list.unfocus_event )
             {
                 delete list.unfocus_event;
@@ -197,7 +201,7 @@ export class Select extends BaseComponent
 
         container.appendChild( selectedOption.root );
 
-        selectedOption.refresh = ( v: string ) => {
+        selectedOption.refresh = ( v?: string ) => {
             const buttonSpan = selectedOption.root.querySelector("span");
             if( buttonSpan.innerText == "" )
             {
@@ -250,7 +254,7 @@ export class Select extends BaseComponent
             filterOptions.className = "lexfilter";
             filterOptions.inputClass = "outline";
 
-            filter = new LX.TextInput(null, options.filterValue ?? "", ( v: string ) => {
+            filter = new TextInput(null, options.filterValue ?? "", ( v: string ) => {
                 const filteredOptions = this._filterOptions( values, v );
                 list.refresh( filteredOptions );
                 _placeOptions( listDialog, true );
@@ -378,7 +382,7 @@ export class Select extends BaseComponent
         if( suboptionsFunc )
         {
             suboptions.innerHTML = "";
-            const suboptionsPanel = new LX.Panel();
+            const suboptionsPanel = new Panel();
             suboptionsPanel.queue( suboptions );
             suboptionsFunc.call( this, suboptionsPanel );
             suboptionsPanel.clearQueue();

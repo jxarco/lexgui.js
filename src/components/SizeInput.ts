@@ -2,6 +2,9 @@
 
 import { LX } from './Namespace';
 import { BaseComponent, ComponentType } from './BaseComponent';
+import { Panel } from './Panel';
+import { Button } from './Button';
+
 /**
  * @class SizeInput
  * @description SizeInput Component
@@ -34,7 +37,7 @@ export class SizeInput extends BaseComponent
 
         for( let i = 0; i < value.length; ++i )
         {
-            const p = new LX.Panel();
+            const p = new Panel();
             this.root.dimensions[ i ] = p.addNumber( null, value[ i ], ( v: number ) => {
 
                 const value = this.value();
@@ -74,7 +77,7 @@ export class SizeInput extends BaseComponent
         // Lock aspect ratio
         if( this.root.aspectRatio )
         {
-            const lockerButton = new LX.Button( null, "", ( swapValue: boolean ) => {
+            const lockerButton = new Button( null, "", ( swapValue: boolean ) => {
                 this.root.locked = swapValue;
                 if( swapValue )
                 {

@@ -14,7 +14,7 @@ export class Button extends BaseComponent
     setState: ( v: any, b?: boolean ) => void;
     swap?: ( b?: boolean ) => void;
 
-    constructor( name: string | null, value: string, callback: any, options: any = {} )
+    constructor( name: string | null, value?: string, callback?: any, options: any = {} )
     {
         super( ComponentType.BUTTON, name, null, options );
 

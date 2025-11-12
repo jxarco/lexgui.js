@@ -2,6 +2,8 @@
 
 import { LX } from './Namespace';
 import { BaseComponent, ComponentType } from './BaseComponent';
+import { Panel } from './Panel';
+import { IEvent } from './Event';
 
 /**
  * @class Toggle
@@ -37,7 +39,7 @@ export class Toggle extends BaseComponent
 
             if( !skipCallback )
             {
-                this._trigger( new LX.IEvent( name, newValue, event ), callback );
+                this._trigger( new IEvent( name, newValue, event ), callback );
             }
         };
 
@@ -73,7 +75,7 @@ export class Toggle extends BaseComponent
             suboptions.className = "lextogglesubmenu";
             suboptions.toggleAttribute( 'hidden', !toggle.checked );
 
-            const suboptionsPanel = new LX.Panel();
+            const suboptionsPanel = new Panel();
             suboptionsPanel.queue( suboptions );
             options.suboptions.call(this, suboptionsPanel);
             suboptionsPanel.clearQueue();

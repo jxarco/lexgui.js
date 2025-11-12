@@ -2,6 +2,7 @@
 
 import { LX } from './Namespace';
 import { BaseComponent, ComponentType } from './BaseComponent';
+import { IEvent } from './Event';
 
 /**
  * @class ComboButtons
@@ -147,7 +148,7 @@ export class ComboButtons extends BaseComponent
             {
                 const enabled = event;
                 const fn = values.filter( v => v.value == newValue )[ 0 ]?.callback;
-                this._trigger( new LX.IEvent( name, shouldToggle ? [ newValue, enabled ] : newValue, null ), fn );
+                this._trigger( new IEvent( name, shouldToggle ? [ newValue, enabled ] : newValue, null ), fn );
             }
         };
 

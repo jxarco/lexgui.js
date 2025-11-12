@@ -132,7 +132,7 @@ export class CanvasMap2D
 
     /**
      * @method computeWeights
-     * @param {LX.vec2} p
+     * @param {vec2} p
      * @description Iterate for every cell to see if our point is nearer to the cell than the nearest point of the cell,
      * If that is the case we increase the weight of the nearest point. At the end we normalize the weights of the points by the number of near points
      * and that give us the weight for every point
@@ -247,7 +247,7 @@ export class CanvasMap2D
 
     /**
      * @method precomputeWeightsToImage
-     * @param {LX.vec2} p
+     * @param {vec2} p
      */
 
     precomputeWeightsToImage( p: vec2 )

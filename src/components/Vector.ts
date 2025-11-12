@@ -2,6 +2,8 @@
 
 import { LX } from './Namespace';
 import { BaseComponent, ComponentType } from './BaseComponent';
+import { Button } from './Button';
+import { IEvent } from './Event';
 
 /**
  * @class Vector
@@ -47,7 +49,7 @@ export class Vector extends BaseComponent
 
             if( !skipCallback )
             {
-                this._trigger( new LX.IEvent( name, value, event ), callback );
+                this._trigger( new IEvent( name, value, event ), callback );
             }
         };
 
@@ -248,7 +250,7 @@ export class Vector extends BaseComponent
             };
         }
 
-        const lockerButton = new LX.Button( null, "", ( swapValue: boolean ) => {
+        const lockerButton: any = new Button( null, "", ( swapValue: boolean ) => {
             lockerButton.locked = swapValue;
         }, { title: "Lock", icon: "LockOpen", swap: "Lock", buttonClass: "bg-none p-0" } );
         container.appendChild( lockerButton.root );

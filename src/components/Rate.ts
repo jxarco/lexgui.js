@@ -2,6 +2,7 @@
 
 import { LX } from './Namespace';
 import { BaseComponent, ComponentType } from './BaseComponent';
+import { IEvent } from './Event';
 
 /**
  * @class Rate
@@ -33,7 +34,7 @@ export class Rate extends BaseComponent
 
             if( !skipCallback )
             {
-                this._trigger( new LX.IEvent( name, newValue, event ), callback );
+                this._trigger( new IEvent( name, newValue, event ), callback );
             }
         };
 

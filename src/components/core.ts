@@ -2,7 +2,10 @@
 
 import { LX } from './Namespace';
 import { Area } from './Area';
+import { Panel } from './Panel';
 import { BaseComponent, ComponentType } from './BaseComponent';
+import { IEvent } from './Event';
+import { TextInput } from './TextInput';
 import { ContextMenu } from './ContextMenu';
 
 /**
@@ -354,12 +357,12 @@ LX._createCommandbar = function( root: any )
 
     const header = LX.makeContainer( ["100%", "auto"], "flex flex-row" );
 
-    const filter = new LX.TextInput( null, "", ( v: string ) => {
+    const filter = new TextInput( null, "", ( v: string ) => {
         commandbar._addElements( v.toLowerCase() );
     }, { width: "100%", icon: "Search", trigger: "input", placeholder: "Search..." } );
     header.appendChild( filter.root );
 
-    const tabArea = new LX.Area( {
+    const tabArea = new Area( {
         width: "100%",
         skipAppend: true,
         className: "cb-tabs"
@@ -571,7 +574,8 @@ LX.REGISTER_COMPONENT = function( customComponentName: string, options: any = {}
 {
     let customIdx = LX.guidGenerator();
 
-    LX.Panel.prototype[ 'add' + customComponentName ] = function( name: string, instance: any, callback: any )
+    const PanelPrototype: any = Panel.prototype;
+    PanelPrototype[ 'add' + customComponentName ] = function( name: string, instance: any, callback: any )
     {
         const userParams = Array.from( arguments ).slice( 3 );
 
@@ -591,7 +595,7 @@ LX.REGISTER_COMPONENT = function( customComponentName: string, options: any = {}
             element.querySelector( ".lexcustomitems" ).toggleAttribute( 'hidden', false );
             if( !skipCallback )
             {
-                component._trigger( new LX.IEvent( name, instance, event ), callback );
+                component._trigger( new IEvent( name, instance, event ), callback );
             }
         };
 
@@ -681,7 +685,7 @@ LX.REGISTER_COMPONENT = function( customComponentName: string, options: any = {}
                     {
                         instance[ key ] = value;
                     }
-                    component._trigger( new LX.IEvent( name, instance, event ), callback );
+                    component._trigger( new IEvent( name, instance, event ), callback );
                 };
 
                 for( let key in defaultInstance )

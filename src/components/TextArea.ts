@@ -2,6 +2,7 @@
 
 import { LX } from './Namespace';
 import { BaseComponent, ComponentType } from './BaseComponent';
+import { IEvent } from './Event';
 
 /**
  * @class TextArea
@@ -10,7 +11,7 @@ import { BaseComponent, ComponentType } from './BaseComponent';
 
 export class TextArea extends BaseComponent
 {
-    constructor( name: string, value: string, callback: any, options: any = {} )
+    constructor( name: string | null, value: string, callback: any, options: any = {} )
     {
         super( ComponentType.TEXTAREA, name, value, options );
 
@@ -24,7 +25,7 @@ export class TextArea extends BaseComponent
 
             if( !skipCallback )
             {
-                this._trigger( new LX.IEvent( name, newValue, event ), callback );
+                this._trigger( new IEvent( name, newValue, event ), callback );
             }
         };
 
