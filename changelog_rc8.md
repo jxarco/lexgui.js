@@ -6,6 +6,7 @@ API:
 - LX.emit -> LX.emitSignal
 - Element.insertChildAtIndex -> LX.insertChildAtIndex
 - Element.listen/ignore -> LX.listen/ignore
+- ItemArray -> ArrayInput
 
 Styling:
 - More TW classes

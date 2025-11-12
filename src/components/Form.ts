@@ -1,0 +1,119 @@
+// Form.ts @jxarco
+
+import { LX } from './Namespace';
+import { BaseComponent, ComponentType } from './BaseComponent';
+
+/**
+ * @class Form
+ * @description Form Component
+ */
+
+export class Form extends BaseComponent
+{
+    constructor( name: string, data: any, callback: any, options: any = {} )
+    {
+        if( data.constructor != Object )
+        {
+            console.error( "Form data must be an Object" );
+            return;
+        }
+
+        // Always hide name for this one
+        options.hideName = true;
+
+        super( ComponentType.FORM, name, null, options );
+
+        this.onGetValue = () => {
+            return container.formData;
+        };
+
+        this.onSetValue = ( newValue, skipCallback, event ) => {
+            container.formData = newValue;
+            const entries = container.querySelectorAll( ".lexcomponent" );
+            for( let i = 0; i < entries.length; ++i )
+            {
+                const entry = entries[ i ];
+                if( entry.jsInstance.type != ComponentType.TEXT )
+                {
+                    continue;
+                }
+                let entryName = entries[ i ].querySelector( ".lexcomponentname" ).innerText;
+                let entryInput = entries[ i ].querySelector( ".lextext input" );
+                entryInput.value = newValue[ entryName ] ?? "";
+                BaseComponent._dispatchEvent( entryInput, "focusout", skipCallback );
+            }
+        };
+
+        let container: any = document.createElement( 'div' );
+        container.className = "lexformdata";
+        container.style.width = "100%";
+        container.formData = {};
+        this.root.appendChild( container );
+
+        for( let entry in data )
+        {
+            let entryData = data[ entry ];
+
+            if( entryData.constructor != Object )
+            {
+                const oldValue = JSON.parse( JSON.stringify( entryData ) );
+                entryData = { value: oldValue };
+                data[ entry ] = entryData;
+            }
+
+            entryData.placeholder = entryData.placeholder ?? ( entryData.label ?? `Enter ${ entry }` );
+            entryData.width = "100%";
+
+            if( !( options.skipLabels ?? false ) )
+            {
+                const label = new LX.TextInput( null, entryData.label ?? entry, null, { disabled: true, inputClass: "formlabel nobg" } );
+                container.appendChild( label.root );
+            }
+
+            entryData.textComponent = new LX.TextInput( null, entryData.constructor == Object ? entryData.value : entryData, ( value: string ) => {
+                container.formData[ entry ] = value;
+            }, entryData );
+            container.appendChild( entryData.textComponent.root );
+
+            container.formData[ entry ] = entryData.constructor == Object ? entryData.value : entryData;
+        }
+
+        const buttonContainer = LX.makeContainer( ["100%", "auto"], "flex flex-row", "", container );
+
+        if( options.secondaryActionName || options.secondaryActionCallback )
+        {
+            const secondaryButton = new LX.Button( null, options.secondaryActionName ?? "Cancel", ( value: any, event: MouseEvent ) => {
+                if( callback )
+                {
+                    callback( container.formData, event );
+                }
+            }, { width: "100%", minWidth: "0", buttonClass: options.secondaryButtonClass ?? "primary" } );
+
+            buttonContainer.appendChild( secondaryButton.root );
+        }
+
+        const primaryButton = new LX.Button( null, options.primaryActionName ?? "Submit", ( value: any, event: MouseEvent ) => {
+
+            const errors = [];
+
+            for( let entry in data )
+            {
+                let entryData = data[ entry ];
+
+                if( !entryData.textComponent.valid() )
+                {
+                    errors.push( { type: "input_not_valid", entry } )
+                }
+            }
+
+            if( callback )
+            {
+                callback( container.formData, errors, event );
+            }
+        }, { width: "100%", minWidth: "0", buttonClass: options.primaryButtonClass ?? "contrast" } );
+
+        buttonContainer.appendChild( primaryButton.root );
+    }
+}
+
+LX.Form = Form;
