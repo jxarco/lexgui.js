@@ -13,7 +13,8 @@ export class IEvent {
     value: any;
     domEvent: any;
 
-    constructor( name: string, value: any, domEvent:any ) {
+    constructor( name: string | null, value: any, domEvent:any )
+    {
         this.name = name;
         this.value = value;
         this.domEvent = domEvent;
@@ -22,8 +23,8 @@ export class IEvent {
 
 LX.IEvent = IEvent;
 
-export class TreeEvent {
-
+export class TreeEvent
+{
     static NONE                 = 0;
     static NODE_SELECTED        = 1;
     static NODE_DELETED         = 2;
@@ -41,14 +42,16 @@ export class TreeEvent {
     multiple : boolean = false; // Multiple selection
     panel: Panel|null = null;
 
-    constructor( type: number, node: any, value: any, event: any ) {
+    constructor( type: number, node: any, value: any, event: any )
+    {
         this.type = type || TreeEvent.NONE;
         this.node = node;
         this.value = value;
         this.event = event;
     }
 
-    string() {
+    string()
+    {
         switch( this.type )
         {
             case TreeEvent.NONE: return "tree_event_none";
