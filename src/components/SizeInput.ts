@@ -2,7 +2,6 @@
 
 import { LX } from './Namespace';
 import { BaseComponent, ComponentType } from './BaseComponent';
-import { Panel } from './Panel';
 import { Button } from './Button';
 
 /**
@@ -37,7 +36,7 @@ export class SizeInput extends BaseComponent
 
         for( let i = 0; i < value.length; ++i )
         {
-            const p = new Panel();
+            const p = new LX.Panel();
             this.root.dimensions[ i ] = p.addNumber( null, value[ i ], ( v: number ) => {
 
                 const value = this.value();

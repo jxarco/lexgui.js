@@ -4,7 +4,6 @@ import { LX } from './Namespace';
 import { BaseComponent, ComponentType } from './BaseComponent';
 import { Button } from './Button';
 import { TextInput } from './TextInput';
-import { Panel } from './Panel';
 import { IEvent } from './Event';
 
 /**
@@ -57,7 +56,7 @@ export class Select extends BaseComponent
             if( suboptionsFunc )
             {
                 suboptions.innerHTML = "";
-                const suboptionsPanel = new Panel();
+                const suboptionsPanel = new LX.Panel();
                 suboptionsPanel.queue( suboptions );
                 suboptionsFunc.call(this, suboptionsPanel);
                 suboptionsPanel.clearQueue();
@@ -382,7 +381,7 @@ export class Select extends BaseComponent
         if( suboptionsFunc )
         {
             suboptions.innerHTML = "";
-            const suboptionsPanel = new Panel();
+            const suboptionsPanel = new LX.Panel();
             suboptionsPanel.queue( suboptions );
             suboptionsFunc.call( this, suboptionsPanel );
             suboptionsPanel.clearQueue();

@@ -3,7 +3,6 @@
 import { LX } from './Namespace';
 import { BaseComponent, ComponentType } from './BaseComponent';
 import { IEvent } from './Event';
-import { Panel } from './Panel';
 
 /**
  * @class Checkbox
@@ -74,7 +73,7 @@ export class Checkbox extends BaseComponent
             suboptions.className = "lexcheckboxsubmenu";
             suboptions.toggleAttribute( "hidden", !checkbox.checked );
 
-            const suboptionsPanel = new Panel();
+            const suboptionsPanel = new LX.Panel();
             suboptionsPanel.queue( suboptions );
             options.suboptions.call(this, suboptionsPanel);
             suboptionsPanel.clearQueue();

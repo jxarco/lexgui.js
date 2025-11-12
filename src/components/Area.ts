@@ -3,7 +3,6 @@
 import { LX } from './Namespace';
 import { ContextMenu } from './ContextMenu';
 import { Menubar } from './Menubar';
-import { Sidebar } from './Sidebar';
 import { Panel } from './Panel';
 import { Tabs } from './Tabs';
 
@@ -974,7 +973,7 @@ export class Area {
 
     addSidebar( callback: any, options: any = {} ) {
 
-        let sidebar = new Sidebar( { callback, ...options } );
+        let sidebar = new LX.Sidebar( { callback, ...options } );
 
         if( callback )
         {

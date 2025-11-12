@@ -2,7 +2,6 @@
 
 import { LX } from './Namespace';
 import { BaseComponent, ComponentType } from './BaseComponent';
-import { Panel } from './Panel';
 import { Button } from './Button';
 import { TextInput } from './TextInput';
 import { Popover } from './Popover';
@@ -136,7 +135,7 @@ export class Table extends BaseComponent
                         {
                             console.assert( f.min != undefined && f.max != undefined, "Range filter needs min and max values!" );
                             const container = LX.makeContainer( ["240px", "auto"], "text-md" );
-                            const panel: any = new Panel();
+                            const panel: any = new LX.Panel();
                             LX.makeContainer( ["100%", "auto"], "px-3 p-2 pb-0 text-md font-medium", f.name, container );
 
                             f.start = f.start ?? f.min;
@@ -174,7 +173,7 @@ export class Table extends BaseComponent
                         else if( f.type == "date" )
                         {
                             const container = LX.makeContainer( ["auto", "auto"], "text-md" );
-                            const panel: any = new Panel();
+                            const panel: any = new LX.Panel();
                             LX.makeContainer( ["100%", "auto"], "px-3 p-2 pb-0 text-md font-medium", f.name, container );
 
                             panel.refresh = () => {
