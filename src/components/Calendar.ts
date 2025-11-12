@@ -1,17 +1,38 @@
-// Calendar.js @jxarco
-import { LX } from './core.js';
+// Calendar.ts @jxarco
 
-class Calendar {
+import { LX } from './Namespace';
+
+export class Calendar {
 
     /**
      * @constructor Calendar
      * @param {String} dateString D/M/Y
      * @param {Object} options
-     * onChange: Function to call on date changes
      */
 
-    constructor( dateString, options = {} ) {
+    root: HTMLElement;
 
+    day: number = -1;
+    month: number = -1;
+    year: number = -1;
+    monthName: string = "";
+    firstDay: number = -1;
+    daysInMonth: number = -1;
+    calendarDays: any[] = [];
+    currentDate: any;
+    range: string[];
+
+    untilToday: boolean;
+    fromToday: boolean;
+    skipPrevMonth: boolean;
+    skipNextMonth: boolean;
+    
+    onChange: any;
+    onPreviousMonth: any;
+    onNextMonth: any;
+
+    constructor( dateString: string, options: any = {} )
+    {
         this.root = LX.makeContainer( ["256px", "auto"], "p-1 text-md" );
 
         this.onChange = options.onChange;
@@ -38,7 +59,8 @@ class Calendar {
         }
     }
 
-    _getCurrentDate() {
+    _getCurrentDate()
+    {
         return {
             day: this.day,
             month: this.month,
@@ -47,8 +69,8 @@ class Calendar {
         }
     }
 
-    _previousMonth( skipCallback ) {
-
+    _previousMonth( skipCallback?: boolean )
+    {
         this.month = Math.max( 0, this.month - 1 );
 
         if( this.month == 0 )
@@ -65,8 +87,8 @@ class Calendar {
         }
     }
 
-    _nextMonth( skipCallback ) {
-
+    _nextMonth( skipCallback?: boolean )
+    {
         this.month = Math.min( this.month + 1, 12 );
 
         if( this.month == 12 )
@@ -83,8 +105,8 @@ class Calendar {
         }
     }
 
-    refresh() {
-
+    refresh()
+    {
         this.root.innerHTML = "";
 
         // Header
@@ -219,8 +241,8 @@ class Calendar {
         }
     }
 
-    fromDateString( dateString ) {
-
+    fromDateString( dateString: string )
+    {
         const tokens = dateString.split( '/' );
 
         this.day = parseInt( tokens[ 0 ] );
@@ -233,8 +255,8 @@ class Calendar {
         this.fromMonthYear( this.month, this.year );
     }
 
-    fromMonthYear( month, year ) {
-
+    fromMonthYear( month: number, year?: number )
+    {
         // Month is 0-based (0 = January, ... 11 = December)
         month--;
 
@@ -279,29 +301,32 @@ class Calendar {
         this.refresh();
     }
 
-    getMonthName( monthIndex, locale = "en-US" ) {
+    getMonthName( monthIndex: number, locale = "en-US" )
+    {
         const formatter = new Intl.DateTimeFormat( locale, { month: "long" } );
         return formatter.format( new Date( 2000, monthIndex, 1 ) );
     }
 
-    getFullDate( monthName, day, year ) {
+    getFullDate( monthName?: string, day?: number, year?: number )
+    {
         return `${ monthName ?? this.monthName } ${ day ?? this.day }${ this._getOrdinalSuffix( day ?? this.day ) }, ${ year ?? this.year }`;
     }
 
-    setRange( range ) {
+    setRange( range: string[] )
+    {
         console.assert( range.constructor === Array, "Date Range must be in Array format" );
         this.range = range;
         this.refresh();
     }
 
-    setMonth( month ) {
-
+    setMonth( month: number )
+    {
         this.month = month;
-
         this.fromMonthYear( this.month, this.year );
     }
 
-    _getOrdinalSuffix( day ) {
+    _getOrdinalSuffix( day: number )
+    {
         if ( day > 3 && day < 21 ) return "th";
         switch ( day % 10 )
         {
@@ -314,5 +339,3 @@ class Calendar {
 }
 
 LX.Calendar = Calendar;
-
-export { Calendar };

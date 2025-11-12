@@ -1,7 +1,9 @@
-// CalendarRange.js @jxarco
-import { LX } from './core.js';
+// CalendarRange.ts @jxarco
 
-class CalendarRange {
+import { LX } from './Namespace';
+import { Calendar } from './Calendar';
+
+export class CalendarRange {
 
     /**
      * @constructor CalendarRange
@@ -9,8 +11,18 @@ class CalendarRange {
      * @param {Object} options
      */
 
-    constructor( range, options = {} ) {
+    root: HTMLElement;
 
+    fromCalendar: Calendar;
+    toCalendar: Calendar;
+
+    from: string;
+    to: string;
+
+    _selectingRange: boolean = false;
+
+    constructor( range: string[], options: any = {} )
+    {
         this.root = LX.makeContainer( ["auto", "auto"], "flex flex-row" );
 
         console.assert( range && range.constructor === Array, "Range cannot be empty and has to be an Array!" );
@@ -37,9 +49,7 @@ class CalendarRange {
         this.from = range[ 0 ];
         this.to = range[ 1 ];
 
-        this._selectingRange = false;
-
-        const onChange = ( date ) => {
+        const onChange = ( date: any ) => {
 
             const newDateString = `${ date.day }/${ date.month }/${ date.year }`;
 
@@ -91,8 +101,8 @@ class CalendarRange {
         this.root.appendChild( this.toCalendar.root );
     }
 
-    getFullDate() {
-
+    getFullDate()
+    {
         const d0 = LX.dateFromDateString( this.from );
         const d0Month = this.fromCalendar.getMonthName( d0.getMonth() );
 
@@ -104,5 +114,3 @@ class CalendarRange {
 }
 
 LX.CalendarRange = CalendarRange;
-
-export { CalendarRange };
