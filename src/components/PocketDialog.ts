@@ -1,17 +1,22 @@
-// PocketDialog.js @jxarco
-import { LX } from './core.js';
+// PocketDialog.ts @jxarco
+
+import { LX } from './../Namespace';
+import { Dialog } from './Dialog';
 
 /**
  * @class PocketDialog
  */
 
-class PocketDialog extends Dialog {
-
+export class PocketDialog extends Dialog
+{
     static TOP      = 0;
     static BOTTOM   = 1;
 
-    constructor( title, callback, options = {} ) {
+    dockPosition: number = PocketDialog.TOP;
+    minimized: boolean = false;
 
+    constructor( title: string, callback: any, options: any = {} )
+    {
         options.draggable = options.draggable ?? false;
         options.closable = options.closable ?? false;
 
@@ -21,10 +26,10 @@ class PocketDialog extends Dialog {
 
         let that = this;
         // Update margins on branch title closes/opens
-        LX.addSignal("@on_branch_closed", this.panel, closed => {
-            if( this.dock_pos == PocketDialog.BOTTOM )
+        LX.addSignal("@on_branch_closed", this.panel, ( closed: boolean ) => {
+            if( this.dockPosition == PocketDialog.BOTTOM )
             {
-                this.root.style.top = "calc(100% - " + (this.root.offsetHeight + dragMargin) + "px)";
+                this.root.style.top = `calc(100% - ${ this.root.offsetHeight + dragMargin }px)`;
             }
         });
 
@@ -43,14 +48,13 @@ class PocketDialog extends Dialog {
 
         this.panel.root.style.width = "100%";
         this.panel.root.style.height = "100%";
-        this.dock_pos = PocketDialog.TOP;
 
-        this.minimized = false;
-        this.title.tabIndex = -1;
-        this.title.addEventListener("click", e => {
-            if( this.title.eventCatched )
+        const innerTitle = ( this.title as any );
+        innerTitle.tabIndex = -1;
+        innerTitle.addEventListener( "click", ( e: MouseEvent ) => {
+            if( innerTitle.eventCatched )
             {
-                this.title.eventCatched = false;
+                innerTitle.eventCatched = false;
                 return;
             }
 
@@ -61,12 +65,14 @@ class PocketDialog extends Dialog {
                 else this.root.style.height = this.size[ 1 ];
             }
 
-            this.root.classList.toggle("minimized");
+            this.root.classList.toggle( "minimized" );
             this.minimized = !this.minimized;
 
-            if( this.dock_pos == PocketDialog.BOTTOM )
-                that.root.style.top = this.root.classList.contains("minimized") ?
-                "calc(100% - " + (that.title.offsetHeight + 6) + "px)" : "calc(100% - " + (that.root.offsetHeight + dragMargin) + "px)";
+            if( this.dockPosition == PocketDialog.BOTTOM )
+            {
+                that.root.style.top = this.root.classList.contains( "minimized" ) ?
+                    `calc(100% - ${ that.title.offsetHeight + 6 }px)` : `calc(100% - ${ that.root.offsetHeight + dragMargin }px)`;
+            }
         });
 
         if( !options.draggable )
@@ -81,19 +87,19 @@ class PocketDialog extends Dialog {
                     switch( t )
                     {
                     case 'b':
-                        this.root.style.top = "calc(100% - " + (this.root.offsetHeight + dragMargin) + "px)";
+                        this.root.style.top = `calc(100% - ${ this.root.offsetHeight + dragMargin }px)`;
                         break;
                     case 'l':
                         this.root.style.right = "unset";
-                        this.root.style.left = options.position ? options.position[ 1 ] : ( dragMargin + "px" );
+                        this.root.style.left = options.position ? options.position[ 1 ] : ( `${ dragMargin }px` );
                         break;
                     }
                 }
             }
 
-            this.root.classList.add('dockable');
+            this.root.classList.add( "dockable" );
 
-            this.title.addEventListener("keydown", function( e ) {
+            innerTitle.addEventListener( "keydown", function( e: KeyboardEvent ) {
                 if( !e.ctrlKey )
                 {
                     return;
@@ -107,17 +113,17 @@ class PocketDialog extends Dialog {
                 }
                 else if( e.key == 'ArrowRight' )
                 {
-                    that.root.style.left = "calc(100% - " + (that.root.offsetWidth + dragMargin) + "px)";
+                    that.root.style.left = `calc(100% - ${ that.root.offsetWidth + dragMargin }px)`;
                 }
                 else if( e.key == 'ArrowUp' )
                 {
                     that.root.style.top = "0px";
-                    that.dock_pos = PocketDialog.TOP;
+                    that.dockPosition = PocketDialog.TOP;
                 }
                 else if( e.key == 'ArrowDown' )
                 {
-                    that.root.style.top = "calc(100% - " + (that.root.offsetHeight + dragMargin) + "px)";
-                    that.dock_pos = PocketDialog.BOTTOM;
+                    that.root.style.top = `calc(100% - ${ that.root.offsetHeight + dragMargin }px)`;
+                    that.dockPosition = PocketDialog.BOTTOM;
                 }
             });
         }
@@ -125,5 +131,3 @@ class PocketDialog extends Dialog {
 }
 
 LX.PocketDialog = PocketDialog;
-
-export { PocketDialog };

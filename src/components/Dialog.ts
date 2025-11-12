@@ -1,16 +1,29 @@
-// Dialog.js @jxarco
-import { LX } from './core.js';
+// Dialog.ts @jxarco
+
+import { LX } from './../Namespace';
+import { Panel } from './Panel';
 
 /**
  * @class Dialog
  */
 
-class Dialog {
-
+export class Dialog
+{
     static _last_id = 0;
 
-    constructor( title, callback, options = {} ) {
+    id: string;
+    root: HTMLDialogElement;
+    panel: Panel;
+    title: HTMLDivElement;
+    size: any[] = [];
+    branchData: any;
 
+    close: () => void = () => {};
+
+    _oncreate: any;
+
+    constructor( title: string, callback: any, options: any = {} )
+    {
         if( !callback )
         {
             console.warn("Content is empty, add some components using 'callback' parameter!");
@@ -37,13 +50,13 @@ class Dialog {
 
         let that = this;
 
-        const titleDiv = document.createElement('div');
+        const titleDiv = document.createElement( 'div' );
 
         if( title )
         {
             titleDiv.className = "lexdialogtitle";
             titleDiv.innerHTML = title;
-            titleDiv.setAttribute( "draggable", false );
+            titleDiv.setAttribute( "draggable", "false" );
             root.appendChild( titleDiv );
         }
 
@@ -125,7 +138,7 @@ class Dialog {
         root.appendChild( panel.root );
 
         // Make branches have a distintive to manage some cases
-        panel.root.querySelectorAll(".lexbranch").forEach( b => b.classList.add("dialog") );
+        panel.root.querySelectorAll(".lexbranch").forEach( ( b: HTMLElement ) => b.classList.add("dialog") );
 
         this.panel = panel;
         this.root = root;
@@ -162,32 +175,32 @@ class Dialog {
         panel.root.style.height = title ? "calc( 100% - " + ( titleDiv.offsetHeight + 30 ) + "px )" : "calc( 100% - 51px )";
     }
 
-    destroy() {
-
+    destroy()
+    {
         this.root.remove();
     }
 
-    refresh() {
-
+    refresh()
+    {
         this.panel.root.innerHTML = "";
         this._oncreate.call(this, this.panel);
     }
 
-    setPosition( x, y ) {
-
-        this.root.style.left = x + "px";
-        this.root.style.top = y + "px";
+    setPosition( x: number, y: number )
+    {
+        this.root.style.left = `${ x }px`;
+        this.root.style.top = `${ y }px`;
     }
 
-    setTitle( title ) {
-
-        const titleDOM = this.root.querySelector( '.lexdialogtitle' );
+    setTitle( title: string )
+    {
+        const titleDOM: HTMLElement | null = this.root.querySelector( '.lexdialogtitle' );
         if( !titleDOM )
+        {
             return;
+        }
         titleDOM.innerText = title;
     }
 }
 
 LX.Dialog = Dialog;
-
-export { Dialog };
