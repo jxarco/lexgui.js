@@ -1,6 +1,6 @@
 // Vec2.ts @jxarco
 
-import { LX } from './Namespace';
+import { LX } from './../Namespace';
 
 export class vec2 {
 

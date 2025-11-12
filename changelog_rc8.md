@@ -9,6 +9,7 @@ API:
 - ItemArray -> ArrayInput
 - LX.ADD_CUSTOM_COMPONENT -> LX.REGISTER_COMPONENT
 - Removed support for Blank panel component
+- LX.main_area -> LX.mainArea
 
 Styling:
 - More TW classes

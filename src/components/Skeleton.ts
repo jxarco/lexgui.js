@@ -1,6 +1,6 @@
 // Skeleton.ts @jxarco
 
-import { LX } from './Namespace';
+import { LX } from './../Namespace';
 
 export class Skeleton {
 

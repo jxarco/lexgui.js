@@ -1,6 +1,6 @@
 // Area.ts @jxarco
 
-import { LX } from './Namespace';
+import { LX } from './../Namespace';
 import { ContextMenu } from './ContextMenu';
 import { Menubar } from './Menubar';
 import { Panel } from './Panel';

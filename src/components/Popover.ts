@@ -1,5 +1,5 @@
 // Popover.js @jxarco
-import { LX } from './Namespace';
+import { LX } from './../Namespace';
 
 /**
  * @class Popover

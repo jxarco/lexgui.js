@@ -1,6 +1,6 @@
 // FileInput.ts @jxarco
 
-import { LX } from './Namespace';
+import { LX } from './../Namespace';
 import { BaseComponent, ComponentType } from './BaseComponent';
 import { Panel } from './Panel';
 import { Button } from './Button';

@@ -1,6 +1,6 @@
 // Utils.ts @jxarco
 
-import { LX } from './Namespace';
+import { LX } from './../Namespace';
 import { Area } from "./Area";
 import { Panel } from "./Panel";
 import { vec2 } from './Vec2';

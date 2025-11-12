@@ -1,6 +1,6 @@
 // BaseComponent.ts @jxarco
 
-import { LX } from './Namespace';
+import { LX } from './../Namespace';
 import { ContextMenu } from './ContextMenu';
 
 export enum ComponentType

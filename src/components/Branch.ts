@@ -1,6 +1,6 @@
 // Branch.ts @jxarco
 
-import { LX } from './Namespace';
+import { LX } from './../Namespace';
 import { Panel } from './Panel';
 import { ContextMenu } from './ContextMenu';
 

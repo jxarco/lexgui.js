@@ -1,6 +1,6 @@
 // Footer.ts @jxarco
 
-import { LX } from './Namespace';
+import { LX } from './../Namespace';
 
 /**
  * @class Footer

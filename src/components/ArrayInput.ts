@@ -1,6 +1,6 @@
 // ArrayInput.ts @jxarco
 
-import { LX } from './Namespace';
+import { LX } from './../Namespace';
 import { BaseComponent, ComponentType } from './BaseComponent';
 import { IEvent } from './Event';
 import { TextInput } from './TextInput';

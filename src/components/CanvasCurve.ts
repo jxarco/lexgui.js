@@ -1,6 +1,6 @@
 // CanvasCurve.ts @jxarco
 
-import { LX } from './Namespace';
+import { LX } from './../Namespace';
 
 /**
  * @class CanvasCurve

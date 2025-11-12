@@ -1,6 +1,6 @@
 // Event.ts @jxarco
 
-import { LX } from './Namespace';
+import { LX } from './../Namespace';
 import { Panel } from './Panel';
 
 /*

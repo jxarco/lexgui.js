@@ -1,6 +1,6 @@
 // CanvasMap2D.js @jxarco
 
-import { LX } from './Namespace';
+import { LX } from './../Namespace';
 import { vec2 } from './Vec2';
 
 // Based on LGraphMap2D from @tamats (jagenjo)

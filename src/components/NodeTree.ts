@@ -1,6 +1,6 @@
 // NodeTree.ts @jxarco
 
-import { LX } from './Namespace';
+import { LX } from './../Namespace';
 import { BaseComponent, ComponentType } from './BaseComponent';
 import { ContextMenu } from './ContextMenu';
 import { Button } from './Button';

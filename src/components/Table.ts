@@ -1,6 +1,6 @@
 // Rate.ts @jxarco
 
-import { LX } from './Namespace';
+import { LX } from './../Namespace';
 import { BaseComponent, ComponentType } from './BaseComponent';
 import { Button } from './Button';
 import { TextInput } from './TextInput';

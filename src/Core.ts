@@ -1,12 +1,12 @@
 // Core.ts @jxarco
 
 import { LX } from './Namespace';
-import { Area } from './Area';
-import { Panel } from './Panel';
-import { BaseComponent, ComponentType } from './BaseComponent';
-import { IEvent } from './Event';
-import { TextInput } from './TextInput';
-import { ContextMenu } from './ContextMenu';
+import { Area } from './components/Area';
+import { Panel } from './components/Panel';
+import { BaseComponent, ComponentType } from './components/BaseComponent';
+import { IEvent } from './components/Event';
+import { TextInput } from './components/TextInput';
+import { ContextMenu } from './components/ContextMenu';
 
 /**
  * @method init
@@ -25,7 +25,7 @@ LX.init = async function( options: any = {} )
 {
     if( this.ready )
     {
-        return this.main_area;
+        return this.mainArea;
     }
 
     await LX.loadScriptSync( "https://unpkg.com/lucide@latest" );
@@ -135,7 +135,7 @@ LX.init = async function( options: any = {} )
 
     if( !options.skipRoot && !options.skipDefaultArea )
     {
-        this.main_area = new Area( { id: options.id ?? 'mainarea' } );
+        this.mainArea = new Area( { id: options.id ?? 'mainarea' } );
     }
 
     // Initial or automatic changes don't force color scheme
@@ -164,7 +164,7 @@ LX.init = async function( options: any = {} )
         this._mqlPrefersDarkScheme.addEventListener( "change", this._onChangeSystemTheme );
     }
 
-    return this.main_area;
+    return this.mainArea;
 },
 
 /**

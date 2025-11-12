@@ -1,6 +1,6 @@
 // Color.js @jxarco
 
-import { LX } from './Namespace';
+import { LX } from './../Namespace';
 
 export class Color {
 

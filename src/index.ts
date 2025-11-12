@@ -1,5 +1,5 @@
 // Utils
-export * from "./components/Namespace";
+export * from "./Namespace";
 export * from "./components/Utils";
 export * from "./components/Vec2";
 export * from "./components/Icons";
@@ -53,4 +53,4 @@ export * from "./components/Skeleton";
 export * from "./components/Footer";
 
 // Core
-export * from "./components/Core";
+export * from "./Core";
