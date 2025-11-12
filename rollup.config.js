@@ -1,7 +1,7 @@
 import typescript from 'rollup-plugin-typescript2';
 
 export default {
-    input: 'src/index.ts',
+    input: 'src/index.all.ts',
     output: {
         file: 'build/lexgui.module.js',
         format: 'esm',
@@ -10,7 +10,7 @@ export default {
     },
     plugins: [
         typescript({
-            tsconfig: './tsconfig.json',
+            tsconfig: './tsconfig.all.json',
             clean: true
         })
     ]

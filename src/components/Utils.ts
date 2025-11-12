@@ -2046,3 +2046,19 @@ function getParentArea( el: any )
 }
 
 LX.getParentArea = getParentArea;
+
+function hasClass( el: any, list: string | string[] )
+{
+    list = ([] as string[]).concat( list );
+    var r = list.filter( v => el.classList.contains( v ) );
+    return !!r.length;
+}
+
+LX.hasClass = hasClass;
+
+function addClass( el: any, className: string )
+{
+   if( className ) el.classList.add( className );
+}
+
+LX.addClass = addClass;

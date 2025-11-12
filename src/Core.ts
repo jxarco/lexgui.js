@@ -761,13 +761,3 @@ LX.REGISTER_COMPONENT = function( customComponentName: string, options: any = {}
 //     enumerable: true,
 //     configurable: true
 // });
-
-// Element.prototype.hasClass = function( list ) {
-//     list = [].concat( list );
-//     var r = list.filter( v => this.classList.contains( v ) );
-//     return !!r.length;
-// }
-
-// Element.prototype.addClass = function( className ) {
-//     if( className ) this.classList.add( className );
-// }
