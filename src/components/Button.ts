@@ -2,6 +2,7 @@
 
 import { LX } from './Namespace';
 import { BaseComponent, ComponentType } from './BaseComponent';
+import { IEvent } from './Event';
 
 /**
  * @class Button
@@ -76,7 +77,7 @@ export class Button extends BaseComponent
 
             if( !skipCallback )
             {
-                this._trigger( new LX.IEvent( name, swapInput ? swapInput.checked : ( options.selectable ? v : value ), null ), callback );
+                this._trigger( new IEvent( name, swapInput ? swapInput.checked : ( options.selectable ? v : value ), null ), callback );
             }
         };
 
@@ -201,7 +202,7 @@ export class Button extends BaseComponent
             {
                 new LX.PopConfirm( wValue, {
                     onConfirm: () => {
-                        this._trigger( new LX.IEvent( name, value, e ), callback );
+                        this._trigger( new IEvent( name, value, e ), callback );
                     },
                     side: options.confirmSide,
                     align: options.confirmAlign,
@@ -214,7 +215,7 @@ export class Button extends BaseComponent
             else
             {
                 const swapInput = wValue.querySelector( "input" );
-                this._trigger( new LX.IEvent( name, swapInput?.checked ?? ( options.selectable ? isSelected : value ), e ), callback );
+                this._trigger( new IEvent( name, swapInput?.checked ?? ( options.selectable ? isSelected : value ), e ), callback );
             }
         });
 

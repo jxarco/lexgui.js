@@ -1,15 +1,20 @@
-// CanvasDial.js @jxarco
-import { LX } from './core.js';
+// CanvasDial.ts @jxarco
+
+import { LX } from './Namespace';
 
 /**
  * @class CanvasDial
+ * @description A canvas-based dial, used internally by the Dial component.
  */
 
 class CanvasDial {
 
-    constructor( panel, value, options = {} ) {
+    element: any;
+    canvas: HTMLCanvasElement;
 
-        let element = document.createElement( "div" );
+    constructor( value: any[], options: any = {} )
+    {
+        let element: any = document.createElement( "div" );
         element.className = "dial " + ( options.className ? options.className : "" );
         element.style.width = element.style.height = options.size || "100%";
         element.style.minWidth = element.style.minHeight = "50px";
@@ -38,8 +43,8 @@ class CanvasDial {
 
         element.addEventListener( "mousedown", onmousedown );
 
-        element.getValueAt = function( x ) {
-
+        element.getValueAt = function( x: number )
+        {
             if( x < element.xrange[ 0 ] || x > element.xrange[ 1 ] )
             {
                 return element.defaulty;
@@ -65,8 +70,8 @@ class CanvasDial {
             return last[ 1 ] * ( 1 - f ) + v[ 1 ] * f;
         }
 
-        element.resample = function( samples ) {
-
+        element.resample = function( samples: number )
+        {
             var r = [];
             var dx = (element.xrange[ 1 ] - element.xrange[ 0 ]) / samples;
             for( var i = element.xrange[ 0 ]; i <= element.xrange[ 1 ]; i += dx)
@@ -76,45 +81,47 @@ class CanvasDial {
             return r;
         }
 
-        element.addValue = function(v) {
-
+        element.addValue = function( v: number[] )
+        {
             for( var i = 0; i < element.value; i++ )
             {
                 var value = element.value[ i ];
                 if(value[ 0 ] < v[ 0 ]) continue;
                 element.value.splice( i, 0, v );
-                redraw();
+                this.redraw();
                 return;
             }
 
             element.value.push( v );
-            redraw();
+            this.redraw();
         }
 
-        //value to canvas
-        function convert(v, r) {
-
-            Math.pow(v[ 0 ],2)
+        // Value to canvas
+        function convert( v : number[] )
+        {
             return [ canvas.width * ( v[ 0 ] - element.xrange[ 0 ])/ (element.xrange[ 1 ]),
                 canvas.height * (v[ 1 ] - element.yrange[ 0 ])/ (element.yrange[ 1 ])];
         }
 
-        //canvas to value
-        function unconvert(v) {
-            return [(v[ 0 ] * element.xrange[ 1 ] / canvas.width + element.xrange[ 0 ]),
-                    (v[ 1 ] * element.yrange[ 1 ] / canvas.height + element.yrange[ 0 ])];
+        // Canvas to value
+        function unconvert( v: number[] )
+        {
+            return [ ( v[ 0 ] * element.xrange[ 1 ] / canvas.width + element.xrange[ 0 ]),
+                    ( v[ 1 ] * element.yrange[ 1 ] / canvas.height + element.yrange[ 0 ]) ];
         }
 
         var selected = -1;
 
-        element.redraw = function( o = {} ) {
-
+        element.redraw = function( o: any = {} )
+        {
             if( o.value ) element.value = o.value;
             if( o.xrange ) element.xrange = o.xrange;
             if( o.yrange ) element.yrange = o.yrange;
             if( o.smooth ) element.smooth = o.smooth;
 
-            var ctx = canvas.getContext( "2d" );
+            var ctx: CanvasRenderingContext2D | null = canvas.getContext( "2d" );
+            if( !ctx ) return;
+
             ctx.setTransform( 1, 0, 0, 1, 0, 0 );
             ctx.translate( 0, canvas.height );
             ctx.scale( 1, -1 );
@@ -132,7 +139,7 @@ class CanvasDial {
 
             for( var i in element.value)
             {
-                var value = element.value[ i ];
+                var value: number[] = element.value[ i ];
                 pos = convert( value );
                 values.push( pos[ 0 ] );
                 values.push( pos[ 1 ] );
@@ -150,16 +157,21 @@ class CanvasDial {
             ctx.arc( pos[ 0 ], pos[ 1 ], 3, 0, Math.PI * 2);
             ctx.fill();
 
-            for( var i = 0; i < element.value.length; i += 1 )
+            for( var idx = 0; idx < element.value.length; idx += 1 )
             {
-                var value = element.value[ i ];
+                var value: number[] = element.value[ idx ];
                 pos = convert( value );
-                if( selected == i )
+                const selectedIndex = ( idx == selected );
+                if( selectedIndex )
+                {
                     ctx.fillStyle = "white";
+                }
                 else
+                {
                     ctx.fillStyle = element.pointscolor;
+                }
                 ctx.beginPath();
-                ctx.arc( pos[ 0 ], pos[ 1 ], selected == i ? 4 : 3, 0, Math.PI * 2);
+                ctx.arc( pos[ 0 ], pos[ 1 ], selectedIndex ? 4 : 3, 0, Math.PI * 2);
                 ctx.fill();
             }
 
@@ -167,9 +179,9 @@ class CanvasDial {
             {
                 var samples = element.resample(element.show_samples);
                 ctx.fillStyle = "#888";
-                for( var i = 0; i < samples.length; i += 1)
+                for( var idx = 0; idx < samples.length; idx += 1)
                 {
-                    var value = [ i * ((element.xrange[ 1 ] - element.xrange[ 0 ]) / element.show_samples) + element.xrange[ 0 ], samples[ i ] ];
+                    var value: number[] = [ idx * ((element.xrange[ 1 ] - element.xrange[ 0 ]) / element.show_samples) + element.xrange[ 0 ], samples[ idx ] ];
                     pos = convert(value);
                     ctx.beginPath();
                     ctx.arc( pos[ 0 ], pos[ 1 ], 2, 0, Math.PI * 2);
@@ -180,7 +192,8 @@ class CanvasDial {
 
         var last_mouse = [ 0, 0 ];
 
-        function onmousedown( e ) {
+        function onmousedown( e: MouseEvent )
+        {
             document.addEventListener( "mousemove", onmousemove );
             document.addEventListener( "mouseup", onmouseup );
 
@@ -204,8 +217,8 @@ class CanvasDial {
             e.stopPropagation();
         }
 
-        function onmousemove( e ) {
-
+        function onmousemove( e: MouseEvent )
+        {
             var rect = canvas.getBoundingClientRect();
             var mousex = e.clientX - rect.left;
             var mousey = e.clientY - rect.top;
@@ -237,7 +250,7 @@ class CanvasDial {
 
             var dx = element.draggable_x ? last_mouse[ 0 ] - mousex : 0;
             var dy = element.draggable_y ? last_mouse[ 1 ] - mousey : 0;
-            var delta = unconvert([ -dx, dy ]);
+            var delta = unconvert( [ -dx, dy ] );
 
             if( selected != -1 )
             {
@@ -269,7 +282,8 @@ class CanvasDial {
             e.stopPropagation();
         }
 
-        function onmouseup( e ) {
+        function onmouseup( e: MouseEvent )
+        {
             selected = -1;
             element.redraw();
             document.removeEventListener("mousemove", onmousemove);
@@ -279,15 +293,18 @@ class CanvasDial {
             e.stopPropagation();
         }
 
-        function onchange( e ) {
+        function onchange( e: MouseEvent )
+        {
             if( options.callback )
+            {
                 options.callback.call( element, element.value, e );
+            }
         }
 
-        function distance(a,b) { return Math.sqrt( Math.pow(b[ 0 ]-a[ 0 ],2) + Math.pow(b[ 1 ]-a[ 1 ],2) ); };
+        function distance( a: number[], b: number[] ) { return Math.sqrt( Math.pow( b[ 0 ] - a[ 0 ], 2 ) + Math.pow( b[ 1 ] - a[ 1 ], 2 ) ); };
 
-        function computeSelected( x, y ) {
-
+        function computeSelected( x: number, y: number )
+        {
             var minDistance = 100000;
             var maxDistance = 8; //pixels
             var selected = -1;
@@ -295,7 +312,7 @@ class CanvasDial {
             {
                 var value = element.value[ i ];
                 var pos = convert( value );
-                var dist = distance( [ x,y ], pos );
+                var dist = distance( [ x, y ], pos );
                 if( dist < minDistance && dist < maxDistance )
                 {
                     minDistance = dist;
@@ -305,13 +322,14 @@ class CanvasDial {
             return selected;
         }
 
-        function sortValues() {
+        function sortValues()
+        {
             var v = null;
             if( selected != -1 )
             {
                 v = element.value[ selected ];
             }
-            element.value.sort(function( a,b ) { return a[ 0 ] - b[ 0 ]; });
+            element.value.sort( function( a: number[], b: number[] ) { return a[ 0 ] - b[ 0 ]; });
             if( v )
             {
                 selected = element.value.indexOf( v );
@@ -322,7 +340,8 @@ class CanvasDial {
         return this;
     }
 
-    redraw( options = {} ) {
+    redraw( options: any = {} )
+    {
         this.element.redraw( options );
     }
 }

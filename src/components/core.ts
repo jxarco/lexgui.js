@@ -2,6 +2,8 @@
 
 import { LX } from './Namespace';
 import { Area } from './Area';
+import { BaseComponent, ComponentType } from './BaseComponent';
+import { ContextMenu } from './ContextMenu';
 
 /**
  * @method init
@@ -234,9 +236,7 @@ LX.emitSignal = function( name: string, value: any, options: Record<string, any>
 
     for( let obj of data )
     {
-        // TODO
-        // if( obj instanceof LX.BaseComponent )
-        if( 0 )
+        if( obj instanceof BaseComponent )
         {
             obj.set( value, options.skipCallback ?? true );
         }
@@ -565,6 +565,189 @@ LX.setCommandbarState = function( value: boolean, resetEntries: boolean = true )
     {
         cb.close();
     }
+}
+
+LX.REGISTER_COMPONENT = function( customComponentName: string, options: any = {} )
+{
+    let customIdx = LX.guidGenerator();
+
+    LX.Panel.prototype[ 'add' + customComponentName ] = function( name: string, instance: any, callback: any )
+    {
+        const userParams = Array.from( arguments ).slice( 3 );
+
+        let component = new BaseComponent( ComponentType.CUSTOM, name, null, options );
+        this._attachComponent( component );
+
+        component.customName = customComponentName;
+        component.customIdx = customIdx;
+
+        component.onGetValue = () => {
+            return instance;
+        };
+
+        component.onSetValue = ( newValue, skipCallback, event ) => {
+            instance = newValue;
+            _refreshComponent();
+            element.querySelector( ".lexcustomitems" ).toggleAttribute( 'hidden', false );
+            if( !skipCallback )
+            {
+                component._trigger( new LX.IEvent( name, instance, event ), callback );
+            }
+        };
+
+        component.onResize = () => {
+            const realNameWidth = ( component.root.domName?.style.width ?? "0px" );
+            container.style.width = `calc( 100% - ${ realNameWidth })`;
+        };
+
+        const element = component.root;
+
+        let container: any, customComponentsDom: any;
+        let defaultInstance = options.default ?? {};
+
+        // Add instance button
+
+        const _refreshComponent = () => {
+
+            if( container ) container.remove();
+            if( customComponentsDom ) customComponentsDom.remove();
+
+            container = document.createElement('div');
+            container.className = "lexcustomcontainer w-full";
+            element.appendChild( container );
+            element.dataset["opened"] = false;
+
+            const customIcon = LX.makeIcon( options.icon ?? "Box" );
+            const menuIcon = LX.makeIcon( "Menu" );
+
+            let buttonName = customComponentName + (!instance ? " [empty]" : "");
+            let buttonEl = this.addButton(null, buttonName, ( value: any, event: MouseEvent ) => {
+                if( instance )
+                {
+                    element.querySelector(".lexcustomitems").toggleAttribute('hidden');
+                    element.dataset["opened"] = !element.querySelector(".lexcustomitems").hasAttribute("hidden");
+                }
+                else
+                {
+                    LX.addContextMenu(null, event, ( c: ContextMenu ) => {
+                        c.add("New " + customComponentName, () => {
+                            instance = {};
+                            _refreshComponent();
+                            element.querySelector(".lexcustomitems").toggleAttribute('hidden', false);
+                            element.dataset["opened"] = !element.querySelector(".lexcustomitems").hasAttribute("hidden");
+                        });
+                    });
+                }
+
+            }, { buttonClass: 'custom' });
+
+            const buttonSpan = buttonEl.root.querySelector( "span" );
+            buttonSpan.prepend( customIcon );
+            buttonSpan.appendChild( menuIcon );
+            container.appendChild( buttonEl.root );
+
+            if( instance )
+            {
+                menuIcon.addEventListener( "click", ( e: MouseEvent ) => {
+                    e.stopImmediatePropagation();
+                    e.stopPropagation();
+                    LX.addContextMenu(null, e, ( c: ContextMenu ) => {
+                        c.add("Clear", () => {
+                            instance = null;
+                            _refreshComponent();
+                        });
+                    });
+                });
+            }
+
+            // Show elements
+
+            customComponentsDom = document.createElement('div');
+            customComponentsDom.className = "lexcustomitems";
+            customComponentsDom.toggleAttribute('hidden', true);
+            element.appendChild( customComponentsDom );
+
+            if( instance )
+            {
+                this.queue( customComponentsDom );
+
+                const on_instance_changed = ( key: string, value: any, event: any ) => {
+                    const setter = options[ `_set_${ key }` ];
+                    if( setter )
+                    {
+                        setter.call( instance, value );
+                    }
+                    else
+                    {
+                        instance[ key ] = value;
+                    }
+                    component._trigger( new LX.IEvent( name, instance, event ), callback );
+                };
+
+                for( let key in defaultInstance )
+                {
+                    let value = null;
+
+                    const getter = options[ `_get_${ key }` ];
+                    if( getter )
+                    {
+                        value = instance[ key ] ? getter.call( instance ) : getter.call( defaultInstance );
+                    }
+                    else
+                    {
+                        value = instance[ key ] ?? defaultInstance[ key ];
+                    }
+
+                    if( !value )
+                    {
+                        continue;
+                    }
+
+                    switch( value.constructor )
+                    {
+                        case String:
+                            if( value[ 0 ] === '#' )
+                            {
+                                this.addColor( key, value, on_instance_changed.bind( this, key ) );
+                            }
+                            else
+                            {
+                                this.addText( key, value, on_instance_changed.bind( this, key ) );
+                            }
+                            break;
+                        case Number:
+                            this.addNumber( key, value, on_instance_changed.bind( this, key ) );
+                            break;
+                        case Boolean:
+                            this.addCheckbox( key, value, on_instance_changed.bind( this, key ) );
+                            break;
+                        case Array:
+                            if( value.length > 4 )
+                            {
+                                this.addArray( key, value, on_instance_changed.bind( this, key ) );
+                            }
+                            else
+                            {
+                                this._addVector( value.length, key, value, on_instance_changed.bind( this, key ) );
+                            }
+                            break;
+                        default:
+                            console.warn( `Unsupported property type: ${ value.constructor.name }` )
+                            break;
+                    }
+                }
+
+                if( options.onCreate )
+                {
+                    options.onCreate.call( this, this, ...userParams );
+                }
+
+                this.clearQueue();
+            }
+        };
+
+        _refreshComponent();
+    };
 }
 
 // Js native overrides

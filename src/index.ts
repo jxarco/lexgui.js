@@ -34,12 +34,15 @@ export * from "./components/Table";
 export * from "./components/Form";
 export * from "./components/Layers";
 export * from "./components/DatePicker";
+export * from "./components/TabSections";
 export * from "./components/Rate";
 export * from "./components/Tags";
 export * from "./components/Progress";
 export * from "./components/Counter";
 export * from "./components/Map2D";
+export * from "./components/Pad";
 export * from "./components/Curve";
+export * from "./components/Dial";
 
 // Composite Components
 export * from "./components/ContextMenu";

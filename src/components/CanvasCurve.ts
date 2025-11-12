@@ -14,7 +14,6 @@ export class CanvasCurve {
 
     constructor( value: any[], options: any = {} )
     {
-
         let element: any = document.createElement( "div" );
         element.className = "curve " + ( options.className ? options.className : "" );
         element.style.minHeight = "50px";

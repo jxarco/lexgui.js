@@ -7,6 +7,8 @@ API:
 - Element.insertChildAtIndex -> LX.insertChildAtIndex
 - Element.listen/ignore -> LX.listen/ignore
 - ItemArray -> ArrayInput
+- LX.ADD_CUSTOM_COMPONENT -> LX.REGISTER_COMPONENT
+- Removed support for Blank panel component
 
 Styling:
 - More TW classes
