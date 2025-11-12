@@ -1915,9 +1915,9 @@ class Form extends BaseComponent
         if( options.secondaryActionName || options.secondaryActionCallback )
         {
             const secondaryButton = new LX.Button( null, options.secondaryActionName ?? "Cancel", ( value, event ) => {
-                if( callback )
+                if( options.secondaryActionCallback )
                 {
-                    callback( container.formData, event );
+                    options.secondaryActionCallback( container.formData, event );
                 }
             }, { width: "100%", minWidth: "0", buttonClass: options.secondaryButtonClass ?? "primary" } );
 

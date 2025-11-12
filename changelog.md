@@ -2,6 +2,8 @@
 
 ## dev
 
+Fixed Form `options.secondaryActionCallback`.
+
 ## 0.7.12 (master)
 
 Added support column actions in Table Component.
