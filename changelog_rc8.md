@@ -1,6 +1,9 @@
 Architecture:
 - Source in TypeScript, builds in TS and JS
 
+Fixes:
+- Area Tabs drag & drop
+
 API:
 - BaseComponent._TYPE_ to ComponentType._TYPE_
 - LX.emit -> LX.emitSignal

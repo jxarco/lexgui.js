@@ -45,6 +45,7 @@ export * from "./components/Curve";
 export * from "./components/Dial";
 
 // Composite Components
+export * from "./components/Sidebar";
 export * from "./components/ContextMenu";
 export * from "./components/DropdownMenu";
 export * from "./components/Tabs";

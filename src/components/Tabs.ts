@@ -76,15 +76,19 @@ export class Tabs {
 
                 // If needed, set last tab of source container active
                 const sourceAsFit = (/true/).test( e.dataTransfer.getData( "fit" ) );
+                let newSelected: any = null;
                 if( sourceContainer.childElementCount == ( sourceAsFit ? 2 : 1 ) )
                 {
-                    sourceContainer.lastChild.click(); // single tab or thumb first (fit mode)
+                    newSelected = sourceContainer.lastChild; // single tab or thumb first (fit mode)
                 }
                 else
                 {
                     const sourceSelected = sourceContainer.querySelector( ".selected" );
-                    ( sourceSelected ?? sourceContainer.childNodes[ sourceAsFit ? 1 : 0 ] ).click();
+                    newSelected = ( sourceSelected ?? sourceContainer.childNodes[ sourceAsFit ? 1 : 0 ] );
                 }
+
+                newSelected._forceSelect = true;
+                newSelected.click();
             }
 
             // Update childIndex for fit mode tabs in target container
@@ -96,6 +100,7 @@ export class Tabs {
 
             // Change tabs instance and select on drop
             tabDom.instance = that;
+            tabDom._forceSelect = true;
             tabDom.click();
 
             // Store info
@@ -131,7 +136,7 @@ export class Tabs {
             this.thumb = mEl;
             this.root.appendChild( mEl );
 
-            const resizeObserver = new ResizeObserver((entries) => {
+            const resizeObserver = new ResizeObserver( ( entries ) => {
                 const tabEl = this.thumb.item;
                 if( !tabEl ) return;
                 var transition = this.thumb.style.transition;
@@ -157,13 +162,13 @@ export class Tabs {
             }
 
             // Listen resize event on parent area
-            const resizeObserver = new ResizeObserver((entries) => {
+            const resizeObserver = new ResizeObserver( ( entries ) => {
                 for (const entry of entries)
                 {
                     const bb = entry.contentRect;
                     const sibling = area.parentArea?.sections[ 0 ].root;
                     const addOffset = true; // hardcoded...
-                    sibling.style.height = "calc(100% - " + ((addOffset ? 42 : 0) + bb.height) + "px )";
+                    sibling.style.height = "calc(100% - " + ( ( addOffset ? 42 : 0 ) + bb.height ) + "px )";
                 }
             });
 
@@ -236,7 +241,7 @@ export class Tabs {
             this.selected = name;
         }
 
-        tabEl.addEventListener("click", ( e: MouseEvent ) => {
+        tabEl.addEventListener( "click", ( e: MouseEvent ) => {
 
             e.preventDefault();
             e.stopPropagation();
@@ -248,10 +253,10 @@ export class Tabs {
                 // For folding tabs
                 const lastValue = tabEl.selected;
                 tabEl.parentElement.querySelectorAll( 'span' ).forEach( ( s: any ) => s.selected = false );
-                tabEl.selected = !lastValue;
+                tabEl.selected = !lastValue || ( tabEl._forceSelect ? true : false );
                 // Manage selected
                 tabEl.parentElement.querySelectorAll( 'span' ).forEach( ( s: any ) => s.classList.remove( 'selected' ));
-                tabEl.classList.toggle('selected', ( scope.folding && tabEl.selected ));
+                tabEl.classList.toggle('selected', ( tabEl.selected ));
                 // Manage visibility
                 const pseudoParent = scope.area.root.querySelector( ":scope > .pseudoparent-tabs" );
                 const contentRoot = pseudoParent ?? scope.area.root;
@@ -268,7 +273,7 @@ export class Tabs {
 
             if( options.onSelect )
             {
-                options.onSelect(e, tabEl.dataset.name);
+                options.onSelect( e, tabEl.dataset.name );
             }
 
             if( scope.thumb )
@@ -277,6 +282,8 @@ export class Tabs {
                 scope.thumb.style.width = ( tabEl.offsetWidth ) + "px";
                 scope.thumb.item = tabEl;
             }
+
+            delete tabEl._forceSelect;
         });
 
         tabEl.addEventListener("contextmenu", ( e: any ) => {
