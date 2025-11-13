@@ -1702,6 +1702,13 @@ function removeClass( el: any, className: string )
 
 LX.removeClass = removeClass;
 
+function toggleClass( el: any, className: string, force?: boolean )
+{
+   if( className ) el.classList.toggle( className, force );
+}
+
+LX.toggleClass = toggleClass;
+
 function lastChar( str: string )
 {
    return str[ str.length - 1 ];
