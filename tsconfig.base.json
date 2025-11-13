@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-        "target": "ES2019",
+        "target": "ES2022",
         "module": "ESNext",
         "outDir": "build/ts", // TS output folder
         "rootDir": "src",

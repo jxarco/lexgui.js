@@ -31,3 +31,5 @@ export class vec2 {
     fromArray ( array: number[] ) { this.x = array[ 0 ]; this.y = array[ 1 ]; }
     toArray () { return this.xy }
 };
+
+LX.vec2 = vec2;

@@ -1629,6 +1629,86 @@ function asTooltip( trigger: any, content: any, options: any = {} )
 
 LX.asTooltip = asTooltip;
 
+function insertChildAtIndex( parent: HTMLElement, child: HTMLElement, index: number = Infinity )
+{
+    if ( index >= parent.children.length ) parent.appendChild( child );
+    else parent.insertBefore( child, parent.children[index] );
+}
+
+LX.insertChildAtIndex = insertChildAtIndex;
+
+// Since we use "box-sizing: border-box" now,
+// it's all included in offsetWidth/offsetHeight
+function getComputedSize( el: HTMLElement )
+{
+    return {
+        width: el.offsetWidth,
+        height: el.offsetHeight
+    }
+}
+
+LX.getComputedSize = getComputedSize;
+
+function listen( el: any, eventName: string, callback: any, callbackName?: string )
+{
+    callbackName = callbackName ?? ( "_on" + eventName );
+    el[ callbackName ] = callback;
+    el.addEventListener( eventName, callback );
+}
+
+LX.listen = listen;
+
+function ignore( el: any, eventName: string, callbackName?: string )
+{
+    callbackName = callbackName ?? ( "_on" + eventName );
+    const callback = el[ callbackName ];
+    el.removeEventListener( eventName, callback );
+}
+
+LX.ignore = ignore;
+
+function getParentArea( el: any )
+{
+    let parent = el.parentElement;
+    while( parent )
+    {
+        if( parent.classList.contains( "lexarea" ) ) { return parent; }
+        parent = parent.parentElement;
+    }
+}
+
+LX.getParentArea = getParentArea;
+
+function hasClass( el: any, list: string | string[] )
+{
+    list = ([] as string[]).concat( list );
+    var r = list.filter( v => el.classList.contains( v ) );
+    return !!r.length;
+}
+
+LX.hasClass = hasClass;
+
+function addClass( el: any, className: string )
+{
+   if( className ) el.classList.add( className );
+}
+
+LX.addClass = addClass;
+
+function removeClass( el: any, className: string )
+{
+   if( className ) el.classList.remove( className );
+}
+
+LX.removeClass = removeClass;
+
+function lastChar( str: string )
+{
+   return str[ str.length - 1 ];
+}
+
+LX.lastChar = lastChar;
+
 /*
 *   Requests
 */
@@ -1989,69 +2069,3 @@ function drawSpline( ctx: CanvasRenderingContext2D, pts: any[], t: number )
 }
 
 LX.drawSpline = drawSpline;
-
-function insertChildAtIndex( parent: HTMLElement, child: HTMLElement, index: number = Infinity )
-{
-    if ( index >= parent.children.length ) parent.appendChild( child );
-    else parent.insertBefore( child, parent.children[index] );
-}
-
-LX.insertChildAtIndex = insertChildAtIndex;
-
-// Since we use "box-sizing: border-box" now,
-// it's all included in offsetWidth/offsetHeight
-function getComputedSize( el: HTMLElement )
-{
-    return {
-        width: el.offsetWidth,
-        height: el.offsetHeight
-    }
-}
-
-LX.getComputedSize = getComputedSize;
-
-function listen( el: any, eventName: string, callback: any, callbackName?: string )
-{
-    callbackName = callbackName ?? ( "_on" + eventName );
-    el[ callbackName ] = callback;
-    el.addEventListener( eventName, callback );
-}
-
-LX.listen = listen;
-
-function ignore( el: any, eventName: string, callbackName?: string )
-{
-    callbackName = callbackName ?? ( "_on" + eventName );
-    const callback = el[ callbackName ];
-    el.removeEventListener( eventName, callback );
-}
-
-LX.ignore = ignore;
-
-function getParentArea( el: any )
-{
-    let parent = el.parentElement;
-    while( parent )
-    {
-        if( parent.classList.contains( "lexarea" ) ) { return parent; }
-        parent = parent.parentElement;
-    }
-}
-
-LX.getParentArea = getParentArea;
-
-function hasClass( el: any, list: string | string[] )
-{
-    list = ([] as string[]).concat( list );
-    var r = list.filter( v => el.classList.contains( v ) );
-    return !!r.length;
-}
-
-LX.hasClass = hasClass;
-
-function addClass( el: any, className: string )
-{
-   if( className ) el.classList.add( className );
-}
-
-LX.addClass = addClass;

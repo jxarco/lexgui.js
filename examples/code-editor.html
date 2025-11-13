@@ -20,11 +20,11 @@
 <script type="module">
 
     import { LX } from 'lexgui';
-    import 'lexgui/extensions/codeeditor.js';
+    import { CodeEditor } from 'lexgui/extensions/codeeditor.js';
 
-    LX.CodeEditor.debugScopes = false;
-    LX.CodeEditor.debugSymbols = false;
-    LX.CodeEditor.debugProcessedLines = false;
+    CodeEditor.debugScopes = false;
+    CodeEditor.debugSymbols = false;
+    CodeEditor.debugProcessedLines = false;
 
     // init library and get main area
     let area = await LX.init();
@@ -51,7 +51,7 @@
         area = rightArea;
     }
 
-    let editor = new LX.CodeEditor(area, {
+    let editor = new CodeEditor(area, {
         // allowAddScripts: false,
         // autocomplete: false,
         // disableEdition: true,

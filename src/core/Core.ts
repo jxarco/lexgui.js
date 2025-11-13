@@ -753,11 +753,3 @@ LX.REGISTER_COMPONENT = function( customComponentName: string, options: any = {}
         _refreshComponent();
     };
 }
-
-// Js native overrides
-
-// Object.defineProperty(String.prototype, 'lastChar', {
-//     get: function() { return this[ this.length - 1 ]; },
-//     enumerable: true,
-//     configurable: true
-// });
