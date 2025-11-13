@@ -752,7 +752,7 @@ export class Panel {
 
     async addImage( name: string, url: string, options: any = {} ) {
 
-        console.assert( url, "Empty src/url for Image!" );
+        console.assert( url.length !== 0, "Empty src/url for Image!" );
 
         let container = document.createElement( 'div' );
         container.className = "leximage";

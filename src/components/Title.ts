@@ -12,7 +12,7 @@ export class Title extends BaseComponent
 {
     constructor( name: string, options: any = {} )
     {
-        console.assert( name, "Can't create Title Component without text!" );
+        console.assert( name.length !== 0, "Can't create Title Component without text!" );
 
         // Note: Titles are not registered in Panel.components by now
         super( ComponentType.TITLE, null, null, options );

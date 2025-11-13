@@ -1,7 +1,3 @@
-// Export css using postcss
-import './../css/lexgui.css';
-import './../css/lexguidocs.css';
-
 // Core Utilities
 export * from "./core/Namespace";
 export * from "./core/Utils";
@@ -17,6 +13,7 @@ export * from "./components/Panel";
 export * from "./components/Area";
 
 // Basic Components
+export * from "./components/BaseComponent";
 export * from "./components/Title";
 export * from "./components/Button";
 export * from "./components/ComboButtons";

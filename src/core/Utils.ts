@@ -26,13 +26,6 @@ else if( typeof Date != "undefined" && Date.now )
 {
     LX.getTime = Date.now.bind( Date );
 }
-else if ( typeof process != "undefined" )
-{
-    LX.getTime = function() {
-        const t = process.hrtime();
-        return t[ 0 ] * 0.001 + t[ 1 ] * 1e-6;
-    };
-}
 else
 {
     LX.getTime = function() {

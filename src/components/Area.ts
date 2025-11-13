@@ -1021,7 +1021,7 @@ export class Area {
             return this.sections[ 1 ].addOverlayButtons(  buttons, options );
         }
 
-        console.assert( buttons.constructor == Array && buttons.length );
+        console.assert( buttons.constructor == Array && buttons.length !== 0 );
 
         // Set area to relative to use local position
         this.root.style.position = "relative";

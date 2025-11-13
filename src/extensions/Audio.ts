@@ -1,9 +1,6 @@
 // Audio.ts @jxarco
 
-import { LX } from './../core/Namespace';
-import { BaseComponent, ComponentType } from '../components/BaseComponent';
-import { IEvent } from '../components/Event';
-import { Panel } from '../components/Panel';
+import { LX } from '../core/Namespace';
 
 if( !LX )
 {
@@ -11,6 +8,11 @@ if( !LX )
 }
 
 LX.extensions.push( 'Audio' );
+
+const Panel = LX.Panel;
+const BaseComponent = LX.BaseComponent;
+const ComponentType = LX.ComponentType;
+const IEvent = LX.IEvent;
 
 /**
  * @class Knob
@@ -33,12 +35,12 @@ export class Knob extends BaseComponent
             return innerKnobCircle.value;
         };
 
-        this.onSetValue = ( newValue, skipCallback ) => {
+        this.onSetValue = ( newValue: any, skipCallback?: boolean, event?: any ) => {
             innerSetValue( newValue );
             LX.BaseComponent._dispatchEvent( innerKnobCircle, "change", skipCallback );
         };
 
-        this.onResize = ( rect ) => {
+        this.onResize = () => {
             const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
             container.style.width = `calc( 100% - ${ realNameWidth })`;
         };
