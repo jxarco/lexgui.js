@@ -1,6 +1,7 @@
 import typescript from 'rollup-plugin-typescript2';
-import { terser } from 'rollup-plugin-terser';
-import css from 'rollup-plugin-import-css';
+// import { terser } from 'rollup-plugin-terser';
+import postcss from 'rollup-plugin-postcss';
+import cssnano from 'cssnano';
 
 export default [
     {
@@ -34,7 +35,9 @@ export default [
             // }
         ],
         plugins: [
-            css(),
+            postcss({
+                extract: 'lexgui.css'
+            }),
             typescript({
                 tsconfig: './tsconfig.core.json',
                 clean: true
@@ -72,7 +75,10 @@ export default [
             // }
         ],
         plugins: [
-            css(),
+            postcss({
+                extract: 'lexgui.min.css',
+                plugins: [cssnano()]
+            }),
             typescript({
                 tsconfig: './tsconfig.all.json',
                 clean: true

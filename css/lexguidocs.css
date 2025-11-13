@@ -1,5 +1,4 @@
-@font-face { font-family: "GeistSans"; src: url("https://raw.githubusercontent.com/jxarco/lexgui.js/master/data/GeistSans.ttf"); }
-@font-face { font-family: "CascadiaCode"; src: url("https://raw.githubusercontent.com/jxarco/lexgui.js/master/data/CascadiaCode.ttf"); font-weight: 400; }
+/* lexguidocs.css @jxarco */
 
 :root {
 	--border-style: 1px solid #444;

@@ -1,3 +1,7 @@
+// Export css using postcss
+import './../css/lexgui.css';
+import './../css/lexguidocs.css';
+
 // Core Utilities
 export * from "./core/Namespace";
 export * from "./core/Utils";

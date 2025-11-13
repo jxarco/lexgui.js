@@ -1,7 +1,9 @@
-/* clean-css ignore:start */
+/* lexgui.css @jxarco */
+
+/* cssnano start ignore */
 @font-face { font-family: "GeistSans"; src: url("https://raw.githubusercontent.com/jxarco/lexgui.js/master/data/GeistSans.ttf"); }
 @font-face { font-family: "CascadiaCode"; src: url("https://raw.githubusercontent.com/jxarco/lexgui.js/master/data/CascadiaCode.ttf"); font-weight: 400; }
-/* clean-css ignore:end */
+/* cssnano end ignore */
 
 :root {
     /* default color scheme */
