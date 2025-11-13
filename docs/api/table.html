@@ -1,21 +1,21 @@
 <script type="module">
     import { LX } from 'lexgui';
 
-    MAKE_HEADER( "Table.", "h1", "table" );
+    docMaker.header( "Table.", "h1", "table" );
 
-    MAKE_HEADER( "Constructor", "h2", "constructor" );
-    MAKE_CLASS_CONSTRUCTOR( "class LX.Table", [
+    docMaker.header( "Constructor", "h2", "constructor" );
+    docMaker.classCtor( "class LX.Table", [
         ["name", "String", "Component name"],
         ["data", "Object", "Table data"],
         ["options", "Object", "Basic options for a component"]
     ] );
 
-    MAKE_LINE_BREAK();
-    MAKE_PARAGRAPH( `The possible ${INLINE_CODE(`options`)} are the following:` );
-    MAKE_CODE_BULLET_LIST( [
+    docMaker.lineBreak();
+    docMaker.paragraph( `The possible ${docMaker.iCode(`options`)} are the following:` );
+    docMaker.codeBulletList( [
         ["head", "Array", "Table headers (each of the headers per column)"],
         ["body", "Array", "Table body (data per row for each column)"],
-        ["rowActions", "Array", `Allow to add actions per row ${INLINE_CODE("action: { icon, callback }")}`],
+        ["rowActions", "Array", `Allow to add actions per row ${docMaker.iCode("action: { icon, callback }")}`],
         ["onMenuAction", "Function", `Function callback to fill the "menu" context`],
         ["selectable", "Boolean", "Each row can be selected"],
         ["sortable", "Boolean", "Rows can be sorted by the user manually"],
@@ -26,19 +26,19 @@
         ["customFilters", "Array", "Add selectors to filter by specific option values"]
     ] );
 
-    MAKE_HEADER( "Properties", "h2", "properties" );
-    MAKE_CODE_BULLET_LIST( [
+    docMaker.header( "Properties", "h2", "properties" );
+    docMaker.codeBulletList( [
         [".centered", "Boolean|Array", "Center row data for all (true) or more columns"],
         [".data", "Object", "Table data including check and column visibility data"],
     ] );
     
-    MAKE_HEADER( "Methods", "h2", "methods" );
+    docMaker.header( "Methods", "h2", "methods" );
 
-    MAKE_CLASS_METHOD( ".getSelectedRows", `Returns selected table rows`, [] );
+    docMaker.classMethod( ".getSelectedRows", `Returns selected table rows`, [] );
 
-    MAKE_CLASS_METHOD( ".refresh", `Refreshes table DOM.`, [] );
+    docMaker.classMethod( ".refresh", `Refreshes table DOM.`, [] );
 
-    MAKE_LINE_BREAK();
-    MAKE_LINE_BREAK();
+    docMaker.lineBreak();
+    docMaker.lineBreak();
 
 </script>

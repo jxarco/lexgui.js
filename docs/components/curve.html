@@ -4,13 +4,13 @@
     const content = document.getElementById('content');
     const componentName = "Curve";
 
-    MAKE_HEADER(componentName + ".", "h1", componentName.toLowerCase());
-    MAKE_PARAGRAPH(`Represents a simple Curve Editor. It's a versatile component designed to simplify the manipulation and visualization
+    docMaker.header(componentName + ".", "h1", componentName.toLowerCase());
+    docMaker.paragraph(`Represents a simple Curve Editor. It's a versatile component designed to simplify the manipulation and visualization
 of curves or graphs, ideal for any scenario where the smooth interpolation of values over time
 or other parameters is essential.` );
-    MAKE_HEADER("Quick Usage", "h2");
-    MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addCurve(name, values, callback, options)")} to add a ${ componentName } Component to your panel or
-    create it anywhere using ${INLINE_CODE(`new LX.${ componentName.replace( /\s/g, '' ) }`)} to append its root to any container.` );
+    docMaker.header("Quick Usage", "h2");
+    docMaker.paragraph( `Call ${docMaker.iCode("Panel.addCurve(name, values, callback, options)")} to add a ${ componentName } Component to your panel or
+    create it anywhere using ${docMaker.iCode(`new LX.${ componentName.replace( /\s/g, '' ) }`)} to append its root to any container.` );
 
     {
         window.__addInteractiveCodeExample( content, componentName, panel => {
@@ -26,7 +26,7 @@ or other parameters is essential.` );
         });
     }
 
-    MAKE_HEADER("API Reference", "h2");
+    docMaker.header("API Reference", "h2");
 
     {
         const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
@@ -41,10 +41,10 @@ or other parameters is essential.` );
                 ["callback", "Function", "Function to be called when the curve changes", "—"],
                 ["options", "Object", "Basic options for a component", "—"]
             ].map( v => {
-                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+                return [ docMaker.iCode( v[ 0 ], "table" ), docMaker.iCode( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? docMaker.iCode( v[ 3 ], "table desc" ) : v[ 3 ] ];
             } )
         }, {});
-        panel.addBlank( null, "24px" );
+        docMaker.lineBreak( panel.root );
         panel.addTable( null, {
             head: [ "Option", "Type", "Description", "Default" ],
             body: [
@@ -56,7 +56,7 @@ or other parameters is essential.` );
                 ["smooth", "Number", "Curve smoothness", "0.3"],
                 ["moveOutAction", "<span class='cursor-pointer' title='LX.CURVE_MOVEOUT_CLAMP | LX.CURVE_MOVEOUT_DELETE'>Enum</span>", "Clamp or delete points moved out of the curve", "LX.CURVE_MOVEOUT_DELETE"]
             ].map( v => {
-                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+                return [ docMaker.iCode( v[ 0 ], "table" ), docMaker.iCode( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? docMaker.iCode( v[ 3 ], "table desc" ) : v[ 3 ] ];
             } )
         }, {});
     }

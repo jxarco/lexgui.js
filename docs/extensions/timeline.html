@@ -2,20 +2,20 @@
     import {LX} from "lexgui"
     import {KeyFramesTimeline, ClipsTimeline} from "lexgui/extensions/timeline.js"
 
-    MAKE_HEADER( "Timeline", "h1", "timeline" );
-    MAKE_PARAGRAPH( `Timeline is an abstract class and it has the following derived clases:` );
-    MAKE_CODE_BULLET_LIST( [
+    docMaker.header( "Timeline", "h1", "timeline" );
+    docMaker.paragraph( `Timeline is an abstract class and it has the following derived clases:` );
+    docMaker.codeBulletList( [
         `<a href="#keyframes-timeline">KeyframesTimeline</a>`,
         `<a href="#clips-timeline">ClipsTimeline</a>`,
     ] );
-    MAKE_HEADER( "Constructor", "h2", "" );
-    MAKE_CLASS_CONSTRUCTOR( "class LX.Timeline", [
+    docMaker.header( "Constructor", "h2", "" );
+    docMaker.classCtor( "class LX.Timeline", [
         ["id", "String", "Unique string that identifies this element"],
         ["options", "Object"]
     ] );
     
-    MAKE_PARAGRAPH(`Each timeline has to be appended to an existing panel, where the possible ${INLINE_CODE(`options`)} are the following:` );
-    MAKE_CODE_BULLET_LIST( [
+    docMaker.paragraph(`Each timeline has to be appended to an existing panel, where the possible ${docMaker.iCode(`options`)} are the following:` );
+    docMaker.codeBulletList( [
         ["title", "String", `Set a title for the timeline.`],
         ["loop", "Boolean", "Set looping mode animation by default."],
         ["skipVisibility", "Boolean", "When it's true, the un/active track button is disabled."],
@@ -29,227 +29,227 @@
         ["onShowConfiguration", "Function", `Callback to add components to the configuration menu.`]
     ] );
         
-    MAKE_HEADER( "Callbacks", "h2", "" );
-    MAKE_HEADER( "Constructor Callbacks", "h3", "" );
-    MAKE_PARAGRAPH( `These are used to build the interface of the timeline. Setting them outside the constructor will require a call to ${INLINE_CODE("updateHeader")} for them to take effect:`);
-    MAKE_CLASS_METHOD( "onCreateBeforeTopBar", `Callback to add components on the top bar before the 'current time' component.`, [
+    docMaker.header( "Callbacks", "h2", "" );
+    docMaker.header( "Constructor Callbacks", "h3", "" );
+    docMaker.paragraph( `These are used to build the interface of the timeline. Setting them outside the constructor will require a call to ${docMaker.iCode("updateHeader")} for them to take effect:`);
+    docMaker.classMethod( "onCreateBeforeTopBar", `Callback to add components on the top bar before the 'current time' component.`, [
         ["panel", "LX panel"]
     ] );
     
-    MAKE_CLASS_METHOD( "onCreateAfterTopBar", `Callback to add components on the top bar after the 'duration' component.`, [
+    docMaker.classMethod( "onCreateAfterTopBar", `Callback to add components on the top bar after the 'duration' component.`, [
         ["panel", "LX panel"]
     ] );
     
-    MAKE_CLASS_METHOD( "onCreateControlsButtons", `Callback to add components on the top bar after the default ones (play, stop, loop).`, [
+    docMaker.classMethod( "onCreateControlsButtons", `Callback to add components on the top bar after the default ones (play, stop, loop).`, [
         ["panel", "LX panel"]
     ] );
 
-    MAKE_CLASS_METHOD( "onCreateSettingsButtons", `Callback to add components on the top bar before the default ones (optimize, configuration).`, [
+    docMaker.classMethod( "onCreateSettingsButtons", `Callback to add components on the top bar before the default ones (optimize, configuration).`, [
         ["panel", "LX panel"]
     ] );
 
-    MAKE_CLASS_METHOD( "onShowOptimizeMenu", `Callback to add an optimize menu on the right side, before the configuration menu. If undefined, the menu will appear and use the default implementation. Set it to null, to deactivate it.`, [
+    docMaker.classMethod( "onShowOptimizeMenu", `Callback to add an optimize menu on the right side, before the configuration menu. If undefined, the menu will appear and use the default implementation. Set it to null, to deactivate it.`, [
         ["panel", "LX panel"]
     ] );
 
-    MAKE_CLASS_METHOD( "onShowConfiguration", `Callback to add components to the configuration menu.`, [
+    docMaker.classMethod( "onShowConfiguration", `Callback to add components to the configuration menu.`, [
         ["panel", "LX panel"]
     ] );
 
-    MAKE_HEADER( "Callbacks", "h3", "" );
-    MAKE_PARAGRAPH( `These are used to react to some event and can be set at any time. Constructor's ${INLINE_CODE("options")} will not recognize this functions. `);
+    docMaker.header( "Callbacks", "h3", "" );
+    docMaker.paragraph( `These are used to react to some event and can be set at any time. Constructor's ${docMaker.iCode("options")} will not recognize this functions. `);
     
-    MAKE_CLASS_METHOD( "onBeforeDrawContent", `Called before rendering the track elements.`, [
+    docMaker.classMethod( "onBeforeDrawContent", `Called before rendering the track elements.`, [
         ["ctx", "canvas context"]
     ] );
 
-    MAKE_CLASS_METHOD( "onStateStop", `After clicking the stop button. The ${INLINE_CODE("playing")} attribute is false.`, [] );
+    docMaker.classMethod( "onStateStop", `After clicking the stop button. The ${docMaker.iCode("playing")} attribute is false.`, [] );
 
-    MAKE_CLASS_METHOD( "onStateChange", `Triggered after clicking the play/pause button. Receives the current state of the ${INLINE_CODE("playing")} attribute`, [
+    docMaker.classMethod( "onStateChange", `Triggered after clicking the play/pause button. Receives the current state of the ${docMaker.iCode("playing")} attribute`, [
         ["currentState", "Boolean"]
     ] );
 
-    MAKE_CLASS_METHOD( "onSetTime", `Triggered after changing the current time using the ${INLINE_CODE("setTime")} function or the interface`, [
+    docMaker.classMethod( "onSetTime", `Triggered after changing the current time using the ${docMaker.iCode("setTime")} function or the interface`, [
         ["currentTime", "Number"]
     ] );
     
-    MAKE_CLASS_METHOD( "onSetDuration", `Triggered after calling ${INLINE_CODE("setDuration")}`, [
+    docMaker.classMethod( "onSetDuration", `Triggered after calling ${docMaker.iCode("setDuration")}`, [
         ["currentDuration", "Number"]
     ] );
 
-    MAKE_CLASS_METHOD( "onChangeLoopMode", `Triggered after calling ${INLINE_CODE("setLoopMode")} or clicking on the loop button`, [
+    docMaker.classMethod( "onChangeLoopMode", `Triggered after calling ${docMaker.iCode("setLoopMode")} or clicking on the loop button`, [
         ["currentLoopMode", "Boolean"]
     ] );
     
-    MAKE_CLASS_METHOD( "onMouse", `Triggered after processing the mouse event over the canvas. The box selection of elements does not trigger this event. Receives the mouse event and the current time of the mouse location`, [
+    docMaker.classMethod( "onMouse", `Triggered after processing the mouse event over the canvas. The box selection of elements does not trigger this event. Receives the mouse event and the current time of the mouse location`, [
         ["event", "MouseEvent"],
         ["time", "Number"],
     ] );
 
-    MAKE_CLASS_METHOD( "onDblClick", `Triggered after processing the mouse event over the canvas. The box selection of elements does not trigger this event. Receives the mouse event and the current time of the mouse location`, [
+    docMaker.classMethod( "onDblClick", `Triggered after processing the mouse event over the canvas. The box selection of elements does not trigger this event. Receives the mouse event and the current time of the mouse location`, [
         ["event", "MouseEvent"],
     ] );
 
-    MAKE_CLASS_METHOD( "onAddNewTrackButton", `Triggered after clicking on the "add track" button (if enabled). The default implementation adds a track to the clip and makes it visible. This callback also to overwrite this behaviour`, [ ] );
+    docMaker.classMethod( "onAddNewTrackButton", `Triggered after clicking on the "add track" button (if enabled). The default implementation adds a track to the clip and makes it visible. This callback also to overwrite this behaviour`, [ ] );
     
-    MAKE_CLASS_METHOD( "onAddNewTrack", `Triggered after creating a track through the ${INLINE_CODE("addNewTrack")} function. This callback can be used to change the default id of the track, modify the dimension of the values or to insert some initial values`, [
+    docMaker.classMethod( "onAddNewTrack", `Triggered after creating a track through the ${docMaker.iCode("addNewTrack")} function. This callback can be used to change the default id of the track, modify the dimension of the values or to insert some initial values`, [
         ["track", "Object"],
     ] );
 
-    MAKE_CLASS_METHOD( "onItemSelected", `Triggered after calling ${INLINE_CODE("selectItems")}.`, [
+    docMaker.classMethod( "onItemSelected", `Triggered after calling ${docMaker.iCode("selectItems")}.`, [
         ["currentSelectedItems", "Array of Numbers"],
         ["itemsAdded", "Array of Numbers"],
         ["itemsRemoved", "Array of Numbers"],
     ] );
 
-    MAKE_CLASS_METHOD( "onTrackTreeEvent", `Triggered after an event of the tree in the left panel, which displays the visible tracks`, [
+    docMaker.classMethod( "onTrackTreeEvent", `Triggered after an event of the tree in the left panel, which displays the visible tracks`, [
         ["event", "LX.TreeEvent"]
     ] );
 
-    MAKE_CLASS_METHOD( "onSetTrackSelection", `Triggered after calling ${INLINE_CODE("setTrackSelection")}.`, [
+    docMaker.classMethod( "onSetTrackSelection", `Triggered after calling ${docMaker.iCode("setTrackSelection")}.`, [
         ["track", "Object"],
         ["previousState", "Boolean"],
     ] );
 
-    MAKE_CLASS_METHOD( "onSetTrackState", `Triggered after calling ${INLINE_CODE("setTrackState")} or clicking on the eye icon (active) of the track.`, [
+    docMaker.classMethod( "onSetTrackState", `Triggered after calling ${docMaker.iCode("setTrackState")} or clicking on the eye icon (active) of the track.`, [
         ["track", "Object"],
         ["previousState", "Boolean"],
     ] );
 
-    MAKE_CLASS_METHOD( "onSetTrackLock", `Triggered after calling ${INLINE_CODE("setTrackLock")} or clicking on the lock icon of the track.`, [
+    docMaker.classMethod( "onSetTrackLock", `Triggered after calling ${docMaker.iCode("setTrackLock")} or clicking on the lock icon of the track.`, [
         ["track", "Object"],
         ["previousState", "Boolean"]
     ] );
           
-    MAKE_HEADER( "Properties", "h2", "" );
+    docMaker.header( "Properties", "h2", "" );
     const baseAnimationClipOptions = [
             [".id", "String", "Id of the animation"],
             [".data", "", "User defined data"],
             [".duration", "Number", "0 by default"],
             [".tracks", "Array", "Tracks of the animation clip"],
         ];
-    MAKE_CODE_BULLET_LIST( [
-        [".root", "LX.Area", `${INLINE_CODE("Read-Only")} Container where the whole timeline is created`],
-        [".uniqueID", "String", `${INLINE_CODE("Read-Only")}.`],  
-        [".timelineTitle", "String", `Use ${INLINE_CODE("updateHeader")} after modifying it to update the interface`],
-        [".animationClip", "Object", `${INLINE_CODE("Read-Only")} Contains all the information of an animation. Setting an animationClip must be done through ${INLINE_CODE("setAnimationClip")}. Check each class for full details`],
+    docMaker.codeBulletList( [
+        [".root", "LX.Area", `${docMaker.iCode("Read-Only")} Container where the whole timeline is created`],
+        [".uniqueID", "String", `${docMaker.iCode("Read-Only")}.`],  
+        [".timelineTitle", "String", `Use ${docMaker.iCode("updateHeader")} after modifying it to update the interface`],
+        [".animationClip", "Object", `${docMaker.iCode("Read-Only")} Contains all the information of an animation. Setting an animationClip must be done through ${docMaker.iCode("setAnimationClip")}. Check each class for full details`],
         baseAnimationClipOptions,
-        [".playing", "Boolean", `${INLINE_CODE("Read-Only")}. Use ${INLINE_CODE("setState")} to modify its value`],  
-        [".loop", "Boolean", `${INLINE_CODE("Read-Only")}. Whether the loop button is set or not.`],
-        [".duration", "Number", `${INLINE_CODE("Read-Only")}. Use ${INLINE_CODE("setDuration")} to modify its value`],  
-        [".currentTime", "Number", `${INLINE_CODE("Read-Only")}. Use ${INLINE_CODE("setTime")} to modify its value`],  
+        [".playing", "Boolean", `${docMaker.iCode("Read-Only")}. Use ${docMaker.iCode("setState")} to modify its value`],  
+        [".loop", "Boolean", `${docMaker.iCode("Read-Only")}. Whether the loop button is set or not.`],
+        [".duration", "Number", `${docMaker.iCode("Read-Only")}. Use ${docMaker.iCode("setDuration")} to modify its value`],  
+        [".currentTime", "Number", `${docMaker.iCode("Read-Only")}. Use ${docMaker.iCode("setTime")} to modify its value`],  
         [".historyMaxSteps", "Int", `Sets the maximum number of states for the history (undo & redo).`],  
-        [".trackHeight", "Number", `${INLINE_CODE("Read-Only")}. Size of the tracks drawn.`],
+        [".trackHeight", "Number", `${docMaker.iCode("Read-Only")}. Size of the tracks drawn.`],
         [".optimizeThreshold", "Number", `Used to optimize tracks, if it has an optimization function`],
         [".visualOriginTime", "Number", `Sets the horizontal scroll of the timeline, displaying the specified time (seconds) at pixel 0 (left). Allows negative values`] 
     ] );
 
-    MAKE_HEADER( "Methods", "h2", "" );
+    docMaker.header( "Methods", "h2", "" );
 
-    MAKE_CLASS_METHOD( ".clear", "Makes the instance ready to be safely deleted.", [], "" );
-    MAKE_CLASS_METHOD( ".updateHeader", "Updates part of the interface. If timelinTitle or constructor callbacks are modified, this function needs to be called.", [], "" );
-    MAKE_CLASS_METHOD( ".updateLeftPanel", "Update part of the interface. If track ids are changed, this function needs to be called.", [], "" );
-    MAKE_CLASS_METHOD( ".draw", "Renders the canvas.", [], "" );
+    docMaker.classMethod( ".clear", "Makes the instance ready to be safely deleted.", [], "" );
+    docMaker.classMethod( ".updateHeader", "Updates part of the interface. If timelinTitle or constructor callbacks are modified, this function needs to be called.", [], "" );
+    docMaker.classMethod( ".updateLeftPanel", "Update part of the interface. If track ids are changed, this function needs to be called.", [], "" );
+    docMaker.classMethod( ".draw", "Renders the canvas.", [], "" );
 
 
-    MAKE_CLASS_METHOD( ".instantiateAnimationClip", `Process and format the animation (and its tracks). If ${INLINE_CODE("clone")} is set to ${true}, the animationClip attributes are duplicated. Otherwise, only references are copied.`, [
+    docMaker.classMethod( ".instantiateAnimationClip", `Process and format the animation (and its tracks). If ${docMaker.iCode("clone")} is set to ${true}, the animationClip attributes are duplicated. Otherwise, only references are copied.`, [
         ["animationClip", "Object"],
         ["clone", "Boolean"]
     ], "AnimationClip" );
-    MAKE_CLASS_METHOD( ".setAnimationClip", `Process and format the animation (and its tracks) and set it as the animationClip. If null, a new empty animation is generated. If already a proper animationClip, set ${INLINE_CODE("needsToProcess")} attribute to ${INLINE_CODE("false")}`, [
+    docMaker.classMethod( ".setAnimationClip", `Process and format the animation (and its tracks) and set it as the animationClip. If null, a new empty animation is generated. If already a proper animationClip, set ${docMaker.iCode("needsToProcess")} attribute to ${docMaker.iCode("false")}`, [
         ["animationClip", "Object"],
         ["needsToProcess", "Boolean"]
     ], "AnimationClip" );
-    MAKE_CLASS_METHOD( ".addNewTrack", `Add a new track in the timeline using the options received. An empty track is generated if no options are sent. Options are the same attributes as the track. Check class specific tracks. ${INLINE_CODE("skipCallback")} skips ${INLINE_CODE("addNewTrack")}`, [
+    docMaker.classMethod( ".addNewTrack", `Add a new track in the timeline using the options received. An empty track is generated if no options are sent. Options are the same attributes as the track. Check class specific tracks. ${docMaker.iCode("skipCallback")} skips ${docMaker.iCode("addNewTrack")}`, [
         ["options", "Object"],
         ["skipCallback", "Boolean"]
     ], "Number" );
-    MAKE_CLASS_METHOD( ".getTracksInRange", "Get the tracks inside the specified vertical range (pixels).", [
+    docMaker.classMethod( ".getTracksInRange", "Get the tracks inside the specified vertical range (pixels).", [
         ["minY", "Number"],
         ["maxY", "Number"],
     ], "Array" );
-    MAKE_CLASS_METHOD( ".setDuration", "Set the duration of the animation.", [
+    docMaker.classMethod( ".setDuration", "Set the duration of the animation.", [
         ["duration", "Number"],
         ["skipCallback", "Boolean"]
     ] );
-    MAKE_CLASS_METHOD( ".setTime", "Set the current time of the animation.", [
+    docMaker.classMethod( ".setTime", "Set the current time of the animation.", [
         ["time", "Number"],
         ["skipCallback", "Boolean"]
     ] );
-    MAKE_CLASS_METHOD( ".setScale", "Set the scale (pixelsPerSecond) of the timeline. Usually called when the user zooms in/out.", [
+    docMaker.classMethod( ".setScale", "Set the scale (pixelsPerSecond) of the timeline. Usually called when the user zooms in/out.", [
         ["scale", "Number"]
     ] );
-    MAKE_CLASS_METHOD( ".setScroll", "Set the scroll of the timeline to the specified value. If normalized is false, scroll is treated as pixels. Otherwise a value in the range [0,1] where 1 is fully scrolled, is expected. Defaults to true", [
+    docMaker.classMethod( ".setScroll", "Set the scroll of the timeline to the specified value. If normalized is false, scroll is treated as pixels. Otherwise a value in the range [0,1] where 1 is fully scrolled, is expected. Defaults to true", [
         ["scroll", "Number"],
         ["normalized", "Boolean"]
     ] );
-    MAKE_CLASS_METHOD( ".setState", "Set whether the animation is playing (true) or paused (false).", [
+    docMaker.classMethod( ".setState", "Set whether the animation is playing (true) or paused (false).", [
         ["state", "Number"],
         ["skipCallback", "Boolean"]
     ] );
-    MAKE_CLASS_METHOD( ".setLoopMode", "Set the loop mode of the animation.", [
+    docMaker.classMethod( ".setLoopMode", "Set the loop mode of the animation.", [
         ["loopState", "Number"],
         ["skipCallback", "Boolean"]
     ] );
-    MAKE_CLASS_METHOD( ".setTrackHeight", "Set track height, in pixels.", [
+    docMaker.classMethod( ".setTrackHeight", "Set track height, in pixels.", [
         ["height", "Number"]
     ], "" );
 
-    MAKE_CLASS_METHOD( ".getVisibleItems", `Returns a reference to the track tree elements. Each element has a ${INLINE_CODE(".treeData.trackData")}.`, [ ], "HTMLCollection" );
+    docMaker.classMethod( ".getVisibleItems", `Returns a reference to the track tree elements. Each element has a ${docMaker.iCode(".treeData.trackData")}.`, [ ], "HTMLCollection" );
 
-    MAKE_CLASS_METHOD( ".setSelectedItems", `Change which tracks are visible.`, [
+    docMaker.classMethod( ".setSelectedItems", `Change which tracks are visible.`, [
         ["items", "Array of Numbers"]
     ] );
-    MAKE_CLASS_METHOD( ".changeSelectedItems", `Add or remove visible tracks.`, [
+    docMaker.classMethod( ".changeSelectedItems", `Add or remove visible tracks.`, [
         ["itemsToAdd", "Array of Numbers"],
         ["itemsToRemove", "Array of Numbers"]
     ] );
-    MAKE_CLASS_METHOD( ".setTrackSelection", `Set whether the track should be selected (highlighted) or not.\
-    ${INLINE_CODE("updateTrackTree")} refreshes the track of tree of the timeline. If multiple ${INLINE_CODE("setTrackSelection")} are to be called, set ${INLINE_CODE("updateTrackTree")} only on the last call.`, [
+    docMaker.classMethod( ".setTrackSelection", `Set whether the track should be selected (highlighted) or not.\
+    ${docMaker.iCode("updateTrackTree")} refreshes the track of tree of the timeline. If multiple ${docMaker.iCode("setTrackSelection")} are to be called, set ${docMaker.iCode("updateTrackTree")} only on the last call.`, [
         ["trackIdx", "Numbers"],
         ["isSelected", "Boolean"],
         ["skipCallback", "Boolean"],
         ["updateTrackTree", "Boolean"],
     ] );
     
-    MAKE_CLASS_METHOD( ".setTrackState", `Set whether the track should be active or not.\
-    ${INLINE_CODE("updateTrackTree")} changes the eye icon of the track, if it is visible in the timeline. If multiple ${INLINE_CODE("setTrackState")} are to be called, set ${INLINE_CODE("updateTrackTree")} only on the last call.`, [
+    docMaker.classMethod( ".setTrackState", `Set whether the track should be active or not.\
+    ${docMaker.iCode("updateTrackTree")} changes the eye icon of the track, if it is visible in the timeline. If multiple ${docMaker.iCode("setTrackState")} are to be called, set ${docMaker.iCode("updateTrackTree")} only on the last call.`, [
         ["trackIdx", "Numbers"],
         ["isEnabled", "Boolean"],
         ["skipCallback", "Boolean"],
         ["updateTrackTree", "Boolean"],
     ] );
     
-    MAKE_CLASS_METHOD( ".setTrackLock", `Set whether the track should be locked or not. Locked tracks cannot be edited (adding or deleting keyframes).\
-        ${INLINE_CODE("updateTrackTree")} changes the lock icon of the track, if it is visible in the timeline. If multiple ${INLINE_CODE("setTrackLock")} are to be called, set ${INLINE_CODE("updateTrackTree")} only on the last call.`, [
+    docMaker.classMethod( ".setTrackLock", `Set whether the track should be locked or not. Locked tracks cannot be edited (adding or deleting keyframes).\
+        ${docMaker.iCode("updateTrackTree")} changes the lock icon of the track, if it is visible in the timeline. If multiple ${docMaker.iCode("setTrackLock")} are to be called, set ${docMaker.iCode("updateTrackTree")} only on the last call.`, [
         ["trackIdx", "Numbers"],
         ["isLocked", "Boolean"],
         ["skipCallback", "Boolean"],
         ["updateTrackTree", "Boolean"],
     ] );
     
-    MAKE_CLASS_METHOD( ".saveState", `Saves the current state of the track into the history.`, [
+    docMaker.classMethod( ".saveState", `Saves the current state of the track into the history.`, [
         ["trackIdx", "Number"],
         ["combineWithPrevious", "Boolean"],
     ], "" );
 
-    MAKE_CLASS_METHOD( ".undo", `Pops the stack of the undo history and sets it as current. Stores the previous state into the redo history.`, [
+    docMaker.classMethod( ".undo", `Pops the stack of the undo history and sets it as current. Stores the previous state into the redo history.`, [
     ], "" );
-    MAKE_CLASS_METHOD( ".redo", `Pops the stack of the redo history and sets it as current. Stores the previous state into the undo history.`, [
+    docMaker.classMethod( ".redo", `Pops the stack of the redo history and sets it as current. Stores the previous state into the undo history.`, [
     ], "" );
 
-    MAKE_CLASS_METHOD( ".resize", `Resize timeline. If no parameters are sent, it uses its container to determine the size.`, [
+    docMaker.classMethod( ".resize", `Resize timeline. If no parameters are sent, it uses its container to determine the size.`, [
         ["size", "[width, height] (optional)"]
     ] );
 
-    MAKE_CLASS_METHOD( ".show", `Make html visible`, [] );
-    MAKE_CLASS_METHOD( ".hide", `Make html hidden`, [] );
+    docMaker.classMethod( ".show", `Make html visible`, [] );
+    docMaker.classMethod( ".hide", `Make html hidden`, [] );
 
-    MAKE_CLASS_METHOD( ".processKeys", `Processes keyboard ${INLINE_CODE("keydown")} events such as copy and paste functionalities. This function can be reimplemented if desired`, [
+    docMaker.classMethod( ".processKeys", `Processes keyboard ${docMaker.iCode("keydown")} events such as copy and paste functionalities. This function can be reimplemented if desired`, [
         ["keydownEvent", "KeyboardEvent"]
     ] );
 
-    MAKE_HEADER( "Controls", "h2", "" );
+    docMaker.header( "Controls", "h2", "" );
     const baseControls = [
         ["Mouse left click", ""],
         [
@@ -264,10 +264,10 @@
         ["Delete", "Delete selected elements"],
         ["Backspace", "Delete selected elements"],
     ];
-    MAKE_PARAGRAPH(`Default keyboard controls can be changed by reimplementing ${INLINE_CODE("processKeys")}`);
-    MAKE_CODE_BULLET_LIST( baseControls );
+    docMaker.paragraph(`Default keyboard controls can be changed by reimplementing ${docMaker.iCode("processKeys")}`);
+    docMaker.codeBulletList( baseControls );
 
-    MAKE_LINE_BREAK();
-    MAKE_LINE_BREAK();
+    docMaker.lineBreak();
+    docMaker.lineBreak();
 
 </script>

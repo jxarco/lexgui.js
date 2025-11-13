@@ -2,10 +2,10 @@
 
     import { LX } from 'lexgui';
 
-    MAKE_HEADER( "Components.", "h1", "components" );
+    docMaker.header( "Components.", "h1", "components" );
 
-    MAKE_PARAGRAPH( `Here you can find all the available components in the library.<br> Feel free to open issues or open PR to add more components to LexGUI!` );
-    MAKE_LINE_BREAK();
+    docMaker.paragraph( `Here you can find all the available components in the library.<br> Feel free to open issues or open PR to add more components to LexGUI!` );
+    docMaker.lineBreak();
     
     {
         const content = document.getElementById('content');
@@ -48,8 +48,8 @@
         content.appendChild( area.root );
     }
 
-    MAKE_LINE_BREAK();
-    MAKE_LINE_BREAK();
+    docMaker.lineBreak();
+    docMaker.lineBreak();
 
     </script>
 

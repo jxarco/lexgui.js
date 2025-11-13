@@ -1,9 +1,9 @@
 <script type="text/javascript">
 
-    MAKE_HEADER( "Asset View.", "h1", "asset-view" );
+    docMaker.header( "Asset View.", "h1", "asset-view" );
             
-    MAKE_PARAGRAPH( `Displays assets by type with optional folder hierarchy and tree navigation, in a file-explorer-style layout.` );
-    MAKE_LINE_BREAK();
+    docMaker.paragraph( `Displays assets by type with optional folder hierarchy and tree navigation, in a file-explorer-style layout.` );
+    docMaker.lineBreak();
 
     {
         const area = new LX.Area( { skipAppend: true, height: "700px" } );
@@ -43,13 +43,13 @@
         area.root.className += " border rounded-lg shadow-lg bg-secondary overflow-hidden";
     }
 
-    MAKE_LINE_BREAK();
+    docMaker.lineBreak();
 
-    MAKE_HEADER("Quick Usage", "h2");
+    docMaker.header("Quick Usage", "h2");
 
-    MAKE_PARAGRAPH( `Load your data using ${ INLINE_CODE( "LX.AssetView.load( data, onevent )" ) }:` );
+    docMaker.paragraph( `Load your data using ${ docMaker.iCode( "LX.AssetView.load( data, onevent )" ) }:` );
 
-    MAKE_CODE( `@const@ assetData = [
+    docMaker.code( `@const@ assetData = [
     { id: @"dog.png"@, type: @"image"@, path: @"https://pngfre.com/wp-content/uploads/1653714420512-1-904x1024.png"@ },
     { id: @"sigml_test.sigml"@, type: @"sigml"@, src: @"../data/sigml_test.sigml"@, lastModified: @1740588312813@ },
     { id: @"test.json"@, type: @"JSON"@, src: @"../data/test.json"@, lastModified: @1740581312813@ },
@@ -81,9 +81,9 @@ assetView.@[mtd]load@(assetData);
 ` );
 
 
-    MAKE_PARAGRAPH( `The parameter ${ INLINE_CODE( "onevent" ) } in a Function callback where you can process the following events:` );
+    docMaker.paragraph( `The parameter ${ docMaker.iCode( "onevent" ) } in a Function callback where you can process the following events:` );
 
-    MAKE_CODE_BULLET_LIST( [
+    docMaker.codeBulletList( [
         [ "AssetViewEvent.ASSET_SELECTED", "Asset has been selected" ],
         [ "AssetViewEvent.ASSET_DELETED", "Asset has been deleted" ],
         [ "AssetViewEvent.ASSET_RENAMED", "Asset has been renamed" ],
@@ -93,11 +93,11 @@ assetView.@[mtd]load@(assetData);
         [ "AssetViewEvent.ENTER_FOLDER", "Folder has been entered" ],
     ] );
 
-    MAKE_HEADER("API Reference", "h2");
-    MAKE_CLASS_CONSTRUCTOR("class LX.AssetView", [ [ "options", "Object = {}" ] ]);
-    MAKE_LINE_BREAK();
-    MAKE_PARAGRAPH(`Where ${ INLINE_CODE( "options" ) } can include the following:`);
-    MAKE_LINE_BREAK();
+    docMaker.header("API Reference", "h2");
+    docMaker.classCtor("class LX.AssetView", [ [ "options", "Object = {}" ] ]);
+    docMaker.lineBreak();
+    docMaker.paragraph(`Where ${ docMaker.iCode( "options" ) } can include the following:`);
+    docMaker.lineBreak();
 
     {
         const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
@@ -118,21 +118,21 @@ assetView.@[mtd]load@(assetData);
                 ["allowedTypes", "Array", "Asset allowed types (strings)"],
                 ["onRefreshContent", "Function", "Function to call when the content is refreshed"],
             ].map( v => {
-                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] ? v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] : "—" ];
+                return [ docMaker.iCode( v[ 0 ], "table" ), docMaker.iCode( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] ? v[ 3 ] != "—" ? docMaker.iCode( v[ 3 ], "table desc" ) : v[ 3 ] : "—" ];
             } )
         }, {});
     }
 
-    MAKE_HEADER( "Methods", "h3", "methods" );
+    docMaker.header( "Methods", "h3", "methods" );
 
-    MAKE_CLASS_METHOD( ".clear", `Clear all AssetView panels`, [] );
+    docMaker.classMethod( ".clear", `Clear all AssetView panels`, [] );
 
-    MAKE_CLASS_METHOD( ".load", `Loads and creates all the data elements.`, [
+    docMaker.classMethod( ".load", `Loads and creates all the data elements.`, [
         ["data", "Object|Array"],
         ["onevent", "Function"],
     ] );
 
-    MAKE_LINE_BREAK();
-    MAKE_LINE_BREAK();
+    docMaker.lineBreak();
+    docMaker.lineBreak();
 
 </script>

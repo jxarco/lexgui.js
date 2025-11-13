@@ -1,12 +1,12 @@
 <script type="text/javascript">
 
-    MAKE_HEADER( "Theme customization.", "h1", "theme-customization" );
+    docMaker.header( "Theme customization.", "h1", "theme-customization" );
             
-    MAKE_PARAGRAPH( `Even though LexGUI has a pretty locked appearance, you can still customize it. HTML elements and some components can be created using a specific class that will colorize, 
+    docMaker.paragraph( `Even though LexGUI has a pretty locked appearance, you can still customize it. HTML elements and some components can be created using a specific class that will colorize, 
     change style or resize it. Below is the guide for the possible options:` );
 
-    MAKE_HEADER( "Background Color <span class='desc'></span>", "h3" );
-    MAKE_PARAGRAPH( `
+    docMaker.header( "Background Color <span class='desc'></span>", "h3" );
+    docMaker.paragraph( `
         <div class="flex gap-2">
         <span class="p-1 px-2 bg-primary rounded-lg">primary</span>
         <span class="p-1 px-2 bg-secondary rounded-lg">secondary</span>
@@ -19,8 +19,8 @@
         </div>
     ` );
 
-    MAKE_HEADER( "Foreground Color <span class='desc'></span>", "h3" );
-    MAKE_PARAGRAPH( `
+    docMaker.header( "Foreground Color <span class='desc'></span>", "h3" );
+    docMaker.paragraph( `
         <div class="flex gap-2">
         <span class="p-1 px-2 fg-primary rounded-lg">primary</span>
         <span class="p-1 px-2 fg-secondary rounded-lg">secondary</span>
@@ -33,8 +33,8 @@
         </div>
     ` );
 
-    MAKE_HEADER( "Sizes <span class='desc'>(for supported components)</span>", "h3" );
-    MAKE_BULLET_LIST( [
+    docMaker.header( "Sizes <span class='desc'>(for supported components)</span>", "h3" );
+    docMaker.bulletList( [
         "xs",
         "sm",
         "md (default)",
@@ -42,8 +42,8 @@
         "xl"
     ] );
 
-    MAKE_HEADER( "Styles <span class='desc'>(for supported components)</span>", "h3" );
-    MAKE_PARAGRAPH( `
+    docMaker.header( "Styles <span class='desc'>(for supported components)</span>", "h3" );
+    docMaker.paragraph( `
         <div class="flex gap-2">
         <span class="p-1 px-2 bg-accent fg-white rounded-lg">solid</span>
         <span class="p-1 px-2 fg-accent rounded-lg border-colored">outline</span>
@@ -51,17 +51,17 @@
         </div>
     ` );
     
-    MAKE_LINE_BREAK();
-    MAKE_PARAGRAPH( `LexGUI uses a dark theme by default. You can change the theme by overriding your device or browser color scheme but the easiest way is to use ${INLINE_CODE("LX.setTheme")}
-     where you can use "light" or "dark". If any of your content depends on the selected theme (usually JavaScript code, not CSS), make sure you are listening to the ${INLINE_CODE("@on_new_color_scheme")} signal being emited when the theme changes.` );
-    MAKE_CODE( `LX.@[mtd]addSignal@( @"|@on_new_color_scheme"@, (el, value) => {
+    docMaker.lineBreak();
+    docMaker.paragraph( `LexGUI uses a dark theme by default. You can change the theme by overriding your device or browser color scheme but the easiest way is to use ${docMaker.iCode("LX.setTheme")}
+     where you can use "light" or "dark". If any of your content depends on the selected theme (usually JavaScript code, not CSS), make sure you are listening to the ${docMaker.iCode("@on_new_color_scheme")} signal being emited when the theme changes.` );
+    docMaker.code( `LX.@[mtd]addSignal@( @"|@on_new_color_scheme"@, (el, value) => {
     @[com]// Retrieve again the color using LX.getThemeColor, which checks the applied theme@
     @const@ bgColor = LX.@[mtd]getThemeColor@( @"global-color-primary"@ );
     @this@.redraw( bgColor );
 } );
 ` );
     
-    MAKE_LINE_BREAK();
-    MAKE_LINE_BREAK();
+    docMaker.lineBreak();
+    docMaker.lineBreak();
 
 </script>

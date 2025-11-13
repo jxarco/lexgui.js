@@ -2,9 +2,9 @@
 
     import { LX } from 'lexgui';
 
-    MAKE_HEADER( "Changelog.", "h1", "changelog" );
+    docMaker.header( "Changelog.", "h1", "changelog" );
 
-    MAKE_PARAGRAPH( `Latest updates and announcements.` );
+    docMaker.paragraph( `Latest updates and announcements.` );
     
     {
         const params = new URLSearchParams( document.location.search );
@@ -33,7 +33,7 @@
                     const headerString = line.substring( ht + 3 ).replaceAll( "#", "" );
                     const endIdx = headerString.indexOf( " " );
                     const id = endIdx > -1 ? headerString.substring( 0, endIdx ) : headerString;
-                    MAKE_HEADER( headerString, `h${ ht }`, id );
+                    docMaker.header( headerString, `h${ ht }`, id );
                 }
                 else
                 {
@@ -43,7 +43,7 @@
                     {
                         const nextIndex = line.substring( codeIndex + 1 ).indexOf( '`' );
                         const trim = line.substring( codeIndex, codeIndex + nextIndex + 2 );
-                        const trimReplaced = INLINE_CODE( trim ).replaceAll( '`', '' );
+                        const trimReplaced = docMaker.iCode( trim ).replaceAll( '`', '' );
                         line = line.replace( trim, trimReplaced );
                         codeIndex = line.indexOf( '`' );
                     }
@@ -53,7 +53,7 @@
                         // I was doing another list
                         if( currentList.length && currentList[ currentList.length - 1 ].constructor === Array )
                         {
-                            MAKE_BULLET_LIST( currentList );
+                            docMaker.bulletList( currentList );
                             currentList = [];
                         }
 
@@ -78,7 +78,7 @@
                         else
                         {
                             // close list
-                            MAKE_BULLET_LIST( currentList );
+                            docMaker.bulletList( currentList );
                             currentList = [];
                         }
                         continue;
@@ -86,7 +86,7 @@
 
                     if( line.length )
                     {
-                        MAKE_PARAGRAPH( line );
+                        docMaker.paragraph( line );
                     }
                 }
             }

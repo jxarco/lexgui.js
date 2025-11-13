@@ -2,21 +2,21 @@
 
     const content = document.getElementById( 'content' );
 
-    MAKE_HEADER( "Dropdown Menus.", "h1", "context-menu" );
+    docMaker.header( "Dropdown Menus.", "h1", "context-menu" );
             
-    MAKE_PARAGRAPH( `Context menus provide quick access to relevant actions and options based on the user's current context, enhancing the overall user experience. LexGUI offers two possible ways to create a custom Context Menu using Dropdowns.` );
-    MAKE_LINE_BREAK();
+    docMaker.paragraph( `Context menus provide quick access to relevant actions and options based on the user's current context, enhancing the overall user experience. LexGUI offers two possible ways to create a custom Context Menu using Dropdowns.` );
+    docMaker.lineBreak();
 
-    MAKE_HEADER("Quick Usage", "h2");
+    docMaker.header("Quick Usage", "h2");
 
-    MAKE_PARAGRAPH( `The first method is to use the ${ INLINE_CODE("LX.addContextMenu(title, event, callback, options)") } function, which allows you to create a reduced Context Menu, 
+    docMaker.paragraph( `The first method is to use the ${ docMaker.iCode("LX.addContextMenu(title, event, callback, options)") } function, which allows you to create a reduced Context Menu, 
     that can be triggered not only on right-click but in any custom event at any place where the mouse/trigger element is.` );
-    MAKE_LINE_BREAK();
+    docMaker.lineBreak();
 
     {
         const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
         const button = LX.makeContainer( ["auto", "auto"], "self-center bg-contrast fg-contrast p-2 rounded-lg cursor-pointer", "Click here", area );
-        button.listen( "click", ( event ) => {
+        LX.listen( button, "click", ( event ) => {
             event.preventDefault();
             LX.addContextMenu( "Nodes", event, ( m ) => {
                 m.add( "Select Children", () => console.log( "Select children" ) );
@@ -29,7 +29,7 @@
         content.appendChild( area.root );
     }
 
-    MAKE_CODE( `LX.@[mtd]addContextMenu@( @"Selected Nodes"@, event, m => {
+    docMaker.code( `LX.@[mtd]addContextMenu@( @"Selected Nodes"@, event, m => {
     @[com]// Event is the DOM event that should have position info@
     m.@[mtd]add@( @"Select Children"@, () => console.@[mtd]log@(@"Select children"@) );
     m.@[mtd]add@( @"Clone"@, { color: @"#0d5"@ } );
@@ -38,23 +38,23 @@
     m.@[mtd]add@( @"Delete"@ );
 });` );
 
-    MAKE_PARAGRAPH( `As you can observe, the usage format resembles that of other UI elements such as dialogs or menubars. You pass the menu as a parameter, 
+    docMaker.paragraph( `As you can observe, the usage format resembles that of other UI elements such as dialogs or menubars. You pass the menu as a parameter, 
     allowing the user to populate it with all the desired entries and subentries.` );
-    MAKE_PARAGRAPH( `The <code class='inline'>options (Object)</code> when creating a Context Menu are the following:` );
-    MAKE_CODE_BULLET_LIST( [
+    docMaker.paragraph( `The <code class='inline'>options (Object)</code> when creating a Context Menu are the following:` );
+    docMaker.codeBulletList( [
         ["callback", "Action to call when entry is clicked"],
         ["color", "Color of the left border of the entry (e.g. mark specific types of entries)"]
     ] );
 
-    MAKE_LINE_BREAK();
+    docMaker.lineBreak();
 
-    MAKE_PARAGRAPH( `The second method is to use the ${ INLINE_CODE("LX.addDropdownMenu(trigger, items, options)") } function, which allows you to create a bigger and more customizable Dropdown menu.
+    docMaker.paragraph( `The second method is to use the ${ docMaker.iCode("LX.addDropdownMenu(trigger, items, options)") } function, which allows you to create a bigger and more customizable Dropdown menu.
     This menu needs a HTML element as trigger to be opened, and receives a list of items and other options as parameters.` );
 
     {
         const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
         const button = LX.makeContainer( ["auto", "auto"], "self-center bg-contrast fg-contrast p-2 rounded-lg cursor-pointer", "Click here", area );
-        button.listen( "click", ( event ) => {
+        LX.listen( button, "click", ( event ) => {
             event.preventDefault();
             LX.addDropdownMenu( button, [
                 "My Account",
@@ -79,12 +79,12 @@
         content.appendChild( area.root );
     }
 
-    MAKE_PARAGRAPH( `Using these dropdowns, you can even add radio button groups. Just make sure your trigger element contains a member with the name of your group and its current value.:` );
+    docMaker.paragraph( `Using these dropdowns, you can even add radio button groups. Just make sure your trigger element contains a member with the name of your group and its current value.:` );
 
     {
         const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
         const button = LX.makeContainer( ["auto", "auto"], "self-center bg-contrast fg-contrast p-2 rounded-lg cursor-pointer", "Click here", area );
-        button.listen( "click", ( event ) => {
+        LX.listen( button, "click", ( event ) => {
             event.preventDefault();
             LX.addDropdownMenu( button, [
                 "Preferences",
@@ -111,7 +111,7 @@
         content.appendChild( area.root );
     }
 
-    MAKE_CODE( `LX.@[mtd]addDropdownMenu@( button, [
+    docMaker.code( `LX.@[mtd]addDropdownMenu@( button, [
     @"My Account"@,
     @null@,
     { name: @"Profile"@, kbd: [@"Meta"@, @"P"@], icon: @"User"@ },
@@ -141,9 +141,9 @@
 button[@"View mode"@] = @"TV"@;
 ` );
 
-    MAKE_PARAGRAPH( `As options, you can set ${ INLINE_CODE("side") } and ${ INLINE_CODE("align") } options to place the menu relative to its trigger.` );
+    docMaker.paragraph( `As options, you can set ${ docMaker.iCode("side") } and ${ docMaker.iCode("align") } options to place the menu relative to its trigger.` );
 
-    MAKE_LINE_BREAK();
-    MAKE_LINE_BREAK();
+    docMaker.lineBreak();
+    docMaker.lineBreak();
 
 </script>

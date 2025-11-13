@@ -4,13 +4,13 @@
     const content = document.getElementById('content');
     const componentName = "Size Input";
 
-    MAKE_HEADER(componentName + ".", "h1", componentName.toLowerCase());
-    MAKE_PARAGRAPH(`Represents a N dimension number size input.`);
-    MAKE_HEADER("Quick Usage", "h2");
-    MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addSize(name, value, callback, options)")} to add a ${ componentName } Component to your panel or
-    create it anywhere using ${INLINE_CODE(`new LX.${ componentName.replace( /\s/g, '' ) }`)} to append its root to any container.` );
-    MAKE_LINE_BREAK();
-    MAKE_PARAGRAPH( `Note: Since a Size Component is a composition of multiple Number Component, you can change its value the same way as the Number inputs.
+    docMaker.header(componentName + ".", "h1", componentName.toLowerCase());
+    docMaker.paragraph(`Represents a N dimension number size input.`);
+    docMaker.header("Quick Usage", "h2");
+    docMaker.paragraph( `Call ${docMaker.iCode("Panel.addSize(name, value, callback, options)")} to add a ${ componentName } Component to your panel or
+    create it anywhere using ${docMaker.iCode(`new LX.${ componentName.replace( /\s/g, '' ) }`)} to append its root to any container.` );
+    docMaker.lineBreak();
+    docMaker.paragraph( `Note: Since a Size Component is a composition of multiple Number Component, you can change its value the same way as the Number inputs.
             Minimum size is always 0.`, true );
     {
         window.__addInteractiveCodeExample( content, componentName, panel => {
@@ -20,7 +20,7 @@
         });
     }
 
-    MAKE_HEADER("API Reference", "h2");
+    docMaker.header("API Reference", "h2");
 
     {
         const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
@@ -35,17 +35,17 @@
                 ["callback", "Function", "Function called when the input changes", "—"],
                 ["options", "Object", "Basic options for a component", "—"]
             ].map( v => {
-                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+                return [ docMaker.iCode( v[ 0 ], "table" ), docMaker.iCode( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? docMaker.iCode( v[ 3 ], "table desc" ) : v[ 3 ] ];
             } )
         }, {});
-        panel.addBlank( null, "24px" );
+        docMaker.lineBreak( panel.root );
         panel.addTable( null, {
             head: [ "Option", "Type", "Description", "Default" ],
             body: [
                 ["disabled", "Boolean", "Make the component disabled", "false"],
                 ["units", "String", "Unit as string added to the end of the value", "—"]
             ].map( v => {
-                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+                return [ docMaker.iCode( v[ 0 ], "table" ), docMaker.iCode( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? docMaker.iCode( v[ 3 ], "table desc" ) : v[ 3 ] ];
             } )
         }, {});
     }

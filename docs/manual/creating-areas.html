@@ -1,17 +1,17 @@
 <script type="text/javascript">
 
-    MAKE_HEADER( "Creating Areas.", "h1", "creating-areas" );
+    docMaker.header( "Creating Areas.", "h1", "creating-areas" );
 
-    MAKE_PARAGRAPH( `An ${ INLINE_PAGE( "Area", "api/area.html" ) } is the main container used in lexgui.js. To append HTML elements to an area is enough to call <code class='inline'>Area.attach(content)</code>,
-    where <code class='inline'>content</code> could be different either any HTML element or instanced containers from LexGUI. From here, you can already build your UI adding ${ INLINE_PAGE( "panels", "api/panel.html" ) }, but
+    docMaker.paragraph( `An ${ docMaker.iPage( "Area", "api/area.html" ) } is the main container used in lexgui.js. To append HTML elements to an area is enough to call <code class='inline'>Area.attach(content)</code>,
+    where <code class='inline'>content</code> could be different either any HTML element or instanced containers from LexGUI. From here, you can already build your UI adding ${ docMaker.iPage( "panels", "api/panel.html" ) }, but
      in most cases you will want to split the main Area first. You can have as many Areas you need using <code class='inline'>Area.split(options)</code>, which allows you to split horizontally or vertically a given Area:` );
-    MAKE_CODE_BULLET_LIST( [
+    docMaker.codeBulletList( [
         ["type", "String", "Split mode, either horizontal (default) or vertical"],
         ["sizes", "Array|String", "Size of each new area. Default is [&quot;50%&quot;, &quot;50%&quot;]. Using 'auto' will make a vertical split to resize automatically."],
         ["resize", "Boolean", "Allow area manual resizing. Default is 'true'"],
         ["minimizable", "Boolean", "Allow the area to be minimized. Default is 'false'"]
     ] );
-    MAKE_CODE( `@[com]// Split main area in 2 sections (2 Areas)@
+    docMaker.code( `@[com]// Split main area in 2 sections (2 Areas)@
 @let@ [ left, right ] = area.@[mtd]split@({
     sizes: [@"70%"@, @"30%"@]
 });
@@ -21,8 +21,8 @@
     sizes: [@"80vh"@, @"20vh"@]
 });` );
 
-    MAKE_PARAGRAPH( `You can also specify a layout for a new area (using ${INLINE_CODE( "options.layout" )}), which will automatically split the area to achieve the desired layout:` );
-    MAKE_CODE( `@const@ area = @new@ @[cls]LX@.@[cls]Area@({ width: @"800px"@, height: @"400px"@, layout: {
+    docMaker.paragraph( `You can also specify a layout for a new area (using ${docMaker.iCode( "options.layout" )}), which will automatically split the area to achieve the desired layout:` );
+    docMaker.code( `@const@ area = @new@ @[cls]LX@.@[cls]Area@({ width: @"800px"@, height: @"400px"@, layout: {
     type: @"horizontal"@,
     splits: [
         { size: @"50%"@, className: @"bg-error"@ },
@@ -32,5 +32,8 @@
         ] }
     ]
 } });` );
+
+    docMaker.lineBreak();
+    docMaker.lineBreak();
 
 </script>

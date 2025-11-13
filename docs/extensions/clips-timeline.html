@@ -2,7 +2,7 @@
     import { LX } from "lexgui"
     import { KeyFramesTimeline, ClipsTimeline } from "lexgui/extensions/timeline.js"
 
-    MAKE_HEADER( "Clips timeline", "h1", "clips-timeline" );
+    docMaker.header( "Clips timeline", "h1", "clips-timeline" );
 
     {
         const clipstimeline = new ClipsTimeline( "ClipsId", { title: "Clips Timeline" } );
@@ -92,7 +92,7 @@
 
         render();
     }
-    MAKE_CODE( `@let@ clipTimeline = @new@ LX.@[cls]ClipsTimeline@(@"ClipsTimelineUniqueID"@, {title: @"Clips Timeline"@});
+    docMaker.code( `@let@ clipTimeline = @new@ LX.@[cls]ClipsTimeline@(@"ClipsTimelineUniqueID"@, {title: @"Clips Timeline"@});
 panel.@[mtd]attach@(clipTimeline.root);` );
 
     const baseAnimationClipOptions = [
@@ -102,154 +102,154 @@ panel.@[mtd]attach@(clipTimeline.root);` );
             [".tracks", "Array", "Tracks of the animation clip"],
         ];
 
-    MAKE_HEADER( "ClipStimeline AnimationClip", "h2", "" );
-    MAKE_PARAGRAPH( `New animations should be created and set to the timeline through the ${INLINE_CODE("setAnimationClip")} function, that (optionaly) expects an object with the same attributes as an animationClip (see below). )`);
-    MAKE_PARAGRAPH( `Tracks will also be processed. Missing attributes will be set to default values.`);
-    MAKE_CODE_BULLET_LIST( baseAnimationClipOptions );
-    MAKE_PARAGRAPH( `${INLINE_CODE("instantiateAnimationClip")} method can be used to duplicate animationClips through the ${INLINE_CODE("clone")} argument.` );
+    docMaker.header( "ClipStimeline AnimationClip", "h2", "" );
+    docMaker.paragraph( `New animations should be created and set to the timeline through the ${docMaker.iCode("setAnimationClip")} function, that (optionaly) expects an object with the same attributes as an animationClip (see below). )`);
+    docMaker.paragraph( `Tracks will also be processed. Missing attributes will be set to default values.`);
+    docMaker.codeBulletList( baseAnimationClipOptions );
+    docMaker.paragraph( `${docMaker.iCode("instantiateAnimationClip")} method can be used to duplicate animationClips through the ${docMaker.iCode("clone")} argument.` );
 
 
-    MAKE_HEADER( "Clip Tracks", "h2", "" );
-    MAKE_PARAGRAPH( `New Tracks should be added to the animationClip clip through the ${INLINE_CODE("addNewTrack")} function, that (optionaly) expects an object with the same attributes as a track (see below).`);
-    MAKE_PARAGRAPH(`All attributes except ${INLINE_CODE("isTrack")} and ${INLINE_CODE("trackIdx")} will be retrieved from the track information sent to the function. Missing attributes will be set to default values.`);
-    MAKE_PARAGRAPH(`${INLINE_CODE("id")} and ${INLINE_CODE("name")} attributes will me mapped to the ${INLINE_CODE("id")} of the track (in this order of precedence).`);
-    MAKE_CODE_BULLET_LIST( [
-        [".isTrack", "Boolean", `${INLINE_CODE("Read-Only")} Identifies it as a track`],
-        [".id", "String", `Name of the track. If the track is currently visible, changing its id will require a call to ${INLINE_CODE("updateLeftPanel")}`],
-        [".active", "Boolean", `${INLINE_CODE("Read-Only")} Whether it is disabled or not. Use ${INLINE_CODE("setTrackState")} to modify it.`],
+    docMaker.header( "Clip Tracks", "h2", "" );
+    docMaker.paragraph( `New Tracks should be added to the animationClip clip through the ${docMaker.iCode("addNewTrack")} function, that (optionaly) expects an object with the same attributes as a track (see below).`);
+    docMaker.paragraph(`All attributes except ${docMaker.iCode("isTrack")} and ${docMaker.iCode("trackIdx")} will be retrieved from the track information sent to the function. Missing attributes will be set to default values.`);
+    docMaker.paragraph(`${docMaker.iCode("id")} and ${docMaker.iCode("name")} attributes will me mapped to the ${docMaker.iCode("id")} of the track (in this order of precedence).`);
+    docMaker.codeBulletList( [
+        [".isTrack", "Boolean", `${docMaker.iCode("Read-Only")} Identifies it as a track`],
+        [".id", "String", `Name of the track. If the track is currently visible, changing its id will require a call to ${docMaker.iCode("updateLeftPanel")}`],
+        [".active", "Boolean", `${docMaker.iCode("Read-Only")} Whether it is disabled or not. Use ${docMaker.iCode("setTrackState")} to modify it.`],
         [".locked", "Boolean", `Whether its elements can be modified or not.`],
-        [".isSelected", "Boolean", `${INLINE_CODE("Read-Only")} Whether to paint the track background blue, flagging it as selected.`],
-        [".trackIdx", "Number", `${INLINE_CODE("Read-Only")} Position of the track in the animationClip's tracks array.`],
+        [".isSelected", "Boolean", `${docMaker.iCode("Read-Only")} Whether to paint the track background blue, flagging it as selected.`],
+        [".trackIdx", "Number", `${docMaker.iCode("Read-Only")} Position of the track in the animationClip's tracks array.`],
 
-        [".clips", "Array Number", `Array with clips that will be attached to the track. Clip attributes can be modified. Clips must be sortes ascendently by its timing properties ${INLINE_CODE("start")} and ${INLINE_CODE("duration")} and must not overlap.`],
+        [".clips", "Array Number", `Array with clips that will be attached to the track. Clip attributes can be modified. Clips must be sortes ascendently by its timing properties ${docMaker.iCode("start")} and ${docMaker.iCode("duration")} and must not overlap.`],
         [".edited", "Array Boolean", `Array of size = number-of-clips, containing a flag to indicate whether the clip has been modified. Its values can be safely modified.`],
-        [".selected", "Array Boolean", `${INLINE_CODE("Read-Only")} Array of size number-of-clips, containing a flag to indicate whether the clip is currently selected. Modifying it might not update the underlying selection system.`],
-        [".hovered", "Array Boolean", `${INLINE_CODE("Read-Only")} Array of size number-of-clips, containing a flag to indicate whether the clip is currently hovered by the mouse. Modifying it might not update the underlying hovering system.`],
+        [".selected", "Array Boolean", `${docMaker.iCode("Read-Only")} Array of size number-of-clips, containing a flag to indicate whether the clip is currently selected. Modifying it might not update the underlying selection system.`],
+        [".hovered", "Array Boolean", `${docMaker.iCode("Read-Only")} Array of size number-of-clips, containing a flag to indicate whether the clip is currently hovered by the mouse. Modifying it might not update the underlying hovering system.`],
 
         [".data", "", "user defined data"]
     ] );
 
-    MAKE_HEADER( "Clip Structure", "h2", "" );
-    MAKE_PARAGRAPH( `Clips (not to be confused with AnimationClip) are the objects that will appear in the tracks, which might contain, the following properties:`);
-    MAKE_CODE_BULLET_LIST( [
+    docMaker.header( "Clip Structure", "h2", "" );
+    docMaker.paragraph( `Clips (not to be confused with AnimationClip) are the objects that will appear in the tracks, which might contain, the following properties:`);
+    docMaker.codeBulletList( [
         [".id", "String", `Will be used to display a name over the clip. Can be empty`],
-        [".start", "Number", `${INLINE_CODE("Mandatory")} Time on which the clip starts.`],
-        [".duration", "Number", `${INLINE_CODE("Mandatory")} Duration of the clip. The end time will be computed as start + duration.`],
+        [".start", "Number", `${docMaker.iCode("Mandatory")} Time on which the clip starts.`],
+        [".duration", "Number", `${docMaker.iCode("Mandatory")} Duration of the clip. The end time will be computed as start + duration.`],
         [".fadein", "Number", `If defined, sets the time at which the fadein ends. Must be in global, not relative to start`],
         [".fadeout", "Number", `If defined, sets the time at which the fadeout starts. Must be in global, not relative to start`],
-        [".clipColor", "Color", `Defines the color of the clip. Must be a value accepted by ${INLINE_CODE("CanvasRenderingContext2D.fillStyle")}.`],
-        [".fadeColor", "Color", `Color of the areas defined by the fade attributes. Must be a value accepted by ${INLINE_CODE("CanvasRenderingContext2D.fillStyle")}.`],
-        [".active", "Boolean", `Whether the clip is enabled or not. It only changes the color from clipColor to a default disabled color. Can be written directly. ${INLINE_CODE("Track.active")} has precedence over this.`],
-        [".trackIdx", "Number", `${INLINE_CODE("READ ONLY")} Track index where the clip is. This attribute is managed by the addClip function.`],
+        [".clipColor", "Color", `Defines the color of the clip. Must be a value accepted by ${docMaker.iCode("CanvasRenderingContext2D.fillStyle")}.`],
+        [".fadeColor", "Color", `Color of the areas defined by the fade attributes. Must be a value accepted by ${docMaker.iCode("CanvasRenderingContext2D.fillStyle")}.`],
+        [".active", "Boolean", `Whether the clip is enabled or not. It only changes the color from clipColor to a default disabled color. Can be written directly. ${docMaker.iCode("Track.active")} has precedence over this.`],
+        [".trackIdx", "Number", `${docMaker.iCode("READ ONLY")} Track index where the clip is. This attribute is managed by the addClip function.`],
 
     ] );
 
-    MAKE_PARAGRAPH( `Clips can contain any other attributes and will be accessible at all times.`);
-    MAKE_PARAGRAPH( `The ${INLINE_CODE("cloneClips")} should be implemented by the user so the system knows how to properly duplicate clips.`);
+    docMaker.paragraph( `Clips can contain any other attributes and will be accessible at all times.`);
+    docMaker.paragraph( `The ${docMaker.iCode("cloneClips")} should be implemented by the user so the system knows how to properly duplicate clips.`);
     
-    MAKE_HEADER( "Constructor", "h2", "" );
-    MAKE_CLASS_CONSTRUCTOR( "class LX.ClipsTimeline", [
+    docMaker.header( "Constructor", "h2", "" );
+    docMaker.classCtor( "class LX.ClipsTimeline", [
         ["id", "String", "Unique string that identifies this element"],
         ["options", "Object"]
     ] );
 
-    MAKE_HEADER( "Properties", "h2", "" );
-    MAKE_PARAGRAPH( `Check ${INLINE_CODE("Timeline")} properties`);
-    MAKE_CODE_BULLET_LIST( [
-        [".lastClipsSelected", "Array of [trackIdx, clipIdx]", `${INLINE_CODE("Read-Only")} The currently selected clips across all tracks, sorted ascendently`],
+    docMaker.header( "Properties", "h2", "" );
+    docMaker.paragraph( `Check ${docMaker.iCode("Timeline")} properties`);
+    docMaker.codeBulletList( [
+        [".lastClipsSelected", "Array of [trackIdx, clipIdx]", `${docMaker.iCode("Read-Only")} The currently selected clips across all tracks, sorted ascendently`],
     ] );
 
-    MAKE_HEADER( "Callbacks", "h2", "" );
-    MAKE_PARAGRAPH(`Callbacks can be set directly to the instance of ${INLINE_CODE("ClipsTimeline")}`);
-    MAKE_PARAGRAPH(`Check ${INLINE_CODE("Timeline")} for the list of inherited callbacks. If a callback appears on both lists, the  ${INLINE_CODE("ClipsTimeline")} takes precedence.`);
+    docMaker.header( "Callbacks", "h2", "" );
+    docMaker.paragraph(`Callbacks can be set directly to the instance of ${docMaker.iCode("ClipsTimeline")}`);
+    docMaker.paragraph(`Check ${docMaker.iCode("Timeline")} for the list of inherited callbacks. If a callback appears on both lists, the  ${docMaker.iCode("ClipsTimeline")} takes precedence.`);
 
-    MAKE_CLASS_METHOD( "onUpdateTrack", `Triggered after adding clips, pasting clips and undoing-redoing.`, [
+    docMaker.classMethod( "onUpdateTrack", `Triggered after adding clips, pasting clips and undoing-redoing.`, [
         ["tracks", "Array of Number"],
     ] );
     
-    MAKE_CLASS_METHOD( "onContentMoved", `Triggered after moving clips horizontally or moving the fadein, fadeout and duration sliders. Calls it for each clip .`, [
+    docMaker.classMethod( "onContentMoved", `Triggered after moving clips horizontally or moving the fadein, fadeout and duration sliders. Calls it for each clip .`, [
         ["clip", "Object"],
         ["deltaTime", "Number"],
     ] );
 
-    MAKE_CLASS_METHOD( "onSelectClip", `Triggered after selecting a clip. If all clips are selected, it returns null.`, [
+    docMaker.classMethod( "onSelectClip", `Triggered after selecting a clip. If all clips are selected, it returns null.`, [
         ["clip", "Object"],
     ] );
-    MAKE_CLASS_METHOD( "onDeleteClip", `Triggered after deleting a clip.`, [
+    docMaker.classMethod( "onDeleteClip", `Triggered after deleting a clip.`, [
         ["trackIdx", "Number"],
         ["clipIdx", "Number"],
         ["clip", "Object"],
     ] );
 
-    MAKE_CLASS_METHOD( "onDeleteSelectedClips", `Triggered after deleting the selected content.`, [
+    docMaker.classMethod( "onDeleteSelectedClips", `Triggered after deleting the selected content.`, [
         ["selectedContent", "Array of [trackIdx, clipIdx, clip Object]"],
     ] );
 
 
-    MAKE_HEADER( "Methods", "h2", "" );
-    MAKE_PARAGRAPH(`Check ${INLINE_CODE("Timeline")} for the list of inherited methods. If a method appears on both lists, the ${INLINE_CODE("ClipsTimeline")} takes precedence.`);
+    docMaker.header( "Methods", "h2", "" );
+    docMaker.paragraph(`Check ${docMaker.iCode("Timeline")} for the list of inherited methods. If a method appears on both lists, the ${docMaker.iCode("ClipsTimeline")} takes precedence.`);
 
-    MAKE_CLASS_METHOD( ".cloneClips", `Deep clone of a clip. Used to copy and paste clips. The default implementation uses ${INLINE_CODE("JSON.parse(JSON.stringify( ))")}.  ${INLINE_CODE("timeOffset")} adds/subtracts a delta time to all duplicated clips`, [
+    docMaker.classMethod( ".cloneClips", `Deep clone of a clip. Used to copy and paste clips. The default implementation uses ${docMaker.iCode("JSON.parse(JSON.stringify( ))")}.  ${docMaker.iCode("timeOffset")} adds/subtracts a delta time to all duplicated clips`, [
         ["clipsToClone", "Array of Objects"],
         ["timeOffset", "Number"],
     ], "Array of Objects" );
 
-    MAKE_CLASS_METHOD( ".addClip", `Add a clip in a track. An ${INLINE_CODE("offsetTime")} is added to the time attributes of the clip. If ${INLINE_CODE("trackIdx")} is -1, the clip will be added in the first suitable track it finds, starting from ${INLINE_CODE("searchStartTrackIdx")} (defaults to 0). Returns the clip's index in the track.`, [
+    docMaker.classMethod( ".addClip", `Add a clip in a track. An ${docMaker.iCode("offsetTime")} is added to the time attributes of the clip. If ${docMaker.iCode("trackIdx")} is -1, the clip will be added in the first suitable track it finds, starting from ${docMaker.iCode("searchStartTrackIdx")} (defaults to 0). Returns the clip's index in the track.`, [
         ["trackIdx", "Int"],
         ["offsetTime", "Number"],
         ["searchStartTrackIdx", "Int"],
     ], "Number" );
 
-    MAKE_CLASS_METHOD( ".addClips", `Add several clips in the timeline, starting from ${INLINE_CODE("searchStartTrackIdx")} (defaults to 0). An ${INLINE_CODE("offsetTime")} is added to the time attributes of the clip.`, [
+    docMaker.classMethod( ".addClips", `Add several clips in the timeline, starting from ${docMaker.iCode("searchStartTrackIdx")} (defaults to 0). An ${docMaker.iCode("offsetTime")} is added to the time attributes of the clip.`, [
         ["clips", "Array of Objects"],
         ["offsetTime", "Number"],
         ["searchStartTrackIdx", "Int"],
     ], "Number" );
 
-    MAKE_CLASS_METHOD( ".getClipOnTime", `Search clip in track that is on the specified time. Returns -1 if no clip overlaps with the timestamp`, [
+    docMaker.classMethod( ".getClipOnTime", `Search clip in track that is on the specified time. Returns -1 if no clip overlaps with the timestamp`, [
         ["track", "Object"],
         ["time", "Number"],
         ["threshold", "Number"],
     ], "Number" );
 
-    MAKE_CLASS_METHOD( ".copySelectedContent", `Copies (clones) the lastSelectedClip elements into clipboard.`, [
+    docMaker.classMethod( ".copySelectedContent", `Copies (clones) the lastSelectedClip elements into clipboard.`, [
     ], "" );
-    MAKE_CLASS_METHOD( ".pasteContent", `Paste copied clips into the tracks, positioned at ${INLINE_CODE("time")}.`, [
+    docMaker.classMethod( ".pasteContent", `Paste copied clips into the tracks, positioned at ${docMaker.iCode("time")}.`, [
         ["time", "Number"]
     ], "" );
-    MAKE_CLASS_METHOD( ".deleteSelectedContent", `Delete selected clips from the tracks.`, [
+    docMaker.classMethod( ".deleteSelectedContent", `Delete selected clips from the tracks.`, [
         ["skipCallback", "Boolean"]
     ], "" );
-    MAKE_CLASS_METHOD( ".clearTrack", `Delete all clips from a track.`, [
+    docMaker.classMethod( ".clearTrack", `Delete all clips from a track.`, [
         ["trackIdx", "Number"]
     ], "" );
 
-    MAKE_CLASS_METHOD( ".deleteClip", `Delete selected clips from the tracks.`, [
+    docMaker.classMethod( ".deleteClip", `Delete selected clips from the tracks.`, [
         ["trackIdx", "Number"],
         ["clipIdx", "Number"],
         ["skipCallback", "Boolean"]
     ], "" );
 
-    MAKE_CLASS_METHOD( ".selectClip", `Selected a clip of the track. If ${INLINE_CODE("deselect")} is true, it deselects all selected clips, and makes this the only one selected`, [
+    docMaker.classMethod( ".selectClip", `Selected a clip of the track. If ${docMaker.iCode("deselect")} is true, it deselects all selected clips, and makes this the only one selected`, [
         ["trackIdx", "Number"],
         ["clipIdx", "Number"],
         ["deselect", "Boolean"],
         ["skipCallback", "Boolean"]
     ], "Number" );
 
-    MAKE_CLASS_METHOD( ".selectAll", `Deselect all selected clips.`, [
+    docMaker.classMethod( ".selectAll", `Deselect all selected clips.`, [
         ["skipCallback", "Boolean"]
     ], "" );
 
-    MAKE_CLASS_METHOD( ".deselectClip", `Deselect a clip of the track.`, [
+    docMaker.classMethod( ".deselectClip", `Deselect a clip of the track.`, [
         ["trackIdx", "Number"],
         ["clipIdx", "Number"],
     ], "Number" );
 
-    MAKE_CLASS_METHOD( ".deselectAllClips", `Deselect all selected clips.`, [
+    docMaker.classMethod( ".deselectAllClips", `Deselect all selected clips.`, [
     ], "" );
 
-    MAKE_CLASS_METHOD( ".unHoverAll", `Unhover current clips.`, [
+    docMaker.classMethod( ".unHoverAll", `Unhover current clips.`, [
     ], "" );
 
     const baseControls = [
@@ -267,17 +267,17 @@ panel.@[mtd]attach@(clipTimeline.root);` );
         ["Backspace", "Delete selected elements"],
     ];
 
-    MAKE_HEADER("Controls", "h2", "" );
-    MAKE_PARAGRAPH(`Default keyboard controls can be changed by reimplementing ${INLINE_CODE("processKeys")}`);
+    docMaker.header("Controls", "h2", "" );
+    docMaker.paragraph(`Default keyboard controls can be changed by reimplementing ${docMaker.iCode("processKeys")}`);
     let clipControls = baseControls.slice();
     clipControls[1].push(
-        ["ctrlKey + horizontal drag", `move selected clips (if any) horizontally. Holding ${INLINE_CODE("ctrlKey")} pressed is not necessary once the mouse is clicked down.` ],
-        ["ctrlKey + altKey + vertical drag", `move selected clips (if any) vertically. It automatically creates new tracks when reaching the bottom. Holding ${INLINE_CODE("ctrlKey")} pressed is not necessary once the mouse is clicked down.`]
+        ["ctrlKey + horizontal drag", `move selected clips (if any) horizontally. Holding ${docMaker.iCode("ctrlKey")} pressed is not necessary once the mouse is clicked down.` ],
+        ["ctrlKey + altKey + vertical drag", `move selected clips (if any) vertically. It automatically creates new tracks when reaching the bottom. Holding ${docMaker.iCode("ctrlKey")} pressed is not necessary once the mouse is clicked down.`]
     );
-    MAKE_CODE_BULLET_LIST( clipControls );
+    docMaker.codeBulletList( clipControls );
 
 
-    MAKE_LINE_BREAK();
-    MAKE_LINE_BREAK();
+    docMaker.lineBreak();
+    docMaker.lineBreak();
 
 </script>

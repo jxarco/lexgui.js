@@ -1,9 +1,9 @@
 <script type="module">
     import { LX } from 'lexgui';
 
-    MAKE_HEADER( "Sheet.", "h1", "sheet" );
-    MAKE_PARAGRAPH( `Display content that complements the main content of the screen.` );
-    MAKE_LINE_BREAK();
+    docMaker.header( "Sheet.", "h1", "sheet" );
+    docMaker.paragraph( `Display content that complements the main content of the screen.` );
+    docMaker.lineBreak();
 
     {
         const area = new LX.Area( { className: "border rounded-lg shadow-lg bg-secondary overflow-hidden p-8", skipAppend: true, height: "auto" } );
@@ -20,8 +20,8 @@
         panel.addButton( null, "Open Sheet", () => { new LX.Sheet( "400px", [ sheetArea ], { side: "right" } ) }, { width: "20%", buttonClass: "contrast", className: "self-center" } );
     }
 
-    MAKE_HEADER("Quick Usage", "h2");
-    MAKE_CODE(`@const@ sheetArea = @new@ @[cls]LX@.@[cls]Area@( { className: @"p-4"@, skipAppend: @true@ } );
+    docMaker.header("Quick Usage", "h2");
+    docMaker.code(`@const@ sheetArea = @new@ @[cls]LX@.@[cls]Area@( { className: @"p-4"@, skipAppend: @true@ } );
 @const@ sheetPanel = sheetArea.@[mtd]addPanel@();
 @const@ formData = { username: @""@, password: { icon: @"Key"@, value: @""@, type: @"password"@ } };
 sheetPanel.@[mtd]addForm@(@"Test form"@, formData, (value, event) => {
@@ -33,18 +33,18 @@ panel.addButton( @null@, @"Open Sheet"@, () => { @new@ @[cls]LX@.@[cls]Sheet@( @
     width: @"20%"@, buttonClass: @"contrast"@, className: @"self-center"@
 } );`, "js");
 
-    MAKE_NOTE( `${ INLINE_CODE( "onSheet()" ) } is called on any passed component that defines it.`, false, "Tip", "Info" );
+    docMaker.note( `${ docMaker.iCode( "onSheet()" ) } is called on any passed component that defines it.`, false, "Tip", "Info" );
 
-    MAKE_HEADER("API Reference", "h2");
-    MAKE_CLASS_CONSTRUCTOR( "class LX.Sheet", [
+    docMaker.header("API Reference", "h2");
+    docMaker.classCtor( "class LX.Sheet", [
         ["size", "String"],
         ["content", "HTMLElement|Array"],
         ["options", "Object"]
     ] );
-    MAKE_LINE_BREAK();
-    MAKE_PARAGRAPH(`Where ${ INLINE_CODE( "size" ) } is the width/height, depending on the orientation; ${ INLINE_CODE( "content" ) } is the element or array of elements contained inside the Sheet,
-    and ${ INLINE_CODE( "options" ) } can include the following:`);
-    MAKE_LINE_BREAK();
+    docMaker.lineBreak();
+    docMaker.paragraph(`Where ${ docMaker.iCode( "size" ) } is the width/height, depending on the orientation; ${ docMaker.iCode( "content" ) } is the element or array of elements contained inside the Sheet,
+    and ${ docMaker.iCode( "options" ) } can include the following:`);
+    docMaker.lineBreak();
 
     {
         const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
@@ -55,17 +55,17 @@ panel.addButton( @null@, @"Open Sheet"@, () => { @new@ @[cls]LX@.@[cls]Sheet@( @
             body: [
                 ["side", `<span class='cursor-pointer' title='"left" | "right" | "top" | "bottom"'>Enum</span>`, `Determines which edge the Sheet slides in from`, `"left"`],
             ].map( v => {
-                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+                return [ docMaker.iCode( v[ 0 ], "table" ), docMaker.iCode( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? docMaker.iCode( v[ 3 ], "table desc" ) : v[ 3 ] ];
             } )
         }, {});
     }
 
-    MAKE_HEADER( "Methods", "h3", "methods" );
+    docMaker.header( "Methods", "h3", "methods" );
 
-    MAKE_CLASS_METHOD( ".destroy", `Closes the Sheet, removes it from the DOM, and restores any modal lock state. Also removes the global event listeners for outside click and focus.`, [
+    docMaker.classMethod( ".destroy", `Closes the Sheet, removes it from the DOM, and restores any modal lock state. Also removes the global event listeners for outside click and focus.`, [
     ] );
 
-    MAKE_LINE_BREAK();
-    MAKE_LINE_BREAK();
+    docMaker.lineBreak();
+    docMaker.lineBreak();
 
 </script>

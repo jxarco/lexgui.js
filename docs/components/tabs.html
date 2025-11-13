@@ -1,9 +1,9 @@
 <script type="module">
     import { LX } from 'lexgui';
 
-    MAKE_HEADER( "Tabs.", "h1", "tabs" );
-    MAKE_PARAGRAPH(`A set of layered sections of content, created within areas, that are displayed one at a time.`);
-    MAKE_LINE_BREAK();
+    docMaker.header( "Tabs.", "h1", "tabs" );
+    docMaker.paragraph(`A set of layered sections of content, created within areas, that are displayed one at a time.`);
+    docMaker.lineBreak();
 
     {
         const area = new LX.Area( { skipAppend: true, height: "200px" } );
@@ -17,31 +17,31 @@
         area.root.className += " p-2 border rounded-lg shadow-lg bg-secondary overflow-hidden";
     }
 
-    MAKE_HEADER("Quick Usage", "h2");
+    docMaker.header("Quick Usage", "h2");
 
-    MAKE_CODE(`@[com]// You can use the _addTabs_ method of Area to directly attach it to an area@
+    docMaker.code(`@[com]// You can use the _addTabs_ method of Area to directly attach it to an area@
 @const@ tabs = area.@[mtd]addTabs@();
 tabs.@[mtd]add@( @"App"@, appContainer, { selected: @true@ } );
 tabs.@[mtd]add@( @"Editor"@, editorContainer );
 tabs.@[mtd]add@( @"Examples"@, examplesContainer );
 `, "js");
 
-    MAKE_HEADER("API Reference", "h2");
-    MAKE_CLASS_CONSTRUCTOR( "class LX.Tabs", [
+    docMaker.header("API Reference", "h2");
+    docMaker.classCtor( "class LX.Tabs", [
         ["area", "Area"],
         ["options", "Object"]
     ] );
 
-    MAKE_LINE_BREAK();
-    MAKE_PARAGRAPH( `The possible ${INLINE_CODE(`options`)} are the following:` );
-    MAKE_CODE_BULLET_LIST( [
+    docMaker.lineBreak();
+    docMaker.paragraph( `The possible ${docMaker.iCode(`options`)} are the following:` );
+    docMaker.codeBulletList( [
         ["fit", "Boolean", "Style of the tabs. Use all parent width"],
         ["folding", "Boolean", "Tabs can be folded/minimized"],
         ["onclose", "Function", "Function to call when a tab is closed"]
     ] );
 
-    MAKE_HEADER( "Properties", "h3", "properties" );
-    MAKE_CODE_BULLET_LIST( [
+    docMaker.header( "Properties", "h3", "properties" );
+    docMaker.codeBulletList( [
         [".area", "LX.Area", "Area of the tab container"],
         [".root", "HTMLElement", "Container element of the menubar"],
         [".selected", "String", "Name of the selected tab if any"],
@@ -49,28 +49,28 @@ tabs.@[mtd]add@( @"Examples"@, examplesContainer );
         [".tabDOMs", "Object", "Map containing the DOM elements for each of the generated tabs"],
     ] );
     
-    MAKE_HEADER( "Methods", "h3", "methods" );
+    docMaker.header( "Methods", "h3", "methods" );
 
-    MAKE_CLASS_METHOD( ".add", `Adds a new tab inside the tab container. As options, you can use:`, [
+    docMaker.classMethod( ".add", `Adds a new tab inside the tab container. As options, you can use:`, [
         ["name", "String"],
         ["content", "HTMLElement"],
         ["options", "Object"],
     ] );
-    MAKE_CODE_BULLET_LIST( [[
+    docMaker.codeBulletList( [[
         ["selected", "Boolean", "If the tab is selected by default"],
         ["onCreate", "Function", "Function to be called when creating the tab DOM element"],
         ["onSelect", "Function", "Function to be called when selecting the tab"]
     ]] );
 
-    MAKE_CLASS_METHOD( ".delete", `Deletes permanently the tab.`, [
+    docMaker.classMethod( ".delete", `Deletes permanently the tab.`, [
         ["name", "String"]
     ] );
 
-    MAKE_CLASS_METHOD( ".select", `Selects a tab, calling onSelect option callback if used when the tab was added.`, [
+    docMaker.classMethod( ".select", `Selects a tab, calling onSelect option callback if used when the tab was added.`, [
         ["name", "String"]
     ] );
 
-    MAKE_LINE_BREAK();
-    MAKE_LINE_BREAK();
+    docMaker.lineBreak();
+    docMaker.lineBreak();
 
 </script>

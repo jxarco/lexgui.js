@@ -1,22 +1,22 @@
 <script type="text/javascript">
 
-    MAKE_HEADER("Doc Maker.", "h1", "doc-maker");
+    docMaker.header("Doc Maker.", "h1", "doc-maker");
 
-    MAKE_PARAGRAPH("Doc Maker is a lightweight script used to programmatically build documentation pages. It exposes helpers for headers, paragraphs, code samples with syntax highlighting, lists, links, images, and notes. It's intended to be embedded by including only this script and calling its functions to compose the doc content.");
+    docMaker.paragraph("Doc Maker is a lightweight script used to programmatically build documentation pages. It exposes helpers for headers, paragraphs, code samples with syntax highlighting, lists, links, images, and notes. It's intended to be embedded by including only this script and calling its functions to compose the doc content.");
 
-    MAKE_HEADER("Quick Usage", "h2");
-    MAKE_PARAGRAPH("Set the target container if you need to render into a subelement instead of the body:");
-    MAKE_CODE(`@[mtd]SET_DOM_TARGET@(document.@[mtd]getElementById@(@"my-doc-area"@));`, "js");
+    docMaker.header("Quick Usage", "h2");
+    docMaker.paragraph("Set the target container if you need to render into a subelement instead of the body:");
+    docMaker.code(`@[mtd]SET_DOM_TARGET@(document.@[mtd]getElementById@(@"my-doc-area"@));`, "js");
 
-    MAKE_PARAGRAPH("Then use the provided helpers to build content. Example:");
-    MAKE_CODE(`@[mtd]MAKE_HEADER@(@"API Reference"@, @"h2"@);
+    docMaker.paragraph("Then use the provided helpers to build content. Example:");
+    docMaker.code(`@[mtd]MAKE_HEADER@(@"API Reference"@, @"h2"@);
 @[mtd]MAKE_PARAGRAPH@(@"This section documents available functions."@);
-@[mtd]MAKE_CODE@(@"MAKE_CODE('console.log(\\'Hello World\\');');"@, @"js"@);`, "js");
+@[mtd]MAKE_CODE@(@"docMaker.code('console.log(\\'Hello World\\');');"@, @"js"@);`, "js");
 
-    MAKE_HEADER("API Reference", "h2");
+    docMaker.header("API Reference", "h2");
 
-    MAKE_PARAGRAPH("Core helpers to compose documentation:", false);
-    MAKE_CODE_BULLET_LIST([
+    docMaker.paragraph("Core helpers to compose documentation:", false);
+    docMaker.codeBulletList([
         ["MAKE_HEADER", "Create a header element. Parameters: text, tag (e.g. 'h1'), optional id"],
         ["MAKE_PARAGRAPH", "Add a paragraph or <sup> when flagged. Parameters: text, optional sup flag"],
         ["MAKE_CODE", "Insert a syntax-highlighted code block. Parameters: code text, language"],
@@ -26,8 +26,8 @@
         ["INLINE_CODE", "Returns inline code markup."],
     ]);
 
-    MAKE_PARAGRAPH("Advanced content helpers:", false);
-    MAKE_CODE_BULLET_LIST([
+    docMaker.paragraph("Advanced content helpers:", false);
+    docMaker.codeBulletList([
         ["MAKE_CLASS_METHOD", "Document a class method with signature and description."],
         ["MAKE_CLASS_CONSTRUCTOR", "Document constructors (JS or C++ style)."],
         ["MAKE_NOTE", "Create a styled note or warning."],
@@ -36,6 +36,6 @@
     ]);
 
     // Footnote / tip
-    MAKE_NOTE("After using resources or large dynamic content, you can reset the target by calling SET_DOM_TARGET to another element if needed.", false, "Tip", "Info");
+    docMaker.note("After using resources or large dynamic content, you can reset the target by calling SET_DOM_TARGET to another element if needed.", false, "Tip", "Info");
 
 </script>

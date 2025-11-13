@@ -5,13 +5,13 @@
     const componentName = "Data Tree";
 
     // Data Tree
-    MAKE_HEADER(componentName + ".", "h1", componentName.toLowerCase());
-    MAKE_PARAGRAPH(`Represents a <strong>data hierarchy visualization Tree</strong>. Enables developers to display hierarchical data in an organized
+    docMaker.header(componentName + ".", "h1", componentName.toLowerCase());
+    docMaker.paragraph(`Represents a <strong>data hierarchy visualization Tree</strong>. Enables developers to display hierarchical data in an organized
      and visually appealing manner. This feature is especially useful when presenting data with parent-child
       relationships, such as file directories, organizational structures, family trees, and more.` );
-      MAKE_HEADER("Quick Usage", "h2");
-    MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addTree(name, data, options)")} to add a ${ componentName } Component to your panel or
-    create it anywhere using ${INLINE_CODE(`new LX.${ componentName.replace( /\s/g, '' ) }`)} to append its root to any container.` );
+      docMaker.header("Quick Usage", "h2");
+    docMaker.paragraph( `Call ${docMaker.iCode("Panel.addTree(name, data, options)")} to add a ${ componentName } Component to your panel or
+    create it anywhere using ${docMaker.iCode(`new LX.${ componentName.replace( /\s/g, '' ) }`)} to append its root to any container.` );
 
     {
         window.__addInteractiveCodeExample( content, componentName, panel => {
@@ -52,7 +52,7 @@
         });
     }
 
-    MAKE_HEADER("API Reference", "h2");
+    docMaker.header("API Reference", "h2");
 
     {
         const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
@@ -66,10 +66,10 @@
                 ["data", "Object", "Hierarchical data", "—"],
                 ["options", "Object", "Basic options for a component", "—"]
             ].map( v => {
-                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+                return [ docMaker.iCode( v[ 0 ], "table" ), docMaker.iCode( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? docMaker.iCode( v[ 3 ], "table desc" ) : v[ 3 ] ];
             } )
         }, {});
-        panel.addBlank( null, "24px" );
+        docMaker.lineBreak( panel.root );
         panel.addTable( null, {
             head: [ "Option", "Type", "Description", "Default" ],
             body: [
@@ -78,7 +78,7 @@
                 ["rename", "Boolean", "Allow item rename", "true"],
                 ["onevent", "Function", "Function to catch the different types of Tree events", "—"],
             ].map( v => {
-                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+                return [ docMaker.iCode( v[ 0 ], "table" ), docMaker.iCode( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? docMaker.iCode( v[ 3 ], "table desc" ) : v[ 3 ] ];
             } )
         }, {});
     }

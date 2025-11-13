@@ -3,9 +3,9 @@
 
     const content = document.getElementById( 'content' );
 
-    MAKE_HEADER( "Sidebar.", "h1", "sidebar" );
-    MAKE_PARAGRAPH( `A composable, themeable and customizable sidebar component.` );
-    MAKE_LINE_BREAK();
+    docMaker.header( "Sidebar.", "h1", "sidebar" );
+    docMaker.paragraph( `A composable, themeable and customizable sidebar component.` );
+    docMaker.lineBreak();
 
     {
         const area = new LX.Area( { skipAppend: true, height: "auto" } );
@@ -70,30 +70,30 @@
         area.root.className += " border rounded-lg shadow-lg bg-secondary overflow-hidden";
     }
     
-    MAKE_HEADER("Quick Usage", "h2");
+    docMaker.header("Quick Usage", "h2");
 
-    MAKE_PARAGRAPH( `Build a Sidebar element directly into any Area using ${INLINE_CODE("Area.addSidebar(callback, options)")}. 
+    docMaker.paragraph( `Build a Sidebar element directly into any Area using ${docMaker.iCode("Area.addSidebar(callback, options)")}. 
     To specify each of the entries, you should pass a <em>callback function</em> to be called when the Sidebar is constructed. Callbacks will have a Sidebar instance as parameter, 
-    so use ${INLINE_CODE("Sidebar.add(entryName, options)")} on that instance inside your callback to add each of the entries.` );
+    so use ${docMaker.iCode("Sidebar.add(entryName, options)")} on that instance inside your callback to add each of the entries.` );
 
-    MAKE_PARAGRAPH( `The different options to be set when adding entries to the Sidebar are the following:` );
-    MAKE_CODE_BULLET_LIST( [
+    docMaker.paragraph( `The different options to be set when adding entries to the Sidebar are the following:` );
+    docMaker.codeBulletList( [
         ["callback", "Function", "To be called when interacting with the entry"],
         ["className", "String", "Extra classes to customize style"],
         ["collapsable", "Boolean", "Add entry as a collapsable section"],
         ["icon", "String", "Entry icon"],
     ] );
 
-    MAKE_NOTE( `Subentries are collapsed by default. To disable this behaviour, set ${INLINE_CODE("options.collapsable: false")} in the parent entry.` );
+    docMaker.note( `Subentries are collapsed by default. To disable this behaviour, set ${docMaker.iCode("options.collapsable: false")} in the parent entry.` );
 
-    MAKE_HEADER("API Reference", "h2");
-    MAKE_CLASS_CONSTRUCTOR( "class LX.Sidebar", [
+    docMaker.header("API Reference", "h2");
+    docMaker.classCtor( "class LX.Sidebar", [
         [ "options", "Object = {}" ]
     ] );
 
-    MAKE_LINE_BREAK();
-    MAKE_PARAGRAPH( `Use ${INLINE_CODE(`Area.addSidebar`)} with the following options to build a Sidebar inside an area:` );
-    MAKE_CODE_BULLET_LIST( [
+    docMaker.lineBreak();
+    docMaker.paragraph( `Use ${docMaker.iCode(`Area.addSidebar`)} with the following options to build a Sidebar inside an area:` );
+    docMaker.codeBulletList( [
         ["className", "String", " Extra class to customize root element"],
         ["side", "String", "Side to attach the sidebar (left|right) [left]"],
         ["filter", "Boolean", "Add search bar to filter entries [false]"],
@@ -117,7 +117,7 @@
         ["width", "String", "Width of the sidebar [16rem]"],
     ] );
 
-    MAKE_HEADER( "Properties", "h3", "properties" );
+    docMaker.header( "Properties", "h3", "properties" );
 
     {
         const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
@@ -137,36 +137,36 @@
                 ["items", "Object", "Map containing the icons for each entry", "—"],
                 ["root", "HTMLElement", "Container element of the sidebar", "—"]
             ].map( v => {
-                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+                return [ docMaker.iCode( v[ 0 ], "table" ), docMaker.iCode( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? docMaker.iCode( v[ 3 ], "table desc" ) : v[ 3 ] ];
             } )
         }, {});
     }
 
-    MAKE_HEADER( "Methods", "h3", "methods" );
+    docMaker.header( "Methods", "h3", "methods" );
 
-    MAKE_CLASS_METHOD( ".add", `Creates a Sidebar entry/subentry.`, [
+    docMaker.classMethod( ".add", `Creates a Sidebar entry/subentry.`, [
         ["key", "String"],
         ["options", "Object"]
     ] );
 
-    MAKE_CLASS_METHOD( ".group", `Start a new group of entries.`, [
+    docMaker.classMethod( ".group", `Start a new group of entries.`, [
         ["groupName", "String"],
         ["action", "Object"]
     ] );
 
-    MAKE_CLASS_METHOD( ".select", `Select an item of the sidebar.`, [
+    docMaker.classMethod( ".select", `Select an item of the sidebar.`, [
         ["name", "String"]
     ] );
 
-    MAKE_CLASS_METHOD( ".separator", `Creates a line separator.`, [] );
+    docMaker.classMethod( ".separator", `Creates a line separator.`, [] );
 
-    MAKE_CLASS_METHOD( ".toggleCollapsed", `Toggles ${ INLINE_CODE( "collapsed" ) } property (collapsed/expanded).`, [
+    docMaker.classMethod( ".toggleCollapsed", `Toggles ${ docMaker.iCode( "collapsed" ) } property (collapsed/expanded).`, [
         ["force", "Boolean"]
     ] );
 
-    MAKE_CLASS_METHOD( ".update", `Builds the sidebar elements using current items.`, [] );
+    docMaker.classMethod( ".update", `Builds the sidebar elements using current items.`, [] );
 
-    MAKE_LINE_BREAK();
-    MAKE_LINE_BREAK();
+    docMaker.lineBreak();
+    docMaker.lineBreak();
 
 </script>

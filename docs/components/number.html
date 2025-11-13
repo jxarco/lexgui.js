@@ -4,17 +4,17 @@
     const content = document.getElementById('content');
     const componentName = "Number Input";
 
-    MAKE_HEADER(componentName + ".", "h1", componentName.toLowerCase());
-    MAKE_PARAGRAPH(`Represents a decimal number input.`);
-    MAKE_HEADER("Quick Usage", "h2");
-    MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addNumber(name, value, callback, options)")} to add a ${ componentName } Component to your panel or
-    create it anywhere using ${INLINE_CODE(`new LX.${ componentName.replace( /\s/g, '' ) }`)} to append its root to any container.` );
-    MAKE_LINE_BREAK();
-    MAKE_PARAGRAPH(`You can change the value of this component manually, using the mouse wheel, and dragging (up/down). In the last two cases, pressing <em>Alt</em> and 
+    docMaker.header(componentName + ".", "h1", componentName.toLowerCase());
+    docMaker.paragraph(`Represents a decimal number input.`);
+    docMaker.header("Quick Usage", "h2");
+    docMaker.paragraph( `Call ${docMaker.iCode("Panel.addNumber(name, value, callback, options)")} to add a ${ componentName } Component to your panel or
+    create it anywhere using ${docMaker.iCode(`new LX.${ componentName.replace( /\s/g, '' ) }`)} to append its root to any container.` );
+    docMaker.lineBreak();
+    docMaker.paragraph(`You can change the value of this component manually, using the mouse wheel, and dragging (up/down). In the last two cases, pressing <em>Alt</em> and 
         <em>Left Shift</em> will apply a factor of <code class='inline'>0.1</code> and <code class='inline'>10</code> in that order. In case you are using limits, store the component and call <code class='inline'>numberComponent.setLimits( min, max, step )</code> to change its 
         parameters once the component has been created.` );
-    MAKE_LINE_BREAK();
-    MAKE_PARAGRAPH( `Note: Setting <code class='inline'>min</code>, <code class='inline'>max</code> values will automatically add a slider below the number input.`, true );
+    docMaker.lineBreak();
+    docMaker.paragraph( `Note: Setting <code class='inline'>min</code>, <code class='inline'>max</code> values will automatically add a slider below the number input.`, true );
 
     {
         window.__addInteractiveCodeExample( content, componentName, panel => {
@@ -24,7 +24,7 @@
         });
     }
 
-    MAKE_HEADER("API Reference", "h2");
+    docMaker.header("API Reference", "h2");
 
     {
         const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
@@ -39,10 +39,10 @@
                 ["callback", "Function", "Function called when the input changes", "—"],
                 ["options", "Object", "Basic options for a component", "—"]
             ].map( v => {
-                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+                return [ docMaker.iCode( v[ 0 ], "table" ), docMaker.iCode( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? docMaker.iCode( v[ 3 ], "table desc" ) : v[ 3 ] ];
             } )
         }, {});
-        panel.addBlank( null, "24px" );
+        docMaker.lineBreak( panel.root );
         panel.addTable( null, {
             head: [ "Option", "Type", "Description", "Default" ],
             body: [
@@ -56,7 +56,7 @@
                 ["onPress", "Function", "Callback function on mouse down", "—"],
                 ["onRelease", "Function", "Callback function on mouse up", "—"],
             ].map( v => {
-                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+                return [ docMaker.iCode( v[ 0 ], "table" ), docMaker.iCode( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? docMaker.iCode( v[ 3 ], "table desc" ) : v[ 3 ] ];
             } )
         }, {});
     }    

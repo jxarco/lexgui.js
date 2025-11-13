@@ -4,13 +4,13 @@
     const content = document.getElementById('content');
     const componentName = "Table";
 
-    MAKE_HEADER(componentName + ".", "h1", componentName.toLowerCase());
-    MAKE_PARAGRAPH(`Represents a dynamic table with user-input data.`);
-    MAKE_HEADER("Quick Usage", "h2");
-    MAKE_PARAGRAPH( `Call ${INLINE_CODE("Panel.addTable(name, data, options)")} to add a ${ componentName } Component to your panel or
-    create it anywhere using ${INLINE_CODE(`new LX.${ componentName.replace( /\s/g, '' ) }`)} to append its root to any container.` );
-    MAKE_NOTE( `You can use default row actions as String such as 'delete' or 'menu', which have predefined icons and callbacks.
-        For the 'menu' action, you must fill the possible menus inside the created Dropdown using ${INLINE_CODE("options.onMenuAction")}.` );
+    docMaker.header(componentName + ".", "h1", componentName.toLowerCase());
+    docMaker.paragraph(`Represents a dynamic table with user-input data.`);
+    docMaker.header("Quick Usage", "h2");
+    docMaker.paragraph( `Call ${docMaker.iCode("Panel.addTable(name, data, options)")} to add a ${ componentName } Component to your panel or
+    create it anywhere using ${docMaker.iCode(`new LX.${ componentName.replace( /\s/g, '' ) }`)} to append its root to any container.` );
+    docMaker.note( `You can use default row actions as String such as 'delete' or 'menu', which have predefined icons and callbacks.
+        For the 'menu' action, you must fill the possible menus inside the created Dropdown using ${docMaker.iCode("options.onMenuAction")}.` );
 
     {
         window.__addInteractiveCodeExample( content, componentName, panel => {
@@ -55,7 +55,7 @@
         });
     }
 
-    MAKE_HEADER("API Reference", "h2");
+    docMaker.header("API Reference", "h2");
 
     {
         const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
@@ -69,17 +69,17 @@
                 ["data", "Object", "Table data", "—"],
                 ["options", "Object", "Basic options for a component", "—"]
             ].map( v => {
-                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+                return [ docMaker.iCode( v[ 0 ], "table" ), docMaker.iCode( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? docMaker.iCode( v[ 3 ], "table desc" ) : v[ 3 ] ];
             } )
         }, {});
-        panel.addBlank( null, "24px" );
+        docMaker.lineBreak( panel.root );
         panel.addTable( null, {
             head: [ "Option", "Type", "Description", "Default" ],
             body: [
                 ["head", "Array", "Table headers (each of the headers per column)", "—"],
                 ["body", "Array", "Table body (data per row for each column)", "—"],
-                ["columnActions", "Array", `Allow to add actions per column ${INLINE_CODE("action: { name, icon, callback }")}`, "—"],
-                ["rowActions", "Array", `Allow to add actions per row ${INLINE_CODE("action: { icon, callback }")}`, "—"],
+                ["columnActions", "Array", `Allow to add actions per column ${docMaker.iCode("action: { name, icon, callback }")}`, "—"],
+                ["rowActions", "Array", `Allow to add actions per row ${docMaker.iCode("action: { icon, callback }")}`, "—"],
                 ["onMenuAction", "Function", `Function callback to fill the "menu" context`, "—"],
                 ["selectable", "Boolean", "Each row can be selected", "false"],
                 ["sortable", "Boolean", "Rows can be sorted by the user manually", "false"],
@@ -90,13 +90,13 @@
                 ["filterValue", "String", "Initial filter value", "—"],
                 ["customFilters", "Array", "Add selectors to filter by specific option values", "false"]
             ].map( v => {
-                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+                return [ docMaker.iCode( v[ 0 ], "table" ), docMaker.iCode( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? docMaker.iCode( v[ 3 ], "table desc" ) : v[ 3 ] ];
             } )
         }, {});
     }
 
-    MAKE_NOTE( `The return value in the ${INLINE_CODE("rowActions")} item callbacks are used to refresh (true) or not (false) the table DOM.`, true );
+    docMaker.note( `The return value in the ${docMaker.iCode("rowActions")} item callbacks are used to refresh (true) or not (false) the table DOM.`, true );
 
-    MAKE_PARAGRAPH( `Check the ${ INLINE_PAGE( "Table API reference", "api/table" ) } to know more details about the Table Component.` );
+    docMaker.paragraph( `Check the ${ docMaker.iPage( "Table API reference", "api/table" ) } to know more details about the Table Component.` );
 
 </script>

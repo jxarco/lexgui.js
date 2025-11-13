@@ -1,18 +1,18 @@
 <script type="module">
     import { LX } from 'lexgui';
 
-    MAKE_HEADER( "Area.", "h1", "area" );
-    MAKE_PARAGRAPH( `Areas are the main container for a LexGUI interface. Inside they can contain panels and even other areas.` );
+    docMaker.header( "Area.", "h1", "area" );
+    docMaker.paragraph( `Areas are the main container for a LexGUI interface. Inside they can contain panels and even other areas.` );
 
-    MAKE_HEADER( "Constructor", "h2", "constructor" );
-    MAKE_CLASS_CONSTRUCTOR( "class LX.Area", [
+    docMaker.header( "Constructor", "h2", "constructor" );
+    docMaker.classCtor( "class LX.Area", [
         ["name", "String"],
         ["options", "Object"]
     ] );
 
-    MAKE_LINE_BREAK();
-    MAKE_PARAGRAPH( `The possible ${INLINE_CODE(`options`)} are the following:` );
-    MAKE_CODE_BULLET_LIST( [
+    docMaker.lineBreak();
+    docMaker.paragraph( `The possible ${docMaker.iCode(`options`)} are the following:` );
+    docMaker.codeBulletList( [
         ["id", "String", "Id of the element"],
         ["className", "String", "Add class to the element"],
         ["width", "Number", "Width of the area element [fit space]"],
@@ -24,66 +24,66 @@
         ["maxHeight", "Number", "Maximum height to be applied when resizing"]
     ] );
 
-    MAKE_HEADER( "Properties", "h2", "properties" );
-    MAKE_CODE_BULLET_LIST( [
+    docMaker.header( "Properties", "h2", "properties" );
+    docMaker.codeBulletList( [
         [".root", "HTMLElement", "Container element of the area"],
         [".sections", "Array", "If split, the two split areas"]
     ] );
     
-    MAKE_HEADER( "Methods", "h2", "methods" );
+    docMaker.header( "Methods", "h2", "methods" );
 
-    MAKE_CLASS_METHOD( ".addMenubar", `Creates a Menubar inside the area using data in Array format to create each of the entries and subentries.`, [
+    docMaker.classMethod( ".addMenubar", `Creates a Menubar inside the area using data in Array format to create each of the entries and subentries.`, [
         ["items", "Array"],
         ["options", "Object"],
-    ], `${ INLINE_PAGE( "Menubar", "components/menubar.html" ) }` );
+    ], `${ docMaker.iPage( "Menubar", "components/menubar.html" ) }` );
 
-    MAKE_CLASS_METHOD( ".addOverlayButtons", `Creates a group of buttons that can be positioned at specific area locations. 
+    docMaker.classMethod( ".addOverlayButtons", `Creates a group of buttons that can be positioned at specific area locations. 
 <code class='inline ref'>options.float = <span class="str">"htc"</span></code> where h: horizontal; v: vertical; t: top; m: middle; b: bottom; l: left; c: center; r: right.`, [
         ["buttons", "Array"],
         ["options", "Object"],
     ] );
 
-    MAKE_CLASS_METHOD( ".addPanel", `Creates a Panel and attaches automatically to the area.`, [
+    docMaker.classMethod( ".addPanel", `Creates a Panel and attaches automatically to the area.`, [
         ["options", "Object"],
-    ], `${ INLINE_PAGE( "Panel", "api/panel.html" ) }` );
+    ], `${ docMaker.iPage( "Panel", "api/panel.html" ) }` );
 
-    MAKE_CLASS_METHOD( ".addSidebar", `Creates a sidebar section inside the area. Use <code class='inline ref'><span class="typ">Sidebar</span>.add()</code> to create and append content to the sidebar.`, [
+    docMaker.classMethod( ".addSidebar", `Creates a sidebar section inside the area. Use <code class='inline ref'><span class="typ">Sidebar</span>.add()</code> to create and append content to the sidebar.`, [
         ["callback", "Function"],
         ["options", "Object"],
-    ], `${ INLINE_PAGE( "Sidebar", "components/sidebar.html" ) }` );
+    ], `${ docMaker.iPage( "Sidebar", "components/sidebar.html" ) }` );
 
-    MAKE_CLASS_METHOD( ".addTabs", `Creates a tab section inside the area. Use <code class='inline ref'><span class="typ">Tabs</span>.add()</code> to create and append content for each of the tabs.`, [
+    docMaker.classMethod( ".addTabs", `Creates a tab section inside the area. Use <code class='inline ref'><span class="typ">Tabs</span>.add()</code> to create and append content for each of the tabs.`, [
         ["options", "Object"],
-    ], `${ INLINE_PAGE( "Tabs", "components/tabs.html" ) }` );
+    ], `${ docMaker.iPage( "Tabs", "components/tabs.html" ) }` );
 
-    MAKE_CLASS_METHOD( ".attach", `Appends a child to the area (e.g. a Panel or any HTMLElement). If "content" has a root, then appends it, if not, append "content".`, [
+    docMaker.classMethod( ".attach", `Appends a child to the area (e.g. a Panel or any HTMLElement). If "content" has a root, then appends it, if not, append "content".`, [
         ["content", "HTMLElement"],
     ] );
 
-    MAKE_CLASS_METHOD( ".extend", `Hide 2nd area split.`, [] );
+    docMaker.classMethod( ".extend", `Hide 2nd area split.`, [] );
 
-    MAKE_CLASS_METHOD( ".propagateEvent", `Propagates an event recursively through all the inner sections of the area in the form <code class='inline ref'>area.eventName(boundingRect)</code>.`, [
+    docMaker.classMethod( ".propagateEvent", `Propagates an event recursively through all the inner sections of the area in the form <code class='inline ref'>area.eventName(boundingRect)</code>.`, [
         ["eventName", "String"],
     ] );
 
-    MAKE_CLASS_METHOD( ".reduce", `Show 2nd area split.`, [] );
+    docMaker.classMethod( ".reduce", `Show 2nd area split.`, [] );
 
-    MAKE_CLASS_METHOD( ".setLimitBox", `Set min and max width and height limits to be applied when resizing the area.`, [
+    docMaker.classMethod( ".setLimitBox", `Set min and max width and height limits to be applied when resizing the area.`, [
         ["minw", "Number"],
         ["minh", "Number"],
         ["maxw", "Number"],
         ["maxh", "Number"],
     ] );
 
-    MAKE_CLASS_METHOD( ".setSize", `Resize both sections of the area using an Array [width, height].`, [
+    docMaker.classMethod( ".setSize", `Resize both sections of the area using an Array [width, height].`, [
         ["size", "Array"]
     ] );
 
-    MAKE_CLASS_METHOD( ".split", `Splits the area into another 2 either vertically or horizontally.`, [
+    docMaker.classMethod( ".split", `Splits the area into another 2 either vertically or horizontally.`, [
         ["options", "Object"]
     ], "Array" );
 
-    MAKE_LINE_BREAK();
-    MAKE_LINE_BREAK();
+    docMaker.lineBreak();
+    docMaker.lineBreak();
 
 </script>

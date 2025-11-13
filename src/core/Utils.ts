@@ -732,23 +732,23 @@ function makeCollapsible( domEl: any, content: any, parent: any, options: any = 
     domEl.classList.add( "collapsible" );
 
     const collapsed = ( options.collapsed ?? true );
-    const actionIcon = LX.makeIcon( "Right" );
+    const actionIcon: HTMLElement = LX.makeIcon( "Right" );
     actionIcon.classList.add( "collapser" );
-    actionIcon.dataset[ "collapsed" ] = collapsed;
+    actionIcon.dataset[ "collapsed" ] = `${ collapsed }`;
     actionIcon.style.marginLeft = "auto";
     actionIcon.style.marginRight = "0.2rem";
 
     actionIcon.addEventListener( "click", function( e: any ) {
         e.preventDefault();
         e.stopPropagation();
-        if( LX.dataset[ "collapsed" ] )
+        if( this.dataset[ "collapsed" ] )
         {
-            delete LX.dataset[ "collapsed" ];
+            delete this.dataset[ "collapsed" ];
             content.style.display = "block";
         }
         else
         {
-            LX.dataset[ "collapsed" ] = true;
+            this.dataset[ "collapsed" ] = "true";
             content.style.display = "none";
         }
     } );
@@ -952,7 +952,7 @@ function makeBreadcrumb( items: any[], options: any = {} )
         if( item.items !== undefined )
         {
             const bDropdownTrigger = LX.makeContainer( ["auto", "auto"], `${ lastElement ? "" : "fg-secondary" }` );
-            bDropdownTrigger.listen( "click", ( e: any ) => {
+            LX.listen( bDropdownTrigger, "click", ( e: any ) => {
                 LX.addDropdownMenu( e.target, item.items, { side: "bottom", align: "start" });
             } );
             bDropdownTrigger.append( itemTitle );

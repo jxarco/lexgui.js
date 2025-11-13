@@ -1,20 +1,20 @@
 <script type="text/javascript">
 
-    MAKE_HEADER( "Tour.", "h1", "tour" );
+    docMaker.header( "Tour.", "h1", "tour" );
             
-    MAKE_PARAGRAPH( `A dynamic popup component that guides users step-by-step through the interface of an application. It highlights key features, explains functionality,
+    docMaker.paragraph( `A dynamic popup component that guides users step-by-step through the interface of an application. It highlights key features, explains functionality,
      and improves onboarding by providing contextual instructions and tips directly within the app.` );
-    MAKE_LINE_BREAK();
+    docMaker.lineBreak();
 
-    INSERT_IMAGE(`images/tour.png`, "dialogs" );
+    docMaker.image(`images/tour.png`, "dialogs" );
 
-    MAKE_HEADER("Quick Usage", "h2");
+    docMaker.header("Quick Usage", "h2");
 
-    MAKE_PARAGRAPH( `To create a guided tour in LexGUI.js, instantiate a new ${ INLINE_CODE( "LX.Tour" ) } with an array of step definitions and optional configuration settings. Each step is an object describing a UI element to highlight,
-     along with a title, descriptive content, the preferred side for the tooltip relative to the element and its alignment. Use the ${ INLINE_CODE( "reference" ) } field to bind the step to a DOM element or component,
-      ${ INLINE_CODE( "side" ) } to specify the tooltip placement ("top", "bottom", "left" or "right") and ${ INLINE_CODE( "align" ) } to specify the tooltip alignment ("start", "center" or "end").` );
+    docMaker.paragraph( `To create a guided tour in LexGUI.js, instantiate a new ${ docMaker.iCode( "LX.Tour" ) } with an array of step definitions and optional configuration settings. Each step is an object describing a UI element to highlight,
+     along with a title, descriptive content, the preferred side for the tooltip relative to the element and its alignment. Use the ${ docMaker.iCode( "reference" ) } field to bind the step to a DOM element or component,
+      ${ docMaker.iCode( "side" ) } to specify the tooltip placement ("top", "bottom", "left" or "right") and ${ docMaker.iCode( "align" ) } to specify the tooltip alignment ("start", "center" or "end").` );
 
-    MAKE_CODE( `@const@ @[var]exampleTour@ = @new@ @[cls]LX@.@[cls]Tour@([
+    docMaker.code( `@const@ @[var]exampleTour@ = @new@ @[cls]LX@.@[cls]Tour@([
     {
         title: @"Welcome to LexGUI.js"@,
         content: @"This is the main canvas where you can draw your application."@,
@@ -39,16 +39,16 @@
 ], { offset: @8@, radius: @12@, horizontalOffset: @12@, verticalOffset: @4@ });
 ` );
 
-    MAKE_PARAGRAPH( `Once ready, just call ${ INLINE_CODE( "Tour.begin()" ) } to start the tour!` );
+    docMaker.paragraph( `Once ready, just call ${ docMaker.iCode( "Tour.begin()" ) } to start the tour!` );
 
-    MAKE_HEADER("API Reference", "h2");
-     MAKE_CLASS_CONSTRUCTOR( "class LX.Tour", [
+    docMaker.header("API Reference", "h2");
+     docMaker.classCtor( "class LX.Tour", [
         ["steps", "Array"],
         ["options", "Object"]
     ] );
-    MAKE_LINE_BREAK();
-    MAKE_PARAGRAPH(`Where ${ INLINE_CODE( "steps" ) } is the array of steps, and ${ INLINE_CODE( "options" ) } can include the following:`);
-    MAKE_LINE_BREAK();
+    docMaker.lineBreak();
+    docMaker.paragraph(`Where ${ docMaker.iCode( "steps" ) } is the array of steps, and ${ docMaker.iCode( "options" ) } can include the following:`);
+    docMaker.lineBreak();
 
     {
         const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
@@ -62,16 +62,16 @@
                 ["horizontalOffset", "Number", "Horizontal margin of the highlighted area (replaces offset value)", "—"],
                 ["verticalOffset", "Number", "Vertical margin of the highlighted area (replaces offset value)", "—"]
             ].map( v => {
-                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+                return [ docMaker.iCode( v[ 0 ], "table" ), docMaker.iCode( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? docMaker.iCode( v[ 3 ], "table desc" ) : v[ 3 ] ];
             } )
         }, {});
     }
 
-    MAKE_HEADER( "Methods", "h3", "methods" );
-    MAKE_CLASS_METHOD( ".begin", `Starts the tour from the first step.`, [] );
-    MAKE_CLASS_METHOD( ".stop", `Stops and clears the tour.`, [] );
+    docMaker.header( "Methods", "h3", "methods" );
+    docMaker.classMethod( ".begin", `Starts the tour from the first step.`, [] );
+    docMaker.classMethod( ".stop", `Stops and clears the tour.`, [] );
 
-    MAKE_LINE_BREAK();
-    MAKE_LINE_BREAK();
+    docMaker.lineBreak();
+    docMaker.lineBreak();
 
 </script>

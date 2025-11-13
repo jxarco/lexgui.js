@@ -13,6 +13,7 @@ API:
 - LX.ADD_CUSTOM_COMPONENT -> LX.REGISTER_COMPONENT
 - Removed support for Blank panel component
 - LX.main_area -> LX.mainArea
+- Docmaker Extension API full changed
 
 Styling:
 - More TW classes

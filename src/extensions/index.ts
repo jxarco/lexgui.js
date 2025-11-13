@@ -2,7 +2,7 @@
 export * from "./AssetView";
 export * from "./Audio";
 export * from "./CodeEditor";
-// export * from "./DocMaker";
+export * from "./DocMaker";
 // export * from "./ImUi";
 // export * from "./NodeGraph";
 // export * from "./Timeline";

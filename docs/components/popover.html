@@ -1,9 +1,9 @@
 <script type="module">
     import { LX } from 'lexgui';
 
-    MAKE_HEADER( "Popover.", "h1", "popover" );
-    MAKE_PARAGRAPH( `Displays rich content in a portal, triggered by another elements, such as buttons.` );
-    MAKE_LINE_BREAK();
+    docMaker.header( "Popover.", "h1", "popover" );
+    docMaker.paragraph( `Displays rich content in a portal, triggered by another elements, such as buttons.` );
+    docMaker.lineBreak();
 
     {
         const area = new LX.Area( { className: "border rounded-lg shadow-lg bg-secondary overflow-hidden p-8", skipAppend: true, height: "auto" } );
@@ -20,8 +20,8 @@
         panel.addButton( null, "Open Popover", ( v, event ) => { new LX.Popover( event.target, [ popoverArea ], { side: "bottom" } ) }, { width: "20%", buttonClass: "contrast", className: "self-center" } );
     }
 
-    MAKE_HEADER("Quick Usage", "h2");
-    MAKE_CODE(`@const@ popoverArea = @new@ @[cls]LX@.@[cls]Area@( { className: @"p-4"@, skipAppend: @true@ } );
+    docMaker.header("Quick Usage", "h2");
+    docMaker.code(`@const@ popoverArea = @new@ @[cls]LX@.@[cls]Area@( { className: @"p-4"@, skipAppend: @true@ } );
 @const@ popoverPanel = popoverArea.@[mtd]addPanel@();
 @const@ formData = { username: @""@, password: { icon: @"Key"@, value: @""@, type: @"password"@ } };
 popoverPanel.@[mtd]addForm@(@"Test form"@, formData, (value, event) => {
@@ -33,18 +33,18 @@ panel.addButton( @null@, @"Open Popover"@, (v, event) => { @new@ @[cls]LX@.@[cls
     width: @"20%"@, buttonClass: @"contrast"@, className: @"self-center"@
 } );`, "js");
 
-    MAKE_NOTE( `${ INLINE_CODE( "onPopover()" ) } is called on any passed component that defines it.`, false, "Tip", "Info" );
+    docMaker.note( `${ docMaker.iCode( "onPopover()" ) } is called on any passed component that defines it.`, false, "Tip", "Info" );
 
-    MAKE_HEADER("API Reference", "h2");
-    MAKE_CLASS_CONSTRUCTOR( "class LX.Popover", [
+    docMaker.header("API Reference", "h2");
+    docMaker.classCtor( "class LX.Popover", [
         ["trigger", "HTMLElement"],
         ["content", "HTMLElement|Array"],
         ["options", "Object"]
     ] );
-    MAKE_LINE_BREAK();
-    MAKE_PARAGRAPH(`Where ${ INLINE_CODE( "trigger" ) } is the HTML element used to relocate; ${ INLINE_CODE( "content" ) } is the element or array of elements contained inside the Popover,
-    and ${ INLINE_CODE( "options" ) } can include the following:`);
-    MAKE_LINE_BREAK();
+    docMaker.lineBreak();
+    docMaker.paragraph(`Where ${ docMaker.iCode( "trigger" ) } is the HTML element used to relocate; ${ docMaker.iCode( "content" ) } is the element or array of elements contained inside the Popover,
+    and ${ docMaker.iCode( "options" ) } can include the following:`);
+    docMaker.lineBreak();
 
     {
         const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
@@ -60,17 +60,17 @@ panel.addButton( @null@, @"Open Popover"@, (v, event) => { @new@ @[cls]LX@.@[cls
                 ["sideOffset", `Number`, `Number of pixels for the alignment margin`, `0`],
                 ["reference", `HTMLElement`, `Secondary element used for relocating`, `—`],
             ].map( v => {
-                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+                return [ docMaker.iCode( v[ 0 ], "table" ), docMaker.iCode( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? docMaker.iCode( v[ 3 ], "table desc" ) : v[ 3 ] ];
             } )
         }, {});
     }
 
-    MAKE_HEADER( "Methods", "h3", "methods" );
+    docMaker.header( "Methods", "h3", "methods" );
 
-    MAKE_CLASS_METHOD( ".destroy", `Closes the Popover, removes it from the DOM, and restores any modal lock state. Also removes the global event listeners for outside click and focus.`, [
+    docMaker.classMethod( ".destroy", `Closes the Popover, removes it from the DOM, and restores any modal lock state. Also removes the global event listeners for outside click and focus.`, [
     ] );
 
-    MAKE_LINE_BREAK();
-    MAKE_LINE_BREAK();
+    docMaker.lineBreak();
+    docMaker.lineBreak();
 
 </script>

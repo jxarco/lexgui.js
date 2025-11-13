@@ -2,10 +2,10 @@
 
     import { LX } from 'lexgui';
 
-    MAKE_HEADER( "Icons.", "h1", "icons" );
+    docMaker.header( "Icons.", "h1", "icons" );
 
-    MAKE_PARAGRAPH( `LexGUI makes use of ${ INLINE_LINK( "Lucide Icons", "https://lucide.dev/" ) }, check its documentation to know more. On top of that, LexGUI overrides some of the icons and offers a collection of solid variants, collected mostly from
-    ${ INLINE_LINK( "FontAwesome", "https://fontawesome.com/" ) }, ${ INLINE_LINK( "SVGRepo", "https://www.svgrepo.com/" ) } and ${ INLINE_LINK( "Iconify.design", "https://iconify.design/" ) }:` );
+    docMaker.paragraph( `LexGUI makes use of ${ docMaker.iLink( "Lucide Icons", "https://lucide.dev/" ) }, check its documentation to know more. On top of that, LexGUI overrides some of the icons and offers a collection of solid variants, collected mostly from
+    ${ docMaker.iLink( "FontAwesome", "https://fontawesome.com/" ) }, ${ docMaker.iLink( "SVGRepo", "https://www.svgrepo.com/" ) } and ${ docMaker.iLink( "Iconify.design", "https://iconify.design/" ) }:` );
     
     {
         const params = new URLSearchParams( document.location.search );
@@ -95,7 +95,7 @@
                     iconDiv.classList.add( "hidden" );
                 }
 
-                iconDiv.listen( "click", () => {
+                LX.listen( iconDiv, "click", () => {
                     copySVG( svg, event );
                 } );
             }
@@ -106,11 +106,11 @@
         content.appendChild( area.root );
     }
 
-    MAKE_PARAGRAPH( `If neither Lucide or LexGUI don't have the icon you are looking for, get the SVG string of your icon from anywhere (it must contain one path) and use ${ INLINE_CODE( "LX.registerIcon(name, svgString, variant, aliases)" ) }
+    docMaker.paragraph( `If neither Lucide or LexGUI don't have the icon you are looking for, get the SVG string of your icon from anywhere (it must contain one path) and use ${ docMaker.iCode( "LX.registerIcon(name, svgString, variant, aliases)" ) }
     to allow using it inside LexGUI. ` );
 
-    MAKE_LINE_BREAK();
-    MAKE_LINE_BREAK();
+    docMaker.lineBreak();
+    docMaker.lineBreak();
 
     </script>
 

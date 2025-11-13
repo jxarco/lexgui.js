@@ -1,18 +1,18 @@
 <script type="module">
     import { LX } from 'lexgui';
 
-    MAKE_HEADER( "BaseComponent.", "h1", "base-component" );
+    docMaker.header( "BaseComponent.", "h1", "base-component" );
 
-    MAKE_HEADER( "Constructor", "h2", "constructor" );
-    MAKE_CLASS_CONSTRUCTOR( "class LX.BaseComponent", [
+    docMaker.header( "Constructor", "h2", "constructor" );
+    docMaker.classCtor( "class LX.BaseComponent", [
         ["name", "String"],
         ["type", "Number"],
         ["options", "Object"],
     ] );
 
-    MAKE_LINE_BREAK();
-    MAKE_PARAGRAPH( `The possible ${INLINE_CODE(`options`)} are the following:` );
-    MAKE_CODE_BULLET_LIST( [
+    docMaker.lineBreak();
+    docMaker.paragraph( `The possible ${docMaker.iCode(`options`)} are the following:` );
+    docMaker.codeBulletList( [
         ["className", "String", "Add class to DOM element"],
         ["id", "String", "Set DOM id to the DOM element"],
         ["hideName", "Boolean", "Hide the component name"],
@@ -24,24 +24,24 @@
         ["title", "String", "HTML title attribute for the DOM element"]
     ] );
 
-    MAKE_HEADER( "Properties", "h2", "properties" );
-    MAKE_CODE_BULLET_LIST( [
+    docMaker.header( "Properties", "h2", "properties" );
+    docMaker.codeBulletList( [
         [".name", "String", "Component name"],
         [".root", "HTMLElement", "Container element of the component"],
         [".type", "Number", "Component type"]
     ] );
     
-    MAKE_HEADER( "Methods", "h2", "methods" );
+    docMaker.header( "Methods", "h2", "methods" );
 
-    MAKE_CLASS_METHOD( ".set", `Sets the value of the component. Type depends on the specific component.`, [
+    docMaker.classMethod( ".set", `Sets the value of the component. Type depends on the specific component.`, [
         ["value", "*"]
     ] );
 
-    MAKE_CLASS_METHOD( ".typeName", `Retrieves the name of the component type.`, [], "*" );
+    docMaker.classMethod( ".typeName", `Retrieves the name of the component type.`, [], "*" );
 
-    MAKE_CLASS_METHOD( ".value", `Retrieves the value of the component. Value type depends on the specific component.`, [], "*" );
+    docMaker.classMethod( ".value", `Retrieves the value of the component. Value type depends on the specific component.`, [], "*" );
 
-    MAKE_LINE_BREAK();
-    MAKE_LINE_BREAK();
+    docMaker.lineBreak();
+    docMaker.lineBreak();
 
 </script>

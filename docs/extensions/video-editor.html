@@ -1,14 +1,14 @@
 <script type="text/javascript">
     // Header
-    MAKE_HEADER("Video Editor.", "h1", "video-editor");
+    docMaker.header("Video Editor.", "h1", "video-editor");
 
     // Overview
-    MAKE_PARAGRAPH("Adds a rich video trimming/cropping UI with a time bar. It integrates with LX panels/areas and exposes controls for playback, start/end trimming, current time, and crop region, all with theming and responsive interaction.");
+    docMaker.paragraph("Adds a rich video trimming/cropping UI with a time bar. It integrates with LX panels/areas and exposes controls for playback, start/end trimming, current time, and crop region, all with theming and responsive interaction.");
 
     // Quick usage
-    MAKE_HEADER("Quick Usage", "h2");
-    MAKE_PARAGRAPH("Instantiate the editor by providing an LX area and options. You can supply a video source or element, enable crop, and react to time changes:");
-    MAKE_CODE(`@const@ editor = @new@ @[cls]LX@.@[cls]VideoEditor@(area, {
+    docMaker.header("Quick Usage", "h2");
+    docMaker.paragraph("Instantiate the editor by providing an LX area and options. You can supply a video source or element, enable crop, and react to time changes:");
+    docMaker.code(`@const@ editor = @new@ @[cls]LX@.@[cls]VideoEditor@(area, {
   src: @"video.mp4"@,
   crop: @true@,
   controls: @true@
@@ -22,11 +22,11 @@ editor.@[mtd]onCropArea@ = (rect) => {
   console.log(@"Cropped area:"@, rect);
 };`, "js");
 
-    MAKE_HEADER("API Reference", "h2");
+    docMaker.header("API Reference", "h2");
 
-    MAKE_HEADER("TimeBar", "h3");
-    MAKE_PARAGRAPH("Low-level timeline bar used internally for trimming and current time display. It handles drawing trim handles, current time marker, and reacts to theme changes.");
-    MAKE_CODE_BULLET_LIST([
+    docMaker.header("TimeBar", "h3");
+    docMaker.paragraph("Low-level timeline bar used internally for trimming and current time display. It handles drawing trim handles, current time marker, and reacts to theme changes.");
+    docMaker.codeBulletList([
         ["constructor(area, type, options = {})", "Create a time bar. `type` is one of `TimeBar.TIMEBAR_PLAY` or `TIMEBAR_TRIM`. Options include `markerWidth`, `markerHeight`, `offset`, and `barHeight`."],
         ["updateTheme()", "Refreshes colors based on current theme."],
         ["update(x)", "Sets current position to `x` and redraws."],
@@ -34,20 +34,20 @@ editor.@[mtd]onCropArea@ = (rect) => {
         ["resize(size)", "Recomputes internal positions when the container size changes."],
     ]);
 
-    MAKE_HEADER("VideoEditor", "h3");
-    MAKE_PARAGRAPH(`High-level editor that embeds video playback with trimming and optional cropping overlay. Provides playback controls, time synchronization, and crop management. 
+    docMaker.header("VideoEditor", "h3");
+    docMaker.paragraph(`High-level editor that embeds video playback with trimming and optional cropping overlay. Provides playback controls, time synchronization, and crop management. 
     It has to be appended to an existing area. It means that it can be created anywhere in the document window (e.g. dialogs, panels, areas, etc.), since to create an area it's as easy as instancing a new one.
     When creating it, you can use different options to adapt the editor to your needs:` );
-    MAKE_CODE_BULLET_LIST( [
+    docMaker.codeBulletList( [
         ["src", "String", "Video URL"],
         ["video", "HTMLVideoElement", "Video native element"],
         ["crop", "Boolean", "Enable crop functionality"],
         ["controls", "Boolean", "Enable playing ontrols for the video"]
     ] );
 
-    MAKE_HEADER("Methods", "h4");
+    docMaker.header("Methods", "h4");
 
-    MAKE_CODE_BULLET_LIST([
+    docMaker.codeBulletList([
         ["showCropArea()", "Displays the crop overlay and masks the underlying video."],
         ["hideCropArea()", "Hides the crop overlay and clears masking."],
         ["showControls() / hideControls()", "Toggle the visibility of the playback/trimming controls."],
@@ -61,9 +61,9 @@ editor.@[mtd]onCropArea@ = (rect) => {
         ["unbind()", "Tears down listeners, pauses video, and clears playback state."],
     ]);
 
-    MAKE_HEADER("Callbacks / Hooks", "h3");
-    MAKE_PARAGRAPH("You can assign handlers to respond to user interaction and internal state changes:");
-    MAKE_CODE_BULLET_LIST([
+    docMaker.header("Callbacks / Hooks", "h3");
+    docMaker.paragraph("You can assign handlers to respond to user interaction and internal state changes:");
+    docMaker.codeBulletList([
         ["onChangeCurrent", "Triggered when current time marker changes (x position)."],
         ["onChangeStart", "Triggered when trim start marker moves."],
         ["onChangeEnd", "Triggered when trim end marker moves."],
@@ -72,5 +72,5 @@ editor.@[mtd]onCropArea@ = (rect) => {
         ["onCropArea", "Called when cropping region changes after dragging/resizing."],
     ]);
 
-    MAKE_NOTE("If you dynamically resize the parent area, the editor listens to resize events and adjusts the time bar and crop overlay accordingly. Call `unbind()` before discarding the instance to avoid lingering listeners.", false, "Tip", "Info");
+    docMaker.note("If you dynamically resize the parent area, the editor listens to resize events and adjusts the time bar and crop overlay accordingly. Call `unbind()` before discarding the instance to avoid lingering listeners.", false, "Tip", "Info");
 </script>

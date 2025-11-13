@@ -1,9 +1,9 @@
 <script type="text/javascript">
 
-    MAKE_HEADER( "Code Editor.", "h1", "code-editor" );
+    docMaker.header( "Code Editor.", "h1", "code-editor" );
 
-    MAKE_PARAGRAPH( `Provides an embedded editing tool with syntax highlighting, line numbers, and editing conveniences like autocomplete and undo/redo.` );
-    MAKE_LINE_BREAK();
+    docMaker.paragraph( `Provides an embedded editing tool with syntax highlighting, line numbers, and editing conveniences like autocomplete and undo/redo.` );
+    docMaker.lineBreak();
 
     {
         const area = new LX.Area( { skipAppend: true, height: "500px" } );
@@ -14,9 +14,9 @@
         area.root.className += " border rounded-lg shadow-lg bg-secondary overflow-hidden";
     }
 
-    MAKE_HEADER("Quick Usage", "h2");
-    MAKE_PARAGRAPH( `The Code Editor component supports the following language highlightings:` );
-    MAKE_CODE_BULLET_LIST( [
+    docMaker.header("Quick Usage", "h2");
+    docMaker.paragraph( `The Code Editor component supports the following language highlightings:` );
+    docMaker.codeBulletList( [
         "Plain text, Markdown",
         "HTML, CSS, JavaScript, TypeScript, JSON",
         "C, C++",
@@ -29,28 +29,28 @@
         "PHP"
     ] );
 
-    MAKE_HEADER( "Creating the editor", "h3", "init" );
+    docMaker.header( "Creating the editor", "h3", "init" );
 
-    MAKE_PARAGRAPH( `The Editor has to be appended to an existing area. It means that it can be created anywhere in the document window (e.g. dialogs, panels, areas, etc.), since to create an area it's as easy as instancing a new
+    docMaker.paragraph( `The Editor has to be appended to an existing area. It means that it can be created anywhere in the document window (e.g. dialogs, panels, areas, etc.), since to create an area it's as easy as instancing a new
     one. The following lines instantiate the DOM element for the editor:` );
-    MAKE_CODE( `@let@ @[var]editor@ = @new@ @[cls]LX@.@[cls]CodeEditor@( @[var]area@, @[var]options@ );` );
+    docMaker.code( `@let@ @[var]editor@ = @new@ @[cls]LX@.@[cls]CodeEditor@( @[var]area@, @[var]options@ );` );
 
-    MAKE_HEADER( "Opening files and new tabs", "h3", "using-tabs" );
-    MAKE_PARAGRAPH( `To load existing files you must use ${INLINE_CODE("CodeEditor.loadFile( filename, options )")}. This will open a new tab with the code in it using as options:` );
-    MAKE_CODE_BULLET_LIST( [
+    docMaker.header( "Opening files and new tabs", "h3", "using-tabs" );
+    docMaker.paragraph( `To load existing files you must use ${docMaker.iCode("CodeEditor.loadFile( filename, options )")}. This will open a new tab with the code in it using as options:` );
+    docMaker.codeBulletList( [
         ["language", "String", "Override the language highlighting for the new loaded file"]
     ] );
 
-    MAKE_PARAGRAPH( `Tab Events:` );
-    MAKE_CODE_BULLET_LIST( [
+    docMaker.paragraph( `Tab Events:` );
+    docMaker.codeBulletList( [
         ["Double click to tab space", "Adds new empty tab"],
         ["Middle click to tab", "Closes tab"]
     ] );
 
-    MAKE_HEADER( "Supporting new languages", "h3", "lang-support" );
-    MAKE_PARAGRAPH(`It is allowed to register new languages with custom highlighting, reserved words, and parsing rules. Use the static method ${INLINE_CODE("CodeEditor.REGISTER_LANGUAGE(name, options, def, rules)")} to extend the editor with your own syntax support.`);
+    docMaker.header( "Supporting new languages", "h3", "lang-support" );
+    docMaker.paragraph(`It is allowed to register new languages with custom highlighting, reserved words, and parsing rules. Use the static method ${docMaker.iCode("CodeEditor.REGISTER_LANGUAGE(name, options, def, rules)")} to extend the editor with your own syntax support.`);
 
-    MAKE_CODE_BULLET_LIST([
+    docMaker.codeBulletList([
         ["name (String)", "Unique identifier for the language (e.g. 'myLang')."],
         ["options (Object)", "Configuration for extension, comment styles, case sensitivity, and other parsing options."],
         [
@@ -78,9 +78,9 @@
     ]);
 
     // Rules
-    MAKE_HEADER("Highlight Rules", "h3");
-    MAKE_PARAGRAPH(`The ${INLINE_CODE("rules")} array contains objects describing how to highlight tokens. Each rule has a ${INLINE_CODE("test")} function, an optional ${INLINE_CODE("action")}, and a ${INLINE_CODE("className")} to apply.`);
-    MAKE_CODE(`[
+    docMaker.header("Highlight Rules", "h3");
+    docMaker.paragraph(`The ${docMaker.iCode("rules")} array contains objects describing how to highlight tokens. Each rule has a ${docMaker.iCode("test")} function, an optional ${docMaker.iCode("action")}, and a ${docMaker.iCode("className")} to apply.`);
+    docMaker.code(`[
   { test: ctx => ctx.inBlockComment, className: @"cm-com"@ },
   { test: ctx => ctx.inString, action: (ctx, editor) => editor.@[mtd]_appendStringToken@(ctx.token), discard: @true@ },
   { test: ctx => ctx.token.@[mtd]startsWith@(ctx.singleLineCommentToken), className: @"cm-com"@ },
@@ -90,11 +90,11 @@
   { test: ctx => ctx.lang.usePreprocessor && ctx.token.@[mtd]includes@(@'#'@), className: @"cm-ppc"@ }
 ];`, "js");
 
-    MAKE_NOTE(`The ${INLINE_CODE("discard")} option is used to skip the token, and the result of any action will be stored in ${INLINE_CODE("ctx.discardToken")}.`, false, "Tip", "Info");
+    docMaker.note(`The ${docMaker.iCode("discard")} option is used to skip the token, and the result of any action will be stored in ${docMaker.iCode("ctx.discardToken")}.`, false, "Tip", "Info");
 
     // Example
-    MAKE_HEADER("Example: Registering a Custom Language", "h3");
-    MAKE_CODE(`@[cls]CodeEditor@.REGISTER_LANGUAGE(@"mylang"@, {
+    docMaker.header("Example: Registering a Custom Language", "h3");
+    docMaker.code(`@[cls]CodeEditor@.REGISTER_LANGUAGE(@"mylang"@, {
     ext: [ @"ml"@, @"mlb"@ ],
     singleLineComments: @true@,
     singleLineCommentToken: @"//"@,
@@ -113,16 +113,16 @@
 ]);`, "js");
 
     // Tip
-    MAKE_NOTE("Start with basic keyword and comment highlighting, then extend rules as needed. This modular approach makes it easier to debug syntax definitions.", false, "Tip", "Info");
+    docMaker.note("Start with basic keyword and comment highlighting, then extend rules as needed. This modular approach makes it easier to debug syntax definitions.", false, "Tip", "Info");
 
-    MAKE_HEADER("API Reference", "h2");
-    MAKE_CLASS_CONSTRUCTOR( "class LX.CodeEditor", [
+    docMaker.header("API Reference", "h2");
+    docMaker.classCtor( "class LX.CodeEditor", [
         ["area", "LX.Area"],
         ["options", "Object"]
     ] );
-    MAKE_LINE_BREAK();
-    MAKE_PARAGRAPH(`Where ${ INLINE_CODE( "area" ) } is the area to be attached to, and ${ INLINE_CODE( "options" ) } can include the following:`);
-    MAKE_LINE_BREAK();
+    docMaker.lineBreak();
+    docMaker.paragraph(`Where ${ docMaker.iCode( "area" ) } is the area to be attached to, and ${ docMaker.iCode( "options" ) } can include the following:`);
+    docMaker.lineBreak();
 
     {
         const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
@@ -159,12 +159,12 @@
                 ["skipInfo", "Boolean", "Show or hide the editor status bar panel at the bottom (Zoom, Line, Column, etc.)", "false"],
                 ["skipTabs", "Boolean", "Don't use tab-style editor for showing opened files", "false"],
             ].map( v => {
-                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] ? v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] : "—" ];
+                return [ docMaker.iCode( v[ 0 ], "table" ), docMaker.iCode( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] ? v[ 3 ] != "—" ? docMaker.iCode( v[ 3 ], "table desc" ) : v[ 3 ] : "—" ];
             } )
         }, {});
     }
 
-    MAKE_LINE_BREAK();
-    MAKE_LINE_BREAK();
+    docMaker.lineBreak();
+    docMaker.lineBreak();
 
 </script>

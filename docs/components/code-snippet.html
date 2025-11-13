@@ -1,9 +1,9 @@
 <script type="text/javascript">
 
-    MAKE_HEADER("Code Snippet", "h1", "code-snippet");
+    docMaker.header("Code Snippet", "h1", "code-snippet");
 
-    MAKE_PARAGRAPH("The Code Snippet helper wraps a read-only instance of the CodeEditor to render syntax-highlighted, annotated code samples. It supports diff-style added/removed line marking, optional window chrome, custom naming/tabs, and toggling gutters (line numbers).");
-    MAKE_LINE_BREAK();
+    docMaker.paragraph("The Code Snippet helper wraps a read-only instance of the CodeEditor to render syntax-highlighted, annotated code samples. It supports diff-style added/removed line marking, optional window chrome, custom naming/tabs, and toggling gutters (line numbers).");
+    docMaker.lineBreak();
 
     {
         const area = new LX.Area( { skipAppend: true, height: "auto", className: "flex flex-col gap-4" } );
@@ -63,8 +63,8 @@
         area.root.className += " items-center p-4 border rounded-lg shadow-lg bg-secondary overflow-hidden";
     }
 
-    MAKE_HEADER("Quick Usage", "h2");
-    MAKE_CODE(`@const@ snippet = @[cls]LX@.@[mtd]makeCodeSnippet@(
+    docMaker.header("Quick Usage", "h2");
+    docMaker.code(`@const@ snippet = @[cls]LX@.@[mtd]makeCodeSnippet@(
   code,
   [@"780px"@, @"auto"@],
   {
@@ -78,12 +78,12 @@
 );
 document.body.@[mtd]appendChild@(snippet);`, "js");
 
-    MAKE_HEADER("API Reference", "h2");
-    MAKE_CLASS_CONSTRUCTOR("function LX.makeCodeSnippet", [ [ "code", "String" ], [ "size", "Array" ], [ "options", "Object = {}" ] ]);
-    MAKE_LINE_BREAK();
-    MAKE_PARAGRAPH(`Where ${ INLINE_CODE( "code" ) } is the source code to display, ${ INLINE_CODE( "size" ) } is the size of the snippet container ([width, height]), and ${ INLINE_CODE( "options" ) } can include the following:`)
+    docMaker.header("API Reference", "h2");
+    docMaker.classCtor("function LX.makeCodeSnippet", [ [ "code", "String" ], [ "size", "Array" ], [ "options", "Object = {}" ] ]);
+    docMaker.lineBreak();
+    docMaker.paragraph(`Where ${ docMaker.iCode( "code" ) } is the source code to display, ${ docMaker.iCode( "size" ) } is the size of the snippet container ([width, height]), and ${ docMaker.iCode( "options" ) } can include the following:`)
 
-    MAKE_CODE_BULLET_LIST([
+    docMaker.codeBulletList([
         ["language", "String", "Language name for syntax highlighting. Defaults to plain text."],
         ["windowMode", "Boolean", "If true, prepends faux window control buttons (red/yellow/green) to mimic a native window title bar."],
         ["lineNumbers", "Boolean", "Controls display of the gutter. `false` hides line numbers; defaults to `true`."],

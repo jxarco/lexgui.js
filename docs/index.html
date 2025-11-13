@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <title>Documentation - LexGUI</title>
     <link rel="stylesheet" href="../build/lexgui.css">
-    <link rel="stylesheet" href="../build/lexgui-docs.css">
     <link rel="icon" href="../images/favicon.png">
     <script type="importmap">
         {
@@ -21,17 +20,19 @@
     <script type="module">
 
         import { LX } from 'lexgui';
-        import 'lexgui/extensions/codeeditor.js';
-        import 'lexgui/extensions/docmaker.js';
+        import { CodeEditor } from 'lexgui/extensions/codeeditor.js';
+        import { DocMaker } from 'lexgui/extensions/docmaker.js';
+        import { AssetView } from 'lexgui/extensions/AssetView.js';
 
         window.LX = LX;
 
+        globalThis.docMaker = new DocMaker();
         const mobile = navigator && /Android|iPhone/i.test( navigator.userAgent );
         const content = document.getElementById('content');
         const oldScripts = [];
         let path = null;
 
-        SET_DOM_TARGET( content );
+        docMaker.setDomTarget( content );
 
         window.setPath = function( startPage ) {
 
@@ -148,7 +149,7 @@
 
             const codeArea = new LX.Area({ className: "rounded overflow-hidden", skipAppend: true, height: "auto" });
             area.attach( codeArea.root );
-            const codeEditor = new LX.CodeEditor( codeArea, { name: `${componentName.toLowerCase().replace( /\s/g, '_' )}.js`, onrun: runCode, skipInfo: true, allowAddScripts: false, language: "JavaScript" } );
+            const codeEditor = new CodeEditor( codeArea, { name: `${componentName.toLowerCase().replace( /\s/g, '_' )}.js`, onrun: runCode, skipInfo: true, allowAddScripts: false, language: "JavaScript" } );
 
             let code = onPanel.toString();
             let lines = code.split( '\n' ).slice( 1, -1 );

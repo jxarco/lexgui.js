@@ -1,9 +1,9 @@
 <script type="module">
     import { LX } from 'lexgui';
 
-    MAKE_HEADER( "AreaOverlayButtons.", "h1", "area-overlay-buttons" );
-    MAKE_PARAGRAPH( `Component that allows you to create an overlay of buttons on top of an area. It is useful for creating interactive areas with multiple buttons that can be used to trigger different actions.` );
-    MAKE_LINE_BREAK();
+    docMaker.header( "AreaOverlayButtons.", "h1", "area-overlay-buttons" );
+    docMaker.paragraph( `Component that allows you to create an overlay of buttons on top of an area. It is useful for creating interactive areas with multiple buttons that can be used to trigger different actions.` );
+    docMaker.lineBreak();
 
     {
         const area = new LX.Area( { skipAppend: true, height: "200px" } );
@@ -56,8 +56,8 @@
         area.root.className += " border rounded-lg shadow-lg bg-tertiary overflow-hidden";
     }
 
-    MAKE_HEADER("Quick Usage", "h2");
-    MAKE_CODE(`@const@ overlayButtons = area.@[mtd]addOverlayButtons@([
+    docMaker.header("Quick Usage", "h2");
+    docMaker.code(`@const@ overlayButtons = area.@[mtd]addOverlayButtons@([
     [
         { name: @"Select"@, icon: @"MousePointer"@, callback: (value, event) => console.@[mtd]log@(value), selectable: @true@ },
         { name: @"Move"@, icon: @"Move"@, callback: (value, event) => console.@[mtd]log@(value), selectable: @true@ },
@@ -71,15 +71,15 @@
     ]
 ], { float: @"htc"@ });`, "js");
 
-    MAKE_HEADER("API Reference", "h2");
-    MAKE_CLASS_CONSTRUCTOR( "class LX.AreaOverlayButtons", [
+    docMaker.header("API Reference", "h2");
+    docMaker.classCtor( "class LX.AreaOverlayButtons", [
         ["area", "Area"],
         ["buttonsArray", "Array"],
         ["options", "Object"]
     ] );
-    MAKE_LINE_BREAK();
-    MAKE_PARAGRAPH(`Where ${ INLINE_CODE( "area" ) } is the area to be attached to, ${ INLINE_CODE( "buttonsArray" ) } is the array that contains all the buttons data, and ${ INLINE_CODE( "options" ) } can include the following:`)
-    MAKE_LINE_BREAK();
+    docMaker.lineBreak();
+    docMaker.paragraph(`Where ${ docMaker.iCode( "area" ) } is the area to be attached to, ${ docMaker.iCode( "buttonsArray" ) } is the array that contains all the buttons data, and ${ docMaker.iCode( "options" ) } can include the following:`)
+    docMaker.lineBreak();
 
     {
         const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
@@ -90,12 +90,12 @@
             body: [
                 ["float", "String", `Placement of the buttons (h: horizontal, v: vertical, t: top, m: middle, b: bottom, l: left, c: center, r: right)`, `"htc"`],
             ].map( v => {
-                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+                return [ docMaker.iCode( v[ 0 ], "table" ), docMaker.iCode( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? docMaker.iCode( v[ 3 ], "table desc" ) : v[ 3 ] ];
             } )
         }, {});
     }
 
-    MAKE_HEADER( "Properties", "h2", "properties" );
+    docMaker.header( "Properties", "h2", "properties" );
 
     {
         const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
@@ -107,19 +107,19 @@
             body: [
                 ["buttons", "Object", "Map containing all the generated components.", "—"]
             ].map( v => {
-                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+                return [ docMaker.iCode( v[ 0 ], "table" ), docMaker.iCode( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? docMaker.iCode( v[ 3 ], "table desc" ) : v[ 3 ] ];
             } )
         }, {});
     }
 
-    // MAKE_HEADER( "Methods", "h2", "methods" );
+    // docMaker.header( "Methods", "h2", "methods" );
 
-    // MAKE_CLASS_METHOD( ".addMenubar", `Creates a Menubar inside the area using data in Array format to create each of the entries and subentries.`, [
+    // docMaker.classMethod( ".addMenubar", `Creates a Menubar inside the area using data in Array format to create each of the entries and subentries.`, [
     //     ["items", "Array"],
     //     ["options", "Object"],
-    // ], `${ INLINE_PAGE( "Menubar", "api/menubar.html" ) }` );
+    // ], `${ docMaker.iPage( "Menubar", "api/menubar.html" ) }` );
 
-    MAKE_LINE_BREAK();
-    MAKE_LINE_BREAK();
+    docMaker.lineBreak();
+    docMaker.lineBreak();
 
 </script>

@@ -2,7 +2,7 @@
     import { LX } from "lexgui"
     import { KeyFramesTimeline } from "lexgui/extensions/timeline.js"
 
-    MAKE_HEADER( "Keyframes Timeline", "h1", "keyframes-timeline" );
+    docMaker.header( "Keyframes Timeline", "h1", "keyframes-timeline" );
 
     {
         const keyframestimeline = new KeyFramesTimeline( "KeyframesId", { title: "Keyframes Timeline" } );
@@ -98,7 +98,7 @@
 
         render();
     }
-    MAKE_CODE( `@let@ kfTimeline = @new@ LX.@[cls]KeyframesTimeline@(@"KeyTimelineUniqueID"@, {title: @"Keyframes Timeline"@});
+    docMaker.code( `@let@ kfTimeline = @new@ LX.@[cls]KeyframesTimeline@(@"KeyTimelineUniqueID"@, {title: @"Keyframes Timeline"@});
 panel.@[mtd]attach@(kfTimeline.root);` );
 
    const baseAnimationClipOptions = [
@@ -108,30 +108,30 @@ panel.@[mtd]attach@(kfTimeline.root);` );
             [".tracks", "Array", "Tracks of the animation clip"],
         ];
 
-    MAKE_HEADER( "Keyframes AnimationClip", "h2", "" );
-    MAKE_PARAGRAPH( `New animations should be created and set to the timeline through the ${INLINE_CODE("setAnimationClip")} function, that (optionaly) expects an object with the same attributes as an animationClip (see below). )`);
-    MAKE_PARAGRAPH( `Tracks will also be processed. Missing attributes will be set to default values.`);
-    MAKE_CODE_BULLET_LIST( baseAnimationClipOptions.concat([
+    docMaker.header( "Keyframes AnimationClip", "h2", "" );
+    docMaker.paragraph( `New animations should be created and set to the timeline through the ${docMaker.iCode("setAnimationClip")} function, that (optionaly) expects an object with the same attributes as an animationClip (see below). )`);
+    docMaker.paragraph( `Tracks will also be processed. Missing attributes will be set to default values.`);
+    docMaker.codeBulletList( baseAnimationClipOptions.concat([
         [".tracksPerGroup", "Object", "maps groupIds (Strings) to an array of tracks"],
     ]) );
-    MAKE_PARAGRAPH( `${INLINE_CODE("instantiateAnimationClip")} method can be used to duplicate animationClips through the ${INLINE_CODE("clone")} argument` );
+    docMaker.paragraph( `${docMaker.iCode("instantiateAnimationClip")} method can be used to duplicate animationClips through the ${docMaker.iCode("clone")} argument` );
 
 
-    MAKE_HEADER( "Keyframes Tracks", "h2", "" );
-    MAKE_PARAGRAPH( `New Tracks should be added to the animationClip clip through the ${INLINE_CODE("addNewTrack")} function, that (optionaly) expects an object of the same attributes as a track (see below).`);
-    MAKE_PARAGRAPH(`All attributes except ${INLINE_CODE("isTrack")} and ${INLINE_CODE("trackIdx")} will be retrieved from the track information sent to the function, if available.`);
-    MAKE_PARAGRAPH(`${INLINE_CODE("id")} and ${INLINE_CODE("name")} attributes will me mapped to the ${INLINE_CODE("id")} of the track (in this order of precedence).`);
-    MAKE_CODE_BULLET_LIST( [
-        [".isTrack", "Boolean", `${INLINE_CODE("Read-Only")} Identifies it as a track`],
-        [".id", "String", `Name of the track. If the track is currently visible, changing its id will require a call to ${INLINE_CODE("updateLeftPanel")}`],
-        [".active", "Boolean", `${INLINE_CODE("Read-Only")} Whether it is disabled or not. Use ${INLINE_CODE("setTrackState")} to modify it.`],
+    docMaker.header( "Keyframes Tracks", "h2", "" );
+    docMaker.paragraph( `New Tracks should be added to the animationClip clip through the ${docMaker.iCode("addNewTrack")} function, that (optionaly) expects an object of the same attributes as a track (see below).`);
+    docMaker.paragraph(`All attributes except ${docMaker.iCode("isTrack")} and ${docMaker.iCode("trackIdx")} will be retrieved from the track information sent to the function, if available.`);
+    docMaker.paragraph(`${docMaker.iCode("id")} and ${docMaker.iCode("name")} attributes will me mapped to the ${docMaker.iCode("id")} of the track (in this order of precedence).`);
+    docMaker.codeBulletList( [
+        [".isTrack", "Boolean", `${docMaker.iCode("Read-Only")} Identifies it as a track`],
+        [".id", "String", `Name of the track. If the track is currently visible, changing its id will require a call to ${docMaker.iCode("updateLeftPanel")}`],
+        [".active", "Boolean", `${docMaker.iCode("Read-Only")} Whether it is disabled or not. Use ${docMaker.iCode("setTrackState")} to modify it.`],
         [".locked", "Boolean", `Whether its elements can be modified or not.`],
-        [".isSelected", "Boolean", `${INLINE_CODE("Read-Only")} Whether to paint the track background blue, flagging it as selected.`],
-        [".trackIdx", "Number", `${INLINE_CODE("Read-Only")} Position of the track in the animationClip's tracks array.`],
+        [".isSelected", "Boolean", `${docMaker.iCode("Read-Only")} Whether to paint the track background blue, flagging it as selected.`],
+        [".trackIdx", "Number", `${docMaker.iCode("Read-Only")} Position of the track in the animationClip's tracks array.`],
 
-        [".dim", "Number", `Number of values per keyframe. It can be modified, as long as it makes sense with ${INLINE_CODE("times")} and ${INLINE_CODE("values")} attributes`],
-        [".groupId", "String", `${INLINE_CODE("Read-Only")} Group to which it is attached. Use ${INLINE_CODE("setTracksGroup")} instead of directly modifying it`],
-        [".groupTrackIdx", "Number", `${INLINE_CODE("Read-Only")} Index of the track inside the group array`],
+        [".dim", "Number", `Number of values per keyframe. It can be modified, as long as it makes sense with ${docMaker.iCode("times")} and ${docMaker.iCode("values")} attributes`],
+        [".groupId", "String", `${docMaker.iCode("Read-Only")} Group to which it is attached. Use ${docMaker.iCode("setTracksGroup")} instead of directly modifying it`],
+        [".groupTrackIdx", "Number", `${docMaker.iCode("Read-Only")} Index of the track inside the group array`],
         
         [".curves", "Boolean", `Whether to render this track as centered keyframes or curves`],
         [".curvesRange", "[Number, Number]", `range of values [min, max] that the track will hold.`],
@@ -139,113 +139,113 @@ panel.@[mtd]attach@(kfTimeline.root);` );
         [".values", "Array Number", `Flat array of size = number-of-keyframes * dim, containing the values of each keyframe. Values inside the array can be safely modified. Directly modifying its length might lead to undefined behaviour.`],
         [".times", "Array Number", `Flat array of size = number-of-keyframes, containing the timestamp of each keyframe sorted ascendently. Values inside the array can be safely modified as long as the array is kept sorted ascendently. Directly modifying its length might lead to undefined behaviour.`],
         [".edited", "Array Boolean", `Array of size = number-of-keyframes, containing a flag to indicate whether the keyframe has been modified. Its values can be safely modified.`],
-        [".selected", "Array Boolean", `${INLINE_CODE("Read-Only")} Array of size number-of-keyframes, containing a flag to indicate whether the keyframe is currently selected. Modifying it might not update the underlying selection system.`],
-        [".hovered", "Array Boolean", `${INLINE_CODE("Read-Only")} Array of size number-of-keyframes, containing a flag to indicate whether the keyframe is currently hovered by the mouse. Modifying it might not update the underlying hovering system.`],
+        [".selected", "Array Boolean", `${docMaker.iCode("Read-Only")} Array of size number-of-keyframes, containing a flag to indicate whether the keyframe is currently selected. Modifying it might not update the underlying selection system.`],
+        [".hovered", "Array Boolean", `${docMaker.iCode("Read-Only")} Array of size number-of-keyframes, containing a flag to indicate whether the keyframe is currently hovered by the mouse. Modifying it might not update the underlying hovering system.`],
 
         [".data", "", "user defined data"]
     ] );
 
-    MAKE_HEADER( "Constructor", "h2", "" );
-    MAKE_CLASS_CONSTRUCTOR( "class LX.KeyFramesTimeline", [
+    docMaker.header( "Constructor", "h2", "" );
+    docMaker.classCtor( "class LX.KeyFramesTimeline", [
         ["id", "String", "Unique string that identifies this element"],
         ["options", "Object"]
     ] );
 
-    MAKE_HEADER( "Properties", "h2", "" );
-    MAKE_PARAGRAPH( `Check ${INLINE_CODE("Timeline")} properties`);
-    MAKE_CODE_BULLET_LIST( [
-        [".lastKeyFramesSelected", "Array of [trackIdx, keyframeIdx, keyframe time]", `${INLINE_CODE("Read-Only")} the currently selected keyframes across all tracks, sorted ascendently`],
-        [".keyValuePerPixel", "Number", `Applicable to tracks with dim = 1, amount of normalized value ( [ 0, 1 ] ) to add per pixel moved while holding ${INLINE_CODE("alt")}. Default to 1/${INLINE_CODE("trackHeight")}`],
+    docMaker.header( "Properties", "h2", "" );
+    docMaker.paragraph( `Check ${docMaker.iCode("Timeline")} properties`);
+    docMaker.codeBulletList( [
+        [".lastKeyFramesSelected", "Array of [trackIdx, keyframeIdx, keyframe time]", `${docMaker.iCode("Read-Only")} the currently selected keyframes across all tracks, sorted ascendently`],
+        [".keyValuePerPixel", "Number", `Applicable to tracks with dim = 1, amount of normalized value ( [ 0, 1 ] ) to add per pixel moved while holding ${docMaker.iCode("alt")}. Default to 1/${docMaker.iCode("trackHeight")}`],
         [".defaultCurves", "Boolean", `Applicable to tracks with dim = 1, the default way of rendering tracks with dim = 1. If true, it renders them with curves.`],  
         [".defaultCurvesRange", "[Number, Number]", `Applicable to tracks with dim = 1, the default range of values [min, max] that a track holds.`],  
     ] );
 
-    MAKE_HEADER( "Callbacks", "h2", "" );
-    MAKE_PARAGRAPH(`Callbacks can be set directly to the instance of ${INLINE_CODE("KeyFramesTimeline")}`);
-    MAKE_PARAGRAPH(`Check ${INLINE_CODE("Timeline")} for the list of inherited callbacks. If a callback appears on both lists, the  ${INLINE_CODE("KeyFramesTimeline")} takes precedence.`);
-    MAKE_CLASS_METHOD( "onAddNewTrack", `Triggered after creating a track through the ${INLINE_CODE("addNewTrack")} function. This callback can be used to change the default id of the track, modify the dimension of the values or to insert some initial values. To include this track into a group, use the ${INLINE_CODE("setTracksGroup")} function`, [
+    docMaker.header( "Callbacks", "h2", "" );
+    docMaker.paragraph(`Callbacks can be set directly to the instance of ${docMaker.iCode("KeyFramesTimeline")}`);
+    docMaker.paragraph(`Check ${docMaker.iCode("Timeline")} for the list of inherited callbacks. If a callback appears on both lists, the  ${docMaker.iCode("KeyFramesTimeline")} takes precedence.`);
+    docMaker.classMethod( "onAddNewTrack", `Triggered after creating a track through the ${docMaker.iCode("addNewTrack")} function. This callback can be used to change the default id of the track, modify the dimension of the values or to insert some initial values. To include this track into a group, use the ${docMaker.iCode("setTracksGroup")} function`, [
         ["track", "Object"],
     ] );
     
-    MAKE_CLASS_METHOD( "onItemSelected", `Triggered after calling ${INLINE_CODE("selectItems")}.`, [
+    docMaker.classMethod( "onItemSelected", `Triggered after calling ${docMaker.iCode("selectItems")}.`, [
         ["currentSelectedItems", "Array of Numbers for tracks or Strings for groups"],
         ["itemsAdded", "Array of Numbers for tracks or Strings for groups"],
         ["itemsRemoved", "Array of Numbers for tracks or Strings for groups"],
     ] );
 
-    MAKE_CLASS_METHOD( "onSelectKeyFrame", `Triggered after selecting a keyframe.`, [
+    docMaker.classMethod( "onSelectKeyFrame", `Triggered after selecting a keyframe.`, [
         ["currentSelection", "[trackIdx, keyframeIdx, time of keyframe]"],
     ] );
     
-    MAKE_CLASS_METHOD( "onDeselectKeyFrames", `Triggered before deselecting all keyframes.`, [
+    docMaker.classMethod( "onDeselectKeyFrames", `Triggered before deselecting all keyframes.`, [
         ["selectedKeyframes", "Array of [trackIdx, keyframeIdx, timestamp of keyframe]"],
     ] );
 
-    MAKE_CLASS_METHOD( "onContentMoved", `Triggered after moving keyframes horizontally. Calls it for each frame .`, [
+    docMaker.classMethod( "onContentMoved", `Triggered after moving keyframes horizontally. Calls it for each frame .`, [
         ["trackIndex", "Number"],
         ["newKeyframeIndex", "Number"],
     ] );
 
-    MAKE_CLASS_METHOD( "onUpdateTrack", `Triggered after changing keyframe values through ${INLINE_CODE("Alt")} in a curves track, pasting values, undoing-redoing and adding keyframes.`, [
+    docMaker.classMethod( "onUpdateTrack", `Triggered after changing keyframe values through ${docMaker.iCode("Alt")} in a curves track, pasting values, undoing-redoing and adding keyframes.`, [
         ["tracks", "Array of Number"],
     ] );
     
-    MAKE_CLASS_METHOD( "onOptimizeTracks", `Triggered after optimizing tracks. It receives either a valid track index or a -1 indicating that all tracks have been optimized at once`, [
+    docMaker.classMethod( "onOptimizeTracks", `Triggered after optimizing tracks. It receives either a valid track index or a -1 indicating that all tracks have been optimized at once`, [
         ["trackIndex", "Number"],
     ] );
 
-    MAKE_CLASS_METHOD( "onDeleteKeyFrames", `Triggered after deleting keyframes.`, [
+    docMaker.classMethod( "onDeleteKeyFrames", `Triggered after deleting keyframes.`, [
         ["trackIndex", "Number"],
         ["keyframeIndices", "Array of Number"],
     ] );
 
 
-    MAKE_HEADER( "Methods", "h2", "" );
-    MAKE_PARAGRAPH(`Check ${INLINE_CODE("Timeline")} for the list of inherited methods. If a method appears on both lists, the ${INLINE_CODE("KeyFramesTimeline")} takes precedence.`);
+    docMaker.header( "Methods", "h2", "" );
+    docMaker.paragraph(`Check ${docMaker.iCode("Timeline")} for the list of inherited methods. If a method appears on both lists, the ${docMaker.iCode("KeyFramesTimeline")} takes precedence.`);
 
-    MAKE_CLASS_METHOD( ".setKeyframeSize", `Sets keyframe size (height), in pixels. Optionally, a size for hovered keyframes can be specified (defaults to ${INLINE_CODE("size")})`, [
+    docMaker.classMethod( ".setKeyframeSize", `Sets keyframe size (height), in pixels. Optionally, a size for hovered keyframes can be specified (defaults to ${docMaker.iCode("size")})`, [
         ["size", "Number"],
         ["hoveredSize", "Number"],
     ], "" );
 
-    MAKE_CLASS_METHOD( ".setTracksGroup", "Group tracks. A track can only be in one group.", [
+    docMaker.classMethod( ".setTracksGroup", "Group tracks. A track can only be in one group.", [
         ["groupId", "String"],
         ["trackIndices", "Array Number"],
     ], "" );
 
-    MAKE_CLASS_METHOD( ".getTracksGroup", "Returns an array of object, each being a track of the group.", [
+    docMaker.classMethod( ".getTracksGroup", "Returns an array of object, each being a track of the group.", [
         ["groupId", "String"],
     ], "Array Tracks" );
 
-    MAKE_CLASS_METHOD( ".optimizeTrack", `Removes similar keyframes of a track, given the ${INLINE_CODE("optimizeThreshold")} attribute. If ${INLINE_CODE("onlyEqualTime")} is set, only keyframes with the same time will be removed, keepin the first occurrence`, [
+    docMaker.classMethod( ".optimizeTrack", `Removes similar keyframes of a track, given the ${docMaker.iCode("optimizeThreshold")} attribute. If ${docMaker.iCode("onlyEqualTime")} is set, only keyframes with the same time will be removed, keepin the first occurrence`, [
         ["trackIdx", "Number"],
         ["onlyEqualTime", "Boolean"],
         ["skipCallback", "Boolean"],
     ], "" );
-    MAKE_CLASS_METHOD( ".optimizeTracks", `Removes similar keyframes of all track, given the ${INLINE_CODE("optimizeThreshold")} attribute. If ${INLINE_CODE("onlyEqualTime")} is set, only keyframes with the same time will be removed, keepin the first occurrence`, [
+    docMaker.classMethod( ".optimizeTracks", `Removes similar keyframes of all track, given the ${docMaker.iCode("optimizeThreshold")} attribute. If ${docMaker.iCode("onlyEqualTime")} is set, only keyframes with the same time will be removed, keepin the first occurrence`, [
         ["onlyEqualTime", "Boolean"],
     ], "" );
     
-    MAKE_CLASS_METHOD( ".copySelectedContent", `Copies the lastKeyFramesSelected elements into clipboard.`, [
+    docMaker.classMethod( ".copySelectedContent", `Copies the lastKeyFramesSelected elements into clipboard.`, [
     ], "" );
-    MAKE_CLASS_METHOD( ".pasteContent", `Paste copied keyframes into the tracks, positioned at ${INLINE_CODE("time")}.`, [
+    docMaker.classMethod( ".pasteContent", `Paste copied keyframes into the tracks, positioned at ${docMaker.iCode("time")}.`, [
         ["time", "Number"]
     ], "" );
-    MAKE_CLASS_METHOD( ".deleteSelectedContent", `Delete selected keyframes from the tracks.`, [
+    docMaker.classMethod( ".deleteSelectedContent", `Delete selected keyframes from the tracks.`, [
         ["skipCallback", "Boolean"]
     ], "" );
-    MAKE_CLASS_METHOD( ".clearTrack", `Delete all keyframes from a track.`, [
+    docMaker.classMethod( ".clearTrack", `Delete all keyframes from a track.`, [
         ["trackIdx", "Number"]
     ], "" );
 
-    MAKE_CLASS_METHOD( ".deleteKeyframes", `Delete keyframes of a track.`, [
+    docMaker.classMethod( ".deleteKeyframes", `Delete keyframes of a track.`, [
         ["trackIdx", "Number"],
         ["frameIndices", "Array of Number"],
         ["skipCallback", "Boolean"]
 
     ], "" );
 
-    MAKE_CLASS_METHOD( ".addKeyFrames", `Add keyframes to a track. ${INLINE_CODE("newTimes")} must be sorted ascendently. If ${INLINE_CODE("flags")} is set to ${INLINE_CODE("Timeline.ADDKEY_VALUESINARRAYS")} (0x01), values must be an array of arrays, each containing the values of a single frame. Otherwise, it must be a flat array.`, [
+    docMaker.classMethod( ".addKeyFrames", `Add keyframes to a track. ${docMaker.iCode("newTimes")} must be sorted ascendently. If ${docMaker.iCode("flags")} is set to ${docMaker.iCode("Timeline.ADDKEY_VALUESINARRAYS")} (0x01), values must be an array of arrays, each containing the values of a single frame. Otherwise, it must be a flat array.`, [
         ["trackIdx", "Number"],
         ["newValues", "Array of Number"],
         ["newTimes", "Array of Number"],
@@ -253,42 +253,42 @@ panel.@[mtd]attach@(kfTimeline.root);` );
         ["flags", "Number"],
     ], "" );
 
-    MAKE_CLASS_METHOD( ".getNearestKeyFrame", `Returns the index of the frame or -1. Modes { -1: nearest frame with t[f] <= time, 0: nearest frame, 1: nearest frame with t[f] >= time }.`, [
+    docMaker.classMethod( ".getNearestKeyFrame", `Returns the index of the frame or -1. Modes { -1: nearest frame with t[f] <= time, 0: nearest frame, 1: nearest frame with t[f] >= time }.`, [
         ["track", "obj"],
         ["time", "Number"],
         ["mode", "Number"],
     ], "Number" );
         
-    MAKE_CLASS_METHOD( ".processSelectionKeyFrame", `Helper function to select a keyframe and set the timeline time to that keyframe (only if ${INLINE_CODE("multipleSelection")} is ${INLINE_CODE("false")} ). If ${INLINE_CODE("multipleSelection")} is ${INLINE_CODE("true")}, previous selected keyframes are kept selected.`, [
+    docMaker.classMethod( ".processSelectionKeyFrame", `Helper function to select a keyframe and set the timeline time to that keyframe (only if ${docMaker.iCode("multipleSelection")} is ${docMaker.iCode("false")} ). If ${docMaker.iCode("multipleSelection")} is ${docMaker.iCode("true")}, previous selected keyframes are kept selected.`, [
         ["trackIdx", "Number"],
         ["frameIdx", "Number"],
         ["multipleSelection", "Boolean"],
     ], "[trackIdx, frameIdx, frameTime]" );
 
-    MAKE_CLASS_METHOD( ".selectKeyFrame", `Selects a keyframe, adding it to the currently selected keyframes.`, [
+    docMaker.classMethod( ".selectKeyFrame", `Selects a keyframe, adding it to the currently selected keyframes.`, [
         ["trackIdx", "Number"],
         ["frameIdx", "Number"],
         ["skipCallback", "Boolean"],
     ], "[trackIdx, frameIdx, frameTime]" );
            
-    MAKE_CLASS_METHOD( ".deselectKeyFrame", `Deselects a keyframe.`, [
+    docMaker.classMethod( ".deselectKeyFrame", `Deselects a keyframe.`, [
         ["trackIdx", "Number"],
         ["frameIdx", "Number"],
     ], "Boolean" );
-    MAKE_CLASS_METHOD( ".deselectAllKeyFrames", `Deselects all keyframes.`, [
+    docMaker.classMethod( ".deselectAllKeyFrames", `Deselects all keyframes.`, [
     ], "" );
 
-    MAKE_CLASS_METHOD( ".unHoverAll", `Unhover current keyframes.`, [
+    docMaker.classMethod( ".unHoverAll", `Unhover current keyframes.`, [
     ], "" );
 
-    MAKE_CLASS_METHOD( ".getCurrentKeyFrame", "Get the nearest keyframe to _time_ given a maximum threshold.", [
+    docMaker.classMethod( ".getCurrentKeyFrame", "Get the nearest keyframe to _time_ given a maximum threshold.", [
         ["track", "Object"],
         ["time", "Number"],
         ["threshold", "Number"]
     ], "Number" );
 
-    MAKE_HEADER("Controls", "h2", "" );
-    MAKE_PARAGRAPH(`Default keyboard controls can be changed by reimplementing ${INLINE_CODE("processKeys")}`);
+    docMaker.header("Controls", "h2", "" );
+    docMaker.paragraph(`Default keyboard controls can be changed by reimplementing ${docMaker.iCode("processKeys")}`);
 
     const baseControls = [
         ["Mouse left click", ""],
@@ -308,11 +308,11 @@ panel.@[mtd]attach@(kfTimeline.root);` );
     let keyControls = baseControls.slice();
     keyControls[1].push(
         ["ctrlKey + left click + horizontal drag", "move selected keyframes (if any)"],
-        ["altKey + left click + vertical drag", `change value of selected keyframes. Only applicable to tracks with dim = 1 and their ${INLINE_CODE("curves")} attribute set to ${INLINE_CODE("true")}`]
+        ["altKey + left click + vertical drag", `change value of selected keyframes. Only applicable to tracks with dim = 1 and their ${docMaker.iCode("curves")} attribute set to ${docMaker.iCode("true")}`]
     );
-    MAKE_CODE_BULLET_LIST( keyControls );
+    docMaker.codeBulletList( keyControls );
 
-    MAKE_LINE_BREAK();
-    MAKE_LINE_BREAK();
+    docMaker.lineBreak();
+    docMaker.lineBreak();
 
 </script>

@@ -2,9 +2,9 @@
 
     import { LX } from 'lexgui';
 
-    MAKE_HEADER( "Badge.", "h1", "badge" );
-    MAKE_PARAGRAPH( `Used to display short text or status labels, such as categories, states, or tags.` );
-    MAKE_LINE_BREAK();
+    docMaker.header( "Badge.", "h1", "badge" );
+    docMaker.paragraph( `Used to display short text or status labels, such as categories, states, or tags.` );
+    docMaker.lineBreak();
 
     {
         const area = new LX.Area( { className: "flex flex-col border rounded-lg shadow-lg bg-secondary overflow-hidden p-12 gap-1", skipAppend: true, height: "auto" } );
@@ -25,20 +25,20 @@
         LX.badge("9", "error fg-white", { asElement: true, xchip: true, parent: chipParent });
     }
 
-    MAKE_LINE_BREAK();
+    docMaker.lineBreak();
 
-    MAKE_HEADER("Quick Usage", "h2");
-    MAKE_CODE(`@[cls]LX@.@[mtd]badge@( badgeText, @"accent outline"@, { asElement: @true@ } );`, "js");
+    docMaker.header("Quick Usage", "h2");
+    docMaker.code(`@[cls]LX@.@[mtd]badge@( badgeText, @"accent outline"@, { asElement: @true@ } );`, "js");
 
-    MAKE_HEADER("API Reference", "h2");
-    MAKE_CLASS_CONSTRUCTOR( "function LX.badge", [
+    docMaker.header("API Reference", "h2");
+    docMaker.classCtor( "function LX.badge", [
         ["text", "String"],
         ["className", "String"],
         ["options", "Object = {}"]
     ]);
-    MAKE_LINE_BREAK();
-    MAKE_PARAGRAPH(`Where ${ INLINE_CODE( "text" ) } is the text content; ${ INLINE_CODE( "className" ) } contains the badge specific classes, and ${ INLINE_CODE( "options" ) } can include the following:`);
-    MAKE_LINE_BREAK();
+    docMaker.lineBreak();
+    docMaker.paragraph(`Where ${ docMaker.iCode( "text" ) } is the text content; ${ docMaker.iCode( "className" ) } contains the badge specific classes, and ${ docMaker.iCode( "options" ) } can include the following:`);
+    docMaker.lineBreak();
 
     {
         const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
@@ -52,12 +52,12 @@
                 ["chip", "Boolean", "Use the badge as a chip indicator", "false"],
                 ["parent", "HTMLElement", "Append the badge into the desired parent to use badge as a child chip", "—"]
             ].map( v => {
-                return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];
+                return [ docMaker.iCode( v[ 0 ], "table" ), docMaker.iCode( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? docMaker.iCode( v[ 3 ], "table desc" ) : v[ 3 ] ];
             } )
         }, {});
     }
 
-    MAKE_LINE_BREAK();
-    MAKE_LINE_BREAK();
+    docMaker.lineBreak();
+    docMaker.lineBreak();
 
 </script>

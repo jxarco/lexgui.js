@@ -20,8 +20,7 @@
 <script type="module">
 
     import { LX } from 'lexgui';
-
-    // import 'lexgui/extensions/codeeditor.js';
+    import { CodeEditor } from 'lexgui/extensions/codeeditor.js';
     import { AssetView } from 'lexgui/extensions/AssetView.js';
 
     // Init library and get main area
@@ -187,13 +186,12 @@
                 if (!event.item.src || event.item.type == "image") break;
                 if (window.dialog) window.dialog.destroy();
                 window.dialog = new LX.PocketDialog("Editor", p => {
-                    // TODO
-                    // const area = new LX.Area();
-                    // p.attach(area);
-                    // let editor = new LX.CodeEditor(area, {
-                    //     allowAddScripts: false
-                    // });
-                    // editor.loadFile(event.item.src);
+                    const area = new LX.Area();
+                    p.attach(area);
+                    let editor = new CodeEditor(area, {
+                        allowAddScripts: false
+                    });
+                    editor.loadFile(event.item.src);
                 }, { size: ["40%", "600px"], closable: true });
                 break;
             case LX.AssetViewEvent.ENTER_FOLDER:

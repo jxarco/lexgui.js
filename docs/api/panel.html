@@ -1,17 +1,17 @@
 <script type="module">
     import { LX } from 'lexgui';
 
-    MAKE_HEADER( "Panel.", "h1", "panel" );
-    // MAKE_PARAGRAPH( `Areas are the main container for a LexGUI interface. Inside they can contain panels and even other areas.` );
+    docMaker.header( "Panel.", "h1", "panel" );
+    // docMaker.paragraph( `Areas are the main container for a LexGUI interface. Inside they can contain panels and even other areas.` );
 
-    MAKE_HEADER( "Constructor", "h2", "constructor" );
-    MAKE_CLASS_CONSTRUCTOR( "class LX.Panel", [
+    docMaker.header( "Constructor", "h2", "constructor" );
+    docMaker.classCtor( "class LX.Panel", [
         ["options", "Object"]
     ] );
 
-    MAKE_LINE_BREAK();
-    MAKE_PARAGRAPH( `The possible ${INLINE_CODE(`options`)} are the following:` );
-    MAKE_CODE_BULLET_LIST( [
+    docMaker.lineBreak();
+    docMaker.paragraph( `The possible ${docMaker.iCode(`options`)} are the following:` );
+    docMaker.codeBulletList( [
         ["id", "String", "Id of the element"],
         ["className", "String", "Add class to the element"],
         ["width", "Number", "Width of the panel DOM element [fit space]"],
@@ -19,63 +19,63 @@
         ["style", "Object", "CSS Style object to be applied to the panel"],
     ] );
 
-    MAKE_HEADER( "Properties", "h2", "properties" );
-    MAKE_CODE_BULLET_LIST( [
+    docMaker.header( "Properties", "h2", "properties" );
+    docMaker.codeBulletList( [
         [".branches", "Array", "Array of opened branches in the panel"],
         [".onevent", "Function", "Function called when any of its components changes its value"],
         [".root", "HTMLElement", "Container element of the panel"],
         [".components", "Object", "Data of all the components created inside the panel"]
     ] );
     
-    MAKE_HEADER( "Methods", "h2", "methods" );
+    docMaker.header( "Methods", "h2", "methods" );
 
-    MAKE_CLASS_METHOD( ".attach", `Appends a child to the panel root. If "content" has a root, then appends it, if not, append "content".`, [
+    docMaker.classMethod( ".attach", `Appends a child to the panel root. If "content" has a root, then appends it, if not, append "content".`, [
         ["content", "HTMLElement"]
     ] );
 
-    MAKE_CLASS_METHOD( ".branch", `Open new closable branch (section) inside the panel.`, [
+    docMaker.classMethod( ".branch", `Open new closable branch (section) inside the panel.`, [
         ["name", "String"],
         ["options", "Object"],
     ] );
     
-    MAKE_CLASS_METHOD( ".clear", `Clear the panel root and all of its components.`, [] );
+    docMaker.classMethod( ".clear", `Clear the panel root and all of its components.`, [] );
 
-    MAKE_CLASS_METHOD( ".clearQueue", `Removes the queued container, so components will be appended in its corresponding branch/container.`, [] );
+    docMaker.classMethod( ".clearQueue", `Removes the queued container, so components will be appended in its corresponding branch/container.`, [] );
 
-    MAKE_CLASS_METHOD( ".endLine", `Stop inlining components when created.`, [
+    docMaker.classMethod( ".endLine", `Stop inlining components when created.`, [
         ["className", "String"],
     ] );
 
-    MAKE_CLASS_METHOD( ".get", `Returns a given component (in the panel) searched by name.`, [
+    docMaker.classMethod( ".get", `Returns a given component (in the panel) searched by name.`, [
         ["name", "String"]
-    ], `${ INLINE_PAGE( "component", "api/component.html" ) }`);
+    ], `${ docMaker.iPage( "component", "api/component.html" ) }`);
 
-    MAKE_CLASS_METHOD( ".getBranch", `Returns a given branch (in the panel) searched by name.`, [
+    docMaker.classMethod( ".getBranch", `Returns a given branch (in the panel) searched by name.`, [
         ["name", "String"]
-    ], `${ INLINE_PAGE( "Branch", "api/branch.html" ) }` );
+    ], `${ docMaker.iPage( "Branch", "api/branch.html" ) }` );
 
-    MAKE_CLASS_METHOD( ".getValue", `Returns the value of a given component (in the panel) searched by name.`, [
+    docMaker.classMethod( ".getValue", `Returns the value of a given component (in the panel) searched by name.`, [
         ["name", "String"]
     ], "*");
 
-    MAKE_CLASS_METHOD( ".merge", `Merges current opened branch, meaning the following components will be created directly to the panel.`, [] );
+    docMaker.classMethod( ".merge", `Merges current opened branch, meaning the following components will be created directly to the panel.`, [] );
 
-    MAKE_CLASS_METHOD( ".queue", `Sets a new temporal container for the newly created components. To stop using it, call <code class='inline'>Panel.clearQueue</code>.`, [
+    docMaker.classMethod( ".queue", `Sets a new temporal container for the newly created components. To stop using it, call <code class='inline'>Panel.clearQueue</code>.`, [
         ["container", "HTMLElement"]
     ] );
 
-    MAKE_CLASS_METHOD( ".sameLine", `Sets the following N components to be inlined when created. If N is <code class='inline'><span class="kwd">null</span></code>, every component created will be 
+    docMaker.classMethod( ".sameLine", `Sets the following N components to be inlined when created. If N is <code class='inline'><span class="kwd">null</span></code>, every component created will be 
 inlined until <code class='inline'>Panel.endLine</code> is called.`, [
         ["numberOfComponents", "Number"],
         ["className", "String"],
     ] );
 
-    MAKE_CLASS_METHOD( ".setValue", `Sets the value of a given component (in the panel) searched by name.`, [
+    docMaker.classMethod( ".setValue", `Sets the value of a given component (in the panel) searched by name.`, [
         ["name", "String"],
         ["value", "*"]
     ] );
 
-    MAKE_LINE_BREAK();
-    MAKE_LINE_BREAK();
+    docMaker.lineBreak();
+    docMaker.lineBreak();
 
 </script>
