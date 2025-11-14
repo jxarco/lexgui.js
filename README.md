@@ -1,7 +1,8 @@
 ![logo](./images/icon_dark.png#gh-dark-mode-only)
 ![logo](./images/icon_light.png#gh-light-mode-only)
 
-# lexgui.js
+[![NPM Package][npm]][npm-url]
+[![NPM Downloads][npm-downloads]][npmtrends-url]
 
 **lexgui.js** is a lightweight JavaScript library for building web user interfaces. No bloated frameworks, no unnecessary complexity, just pure HTML, CSS, and JavaScript magic. It gives you an easy API for crafting dynamic, interactive editor interfaces without the headache of big libraries.
 
@@ -101,3 +102,8 @@ Look at this [examples](https://jxarco.github.io/lexgui.js/examples/) to see how
 ## Feedback/Issues
 
 You can use the [repository issues section](https://github.com/jxarco/lexgui.js/issues) or simply write any feedback to alexroco.30@gmail.com.
+
+[npm]: https://img.shields.io/npm/v/lexgui
+[npm-url]: https://www.npmjs.com/package/lexgui
+[npm-downloads]: https://img.shields.io/npm/dw/lexgui
+[npmtrends-url]: https://www.npmtrends.com/lexgui
