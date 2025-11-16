@@ -10,7 +10,6 @@ if( !LX )
 LX.extensions.push( 'CodeEditor' );
 
 const g = ( globalThis as any );
-
 const vec2 = LX.vec2;
 const Area = LX.Area;
 const Panel = LX.Panel;

@@ -20,7 +20,7 @@
 <script type="module">
 
     import { LX } from 'lexgui';
-    import 'lexgui/extensions/nodegraph.js';
+    import { GraphEditor } from 'lexgui/extensions/nodegraph.js';
 
     // init library and get main area
     let area = await LX.init();
@@ -43,7 +43,7 @@
         canvas.height = bounding.height;
     };
 
-    let graphEditor = new LX.GraphEditor( bottomArea, {
+    let graphEditor = new GraphEditor( bottomArea, {
         sidebar: false,
     } );
 

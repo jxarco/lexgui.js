@@ -14,6 +14,7 @@ API:
 - Removed support for Blank panel component
 - LX.main_area -> LX.mainArea
 - Docmaker Extension API full changed
+- NodeGraph extension renamed to GraphEditor
 
 Styling:
 - More TW classes

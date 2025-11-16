@@ -32,7 +32,7 @@ export class ImUI
 
     constructor( canvas: HTMLCanvasElement, options: any = {} )
     {
-        console.assert( canvas );
+        console.assert( canvas !== undefined );
         
         // To capture key events
         canvas.tabIndex = -1;
