@@ -1,953 +1,1128 @@
-// import { LX } from 'lexgui';
+// VideoEditor.ts @jxarco
 
-// if(!LX) {
-//     throw("lexgui.js missing!");
-// }
+import { LX } from '../core/Namespace';
 
-// LX.extensions.push( 'TimeBar' );
-// LX.extensions.push( 'VideoEditor' );
+if( !LX )
+{
+    throw( "Missing LX namespace!" );
+}
 
-// /**
-//  * @class TimeBar
-//  */
+LX.extensions.push( 'VideoEditor' );
 
-// class TimeBar {
+const g = ( globalThis as any );
+const vec2 = LX.vec2;
+const Area = LX.Area;
+const Panel = LX.Panel;
 
-//     static TIMEBAR_PLAY       = 1;
-//     static TIMEBAR_TRIM       = 2;
+/**
+ * @class TimeBar
+ */
 
-//     static BACKGROUND_COLOR = LX.getThemeColor("global-branch-darker");
-//     static COLOR = LX.getThemeColor("global-button-color");
-//     static ACTIVE_COLOR = "#668ee4";
+export class TimeBar
+{
+    static TIMEBAR_PLAY       = 1;
+    static TIMEBAR_TRIM       = 2;
 
-//     constructor( area, type, options = {} ) {
+    static BACKGROUND_COLOR = LX.getThemeColor("global-branch-darker");
+    static COLOR = LX.getThemeColor("global-button-color");
+    static ACTIVE_COLOR = "#668ee4";
 
-//         this.type = type;
-//         this.duration = options.duration || 1.0;
+    type: number = TimeBar.TIMEBAR_PLAY;
+    duration: number = 1.0;
+    canvas: HTMLCanvasElement;
+    ctx: CanvasRenderingContext2D | null;
 
-//         // Create canvas
-//         this.canvas = document.createElement( 'canvas' );
-//         this.canvas.width = area.size[0];
-//         this.canvas.height = area.size[1];
-//         area.attach( this.canvas );
+    markerWidth: number = 8;
+    markerHeight: number;
+    offset: number;
+    lineWidth: number;
+    lineHeight: number;
+    position: typeof vec2;
+    startX: number;
+    endX: number;
+    currentX: number;
+    hovering: string | undefined;
+    dragging: string | undefined;
 
-//         this.ctx = this.canvas.getContext("2d");
+    onChangeCurrent: any;
+    onChangeStart: any;
+    onChangeEnd: any;
+    onDraw: any;
+    onMouse: any;
 
-//         this.markerWidth = options.markerWidth ?? 8;
-//         this.markerHeight = options.markerHeight ?? (this.canvas.height * 0.5);
-//         this.offset = options.offset || (this.markerWidth*0.5 + 5);
+    constructor( area: typeof Area, type?: number, options: any = {} )
+    {
+        this.type = type ?? TimeBar.TIMEBAR_PLAY;
+        this.duration = options.duration ?? this.duration;
 
-//         // dimensions of line (not canvas)
-//         this.lineWidth = this.canvas.width - this.offset * 2;
-//         this.lineHeight = options.barHeight ?? 5;
+        // Create canvas
+        this.canvas = document.createElement( 'canvas' );
+        this.canvas.width = area.size[ 0 ];
+        this.canvas.height = area.size[ 1 ];
+        area.attach( this.canvas );
 
-//         this.position = new LX.vec2( this.offset, this.canvas.height * 0.5 - this.lineHeight * 0.5);
-//         this.startX = this.position.x;
-//         this.endX = this.position.x + this.lineWidth;
-//         this.currentX = this.startX;
+        this.ctx = this.canvas.getContext( "2d" );
 
-//         this._draw();
+        this.markerWidth = options.markerWidth ?? this.markerWidth;
+        this.markerHeight = options.markerHeight ?? ( this.canvas.height * 0.5 );
+        this.offset = options.offset || ( this.markerWidth*0.5 + 5 );
 
-//         this.updateTheme();
-//         LX.addSignal( "@on_new_color_scheme", (el, value) => {
-//             // Retrieve again the color using LX.getThemeColor, which checks the applied theme
-//             this.updateTheme();
-//         } )
+        // dimensions of line (not canvas)
+        this.lineWidth = this.canvas.width - this.offset * 2;
+        this.lineHeight = options.barHeight ?? 5;
 
-//         this.canvas.onmousedown = (e) => this.onMouseDown(e);
-//         this.canvas.onmousemove = (e) => this.onMouseMove(e);
-//         this.canvas.onmouseup = (e) => this.onMouseUp(e);
-//     }
+        this.position = new vec2( this.offset, this.canvas.height * 0.5 - this.lineHeight * 0.5);
+        this.startX = this.position.x;
+        this.endX = this.position.x + this.lineWidth;
+        this.currentX = this.startX;
 
-//     updateTheme( ) {
-//         TimeBar.BACKGROUND_COLOR = LX.getThemeColor("global-color-secondary");
-//         TimeBar.COLOR = LX.getThemeColor("global-color-quaternary");
-//         TimeBar.ACTIVE_COLOR = "#668ee4";
-//     }
+        this._draw();
+
+        this.updateTheme();
+        LX.addSignal( "@on_new_color_scheme", () => {
+            // Retrieve again the color using LX.getThemeColor, which checks the applied theme
+            this.updateTheme();
+        } )
+
+        this.canvas.onmousedown = ( e: MouseEvent ) => this.onMouseDown( e );
+        this.canvas.onmousemove = ( e: MouseEvent ) => this.onMouseMove( e );
+        this.canvas.onmouseup = ( e: MouseEvent ) => this.onMouseUp( e );
+    }
+
+    updateTheme()
+    {
+        TimeBar.BACKGROUND_COLOR = LX.getThemeColor("global-color-secondary");
+        TimeBar.COLOR = LX.getThemeColor("global-color-quaternary");
+        TimeBar.ACTIVE_COLOR = "#668ee4";
+    }
     
-//     setDuration( duration ) {
-//         this.duration = duration;
-//     }
+    setDuration( duration: number )
+    {
+        this.duration = duration;
+    }
 
-//     xToTime( x ) {
-//         return ((x - this.offset) / (this.lineWidth)) *  this.duration;
-//     }
+    xToTime( x: number )
+    {
+        return ( ( x - this.offset ) / ( this.lineWidth ) ) *  this.duration;
+    }
 
-//     timeToX( time ) {
-//         return (time / this.duration) *  (this.lineWidth) + this.offset;
-//     }
+    timeToX( time: number )
+    {
+        return ( time / this.duration ) * ( this.lineWidth ) + this.offset;
+    }
 
-//     setCurrentTime( time ) {
-//         this.currentX = this.timeToX( time );
-//         this.onSetCurrentValue( this.currentX );
-//     }
+    setCurrentTime( time: number )
+    {
+        this.currentX = this.timeToX( time );
+        this.onSetCurrentValue( this.currentX );
+    }
 
-//     setStartTime( time ) {
-//         this.startX = this.timeToX( time );
-//         this.onSetStartValue( this.startX )
-//     }
+    setStartTime( time: number )
+    {
+        this.startX = this.timeToX( time );
+        this.onSetStartValue( this.startX )
+    }
 
-//     setEndTime( time ) {
-//         this.endX = this.timeToX( time );
-//         this.onSetEndValue( this.endX );
-//     }
+    setEndTime( time: number )
+    {
+        this.endX = this.timeToX( time );
+        this.onSetEndValue( this.endX );
+    }
 
-//     onSetCurrentValue( x ) {
-//         this.update( x );
+    onSetCurrentValue( x : number )
+    {
+        this.update( x );
 
-//         const t = this.xToTime( x );
-//         if( this.onChangeCurrent ) {
-//             this.onChangeCurrent( t );
-//         }
-//     }
+        const t = this.xToTime( x );
+        if( this.onChangeCurrent )
+        {
+            this.onChangeCurrent( t );
+        }
+    }
 
-//     onSetStartValue( x ) {
-//         this.update( x );
+    onSetStartValue( x: number )
+    {
+        this.update( x );
         
-//         const t = this.xToTime( x );
-//         if( this.onChangeStart ) {
-//             this.onChangeStart( t );
-//         }
-//     }
+        const t = this.xToTime( x );
+        if( this.onChangeStart )
+        {
+            this.onChangeStart( t );
+        }
+    }
 
-//     onSetEndValue( x ) {
-//         this.update( x );
+    onSetEndValue( x: number )
+    {
+        this.update( x );
         
-//         const t = this.xToTime( x );
-//         if( this.onChangeEnd ) {
-//             this.onChangeEnd( t );
-//         }
-//     }
+        const t = this.xToTime( x );
+        if( this.onChangeEnd )
+        {
+            this.onChangeEnd( t );
+        }
+    }
 
-//     _draw( ) {
-//         const ctx = this.ctx;
+    _draw()
+    {
+        const ctx = this.ctx;
+        if( !ctx ) return;
 
-//         ctx.save();
-//         ctx.fillStyle = TimeBar.BACKGROUND_COLOR;
-//         ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-//         ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        ctx.save();
+        ctx.fillStyle = TimeBar.BACKGROUND_COLOR;
+        ctx.clearRect( 0, 0, this.canvas.width, this.canvas.height );
+        ctx.fillRect( 0, 0, this.canvas.width, this.canvas.height );
 
-//         // Draw background timeline
-//         ctx.fillStyle = TimeBar.COLOR;
-//         ctx.fillRect(this.position.x, this.position.y, this.lineWidth, this.lineHeight);
+        // Draw background timeline
+        ctx.fillStyle = TimeBar.COLOR;
+        ctx.fillRect( this.position.x, this.position.y, this.lineWidth, this.lineHeight );
 
-//         // Draw background trimed timeline
-//         ctx.fillStyle = TimeBar.ACTIVE_COLOR;
-//         ctx.fillRect(this.startX, this.position.y, this.endX - this.startX, this.lineHeight);
+        // Draw background trimed timeline
+        ctx.fillStyle = TimeBar.ACTIVE_COLOR;
+        ctx.fillRect( this.startX, this.position.y, this.endX - this.startX, this.lineHeight );
 
-//         ctx.restore();
+        ctx.restore();
 
-//         // Min-Max time markers
-//         this._drawTrimMarker('start', this.startX, { color: null, fillColor: TimeBar.ACTIVE_COLOR || '#5f88c9'});
-//         this._drawTrimMarker('end', this.endX, { color: null, fillColor: TimeBar.ACTIVE_COLOR || '#5f88c9'});
-//         this._drawTimeMarker('current', this.currentX, { color: '#e5e5e5', fillColor: TimeBar.ACTIVE_COLOR || '#5f88c9', width: this.markerWidth });
+        // Min-Max time markers
+        this._drawTrimMarker( 'start', this.startX, { color: null, fillColor: TimeBar.ACTIVE_COLOR || '#5f88c9'});
+        this._drawTrimMarker( 'end', this.endX, { color: null, fillColor: TimeBar.ACTIVE_COLOR || '#5f88c9'});
+        this._drawTimeMarker( 'current', this.currentX, { color: '#e5e5e5', fillColor: TimeBar.ACTIVE_COLOR || '#5f88c9', width: this.markerWidth });
         
-//         if( this.onDraw ) {
-//             this.onDraw();
-//         }
-//     }
+        if( this.onDraw )
+        {
+            this.onDraw();
+        }
+    }
 
-//     _drawTrimMarker(name, x, options) {
+    _drawTrimMarker( name: string, x: number, options: any = {} )
+    {
+        const w = this.markerWidth;
+        const h = this.markerHeight;
+        const y = this.canvas.height * 0.5 - h * 0.5;
+        const ctx = this.ctx;
+        if( !ctx ) return;
 
-//         options = options || {};
+        // Shadow
+        if( this.hovering == name )
+        {
+            ctx.shadowColor = "white";
+            ctx.shadowBlur = 2;
+        }
 
-//         const w = this.markerWidth;
-//         const h = this.markerHeight;
-//         const y = this.canvas.height * 0.5 - h * 0.5;
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = ctx.strokeStyle = options.fillColor || '#111' // "#FFF";
 
-//         const ctx = this.ctx;
-//         if(this.hovering == name) {
-//             // Shadow
-//             ctx.shadowColor = "white";
-//             ctx.shadowBlur = 2;
-//         }
-//         ctx.globalAlpha = 1;
-//         ctx.fillStyle = ctx.strokeStyle = options.fillColor || '#111' // "#FFF";
+        ctx.beginPath();
+        ctx.roundRect( x - w * 0.5, y, w, h, 2 );
+        ctx.fill();
+        ctx.fillStyle = ctx.strokeStyle = options.fillColor || '#111' // "#FFF";
 
-//         ctx.beginPath();
-//         ctx.roundRect(x - w * 0.5, y, w, h, 2);
-//         ctx.fill();
-//         ctx.fillStyle = ctx.strokeStyle = options.fillColor || '#111' // "#FFF";
+        ctx.strokeStyle = "white";
+        ctx.beginPath();
+        ctx.lineWidth = 2;
+        ctx.moveTo( x, y + 4);
+        ctx.lineTo( x, y + h - 4 );
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+    }
 
-//         ctx.strokeStyle = "white";
-//         ctx.beginPath();
-//         ctx.lineWitdh = 2;
-//         ctx.moveTo(x, y + 4);
-//         ctx.lineTo(x, y + h - 4);
-//         ctx.stroke();
-//         ctx.shadowBlur = 0;
+    _drawTimeMarker( name: string, x: number, options: any = {} )
+    {
+        let y = this.offset;
+        const w = options.width ? options.width : ( this.dragging == name ? 6 : 4 );
+        const h = this.canvas.height - this.offset * 2;
 
-//     }
+        let ctx = this.ctx;
+        if( !ctx ) return;
 
-//     _drawTimeMarker(name, x, options) {
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = ctx.strokeStyle = options.fillColor || '#111' // "#FFF";
 
-//         options = options || {};
+        // Shadow
+        if( this.hovering == name )
+        {
+            ctx.shadowColor = "white";
+            ctx.shadowBlur = 2;
+        }
 
-//         let y = this.offset;
-//         const w = options.width ? options.width : (this.dragging == name ? 6 : 4);
-//         const h = this.canvas.height - this.offset * 2;
+        // Current time line
+        ctx.fillStyle = ctx.strokeStyle = "white";
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x, y + h * 0.5);
+        ctx.stroke();
+        ctx.closePath();
+        ctx.fillStyle = ctx.strokeStyle = options.fillColor || '#111' // "#FFF";
 
-//         let ctx = this.ctx;
+        y -= this.offset + 8;
+        // Current time ball grab
+        ctx.fillStyle = options.fillColor || '#e5e5e5';
+        ctx.beginPath();
+        ctx.roundRect( x - w * 0.5, y + this.offset, w, w, 5 );
 
-//         ctx.globalAlpha = 1;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+    }
 
-//         ctx.fillStyle = ctx.strokeStyle = options.fillColor || '#111' // "#FFF";
+    update( x: number )
+    {
+        this.currentX = Math.min( Math.max( this.startX, x ), this.endX );
+        this._draw();
+    }
 
+    onMouseDown( e: MouseEvent )
+    {
+        if( this.onMouse )
+        {
+            this.onMouse( e );
+        }
 
-//         if(this.hovering == name) {
-//            // Shadow
-//             ctx.shadowColor = "white";
-//             ctx.shadowBlur = 2;
-//         }
+        e.preventDefault();
 
-//         // Current time line
-//         ctx.fillStyle = ctx.strokeStyle = "white";
-//         ctx.beginPath();
-//         ctx.moveTo(x, y);
-//         ctx.lineTo(x, y + h * 0.5);
-//         ctx.stroke();
-//         ctx.closePath();
-//         ctx.fillStyle = ctx.strokeStyle = options.fillColor || '#111' // "#FFF";
+        if( !this.canvas || e.target != this.canvas || e.cancelBubble )
+        {
+            return;
+        }
 
+        const canvas = this.canvas;
 
-//         y -= this.offset + 8;
-//         // Current time ball grab
-//         ctx.fillStyle = options.fillColor || '#e5e5e5';
-//         ctx.beginPath();
-//         ctx.roundRect(x - w * 0.5, y + this.offset, w, w, 5);
+        // Process mouse
+        const x = e.offsetX;
+        const y = e.offsetY;
 
-//         ctx.fill();
-//         ctx.shadowBlur = 0;
-//     }
+        // Check if some marker is clicked
+        const threshold = this.markerWidth;
 
-//     update( x ) {
-//         this.currentX = Math.min(Math.max(this.startX, x), this.endX);
-//         this._draw();
-//     }
+        // grab trim markers only from the bottom
+        if( Math.abs( this.startX - x ) < threshold && this.position.y < y )
+        {
+            this.dragging = 'start';
+            canvas.style.cursor = "grabbing";
+        }
+        else if( Math.abs( this.endX - x ) < threshold && this.position.y < y )
+        {
+            this.dragging = 'end';
+            canvas.style.cursor = "grabbing";
+        }
+        else
+        {
+            this.dragging = 'current';
+            canvas.style.cursor = "grabbing";
 
-//     onMouseDown( e ) {
+            if( x < this.startX )
+            {
+                this.currentX = this.startX;
+            }
+            else if( x > this.endX )
+            {
+                this.currentX = this.endX;
+            }
+            else
+            {
+                this.currentX = x;
+            }
 
-//         if( this.onMouse ) {
-//             this.onMouse( e );
-//         }
+            this.onSetCurrentValue( this.currentX );
+        }
 
-//         e.preventDefault();
+        this._draw();
+    }
 
-//         if( !this.canvas || e.target != this.canvas || e.cancelBubble ) {
-//             return;
-//         }
-//         const canvas = this.canvas;
+    onMouseUp( e: MouseEvent )
+    {
+        if( this.onMouse )
+        {
+            this.onMouse( e );
+        }
 
-//         // Process mouse
-//         const x = e.offsetX;
-//         const y = e.offsetY;
+        e.preventDefault();
 
-//         // Check if some marker is clicked
-//         const threshold = this.markerWidth;
+        delete this.dragging;
+        delete this.hovering;
 
-//         // grab trim markers only from the bottom
-//         if( Math.abs(this.startX - x) < threshold && this.position.y < y ) {
-//             this.dragging = 'start';
-//             canvas.style.cursor = "grabbing";
-//         }
-//         else if( Math.abs(this.endX - x) < threshold && this.position.y < y ) {
-//             this.dragging = 'end';
-//             canvas.style.cursor = "grabbing";
-//         }
-//         else {
-//             this.dragging = 'current';
-//             canvas.style.cursor = "grabbing";
+        if( !this.canvas  || e.cancelBubble )
+        {
+            return;
+        }
 
-//             if( x < this.startX ) {
-//                 this.currentX = this.startX;
-//             }
-//             else if( x > this.endX ) {
-//                 this.currentX = this.endX;
-//             }
-//             else {
-//                 this.currentX = x;
-//             }
+        const canvas = this.canvas;
+        canvas.style.cursor = "default";
+    }
 
-//             this.onSetCurrentValue( this.currentX );
-//         }
-
-//         this._draw();
-//     }
-
-//     onMouseUp( e ) {
+    onMouseMove( e: MouseEvent )
+    {
+        if( this.onMouse )
+        {
+            this.onMouse( e );
+        }
         
-//         if( this.onMouse ) {
-//             this.onMouse( e );
-//         }
+        if( !this.canvas || e.cancelBubble )
+        {
+            return;
+        }
 
-//         e.preventDefault();
+        e.preventDefault();
 
-//         this.dragging = false;
-//         this.hovering = false;
+        const canvas = this.canvas;
 
-//         if( !this.canvas  || e.cancelBubble ) {
-//             return;
-//         }
+        // Process mouse
+        const x = e.target == canvas ? e.offsetX : e.clientX - canvas.offsetLeft;
+        const y = e.target == canvas ? e.offsetY : e.clientY - canvas.offsetTop;
 
-//         const canvas = this.canvas;
-//         canvas.style.cursor = "default";
-//     }
+        if( this.dragging )
+        {
+            switch( this.dragging )
+            {
+                case 'start':
+                    this.startX = Math.max( this.position.x, Math.min( this.endX, x ) );
+                    this.currentX = this.startX;
+                    this.onSetStartValue( this.startX );
+                    break;
+                case 'end':
+                    this.endX = Math.max( this.startX, Math.min( this.position.x + this.lineWidth, x ) );
+                    this.currentX = this.endX;
+                    this.onSetEndValue( this.endX );
+                    break;
+                default:
+                    this.currentX = Math.max( this.startX, Math.min( this.endX, x ) );
+                    break;
+            }
 
-//     onMouseMove( e ) {
+            this.onSetCurrentValue( this.currentX );
+        }
+        else
+        {
+            const threshold = this.markerWidth * 0.5;
 
-//         if( this.onMouse ) {
-//             this.onMouse( e );
-//         }
-        
-//         if( !this.canvas || e.cancelBubble ) {
-//             return;
-//         }
+            if( Math.abs( this.startX - x ) < threshold )
+            {
+                this.hovering = 'start';
+                canvas.style.cursor = "grab";
+            }
+            else if( Math.abs( this.endX - x ) < threshold )
+            {
+                this.hovering = 'end';
+                canvas.style.cursor = "grab";
+            }
+            else if( Math.abs( this.currentX - x ) < threshold )
+            {
+                this.hovering = 'current';
+                canvas.style.cursor = "grab";
+            }
+            else
+            {
+                delete this.hovering;
+                canvas.style.cursor = "default";
+            }
+        }
 
-//         e.preventDefault();
-//         const canvas = this.canvas;
+        this._draw();
+    }
 
-//         // Process mouse
-//         const x = e.target == canvas ? e.offsetX : e.clientX - canvas.offsetLeft;
-//         const y = e.target == canvas ? e.offsetY : e.clientY - canvas.offsetTop;
+    resize( size: number[] )
+    {
+        this.canvas.width = size[ 0 ];
+        this.canvas.height = size[ 1 ];
 
-//         if( this.dragging ) {
-//             switch( this.dragging ) {
-//                 case 'start':
-//                     this.startX = Math.max(this.position.x, Math.min(this.endX, x));
-//                     this.currentX = this.startX;
-//                     this.onSetStartValue(this.startX);
-//                     break;
-//                 case 'end':
-//                     this.endX = Math.max( this.startX, Math.min(this.position.x + this.lineWidth, x) );
-//                     this.currentX = this.endX;
-                    
-//                     this.onSetEndValue( this.endX );
-//                     break;
-//                 default:
-//                     this.currentX = Math.max( this.startX, Math.min(this.endX, x) );
-//                     break;
-//             }
+        let newWidth = size[ 0 ] - this.offset * 2;
+        newWidth = newWidth < 0.00001 ? 0.00001 : newWidth; // actual width of the line = canvas.width - offsetleft - offsetRight
+        const startRatio = ( this.startX - this.offset ) / this.lineWidth;
+        const currentRatio = ( this.currentX - this.offset ) / this.lineWidth;
+        const endRatio = ( this.endX - this.offset ) / this.lineWidth;
 
-//             this.onSetCurrentValue( this.currentX );
-//         }
-//         else {
-//             const threshold = this.markerWidth * 0.5;
+        this.lineWidth = newWidth;
+        this.startX = Math.min( Math.max( newWidth * startRatio, 0 ), newWidth ) + this.offset;
+        this.currentX = Math.min(Math.max( newWidth * currentRatio, 0 ), newWidth) + this.offset;
+        this.endX = Math.min( Math.max( newWidth * endRatio, 0  ), newWidth) + this.offset;
 
-//             if( Math.abs(this.startX - x) < threshold ) {
-//                 this.hovering = 'start';
-//                 canvas.style.cursor = "grab";
-//             }
-//             else if( Math.abs(this.endX - x) < threshold ) {
-//                 this.hovering = 'end';
-//                 canvas.style.cursor = "grab";
-//             }
-//             else if( Math.abs(this.currentX - x) < threshold ) {
-//                 this.hovering = 'current';
-//                 canvas.style.cursor = "grab";
-//             }
-//             else {
-//                 this.hovering = false;
-//                 canvas.style.cursor = "default";
-//             }
-//         }
-//         this._draw();
-//     }
+        this._draw();
+    }
+}
 
-//     resize( size ) {
-//         this.canvas.width = size[0];
-//         this.canvas.height = size[1];
+LX.TimeBar = TimeBar;
 
-//         let newWidth = size[0] - this.offset * 2;
-//         newWidth = newWidth < 0.00001 ? 0.00001 : newWidth; // actual width of the line = canvas.width - offsetleft - offsetRight
-//         const startRatio = (this.startX - this.offset) / this.lineWidth;
-//         const currentRatio = (this.currentX - this.offset) / this.lineWidth;
-//         const endRatio = (this.endX - this.offset) / this.lineWidth;
+/**
+ * @class VideoEditor
+ */
 
-//         this.lineWidth = newWidth;
-//         this.startX = Math.min( Math.max(newWidth * startRatio, 0), newWidth ) + this.offset;
-//         this.currentX = Math.min(Math.max(newWidth * currentRatio, 0), newWidth) + this.offset;
-//         this.endX = Math.min( Math.max(newWidth * endRatio, 0 ), newWidth) + this.offset;
+export class VideoEditor
+{
+    playing: boolean = false;
+    videoReady: boolean = false;
+    controls: boolean = true;
+    startTimeString: string = "0:0";
+    endTimeString: string = "0:0";
+    speed: number = 1.0;
+    currentTime: number = 0.0;
+    startTime: number = 0.0;
+    endTime: number = 0.0;
+    requestId: any;
+    video: HTMLVideoElement;
+    loop: boolean = false;
+    isDragging: boolean = false;
+    isResizing: boolean = false;
+    crop: boolean = false;
+    dragOffsetX: number = 0.0;
+    dragOffsetY: number = 0.0;
+    currentTimeString: string = "";
 
-//         this._draw();
-//     }
-// }
+    timebar: TimeBar;
+    mainArea: typeof Area;
+    cropArea: HTMLElement;
+    brCrop: HTMLElement;
+    controlsArea: typeof Area;
+    controlsPanelLeft: typeof Panel;
+    controlsPanelRight: typeof Panel;
+    controlsCurrentPanel: typeof Panel;
 
-// LX.TimeBar = TimeBar;
+    onChangeCurrent: any;
+    onChangeStart: any;
+    onChangeEnd: any;
+    onKeyUp: any;
+    onSetTime: any;
+    onVideoLoaded: any;
+    onCropArea: any;
+    onResize: any;
+    onChangeSpeed: any;
 
+    _updateTime: boolean = true;
 
-// /**
-//  * @class VideoEditor
-//  */
+    constructor( area: typeof Area, options: any = {} )
+    {
+        this.speed = options.speed ?? this.speed
+        this.mainArea = area;
 
-// class VideoEditor {
+        let videoArea = null;
+        let controlsArea = null;
 
-//     constructor( area, options = {} ) {
+        if( options.controlsArea )
+        {
+            videoArea = area;
+            controlsArea = options.controlsArea;
+        }
+        else
+        {
+            [ videoArea, controlsArea ] = area.split( { type: 'vertical', sizes: ["85%", null], minimizable: false, resize: false } );
+        }
 
-//         this.playing = false;
-//         this.requestId = null;
-//         this.videoReady = false;
-//         this.currentTime = this.startTime = 0;
-//         this.startTimeString = "0:0";
-//         this.endTimeString = "0:0";
-//         this._updateTime = true;
-//         this.speed = options.speed || 1; 
-//         this.mainArea = area;
+        controlsArea.root.classList.add('lexconstrolsarea');
 
-//         let videoArea = null;
-//         let controlsArea = null;
-//         if( options.controlsArea ) {
-//             videoArea = area;
-//             controlsArea = options.controlsArea;
-//         }
-//         else {
-//             [videoArea, controlsArea] = area.split({ type: 'vertical', sizes: ["85%", null], minimizable: false, resize: false });
-//         }
-//         controlsArea.root.classList.add('lexconstrolsarea');
+        this.cropArea = document.createElement("div");
+        this.cropArea.id = "cropArea";
+        this.cropArea.className = "resize-area hidden"
 
-//         this.cropArea = document.createElement("div");
-//         this.cropArea.id = "cropArea";
-//         this.cropArea.className = "resize-area hidden"
+        this.brCrop = document.createElement("div");
+        this.brCrop.className = " resize-handle br"; // bottom right
+        this.cropArea.append( this.brCrop );
 
-//         this.brCrop = document.createElement("div");
-//         this.brCrop.className = " resize-handle br"; // bottom right
-//         this.cropArea.append(this.brCrop);
+        this.crop = options.crop;
+        this.dragOffsetX = 0;
+        this.dragOffsetY = 0;
+        // Create video element and load it
+        let video = this.video = options.video ?? document.createElement( 'video' );
+        this.loop = options.loop ?? this.loop;
 
-//         this.crop = options.crop;
-//         this.dragOffsetX = 0;
-//         this.dragOffsetY = 0;
-//         // Create video element and load it
-//         let video = this.video = options.video ?? document.createElement( 'video' );
-//         this.loop = options.loop ?? false;
+        if( options.src )
+        {
+            this.video.src = options.src;
+            this.loadVideo( options );
+        }
 
-//         if( options.src ) {
-//             this.video.src = options.src;
-//             this.loadVideo( options );
-//         }
+        if( options.videoArea )
+        {
+            options.videoArea.root.classList.add( "lexvideoeditor" );
+            options.videoArea.attach( this.cropArea );
+            videoArea.attach( options.videoArea );
+        }
+        else
+        {
+            videoArea.attach( video );
+            videoArea.attach( this.cropArea );
+            videoArea.root.classList.add("lexvideoeditor");
+        }
 
-//         if( options.videoArea ) {
-//             options.videoArea.root.classList.add("lexvideoeditor");
-//             options.videoArea.attach(this.cropArea);
-//             videoArea.attach(options.videoArea);
-//         }
-//         else {
-//             videoArea.attach(video);
-//             videoArea.attach(this.cropArea);
-//             videoArea.root.classList.add("lexvideoeditor");
-//         }
+        this.controlsArea = controlsArea;
+        // Create playing timeline area and attach panels
+        let [ topArea, bottomArea ] = controlsArea.split({ type: 'vertical', sizes:["50%", null], minimizable: false, resize: false });
+        bottomArea.setSize( [ bottomArea.size[ 0 ], 40 ] );
+        let [ leftArea, controlsRight ] = bottomArea.split({ type: 'horizontal', sizes:["92%", null], minimizable: false, resize: false });
+        let [ controlsLeft, timeBarArea ] = leftArea.split({ type: 'horizontal', sizes:["10%", null], minimizable: false, resize: false });
 
-//         this.controlsArea = controlsArea;
-//         // Create playing timeline area and attach panels
-//         let [topArea, bottomArea] = controlsArea.split({ type: 'vertical', sizes:["50%", null], minimizable: false, resize: false });
-//         bottomArea.setSize([bottomArea.size[0], 40]);
-//         let [leftArea, controlsRight] = bottomArea.split({ type: 'horizontal', sizes:["92%", null], minimizable: false, resize: false });
-//         let [controlsLeft, timeBarArea] = leftArea.split({ type: 'horizontal', sizes:["10%", null], minimizable: false, resize: false });
+        topArea.root.classList.add('lexbar');
+        bottomArea.root.classList.add('lexbar');
+        this.controlsCurrentPanel = new LX.Panel( { className: 'lexcontrolspanel lextime' } );
+        this.controlsCurrentPanel.refresh = () =>
+        {
+            this.controlsCurrentPanel.clear();
+            this.controlsCurrentPanel.addLabel( this.currentTimeString, { float: "center" } );
+        }
+        topArea.root.classList.add('lexflexarea')
+        topArea.attach( this.controlsCurrentPanel );
+        this.controlsCurrentPanel.refresh();
 
-//         topArea.root.classList.add('lexbar');
-//         bottomArea.root.classList.add('lexbar');
-//         this.controlsCurrentPanel = new LX.Panel({className: 'lexcontrolspanel lextime'});
-//         this.controlsCurrentPanel.refresh = () => {
-//             this.controlsCurrentPanel.clear();
-//             this.controlsCurrentPanel.addLabel(this.currentTimeString, {float: "center"});
-//         }
-//         topArea.root.classList.add('lexflexarea')
-//         topArea.attach(this.controlsCurrentPanel);
-//         this.controlsCurrentPanel.refresh();
+        const style = getComputedStyle( bottomArea.root );
+        let padding = Number( style.getPropertyValue( 'padding' ).replace( "px", "" ) );
+        this.timebar = new TimeBar( timeBarArea, TimeBar.TIMEBAR_TRIM, { offset: padding } );
 
-//         const style = getComputedStyle(bottomArea.root);
-//         let padding = Number(style.getPropertyValue('padding').replace("px",""));
-//         this.timebar = new TimeBar(timeBarArea, TimeBar.TIMEBAR_TRIM, {offset: padding});
+        // Create controls panel (play/pause button and start time)
+        this.controlsPanelLeft = new LX.Panel({className: 'lexcontrolspanel'});
+        this.controlsPanelLeft.refresh = () => {
+            this.controlsPanelLeft.clear();
+            this.controlsPanelLeft.sameLine();
+            this.controlsPanelLeft.addButton('', "", () => {
+                this.playing = !this.playing;
+                if( this.playing) {
+                    if( this.video.currentTime + 0.000001 >= this.endTime) {
+                        this.video.currentTime = this.startTime;
+                    }
+                    this.video.play()
+                }
+                else {
+                    this.video.pause();
+                }
+                this.controlsPanelLeft.refresh();
+            }, { width: '40px', icon: ( this.playing ? 'Pause@solid' : 'Play@solid'), className: "justify-center"});
 
-//         // Create controls panel (play/pause button and start time)
-//         this.controlsPanelLeft = new LX.Panel({className: 'lexcontrolspanel'});
-//         this.controlsPanelLeft.refresh = () => {
-//             this.controlsPanelLeft.clear();
-//             this.controlsPanelLeft.sameLine();
-//             this.controlsPanelLeft.addButton('', "", (v) => {
-//                 this.playing = !this.playing;
-//                 if(this.playing) {
-//                     if( this.video.currentTime + 0.000001 >= this.endTime) {
-//                         this.video.currentTime = this.startTime;
-//                     }
-//                     this.video.play()
-//                 }
-//                 else {
-//                     this.video.pause();
-//                 }
-//                 this.controlsPanelLeft.refresh();
-//             }, { width: '40px', icon: (this.playing ? 'Pause@solid' : 'Play@solid'), className: "justify-center"});
+            // if( this.speedDialog )
+            // {
+            //     this.speedDialog.close();
+            // }
 
-//             if(this.speedDialog) {
-//                 this.speedDialog.close();
-//             }
-//             this.speedDialog = null;
-//             const btn = this.controlsPanelLeft.addButton('', '', (v, e) => {
+            // this.speedDialog = null;
+
+            const btn = this.controlsPanelLeft.addButton('', '', ( v: any, e: MouseEvent ) =>
+            {
+                // if( this.speedDialog) {
+                //     this.speedDialog.close();
+                //     this.speedDialog = null;
+                //     return;
+                // }
                 
-//                 // if(this.speedDialog) {
-//                 //     this.speedDialog.close();
-//                 //     this.speedDialog = null;
-//                 //     return;
-//                 // }
+                const panel = new LX.Panel();
+                panel.addNumber("Speed", this.speed, ( v: number ) => {
+                    this.speed = v;
+                    this.video.playbackRate = v;
+                    if( this.onChangeSpeed )
+                    {
+                        this.onChangeSpeed( v );
+                    }
+                }, {min: 0, max: 2.5, step: 0.01, nameWidth: "50px"})
                 
-//                 const panel = new LX.Panel();
-//                 panel.addNumber("Speed", this.speed, (v) => {
-//                     this.speed = v;
-//                     this.video.playbackRate = v;
-//                     if( this.onChangeSpeed ) {
-//                         this.onChangeSpeed( v );
-//                     }
-//                 }, {min: 0, max: 2.5, step: 0.01, nameWidth: "50px"})
-                
-//                 new LX.Popover( e.target, [ panel ], { align: "start", side: "top", sideOffset: 12 } );
+                new LX.Popover( e.target, [ panel ], { align: "start", side: "top", sideOffset: 12 } );
               
-//             }, { width: '40px', title: 'speed', icon: "Timer@solid", className: "justify-center" } );
+            }, { width: '40px', title: 'speed', icon: "Timer@solid", className: "justify-center" } );
             
-//             this.controlsPanelLeft.addButton('', 'Loop', (v) => {
-//                 this.loop = !this.loop;
-                
-//                 this.controlsPanelLeft.refresh();
-//             }, { width: '40px', title: 'loop', icon: ( 'Repeat@solid'), className: `justify-center`, buttonClass: `${(this.loop ? 'bg-accent' : '')}`});
+            this.controlsPanelLeft.addButton('', 'Loop', () =>
+            {
+                this.loop = !this.loop;
+                this.controlsPanelLeft.refresh();
+            }, { width: '40px', title: 'loop', icon: ( 'Repeat@solid'), className: `justify-center`, buttonClass: `${( this.loop ? 'bg-accent' : '')}`});
 
-//             this.controlsPanelLeft.addLabel(this.startTimeString, {width: "100px"});
-//             this.controlsPanelLeft.endLine();
+            this.controlsPanelLeft.addLabel( this.startTimeString, {width: "100px"});
+            this.controlsPanelLeft.endLine();
 
-//             let availableWidth = leftArea.root.clientWidth - controlsLeft.root.clientWidth;
-//             this.timebar.resize([availableWidth, timeBarArea.root.clientHeight]);
-//         }
+            let availableWidth = leftArea.root.clientWidth - controlsLeft.root.clientWidth;
+            this.timebar.resize([availableWidth, timeBarArea.root.clientHeight]);
+        }
 
-//         this.controlsPanelLeft.refresh();
-//         controlsLeft.root.style.minWidth = 'fit-content';
-//        // controlsLeft.root.classList.add();
-//         controlsLeft.attach(this.controlsPanelLeft);
+        this.controlsPanelLeft.refresh();
+        controlsLeft.root.style.minWidth = 'fit-content';
+       // controlsLeft.root.classList.add();
+        controlsLeft.attach( this.controlsPanelLeft);
 
-//         // Create right controls panel (ens time)
-//         this.controlsPanelRight = new LX.Panel({className: 'lexcontrolspanel'});
-//         this.controlsPanelRight.refresh = () => {
-//             this.controlsPanelRight.clear();
-//             this.controlsPanelRight.addLabel(this.endTimeString, {width: 100});
-//         }
-//         this.controlsPanelRight.refresh();
-//         controlsRight.root.style.minWidth = 'fit-content';
-//         controlsRight.attach(this.controlsPanelRight);
+        // Create right controls panel (ens time)
+        this.controlsPanelRight = new LX.Panel({className: 'lexcontrolspanel'});
+        this.controlsPanelRight.refresh = () => {
+            this.controlsPanelRight.clear();
+            this.controlsPanelRight.addLabel( this.endTimeString, {width: 100});
+        }
+        this.controlsPanelRight.refresh();
+        controlsRight.root.style.minWidth = 'fit-content';
+        controlsRight.attach( this.controlsPanelRight);
 
-//         this.timebar.onChangeCurrent = this._setCurrentTime.bind(this);
-//         this.timebar.onChangeStart = this._setStartTime.bind(this);
-//         this.timebar.onChangeEnd = this._setEndTime.bind(this);
+        this.timebar.onChangeCurrent = this._setCurrentTime.bind(this);
+        this.timebar.onChangeStart = this._setStartTime.bind(this);
+        this.timebar.onChangeEnd = this._setEndTime.bind(this);
 
-//         window.addEventListener('resize', (v) => {
-//             if(this.onResize) {
-//                 this.onResize([videoArea.root.clientWidth, videoArea.root.clientHeight]);
-//             }
-//             bottomArea.setSize([this.controlsArea.root.clientWidth, 40]);
-//             let availableWidth = this.controlsArea.root.clientWidth - controlsLeft.root.clientWidth - controlsRight.root.clientWidth;
-//             this.timebar.resize([availableWidth, timeBarArea.root.clientHeight]);
-//             this.dragCropArea( { clientX: -1, clientY: -1 } );
-//             this.resizeCropArea( { clientX: window.screen.width, clientY: window.screen.height } );
+        window.addEventListener('resize', () =>
+        {
+            if( this.onResize )
+            {
+                this.onResize( [ videoArea.root.clientWidth, videoArea.root.clientHeight ] );
+            }
 
-//         })
+            bottomArea.setSize( [ this.controlsArea.root.clientWidth, 40 ] );
+            let availableWidth = this.controlsArea.root.clientWidth - controlsLeft.root.clientWidth - controlsRight.root.clientWidth;
+            this.timebar.resize( [ availableWidth, timeBarArea.root.clientHeight ] );
+            this.dragCropArea( { clientX: -1, clientY: -1 } );
+            this.resizeCropArea( { clientX: window.screen.width, clientY: window.screen.height } );
 
-//         this.onKeyUp = (event) => {
-//             if( this.controls && event.key == " " ) {
-//                 event.preventDefault();
-//                 event.stopPropagation();
+        })
 
-//                 this.playing = !this.playing;
-//                 if( this.playing ) {
-//                     if( this.video.currentTime + 0.000001 >= this.endTime) {
-//                         this.video.currentTime = this.startTime;
-//                     }
-//                     this.video.play();
-//                 }
-//                 else {
-//                     this.video.pause();
-//                 }
-//                 this.controlsPanelLeft.refresh();
-//             }
-//         }
+        this.onKeyUp = ( e: KeyboardEvent ) =>
+        {
+            if( this.controls && e.key == " " )
+            {
+                e.preventDefault();
+                e.stopPropagation();
 
-//         window.addEventListener( "keyup", this.onKeyUp);
+                this.playing = !this.playing;
+                if( this.playing )
+                {
+                    if( this.video.currentTime + 0.000001 >= this.endTime)
+                    {
+                        this.video.currentTime = this.startTime;
+                    }
+                    this.video.play();
+                }
+                else
+                {
+                    this.video.pause();
+                }
 
-//         videoArea.onresize = (v) => {
-//             if( bottomArea.parentArea ) {
-//                 bottomArea.setSize([bottomArea.parentArea.root.clientWidth, 40]);
-//             }
+                this.controlsPanelLeft.refresh();
+            }
+        }
 
-//             const ratio = this.video.clientHeight / this.video.videoHeight;
-//             this.cropArea.style.height = this.video.clientHeight + "px";
-//             this.cropArea.style.width = this.video.videoWidth * ratio + "px";
-//         }
+        window.addEventListener( "keyup", this.onKeyUp );
 
+        videoArea.onresize = () =>
+        {
+            if( bottomArea.parentArea )
+            {
+                bottomArea.setSize([bottomArea.parentArea.root.clientWidth, 40]);
+            }
 
-//         timeBarArea.onresize = (v) => {
-//             let availableWidth = this.controlsArea.root.clientWidth - controlsLeft.root.clientWidth - controlsRight.root.clientWidth - 20;
-//             this.timebar.resize([availableWidth, v.height]);
-//         }
+            const ratio = this.video.clientHeight / this.video.videoHeight;
+            this.cropArea.style.height = this.video.clientHeight + "px";
+            this.cropArea.style.width = this.video.videoWidth * ratio + "px";
+        }
 
-//         const parent = controlsArea.parentElement ? controlsArea.parentElement : controlsArea.root.parentElement;
+        timeBarArea.onresize = ( v: any ) =>
+        {
+            let availableWidth = this.controlsArea.root.clientWidth - controlsLeft.root.clientWidth - controlsRight.root.clientWidth - 20;
+            this.timebar.resize([availableWidth, v.height]);
+        }
 
-//         // Add canvas event listeneres
-//         parent.addEventListener( "mousedown", (event) => {
-//             // if(this.controls) {
-//             //     this.timebar.onMouseDown(event);
-//             // }
-//         });
-//         parent.addEventListener( "mouseup", (event) => {
-//             // if(this.controls) {
-//             //     this.timebar.onMouseUp(event);
-//             // }
+        const parent = controlsArea.parentElement ? controlsArea.parentElement : controlsArea.root.parentElement;
 
-//             if( ( this.isDragging || this.isResizing ) && this.onCropArea ) {
-//                 if( this.onCropArea ) {
-//                     this.onCropArea( this.getCroppedArea() );
-//                 }
-//             }
-//             this.isDragging = false;
-//             this.isResizing = false;
+        // Add canvas event listeneres
+        parent.addEventListener( "mousedown", ( e: MouseEvent ) => {
+            // if( this.controls) {
+            //     this.timebar.onMouseDown(e);
+            // }
+        });
+        parent.addEventListener( "mouseup", ( e: MouseEvent ) => {
+            // if( this.controls) {
+            //     this.timebar.onMouseUp(e);
+            // }
 
-//         });
-//         parent.addEventListener( "mousemove", (event) => {
-//             // if(this.controls) {
-//             //     this.timebar.onMouseMove(event);
-//             // }
+            if( ( this.isDragging || this.isResizing ) && this.onCropArea )
+            {
+                if( this.onCropArea )
+                {
+                    this.onCropArea( this.getCroppedArea() );
+                }
+            }
+            this.isDragging = false;
+            this.isResizing = false;
 
-//             if ( this.isResizing ) {
-//                 this.resizeCropArea( event );
-//             }
+        });
+        parent.addEventListener( "mousemove", ( e: MouseEvent ) => {
+            // if( this.controls) {
+            //     this.timebar.onMouseMove(e);
+            // }
 
-//             if( this.isDragging ) {
-//                 this.dragCropArea( event );
-//             }
-//         });
+            if ( this.isResizing )
+            {
+                this.resizeCropArea( e );
+            }
 
-//         this.cropArea.addEventListener( "mousedown", (event) => {
+            if( this.isDragging )
+            {
+                this.dragCropArea( e );
+            }
+        });
 
+        this.cropArea.addEventListener( "mousedown", ( e: MouseEvent ) => {
+            if ( e.target === this.cropArea )
+            {
+                const rect = this.cropArea.getBoundingClientRect();
+                this.isDragging = true;
 
-//             if ( event.target === this.cropArea ) {
-//                 const rect = this.cropArea.getBoundingClientRect();
-//                 this.isDragging = true;
+                this.dragOffsetX = e.clientX - rect.left;
+                this.dragOffsetY = e.clientY - rect.top;
+            }
+        });
 
-//                 this.dragOffsetX = event.clientX - rect.left;
-//                 this.dragOffsetY = event.clientY - rect.top;
-//             }
-//         });
+        document.querySelectorAll(".resize-handle" ).forEach( handle => {
+            handle.addEventListener("mousedown", ( e ) => {
+                e.stopPropagation();
+                if( handle.classList[ 1 ] === 'br' )
+                {
+                    this.isResizing = true;
+                }
+            });
+        });
 
-//         document.querySelectorAll(".resize-handle" ).forEach( handle => {
+        this.onChangeStart = null;
+        this.onChangeEnd = null;
+    }
 
-//             handle.addEventListener("mousedown", ( e ) => {
+    resizeCropArea( e: any )
+    {
+        const mouseX = e.clientX;
+        const mouseY = e.clientY;
 
-//                 e.stopPropagation();
-//                 if (handle.classList[1] === 'br') {
-//                     this.isResizing = true;
-//                 }
-//             });
-//         });
+        const isCropHidden = this.cropArea.classList.contains("hidden");
+        const nodes = this.cropArea.parentElement?.childNodes ?? [];
 
-//         this.onChangeStart = null;
-//         this.onChangeEnd = null;
-//     }
-
-//     resizeCropArea( event ) {
-
-//         const mouseX = event.clientX;
-//         const mouseY = event.clientY;
-
-//         const isCropHidden = this.cropArea.classList.contains("hidden");
-//         const nodes = this.cropArea.parentElement.childNodes;
-
-//         const rectCrop = this.cropArea.getBoundingClientRect();
-//         const rectVideo = this.video.getBoundingClientRect();
-//         let width = Math.max( 0, Math.min( mouseX - rectCrop.left, rectVideo.width ) );
-//         let height = Math.max( 0, Math.min( mouseY - rectCrop.top, rectVideo.height ) );
+        const rectCrop = this.cropArea.getBoundingClientRect();
+        const rectVideo = this.video.getBoundingClientRect();
+        let width = Math.max( 0, Math.min( mouseX - rectCrop.left, rectVideo.width ) );
+        let height = Math.max( 0, Math.min( mouseY - rectCrop.top, rectVideo.height ) );
         
-//         if ( (rectCrop.left + width) > rectVideo.right ){
-//             width = Math.min( rectVideo.width, rectVideo.right - rectCrop.left);
-//         }
-//         if ( (rectCrop.top + height) > rectVideo.bottom ){
-//             height = Math.min( rectVideo.height, rectVideo.bottom - rectCrop.top);
-//         }
+        if ( (rectCrop.left + width) > rectVideo.right )
+        {
+            width = Math.min( rectVideo.width, rectVideo.right - rectCrop.left );
+        }
 
-//         if ( !isCropHidden ){
-//             for( let i = 0; i < nodes.length; i++ ) {
-//                 if( nodes[i] != this.cropArea ) {
-//                     const rectEl = nodes[i].getBoundingClientRect();
-//                     nodes[i].style.webkitMask = `linear-gradient(#000 0 0) ${rectCrop.x - rectEl.left}px ${ rectCrop.y - rectEl.top }px / ${width}px ${height}px, linear-gradient(rgba(0, 0, 0, 0.3) 0 0)`;
-//                     nodes[i].style.webkitMaskRepeat = 'no-repeat';
-//                 }
-//             }
-//         }
+        if ( (rectCrop.top + height) > rectVideo.bottom )
+        {
+            height = Math.min( rectVideo.height, rectVideo.bottom - rectCrop.top );
+        }
 
-//         this.cropArea.style.width = width + "px";
-//         this.cropArea.style.height = height + "px";
-//     }
+        if ( !isCropHidden )
+        {
+            for( let i = 0; i < nodes.length; i++ )
+            {
+                const node: any = nodes[ i ];
+                if( node == this.cropArea ) continue;
+                const rectEl = node.getBoundingClientRect();
+                node.style.webkitMask = `linear-gradient(#000 0 0) ${rectCrop.x - rectEl.left}px ${ rectCrop.y - rectEl.top }px / ${width}px ${height}px, linear-gradient(rgba(0, 0, 0, 0.3) 0 0)`;
+                node.style.webkitMaskRepeat = 'no-repeat';
+            }
+        }
 
-//     dragCropArea( event ) {
-//         const rectVideo = this.video.getBoundingClientRect();
-//         const rectCrop = this.cropArea.getBoundingClientRect();
+        this.cropArea.style.width = width + "px";
+        this.cropArea.style.height = height + "px";
+    }
 
-//         let x = event.clientX - this.dragOffsetX;
-//         let y = event.clientY - this.dragOffsetY;
+    dragCropArea( e: any )
+    {
+        const rectVideo = this.video.getBoundingClientRect();
+        const rectCrop = this.cropArea.getBoundingClientRect();
 
-//         if( x < rectVideo.left ) {
-//             x = rectVideo.left;
-//         }
+        let x = e.clientX - this.dragOffsetX;
+        let y = e.clientY - this.dragOffsetY;
 
-//         if( x + rectCrop.width > rectVideo.right ) {
-//             x = Math.max( rectVideo.left, rectVideo.right - rectCrop.width);
-//         }
+        if( x < rectVideo.left )
+        {
+            x = rectVideo.left;
+        }
 
-//         if( y < rectVideo.top ) {
-//             y = rectVideo.top;
-//         }
+        if( x + rectCrop.width > rectVideo.right )
+        {
+            x = Math.max( rectVideo.left, rectVideo.right - rectCrop.width );
+        }
 
-//         if( y + rectCrop.height > rectVideo.bottom ) {
-//             y = Math.max( rectVideo.top, rectVideo.bottom - rectCrop.height );
-//         }
+        if( y < rectVideo.top )
+        {
+            y = rectVideo.top;
+        }
 
-//         if ( !this.cropArea.classList.contains("hidden") ){
-//             const nodes = this.cropArea.parentElement.childNodes;
-//             for( let i = 0; i < nodes.length; i++ ) {
-//                 if( nodes[i] != this.cropArea ) {
-//                     const rectEl = nodes[i].getBoundingClientRect();
-//                     nodes[i].style.webkitMask = `linear-gradient(#000 0 0) ${x - rectEl.left}px ${y - rectEl.top}px / ${rectCrop.width}px ${rectCrop.height}px, linear-gradient(rgba(0, 0, 0, 0.3) 0 0)`;
-//                     nodes[i].style.webkitMaskRepeat = 'no-repeat';
-//                 }
-//             }
-//         }
+        if( y + rectCrop.height > rectVideo.bottom )
+        {
+            y = Math.max( rectVideo.top, rectVideo.bottom - rectCrop.height );
+        }
 
-//         const parentRect = this.cropArea.parentElement.getBoundingClientRect();
-//         this.cropArea.style.left = x - parentRect.left + "px";
-//         this.cropArea.style.top = y - parentRect.top + "px";
+        if ( !this.cropArea.classList.contains( "hidden" ) )
+        {
+            const nodes = this.cropArea.parentElement?.childNodes ?? [];
+            for( let i = 0; i < nodes.length; i++ )
+            {
+                const node: any = nodes[ i ];
+                if( node == this.cropArea ) continue;
+                const rectEl = node.getBoundingClientRect();
+                node.style.webkitMask = `linear-gradient(#000 0 0) ${ x - rectEl.left }px ${ y - rectEl.top }px / ${ rectCrop.width }px ${ rectCrop.height }px, linear-gradient(rgba(0, 0, 0, 0.3) 0 0)`;
+                node.style.webkitMaskRepeat = 'no-repeat';
+            }
+        }
 
-//     }
+        const parentRect = this.cropArea.parentElement?.getBoundingClientRect()!;
+        this.cropArea.style.left = x - parentRect.left + "px";
+        this.cropArea.style.top = y - parentRect.top + "px";
 
-//     async loadVideo( options = {} ) {
-//         this.videoReady = false;
-//         while( this.video.duration === Infinity || isNaN(this.video.duration) || !this.timebar ) {
-//             await new Promise(r => setTimeout(r, 1000));
-//             this.video.currentTime = 10000000 * Math.random();
-//         }
-//         this.video.currentTime = 0.01; // BUG: some videos will not play unless this line is present
+    }
 
-//         // Duration can change if the video is dynamic (stream). This function is to ensure to load all buffer data
-//         const forceLoadChunks =  () => {
-//             const state = this.videoReady;
-//             if( this.video.readyState > 3 ) {
-//                 this.videoReady = true;
-//             }
-//             if( !state ) {
-//                 this.video.currentTime = this.video.duration;
-//             }
-//         }
+    async loadVideo( options: any = {} )
+    {
+        this.videoReady = false;
 
-//         this.video.addEventListener( "canplaythrough", forceLoadChunks, { passive: true } );
+        while( this.video.duration === Infinity || isNaN( this.video.duration) || !this.timebar )
+        {
+            await new Promise(r => setTimeout(r, 1000));
+            this.video.currentTime = 10000000 * Math.random();
+        }
 
-//         this.video.ondurationchange = ( v ) => {
-//             if( this.video.duration != this.endTime ) {
+        this.video.currentTime = 0.01; // BUG: some videos will not play unless this line is present
 
-//                 this.video.currentTime = this.startTime;
-//                 console.log("duration changed from", this.endTime, " to ", this.video.duration);
-//                 this.endTime = this.video.duration;
-//                 this.timebar.setDuration( this.endTime );
-//                 this.timebar.setEndTime( this.endTime );
-//             }
-//             this.video.currentTime = this.startTime;
-//             this.timebar.setCurrentTime( this.video.currentTime );
+        // Duration can change if the video is dynamic (stream). This function is to ensure to load all buffer data
+        const forceLoadChunks =  () => {
+            const state = this.videoReady;
+            if( this.video.readyState > 3 ) {
+                this.videoReady = true;
+            }
+            if( !state ) {
+                this.video.currentTime = this.video.duration;
+            }
+        }
 
-//         }
+        this.video.addEventListener( "canplaythrough", forceLoadChunks, { passive: true } );
 
-//         this.timebar.startX = this.timebar.position.x;
-//         this.timebar.endX = this.timebar.position.x + this.timebar.lineWidth;
-//         this.startTime = 0;
-//         this.endTime = this.video.duration;
-//         this.timebar.setDuration( this.endTime );
-//         this.timebar.setEndTime( this.video.duration );
-//         this.timebar.setStartTime( this.startTime );
-//         this.timebar.setCurrentTime( this.startTime );
-//         //this.timebar.setStartValue(this.timebar.startX);
-//         //this.timebar.currentX = this._timeToX(this.video.currentTime);
-//         //this.timebar.setCurrentValue(this.timebar.currentX);
-//         //this.timebar.update( this.timebar.currentX );
+        this.video.ondurationchange = ( v ) => {
+            if( this.video.duration != this.endTime )
+            {
+                this.video.currentTime = this.startTime;
+                console.log("duration changed from", this.endTime, " to ", this.video.duration);
+                this.endTime = this.video.duration;
+                this.timebar.setDuration( this.endTime );
+                this.timebar.setEndTime( this.endTime );
+            }
+            this.video.currentTime = this.startTime;
+            this.timebar.setCurrentTime( this.video.currentTime );
 
-//         if ( !this.requestId ){ // only have one update on flight
-//             this._update();
-//         }
-//         this.controls = options.controls ?? true;
+        }
 
-//         if ( !this.controls ) {
-//             this.hideControls();
-//         }
+        this.timebar.startX = this.timebar.position.x;
+        this.timebar.endX = this.timebar.position.x + this.timebar.lineWidth;
+        this.startTime = 0;
+        this.endTime = this.video.duration;
+        this.timebar.setDuration( this.endTime );
+        this.timebar.setEndTime( this.video.duration );
+        this.timebar.setStartTime( this.startTime );
+        this.timebar.setCurrentTime( this.startTime );
+        //this.timebar.setStartValue( this.timebar.startX);
+        //this.timebar.currentX = this._timeToX( this.video.currentTime);
+        //this.timebar.setCurrentValue( this.timebar.currentX);
+        //this.timebar.update( this.timebar.currentX );
 
-//         this.cropArea.style.height = this.video.clientHeight + "px";
-//         this.cropArea.style.width =  this.video.clientWidth + "px";
-//         this.resizeCropArea( { clientX: window.screen.width, clientY: window.screen.height } );
-//         this.dragCropArea( { clientX: -1, clientY: -1 } );
+        // only have one update on flight
+        if ( !this.requestId )
+        {
+            this._update();
+        }
 
-//         if( this.crop ) {
-//             this.showCropArea();
-//         }
-//         else {
-//             this.hideCropArea();
-//         }
+        this.controls = options.controls ?? true;
 
-//         window.addEventListener( "keyup", this.onKeyUp);
+        if ( !this.controls )
+        {
+            this.hideControls();
+        }
 
-//         if( this.onVideoLoaded ) {
-//             this.onVideoLoaded( this.video );
-//         }
-//     }
+        this.cropArea.style.height = this.video.clientHeight + "px";
+        this.cropArea.style.width = this.video.clientWidth + "px";
+        this.resizeCropArea( { clientX: window.screen.width, clientY: window.screen.height } );
+        this.dragCropArea( { clientX: -1, clientY: -1 } );
 
-//     _update () {
+        if( this.crop )
+        {
+            this.showCropArea();
+        }
+        else
+        {
+            this.hideCropArea();
+        }
 
-//         // if( this.onDraw ) {
-//         //     this.onDraw();
-//         // }
-//         if( this.playing ) {
-//             if( this.video.currentTime + 0.000001 >= this.endTime ) {
-//                 this.video.pause();
-//                 if( !this.loop ) {
-//                     this.playing = false;
-//                     this.controlsPanelLeft.refresh();
-//                 }
-//                 else {
-//                     this.video.currentTime = this.startTime;
-//                     this.video.play();
-//                 }
-//             }
-//             this._updateTime = false;
-//             this.timebar.setCurrentTime( this.video.currentTime );
-//             this._updateTime = true;
-//         }
+        window.addEventListener( "keyup", this.onKeyUp );
 
-//         this.requestId = requestAnimationFrame( this._update.bind(this) );
-//     }
+        if( this.onVideoLoaded )
+        {
+            this.onVideoLoaded( this.video );
+        }
+    }
 
-//     timeToString( t ) {
-//         let mzminutes = Math.floor(t / 60);
-//         let mzseconds = Math.floor(t - (mzminutes * 60));
-//         let mzmiliseconds = Math.floor((t - mzseconds)*100);
+    _update()
+    {
+        // if( this.onDraw ) {
+        //     this.onDraw();
+        // }
+        if( this.playing )
+        {
+            if( this.video.currentTime + 0.000001 >= this.endTime )
+            {
+                this.video.pause();
 
-//         mzmiliseconds = mzmiliseconds < 10 ? ('0' + mzmiliseconds) : mzmiliseconds;
-//         mzseconds = mzseconds < 10 ? ('0' + mzseconds) : mzseconds;
-//         mzminutes = mzminutes < 10 ? ('0' + mzminutes) : mzminutes;
-//         return mzminutes + ':' + mzseconds + '.' + mzmiliseconds;
-//     }
+                if( !this.loop )
+                {
+                    this.playing = false;
+                    this.controlsPanelLeft.refresh();
+                }
+                else
+                {
+                    this.video.currentTime = this.startTime;
+                    this.video.play();
+                }
+            }
 
-//     _setCurrentTime( t ) {
+            this._updateTime = false;
+            this.timebar.setCurrentTime( this.video.currentTime );
+            this._updateTime = true;
+        }
 
-//         if( this.video.currentTime != t && this._updateTime ) {
-//             this.video.currentTime = t;
-//         }
+        this.requestId = requestAnimationFrame( this._update.bind(this) );
+    }
+
+    timeToString( t: number )
+    {
+        let mzminutes = Math.floor( t / 60 );
+        let mzseconds = Math.floor( t - ( mzminutes * 60 ) );
+        let mzmiliseconds = Math.floor( ( t - mzseconds ) * 100 );
+
+        let mzmilisecondsStr: string = mzmiliseconds < 10 ? ( '0' + mzmiliseconds ) : mzmiliseconds.toString();
+        let mzsecondsStr: string = mzseconds < 10 ? ( '0' + mzseconds ) : mzseconds.toString();
+        let mzminutesStr: string = mzminutes < 10 ? ( '0' + mzminutes ) : mzminutes.toString();
+        return `${ mzminutesStr }:${ mzsecondsStr }.${ mzmilisecondsStr }`;
+    }
+
+    _setCurrentTime( t: number )
+    {
+        if( this.video.currentTime != t && this._updateTime )
+        {
+            this.video.currentTime = t;
+        }
         
-//         this.currentTimeString = this.timeToString( t );
-//         this.controlsCurrentPanel.refresh();
+        this.currentTimeString = this.timeToString( t );
+        this.controlsCurrentPanel.refresh();
 
-//         if( this.onSetTime ) {
-//             this.onSetTime(t);
-//         }
-//         if( this.onChangeCurrent ) {
-//             this.onChangeCurrent( t );
-//         }
-//     }
+        if( this.onSetTime )
+        {
+            this.onSetTime( t );
+        }
 
-//     _setStartTime( t ) {
-//         this.startTime = this.video.currentTime = t;
+        if( this.onChangeCurrent )
+        {
+            this.onChangeCurrent( t );
+        }
+    }
 
-//         this.startTimeString =  this.timeToString( t );
-//         this.controlsPanelLeft.refresh();
+    _setStartTime( t: number )
+    {
+        this.startTime = this.video.currentTime = t;
 
-//         if( this.onSetTime ) {
-//             this.onSetTime( t );
-//         }
-//         if( this.onChangeStart ) {
-//             this.onChangeStart ( t );
-//         }
-//     }
+        this.startTimeString =  this.timeToString( t );
+        this.controlsPanelLeft.refresh();
 
-//     _setEndTime( t ) {
-//         this.endTime = this.video.currentTime = t;
+        if( this.onSetTime )
+        {
+            this.onSetTime( t );
+        }
 
-//         this.endTimeString = this.timeToString( t)
-//         this.controlsPanelRight.refresh();
+        if( this.onChangeStart )
+        {
+            this.onChangeStart ( t );
+        }
+    }
 
-//         if( this.onSetTime ) {
-//             this.onSetTime(t);
-//         }
-//         if( this.onChangeEnd ) {
-//             this.onChangeEnd( t );
-//         }
-//     }
+    _setEndTime( t: number )
+    {
+        this.endTime = this.video.currentTime = t;
 
-//     getStartTime ( ) {
-//         return this.startTime;
-//     }
+        this.endTimeString = this.timeToString( t )
+        this.controlsPanelRight.refresh();
 
-//     getEndTime ( ) {
-//         return this.endTime;
-//     }
+        if( this.onSetTime )
+        {
+            this.onSetTime( t );
+        }
 
-//     getTrimedTimes ( ) {
-//         return {start: this.startTime, end: this.endTime};
-//     }
+        if( this.onChangeEnd )
+        {
+            this.onChangeEnd( t );
+        }
+    }
 
-//     getCroppedArea ( ) {
-//         return this.cropArea.getBoundingClientRect();
-//     }
+    getStartTime()
+    {
+        return this.startTime;
+    }
 
-//     showCropArea ( ) {
-//         this.cropArea.classList.remove("hidden");
+    getEndTime()
+    {
+        return this.endTime;
+    }
 
-//         const nodes = this.cropArea.parentElement.childNodes;
-//         const rect = this.cropArea.getBoundingClientRect();
-//         for( let i = 0; i < nodes.length; i++ ) {
-//             if( nodes[i] != this.cropArea ) {
-//                const rectEl = nodes[i].getBoundingClientRect();
-//                 nodes[i].style.webkitMask = `linear-gradient(#000 0 0) ${rect.left - rectEl.left}px ${rect.top - rectEl.top}px / ${rect.width}px ${rect.height}px, linear-gradient(rgba(0, 0, 0, 0.3) 0 0)`;
-//                 nodes[i].style.webkitMaskRepeat = 'no-repeat';
-//             }
-//         }
-//     }
+    getTrimedTimes()
+    {
+        return { start: this.startTime, end: this.endTime };
+    }
 
-//     hideCropArea ( ) {
-//         this.cropArea.classList.add("hidden");
+    getCroppedArea()
+    {
+        return this.cropArea.getBoundingClientRect();
+    }
 
-//         const nodes = this.cropArea.parentElement.childNodes;
-//         for( let i = 0; i < nodes.length; i++ ) {
-//             if( nodes[i] != this.cropArea ) {
-//                 nodes[i].style.webkitMask = "";
-//                 nodes[i].style.webkitMaskRepeat = 'no-repeat';
-//             }
-//         }
-//     }
+    showCropArea()
+    {
+        this.cropArea.classList.remove( "hidden" );
 
-//     showControls ( ) {
-//         this.controls = true;
-//         this.controlsArea.show();
-//     }
+        const nodes = this.cropArea.parentElement?.childNodes ?? [];
+        const rect = this.cropArea.getBoundingClientRect();
+        for( let i = 0; i < nodes.length; i++ )
+        {
+            const node: any = nodes[ i ];
+            if( node == this.cropArea ) continue;
+            const rectEl = node.getBoundingClientRect();
+            node.style.webkitMask = `linear-gradient(#000 0 0) ${ rect.left - rectEl.left }px ${ rect.top - rectEl.top }px / ${ rect.width }px ${ rect.height }px, linear-gradient(rgba(0, 0, 0, 0.3) 0 0)`;
+            node.style.webkitMaskRepeat = 'no-repeat';
+        }
+    }
 
-//     hideControls ( ) {
-//         this.controls = false;
-//         this.controlsArea.hide();
-//     }
+    hideCropArea()
+    {
+        this.cropArea.classList.add("hidden");
 
-//     stopUpdates(){
+        const nodes = this.cropArea.parentElement?.childNodes ?? [];
+        for( let i = 0; i < nodes.length; i++ )
+        {
+            const node: any = nodes[ i ];
+            if( node == this.cropArea ) continue;
+            node.style.webkitMask = "";
+            node.style.webkitMaskRepeat = 'no-repeat';
+        }
+    }
 
-//         if(this.requestId) {
-//             cancelAnimationFrame(this.requestId);
-//             this.requestId = null;
-//         }
-//     }
+    showControls()
+    {
+        this.controls = true;
+        this.controlsArea.show();
+    }
 
-//     unbind ( ) {
-//         this.stopUpdates();
+    hideControls()
+    {
+        this.controls = false;
+        this.controlsArea.hide();
+    }
 
-//         this.video.pause();
-//         this.playing = false;
-//         this.controlsPanelLeft.refresh();
-//         this.video.src = "";
+    stopUpdates()
+    {
+        if( this.requestId )
+        {
+            cancelAnimationFrame( this.requestId );
+            this.requestId = null;
+        }
+    }
 
-//         window.removeEventListener("keyup", this.onKeyUp);
-//     }
-// }
+    unbind()
+    {
+        this.stopUpdates();
 
-// LX.VideoEditor = VideoEditor;
+        this.video.pause();
+        this.playing = false;
+        this.controlsPanelLeft.refresh();
+        this.video.src = "";
 
-// export { VideoEditor, TimeBar }
+        window.removeEventListener( "keyup", this.onKeyUp );
+    }
+}
+
+LX.VideoEditor = VideoEditor;
