@@ -65,34 +65,37 @@
 
     docMaker.classMethod( "onStateStop", `After clicking the stop button. The ${docMaker.iCode("playing")} attribute is false.`, [] );
 
-    docMaker.classMethod( "onStateChange", `Triggered after clicking the play/pause button. Receives the current state of the ${docMaker.iCode("playing")} attribute`, [
+    docMaker.classMethod( "onStateChange", `Triggered after clicking the play/pause button. Receives the current state of the ${docMaker.iCode("playing")} attribute.`, [
         ["currentState", "Boolean"]
     ] );
 
-    docMaker.classMethod( "onSetTime", `Triggered after changing the current time using the ${docMaker.iCode("setTime")} function or the interface`, [
+    docMaker.classMethod( "onSetTime", `Triggered after changing the current time using the ${docMaker.iCode("setTime")} function or the interface.`, [
         ["currentTime", "Number"]
     ] );
     
-    docMaker.classMethod( "onSetDuration", `Triggered after calling ${docMaker.iCode("setDuration")}`, [
+    docMaker.classMethod( "onSetDuration", `Triggered after calling ${docMaker.iCode("setDuration")}.`, [
         ["currentDuration", "Number"]
     ] );
 
-    docMaker.classMethod( "onChangeLoopMode", `Triggered after calling ${docMaker.iCode("setLoopMode")} or clicking on the loop button`, [
+    docMaker.classMethod( "onChangeLoopMode", `Triggered after calling ${docMaker.iCode("setLoopMode")} or clicking on the loop button.`, [
         ["currentLoopMode", "Boolean"]
     ] );
     
-    docMaker.classMethod( "onMouse", `Triggered after processing the mouse event over the canvas. The box selection of elements does not trigger this event. Receives the mouse event and the current time of the mouse location`, [
+    docMaker.classMethod( "onMouse", `Triggered after processing the mouse event over the canvas. The box selection of elements does not trigger this event. Receives the mouse event with the ${docMaker.iCode(".track")} attribute if clicked over a valid track; and the current time of the mouse location.`, [
         ["event", "MouseEvent"],
         ["time", "Number"],
     ] );
 
-    docMaker.classMethod( "onDblClick", `Triggered after processing the mouse event over the canvas. The box selection of elements does not trigger this event. Receives the mouse event and the current time of the mouse location`, [
+    docMaker.classMethod( "onDblClick", `Triggered after processing the mouse event over the canvas. The box selection of elements does not trigger this event. Receives the mouse event with the ${docMaker.iCode(".track")} attribute if clicked over a valid track.`, [
+        ["event", "MouseEvent"],
+    ] );
+    docMaker.classMethod( "onShowContextMenu", `Triggered after processing the right-click mouse event over the canvas. Receives the mouse event with the ${docMaker.iCode(".track")} attribute if clicked over a valid track. A default implementation is already assigned to this variable.`, [
         ["event", "MouseEvent"],
     ] );
 
-    docMaker.classMethod( "onAddNewTrackButton", `Triggered after clicking on the "add track" button (if enabled). The default implementation adds a track to the clip and makes it visible. This callback also to overwrite this behaviour`, [ ] );
+    docMaker.classMethod( "onAddNewTrackButton", `Triggered after clicking on the "add track" button (if enabled). This callback overrides the default implementation, that is adding a track to the animationClip and making it visible.`, [ ] );
     
-    docMaker.classMethod( "onAddNewTrack", `Triggered after creating a track through the ${docMaker.iCode("addNewTrack")} function. This callback can be used to change the default id of the track, modify the dimension of the values or to insert some initial values`, [
+    docMaker.classMethod( "onAddNewTrack", `Triggered after creating a track through the ${docMaker.iCode("addNewTrack")} function. This callback can be used to change the default id of the track, modify the dimension of the values or to insert some initial values.`, [
         ["track", "Object"],
     ] );
 
@@ -102,7 +105,7 @@
         ["itemsRemoved", "Array of Numbers"],
     ] );
 
-    docMaker.classMethod( "onTrackTreeEvent", `Triggered after an event of the tree in the left panel, which displays the visible tracks`, [
+    docMaker.classMethod( "onTrackTreeEvent", `Triggered after an event of the tree in the left panel, which displays the visible tracks.`, [
         ["event", "LX.TreeEvent"]
     ] );
 
@@ -156,11 +159,11 @@
         ["animationClip", "Object"],
         ["clone", "Boolean"]
     ], "AnimationClip" );
-    docMaker.classMethod( ".setAnimationClip", `Process and format the animation (and its tracks) and set it as the animationClip. If null, a new empty animation is generated. If already a proper animationClip, set ${docMaker.iCode("needsToProcess")} attribute to ${docMaker.iCode("false")}`, [
+    docMaker.classMethod( ".setAnimationClip", `Process and format the animation (and its tracks) and set it as the animationClip. If null, a new empty animation is generated. If already a proper animationClip, set ${docMaker.iCode("needsToProcess")} attribute to ${docMaker.iCode("false")}.`, [
         ["animationClip", "Object"],
         ["needsToProcess", "Boolean"]
     ], "AnimationClip" );
-    docMaker.classMethod( ".addNewTrack", `Add a new track in the timeline using the options received. An empty track is generated if no options are sent. Options are the same attributes as the track. Check class specific tracks. ${docMaker.iCode("skipCallback")} skips ${docMaker.iCode("addNewTrack")}`, [
+    docMaker.classMethod( ".addNewTrack", `Add a new track in the timeline using the options received. An empty track is generated if no options are sent. Options are the same attributes as the track. Check class specific tracks. ${docMaker.iCode("skipCallback")} skips ${docMaker.iCode("addNewTrack")}.`, [
         ["options", "Object"],
         ["skipCallback", "Boolean"]
     ], "Number" );
@@ -179,7 +182,7 @@
     docMaker.classMethod( ".setScale", "Set the scale (pixelsPerSecond) of the timeline. Usually called when the user zooms in/out.", [
         ["scale", "Number"]
     ] );
-    docMaker.classMethod( ".setScroll", "Set the scroll of the timeline to the specified value. If normalized is false, scroll is treated as pixels. Otherwise a value in the range [0,1] where 1 is fully scrolled, is expected. Defaults to true", [
+    docMaker.classMethod( ".setScroll", "Set the scroll of the timeline to the specified value. If normalized is false, scroll is treated as pixels. Otherwise a value in the range [0,1] where 1 is fully scrolled, is expected. Defaults to true.", [
         ["scroll", "Number"],
         ["normalized", "Boolean"]
     ] );
@@ -245,7 +248,7 @@
     docMaker.classMethod( ".show", `Make html visible`, [] );
     docMaker.classMethod( ".hide", `Make html hidden`, [] );
 
-    docMaker.classMethod( ".processKeys", `Processes keyboard ${docMaker.iCode("keydown")} events such as copy and paste functionalities. This function can be reimplemented if desired`, [
+    docMaker.classMethod( ".processKeys", `Processes keyboard ${docMaker.iCode("keydown")} events such as copy and paste functionalities. This function can be reimplemented if desired.`, [
         ["keydownEvent", "KeyboardEvent"]
     ] );
 
@@ -264,7 +267,7 @@
         ["Delete", "Delete selected elements"],
         ["Backspace", "Delete selected elements"],
     ];
-    docMaker.paragraph(`Default keyboard controls can be changed by reimplementing ${docMaker.iCode("processKeys")}`);
+    docMaker.paragraph(`Default keyboard controls can be changed by reimplementing ${docMaker.iCode("processKeys")}.`);
     docMaker.codeBulletList( baseControls );
 
     docMaker.lineBreak();

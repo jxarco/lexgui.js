@@ -109,32 +109,31 @@ abstract class Timeline {
 
     updateTheme: () => void;
 
-    onCreateBeforeTopBar: Nullable< ( headerPanel : typeof Panel ) => void >;
-    onCreateAfterTopBar: Nullable< ( headerPanel : typeof Panel ) => void >;
-    onCreateControlsButtons: Nullable< ( headerPanel : typeof Panel ) => void >;
-    onCreateSettingsButtons: Nullable< ( headerPanel : typeof Panel ) => void >;
-    onShowOptimizeMenu: Nullable< ( event: any ) => void >;
-    onShowConfiguration: Nullable< ( dialog: typeof Panel ) => void >;
-    onMouse: Nullable< (event: MouseEvent, t: number) => void >;
-    onDblClick: Nullable< (event: MouseEvent) => void >;
-    onAddNewTrackButton: Nullable< () => void >; // overrides button "add track" behaviour
-    onAddNewTrack: Nullable< (track: any, options: any) => void >;
-    onTrackTreeEvent: Nullable< (event: typeof TreeEvent ) => void >;
-    onBeforeDrawContent: Nullable< (ctx: CanvasRenderingContext2D ) => void >;
-    onStateStop: Nullable< () => void >;
-    onStateChange: Nullable< (s: boolean) => void >;
-    onChangeLoopMode: Nullable< (l: boolean) => void >;
-    onSetDuration: Nullable< (d: number) => void >;
-    onSetTime: Nullable< (t: number) => void >;
-    onItemSelected: Nullable< (selected: any[], itemsToAdd: Nullable< any[] >, itemsToRemove: Nullable< any[] >) => void >;
-    onSetTrackSelection: Nullable< (track: object, oldValue: boolean) => void >;
-    onSetTrackState: Nullable< (track: object, oldValue: boolean) => void >;
-    onSetTrackLock: Nullable< (track: object, oldValue: boolean) => void >;
-    onUpdateTrack: Nullable< (tracks: number[] | string[] ) => void >;
+    onCreateBeforeTopBar: Nullable< ( headerPanel : typeof Panel ) => void > = null;
+    onCreateAfterTopBar: Nullable< ( headerPanel : typeof Panel ) => void > = null;
+    onCreateControlsButtons: Nullable< ( headerPanel : typeof Panel ) => void > = null;
+    onCreateSettingsButtons: Nullable< ( headerPanel : typeof Panel ) => void > = null;
+    onShowOptimizeMenu: Nullable< ( event: any ) => void > = null;
+    onShowConfiguration: Nullable< ( panel: typeof Panel ) => void > = null;
+    onMouse: Nullable< (event: any, t: number) => void > = null;
+    onDblClick: Nullable< (event: any) => void > = null;
+    onShowContextMenu: Nullable< (event: any) => void > = null;
+    onAddNewTrackButton: Nullable< () => void > = null; // overrides button "add track" behaviour
+    onAddNewTrack: Nullable< (track: any, options: any) => void > = null;
+    onTrackTreeEvent: Nullable< (event: typeof TreeEvent ) => void > = null;
+    onBeforeDrawContent: Nullable< (ctx: CanvasRenderingContext2D ) => void > = null;
+    onStateStop: Nullable< () => void > = null;
+    onStateChange: Nullable< (s: boolean) => void > = null;
+    onChangeLoopMode: Nullable< (l: boolean) => void > = null;
+    onSetDuration: Nullable< (d: number) => void > = null;
+    onSetTime: Nullable< (t: number) => void > = null;
+    onItemSelected: Nullable< (selected: any[], itemsToAdd: Nullable< any[] >, itemsToRemove: Nullable< any[] >) => void > = null;
+    onSetTrackSelection: Nullable< (track: object, oldValue: boolean) => void > = null;
+    onSetTrackState: Nullable< (track: object, oldValue: boolean) => void > = null;
+    onSetTrackLock: Nullable< (track: object, oldValue: boolean) => void > = null;
+    onUpdateTrack: Nullable< (tracks: number[] | string[] ) => void > = null;
 
-    configurationDialog: Nullable< typeof Dialog > = null;
-    
-    abstract showContextMenu(event: any): void;
+    configurationDialog: Nullable< typeof Dialog > = null;  
 
     abstract onMouseUp(event: any, t: number): void;
     abstract onMouseDown(event: any, t: number): void;
@@ -1065,8 +1064,8 @@ abstract class Timeline {
         else if (e.type == "dblclick" && this.onDblClick) {
             this.onDblClick(e);	
         }
-        else if (e.type == "contextmenu" && this.showContextMenu && this.active) {
-            this.showContextMenu(e);
+        else if (e.type == "contextmenu" && this.onShowContextMenu && this.active) {
+            this.onShowContextMenu(e);
         }
 
         this.lastMouse[0] = x;
@@ -1571,11 +1570,11 @@ class KeyFramesTimeline extends Timeline {
     lastHovered: Nullable< [number, number] >= null;
     moveKeyMinTime: number = 0;
     
-    onDeselectKeyFrames: Nullable< (lastSelected: any[])=> void >;
-    onContentMoved: Nullable< (trackIdx: number, keyIdx: number) => void >;
-    onOptimizeTracks: Nullable< (trackIdx: number) => void >;
-    onDeleteKeyFrames: Nullable< (trackIdx: number, indices: number[] ) => void >;
-    onSelectKeyFrame: Nullable< (selection: [number,number,number][] ) => void >;
+    onContentMoved: Nullable< (trackIdx: number, keyIdx: number) => void > = null;
+    onOptimizeTracks: Nullable< (trackIdx: number) => void > = null;
+    onDeleteKeyFrames: Nullable< (trackIdx: number, indices: number[] ) => void > = null;
+    onSelectKeyFrame: Nullable< (selection: [number,number,number][] ) => void > = null;
+    onDeselectKeyFrames: Nullable< (lastSelected: any[])=> void > = null;
     
     /**
      * @param {String} name unique string
@@ -1621,6 +1620,97 @@ class KeyFramesTimeline extends Timeline {
                 });
             } 
         }
+
+
+        this.onShowContextMenu = ( e: any ) => {
+
+            e.preventDefault();
+            e.stopPropagation();
+    
+            let actions: any = [];
+            if(this.lastKeyFramesSelected && this.lastKeyFramesSelected.length) {
+                actions.push(
+                    {
+                        title: "Copy",
+                        callback: () => {
+                            this.copySelectedContent();
+                        }
+                    }
+                );
+                actions.push(
+                    {
+                        title: "Delete",
+                        callback: () => {
+                            this.deleteSelectedContent();
+                        }
+                    }
+                );
+                if(this.lastKeyFramesSelected.length == 1 && this.clipboard && this.clipboard.value)
+                {
+                    actions.push(
+                        {
+                            title: "Paste Value",
+                            callback: () => {
+                                this.pasteContentValue();
+                            }
+                        }
+                    );
+                }
+            }
+            else{
+                
+                actions.push(
+                    {
+                        title: "Add Here",
+                        callback: () => {
+                            if ( !e.track ){ return; }
+                            const values: any = new Float32Array( e.track.dim );
+                            values.fill(0);
+                            this.addKeyFrames( e.track.trackIdx, values, [this.xToTime(e.localX)] );
+                        }
+                    }
+                );
+                actions.push(
+                    {
+                        title: "Add",
+                        callback: () => {
+                            if ( !e.track ){ return; }
+                            const values: any = new Float32Array( e.track.dim );
+                            values.fill(0);
+                            this.addKeyFrames( e.track.trackIdx, values, [this.currentTime] );
+                        }
+                    }
+                );
+    
+            }
+    
+            if(this.clipboard && this.clipboard.keyframes)
+            {
+                actions.push(
+                    {
+                        title: "Paste Here",
+                        callback: () => {
+                            this.pasteContent( this.xToTime(e.localX) );
+                        }
+                    }
+                );
+                actions.push(
+                    {
+                        title: "Paste",
+                        callback: () => {
+                            this.pasteContent( this.currentTime );
+                        }
+                    }
+                );
+            }
+            
+            LX.addContextMenu("Options", e, (m: any) => {
+                for(let i = 0; i < actions.length; i++) {
+                    m.add(actions[i].title,  actions[i].callback );
+                }
+            });
+        } // end of onShowContextMenu
+    
 
         if(this.animationClip) {
             this.setAnimationClip( this.animationClip );
@@ -2165,96 +2255,6 @@ class KeyFramesTimeline extends Timeline {
         else {
             this.unHoverAll();
         }
-    }
-
-    showContextMenu( e: any ) {
-
-        e.preventDefault();
-        e.stopPropagation();
-
-        let actions: any = [];
-        if(this.lastKeyFramesSelected && this.lastKeyFramesSelected.length) {
-            actions.push(
-                {
-                    title: "Copy",
-                    callback: () => {
-                        this.copySelectedContent();
-                    }
-                }
-            );
-            actions.push(
-                {
-                    title: "Delete",
-                    callback: () => {
-                        this.deleteSelectedContent();
-                    }
-                }
-            );
-            if(this.lastKeyFramesSelected.length == 1 && this.clipboard && this.clipboard.value)
-            {
-                actions.push(
-                    {
-                        title: "Paste Value",
-                        callback: () => {
-                            this.pasteContentValue();
-                        }
-                    }
-                );
-            }
-        }
-        else{
-            
-            actions.push(
-                {
-                    title: "Add Here",
-                    callback: () => {
-                        if ( !e.track ){ return; }
-                        const values: any = new Float32Array( e.track.dim );
-                        values.fill(0);
-                        this.addKeyFrames( e.track.trackIdx, values, [this.xToTime(e.localX)] );
-                    }
-                }
-            );
-            actions.push(
-                {
-                    title: "Add",
-                    callback: () => {
-                        if ( !e.track ){ return; }
-                        const values: any = new Float32Array( e.track.dim );
-                        values.fill(0);
-                        this.addKeyFrames( e.track.trackIdx, values, [this.currentTime] );
-                    }
-                }
-            );
-
-        }
-
-        if(this.clipboard && this.clipboard.keyframes)
-        {
-            actions.push(
-                {
-                    title: "Paste Here",
-                    callback: () => {
-                        this.pasteContent( this.xToTime(e.localX) );
-                    }
-                }
-            );
-            actions.push(
-                {
-                    title: "Paste",
-                    callback: () => {
-                        this.pasteContent( this.currentTime );
-                    }
-                }
-            );
-        }
-        
-        LX.addContextMenu("Options", e, (m: any) => {
-            for(let i = 0; i < actions.length; i++) {
-                m.add(actions[i].title,  actions[i].callback )
-            }
-        });
-
     }
 
     drawContent( ctx: CanvasRenderingContext2D ) {
@@ -3361,6 +3361,59 @@ class ClipsTimeline extends Timeline {
                 this.selectClip(track.trackIdx, clipIdx); // deselect and try to select clip in localX, if any
             }
         }
+
+        this.onShowContextMenu = ( e: any ) => {
+
+            e.preventDefault();
+            e.stopPropagation();
+    
+            let actions: any[] = [];
+            if(this.lastClipsSelected.length) {
+                actions.push(
+                    {
+                        title: "Copy",
+                        callback: () => { this.copySelectedContent();}
+                    }
+                )
+                actions.push(
+                    {
+                        title: "Delete",
+                        callback: () => {
+                            this.deleteSelectedContent();
+                        }
+                    }
+                )
+            }
+            else{
+                
+                if(this.clipboard)
+                {
+                    actions.push(
+                        {
+                            title: "Paste",
+                            callback: () => {
+                                this.pasteContent();
+                            }
+                        }
+                    );
+                    actions.push(
+                        {
+                            title: "Paste Here",
+                            callback: () => {
+                                this.pasteContent( this.xToTime(e.localX) );
+                            }
+                        }
+                    )
+                }
+            }
+            
+            LX.addContextMenu("Options", e, (m: any) => {
+                for(let i = 0; i < actions.length; i++) {
+                    m.add(actions[i].title,  actions[i].callback )
+                }
+            });
+    
+        } // end of onShowContextMenu
     
     }
 
@@ -3919,59 +3972,6 @@ class ClipsTimeline extends Timeline {
         else {
             this.unHoverAll(); 
         }
-
-    }
-
-    showContextMenu( e: any ) {
-
-        e.preventDefault();
-        e.stopPropagation();
-
-        let actions: any[] = [];
-        if(this.lastClipsSelected.length) {
-            actions.push(
-                {
-                    title: "Copy",
-                    callback: () => { this.copySelectedContent();}
-                }
-            )
-            actions.push(
-                {
-                    title: "Delete",
-                    callback: () => {
-                        this.deleteSelectedContent();
-                    }
-                }
-            )
-        }
-        else{
-            
-            if(this.clipboard)
-            {
-                actions.push(
-                    {
-                        title: "Paste",
-                        callback: () => {
-                            this.pasteContent();
-                        }
-                    }
-                );
-                actions.push(
-                    {
-                        title: "Paste Here",
-                        callback: () => {
-                            this.pasteContent( this.xToTime(e.localX) );
-                        }
-                    }
-                )
-            }
-        }
-        
-        LX.addContextMenu("Options", e, (m: any) => {
-            for(let i = 0; i < actions.length; i++) {
-                m.add(actions[i].title,  actions[i].callback )
-            }
-        });
 
     }
 
