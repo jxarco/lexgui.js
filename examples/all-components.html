@@ -31,6 +31,7 @@
     // Init library and get main area
     let area = await LX.init();
 
+    const mobile = navigator && /Android|iPhone/i.test( navigator.userAgent );
     const starterTheme = LX.getTheme();
     const menubar = area.addMenubar( [], { sticky: false } );
     menubar.addButtons([
@@ -59,13 +60,22 @@
         menubar.setButtonImage( "lexgui.js", `../images/icon_small_${ value }.png` );
     } );
 
-    var [middle, right] = area.split({ sizes: ["70%", "30%"], minimizable: true });
-    var [left, center] = middle.split({ sizes: ["50%", null], minimizable: true });
+    var panelA, panelB, panelC;
 
-    // add panels
-    var panelA = left.addPanel();
-    var panelB = center.addPanel();
-    var panelC = right.addPanel();
+    if( mobile )
+    {
+        panelA = panelB = panelC = area.addPanel();
+    }
+    else
+    {
+        var [middle, right] = area.split({ sizes: ["70%", "30%"], minimizable: true });
+        var [left, center] = middle.split({ sizes: ["50%", null], minimizable: true });
+
+        // add panels
+        panelA = left.addPanel();
+        panelB = center.addPanel();
+        panelC = right.addPanel();
+    }
 
     let closedDefault = false;
 
@@ -98,17 +108,25 @@
 
         const selectValues = ["Godot", "Unity", "Unreal Engine", "Visual Studio", "Visual Studio Code"];
         const selectValuesWithLabels = ["@Engines", "Godot", "Unity", "Unreal Engine", "@Apps", "Visual Studio", "Visual Studio Code"];
-
         const loremText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
 
         // Test buttons
         {
             const buttonsArea = new LX.Area({ width: "100%", height: "auto" });
-            var [buttonsLeft, buttonsRight] = buttonsArea.split({ sizes: ["50%", "50%"] });
             panelA.attach(buttonsArea.root);
 
-            const buttonsLeftPanel = buttonsLeft.addPanel();
-            const buttonsRightPanel = buttonsRight.addPanel();
+            let buttonsLeftPanel, buttonsRightPanel;
+
+            if( mobile )
+            {
+                buttonsLeftPanel = buttonsRightPanel = buttonsArea.addPanel();
+            }
+            else
+            {
+                var [ buttonsLeft, buttonsRight ] = buttonsArea.split({ sizes: ["50%", "50%"] });
+                buttonsLeftPanel = buttonsLeft.addPanel();
+                buttonsRightPanel = buttonsRight.addPanel();
+            }
 
             buttonsLeftPanel.branch("Classic Buttons", { closed: closedDefault });
             buttonsLeftPanel.addButton(null, "Classic", null);
@@ -167,12 +185,23 @@
             buttonsRightPanel.addComboButtons("No Selection Combo", comboValues, { noSelection: true });
         }
 
+        
+
         const checkArea = new LX.Area({ width: "100%", height: "auto" });
-        var [checkLeft, checkRight] = checkArea.split({ sizes: ["50%", "50%"] });
         panelA.attach(checkArea.root);
 
-        const checkLeftPanel = checkLeft.addPanel();
-        const checkRightPanel = checkRight.addPanel();
+        let checkLeftPanel, checkRightPanel;
+
+        if( mobile )
+        {
+            checkLeftPanel = checkRightPanel = checkArea.addPanel();
+        }
+        else
+        {
+            var [checkLeft, checkRight] = checkArea.split({ sizes: ["50%", "50%"] });
+            checkLeftPanel = buttonsLeft.addPanel();
+            checkRightPanel = buttonsRight.addPanel();
+        }
 
         // Test Checkboxes
         {

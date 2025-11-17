@@ -58,7 +58,8 @@
         if( mobile )
         {
             const sheetArea = new LX.Area({ skipAppend: true });
-            panel = sheetArea.addPanel({ className: "flex flex-col gap-2" });
+            sheetArea.root.classList.add( "overflow-scroll" );
+            panel = sheetArea.addPanel({ height: "auto", className: "flex flex-col gap-2" });
             iFrameArea = area;
 
             overlayButtons.splice( 0, 0, {
@@ -78,8 +79,9 @@
                 { name: "Docs v" + LX.version, callback: (v, name) => { location.href = "../docs/"; } }
             ] );
             menubar.setButtonIcon("Github", "Github", () => {window.open("https://github.com/jxarco/lexgui.js/")}, { float: "left" });
+            menubar.siblingArea.root.classList.add( "overflow-scroll" );
 
-            panel = leftArea.addPanel({ className: "flex flex-col gap-1" });
+            panel = leftArea.addPanel({ height: "auto", className: "flex flex-col gap-1" });
             iFrameArea = rightArea;
         }
 
