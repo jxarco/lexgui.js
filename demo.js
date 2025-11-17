@@ -1,7 +1,5 @@
 import { LX } from 'lexgui';
-// import 'lexgui/extensions/codeeditor.js';
-// import 'lexgui/extensions/timeline.js';
-// import 'lexgui/extensions/audio.js';
+import { CodeEditor } from 'lexgui/extensions/CodeEditor.js';
 
 window.LX = LX;
 
@@ -606,12 +604,12 @@ const starterTheme = LX.getTheme();
         const codeArea = new LX.Area();
         codeContainer.appendChild( codeArea.root );
 
-        // let editor = new LX.CodeEditor(codeArea, {
-        //     // allowAddScripts: false,
-        //     // autocomplete: false,
-        //     // disableEdition: true,
-        //     // fileExplorer: false
-        // });
+        let editor = new LX.CodeEditor(codeArea, {
+            // allowAddScripts: false,
+            // autocomplete: false,
+            // disableEdition: true,
+            // fileExplorer: false
+        });
     }
 
     // Audio
