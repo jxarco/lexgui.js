@@ -146,6 +146,13 @@ export class AssetView
         this.previewActions = options.previewActions ?? [];
         this.contextMenu = options.contextMenu ?? [];
         this.onRefreshContent = options.onRefreshContent;
+        this.gridScale = options.gridScale ?? this.gridScale;
+
+        if( this.gridScale !== 1.0 )
+        {
+            const r: any = document.querySelector( ':root' );
+            r.style.setProperty( '--av-grid-scale', this.gridScale );
+        }
 
         // Append temporarily to the dom
         document.body.appendChild( this.root );
