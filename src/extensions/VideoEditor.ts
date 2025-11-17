@@ -1,4 +1,4 @@
-// VideoEditor.ts @jxarco
+// VideoEditor.ts @evallsg
 
 import { LX } from '../core/Namespace';
 

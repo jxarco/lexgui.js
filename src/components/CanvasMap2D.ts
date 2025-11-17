@@ -1,7 +1,7 @@
 // CanvasMap2D.js @jxarco
 
 import { LX } from './../core/Namespace';
-import { vec2 } from './Vec2';
+import { vec2 } from './../core/Vec2';
 
 // Based on LGraphMap2D from @tamats (jagenjo)
 // https://github.com/jagenjo/litescene.js

@@ -1,8 +1,10 @@
+// Timeline.ts @evallsg, @japopra
+
 import { LX } from '../core/Namespace';
 
-if(!LX) 
+if( !LX )
 {
-    throw("lexgui.js missing!");
+    throw( "Missing LX namespace!" );
 }
 
 LX.extensions.push( 'Timeline' );

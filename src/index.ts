@@ -1,9 +1,9 @@
 // Core Utilities
 export * from "./core/Namespace";
 export * from "./core/Utils";
+export * from "./core/Vec2";
 
 // Components Utilities
-export * from "./components/Vec2";
 export * from "./components/Icons";
 export * from "./components/Event";
 

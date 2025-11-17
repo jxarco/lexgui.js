@@ -3,7 +3,7 @@
 import { LX } from './../core/Namespace';
 import { BaseComponent, ComponentType } from './BaseComponent';
 import { IEvent } from './Event';
-import { vec2 } from './Vec2';
+import { vec2 } from './../core/Vec2';
 
 /**
  * @class Pad
