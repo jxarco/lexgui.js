@@ -114,7 +114,7 @@ panel.@[mtd]attach@(kfTimeline.root);` );
     docMaker.codeBulletList( baseAnimationClipOptions.concat([
         [".tracksPerGroup", "Object", "maps groupIds (Strings) to an array of tracks"],
     ]) );
-    docMaker.paragraph( `${docMaker.iCode("instantiateAnimationClip")} method can be used to duplicate animationClips through the ${docMaker.iCode("clone")} argument` );
+    docMaker.paragraph( `${docMaker.iCode("instantiateAnimationClip")} method can be used to duplicate animationClips through the ${docMaker.iCode("clone")} argument.` );
 
 
     docMaker.header( "Keyframes Tracks", "h2", "" );
@@ -122,18 +122,18 @@ panel.@[mtd]attach@(kfTimeline.root);` );
     docMaker.paragraph(`All attributes except ${docMaker.iCode("isTrack")} and ${docMaker.iCode("trackIdx")} will be retrieved from the track information sent to the function, if available.`);
     docMaker.paragraph(`${docMaker.iCode("id")} and ${docMaker.iCode("name")} attributes will me mapped to the ${docMaker.iCode("id")} of the track (in this order of precedence).`);
     docMaker.codeBulletList( [
-        [".isTrack", "Boolean", `${docMaker.iCode("Read-Only")} Identifies it as a track`],
-        [".id", "String", `Name of the track. If the track is currently visible, changing its id will require a call to ${docMaker.iCode("updateLeftPanel")}`],
+        [".isTrack", "Boolean", `${docMaker.iCode("Read-Only")} Identifies it as a track.`],
+        [".id", "String", `Name of the track. If the track is currently visible, changing its id will require a call to ${docMaker.iCode("updateLeftPanel")}.`],
         [".active", "Boolean", `${docMaker.iCode("Read-Only")} Whether it is disabled or not. Use ${docMaker.iCode("setTrackState")} to modify it.`],
         [".locked", "Boolean", `Whether its elements can be modified or not.`],
         [".isSelected", "Boolean", `${docMaker.iCode("Read-Only")} Whether to paint the track background blue, flagging it as selected.`],
         [".trackIdx", "Number", `${docMaker.iCode("Read-Only")} Position of the track in the animationClip's tracks array.`],
 
-        [".dim", "Number", `Number of values per keyframe. It can be modified, as long as it makes sense with ${docMaker.iCode("times")} and ${docMaker.iCode("values")} attributes`],
-        [".groupId", "String", `${docMaker.iCode("Read-Only")} Group to which it is attached. Use ${docMaker.iCode("setTracksGroup")} instead of directly modifying it`],
-        [".groupTrackIdx", "Number", `${docMaker.iCode("Read-Only")} Index of the track inside the group array`],
+        [".dim", "Number", `Number of values per keyframe. It can be modified, as long as it makes sense with ${docMaker.iCode("times")} and ${docMaker.iCode("values")} attributes.`],
+        [".groupId", "String", `${docMaker.iCode("Read-Only")} Group to which it is attached. Use ${docMaker.iCode("setTracksGroup")} instead of directly modifying it.`],
+        [".groupTrackIdx", "Number", `${docMaker.iCode("Read-Only")} Index of the track inside the group array.`],
         
-        [".curves", "Boolean", `Whether to render this track as centered keyframes or curves`],
+        [".curves", "Boolean", `Whether to render this track as centered keyframes or curves.`],
         [".curvesRange", "[Number, Number]", `range of values [min, max] that the track will hold.`],
 
         [".values", "Array Number", `Flat array of size = number-of-keyframes * dim, containing the values of each keyframe. Values inside the array can be safely modified. Directly modifying its length might lead to undefined behaviour.`],
@@ -142,28 +142,28 @@ panel.@[mtd]attach@(kfTimeline.root);` );
         [".selected", "Array Boolean", `${docMaker.iCode("Read-Only")} Array of size number-of-keyframes, containing a flag to indicate whether the keyframe is currently selected. Modifying it might not update the underlying selection system.`],
         [".hovered", "Array Boolean", `${docMaker.iCode("Read-Only")} Array of size number-of-keyframes, containing a flag to indicate whether the keyframe is currently hovered by the mouse. Modifying it might not update the underlying hovering system.`],
 
-        [".data", "", "user defined data"]
+        [".data", "", "user defined data."]
     ] );
 
     docMaker.header( "Constructor", "h2", "" );
     docMaker.classCtor( "class LX.KeyFramesTimeline", [
-        ["id", "String", "Unique string that identifies this element"],
+        ["id", "String", "Unique string that identifies this element."],
         ["options", "Object"]
     ] );
 
     docMaker.header( "Properties", "h2", "" );
     docMaker.paragraph( `Check ${docMaker.iCode("Timeline")} properties`);
     docMaker.codeBulletList( [
-        [".lastKeyFramesSelected", "Array of [trackIdx, keyframeIdx, keyframe time]", `${docMaker.iCode("Read-Only")} the currently selected keyframes across all tracks, sorted ascendently`],
-        [".keyValuePerPixel", "Number", `Applicable to tracks with dim = 1, amount of normalized value ( [ 0, 1 ] ) to add per pixel moved while holding ${docMaker.iCode("alt")}. Default to 1/${docMaker.iCode("trackHeight")}`],
+        [".lastKeyFramesSelected", "Array of [trackIdx, keyframeIdx, keyframe time]", `${docMaker.iCode("Read-Only")} the currently selected keyframes across all tracks, sorted ascendently.`],
+        [".keyValuePerPixel", "Number", `Applicable to tracks with dim = 1, amount of normalized value ( [ 0, 1 ] ) to add per pixel moved while holding ${docMaker.iCode("alt")}. Default to 1/${docMaker.iCode("trackHeight")}.`],
         [".defaultCurves", "Boolean", `Applicable to tracks with dim = 1, the default way of rendering tracks with dim = 1. If true, it renders them with curves.`],  
         [".defaultCurvesRange", "[Number, Number]", `Applicable to tracks with dim = 1, the default range of values [min, max] that a track holds.`],  
     ] );
 
     docMaker.header( "Callbacks", "h2", "" );
-    docMaker.paragraph(`Callbacks can be set directly to the instance of ${docMaker.iCode("KeyFramesTimeline")}`);
+    docMaker.paragraph(`Callbacks can be set directly to the instance of ${docMaker.iCode("KeyFramesTimeline")}.`);
     docMaker.paragraph(`Check ${docMaker.iCode("Timeline")} for the list of inherited callbacks. If a callback appears on both lists, the  ${docMaker.iCode("KeyFramesTimeline")} takes precedence.`);
-    docMaker.classMethod( "onAddNewTrack", `Triggered after creating a track through the ${docMaker.iCode("addNewTrack")} function. This callback can be used to change the default id of the track, modify the dimension of the values or to insert some initial values. To include this track into a group, use the ${docMaker.iCode("setTracksGroup")} function`, [
+    docMaker.classMethod( "onAddNewTrack", `Triggered after creating a track through the ${docMaker.iCode("addNewTrack")} function. This callback can be used to change the default id of the track, modify the dimension of the values or to insert some initial values. To include this track into a group, use the ${docMaker.iCode("setTracksGroup")} function.`, [
         ["track", "Object"],
     ] );
     
@@ -181,7 +181,7 @@ panel.@[mtd]attach@(kfTimeline.root);` );
         ["selectedKeyframes", "Array of [trackIdx, keyframeIdx, timestamp of keyframe]"],
     ] );
 
-    docMaker.classMethod( "onContentMoved", `Triggered after moving keyframes horizontally. Calls it for each frame .`, [
+    docMaker.classMethod( "onContentMoved", `Triggered after moving keyframes horizontally. Calls it for each frame.`, [
         ["trackIndex", "Number"],
         ["newKeyframeIndex", "Number"],
     ] );
@@ -190,7 +190,7 @@ panel.@[mtd]attach@(kfTimeline.root);` );
         ["tracks", "Array of Number"],
     ] );
     
-    docMaker.classMethod( "onOptimizeTracks", `Triggered after optimizing tracks. It receives either a valid track index or a -1 indicating that all tracks have been optimized at once`, [
+    docMaker.classMethod( "onOptimizeTracks", `Triggered after optimizing tracks. It receives either a valid track index or a -1 indicating that all tracks have been optimized at once.`, [
         ["trackIndex", "Number"],
     ] );
 
@@ -203,7 +203,7 @@ panel.@[mtd]attach@(kfTimeline.root);` );
     docMaker.header( "Methods", "h2", "" );
     docMaker.paragraph(`Check ${docMaker.iCode("Timeline")} for the list of inherited methods. If a method appears on both lists, the ${docMaker.iCode("KeyFramesTimeline")} takes precedence.`);
 
-    docMaker.classMethod( ".setKeyframeSize", `Sets keyframe size (height), in pixels. Optionally, a size for hovered keyframes can be specified (defaults to ${docMaker.iCode("size")})`, [
+    docMaker.classMethod( ".setKeyframeSize", `Sets keyframe size (height), in pixels. Optionally, a size for hovered keyframes can be specified (defaults to ${docMaker.iCode("size")}).`, [
         ["size", "Number"],
         ["hoveredSize", "Number"],
     ], "" );
@@ -217,12 +217,12 @@ panel.@[mtd]attach@(kfTimeline.root);` );
         ["groupId", "String"],
     ], "Array Tracks" );
 
-    docMaker.classMethod( ".optimizeTrack", `Removes similar keyframes of a track, given the ${docMaker.iCode("optimizeThreshold")} attribute. If ${docMaker.iCode("onlyEqualTime")} is set, only keyframes with the same time will be removed, keepin the first occurrence`, [
+    docMaker.classMethod( ".optimizeTrack", `Removes similar keyframes of a track, given the ${docMaker.iCode("optimizeThreshold")} attribute. If ${docMaker.iCode("onlyEqualTime")} is set, only keyframes with the same time will be removed, keepin the first occurrence.`, [
         ["trackIdx", "Number"],
         ["onlyEqualTime", "Boolean"],
         ["skipCallback", "Boolean"],
     ], "" );
-    docMaker.classMethod( ".optimizeTracks", `Removes similar keyframes of all track, given the ${docMaker.iCode("optimizeThreshold")} attribute. If ${docMaker.iCode("onlyEqualTime")} is set, only keyframes with the same time will be removed, keepin the first occurrence`, [
+    docMaker.classMethod( ".optimizeTracks", `Removes similar keyframes of all track, given the ${docMaker.iCode("optimizeThreshold")} attribute. If ${docMaker.iCode("onlyEqualTime")} is set, only keyframes with the same time will be removed, keepin the first occurrence.`, [
         ["onlyEqualTime", "Boolean"],
     ], "" );
     
@@ -288,7 +288,7 @@ panel.@[mtd]attach@(kfTimeline.root);` );
     ], "Number" );
 
     docMaker.header("Controls", "h2", "" );
-    docMaker.paragraph(`Default keyboard controls can be changed by reimplementing ${docMaker.iCode("processKeys")}`);
+    docMaker.paragraph(`Default keyboard controls can be changed by reimplementing ${docMaker.iCode("processKeys")}.`);
 
     const baseControls = [
         ["Mouse left click", ""],

@@ -103,7 +103,7 @@ panel.@[mtd]attach@(clipTimeline.root);` );
         ];
 
     docMaker.header( "ClipStimeline AnimationClip", "h2", "" );
-    docMaker.paragraph( `New animations should be created and set to the timeline through the ${docMaker.iCode("setAnimationClip")} function, that (optionaly) expects an object with the same attributes as an animationClip (see below). )`);
+    docMaker.paragraph( `New animations should be created and set to the timeline through the ${docMaker.iCode("setAnimationClip")} function, that (optionaly) expects an object with the same attributes as an animationClip (see below).`);
     docMaker.paragraph( `Tracks will also be processed. Missing attributes will be set to default values.`);
     docMaker.codeBulletList( baseAnimationClipOptions );
     docMaker.paragraph( `${docMaker.iCode("instantiateAnimationClip")} method can be used to duplicate animationClips through the ${docMaker.iCode("clone")} argument.` );
@@ -114,8 +114,8 @@ panel.@[mtd]attach@(clipTimeline.root);` );
     docMaker.paragraph(`All attributes except ${docMaker.iCode("isTrack")} and ${docMaker.iCode("trackIdx")} will be retrieved from the track information sent to the function. Missing attributes will be set to default values.`);
     docMaker.paragraph(`${docMaker.iCode("id")} and ${docMaker.iCode("name")} attributes will me mapped to the ${docMaker.iCode("id")} of the track (in this order of precedence).`);
     docMaker.codeBulletList( [
-        [".isTrack", "Boolean", `${docMaker.iCode("Read-Only")} Identifies it as a track`],
-        [".id", "String", `Name of the track. If the track is currently visible, changing its id will require a call to ${docMaker.iCode("updateLeftPanel")}`],
+        [".isTrack", "Boolean", `${docMaker.iCode("Read-Only")} Identifies it as a track.`],
+        [".id", "String", `Name of the track. If the track is currently visible, changing its id will require a call to ${docMaker.iCode("updateLeftPanel")}.`],
         [".active", "Boolean", `${docMaker.iCode("Read-Only")} Whether it is disabled or not. Use ${docMaker.iCode("setTrackState")} to modify it.`],
         [".locked", "Boolean", `Whether its elements can be modified or not.`],
         [".isSelected", "Boolean", `${docMaker.iCode("Read-Only")} Whether to paint the track background blue, flagging it as selected.`],
@@ -126,17 +126,17 @@ panel.@[mtd]attach@(clipTimeline.root);` );
         [".selected", "Array Boolean", `${docMaker.iCode("Read-Only")} Array of size number-of-clips, containing a flag to indicate whether the clip is currently selected. Modifying it might not update the underlying selection system.`],
         [".hovered", "Array Boolean", `${docMaker.iCode("Read-Only")} Array of size number-of-clips, containing a flag to indicate whether the clip is currently hovered by the mouse. Modifying it might not update the underlying hovering system.`],
 
-        [".data", "", "user defined data"]
+        [".data", "", "user defined data."]
     ] );
 
     docMaker.header( "Clip Structure", "h2", "" );
     docMaker.paragraph( `Clips (not to be confused with AnimationClip) are the objects that will appear in the tracks, which might contain, the following properties:`);
     docMaker.codeBulletList( [
-        [".id", "String", `Will be used to display a name over the clip. Can be empty`],
+        [".id", "String", `Will be used to display a name over the clip. Can be empty.`],
         [".start", "Number", `${docMaker.iCode("Mandatory")} Time on which the clip starts.`],
         [".duration", "Number", `${docMaker.iCode("Mandatory")} Duration of the clip. The end time will be computed as start + duration.`],
-        [".fadein", "Number", `If defined, sets the time at which the fadein ends. Must be in global, not relative to start`],
-        [".fadeout", "Number", `If defined, sets the time at which the fadeout starts. Must be in global, not relative to start`],
+        [".fadein", "Number", `If defined, sets the time at which the fadein ends. Must be in global, not relative to start.`],
+        [".fadeout", "Number", `If defined, sets the time at which the fadeout starts. Must be in global, not relative to start.`],
         [".clipColor", "Color", `Defines the color of the clip. Must be a value accepted by ${docMaker.iCode("CanvasRenderingContext2D.fillStyle")}.`],
         [".fadeColor", "Color", `Color of the areas defined by the fade attributes. Must be a value accepted by ${docMaker.iCode("CanvasRenderingContext2D.fillStyle")}.`],
         [".active", "Boolean", `Whether the clip is enabled or not. It only changes the color from clipColor to a default disabled color. Can be written directly. ${docMaker.iCode("Track.active")} has precedence over this.`],
@@ -154,9 +154,9 @@ panel.@[mtd]attach@(clipTimeline.root);` );
     ] );
 
     docMaker.header( "Properties", "h2", "" );
-    docMaker.paragraph( `Check ${docMaker.iCode("Timeline")} properties`);
+    docMaker.paragraph( `Check ${docMaker.iCode("Timeline")} properties.`);
     docMaker.codeBulletList( [
-        [".lastClipsSelected", "Array of [trackIdx, clipIdx]", `${docMaker.iCode("Read-Only")} The currently selected clips across all tracks, sorted ascendently`],
+        [".lastClipsSelected", "Array of [trackIdx, clipIdx]", `${docMaker.iCode("Read-Only")} The currently selected clips across all tracks, sorted ascendently.`],
     ] );
 
     docMaker.header( "Callbacks", "h2", "" );
@@ -167,7 +167,7 @@ panel.@[mtd]attach@(clipTimeline.root);` );
         ["tracks", "Array of Number"],
     ] );
     
-    docMaker.classMethod( "onContentMoved", `Triggered after moving clips horizontally or moving the fadein, fadeout and duration sliders. Calls it for each clip .`, [
+    docMaker.classMethod( "onContentMoved", `Triggered after moving clips horizontally or moving the fadein, fadeout and duration sliders. Calls it for each clip.`, [
         ["clip", "Object"],
         ["deltaTime", "Number"],
     ] );
@@ -189,7 +189,7 @@ panel.@[mtd]attach@(clipTimeline.root);` );
     docMaker.header( "Methods", "h2", "" );
     docMaker.paragraph(`Check ${docMaker.iCode("Timeline")} for the list of inherited methods. If a method appears on both lists, the ${docMaker.iCode("ClipsTimeline")} takes precedence.`);
 
-    docMaker.classMethod( ".cloneClips", `Deep clone of a clip. Used to copy and paste clips. The default implementation uses ${docMaker.iCode("JSON.parse(JSON.stringify( ))")}.  ${docMaker.iCode("timeOffset")} adds/subtracts a delta time to all duplicated clips`, [
+    docMaker.classMethod( ".cloneClips", `Deep clone of a clip. Used to copy and paste clips. The default implementation uses ${docMaker.iCode("JSON.parse(JSON.stringify( ))")}.  ${docMaker.iCode("timeOffset")} adds/subtracts a delta time to all duplicated clips.`, [
         ["clipsToClone", "Array of Objects"],
         ["timeOffset", "Number"],
     ], "Array of Objects" );
@@ -206,7 +206,7 @@ panel.@[mtd]attach@(clipTimeline.root);` );
         ["searchStartTrackIdx", "Int"],
     ], "Number" );
 
-    docMaker.classMethod( ".getClipOnTime", `Search clip in track that is on the specified time. Returns -1 if no clip overlaps with the timestamp`, [
+    docMaker.classMethod( ".getClipOnTime", `Search clip in track that is on the specified time. Returns -1 if no clip overlaps with the timestamp.`, [
         ["track", "Object"],
         ["time", "Number"],
         ["threshold", "Number"],
@@ -230,7 +230,7 @@ panel.@[mtd]attach@(clipTimeline.root);` );
         ["skipCallback", "Boolean"]
     ], "" );
 
-    docMaker.classMethod( ".selectClip", `Selected a clip of the track. If ${docMaker.iCode("deselect")} is true, it deselects all selected clips, and makes this the only one selected`, [
+    docMaker.classMethod( ".selectClip", `Selected a clip of the track. If ${docMaker.iCode("deselect")} is true, it deselects all selected clips, and makes this the only one selected.`, [
         ["trackIdx", "Number"],
         ["clipIdx", "Number"],
         ["deselect", "Boolean"],

@@ -5,5 +5,5 @@ export * from "./CodeEditor";
 export * from "./DocMaker";
 export * from "./ImUi";
 export * from "./GraphEditor";
-// export * from "./Timeline";
+export * from "./Timeline";
 export * from "./VideoEditor";
