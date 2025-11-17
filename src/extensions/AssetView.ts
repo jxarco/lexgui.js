@@ -93,6 +93,7 @@ export class AssetView
     contentPage: number = 1;
     searchValue: string = "";
     filter: string = "None";
+    gridScale: number = 1.0;
 
     // Options
     layout: number = AssetView.LAYOUT_GRID;
@@ -361,9 +362,20 @@ export class AssetView
             this.toolsPanel = area.addPanel({ className: 'flex flex-col overflow-hidden', height:"auto" });
             this.toolsPanel.root.style.flex = "none";
             this.contentPanel = area.addPanel({ className: 'lexassetcontentpanel flex flex-col overflow-hidden' });
+
+            this.contentPanel.root.addEventListener( 'wheel', ( e: WheelEvent ) =>
+            {
+                if( !e.ctrlKey ) return;
+                e.preventDefault();
+                this.gridScale *= ( e.deltaY < 0 ? 1.05 : 0.95 );
+                this.gridScale = LX.clamp( this.gridScale, 0.5, 2.0 );
+                const r: any = document.querySelector( ':root' );
+                r.style.setProperty( '--av-grid-scale', this.gridScale );
+            });
         }
 
-        const _onSort = ( value: any, event: any ) => {
+        const _onSort = ( value: any, event: any ) =>
+        {
             new LX.DropdownMenu( event.target, [
                 { name: "Name", icon: "ALargeSmall", callback: () => this._sortData( "id" ) },
                 { name: "Type", icon: "Type", callback: () => this._sortData( "type" ) },
@@ -373,7 +385,8 @@ export class AssetView
             ], { side: "right", align: "start" });
         };
 
-        const _onChangeView = ( value: any, event: any ) => {
+        const _onChangeView = ( value: any, event: any ) =>
+        {
             new LX.DropdownMenu( event.target, [
                 { name: "Grid", icon: "LayoutGrid", callback: () => this._setContentLayout( AssetView.LAYOUT_GRID ) },
                 { name: "Compact", icon: "LayoutList", callback: () => this._setContentLayout( AssetView.LAYOUT_COMPACT ) },
@@ -381,7 +394,8 @@ export class AssetView
             ], { side: "right", align: "start" });
         };
 
-        const _onChangePage = ( value: any, event: any ) => {
+        const _onChangePage = ( value: any, event: any ) =>
+        {
             if( !this.allowNextPage )
             {
                 return;
@@ -397,18 +411,19 @@ export class AssetView
             }
         };
 
-        this.toolsPanel.refresh = () => {
+        this.toolsPanel.refresh = () =>
+        {
             this.toolsPanel.clear();
             this.toolsPanel.sameLine();
             this.toolsPanel.addSelect( "Filter", this.allowedTypes, this.filter ?? this.allowedTypes[ 0 ], ( v: any ) => {
                 this._refreshContent( undefined, v );
             }, { width: "30%", minWidth: "128px", overflowContainer: null } );
             this.toolsPanel.addText( null, this.searchValue ?? "", ( v: string ) => this._refreshContent.call( this, v, undefined ), { placeholder: "Search assets.." } );
-            this.toolsPanel.addButton( null, "", _onSort.bind(this), { title: "Sort", tooltip: true, icon: ( this.sortMode === AssetView.CONTENT_SORT_ASC ) ? "SortAsc" : "SortDesc" } );
-            this.toolsPanel.addButton( null, "", _onChangeView.bind(this), { title: "View", tooltip: true, icon: ( this.layout === AssetView.LAYOUT_GRID ) ? "LayoutGrid" : "LayoutList" } );
+            this.toolsPanel.addButton( null, "", _onSort.bind( this ), { title: "Sort", tooltip: true, icon: ( this.sortMode === AssetView.CONTENT_SORT_ASC ) ? "SortAsc" : "SortDesc" } );
+            this.toolsPanel.addButton( null, "", _onChangeView.bind( this ), { title: "View", tooltip: true, icon: ( this.layout === AssetView.LAYOUT_GRID ) ? "LayoutGrid" : "LayoutList" } );
             // Content Pages
-            this.toolsPanel.addButton( null, "", _onChangePage.bind(this, -1), { title: "Previous Page", icon: "ChevronsLeft", className: "ml-auto" } );
-            this.toolsPanel.addButton( null, "", _onChangePage.bind(this, 1), { title: "Next Page", icon: "ChevronsRight" } );
+            this.toolsPanel.addButton( null, "", _onChangePage.bind( this, -1 ), { title: "Previous Page", icon: "ChevronsLeft", className: "ml-auto" } );
+            this.toolsPanel.addButton( null, "", _onChangePage.bind( this, 1 ), { title: "Next Page", icon: "ChevronsRight" } );
             const textString = "Page " + this.contentPage + " / " + ((((this.currentData.length - 1) / AssetView.MAX_PAGE_ELEMENTS )|0) + 1);
             this.toolsPanel.addText(null, textString, null, {
                 inputClass: "nobg", disabled: true, signal: "@on_page_change", maxWidth: "16ch" }
@@ -423,7 +438,7 @@ export class AssetView
                         value: "Left",
                         icon: "ArrowLeft",
                         callback: () => {
-                            if(!this.prevData.length) return;
+                            if( !this.prevData.length ) return;
                             this.nextData.push( this.currentData );
                             this.currentData = this.prevData.pop();
                             this._refreshContent();
@@ -467,17 +482,22 @@ export class AssetView
 
         this.content.addEventListener( 'dragenter', function( e: DragEvent ) {
             e.preventDefault();
-            this.classList.add('dragging');
+            this.classList.add( 'dragging' );
         });
+
         this.content.addEventListener( 'dragleave', function( e: DragEvent ) {
             e.preventDefault();
-            this.classList.remove('dragging');
+            this.classList.remove( 'dragging' );
         });
-        this.content.addEventListener( 'drop', ( e: DragEvent ) => {
+
+        this.content.addEventListener( 'drop', ( e: DragEvent ) =>
+        {
             e.preventDefault();
             this._processDrop( e );
         });
-        this.content.addEventListener('click', function() {
+
+        this.content.addEventListener( 'click', function()
+        {
             this.querySelectorAll('.lexassetitem').forEach( i => i.classList.remove('selected') );
         });
 
@@ -507,6 +527,11 @@ export class AssetView
             itemEl.tabIndex = -1;
             that.content.appendChild( itemEl );
 
+            if( !item.uid )
+            {
+                item.uid = LX.guidGenerator();
+            }
+
             if( item.lastModified && !item.lastModifiedDate )
             {
                 item.lastModifiedDate = that._lastModifiedToStringDate( item.lastModified );
@@ -516,12 +541,12 @@ export class AssetView
             {
                 let desc = document.createElement( 'span' );
                 desc.className = 'lexitemdesc';
-                desc.id = `floatingTitle_${ item.id }`;
+                desc.id = `floatingTitle_${ item.uid }`;
                 desc.innerHTML = `File: ${ item.id }<br>Type: ${ type }`;
                 that.content.appendChild( desc );
 
-                itemEl.addEventListener( "mousemove", ( e: MouseEvent ) => {
-
+                itemEl.addEventListener( "mousemove", ( e: MouseEvent ) =>
+                {
                     if( !isGridLayout )
                     {
                         return;
@@ -653,7 +678,8 @@ export class AssetView
 
             LX.makeContainer( [ 'auto', 'auto' ], 'lexassetinfo', itemInfoHtml, itemEl );
 
-            itemEl.addEventListener('click', function( e ) {
+            itemEl.addEventListener('click', function( e )
+            {
                 e.stopImmediatePropagation();
                 e.stopPropagation();
 
@@ -719,11 +745,11 @@ export class AssetView
                 e.preventDefault();
             }, false );
 
-            itemEl.addEventListener( "mouseenter", ( e ) => {
-
+            itemEl.addEventListener( "mouseenter", ( e ) =>
+            {
                 if( !that.useNativeTitle && isGridLayout )
                 {
-                    const desc: any = that.content.querySelector( `#floatingTitle_${ item.id }` );
+                    const desc: any = that.content.querySelector( `#floatingTitle_${ item.uid }` );
                     if( desc ) desc.style.display = "unset";
                 }
 
@@ -734,8 +760,8 @@ export class AssetView
                 video.play();
             } );
 
-            itemEl.addEventListener( "mouseleave", ( e ) => {
-
+            itemEl.addEventListener( "mouseleave", ( e ) =>
+            {
                 if( !that.useNativeTitle && isGridLayout )
                 {
                     setTimeout( () => {

@@ -21,6 +21,7 @@ API:
 
 Additions:
 - Table now sort Date strings by date
+- AssetView ctrl+wheel to increase grid item size
 
 Styling:
 - More TW classes

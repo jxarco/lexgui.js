@@ -58,6 +58,7 @@
     --svg-size-xl: 1.4rem;
     --svg-size-xxl: 1.6rem;
 
+    --av-grid-scale: 1;
     --code-editor-font-size: 14px;
     --code-editor-row-height: 20px;
     --graphnode-background: 17, 17, 17;
@@ -4659,8 +4660,8 @@ ul.lexassetscontent {
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
-    width: 10em;
-    height: 11.4em;
+    width: calc(10em * var(--av-grid-scale));
+    height: calc(10em * var(--av-grid-scale));
     display: inline-block;
     vertical-align: top;
     margin: 0.5em;
@@ -4770,7 +4771,7 @@ ul.lexassetscontent {
 .lexassetscontent li .lexassettitle {
     position: absolute;
     width: 100%;
-    height: 24px;
+    height: 2em;
     bottom: 0px;
     -webkit-text-size-adjust: 100%;
     font-size: var(--global-font-size);
@@ -4844,8 +4845,8 @@ ul.lexassetscontent {
     text-align: center;
     color: white;
     border: 0;
-    max-width: 10em;
-    max-height: 10em;
+    /* max-width: 10em;
+    max-height: 10em; */
     width: 100%;
     height: 100%;
     object-fit: cover;
