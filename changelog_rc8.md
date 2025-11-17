@@ -3,18 +3,24 @@ Architecture:
 
 Fixes:
 - Area Tabs drag & drop
+- "All components" example on mobile
 
 API:
 - BaseComponent._TYPE_ to ComponentType._TYPE_
 - LX.emit -> LX.emitSignal
 - Element.insertChildAtIndex -> LX.insertChildAtIndex
+- Element.getParentArea -> LX.getParentArea
 - Element.listen/ignore -> LX.listen/ignore
+- Element.hasClass/addClass  -> LX.hasClas/addClass
 - ItemArray -> ArrayInput
 - LX.ADD_CUSTOM_COMPONENT -> LX.REGISTER_COMPONENT
 - Removed support for Blank panel component
 - LX.main_area -> LX.mainArea
 - Docmaker Extension API full changed
 - NodeGraph extension renamed to GraphEditor
+
+Additions:
+- Table now sort Date strings by date
 
 Styling:
 - More TW classes

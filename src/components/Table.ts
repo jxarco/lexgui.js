@@ -67,13 +67,63 @@ export class Table extends BaseComponent
         data.head.forEach( ( col: any, index: number ) => { data.colVisibilityMap[ index ] = true; })
         this.data = data;
 
-        const compareFn = ( idx: number, order: number, a: any, b: any ) => {
-            if( a[ idx ] < b[ idx ] ) return -order;
-            else if( a[ idx ] > b[ idx ] ) return order;
+        const getDate = ( text: string ): Date | null =>
+        {
+            // Match DD/MM/YYYY or DD-MM-YYYY
+            const m = text.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{2}|\d{4})$/);
+            if( !m ) return null;
+
+            let day = Number( m[ 1 ] );
+            let month = Number( m[ 2 ] ) - 1; // JS months: 0-11
+            let year = Number( m[ 3 ] );
+
+            // Convert YY → 20YY
+            if( year < 100 ) year += 2000;
+
+            const d = new Date( year, month, day );
+
+            // Validate (to avoid things like 32/13/2025 becoming valid)
+            if( d.getFullYear() !== year || d.getMonth() !== month || d.getDate() !== day )
+            {
+                return null;
+            }
+
+            return d;
+        };
+
+        const compareFn = ( idx: number, order: number, a: any, b: any ) =>
+        {
+            const va = a[ idx ];
+            const vb = b[ idx ];
+
+            // Date sort
+            const da = getDate( va );
+            const db = getDate( vb );
+            if( da && db )
+            {
+                if( da.getTime() < db.getTime() ) return -order;
+                if( da.getTime() > db.getTime() ) return order;
+                return 0;
+            }
+
+            // Number sort
+            const na = Number( va );
+            const nb = Number( vb );
+            if( !isNaN( na ) && !isNaN( nb ) )
+            {
+                if( na < nb ) return -order;
+                if( na > nb ) return order;
+                return 0;
+            }
+
+            // String sort
+            if( va < vb ) return -order;
+            else if( va > vb ) return order;
             return 0;
         }
 
-        const sortFn = ( idx: number, sign: number ) => {
+        const sortFn = ( idx: number, sign: number ) =>
+        {
             data.body = data.body.sort( compareFn.bind( this, idx, sign ) );
             this.refresh();
         }
