@@ -5,6 +5,7 @@
 Fixed Form `options.secondaryActionCallback`.
 
 CodeEditor:
+- Support for JS/TS String interpolation highlighting.
 - Fixed Ctrl+Arrow horizontal scroll.
 - Fixed some issues reseting cursor position.
 

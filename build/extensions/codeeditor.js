@@ -4080,7 +4080,7 @@ class CodeEditor
             charCounter += t.length;
         };
 
-        let iter = lineString.matchAll(/(<!--|-->|\*\/|\/\*|::|[\[\](){}<>.,;:*"'%@$!/= ])/g);
+        let iter = lineString.matchAll(/(<!--|-->|\*\/|\/\*|::|[\[\](){}<>.,;:*"'`%@$!/= ])/g);
         let subtokens = iter.next();
         if( subtokens.value )
         {
@@ -4240,13 +4240,29 @@ class CodeEditor
             usePreviousTokenToCheckString = true;
             customStringKeys['@['] = ']';
         }
+        else if( highlight == 'javascript' || highlight == 'typescript' )
+        {
+            customStringKeys["@`"] = "`";
+        }
 
         // Manage strings
         this._stringEnded = false;
 
         if( usePreviousTokenToCheckString || ( !inBlockComment && ( lang.tags ?? false ? ( this._enclosedByTokens( token, tokenIndex, '<', '>' ) ) : true ) ) )
         {
-            const _checkIfStringEnded = t => {
+            const _checkIfStringEnded = ( t ) => {
+
+                if( this._stringInterpolation )
+                {
+                    if( token == "$" && next == "{" )
+                    {
+                        delete this._stringInterpolation;
+                        this._stringInterpolationOpened = true;
+                        this._stringEnded = true;
+                        return;
+                    }
+                }
+
                 const idx = Object.values( customStringKeys ).indexOf( t );
                 this._stringEnded = (idx > -1) && (idx == Object.values(customStringKeys).indexOf( customStringKeys[ '@' + this._buildingString ] ));
             };
@@ -4260,11 +4276,22 @@ class CodeEditor
                 // Start new string
                 this._buildingString = ( usePreviousTokenToCheckString ? ctxData.prevWithSpaces : token );
 
+                if( ( highlight == 'javascript' || highlight == 'typescript' ) && token == "`" )
+                {
+                    this._stringInterpolation = true;
+                }
+
                 // Check if string ended in same token using next...
                 if( usePreviousTokenToCheckString )
                 {
                     _checkIfStringEnded( ctxData.nextWithSpaces );
                 }
+            }
+            else if( this._stringInterpolationOpened && prev == "}" )
+            {
+                delete this._stringInterpolationOpened;
+                this._stringInterpolation = true;
+                this._buildingString = "`";
             }
         }
 
@@ -4286,6 +4313,16 @@ class CodeEditor
 
         // Get highlighting class based on language common and specific rules
         let tokenClass = this._getTokenHighlighting( ctxData, highlight );
+
+        if( this._stringInterpolationOpened && this._pendingString )
+        {
+            this._pendingString = this._pendingString.substring( 0, this._pendingString.indexOf( "$" ) );
+
+            if( ctxData.tokens[ tokenIndex + 1 ] == "{" )
+            {
+                ctxData.tokens[ tokenIndex + 1 ] = "${";
+            }
+        }
 
         // We finished constructing a string
         if( this._buildingString && ( this._stringEnded || isLastToken ) && !inBlockComment )
