@@ -11,7 +11,7 @@ import { IEvent } from './Event';
 
 export class TextInput extends BaseComponent
 {
-    valid: ( s: string ) => boolean;
+    valid: ( s: string, m?: string ) => boolean;
 
     _lastValueTriggered?: any;
 
@@ -25,7 +25,14 @@ export class TextInput extends BaseComponent
 
         this.onSetValue = ( newValue, skipCallback, event ) => {
 
-            if( !this.valid( newValue ) || ( this._lastValueTriggered == newValue ) )
+            let skipTrigger = ( this._lastValueTriggered == newValue );
+
+            if( !options.ignoreValidation )
+            {
+                skipTrigger = skipTrigger || ( !this.valid( newValue ) );
+            }
+
+            if( skipTrigger )
             {
                 return;
             }
@@ -45,11 +52,11 @@ export class TextInput extends BaseComponent
             container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth })`;
         };
 
-        this.valid = ( v ) => {
+        this.valid = ( v, matchField ) => {
             v = v ?? this.value();
-            if( ( wValue.pattern ?? "" ) == "" ) return true;
-            const regexp = new RegExp( wValue.pattern );
-            return regexp.test( v );
+            if( !options.pattern ) return true;
+            const errs = LX.validateValueAtPattern( v, options.pattern, matchField );
+            return ( errs.length == 0 );
         };
 
         let container = document.createElement( 'div' );
@@ -78,7 +85,7 @@ export class TextInput extends BaseComponent
 
             if( options.pattern )
             {
-                wValue.setAttribute( "pattern", options.pattern );
+                wValue.setAttribute( "pattern", LX.buildTextPattern( options.pattern ) );
             }
 
             const trigger = options.trigger ?? "default";

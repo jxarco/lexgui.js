@@ -2,9 +2,23 @@
 
 ## dev
 
-Fixed Form `options.secondaryActionCallback`.
+## 0.7.13 (master)
 
-## 0.7.12 (master)
+Added `LX.validateValueAtPattern`.
+TextInput now receive `options.pattern` as an Object, instead of text.
+Added support for `options.email` in `LX.buildTextPattern`.
+
+Form Component:
+- Fixed `options.secondaryActionCallback`.
+- Improve validation errors by adding field-specific error messages.
+
+CodeEditor:
+- Support for JS/TS String interpolation highlighting.
+- Fixed Ctrl+Arrow horizontal scroll.
+- Fixed some issues reseting cursor position.
+- Fixed cursor horizontal scrolling issues.
+
+## 0.7.12
 
 Added support column actions in Table Component.
 

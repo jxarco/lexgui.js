@@ -539,6 +539,8 @@ export class CodeEditor
     _scopeStack: any = null;
     _scopesUpdated: boolean | undefined = undefined;
     _stringEnded: boolean = false;
+    _stringInterpolation: boolean | undefined = undefined;
+    _stringInterpolationOpened: boolean | undefined = undefined;
 
     constructor( area: typeof Area, options: any = {} )
     {
@@ -1152,8 +1154,11 @@ export class CodeEditor
                     {
                         this._processSelection( cursor, e );
                     }
-                } else if( !e.keepSelection )
+                }
+                else if( !e.keepSelection )
+                {
                     this.endSelection();
+                }
             });
 
             this.action( 'End', false, ( ln, cursor, e ) => {
@@ -2718,7 +2723,7 @@ export class CodeEditor
         {
             // Make sure we only keep the main cursor..
             this._removeSecondaryCursors();
-            this.cursorToLine( cursor, ln, true );
+            this.cursorToLine( cursor, ln );
             this.cursorToPosition( cursor, string.length );
         }
 
@@ -4300,7 +4305,7 @@ export class CodeEditor
             charCounter += t.length;
         };
 
-        let iter = lineString.matchAll(/(<!--|-->|\*\/|\/\*|::|[\[\](){}<>.,;:*"'%@$!/= ])/g);
+        let iter = lineString.matchAll(/(<!--|-->|\*\/|\/\*|::|[\[\](){}<>.,;:*"'`%@$!/= ])/g);
         let subtokens = iter.next();
         if( subtokens.value )
         {
@@ -4460,13 +4465,29 @@ export class CodeEditor
             usePreviousTokenToCheckString = true;
             customStringKeys['@['] = ']';
         }
+        else if( highlight == 'javascript' || highlight == 'typescript' )
+        {
+            customStringKeys["@`"] = "`";
+        }
 
         // Manage strings
         this._stringEnded = false;
 
         if( usePreviousTokenToCheckString || ( !inBlockComment && ( lang.tags ?? false ? ( this._enclosedByTokens( token, tokenIndex, '<', '>' ) ) : true ) ) )
         {
-            const _checkIfStringEnded = ( t: string ) => {
+            const _checkIfStringEnded = ( t: string ) =>
+            {
+                if( this._stringInterpolation )
+                {
+                    if( token == "$" && next == "{" )
+                    {
+                        delete this._stringInterpolation;
+                        this._stringInterpolationOpened = true;
+                        this._stringEnded = true;
+                        return;
+                    }
+                }
+
                 const idx = Object.values( customStringKeys ).indexOf( t );
                 this._stringEnded = (idx > -1) && (idx == Object.values(customStringKeys).indexOf( customStringKeys[ '@' + this._buildingString ] ));
             };
@@ -4480,11 +4501,22 @@ export class CodeEditor
                 // Start new string
                 this._buildingString = ( usePreviousTokenToCheckString ? ctxData.prevWithSpaces : token );
 
+                if( ( highlight == 'javascript' || highlight == 'typescript' ) && token == "`" )
+                {
+                    this._stringInterpolation = true;
+                }
+
                 // Check if string ended in same token using next...
                 if( usePreviousTokenToCheckString )
                 {
                     _checkIfStringEnded( ctxData.nextWithSpaces );
                 }
+            }
+            else if( this._stringInterpolationOpened && prev == "}" )
+            {
+                delete this._stringInterpolationOpened;
+                this._stringInterpolation = true;
+                this._buildingString = "`";
             }
         }
 
@@ -4506,6 +4538,16 @@ export class CodeEditor
 
         // Get highlighting class based on language common and specific rules
         let tokenClass = this._getTokenHighlighting( ctxData, highlight );
+
+        if( this._stringInterpolationOpened && this._pendingString )
+        {
+            this._pendingString = this._pendingString.substring( 0, this._pendingString.indexOf( "$" ) );
+
+            if( ctxData.tokens[ tokenIndex + 1 ] == "{" )
+            {
+                ctxData.tokens[ tokenIndex + 1 ] = "${";
+            }
+        }
 
         // We finished constructing a string
         if( this._buildingString && ( this._stringEnded || isLastToken ) && !inBlockComment )
@@ -4896,43 +4938,57 @@ export class CodeEditor
         this.hideAutoCompleteBox();
     }
 
-    cursorToRight( key: string, cursor: Cursor )
+    cursorToRight( text: string, cursor: Cursor )
     {
-        if( !key ) return;
+        if( !text || !text.length ) return;
 
-        cursor.left += this.charWidth;
+        const chars = text.length;
+        const offset = chars * this.charWidth;
+
+        cursor.left += offset;
         cursor.root.style.left = `calc( ${ cursor.left }px + ${ this.xPadding } )`;
-        cursor.position++;
+        cursor.position += chars;
 
         this.restartBlink();
 
         // Add horizontal scroll
+        const rightMargin = this.charWidth;
+        const cursorX = ( cursor.position * this.charWidth );
         const currentScrollLeft = this.getScrollLeft();
-        var viewportSizeX = ( this.codeScroller.clientWidth + currentScrollLeft ) - CodeEditor.LINE_GUTTER_WIDTH; // Gutter offset
-        if( (cursor.position * this.charWidth) >= viewportSizeX )
+        const viewportSizeX = this.codeScroller.clientWidth - CodeEditor.LINE_GUTTER_WIDTH; // Gutter offset
+        const viewportX = viewportSizeX + currentScrollLeft;
+
+        if( cursorX >= ( viewportX - rightMargin ) )
         {
-            this.setScrollLeft( currentScrollLeft + this.charWidth );
+            const scroll = Math.max( cursorX - ( viewportSizeX - rightMargin ), 0 );
+            this.setScrollLeft( scroll );
         }
     }
 
-    cursorToLeft( key: string, cursor: Cursor )
+    cursorToLeft( text: string, cursor: Cursor )
     {
-        if( !key ) return;
+        if( !text || !text.length ) return;
 
-        cursor.left -= this.charWidth;
+        const chars = text.length;
+        const offset = chars * this.charWidth;
+
+        cursor.left -= offset;
         cursor.left = Math.max( cursor.left, 0 );
         cursor.root.style.left = `calc( ${ cursor.left }px + ${ this.xPadding } )`;
-        cursor.position--;
+        cursor.position -= chars;
         cursor.position = Math.max( cursor.position, 0 );
+
         this.restartBlink();
 
         // Add horizontal scroll
-
+        const leftMargin = this.charWidth;
+        const cursorX = ( cursor.position * this.charWidth );
         const currentScrollLeft = this.getScrollLeft();
-        var viewportSizeX = currentScrollLeft; // Gutter offset
-        if( ( ( cursor.position - 1 ) * this.charWidth ) < viewportSizeX )
+
+        if( cursorX < ( currentScrollLeft + leftMargin ) )
         {
-            this.setScrollLeft( currentScrollLeft - this.charWidth );
+            const scroll = Math.max( cursorX - leftMargin, 0 );
+            this.setScrollLeft( scroll );
         }
     }
 
@@ -4984,9 +5040,13 @@ export class CodeEditor
             return;
         }
 
-        for( let char of text )
+        if( reverse )
         {
-            reverse ? this.cursorToLeft( char, cursor ) : this.cursorToRight( char, cursor );
+            this.cursorToLeft( text, cursor )
+        }
+        else
+        {
+            this.cursorToRight( text, cursor );
         }
     }
 
@@ -5089,15 +5149,17 @@ export class CodeEditor
         if( flag & CodeEditor.CURSOR_LEFT )
         {
             cursor.left = 0;
-            cursor.root.style.left = "calc(" + ( -this.getScrollLeft() ) + "px + " + this.xPadding + ")";
+            cursor.root.style.left = "calc(" + this.xPadding + ")";
             cursor.position = 0;
+            this.setScrollLeft( 0 );
         }
 
         if( flag & CodeEditor.CURSOR_TOP )
         {
             cursor.top = 0;
-            cursor.root.style.top = ( -this.getScrollTop() ) + "px";
+            cursor.root.style.top = "0px";
             cursor.line = 0;
+            this.setScrollTop( 0 )
         }
     }
 
@@ -5232,7 +5294,7 @@ export class CodeEditor
         LX.doAsync( () => {
             this.codeScroller.scrollLeft = value;
             this.setScrollBarValue( 'horizontal', 0 );
-        }, 20 );
+        }, 10 );
     }
 
     setScrollTop( value: number )
@@ -5241,7 +5303,7 @@ export class CodeEditor
         LX.doAsync( () => {
             this.codeScroller.scrollTop = value;
             this.setScrollBarValue( 'vertical' );
-        }, 20 );
+        }, 10 );
     }
 
     resize( flag: number = CodeEditor.RESIZE_SCROLLBAR_H_V, pMaxLength?: number, onResize?: any )

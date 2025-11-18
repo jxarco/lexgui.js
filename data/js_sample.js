@@ -10,6 +10,9 @@ class Test {
         var div = document.createElement('div');
         div.style.background = "red";
 
+        const name = "Pep";
+        const textWithStringInterpolation = `hello ${ name }!`;
+
         // single line comment
 
         document.body.appendChild( div );

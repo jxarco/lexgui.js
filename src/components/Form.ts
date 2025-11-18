@@ -58,13 +58,14 @@ export class Form extends BaseComponent
 
             if( entryData.constructor != Object )
             {
-                const oldValue = JSON.parse( JSON.stringify( entryData ) );
+                const oldValue = LX.deepCopy( entryData );
                 entryData = { value: oldValue };
                 data[ entry ] = entryData;
             }
 
-            entryData.placeholder = entryData.placeholder ?? ( entryData.label ?? `Enter ${ entry }` );
             entryData.width = "100%";
+            entryData.placeholder = entryData.placeholder ?? ( entryData.label ?? `Enter ${ entry }` );
+            entryData.ignoreValidation = true;
 
             if( !( options.skipLabels ?? false ) )
             {
@@ -80,7 +81,7 @@ export class Form extends BaseComponent
             container.formData[ entry ] = entryData.constructor == Object ? entryData.value : entryData;
         }
 
-        const buttonContainer = LX.makeContainer( ["100%", "auto"], "flex flex-row", "", container );
+        const buttonContainer = LX.makeContainer( ["100%", "auto"], "flex flex-row mt-2", "", container );
 
         if( options.secondaryActionName || options.secondaryActionCallback )
         {
@@ -102,9 +103,22 @@ export class Form extends BaseComponent
             {
                 let entryData = data[ entry ];
 
-                if( !entryData.textComponent.valid() )
+                const pattern = entryData.pattern;
+                const matchField = pattern?.fieldMatchName ? container.formData[ pattern.fieldMatchName ] : undefined;
+
+                if( !entryData.textComponent.valid( undefined, matchField ) )
                 {
-                    errors.push( { type: "input_not_valid", entry } )
+                    const err = { entry, type: "input_not_valid", messages: [] };
+                    if( pattern )
+                    {
+                        err.messages = LX.validateValueAtPattern(
+                            container.formData[ entry ],
+                            pattern,
+                            matchField
+                        );
+                    }
+
+                    errors.push( err );
                 }
             }
 
