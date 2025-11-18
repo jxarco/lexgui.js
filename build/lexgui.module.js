@@ -5322,11 +5322,12 @@ LX.guidGenerator = guidGenerator;
 function buildTextPattern( options = {} )
 {
     let patterns = [];
-    if ( options.lowercase ) patterns.push("(?=.*[a-z])");
-    if ( options.uppercase ) patterns.push("(?=.*[A-Z])");
-    if ( options.digit ) patterns.push("(?=.*\\d)");
-    if ( options.specialChar ) patterns.push("(?=.*[@#$%^&+=!])");
-    if ( options.noSpaces ) patterns.push("(?!.*\\s)");
+    if( options.lowercase ) patterns.push("(?=.*[a-z])");
+    if( options.uppercase ) patterns.push("(?=.*[A-Z])");
+    if( options.digit ) patterns.push("(?=.*\\d)");
+    if( options.specialChar ) patterns.push("(?=.*[@#$%^&+=!])");
+    if( options.noSpaces ) patterns.push("(?!.*\\s)");
+    if( options.email ) patterns.push("(^[^\s@]+@[^\s@]+\.[^\s@]+$)");
 
     let minLength = options.minLength || 0;
     let maxLength = options.maxLength || ""; // Empty means no max length restriction
@@ -5336,6 +5337,45 @@ function buildTextPattern( options = {} )
 }
 
 LX.buildTextPattern = buildTextPattern;
+
+/**
+ * Checks a value against a set of pattern requirements and returns an array
+ * of specific error messages for all criteria that failed.
+ * @param { String } value The string to validate.
+ * @param { Object } pattern The pattern options
+ * @returns { Array } An array of error messages for failed criteria.
+ */
+function validateValueAtPattern( value, pattern = {}, ...args )
+{
+    const errors = [];
+    const minLength = pattern.minLength || 0;
+    const maxLength = pattern.maxLength; // undefined means no max limit
+
+    // Length requirements
+    if( value.length < minLength ) errors.push(`Must be at least ${ minLength } characters long.`);
+    else if( maxLength !== undefined && value.length > maxLength ) errors.push(`Must be no more than ${ maxLength } characters long.`);
+
+    // Check for Lowercase, Uppercase, Digits
+    if( pattern.lowercase && !/[a-z]/.test( value ) ) errors.push( "Must contain at least one lowercase letter (a-z)." );
+    if( pattern.uppercase && !/[A-Z]/.test( value ) ) errors.push( "Must contain at least one uppercase letter (A-Z)." );
+    if( pattern.digit && !/\d/.test( value ) ) errors.push( "Must contain at least one number (0-9)." );
+
+    // Check for No Spaces (The original regex was (?!.*\s), meaning 'not followed by any character and a space')
+    if( pattern.noSpaces && /\s/.test(value)) errors.push("Must NOT contain any spaces.");
+
+    // Check for Special Character (using the same set as buildTextPattern)
+    if( pattern.specialChar && !/[@#$%^&+=!]/.test( value ) ) errors.push("Must contain at least one special character (e.g., @, #, $, %, ^, &, +, =, !).");
+
+    // Check email formatting
+    if( pattern.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test( value ) ) errors.push("Must have a valid email format.");
+
+    // Check match to any other text word
+    if( pattern.fieldMatchName && value !== ( args[ 0 ] ) ) errors.push(`Must match ${ pattern.fieldMatchName  } field.`);
+
+    return errors;
+}
+
+LX.validateValueAtPattern = validateValueAtPattern;
 
 /**
  * @method makeDraggable
@@ -9055,7 +9095,14 @@ class TextInput extends BaseComponent
 
         this.onSetValue = ( newValue, skipCallback, event ) => {
 
-            if( !this.valid( newValue ) || ( this._lastValueTriggered == newValue ) )
+            let skipTrigger = ( this._lastValueTriggered == newValue );
+
+            if( !options.ignoreValidation )
+            {
+                skipTrigger |=  ( !this.valid( newValue ) );
+            }
+
+            if( skipTrigger )
             {
                 return;
             }
@@ -9075,11 +9122,11 @@ class TextInput extends BaseComponent
             container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth })`;
         };
 
-        this.valid = ( v ) => {
+        this.valid = ( v, matchField ) => {
             v = v ?? this.value();
-            if( ( wValue.pattern ?? "" ) == "" ) return true;
-            const regexp = new RegExp( wValue.pattern );
-            return regexp.test( v );
+            if( !options.pattern ) return true;
+            const errs = LX.validateValueAtPattern( v, options.pattern, matchField );
+            return ( errs.length == 0 );
         };
 
         let container = document.createElement( 'div' );
@@ -9108,7 +9155,7 @@ class TextInput extends BaseComponent
 
             if( options.pattern )
             {
-                wValue.setAttribute( "pattern", options.pattern );
+                wValue.setAttribute( "pattern", LX.buildTextPattern( options.pattern ) );
             }
 
             const trigger = options.trigger ?? "default";
@@ -9778,13 +9825,14 @@ class Form extends BaseComponent
 
             if( entryData.constructor != Object )
             {
-                const oldValue = JSON.parse( JSON.stringify( entryData ) );
+                const oldValue = LX.deepCopy( entryData );
                 entryData = { value: oldValue };
                 data[ entry ] = entryData;
             }
 
-            entryData.placeholder = entryData.placeholder ?? ( entryData.label ?? `Enter ${ entry }` );
             entryData.width = "100%";
+            entryData.placeholder = entryData.placeholder ?? ( entryData.label ?? `Enter ${ entry }` );
+            entryData.ignoreValidation = true;
 
             if( !( options.skipLabels ?? false ) )
             {
@@ -9800,7 +9848,7 @@ class Form extends BaseComponent
             container.formData[ entry ] = entryData.constructor == Object ? entryData.value : entryData;
         }
 
-        const buttonContainer = LX.makeContainer( ["100%", "auto"], "flex flex-row", "", container );
+        const buttonContainer = LX.makeContainer( ["100%", "auto"], "flex flex-row mt-2", "", container );
 
         if( options.secondaryActionName || options.secondaryActionCallback )
         {
@@ -9822,9 +9870,22 @@ class Form extends BaseComponent
             {
                 let entryData = data[ entry ];
 
-                if( !entryData.textComponent.valid() )
+                const pattern = entryData.pattern;
+                const matchField = pattern?.fieldMatchName ? container.formData[ pattern.fieldMatchName ] : undefined;
+
+                if( !entryData.textComponent.valid( undefined, matchField ) )
                 {
-                    errors.push( { type: "input_not_valid", entry } );
+                    const err = { entry, type: "input_not_valid" };
+                    err.messages = [];
+                    if( pattern )
+                    {
+                        err.messages = LX.validateValueAtPattern(
+                            container.formData[ entry ],
+                            pattern,
+                            matchField
+                        );
+                    }
+                    errors.push( err );
                 }
             }
 

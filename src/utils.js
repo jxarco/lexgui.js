@@ -574,11 +574,12 @@ LX.guidGenerator = guidGenerator;
 function buildTextPattern( options = {} )
 {
     let patterns = [];
-    if ( options.lowercase ) patterns.push("(?=.*[a-z])");
-    if ( options.uppercase ) patterns.push("(?=.*[A-Z])");
-    if ( options.digit ) patterns.push("(?=.*\\d)");
-    if ( options.specialChar ) patterns.push("(?=.*[@#$%^&+=!])");
-    if ( options.noSpaces ) patterns.push("(?!.*\\s)");
+    if( options.lowercase ) patterns.push("(?=.*[a-z])");
+    if( options.uppercase ) patterns.push("(?=.*[A-Z])");
+    if( options.digit ) patterns.push("(?=.*\\d)");
+    if( options.specialChar ) patterns.push("(?=.*[@#$%^&+=!])");
+    if( options.noSpaces ) patterns.push("(?!.*\\s)");
+    if( options.email ) patterns.push("(^[^\s@]+@[^\s@]+\.[^\s@]+$)");
 
     let minLength = options.minLength || 0;
     let maxLength = options.maxLength || ""; // Empty means no max length restriction
@@ -588,6 +589,45 @@ function buildTextPattern( options = {} )
 }
 
 LX.buildTextPattern = buildTextPattern;
+
+/**
+ * Checks a value against a set of pattern requirements and returns an array
+ * of specific error messages for all criteria that failed.
+ * @param { String } value The string to validate.
+ * @param { Object } pattern The pattern options
+ * @returns { Array } An array of error messages for failed criteria.
+ */
+function validateValueAtPattern( value, pattern = {}, ...args )
+{
+    const errors = [];
+    const minLength = pattern.minLength || 0;
+    const maxLength = pattern.maxLength; // undefined means no max limit
+
+    // Length requirements
+    if( value.length < minLength ) errors.push(`Must be at least ${ minLength } characters long.`);
+    else if( maxLength !== undefined && value.length > maxLength ) errors.push(`Must be no more than ${ maxLength } characters long.`);
+
+    // Check for Lowercase, Uppercase, Digits
+    if( pattern.lowercase && !/[a-z]/.test( value ) ) errors.push( "Must contain at least one lowercase letter (a-z)." );
+    if( pattern.uppercase && !/[A-Z]/.test( value ) ) errors.push( "Must contain at least one uppercase letter (A-Z)." );
+    if( pattern.digit && !/\d/.test( value ) ) errors.push( "Must contain at least one number (0-9)." );
+
+    // Check for No Spaces (The original regex was (?!.*\s), meaning 'not followed by any character and a space')
+    if( pattern.noSpaces && /\s/.test(value)) errors.push("Must NOT contain any spaces.");
+
+    // Check for Special Character (using the same set as buildTextPattern)
+    if( pattern.specialChar && !/[@#$%^&+=!]/.test( value ) ) errors.push("Must contain at least one special character (e.g., @, #, $, %, ^, &, +, =, !).");
+
+    // Check email formatting
+    if( pattern.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test( value ) ) errors.push("Must have a valid email format.");
+
+    // Check match to any other text word
+    if( pattern.fieldMatchName && value !== ( args[ 0 ] ) ) errors.push(`Must match ${ pattern.fieldMatchName  } field.`);
+
+    return errors;
+}
+
+LX.validateValueAtPattern = validateValueAtPattern;
 
 /**
  * @method makeDraggable

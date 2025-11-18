@@ -182,6 +182,7 @@
         {
             name: "Account", submenu: [
                 { name: "Login", icon: "User", callback: createLoginForm },
+                { name: "Signup", icon: "User", callback: openSignUpDialog },
             ]
         },
         {
@@ -967,10 +968,9 @@
         });
         panel.addText("Camera", "Canon EOS 80D", null, { disabled: true });
         panel.addText("Text", "Warning text", null, { warning: true });
-        const patternOptions = { uppercase: true }
         panel.addText("Text With Validator Pattern", "", (value, event) => {
             console.log(value);
-        }, { pattern: LX.buildTextPattern(patternOptions) });
+        }, { pattern: { uppercase: true } });
         panel.addTextArea("Notes", "", (value, event) => {
             console.log(value);
         }, { placeholder: 'Some notes...' });
@@ -1016,6 +1016,33 @@
 
     }
 
+    function openSignUpDialog()
+    {
+        const dialog = new LX.Dialog( "Create account", ( p ) => {
+
+            const formData = {
+                name: { label: "Name", value: "", icon: "User", pattern: { minLength: 3, noSpaces: true } },
+                email: { label: "Email", value: "", icon: "AtSign", pattern: { email: true } },
+                password: { label: "Password", value: "", type: "password", icon: "Key", pattern: { minLength: 4, digit: true } },
+                confirmPassword: { label: "Confirm password", value: "", type: "password", icon: "Key", pattern: { fieldMatchName: "password" }  }
+            };
+
+            const form = p.addForm( null, formData, async (value, errors) => {
+
+                console.log(errors)
+
+                errorMsg.set( "" );
+
+                if( errors.length )
+                {
+                    const err = errors[ 0 ];
+                    errorMsg.set( `${ err.entry }: ${ err.messages.join( "\n" ) }` );
+                }
+            }, { primaryActionName: "SignUp" });
+            const errorMsg = p.addTextArea( null, "", null, { inputClass: "fg-secondary", disabled: true, fitHeight: true } );
+        }, { modal: true } );
+    }
+
     function createLoginForm() {
 
         let dialog = new LX.Dialog('Login', panel => {
@@ -1025,14 +1052,14 @@
                     value: "",
                     placeholder: "Enter username",
                     icon: "User",
-                    pattern: LX.buildTextPattern({ minLength: 3 })
+                    pattern: { minLength: 3 }
                 },
                 Password: {
                     value: "",
                     type: "password",
                     placeholder: "Enter password",
                     icon: "KeyRound",
-                    pattern: LX.buildTextPattern({ lowercase: true, uppercase: true, digit: true, minLength: 6 })
+                    pattern: { lowercase: true, uppercase: true, digit: true, minLength: 6 }
                 }
             };
 

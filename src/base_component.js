@@ -1165,7 +1165,14 @@ class TextInput extends BaseComponent
 
         this.onSetValue = ( newValue, skipCallback, event ) => {
 
-            if( !this.valid( newValue ) || ( this._lastValueTriggered == newValue ) )
+            let skipTrigger = ( this._lastValueTriggered == newValue );
+
+            if( !options.ignoreValidation )
+            {
+                skipTrigger |=  ( !this.valid( newValue ) );
+            }
+
+            if( skipTrigger )
             {
                 return;
             }
@@ -1185,11 +1192,11 @@ class TextInput extends BaseComponent
             container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth })`;
         };
 
-        this.valid = ( v ) => {
+        this.valid = ( v, matchField ) => {
             v = v ?? this.value();
-            if( ( wValue.pattern ?? "" ) == "" ) return true;
-            const regexp = new RegExp( wValue.pattern );
-            return regexp.test( v );
+            if( !options.pattern ) return true;
+            const errs = LX.validateValueAtPattern( v, options.pattern, matchField );
+            return ( errs.length == 0 );
         };
 
         let container = document.createElement( 'div' );
@@ -1218,7 +1225,7 @@ class TextInput extends BaseComponent
 
             if( options.pattern )
             {
-                wValue.setAttribute( "pattern", options.pattern );
+                wValue.setAttribute( "pattern", LX.buildTextPattern( options.pattern ) );
             }
 
             const trigger = options.trigger ?? "default";
@@ -1888,13 +1895,14 @@ class Form extends BaseComponent
 
             if( entryData.constructor != Object )
             {
-                const oldValue = JSON.parse( JSON.stringify( entryData ) );
+                const oldValue = LX.deepCopy( entryData );
                 entryData = { value: oldValue };
                 data[ entry ] = entryData;
             }
 
-            entryData.placeholder = entryData.placeholder ?? ( entryData.label ?? `Enter ${ entry }` );
             entryData.width = "100%";
+            entryData.placeholder = entryData.placeholder ?? ( entryData.label ?? `Enter ${ entry }` );
+            entryData.ignoreValidation = true;
 
             if( !( options.skipLabels ?? false ) )
             {
@@ -1910,7 +1918,7 @@ class Form extends BaseComponent
             container.formData[ entry ] = entryData.constructor == Object ? entryData.value : entryData;
         }
 
-        const buttonContainer = LX.makeContainer( ["100%", "auto"], "flex flex-row", "", container );
+        const buttonContainer = LX.makeContainer( ["100%", "auto"], "flex flex-row mt-2", "", container );
 
         if( options.secondaryActionName || options.secondaryActionCallback )
         {
@@ -1932,9 +1940,22 @@ class Form extends BaseComponent
             {
                 let entryData = data[ entry ];
 
-                if( !entryData.textComponent.valid() )
+                const pattern = entryData.pattern;
+                const matchField = pattern?.fieldMatchName ? container.formData[ pattern.fieldMatchName ] : undefined;
+
+                if( !entryData.textComponent.valid( undefined, matchField ) )
                 {
-                    errors.push( { type: "input_not_valid", entry } )
+                    const err = { entry, type: "input_not_valid" };
+                    err.messages = [];
+                    if( pattern )
+                    {
+                        err.messages = LX.validateValueAtPattern(
+                            container.formData[ entry ],
+                            pattern,
+                            matchField
+                        );
+                    }
+                    errors.push( err );
                 }
             }
 

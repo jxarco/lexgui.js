@@ -2,7 +2,13 @@
 
 ## dev
 
-Fixed Form `options.secondaryActionCallback`.
+Added `LX.validateValueAtPattern`.
+TextInput now receive `options.pattern` as an Object, instead of text.
+Added support for `options.email` in `LX.buildTextPattern`.
+
+Form Component:
+- Fixed `options.secondaryActionCallback`.
+- Improve validation errors by adding field-specific error messages.
 
 CodeEditor:
 - Support for JS/TS String interpolation highlighting.
