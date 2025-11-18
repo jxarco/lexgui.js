@@ -599,7 +599,7 @@ LX.buildTextPattern = buildTextPattern;
  * @param { Object } pattern The pattern options
  * @returns { Array } An array of error messages for failed criteria.
  */
-function validateValueAtPattern( value, pattern = {}, ...args )
+function validateValueAtPattern( value: string, pattern: any = {}, ...args: any[] )
 {
     const errors = [];
     const minLength = pattern.minLength || 0;
