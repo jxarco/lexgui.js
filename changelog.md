@@ -2,6 +2,8 @@
 
 ## dev
 
+## 0.7.13 (master)
+
 Added `LX.validateValueAtPattern`.
 TextInput now receive `options.pattern` as an Object, instead of text.
 Added support for `options.email` in `LX.buildTextPattern`.
@@ -16,7 +18,7 @@ CodeEditor:
 - Fixed some issues reseting cursor position.
 - Fixed cursor horizontal scrolling issues.
 
-## 0.7.12 (master)
+## 0.7.12
 
 Added support column actions in Table Component.
 
