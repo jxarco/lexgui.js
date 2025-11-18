@@ -48,6 +48,8 @@ export enum ComponentType
     RATE         = 41,
 }
 
+LX.ComponentType = ComponentType;
+
 /**
  * @class BaseComponent
  */

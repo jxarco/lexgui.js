@@ -3905,7 +3905,6 @@ export class CodeEditor
                 const tokenIndex = tokens.indexOf( blockCommentsTokens[ 0 ] );
                 const tokenStartIndex = this._currentTokenPositions[ tokenIndex ];
                 section[ 1 ].x = tokenStartIndex;
-                console.log(tokenStartIndex)
                 // Process current line to update new sections
                 this.processLine( lineNumber, false, true );
             }
