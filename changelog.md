@@ -14,6 +14,7 @@ CodeEditor:
 - Support for JS/TS String interpolation highlighting.
 - Fixed Ctrl+Arrow horizontal scroll.
 - Fixed some issues reseting cursor position.
+- Fixed cursor horizontal scrolling issues.
 
 ## 0.7.12 (master)
 

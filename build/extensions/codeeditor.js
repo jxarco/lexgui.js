@@ -2505,7 +2505,7 @@ class CodeEditor
         {
             // Make sure we only keep the main cursor..
             this._removeSecondaryCursors();
-            this.cursorToLine( cursor, ln, true );
+            this.cursorToLine( cursor, ln );
             this.cursorToPosition( cursor, string.length );
         }
 
@@ -4713,43 +4713,55 @@ class CodeEditor
 
     cursorToRight( text, cursor )
     {
-        if( !text ) return;
+        if( !text || !text.length ) return;
 
-        const offset = text.length * this.charWidth;
+        const chars = text.length;
+        const offset = chars * this.charWidth;
+
         cursor._left += offset;
         cursor.style.left = `calc( ${ cursor._left }px + ${ this.xPadding } )`;
-        cursor.position += text.length;
+        cursor.position += chars;
 
         this.restartBlink();
 
         // Add horizontal scroll
+        const rightMargin = this.charWidth;
+        const cursorX = ( cursor.position * this.charWidth );
         const currentScrollLeft = this.getScrollLeft();
-        var viewportSizeX = ( this.codeScroller.clientWidth + currentScrollLeft ) - CodeEditor.LINE_GUTTER_WIDTH; // Gutter offset
-        if( (cursor.position * this.charWidth) >= viewportSizeX )
+        const viewportSizeX = this.codeScroller.clientWidth - CodeEditor.LINE_GUTTER_WIDTH; // Gutter offset
+        const viewportX = viewportSizeX + currentScrollLeft;
+
+        if( cursorX >= ( viewportX - rightMargin ) )
         {
-            this.setScrollLeft( currentScrollLeft + offset );
+            const scroll = Math.max( cursorX - ( viewportSizeX - rightMargin ), 0 );
+            this.setScrollLeft( scroll );
         }
     }
 
     cursorToLeft( text, cursor )
     {
-        if( !text ) return;
+        if( !text || !text.length ) return;
 
-        const offset = text.length * this.charWidth;
+        const chars = text.length;
+        const offset = chars * this.charWidth;
+
         cursor._left -= offset;
         cursor._left = Math.max( cursor._left, 0 );
         cursor.style.left = `calc( ${ cursor._left }px + ${ this.xPadding } )`;
-        cursor.position -= text.length;
+        cursor.position -= chars;
         cursor.position = Math.max( cursor.position, 0 );
+
         this.restartBlink();
 
         // Add horizontal scroll
-
+        const leftMargin = this.charWidth;
+        const cursorX = ( cursor.position * this.charWidth );
         const currentScrollLeft = this.getScrollLeft();
-        var viewportSizeX = currentScrollLeft; // Gutter offset
-        if( ( ( cursor.position - 1 ) * this.charWidth ) < viewportSizeX )
+
+        if( cursorX < ( currentScrollLeft + leftMargin ) )
         {
-            this.setScrollLeft( currentScrollLeft - offset );
+            const scroll = Math.max( cursorX - leftMargin, 0 );
+            this.setScrollLeft( scroll );
         }
     }
 
@@ -4914,16 +4926,16 @@ class CodeEditor
         {
             cursor._left = 0;
             cursor.style.left = "calc(" + this.xPadding + ")";
-            //cursor.style.left = "calc(" + ( -this.getScrollLeft() ) + "px + " + this.xPadding + ")";
             cursor.position = 0;
+            this.setScrollLeft( 0 );
         }
 
         if( flag & CodeEditor.CURSOR_TOP )
         {
             cursor._top = 0;
-            // cursor.style.top = ( -this.getScrollTop() ) + "px";
             cursor.style.top = "0px";
             cursor.line = 0;
+            this.setScrollTop( 0 )
         }
     }
 
@@ -5082,7 +5094,7 @@ class CodeEditor
         LX.doAsync( () => {
             this.codeScroller.scrollLeft = value;
             this.setScrollBarValue( 'horizontal', 0 );
-        }, 20 );
+        }, 10 );
     }
 
     setScrollTop( value )
@@ -5091,7 +5103,7 @@ class CodeEditor
         LX.doAsync( () => {
             this.codeScroller.scrollTop = value;
             this.setScrollBarValue( 'vertical' );
-        }, 20 );
+        }, 10 );
     }
 
     resize( flag = CodeEditor.RESIZE_SCROLLBAR_H_V, pMaxLength, onResize )
