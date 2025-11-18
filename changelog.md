@@ -4,6 +4,10 @@
 
 Fixed Form `options.secondaryActionCallback`.
 
+CodeEditor:
+- Fixed Ctrl+Arrow horizontal scroll.
+- Fixed some issues reseting cursor position.
+
 ## 0.7.12 (master)
 
 Added support column actions in Table Component.

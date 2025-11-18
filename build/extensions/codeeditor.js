@@ -946,8 +946,11 @@ class CodeEditor
                     {
                         this._processSelection( cursor, e );
                     }
-                } else if( !e.keepSelection )
+                }
+                else if( !e.keepSelection )
+                {
                     this.endSelection();
+                }
             });
 
             this.action( 'End', false, ( ln, cursor, e ) => {
@@ -4671,13 +4674,14 @@ class CodeEditor
         this.hideAutoCompleteBox();
     }
 
-    cursorToRight( key, cursor )
+    cursorToRight( text, cursor )
     {
-        if( !key ) return;
+        if( !text ) return;
 
-        cursor._left += this.charWidth;
+        const offset = text.length * this.charWidth;
+        cursor._left += offset;
         cursor.style.left = `calc( ${ cursor._left }px + ${ this.xPadding } )`;
-        cursor.position++;
+        cursor.position += text.length;
 
         this.restartBlink();
 
@@ -4686,18 +4690,19 @@ class CodeEditor
         var viewportSizeX = ( this.codeScroller.clientWidth + currentScrollLeft ) - CodeEditor.LINE_GUTTER_WIDTH; // Gutter offset
         if( (cursor.position * this.charWidth) >= viewportSizeX )
         {
-            this.setScrollLeft( currentScrollLeft + this.charWidth );
+            this.setScrollLeft( currentScrollLeft + offset );
         }
     }
 
-    cursorToLeft( key, cursor )
+    cursorToLeft( text, cursor )
     {
-        if( !key ) return;
+        if( !text ) return;
 
-        cursor._left -= this.charWidth;
+        const offset = text.length * this.charWidth;
+        cursor._left -= offset;
         cursor._left = Math.max( cursor._left, 0 );
         cursor.style.left = `calc( ${ cursor._left }px + ${ this.xPadding } )`;
-        cursor.position--;
+        cursor.position -= text.length;
         cursor.position = Math.max( cursor.position, 0 );
         this.restartBlink();
 
@@ -4707,7 +4712,7 @@ class CodeEditor
         var viewportSizeX = currentScrollLeft; // Gutter offset
         if( ( ( cursor.position - 1 ) * this.charWidth ) < viewportSizeX )
         {
-            this.setScrollLeft( currentScrollLeft - this.charWidth );
+            this.setScrollLeft( currentScrollLeft - offset );
         }
     }
 
@@ -4759,9 +4764,13 @@ class CodeEditor
             return;
         }
 
-        for( let char of text )
+        if( reverse )
         {
-            reverse ? this.cursorToLeft( char, cursor ) : this.cursorToRight( char, cursor );
+            this.cursorToLeft( text, cursor )
+        }
+        else
+        {
+            this.cursorToRight( text, cursor );
         }
     }
 
@@ -4867,14 +4876,16 @@ class CodeEditor
         if( flag & CodeEditor.CURSOR_LEFT )
         {
             cursor._left = 0;
-            cursor.style.left = "calc(" + ( -this.getScrollLeft() ) + "px + " + this.xPadding + ")";
+            cursor.style.left = "calc(" + this.xPadding + ")";
+            //cursor.style.left = "calc(" + ( -this.getScrollLeft() ) + "px + " + this.xPadding + ")";
             cursor.position = 0;
         }
 
         if( flag & CodeEditor.CURSOR_TOP )
         {
             cursor._top = 0;
-            cursor.style.top = ( -this.getScrollTop() ) + "px";
+            // cursor.style.top = ( -this.getScrollTop() ) + "px";
+            cursor.style.top = "0px";
             cursor.line = 0;
         }
     }
