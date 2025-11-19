@@ -4,7 +4,9 @@
 
 CodeEditor:
 - Fixed `charWidth` value when editor font isn't loaded.
+- Fixed autocomplete box position when opened near the window limit.
 - Fixed autocomplete box issue when selecting options using arrows.
+- Improved language detection on copy text.
 
 ## 0.7.13 (master)
 

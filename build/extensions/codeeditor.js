@@ -4551,35 +4551,43 @@ class CodeEditor
         const tokenSet = new Set( this._getTokensFromLine( text, true ) );
         const scores = {};
 
-        for( let [ lang, wordList ] of Object.entries( CodeEditor.keywords ) )
+        // Check strong indicators first
+        const strongIndicators = {
+            "JavaScript": ["import ", "export default", "console.", "=>", "document.", "window."],
+            "TypeScript": ["import ", "export default", "console.", "=>", "document.", "window."],
+            "C++": ["#include", "::", "std::", "template <", "using namespace"],
+            "Python": ["def ", "import ", "print(", "self", "None", "True", "False"],
+            "HTML": ["<html", "<div", "<body", "<script", "<style"],
+            "CSS": ["@media"],
+            "Markdown": ["#", "##", "###", "](", "![", "**"],
+        };
+
+        for( const [ lang, indicators ] of Object.entries( strongIndicators ) )
         {
-            scores[ lang ] = 0;
-            for( let kw of wordList )
-                if( tokenSet.has( kw ) ) scores[ lang ]++;
+            scores[ lang ] = scores[ lang ] ?? 0;
+            for( const key of indicators )
+            {
+                if( text.includes( key ) ) scores[ lang ] += 20;
+            }
         }
 
-        for( let [ lang, wordList ] of Object.entries( CodeEditor.statements ) )
-        {
-            for( let kw of wordList )
-                if( tokenSet.has( kw ) ) scores[ lang ]++;
-        }
+        // Check groups' words now with less importance score
+        const groups = [
+            CodeEditor.keywords,
+            CodeEditor.statements,
+            CodeEditor.utils,
+            CodeEditor.types,
+            CodeEditor.builtIn,
+        ];
 
-        for( let [ lang, wordList ] of Object.entries( CodeEditor.utils ) )
+        for( const group of groups )
         {
-            for( let kw of wordList )
-                if( tokenSet.has( kw ) ) scores[ lang ]++;
-        }
-
-        for( let [ lang, wordList ] of Object.entries( CodeEditor.types ) )
-        {
-            for( let kw of wordList )
-                if( tokenSet.has( kw ) ) scores[ lang ]++;
-        }
-
-        for( let [ lang, wordList ] of Object.entries( CodeEditor.builtIn ) )
-        {
-            for( let kw of wordList )
-                if( tokenSet.has( kw ) ) scores[ lang ]++;
+            for( let [ lang, wordList ] of Object.entries( group ) )
+            {
+                scores[ lang ] = scores[ lang ] ?? 0;
+                for( let kw of wordList )
+                    if( tokenSet.has( kw ) ) scores[ lang ]++;
+            }
         }
 
         const sorted = Object.entries( scores ).sort( ( a, b ) => b[ 1 ] - a[ 1 ] );
@@ -6117,7 +6125,7 @@ CodeEditor.builtIn =
 
 CodeEditor.statements =
 {
-    'JavaScript': ['for', 'if', 'else', 'case', 'switch', 'return', 'while', 'continue', 'break', 'do', 'import', 'from', 'throw', 'async', 'try', 'catch', 'await'],
+    'JavaScript': ['for', 'if', 'else', 'case', 'switch', 'return', 'while', 'continue', 'break', 'do', 'import', 'from', 'throw', 'async', 'try', 'catch', 'await', 'as'],
     'TypeScript': ['for', 'if', 'else', 'case', 'switch', 'return', 'while', 'continue', 'break', 'do', 'import', 'from', 'throw', 'async', 'try', 'catch', 'await', 'as'],
     'CSS': ['@', 'import'],
     'C': ['for', 'if', 'else', 'return', 'continue', 'break', 'case', 'switch', 'while', 'using', 'default', 'goto', 'do'],
