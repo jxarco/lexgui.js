@@ -356,6 +356,7 @@ class CodeEditor
         this.highlight = options.highlight ?? 'Plain Text';
         this.newTabOptions = options.newTabOptions;
         this.customSuggestions = options.customSuggestions ?? [];
+        this.explorerName = options.explorerName ?? "EXPLORER";
 
         // Editor callbacks
         this.onSave = options.onSave ?? options.onsave;  // LEGACY onsave
@@ -375,45 +376,43 @@ class CodeEditor
 
             let panel = new LX.Panel();
 
-            panel.addTitle( options.explorerName ?? "EXPLORER" );
+            panel.addTitle( this.explorerName );
 
-            let sceneData = {
-                'id': 'WORKSPACE',
-                'skipVisibility': true,
-                'children': []
-            };
+            let sceneData = [];
 
             this.explorer = panel.addTree( null, sceneData, {
                 filter: false,
                 rename: false,
                 skipDefaultIcon: true,
-                onevent: (event) => {
-                    switch(event.type) {
-                        // case LX.TreeEvent.NODE_SELECTED:
-                        //     if( !this.tabs.tabDOMs[ event.node.id ] ) break;
-                        case LX.TreeEvent.NODE_DBLCLICKED:
-                            this.loadTab( event.node.id );
-                            break;
-                        case LX.TreeEvent.NODE_DELETED:
-                            this.closeTab( event.node.id );
-                            break;
-                        // case LX.TreeEvent.NODE_CONTEXTMENU:
-                        //     LX.addContextMenu( event.multiple ? "Selected Nodes" : event.node.id, event.value, m => {
-                        //
-                        //     });
-                        //     break;
-                        // case LX.TreeEvent.NODE_DRAGGED:
-                        //     console.log(event.node.id + " is now child of " + event.value.id);
-                        //     break;
+                onevent: (event) =>
+                {
+                    switch( event.type )
+                    {
+                    // case LX.TreeEvent.NODE_SELECTED:
+                    //     if( !this.tabs.tabDOMs[ event.node.id ] ) break;
+                    case LX.TreeEvent.NODE_DBLCLICKED:
+                        this.loadTab( event.node.id );
+                        break;
+                    case LX.TreeEvent.NODE_DELETED:
+                        this.closeTab( event.node.id );
+                        break;
+                    // case LX.TreeEvent.NODE_CONTEXTMENU:
+                    //     LX.addContextMenu( event.multiple ? "Selected Nodes" : event.node.id, event.value, m => {
+                    //
+                    //     });
+                    //     break;
+                    // case LX.TreeEvent.NODE_DRAGGED:
+                    //     console.log(event.node.id + " is now child of " + event.value.id);
+                    //     break;
                     }
                 }
             });
 
             this.addExplorerItem = function( item )
             {
-                if( !this.explorer.innerTree.data.children.find( ( value, index ) => value.id === item.id ) )
+                if( !this.explorer.innerTree.data.find( ( value, index ) => value.id === item.id ) )
                 {
-                    this.explorer.innerTree.data.children.push( item );
+                    this.explorer.innerTree.data.push( item );
                 }
             };
 
@@ -1731,7 +1730,7 @@ class CodeEditor
         // Update explorer icon
         if( this.useFileExplorer )
         {
-            const item = this.explorer.innerTree.data.children.filter( (v) => v.id === this.code.tabName )[ 0 ];
+            const item = this.explorer.innerTree.data.filter( (v) => v.id === this.code.tabName )[ 0 ];
             console.assert( item != undefined );
             item.icon = icon;
             this.explorer.innerTree.frefresh( this.code.tabName );
@@ -2083,7 +2082,7 @@ class CodeEditor
         });
         code.addEventListener( 'dragleave', function(e) {
             e.preventDefault();
-            this.parentElement.remove( 'dragging' );
+            this.parentElement.classList.remove( 'dragging' );
         });
         code.addEventListener( 'drop', e => {
             e.preventDefault();
@@ -6089,9 +6088,9 @@ CodeEditor.declarationKeywords =
 CodeEditor.keywords =
 {
     'JavaScript': ['var', 'let', 'const', 'this', 'in', 'of', 'true', 'false', 'new', 'function', 'NaN', 'static', 'class', 'constructor', 'null', 'typeof', 'debugger', 'abstract',
-                  'arguments', 'extends', 'instanceof', 'Infinity'],
+                  'arguments', 'extends', 'instanceof', 'Infinity', 'get'],
     'TypeScript': ['var', 'let', 'const', 'this', 'in', 'of', 'true', 'false', 'new', 'function', 'class', 'extends', 'instanceof', 'Infinity', 'private', 'public', 'protected', 'interface',
-                  'enum', 'type'],
+                  'enum', 'type', 'get'],
     'C': ['int', 'float', 'double', 'long', 'short', 'char', 'const', 'void', 'true', 'false', 'auto', 'struct', 'typedef', 'signed', 'volatile', 'unsigned', 'static', 'extern', 'enum', 'register',
         'union'],
     'C++': [...CodeEditor.nativeTypes["C++"], 'const', 'static_cast', 'dynamic_cast', 'new', 'delete', 'true', 'false', 'auto', 'class', 'struct', 'typedef', 'nullptr',
@@ -6141,7 +6140,8 @@ CodeEditor.types =
     'JavaScript': ['Object', 'String', 'Function', 'Boolean', 'Symbol', 'Error', 'Number', 'TextEncoder', 'TextDecoder', 'Array', 'ArrayBuffer', 'InputEvent', 'MouseEvent',
                    'Int8Array', 'Int16Array', 'Int32Array', 'Float32Array', 'Float64Array', 'Element'],
     'TypeScript': ['arguments', 'constructor', 'null', 'typeof', 'debugger', 'abstract', 'Object', 'string', 'String', 'Function', 'Boolean', 'boolean', 'Error', 'Number', 'number', 'TextEncoder',
-                  'TextDecoder', 'Array', 'ArrayBuffer', 'InputEvent', 'MouseEvent', 'Int8Array', 'Int16Array', 'Int32Array', 'Float32Array', 'Float64Array', 'Element'],
+                  'TextDecoder', 'Array', 'ArrayBuffer', 'InputEvent', 'MouseEvent', 'Int8Array', 'Int16Array', 'Int32Array', 'Float32Array', 'Float64Array', 'Element', 'bigint', 'unknown', 'any',
+                  'Record'],
     'Rust': ['u128'],
     'Python': ['int', 'type', 'float', 'map', 'list', 'ArithmeticError', 'AssertionError', 'AttributeError', 'Exception', 'EOFError', 'FloatingPointError', 'GeneratorExit',
               'ImportError', 'IndentationError', 'IndexError', 'KeyError', 'KeyboardInterrupt', 'LookupError', 'MemoryError', 'NameError', 'NotImplementedError', 'OSError',
@@ -6164,8 +6164,8 @@ CodeEditor.builtIn =
 
 CodeEditor.statements =
 {
-    'JavaScript': ['for', 'if', 'else', 'case', 'switch', 'return', 'while', 'continue', 'break', 'do', 'import', 'from', 'throw', 'async', 'try', 'catch', 'await', 'as'],
-    'TypeScript': ['for', 'if', 'else', 'case', 'switch', 'return', 'while', 'continue', 'break', 'do', 'import', 'from', 'throw', 'async', 'try', 'catch', 'await', 'as'],
+    'JavaScript': ['for', 'if', 'else', 'case', 'switch', 'return', 'while', 'continue', 'break', 'do', 'import', 'default', 'export', 'from', 'throw', 'async', 'try', 'catch', 'await', 'as'],
+    'TypeScript': ['for', 'if', 'else', 'case', 'switch', 'return', 'while', 'continue', 'break', 'do', 'import', 'default', 'export', 'from', 'throw', 'async', 'try', 'catch', 'await', 'as'],
     'CSS': ['@', 'import'],
     'C': ['for', 'if', 'else', 'return', 'continue', 'break', 'case', 'switch', 'while', 'using', 'default', 'goto', 'do'],
     'C++': ['std', 'for', 'if', 'else', 'return', 'continue', 'break', 'case', 'switch', 'while', 'using', 'glm', 'spdlog', 'default'],
