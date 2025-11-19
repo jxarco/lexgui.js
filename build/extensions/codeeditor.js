@@ -2910,33 +2910,19 @@ class CodeEditor
                 }
             }
         }
-
         else if( e.altKey )
         {
-            switch( key ) {
-                case 'd': // duplicate line
+            switch( key )
+            {
+            case 'd': // duplicate line
                 e.preventDefault();
                 this._duplicateLine( lidx, cursor );
                 return;
-                case 'ArrowUp':
-                if(this.code.lines[ lidx - 1 ] == undefined)
-                    return;
-                this._addUndoStep( cursor, true );
-                swapArrayElements( this.code.lines, lidx - 1, lidx );
-                this.lineUp( cursor );
-                this.processLine( lidx - 1 );
-                this.processLine( lidx );
-                this.hideAutoCompleteBox();
+            case 'ArrowUp':
+                this.swapLines( lidx, -1, cursor );
                 return;
             case 'ArrowDown':
-                if(this.code.lines[ lidx + 1 ] == undefined)
-                    return;
-                this._addUndoStep( cursor, true );
-                swapArrayElements( this.code.lines, lidx, lidx + 1 );
-                this.lineDown( cursor );
-                this.processLine( lidx );
-                this.processLine( lidx + 1 );
-                this.hideAutoCompleteBox();
+                this.swapLines( lidx, 1, cursor );
                 return;
             }
         }
@@ -4612,6 +4598,33 @@ class CodeEditor
         this.cursorToBottom( cursor, resetLeft );
 
         return true;
+    }
+
+    swapLines( lidx, offset, cursor )
+    {
+        if( this.code.lines[ lidx + offset ] == undefined )
+        {
+            return;
+        }
+
+        this._addUndoStep( cursor, true );
+
+        swapArrayElements( this.code.lines, lidx + offset, lidx );
+
+        // Process both lines
+        this.processLine( lidx + offset );
+        this.processLine( lidx );
+
+        if( offset > 0 )
+        {
+            this.lineDown( cursor );
+        }
+        else
+        {
+            this.lineUp( cursor );
+        }
+
+        this.hideAutoCompleteBox();
     }
 
     restartBlink()
