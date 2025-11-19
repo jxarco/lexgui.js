@@ -910,7 +910,7 @@ class CodeEditor
                 const prestring = this.code.lines[ ln ].substring( 0, idx );
                 let lastX = cursor.position;
 
-                this.resetCursorPos( CodeEditor.CURSOR_LEFT, cursor );
+                this.resetCursorPos( CodeEditor.CURSOR_LEFT, cursor, true );
                 if( idx > 0 )
                 {
                     this.cursorToString( cursor, prestring );
@@ -921,7 +921,6 @@ class CodeEditor
                     idx = 0;
                 }
 
-                this.setScrollLeft( 0 );
                 this.mergeCursors( ln );
 
                 if( e.shiftKey && !e.cancelShift )
@@ -953,10 +952,10 @@ class CodeEditor
                 }
             });
 
-            this.action( 'End', false, ( ln, cursor, e ) => {
-
-                if( ( e.shiftKey || e._shiftKey ) && !e.cancelShift ) {
-
+            this.action( 'End', false, ( ln, cursor, e ) =>
+            {
+                if( ( e.shiftKey || e._shiftKey ) && !e.cancelShift )
+                {
                     var string = this.code.lines[ ln ].substring( cursor.position );
                     if( !cursor.selection )
                         this.startSelection( cursor );
@@ -1075,11 +1074,14 @@ class CodeEditor
                     const letter = this.getCharAtPos( cursor );
 
                     // Go to end of line if out of range
-                    if( !letter || !canGoDown ) {
-                        this.cursorToPosition( cursor, Math.max(this.code.lines[ cursor.line ].length, 0) );
+                    if( !letter || !canGoDown )
+                    {
+                        this.resetCursorPos( CodeEditor.CURSOR_LEFT, cursor );
+                        this.cursorToRight( this.code.lines[ cursor.line ], cursor );
                     }
 
-                    if( e.shiftKey ) {
+                    if( e.shiftKey )
+                    {
                         this._processSelection( cursor, e );
                     }
                 }
@@ -1145,8 +1147,8 @@ class CodeEditor
                             else {
                                 cursor.selection.invertIfNecessary();
                                 this.resetCursorPos( CodeEditor.CURSOR_LEFT_TOP, cursor );
-                                this.cursorToLine( cursor, cursor.selection.fromY, true );
-                                this.cursorToPosition( cursor, cursor.selection.fromX );
+                                this.cursorToLine( cursor, cursor.selection.fromY );
+                                this.cursorToPosition( cursor, cursor.selection.fromX, true );
                                 this.endSelection();
                             }
                         }
@@ -1228,7 +1230,7 @@ class CodeEditor
                                 cursor.selection.invertIfNecessary();
                                 this.resetCursorPos( CodeEditor.CURSOR_LEFT_TOP, cursor );
                                 this.cursorToLine( cursor, cursor.selection.toY );
-                                this.cursorToPosition( cursor, cursor.selection.toX );
+                                this.cursorToPosition( cursor, cursor.selection.toX, true );
                                 this.endSelection( cursor );
                             }
                         }
@@ -1259,7 +1261,7 @@ class CodeEditor
         this.loadedTabs = { };
         this.openedTabs = { };
 
-        const onLoadAll = () =>
+        const onLoadAll = async () =>
         {
             // Create inspector panel when the initial state is complete
             // and we have at least 1 tab opened
@@ -1269,52 +1271,46 @@ class CodeEditor
                 area.attach( this.statusPanel );
             }
 
-            // Wait until the fonts are all loaded
-            document.fonts.onloadingdone = ( e ) =>
+            if( document.fonts.status == "loading" )
             {
-                // Wait for the Code font to load
-                const fontface = e.fontfaces[ 0 ];
-                if( fontface?.family !== "CascadiaCode" )
-                {
-                    return;
-                }
+                await document.fonts.ready;
+            }
 
-                // Load any font size from local storage
-                const savedFontSize = window.localStorage.getItem( "lexcodeeditor-font-size" );
-                if( savedFontSize )
-                {
-                    this._setFontSize( parseInt( savedFontSize ) );
-                }
-                else // Use default size
-                {
-                    const r = document.querySelector( ':root' );
-                    const s = getComputedStyle( r );
-                    this.fontSize = parseInt( s.getPropertyValue( "--code-editor-font-size" ) );
-                    this.charWidth = this._measureChar();
-                    this.processLines();
-                }
+            // Load any font size from local storage
+            const savedFontSize = window.localStorage.getItem( "lexcodeeditor-font-size" );
+            if( savedFontSize )
+            {
+                this._setFontSize( parseInt( savedFontSize ) );
+            }
+            else // Use default size
+            {
+                const r = document.querySelector( ':root' );
+                const s = getComputedStyle( r );
+                this.fontSize = parseInt( s.getPropertyValue( "--code-editor-font-size" ) );
+                this.charWidth = this._measureChar();
+                this.processLines();
+            }
 
-                LX.emit( "@font-size", this.fontSize );
+            LX.emit( "@font-size", this.fontSize );
 
-                // Get final sizes for editor elements based on Tabs and status bar offsets
-                LX.doAsync( () => {
-                    this._verticalTopOffset = this.tabs?.root.getBoundingClientRect().height ?? 0;
-                    this._verticalBottomOffset = this.statusPanel?.root.getBoundingClientRect().height ?? 0;
-                    this._fullVerticalOffset = this._verticalTopOffset + this._verticalBottomOffset;
+            // Get final sizes for editor elements based on Tabs and status bar offsets
+            LX.doAsync( () => {
+                this._verticalTopOffset = this.tabs?.root.getBoundingClientRect().height ?? 0;
+                this._verticalBottomOffset = this.statusPanel?.root.getBoundingClientRect().height ?? 0;
+                this._fullVerticalOffset = this._verticalTopOffset + this._verticalBottomOffset;
 
-                    this.gutter.style.marginTop = `${ this._verticalTopOffset }px`;
-                    this.gutter.style.height = `calc(100% - ${ this._fullVerticalOffset }px)`;
-                    this.vScrollbar.root.style.marginTop = `${ this._verticalTopOffset }px`;
-                    this.vScrollbar.root.style.height = `calc(100% - ${ this._fullVerticalOffset }px)`;
-                    this.hScrollbar.root.style.bottom = `${ this._verticalBottomOffset }px`;
-                    this.codeArea.root.style.height = `calc(100% - ${ this._fullVerticalOffset }px)`;
-                }, 50 );
+                this.gutter.style.marginTop = `${ this._verticalTopOffset }px`;
+                this.gutter.style.height = `calc(100% - ${ this._fullVerticalOffset }px)`;
+                this.vScrollbar.root.style.marginTop = `${ this._verticalTopOffset }px`;
+                this.vScrollbar.root.style.height = `calc(100% - ${ this._fullVerticalOffset }px)`;
+                this.hScrollbar.root.style.bottom = `${ this._verticalBottomOffset }px`;
+                this.codeArea.root.style.height = `calc(100% - ${ this._fullVerticalOffset }px)`;
+            }, 50 );
 
-                if( options.callback )
-                {
-                    options.callback.call( this, this );
-                }
-            };
+            if( options.callback )
+            {
+                options.callback.call( this, this );
+            }
 
             window.editor = this;
         };
@@ -1411,7 +1407,7 @@ class CodeEditor
         let lastLine = newLines.pop();
 
         this.cursorToLine( cursor, newLines.length ); // Already substracted 1
-        this.cursorToPosition( cursor, lastLine.length );
+        this.cursorToPosition( cursor, lastLine.length, true );
 
         this.mustProcessLines = true;
 
@@ -2145,7 +2141,7 @@ class CodeEditor
 
         if( selected )
         {
-            this.resetCursorPos( CodeEditor.CURSOR_LEFT_TOP );
+            this.resetCursorPos( CodeEditor.CURSOR_LEFT_TOP, undefined, true );
             this.mustProcessLines = true;
         }
         else
@@ -2213,7 +2209,7 @@ class CodeEditor
         this.code = code;
         this.mustProcessLines = true;
 
-        this.resetCursorPos( CodeEditor.CURSOR_LEFT_TOP );
+        this.resetCursorPos( CodeEditor.CURSOR_LEFT_TOP, undefined, true );
         this.processLines();
         this._changeLanguageFromExtension( LX.getExtension( name ) );
         this._processLinesIfNecessary();
@@ -2280,7 +2276,7 @@ class CodeEditor
 
         // Select as current...
         this.code = code;
-        this.resetCursorPos( CodeEditor.CURSOR_LEFT_TOP );
+        this.resetCursorPos( CodeEditor.CURSOR_LEFT_TOP, undefined, true );
         this.processLines();
         this._changeLanguageFromExtension( LX.getExtension( name ) );
         this._updateDataInfoPanel( "@tab-name", code.tabName );
@@ -2400,7 +2396,7 @@ class CodeEditor
                 case LX.MOUSE_TRIPLE_CLICK:
                     this.resetCursorPos( CodeEditor.CURSOR_LEFT, cursor );
                     e._shiftKey = true;
-                    this.actions['End'].callback(cursor.line, cursor, e);
+                    this.actions['End'].callback( cursor.line, cursor, e );
                     this._tripleClickSelection = true;
                     break;
             }
@@ -4712,7 +4708,7 @@ class CodeEditor
         this._removeSecondaryCursors();
 
         var cursor = this.getCurrentCursor();
-        this.resetCursorPos( CodeEditor.CURSOR_LEFT_TOP, cursor );
+        this.resetCursorPos( CodeEditor.CURSOR_LEFT_TOP, cursor, true );
 
         this.startSelection( cursor );
 
@@ -4741,18 +4737,7 @@ class CodeEditor
 
         this.restartBlink();
 
-        // Add horizontal scroll
-        const rightMargin = this.charWidth;
-        const cursorX = ( cursor.position * this.charWidth );
-        const currentScrollLeft = this.getScrollLeft();
-        const viewportSizeX = this.codeScroller.clientWidth - CodeEditor.LINE_GUTTER_WIDTH; // Gutter offset
-        const viewportX = viewportSizeX + currentScrollLeft;
-
-        if( cursorX >= ( viewportX - rightMargin ) )
-        {
-            const scroll = Math.max( cursorX - ( viewportSizeX - rightMargin ), 0 );
-            this.setScrollLeft( scroll );
-        }
+        this.updateScrollLeft( cursor );
     }
 
     cursorToLeft( text, cursor )
@@ -4770,15 +4755,18 @@ class CodeEditor
 
         this.restartBlink();
 
-        // Add horizontal scroll
-        const leftMargin = this.charWidth;
-        const cursorX = ( cursor.position * this.charWidth );
-        const currentScrollLeft = this.getScrollLeft();
-
-        if( cursorX < ( currentScrollLeft + leftMargin ) )
+        // Check if we need to add scroll; if not then we might have to reduce it
+        if( !this.updateScrollLeft( cursor ) )
         {
-            const scroll = Math.max( cursorX - leftMargin, 0 );
-            this.setScrollLeft( scroll );
+            const leftMargin = this.charWidth;
+            const cursorX = ( cursor.position * this.charWidth );
+            const currentScrollLeft = this.getScrollLeft();
+    
+            if( cursorX < ( currentScrollLeft + leftMargin ) )
+            {
+                const scroll = Math.max( cursorX - leftMargin, 0 );
+                this.setScrollLeft( scroll );
+            }
         }
     }
 
@@ -4791,7 +4779,7 @@ class CodeEditor
 
         if( resetLeft )
         {
-            this.resetCursorPos( CodeEditor.CURSOR_LEFT, cursor );
+            this.resetCursorPos( CodeEditor.CURSOR_LEFT, cursor, true );
         }
 
         const currentScrollTop = this.getScrollTop();
@@ -4811,7 +4799,7 @@ class CodeEditor
 
         if( resetLeft )
         {
-            this.resetCursorPos( CodeEditor.CURSOR_LEFT, cursor );
+            this.resetCursorPos( CodeEditor.CURSOR_LEFT, cursor, true );
         }
 
         const currentScrollTop = this.getScrollTop();
@@ -4840,11 +4828,16 @@ class CodeEditor
         }
     }
 
-    cursorToPosition( cursor, position )
+    cursorToPosition( cursor, position, updateScroll = false )
     {
         cursor.position = position;
         cursor._left = position * this.charWidth;
         cursor.style.left = `calc( ${ cursor._left }px + ${ this.xPadding } )`;
+
+        if( updateScroll )
+        {
+            this.updateScrollLeft( cursor );
+        }
     }
 
     cursorToLine( cursor, line, resetLeft = false )
@@ -4935,7 +4928,7 @@ class CodeEditor
         LX.deleteElement( cursor );
     }
 
-    resetCursorPos( flag, cursor )
+    resetCursorPos( flag, cursor, resetScroll = false )
     {
         cursor = cursor ?? this.getCurrentCursor();
 
@@ -4944,7 +4937,11 @@ class CodeEditor
             cursor._left = 0;
             cursor.style.left = "calc(" + this.xPadding + ")";
             cursor.position = 0;
-            this.setScrollLeft( 0 );
+
+            if( resetScroll )
+            {
+                this.setScrollLeft( 0 );
+            }
         }
 
         if( flag & CodeEditor.CURSOR_TOP )
@@ -4952,7 +4949,11 @@ class CodeEditor
             cursor._top = 0;
             cursor.style.top = "0px";
             cursor.line = 0;
-            this.setScrollTop( 0 )
+
+            if( resetScroll )
+            {
+                this.setScrollTop( 0 );
+            }
         }
     }
 
@@ -5093,6 +5094,24 @@ class CodeEditor
         }
     }
 
+    updateScrollLeft( cursor )
+    {
+        cursor = cursor ?? this.getCurrentCursor();
+
+        const rightMargin = this.charWidth;
+        const cursorX = ( cursor.position * this.charWidth );
+        const currentScrollLeft = this.getScrollLeft();
+        const viewportSizeX = this.codeScroller.clientWidth - CodeEditor.LINE_GUTTER_WIDTH; // Gutter offset
+        const viewportX = viewportSizeX + currentScrollLeft;
+
+        if( cursorX >= ( viewportX - rightMargin ) )
+        {
+            const scroll = Math.max( cursorX - ( viewportSizeX - rightMargin ), 0 );
+            this.setScrollLeft( scroll );
+            return true;
+        }
+    }
+
     getScrollLeft()
     {
         if( !this.codeScroller ) return 0;
@@ -5207,14 +5226,16 @@ class CodeEditor
     {
         if( type == 'vertical' )
         {
-            const scrollBarHeight = this.vScrollbar.thumb.parentElement.offsetHeight;
-            const scrollThumbHeight = this.vScrollbar.thumb.offsetHeight;
-
             const scrollHeight = this.codeScroller.scrollHeight - this.codeScroller.clientHeight;
-            const currentScroll = this.codeScroller.scrollTop;
 
-            this.vScrollbar.thumb._top = ( currentScroll / scrollHeight ) * ( scrollBarHeight - scrollThumbHeight );
-            this.vScrollbar.thumb.style.top = this.vScrollbar.thumb._top + "px";
+            if( scrollHeight > 0 )
+            {
+                const scrollBarHeight = this.vScrollbar.thumb.parentElement.offsetHeight;
+                const scrollThumbHeight = this.vScrollbar.thumb.offsetHeight;
+                const currentScroll = this.codeScroller.scrollTop;
+                this.vScrollbar.thumb._top = ( currentScroll / scrollHeight ) * ( scrollBarHeight - scrollThumbHeight );
+                this.vScrollbar.thumb.style.top = this.vScrollbar.thumb._top + "px";
+            }
         }
         else
         {
@@ -5223,14 +5244,16 @@ class CodeEditor
                 this.codeScroller.scrollLeft += value;
             }
 
-            const scrollBarWidth = this.hScrollbar.thumb.parentElement.offsetWidth;
-            const scrollThumbWidth = this.hScrollbar.thumb.offsetWidth;
-
+            // Only when scroll is needed
             const scrollWidth = this.codeScroller.scrollWidth - this.codeScroller.clientWidth;
-            const currentScroll = this.codeScroller.scrollLeft;
-
-            this.hScrollbar.thumb._left = ( currentScroll / scrollWidth ) * ( scrollBarWidth - scrollThumbWidth );
-            this.hScrollbar.thumb.style.left = this.hScrollbar.thumb._left + "px";
+            if( scrollWidth > 0 )
+            {
+                const scrollBarWidth = this.hScrollbar.thumb.parentElement.offsetWidth;
+                const scrollThumbWidth = this.hScrollbar.thumb.offsetWidth;
+                const currentScroll = this.codeScroller.scrollLeft;
+                this.hScrollbar.thumb._left = ( currentScroll / scrollWidth ) * ( scrollBarWidth - scrollThumbWidth );
+                this.hScrollbar.thumb.style.left = this.hScrollbar.thumb._left + "px";
+            }
         }
     }
 
@@ -5251,7 +5274,6 @@ class CodeEditor
         const scrollWidth = this.codeScroller.scrollWidth - this.codeScroller.clientWidth;
         const currentScroll = (this.hScrollbar.thumb._left * scrollWidth) / ( scrollBarWidth - scrollThumbWidth );
         this.codeScroller.scrollLeft = currentScroll;
-
 
         this._discardScroll = true;
     }
