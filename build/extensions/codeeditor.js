@@ -2254,6 +2254,9 @@ class CodeEditor
             return;
         }
 
+        // Reset visibility
+        code.style.display = "block";
+
         this.openedTabs[ name ] = code;
 
         const isNewTabButton = ( name === '+' );
@@ -2277,9 +2280,10 @@ class CodeEditor
         // Select as current...
         this.code = code;
         this.resetCursorPos( CodeEditor.CURSOR_LEFT_TOP, undefined, true );
-        this.processLines();
         this._changeLanguageFromExtension( LX.getExtension( name ) );
         this._updateDataInfoPanel( "@tab-name", code.tabName );
+
+        this.processLines();
     }
 
     closeTab( name, eraseAll )
