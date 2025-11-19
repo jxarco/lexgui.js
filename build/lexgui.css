@@ -5311,7 +5311,7 @@ ul.lexassetscontent {
 .lexcodeeditor .autocomplete {
     background-color: var(--global-medium-background);
     width: 256px;
-    max-height: 128px;
+    max-height: 132px;
     position: absolute;
     left: 0;
     top: 0;
@@ -5320,6 +5320,7 @@ ul.lexassetscontent {
     border-radius: 4px;
     border: 1px solid var(--global-color-tertiary);
     box-shadow: 0 0px 4px #101010;
+    overflow-x: hidden;
     overflow-y: scroll;
 }
 

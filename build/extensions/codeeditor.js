@@ -1821,7 +1821,8 @@ class CodeEditor
                 for( const lang of Object.keys( CodeEditor.languages ) )
                 {
                     m.add( lang, v => {
-                        this._changeLanguage( v, null, true )
+                        this._changeLanguage( v, null, true );
+                        this.processLines();
                     } );
                 }
             });
@@ -5508,14 +5509,16 @@ class CodeEditor
             return;
         }
 
+        const maxX = this.codeScroller.clientWidth - 256; // Viewport - box width
+
         // Select always first option
         this.autocomplete.firstChild.classList.add( 'selected' );
 
         // Show box
         this.autocomplete.classList.toggle( 'show', true );
         this.autocomplete.classList.toggle( 'no-scrollbar', !( this.autocomplete.scrollHeight > this.autocomplete.offsetHeight ) );
-        this.autocomplete.style.left = (cursor._left + CodeEditor.LINE_GUTTER_WIDTH - this.getScrollLeft()) + "px";
-        this.autocomplete.style.top = (cursor._top + 28 + this.lineHeight - this.getScrollTop()) + "px";
+        this.autocomplete.style.left = `${ Math.min( cursor._left + CodeEditor.LINE_GUTTER_WIDTH - this.getScrollLeft(), maxX ) }px`;
+        this.autocomplete.style.top = `${ ( cursor._top + this._verticalTopOffset + this.lineHeight - this.getScrollTop() ) }px`;
 
         this.isAutoCompleteActive = true;
     }
@@ -5596,21 +5599,33 @@ class CodeEditor
 
         const [ word, idx ] = this._getSelectedAutoComplete();
         const offset = dir == 'down' ? 1 : -1;
+        const fIdx = idx + offset;
+
+        const autocompleteRowHeight = 22;
+        const autocompleteHeight = 132;
 
         if( dir == 'down' )
         {
-            if( ( idx + offset ) >= this.autocomplete.childElementCount ) return;
+            if( fIdx >= this.autocomplete.childElementCount ) return;
+
+            if( ( ( idx + offset * 2 ) * autocompleteRowHeight ) - this.autocomplete.scrollTop > autocompleteHeight )
+            {
+                this.autocomplete.scrollTop += autocompleteRowHeight;
+            }
         }
         else if( dir == 'up')
         {
-            if( ( idx + offset ) < 0 ) return;
+            if( fIdx < 0 ) return;
+
+            if( ( fIdx * autocompleteRowHeight ) < this.autocomplete.scrollTop )
+            {
+                this.autocomplete.scrollTop -= autocompleteRowHeight;
+            }
         }
 
-        this.autocomplete.scrollTop += offset * 20;
-
         // Remove selected from the current word and add it to the next one
-        this.autocomplete.childNodes[ idx ].classList.remove('selected');
-        this.autocomplete.childNodes[ idx + offset ].classList.add('selected');
+        this.autocomplete.childNodes[ idx ].classList.remove( 'selected' );
+        this.autocomplete.childNodes[ idx + offset ].classList.add( 'selected' );
     }
 
     showSearchBox( clear )
