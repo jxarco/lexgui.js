@@ -3,13 +3,15 @@
 ## dev
 
 CodeEditor:
+- Added support for add/remove multi-line indentation.
+- Improved language detection on copy text.
+- Few more keywords added to JS and TS highlighting.
 - Fixed `charWidth` value when editor font isn't loaded.
 - Fixed autocomplete box position when opened near the window limit.
 - Fixed autocomplete box issue when selecting options using arrows.
-- Improved language detection on copy text.
 - Fixed issue loading files using drag&drop.
 - Fixed tab visibility bug when using explorer mode.
-- Few more keywords added to JS and TS highlighting.
+- Fixed line swap minor setting incorrect active line.
 
 ## 0.7.13 (master)
 

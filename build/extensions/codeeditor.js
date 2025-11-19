@@ -904,11 +904,13 @@ class CodeEditor
                     }
                     else
                     {
-                        const indentSpaces = this.tabSpaces - (cursor.position % this.tabSpaces);
-                        this._addSpaces( indentSpaces );
+                        const indentSpaces = this.tabSpaces - ( cursor.position % this.tabSpaces );
+                        this._addSpaces( cursor, indentSpaces );
                     }
                 }
-            }, "shiftKey");
+            }, ( cursor, e ) => {
+                return e.shiftKey || ( cursor.selection && !cursor.selection.sameLine() );
+            });
 
             this.action( 'Home', false, ( ln, cursor, e ) => {
 
@@ -2892,6 +2894,7 @@ class CodeEditor
     async _processKeyAtCursor( e, key, cursor )
     {
         const skipUndo = e.detail.skipUndo ?? false;
+        const skipDeleteSelection = e.detail.skipDeleteSelection ?? false;
 
         // keys with length > 1 are probably special keys
         if( key.length > 1 && this.specialKeys.indexOf( key ) == -1 )
@@ -2956,7 +2959,9 @@ class CodeEditor
             e.preventDefault();
 
             if( this._actionMustDelete( cursor, this.actions[ key ], e ) )
+            {
                 this.actions['Backspace'].callback( lidx, cursor, e );
+            }
 
             return this.actions[ key ].callback( lidx, cursor, e );
         }
@@ -2984,7 +2989,7 @@ class CodeEditor
         // Until this point, if there was a selection, we need
         // to delete the content..
 
-        if( cursor.selection )
+        if( cursor.selection && !skipDeleteSelection )
         {
             this.actions['Backspace'].callback( lidx, cursor, e );
             lidx = cursor.line;
@@ -3318,20 +3323,20 @@ class CodeEditor
         }
     }
 
-    action( key, deleteSelection, fn, eventSkipDelete )
+    action( key, deleteSelection, fn, eventSkipDeleteFn )
     {
         this.actions[ key ] = {
             "key": key,
             "callback": fn,
             "deleteSelection": deleteSelection,
-            "eventSkipDelete": eventSkipDelete
+            "eventSkipDeleteFn": eventSkipDeleteFn
         };
     }
 
     _actionMustDelete( cursor, action, e )
     {
         return cursor.selection && action.deleteSelection &&
-            ( action.eventSkipDelete ? !e[ action.eventSkipDelete ] : true );
+            !( action.eventSkipDeleteFn ? action.eventSkipDeleteFn( cursor, e ) : false );
     }
 
     scanWordSuggestions()
@@ -5074,8 +5079,56 @@ class CodeEditor
         }
     }
 
-    _addSpaces( n )
+    _addSpaces( cursor, n )
     {
+        if( cursor.selection && !cursor.selection.sameLine() )
+        {
+            cursor.selection.invertIfNecessary();
+
+            for( let lidx = cursor.selection.fromY; lidx <= cursor.selection.toY; ++lidx )
+            {
+                // Remove indentation
+                let lineStart = firstNonspaceIndex( this.code.lines[ lidx ] );
+
+                // Only tabs/spaces in the line...
+                if( lineStart == -1 )
+                {
+                    lineStart = this.code.lines[ lidx ].length;
+                }
+
+                let indentSpaces = lineStart % this.tabSpaces;
+                indentSpaces = indentSpaces == 0 ? this.tabSpaces : this.tabSpaces - indentSpaces;
+
+                const spacesString = " ".repeat( indentSpaces );
+
+                this.code.lines[ lidx ] = [
+                    this.code.lines[ lidx ].slice( 0, lineStart ),
+                    spacesString,
+                    this.code.lines[ lidx ].slice( lineStart )
+                ].join('');
+
+                this.processLine( lidx );
+
+                if( cursor.line === lidx )
+                {
+                    this.cursorToString( cursor, spacesString );
+                }
+
+                if( cursor.selection.fromY === lidx )
+                {
+                    cursor.selection.fromX = Math.max( cursor.selection.fromX + indentSpaces, 0 );
+                }
+                if( cursor.selection.toY === lidx )
+                {
+                    cursor.selection.toX = Math.max( cursor.selection.toX + indentSpaces, 0 );
+                }
+
+                this._processSelection( cursor, undefined, true );
+            }
+
+            return;
+        }
+
         for( var i = 0; i < n; ++i )
         {
             this.root.dispatchEvent( new CustomEvent( 'keydown', { 'detail': {
@@ -5088,41 +5141,61 @@ class CodeEditor
 
     _removeSpaces( cursor )
     {
-        const lidx = cursor.line;
-
-        // Remove indentation
-        let lineStart = firstNonspaceIndex( this.code.lines[ lidx ] );
-
-        // Nothing to remove... we are at the start of the line
-        if( lineStart == 0 )
-        {
-            return;
-        }
-
-        // Only tabs/spaces in the line...
-        if( lineStart == -1 )
-        {
-            lineStart = this.code.lines[ lidx ].length;
-        }
-
-        let indentSpaces = lineStart % this.tabSpaces;
-        indentSpaces = indentSpaces == 0 ? this.tabSpaces : indentSpaces;
-        const newStart = Math.max( lineStart - indentSpaces, 0 );
-
-        this.code.lines[ lidx ] = [
-            this.code.lines[ lidx ].slice( 0, newStart ),
-            this.code.lines[ lidx ].slice( lineStart )
-        ].join('');
-
-        this.processLine( lidx );
-
-        this.cursorToString( cursor, " ".repeat( indentSpaces ), true );
-
         if( cursor.selection )
         {
             cursor.selection.invertIfNecessary();
-            cursor.selection.fromX = Math.max( cursor.selection.fromX - indentSpaces, 0 );
-            this._processSelection( cursor );
+        }
+
+        const lCount = cursor.selection ? 1 + ( cursor.selection.toY - cursor.selection.fromY  ) : 1;
+
+        for( let i = 0; i < lCount; ++i )
+        {
+            const lidx = ( cursor.selection ? cursor.selection.fromY : cursor.line ) + i;
+
+            // Remove indentation
+            let lineStart = firstNonspaceIndex( this.code.lines[ lidx ] );
+
+            // Nothing to remove... we are at the start of the line
+            if( lineStart == 0 )
+            {
+                continue;
+            }
+
+            // Only tabs/spaces in the line...
+            if( lineStart == -1 )
+            {
+                lineStart = this.code.lines[ lidx ].length;
+            }
+
+            let indentSpaces = lineStart % this.tabSpaces;
+            indentSpaces = indentSpaces == 0 ? this.tabSpaces : indentSpaces;
+            const newStart = Math.max( lineStart - indentSpaces, 0 );
+
+            this.code.lines[ lidx ] = [
+                this.code.lines[ lidx ].slice( 0, newStart ),
+                this.code.lines[ lidx ].slice( lineStart )
+            ].join('');
+
+            this.processLine( lidx );
+
+            if( cursor.line === lidx )
+            {
+                this.cursorToString( cursor, " ".repeat( indentSpaces ), true );
+            }
+
+            if( cursor.selection )
+            {
+                if( cursor.selection.fromY === lidx )
+                {
+                    cursor.selection.fromX = Math.max( cursor.selection.fromX - indentSpaces, 0 );
+                }
+                if( cursor.selection.toY === lidx )
+                {
+                    cursor.selection.toX = Math.max( cursor.selection.toX - indentSpaces, 0 );
+                }
+
+                this._processSelection( cursor, undefined, true );
+            }
         }
     }
 
