@@ -1259,8 +1259,8 @@ class CodeEditor
         this.loadedTabs = { };
         this.openedTabs = { };
 
-        const onLoadAll = () => {
-
+        const onLoadAll = () =>
+        {
             // Create inspector panel when the initial state is complete
             // and we have at least 1 tab opened
             this.statusPanel = this._createStatusPanel( options );
@@ -1270,7 +1270,15 @@ class CodeEditor
             }
 
             // Wait until the fonts are all loaded
-            document.fonts.ready.then(() => {
+            document.fonts.onloadingdone = ( e ) =>
+            {
+                // Wait for the Code font to load
+                const fontface = e.fontfaces[ 0 ];
+                if( fontface?.family !== "CascadiaCode" )
+                {
+                    return;
+                }
+
                 // Load any font size from local storage
                 const savedFontSize = window.localStorage.getItem( "lexcodeeditor-font-size" );
                 if( savedFontSize )
@@ -1282,7 +1290,7 @@ class CodeEditor
                     const r = document.querySelector( ':root' );
                     const s = getComputedStyle( r );
                     this.fontSize = parseInt( s.getPropertyValue( "--code-editor-font-size" ) );
-                    this.charWidth = this._measureChar( "a", true );
+                    this.charWidth = this._measureChar();
                     this.processLines();
                 }
 
@@ -1306,7 +1314,7 @@ class CodeEditor
                 {
                     options.callback.call( this, this );
                 }
-            });
+            };
 
             window.editor = this;
         };
@@ -1342,13 +1350,13 @@ class CodeEditor
                 }});
             }
         }
-        else if( options.defaultTab ?? true )
-        {
-            this.addTab( options.name || "untitled", true, options.title, { language: options.highlight ?? "Plain Text" } );
-            onLoadAll();
-        }
         else
         {
+            if( options.defaultTab ?? true )
+            {
+                this.addTab( options.name || "untitled", true, options.title, { language: options.highlight ?? "Plain Text" } );
+            }
+
             onLoadAll();
         }
     }
@@ -5313,7 +5321,7 @@ class CodeEditor
         return [ word, from, to ];
     }
 
-    _measureChar( char = "a", useFloating = false, getBB = false )
+    _measureChar( char = "M", useFloating = true, getBB = false )
     {
         const parentContainer = LX.makeContainer( null, "lexcodeeditor", "", document.body );
         const container = LX.makeContainer( null, "code", "", parentContainer );
@@ -5904,7 +5912,7 @@ class CodeEditor
         this.fontSize = size;
         const r = document.querySelector( ':root' );
         r.style.setProperty( "--code-editor-font-size", `${ this.fontSize }px` );
-        this.charWidth = this._measureChar( "a", true );
+        this.charWidth = this._measureChar();
 
         window.localStorage.setItem( "lexcodeeditor-font-size", this.fontSize );
 

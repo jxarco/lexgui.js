@@ -2,6 +2,9 @@
 
 ## dev
 
+CodeEditor:
+- Fixed `charWidth` value when editor font isn't loaded.
+
 ## 0.7.13 (master)
 
 Added `LX.validateValueAtPattern`.
