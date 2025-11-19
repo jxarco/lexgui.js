@@ -486,6 +486,17 @@ class CodeEditor
 
         this.codeArea.root.classList.add( 'lexcodearea' );
 
+        const codeResizeObserver = new ResizeObserver( entries => {
+
+            if( !this.code )
+            {
+                return;
+            }
+
+            this.resize();
+        });
+        codeResizeObserver.observe( this.codeArea.root );
+
         // Full editor
         area.root.classList.add('codebasearea');
 
@@ -2773,7 +2784,10 @@ class CodeEditor
             cursorOffset.y += ( cursor.line - lastProcessedCursor.line );
 
             // Set active line in case it's blurred
-            cursor.line = cursor.line;
+            if( !cursor.selection )
+            {
+                cursor.line = cursor.line;
+            }
         }
 
         // Clear tmp
