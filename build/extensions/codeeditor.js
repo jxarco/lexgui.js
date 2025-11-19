@@ -2771,10 +2771,12 @@ class CodeEditor
 
             cursorOffset.x += ( cursor.position - lastProcessedCursor.position );
             cursorOffset.y += ( cursor.line - lastProcessedCursor.line );
+
+            // Set active line in case it's blurred
+            cursor.line = cursor.line;
         }
 
         // Clear tmp
-
         delete this._lastProcessedCursorIndex;
     }
 
