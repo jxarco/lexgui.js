@@ -13,6 +13,7 @@ export class TextInput extends BaseComponent
 {
     valid: ( s: string, m?: string ) => boolean;
 
+    _triggerEvent: Event | undefined;
     _lastValueTriggered?: any;
 
     constructor( name: string | null, value?: string, callback?: any, options: any = {} )
@@ -40,6 +41,8 @@ export class TextInput extends BaseComponent
             this._lastValueTriggered = value = newValue;
 
             wValue.value = newValue;
+
+            delete this._triggerEvent;
 
             if( !skipCallback )
             {
@@ -92,25 +95,31 @@ export class TextInput extends BaseComponent
 
             if( trigger == "default" )
             {
-                wValue.addEventListener( "keyup", ( e: KeyboardEvent ) => {
+                wValue.addEventListener( "keyup", ( e: KeyboardEvent ) =>
+                {
                     if( e.key == "Enter" )
                     {
+                        this._triggerEvent = e;
                         wValue.blur();
                     }
                 });
 
-                wValue.addEventListener( "focusout", ( e: any ) => {
-                    this.set( e.target.value, false, e );
+                wValue.addEventListener( "focusout", ( e: FocusEvent ) =>
+                {
+                    this._triggerEvent = this._triggerEvent ?? e;
+                    this.set( ( e.target as any ).value, false, this._triggerEvent );
                 });
             }
             else if( trigger == "input" )
             {
-                wValue.addEventListener("input", ( e: any ) => {
-                    this.set( e.target.value, false, e );
+                wValue.addEventListener("input", ( e: InputEvent ) =>
+                {
+                    this.set( ( e.target as any ).value, false, e );
                 });
             }
 
-            wValue.addEventListener( "mousedown", function( e: KeyboardEvent ) {
+            wValue.addEventListener( "mousedown", function( e: MouseEvent )
+            {
                 e.stopImmediatePropagation();
                 e.stopPropagation();
             });

@@ -13,7 +13,7 @@ export class IEvent {
     value: any;
     domEvent: any;
 
-    constructor( name: string | null, value: any, domEvent?: any )
+    constructor( name: string | null | undefined, value: any, domEvent?: any )
     {
         this.name = name;
         this.value = value;

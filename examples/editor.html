@@ -1012,7 +1012,6 @@
                 }
             }
         });
-
     }
 
     function openSignUpDialog()
@@ -1023,19 +1022,23 @@
                 name: { label: "Name", value: "", icon: "User", pattern: { minLength: 3, noSpaces: true } },
                 email: { label: "Email", value: "", icon: "AtSign", pattern: { email: true } },
                 password: { label: "Password", value: "", type: "password", icon: "Key", pattern: { minLength: 4, digit: true } },
-                confirmPassword: { label: "Confirm password", value: "", type: "password", icon: "Key", pattern: { fieldMatchName: "password" }  }
+                confirmPassword: { label: "Confirm password", value: "", type: "password", submit: true, icon: "Key", pattern: { fieldMatchName: "password" }  }
             };
 
             const form = p.addForm( null, formData, async (value, errors) => {
-
-                console.log(errors)
 
                 errorMsg.set( "" );
 
                 if( errors.length )
                 {
+                    console.log(errors)
                     const err = errors[ 0 ];
                     errorMsg.set( `${ err.entry }: ${ err.messages.join( "\n" ) }` );
+                }
+                else
+                {
+                    dialog.close();
+                    LX.toast( "Signed Up!", "Validate your email before login.");
                 }
             }, { primaryActionName: "SignUp" });
             const errorMsg = p.addTextArea( null, "", null, { inputClass: "fg-secondary", disabled: true, fitHeight: true } );
@@ -1058,17 +1061,29 @@
                     type: "password",
                     placeholder: "Enter password",
                     icon: "KeyRound",
-                    pattern: { lowercase: true, uppercase: true, digit: true, minLength: 6 }
+                    pattern: { lowercase: true, uppercase: true, digit: true, minLength: 6 },
+                    submit: true
                 }
             };
 
-            panel.addForm("Test form", formData, (value, event) => {
-                console.log(value);
-            }, { skipLabels: false, primaryActionName: "Login", secondaryActionName: "Sign Up", secondaryActionCallback: () => { console.log("Signed up") } });
+            panel.addForm("Test form", formData, (value, errors) => {
+                if( !errors.length )
+                {
+                    dialog.close();
+                    LX.toast( "Logged in!", `Welcome ${ value.Username } :)`);
+                }
+                else
+                {
+                    console.log(errors);
+                }
+            }, { skipLabels: false, primaryActionName: "Login" } );
 
             panel.addLabel("Or", { float: 'center' });
 
-            panel.addButton(null, "Sign up", (value, event) => { });
+            panel.addButton(null, "Sign up", (value, event) => {
+                dialog.close();
+                openSignUpDialog();
+            });
 
         }, { close: true, minimize: false, size: ["25%"], scroll: true, resizable: true, draggable: true });
     }

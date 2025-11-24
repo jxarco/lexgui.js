@@ -73,8 +73,12 @@ export class Form extends BaseComponent
                 container.appendChild( label.root );
             }
 
-            entryData.textComponent = new TextInput( null, entryData.constructor == Object ? entryData.value : entryData, ( value: string ) => {
+            entryData.textComponent = new TextInput( null, entryData.constructor == Object ? entryData.value : entryData, ( value: string, event: any ) => {
                 container.formData[ entry ] = value;
+                if( entryData.submit && event.constructor === KeyboardEvent )
+                {
+                    primaryButton?.click();
+                }
             }, entryData );
             container.appendChild( entryData.textComponent.root );
 

@@ -11,6 +11,9 @@ import { IEvent } from './Event';
 
 export class Button extends BaseComponent
 {
+    selectable: boolean = false;
+    callback?: any;
+
     setState: ( v: any, b?: boolean ) => void;
     swap?: ( b?: boolean ) => void;
 
@@ -18,9 +21,13 @@ export class Button extends BaseComponent
     {
         super( ComponentType.BUTTON, name, null, options );
 
+        this.callback = callback;
+        this.selectable = options.selectable ?? this.selectable;
+
         this.onGetValue = () => {
+            const isSelected = LX.hasClass( wValue, "selected" );
             const swapInput = wValue.querySelector( "input" );
-            return swapInput ? swapInput.checked : value
+            return swapInput ? swapInput.checked : ( this.selectable ? isSelected : value );
         };
 
         this.onSetValue = ( newValue, skipCallback, event ) => {
@@ -65,7 +72,7 @@ export class Button extends BaseComponent
             {
                 swapInput.checked = v;
             }
-            else if( options.selectable )
+            else if( this.selectable )
             {
                 if( options.parent )
                 {
@@ -77,14 +84,13 @@ export class Button extends BaseComponent
 
             if( !skipCallback )
             {
-                this._trigger( new IEvent( name, swapInput ? swapInput.checked : ( options.selectable ? v : value ), null ), callback );
+                this._trigger( new IEvent( name, swapInput ? swapInput.checked : ( this.selectable ? v : value ), null ), callback );
             }
         };
 
         var wValue: any = document.createElement( 'button' );
         wValue.title = options.tooltip ? "" : ( options.title ?? "" );
         wValue.className = "lexbutton p-1 " + ( options.buttonClass ?? "" );
-
         this.root.appendChild( wValue );
 
         if( options.selected )
@@ -184,7 +190,7 @@ export class Button extends BaseComponent
 
         trigger.addEventListener( "click", ( e: MouseEvent ) => {
             let isSelected;
-            if( options.selectable )
+            if( this.selectable )
             {
                 if( options.parent )
                 {
@@ -215,7 +221,7 @@ export class Button extends BaseComponent
             else
             {
                 const swapInput = wValue.querySelector( "input" );
-                this._trigger( new IEvent( name, swapInput?.checked ?? ( options.selectable ? isSelected : value ), e ), callback );
+                this._trigger( new IEvent( name, swapInput?.checked ?? ( this.selectable ? isSelected : value ), e ), callback );
             }
         });
 
@@ -225,6 +231,12 @@ export class Button extends BaseComponent
         }
 
         LX.doAsync( this.onResize.bind( this ) );
+    }
+
+    click()
+    {
+        const buttonDOM: HTMLButtonElement = this.root.querySelector( 'button' );
+        buttonDOM.click();
     }
 }
 
