@@ -61,7 +61,9 @@
             head: [ "Option", "Type", "Description", "Default" ],
             body: [
                 ["value", "String", "Value of the form entry", "—"],
-                ["label", "String", "Label of the form entry (used as the placeholder if it is not defined)", "—"]
+                ["label", "String", "Label of the form entry (used as the placeholder if it is not defined)", "—"],
+                ["pattern", "Object", "Pattern options to validate the text entry value", "—"],
+                ["submit", "Boolean", "Pressing Enter key submits the form", "false"],
             ].map( v => {
                 return [ docMaker.iCode( v[ 0 ], "table" ), docMaker.iCode( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? docMaker.iCode( v[ 3 ], "table desc" ) : v[ 3 ] ];
             } )
