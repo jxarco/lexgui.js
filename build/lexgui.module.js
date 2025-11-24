@@ -16993,10 +16993,6 @@ class AssetView {
                     {
                         m.add("Clone", that._cloneItem.bind( that, item ));
                     }
-                    if( multiple <= 1 )
-                    {
-                        m.add("Properties");
-                    }
                     m.add("");
                     m.add("Delete", that._deleteItem.bind( that, item ));
                 });

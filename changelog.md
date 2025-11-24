@@ -8,6 +8,7 @@ AssetView:
 - Support for renaming items.
 - Support select and preview also from the asset explorer.
 - Fixed `lastModifiedDate` on preview some assets.
+- Removed not used "Properties" item context menu entry.
 
 ## 0.7.14 (master)
 
