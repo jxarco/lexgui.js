@@ -6383,7 +6383,7 @@ CE.languages =
     'CMake': { ext: "cmake", singleLineCommentToken: '#', blockComments: false, ignoreCase: true },
     'GLSL': { ext: "glsl", usePreprocessor: true },
     'WGSL': { ext: "wgsl", usePreprocessor: true },
-    'JSON': { ext: "json", blockComments: false, singleLineComments: false, icon: "Braces fg-primary" },
+    'JSON': { ext: "json", blockComments: false, singleLineComments: false, icon: "Json jsonyellow" },
     'XML': { ext: "xml", tags: true, icon: "Rss orange" },
     'Rust': { ext: "rs", icon: "Rust fg-primary" },
     'Python': { ext: "py", singleLineCommentToken: '#', icon: "Python munsellblue" },

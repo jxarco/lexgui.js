@@ -24,6 +24,7 @@ Additions:
 - Table now sort Date strings by date
 - AssetView ctrl+wheel to increase grid item size
 - Support options.submit in Form entries
+- Added "dev" icons, Vscode, godot, unity, UE, go, css, android, etc.
 
 Styling:
 - More TW classes

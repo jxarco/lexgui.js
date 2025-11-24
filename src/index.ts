@@ -2,12 +2,10 @@
 export * from "./core/Namespace";
 export * from "./core/Utils";
 export * from "./core/Vec2";
-
-// Components Utilities
-export * from "./components/Icons";
-export * from "./components/Event";
+export * from "./core/Icons";
 
 // Layout
+export * from "./components/Event";
 export * from "./components/Branch";
 export * from "./components/Panel";
 export * from "./components/Area";
