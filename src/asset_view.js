@@ -275,6 +275,7 @@ class AssetView {
                         else
                         {
                             this._enterFolder( node.type === "folder" ? node : node.parent );
+
                             this._previewAsset( node );
 
                             if( node.type !== "folder" )
@@ -450,7 +451,6 @@ class AssetView {
 
     _refreshContent( searchValue, filter ) {
 
-        const isGridLayout = ( this.layout == AssetView.LAYOUT_GRID ); // default
         const isCompactLayout = ( this.layout == AssetView.LAYOUT_COMPACT );
         const isListLayout = ( this.layout == AssetView.LAYOUT_LIST );
 
@@ -458,268 +458,6 @@ class AssetView {
         this.searchValue = searchValue ?? ( this.searchValue ?? "" );
         this.content.innerHTML = "";
         this.content.className = `lexassetscontent${ isCompactLayout ? " compact" : ( isListLayout ? " list" : "" ) }`;
-        let that = this;
-
-        const _addItem = function( item )
-        {
-            const type = item.type.charAt( 0 ).toUpperCase() + item.type.slice( 1 );
-            const extension = LX.getExtension( item.id );
-            const isFolder = type === "Folder";
-
-            let itemEl = document.createElement('li');
-            itemEl.className = "lexassetitem " + item.type.toLowerCase();
-            itemEl.tabIndex = -1;
-            that.content.appendChild( itemEl );
-
-            if( item.lastModified && !item.lastModifiedDate )
-            {
-                item.lastModifiedDate = that._lastModifiedToStringDate( item.lastModified );
-            }
-
-            if( !that.useNativeTitle )
-            {
-                let desc = document.createElement( 'span' );
-                desc.className = 'lexitemdesc';
-                desc.id = `floatingTitle_${ item.id }`;
-                desc.innerHTML = `File: ${ item.id }<br>Type: ${ type }`;
-                that.content.appendChild( desc );
-
-                itemEl.addEventListener( "mousemove", e => {
-
-                    if( !isGridLayout )
-                    {
-                        return;
-                    }
-
-                    const dialog = itemEl.closest('dialog');
-                    const rect = itemEl.getBoundingClientRect();
-                    const targetRect = e.target.getBoundingClientRect();
-
-                    let localOffsetX = rect.x + e.offsetX;
-                    let localOffsetY = rect.y + e.offsetY;
-
-                    if( dialog )
-                    {
-                        const dialogRect = dialog.getBoundingClientRect();
-                        localOffsetX -= dialogRect.x;
-                        localOffsetY -= dialogRect.y;
-                    }
-
-                    if( e.target.classList.contains( "lexassettitle" ) )
-                    {
-                        localOffsetY += ( targetRect.y - rect.y );
-                    }
-
-                    desc.style.left = ( localOffsetX ) + "px";
-                    desc.style.top = ( localOffsetY - 36 ) + "px";
-                } );
-            }
-            else
-            {
-                itemEl.title = type + ": " + item.id;
-            }
-
-            if( that.allowMultipleSelection )
-            {
-                let checkbox = document.createElement( 'input' );
-                checkbox.type = "checkbox";
-                checkbox.className = "lexcheckbox";
-                checkbox.checked = item.selected;
-                checkbox.addEventListener('change', ( e, v ) => {
-                    item.selected = !item.selected;
-                    if( that.onevent )
-                    {
-                        const event = new AssetViewEvent(AssetViewEvent.ASSET_CHECKED, e.shiftKey ? [item] : item );
-                        event.multiple = !!e.shiftKey;
-                        that.onevent( event );
-                    }
-                    e.stopPropagation();
-                    e.stopImmediatePropagation();
-                });
-
-                itemEl.appendChild( checkbox );
-            }
-
-            let title = document.createElement('span');
-            title.className = "lexassettitle";
-            title.innerText = item.id;
-            itemEl.appendChild( title );
-
-            if( !that.skipPreview )
-            {
-                if( item.type === 'video' )
-                {
-                    const itemVideo = LX.makeElement( 'video', 'absolute left-0 top-0 w-full border-none pointer-events-none', '', itemEl );
-                    itemVideo.setAttribute( 'disablePictureInPicture', false );
-                    itemVideo.setAttribute( 'disableRemotePlayback', false );
-                    itemVideo.setAttribute( 'loop', true );
-                    itemVideo.setAttribute( 'async', true );
-                    itemVideo.style.transition = 'opacity 0.2s ease-out';
-                    itemVideo.style.opacity = item.preview ? '0' : '1';
-                    itemVideo.src = item.src;
-                    itemVideo.volume = item.videoVolume ?? 0.4;
-                }
-
-                let preview = null;
-
-                const previewSrc    = item.preview ?? item.src;
-                const hasImage = previewSrc && (
-                    (() => {
-                        const ext = LX.getExtension( previewSrc.split( '?' )[ 0 ].split( '#' )[ 0 ]); // get final source without url parameters/anchors
-                        return ext ? ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'avif'].includes( ext.toLowerCase() ) : false;
-                    })()
-                    || previewSrc.startsWith( 'data:image/' )
-                );
-
-                if( hasImage || isFolder || !isGridLayout )
-                {
-                    const defaultPreviewPath    = `${ that.rootPath }images/file.png`;
-                    const defaultFolderPath     = `${ that.rootPath }images/folder.png`;
-
-                    preview = document.createElement('img');
-                    let realSrc = item.unknownExtension ? defaultPreviewPath : ( isFolder ? defaultFolderPath : previewSrc );
-                    preview.src = ( isGridLayout || isFolder ? realSrc : defaultPreviewPath );
-                    itemEl.appendChild( preview );
-                }
-                else
-                {
-                    preview = document.createElement( 'svg' );
-                    preview.className = 'asset-file-preview';
-                    itemEl.appendChild( preview );
-
-                    let textEl = document.createElement( 'text' );
-                    textEl.innerText = ( !extension || extension == item.id ) ? item.type.toUpperCase() : ( `${ extension.toUpperCase() }` ); // If no extension, e.g. Clip, use the type...
-                    preview.appendChild( textEl );
-
-                    var newLength = textEl.innerText.length;
-                    var charsPerLine = 2.5;
-                    var newEmSize = charsPerLine / newLength;
-                    var textBaseSize = 64;
-
-                    if( newEmSize < 1 )
-                    {
-                        var newFontSize = newEmSize * textBaseSize;
-                        textEl.style.fontSize = newFontSize + 'px';
-                        preview.style.paddingTop = `calc(50% - ${ ( textEl.offsetHeight * 0.5 + 10 ) }px)`;
-                    }
-                }
-            }
-
-            // Add item type info
-            let itemInfoHtml = type;
-
-            if( isListLayout )
-            {
-                if( item.bytesize ) itemInfoHtml += ` | ${ LX.formatBytes( item.bytesize ) }`;
-                if( item.lastModifiedDate ) itemInfoHtml += ` | ${ item.lastModifiedDate }`;
-            }
-
-            LX.makeContainer( [ 'auto', 'auto' ], 'lexassetinfo', itemInfoHtml, itemEl );
-
-            itemEl.addEventListener('click', function( e ) {
-                e.stopImmediatePropagation();
-                e.stopPropagation();
-
-                const isDoubleClick = ( e.detail == LX.MOUSE_DOUBLE_CLICK );
-
-                if( !isDoubleClick )
-                {
-                    if( !e.shiftKey )
-                    {
-                        that.content.querySelectorAll( '.lexassetitem').forEach( i => i.classList.remove( 'selected' ) );
-                    }
-
-                    this.classList.add( 'selected' );
-                    that.selectedItem = item;
-
-                    if( !that.skipPreview )
-                    {
-                        that._previewAsset( item );
-                    }
-                }
-                else if( isFolder )
-                {
-                    that._enterFolder( item );
-                    return;
-                }
-
-                if( that.onevent )
-                {
-                    const event = new AssetViewEvent(isDoubleClick ? AssetViewEvent.ASSET_DBLCLICKED : AssetViewEvent.ASSET_SELECTED, e.shiftKey ? [item] : item );
-                    event.multiple = !!e.shiftKey;
-                    that.onevent( event );
-                }
-            });
-
-            if( that.contextMenu )
-            {
-                itemEl.addEventListener('contextmenu', function( e ) {
-                    e.preventDefault();
-
-                    const multiple = that.content.querySelectorAll('.selected').length;
-
-                    LX.addContextMenu( multiple > 1 ? (multiple + " selected") :
-                                isFolder ? item.id : item.type, e, m => {
-                        if( multiple <= 1 )
-                        {
-                            m.add("Rename");
-                        }
-                        if( !isFolder )
-                        {
-                            m.add("Clone", that._cloneItem.bind( that, item ));
-                        }
-                        if( multiple <= 1 )
-                        {
-                            m.add("Properties");
-                        }
-                        m.add("");
-                        m.add("Delete", that._deleteItem.bind( that, item ));
-                    });
-                });
-            }
-
-            itemEl.addEventListener("dragstart", function( e ) {
-                e.preventDefault();
-            }, false );
-
-            itemEl.addEventListener( "mouseenter", ( e ) => {
-
-                if( !that.useNativeTitle && isGridLayout )
-                {
-                    const desc = that.content.querySelector( `#floatingTitle_${ item.id }` );
-                    if( desc ) desc.style.display = "unset";
-                }
-
-                if( item.type !== "video" ) return;
-                e.preventDefault();
-                const video = itemEl.querySelector( "video" );
-                video.style.opacity = "1";
-                video.play();
-            } );
-
-            itemEl.addEventListener( "mouseleave", ( e ) => {
-
-                if( !that.useNativeTitle && isGridLayout )
-                {
-                    setTimeout( () => {
-                        const desc = that.content.querySelector( `#floatingTitle_${ item.id }` );
-                        if( desc ) desc.style.display = "none";
-                    }, 100 );
-                }
-
-                if( item.type !== "video" ) return;
-                e.preventDefault();
-                const video = itemEl.querySelector( "video" );
-                video.pause();
-                video.currentTime = 0;
-                if( item.preview )
-                {
-                    video.style.opacity = "0";
-                }
-            } );
-
-            return itemEl;
-        }
 
         const fr = new FileReader();
 
@@ -755,7 +493,7 @@ class AssetView {
                 } });
             }else
             {
-                item.domEl = _addItem( item );
+                item.domEl = this._addItem( item );
             }
         }
 
@@ -770,11 +508,280 @@ class AssetView {
         }
     }
 
+    _addItem( item, childIndex ) {
+
+        const isListLayout = ( this.layout == AssetView.LAYOUT_LIST );
+        const isGridLayout = ( this.layout == AssetView.LAYOUT_GRID ); // default
+        const type = item.type.charAt( 0 ).toUpperCase() + item.type.slice( 1 );
+        const extension = LX.getExtension( item.id );
+        const isFolder = type === "Folder";
+        const that = this;
+
+        let itemEl = document.createElement('li');
+        itemEl.className = "lexassetitem " + item.type.toLowerCase();
+        itemEl.tabIndex = -1;
+        this.content.insertChildAtIndex( itemEl, childIndex );
+
+        if( item.lastModified && !item.lastModifiedDate )
+        {
+            item.lastModifiedDate = this._lastModifiedToStringDate( item.lastModified );
+        }
+
+        if( !this.useNativeTitle )
+        {
+            let desc = document.createElement( 'span' );
+            desc.className = 'lexitemdesc';
+            desc.id = `floatingTitle_${ item.id.replace( /\s/g, '_' ).replaceAll( ".", "_" ) }`;
+            desc.innerHTML = `File: ${ item.id }<br>Type: ${ type }`;
+            this.content.insertChildAtIndex( desc, childIndex ? childIndex + 1 : undefined );
+
+            itemEl.addEventListener( "mousemove", e => {
+
+                if( !isGridLayout )
+                {
+                    return;
+                }
+
+                const dialog = itemEl.closest('dialog');
+                const rect = itemEl.getBoundingClientRect();
+                const targetRect = e.target.getBoundingClientRect();
+
+                let localOffsetX = rect.x + e.offsetX;
+                let localOffsetY = rect.y + e.offsetY;
+
+                if( dialog )
+                {
+                    const dialogRect = dialog.getBoundingClientRect();
+                    localOffsetX -= dialogRect.x;
+                    localOffsetY -= dialogRect.y;
+                }
+
+                if( e.target.classList.contains( "lexassettitle" ) )
+                {
+                    localOffsetY += ( targetRect.y - rect.y );
+                }
+
+                desc.style.left = ( localOffsetX ) + "px";
+                desc.style.top = ( localOffsetY - 36 ) + "px";
+            } );
+        }
+        else
+        {
+            itemEl.title = type + ": " + item.id;
+        }
+
+        if( this.allowMultipleSelection )
+        {
+            let checkbox = document.createElement( 'input' );
+            checkbox.type = "checkbox";
+            checkbox.className = "lexcheckbox";
+            checkbox.checked = item.selected;
+            checkbox.addEventListener('change', ( e, v ) => {
+                item.selected = !item.selected;
+                if( this.onevent )
+                {
+                    const event = new AssetViewEvent(AssetViewEvent.ASSET_CHECKED, e.shiftKey ? [item] : item );
+                    event.multiple = !!e.shiftKey;
+                    this.onevent( event );
+                }
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+            });
+
+            itemEl.appendChild( checkbox );
+        }
+
+        let title = document.createElement('span');
+        title.className = "lexassettitle";
+        title.innerText = item.id;
+        itemEl.appendChild( title );
+
+        if( !this.skipPreview )
+        {
+            if( item.type === 'video' )
+            {
+                const itemVideo = LX.makeElement( 'video', 'absolute left-0 top-0 w-full border-none pointer-events-none', '', itemEl );
+                itemVideo.setAttribute( 'disablePictureInPicture', false );
+                itemVideo.setAttribute( 'disableRemotePlayback', false );
+                itemVideo.setAttribute( 'loop', true );
+                itemVideo.setAttribute( 'async', true );
+                itemVideo.style.transition = 'opacity 0.2s ease-out';
+                itemVideo.style.opacity = item.preview ? '0' : '1';
+                itemVideo.src = item.src;
+                itemVideo.volume = item.videoVolume ?? 0.4;
+            }
+
+            let preview = null;
+
+            const previewSrc    = item.preview ?? item.src;
+            const hasImage = previewSrc && (
+                (() => {
+                    const ext = LX.getExtension( previewSrc.split( '?' )[ 0 ].split( '#' )[ 0 ]); // get final source without url parameters/anchors
+                    return ext ? ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'avif'].includes( ext.toLowerCase() ) : false;
+                })()
+                || previewSrc.startsWith( 'data:image/' )
+            );
+
+            if( hasImage || isFolder || !isGridLayout )
+            {
+                const defaultPreviewPath    = `${ this.rootPath }images/file.png`;
+                const defaultFolderPath     = `${ this.rootPath }images/folder.png`;
+
+                preview = document.createElement('img');
+                let realSrc = item.unknownExtension ? defaultPreviewPath : ( isFolder ? defaultFolderPath : previewSrc );
+                preview.src = ( isGridLayout || isFolder ? realSrc : defaultPreviewPath );
+                itemEl.appendChild( preview );
+            }
+            else
+            {
+                preview = document.createElement( 'svg' );
+                preview.className = 'asset-file-preview';
+                itemEl.appendChild( preview );
+
+                let textEl = document.createElement( 'text' );
+                textEl.innerText = ( !extension || extension == item.id ) ? item.type.toUpperCase() : ( `${ extension.toUpperCase() }` ); // If no extension, e.g. Clip, use the type...
+                preview.appendChild( textEl );
+
+                var newLength = textEl.innerText.length;
+                var charsPerLine = 2.5;
+                var newEmSize = charsPerLine / newLength;
+                var textBaseSize = 64;
+
+                if( newEmSize < 1 )
+                {
+                    var newFontSize = newEmSize * textBaseSize;
+                    textEl.style.fontSize = newFontSize + 'px';
+                    preview.style.paddingTop = `calc(50% - ${ ( textEl.offsetHeight * 0.5 + 10 ) }px)`;
+                }
+            }
+        }
+
+        // Add item type info
+        let itemInfoHtml = type;
+
+        if( isListLayout )
+        {
+            if( item.bytesize ) itemInfoHtml += ` | ${ LX.formatBytes( item.bytesize ) }`;
+            if( item.lastModifiedDate ) itemInfoHtml += ` | ${ item.lastModifiedDate }`;
+        }
+
+        LX.makeContainer( [ 'auto', 'auto' ], 'lexassetinfo', itemInfoHtml, itemEl );
+
+        itemEl.addEventListener('click', function( e ) {
+            e.stopImmediatePropagation();
+            e.stopPropagation();
+
+            const isDoubleClick = ( e.detail == LX.MOUSE_DOUBLE_CLICK );
+
+            if( !isDoubleClick )
+            {
+                if( !e.shiftKey )
+                {
+                    that.content.querySelectorAll( '.lexassetitem').forEach( i => i.classList.remove( 'selected' ) );
+                }
+
+                this.classList.add( 'selected' );
+                that.selectedItem = item;
+
+                if( !that.skipPreview )
+                {
+                    that._previewAsset( item );
+                }
+            }
+            else if( isFolder )
+            {
+                that._enterFolder( item );
+                return;
+            }
+
+            if( that.onevent )
+            {
+                const event = new AssetViewEvent(isDoubleClick ? AssetViewEvent.ASSET_DBLCLICKED : AssetViewEvent.ASSET_SELECTED, e.shiftKey ? [item] : item );
+                event.multiple = !!e.shiftKey;
+                that.onevent( event );
+            }
+        });
+
+        if( this.contextMenu )
+        {
+            itemEl.addEventListener('contextmenu', function( e ) {
+                e.preventDefault();
+
+                const multiple = that.content.querySelectorAll('.selected').length;
+
+                LX.addContextMenu( multiple > 1 ? (multiple + " selected") :
+                            isFolder ? item.id : item.type, e, m => {
+                    if( multiple <= 1 )
+                    {
+                        m.add("Rename", that._renameItem.bind( that, item ));
+                    }
+                    if( !isFolder )
+                    {
+                        m.add("Clone", that._cloneItem.bind( that, item ));
+                    }
+                    if( multiple <= 1 )
+                    {
+                        m.add("Properties");
+                    }
+                    m.add("");
+                    m.add("Delete", that._deleteItem.bind( that, item ));
+                });
+            });
+        }
+
+        itemEl.addEventListener("dragstart", function( e ) {
+            e.preventDefault();
+        }, false );
+
+        itemEl.addEventListener( "mouseenter", ( e ) => {
+
+            if( !that.useNativeTitle && isGridLayout )
+            {
+                const desc = that.content.querySelector( `#floatingTitle_${ item.id.replace( /\s/g, '_' ).replaceAll( ".", "_" ) }` );
+                if( desc ) desc.style.display = "unset";
+            }
+
+            if( item.type !== "video" ) return;
+            e.preventDefault();
+            const video = itemEl.querySelector( "video" );
+            video.style.opacity = "1";
+            video.play();
+        } );
+
+        itemEl.addEventListener( "mouseleave", ( e ) => {
+
+            if( !that.useNativeTitle && isGridLayout )
+            {
+                setTimeout( () => {
+                    const desc = that.content.querySelector( `#floatingTitle_${ item.id.replace( /\s/g, '_' ).replaceAll( ".", "_" ) }` );
+                    if( desc ) desc.style.display = "none";
+                }, 100 );
+            }
+
+            if( item.type !== "video" ) return;
+            e.preventDefault();
+            const video = itemEl.querySelector( "video" );
+            video.pause();
+            video.currentTime = 0;
+            if( item.preview )
+            {
+                video.style.opacity = "0";
+            }
+        } );
+
+        return itemEl;
+    }
+
     /**
     * @method _previewAsset
     */
 
     _previewAsset( file ) {
+
+        if( this.skipPreview )
+        {
+            return;
+        }
 
         const is_base_64 = file.src && file.src.includes("data:image/");
 
@@ -969,6 +976,55 @@ class AssetView {
         }
 
         this._processData( this.data );
+    }
+
+    _renameItem( item ) {
+
+        const idx = this.currentData.indexOf( item );
+        if( idx < 0 )
+        {
+            return;
+        }
+
+        const oldName = item.id;
+        const wasSelected = item.domEl.hasClass( "selected" );
+
+        const onRename = ( value ) =>
+        {
+            p.destroy();
+
+            const hoverTitle = this.content.querySelector( `#floatingTitle_${ item.id.replace( /\s/g, '_' ).replaceAll( ".", "_" ) }` );
+            hoverTitle.remove();
+            item.domEl.remove();
+
+            item.id = value;
+            item.domEl = this._addItem( item, idx * 2 );
+
+            if( this.onevent )
+            {
+                const event = new AssetViewEvent( AssetViewEvent.ASSET_RENAMED, item, oldName );
+                this.onevent( event );
+            }
+
+            if( wasSelected )
+            {
+                this._previewAsset( item );
+            }
+
+            this._processData( this.data );
+        }
+
+        let newName = item.id;
+        const panel = new LX.Panel();
+        panel.addText( null, item.id, ( v, e ) => {
+            newName = v;
+            if( e.constructor === KeyboardEvent ) onRename( v );
+        });
+        panel.addButton( null, "Save", ( v ) => {
+            onRename( newName );
+        }, { buttonClass: "contrast" });
+
+        const p = new LX.Popover( item.domEl, [ panel ], { align: "start", side: "right", sideOffset: 4 });
     }
 
     _lastModifiedToStringDate( lm ) {

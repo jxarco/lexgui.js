@@ -2,9 +2,12 @@
 
 ## dev
 
+Minor fixes.
+
 AssetView:
-- Fixed `lastModifiedDate` on preview some assets.
+- Support for renaming items.
 - Support select and preview also from the asset explorer.
+- Fixed `lastModifiedDate` on preview some assets.
 
 ## 0.7.14 (master)
 
