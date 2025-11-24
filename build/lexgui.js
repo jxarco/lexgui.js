@@ -14,7 +14,7 @@ console.warn( 'Script _build/lexgui.js_ is depracated and will be removed soon. 
 */
 
 const LX = {
-    version: "0.7.13",
+    version: "0.7.14",
     ready: false,
     extensions: [], // Store extensions used
     signals: {}, // Events and triggers

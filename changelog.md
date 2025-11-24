@@ -2,6 +2,8 @@
 
 ## dev
 
+## 0.7.14 (master)
+
 CodeEditor:
 - Added support for add/remove multi-line indentation.
 - Improved language detection on copy text.
@@ -13,7 +15,7 @@ CodeEditor:
 - Fixed tab visibility bug when using explorer mode.
 - Fixed line swap minor setting incorrect active line.
 
-## 0.7.13 (master)
+## 0.7.13
 
 Added `LX.validateValueAtPattern`.
 TextInput now receive `options.pattern` as an Object, instead of text.
