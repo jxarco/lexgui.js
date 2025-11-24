@@ -1007,6 +1007,11 @@ class AssetView {
                 this._previewAsset( item );
             }
 
+            if( !this.skipBrowser )
+            {
+                this.tree.refresh();
+            }
+
             this._processData( this.data );
         }
 
