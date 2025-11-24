@@ -5304,13 +5304,19 @@ export class CodeEditor
 
             for( let lidx = cursor.selection.fromY; lidx <= cursor.selection.toY; ++lidx )
             {
+                const lineString: string = this.code.lines[ lidx ];
+                if( !lineString.length )
+                {
+                    continue;
+                }
+
                 // Remove indentation
-                let lineStart = firstNonspaceIndex( this.code.lines[ lidx ] );
+                let lineStart = firstNonspaceIndex( lineString );
 
                 // Only tabs/spaces in the line...
                 if( lineStart == -1 )
                 {
-                    lineStart = this.code.lines[ lidx ].length;
+                    lineStart = lineString.length;
                 }
 
                 let indentSpaces = lineStart % this.tabSpaces;
@@ -5319,9 +5325,9 @@ export class CodeEditor
                 const spacesString = " ".repeat( indentSpaces );
 
                 this.code.lines[ lidx ] = [
-                    this.code.lines[ lidx ].slice( 0, lineStart ),
+                    lineString.slice( 0, lineStart ),
                     spacesString,
-                    this.code.lines[ lidx ].slice( lineStart )
+                    lineString.slice( lineStart )
                 ].join('');
 
                 this.processLine( lidx );
@@ -5368,9 +5374,10 @@ export class CodeEditor
         for( let i = 0; i < lCount; ++i )
         {
             const lidx = ( cursor.selection ? cursor.selection.fromY : cursor.line ) + i;
+            const lineString: string = this.code.lines[ lidx ];
 
             // Remove indentation
-            let lineStart = firstNonspaceIndex( this.code.lines[ lidx ] );
+            let lineStart = firstNonspaceIndex( lineString );
 
             // Nothing to remove... we are at the start of the line
             if( lineStart == 0 )
@@ -5381,7 +5388,7 @@ export class CodeEditor
             // Only tabs/spaces in the line...
             if( lineStart == -1 )
             {
-                lineStart = this.code.lines[ lidx ].length;
+                lineStart = lineString.length;
             }
 
             let indentSpaces = lineStart % this.tabSpaces;
@@ -5389,8 +5396,8 @@ export class CodeEditor
             const newStart = Math.max( lineStart - indentSpaces, 0 );
 
             this.code.lines[ lidx ] = [
-                this.code.lines[ lidx ].slice( 0, newStart ),
-                this.code.lines[ lidx ].slice( lineStart )
+                lineString.slice( 0, newStart ),
+                lineString.slice( lineStart )
             ].join('');
 
             this.processLine( lidx );

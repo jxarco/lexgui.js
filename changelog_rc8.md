@@ -4,6 +4,7 @@ Architecture:
 Fixes:
 - Area Tabs drag & drop
 - "All components" example on mobile
+- multiline indentation on empty lines
 
 API:
 - BaseComponent._TYPE_ to ComponentType._TYPE_
