@@ -405,8 +405,8 @@ export class Table extends BaseComponent
                         }
 
                         menuOptions.push(
-                            { name: "Asc", icon: "ArrowUpAZ", callback: sortFn.bind( this, idx, 1 ) },
-                            { name: "Desc", icon: "ArrowDownAZ", callback: sortFn.bind( this, idx, -1 ) }
+                            { name: "Asc", icon: "ArrowUpZA", callback: sortFn.bind( this, idx, 1 ) },
+                            { name: "Desc", icon: "ArrowDownZA", callback: sortFn.bind( this, idx, -1 ) }
                         );
                     }
 
