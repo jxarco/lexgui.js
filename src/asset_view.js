@@ -776,6 +776,11 @@ class AssetView {
             }
         }
 
+        if( file.lastModified && !file.lastModifiedDate )
+        {
+            file.lastModifiedDate = this._lastModifiedToStringDate( file.lastModified );
+        }
+
         const options = { disabled: true };
 
         this.previewPanel.addText("Filename", file.id, null, options);
