@@ -2,6 +2,10 @@
 
 ## dev
 
+AssetView:
+- Fixed `lastModifiedDate` on preview some assets.
+- Support select and preview also from the asset explorer.
+
 ## 0.7.14 (master)
 
 CodeEditor:

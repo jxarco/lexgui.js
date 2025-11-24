@@ -588,7 +588,7 @@ class AssetView {
                     itemEl.appendChild( preview );
 
                     let textEl = document.createElement( 'text' );
-                    textEl.innerText = ( !extension || extension == item.id ) ? item.type.toUpperCase() : ( `.${ extension.toUpperCase() }` ); // If no extension, e.g. Clip, use the type...
+                    textEl.innerText = ( !extension || extension == item.id ) ? item.type.toUpperCase() : ( `${ extension.toUpperCase() }` ); // If no extension, e.g. Clip, use the type...
                     preview.appendChild( textEl );
 
                     var newLength = textEl.innerText.length;

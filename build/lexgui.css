@@ -4953,7 +4953,7 @@ ul.lexassetscontent {
 .codebasearea {
     display: flex;
     position: relative;
-    overflow: inherit;
+    /* overflow: inherit; */
     background-color: var(--global-color-secondary);
 }
 
