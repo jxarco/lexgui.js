@@ -76,6 +76,7 @@
                 ["icons", "Array", "Array of objects with button information {name, icon, callback}", "—"],
                 ["filter", "Boolean", "Adds a filter bar", "true"],
                 ["rename", "Boolean", "Allow item rename", "true"],
+                ["onlyFolders", "Boolean", "Only show items with 'folder' type", "false"],
                 ["onevent", "Function", "Function to catch the different types of Tree events", "—"],
             ].map( v => {
                 return [ INLINE_CODE( v[ 0 ], "table" ), INLINE_CODE( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? INLINE_CODE( v[ 3 ], "table desc" ) : v[ 3 ] ];

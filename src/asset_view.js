@@ -259,9 +259,9 @@ class AssetView {
                 switch( event.type )
                 {
                     case LX.TreeEvent.NODE_SELECTED:
-                        if( !event.multiple )
+                        if( event.multiple )
                         {
-                            this._enterFolder( node );
+                            return;
                         }
                         if( !node.parent )
                         {
@@ -271,6 +271,20 @@ class AssetView {
 
                             this.path = ['@'];
                             LX.emit("@on_folder_change", this.path.join('/'));
+                        }
+                        else
+                        {
+                            this._enterFolder( node.type === "folder" ? node : node.parent );
+                            this._previewAsset( node );
+
+                            if( node.type !== "folder" )
+                            {
+                                this.content.querySelectorAll( '.lexassetitem').forEach( i => i.classList.remove( 'selected' ) );
+                                const dom = node.domEl;
+                                dom?.classList.add( 'selected' );
+                            }
+
+                            this.selectedItem = node;
                         }
                         break;
                     case LX.TreeEvent.NODE_DRAGGED:
@@ -888,13 +902,20 @@ class AssetView {
 
     _enterFolder( folderItem ) {
 
+        const child = this.currentData[ 0 ];
+        const sameFolder = child?.parent?.id === folderItem.id;
+
         this.prevData.push( this.currentData );
         this.currentData = folderItem.children;
         this.contentPage = 1;
-        this._refreshContent();
+
+        if( !sameFolder )
+        {
+            this._refreshContent();
+        }
 
         // Update path
-        this._updatePath(this.currentData);
+        this._updatePath( this.currentData );
 
         // Trigger event
         if( this.onevent )
