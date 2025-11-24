@@ -2379,8 +2379,8 @@ class CodeEditor
                 }
             }
 
+            this._mouseDown = true;
             this.lastMouseDown = LX.getTime();
-            this.state.selectingText = true;
             this.endSelection();
             this.processClick( e );
         }
@@ -2392,8 +2392,11 @@ class CodeEditor
 
         else if( e.type == 'mousemove' )
         {
-            if( this.state.selectingText )
+            if( this._mouseDown )
+            {
+                this.state.selectingText = true;
                 this.processSelections( e );
+            }
         }
 
         else if ( e.type == 'click' ) // trip
@@ -2501,8 +2504,16 @@ class CodeEditor
         if( cursor.selection )
         {
             cursor.selection.invertIfNecessary();
+
+            // If single line selection and no chars selected, remove selection
+            const deltaY = cursor.selection.toY - cursor.selection.fromY;
+            if( cursor.selection.chars == 0 && deltaY == 0 )
+            {
+                this.endSelection();
+            }
         }
 
+        this._mouseDown = false;
         this.state.selectingText = false;
         delete this._lastSelectionKeyDir;
     }
@@ -2665,7 +2676,7 @@ class CodeEditor
 
                 if( isVisible )
                 {
-                    domEl.style.width = ( stringWidth || 8 ) + "px";
+                    domEl.style.width = ( stringWidth || ( deltaY == 0 ? 0 : 8 ) ) + "px";
                     domEl._top = i * this.lineHeight;
                     domEl.style.top = domEl._top + "px";
                 }
@@ -4725,11 +4736,13 @@ class CodeEditor
             LX.deleteElement( this.selections[ cursor.name ] );
             delete this.selections[ cursor.name ];
             delete cursor.selection;
+            cursor.line = cursor.line; // Update current line
         }
         else
         {
             for( let cursor of this.cursors.children )
             {
+                cursor.line = cursor.line; // Update current line
                 LX.deleteElement( this.selections[ cursor.name ] );
                 delete this.selections[ cursor.name ];
                 delete cursor.selection;
