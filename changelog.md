@@ -2,7 +2,20 @@
 
 ## dev
 
-## 0.7.13 (master)
+## 0.7.14 (master)
+
+CodeEditor:
+- Added support for add/remove multi-line indentation.
+- Improved language detection on copy text.
+- Few more keywords added to JS and TS highlighting.
+- Fixed `charWidth` value when editor font isn't loaded.
+- Fixed autocomplete box position when opened near the window limit.
+- Fixed autocomplete box issue when selecting options using arrows.
+- Fixed issue loading files using drag&drop.
+- Fixed tab visibility bug when using explorer mode.
+- Fixed line swap minor setting incorrect active line.
+
+## 0.7.13
 
 Added `LX.validateValueAtPattern`.
 TextInput now receive `options.pattern` as an Object, instead of text.
