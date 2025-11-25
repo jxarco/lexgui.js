@@ -2,7 +2,42 @@
 
 ## dev
 
-## 0.7.15 (master)
+## 0.8.0 (master)
+
+From 0.8.0, the full library is written in TypeScript to facilitate integrations in newer frameworks. Build are still available as a JS module with its extensions.
+
+Table Component now sort Date strings by date.
+Added support for `Ctrl+Wheel` to increase grid item size in AssetView.
+Added support for `options.submit` in Form entries.
+Added "dev" icons, Vscode, Godot, Unity, UnrealEngine, Go, Css, Android, and more.
+New `colors/` page in main demo page.
+Fixed Area Tabs drag & drop issues.
+Fixed "All components" example on mobile devices.
+Fixed multiline indentation on empty lines.
+
+API Changes:
+- `BaseComponent` enum types moved to `ComponentType`.
+- `LX.emit` -> `LX.emitSignal`.
+- `LX.ADD_CUSTOM_COMPONENT` -> `LX.REGISTER_COMPONENT`.
+- `LX.main_area` renamed to `LX.mainArea`.
+- `Element.insertChildAtIndex` -> `LX.insertChildAtIndex`.
+- `Element.getParentArea` -> `LX.getParentArea`.
+- `Element.listen/ignore` -> `LX.listen/ignore`.
+- `Element.hasClass/addClass` -> `LX.hasClas/addClass`.
+- ItemArray Component renamed to ArrayInput.
+- Removed support for Blank panel component.
+- AssetView is now an extension.
+- Docmaker Extension API full changed (see docs).
+- NodeGraph extension renamed to GraphEditor
+
+Styling:
+- Main Theme colors updates.
+- Improved color consistency with darker tones.
+- Use `Inter` (https://fonts.google.com/specimen/Inter) as default font.
+- Tailwind color palette with classes and css variables.
+- Added more utility Tailwind style classes.
+
+## 0.7.15
 
 Minor fixes.
 Docs updated.

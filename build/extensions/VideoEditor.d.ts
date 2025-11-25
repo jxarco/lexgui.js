@@ -1,0 +1,116 @@
+declare const vec2: any;
+declare const Area: any;
+declare const Panel: any;
+/**
+ * @class TimeBar
+ */
+export declare class TimeBar {
+    static TIMEBAR_PLAY: number;
+    static TIMEBAR_TRIM: number;
+    static BACKGROUND_COLOR: any;
+    static COLOR: any;
+    static ACTIVE_COLOR: string;
+    type: number;
+    duration: number;
+    canvas: HTMLCanvasElement;
+    ctx: CanvasRenderingContext2D | null;
+    markerWidth: number;
+    markerHeight: number;
+    offset: number;
+    lineWidth: number;
+    lineHeight: number;
+    position: typeof vec2;
+    startX: number;
+    endX: number;
+    currentX: number;
+    hovering: string | undefined;
+    dragging: string | undefined;
+    onChangeCurrent: any;
+    onChangeStart: any;
+    onChangeEnd: any;
+    onDraw: any;
+    onMouse: any;
+    constructor(area: typeof Area, type?: number, options?: any);
+    updateTheme(): void;
+    setDuration(duration: number): void;
+    xToTime(x: number): number;
+    timeToX(time: number): number;
+    setCurrentTime(time: number): void;
+    setStartTime(time: number): void;
+    setEndTime(time: number): void;
+    onSetCurrentValue(x: number): void;
+    onSetStartValue(x: number): void;
+    onSetEndValue(x: number): void;
+    _draw(): void;
+    _drawTrimMarker(name: string, x: number, options?: any): void;
+    _drawTimeMarker(name: string, x: number, options?: any): void;
+    update(x: number): void;
+    onMouseDown(e: MouseEvent): void;
+    onMouseUp(e: MouseEvent): void;
+    onMouseMove(e: MouseEvent): void;
+    resize(size: number[]): void;
+}
+/**
+ * @class VideoEditor
+ */
+export declare class VideoEditor {
+    playing: boolean;
+    videoReady: boolean;
+    controls: boolean;
+    startTimeString: string;
+    endTimeString: string;
+    speed: number;
+    currentTime: number;
+    startTime: number;
+    endTime: number;
+    requestId: any;
+    video: HTMLVideoElement;
+    loop: boolean;
+    isDragging: boolean;
+    isResizing: boolean;
+    crop: boolean;
+    dragOffsetX: number;
+    dragOffsetY: number;
+    currentTimeString: string;
+    timebar: TimeBar;
+    mainArea: typeof Area;
+    cropArea: HTMLElement;
+    brCrop: HTMLElement;
+    controlsArea: typeof Area;
+    controlsPanelLeft: typeof Panel;
+    controlsPanelRight: typeof Panel;
+    controlsCurrentPanel: typeof Panel;
+    onChangeCurrent: any;
+    onChangeStart: any;
+    onChangeEnd: any;
+    onKeyUp: any;
+    onSetTime: any;
+    onVideoLoaded: any;
+    onCropArea: any;
+    onResize: any;
+    onChangeSpeed: any;
+    _updateTime: boolean;
+    constructor(area: typeof Area, options?: any);
+    resizeCropArea(e: any): void;
+    dragCropArea(e: any): void;
+    loadVideo(options?: any): Promise<void>;
+    _update(): void;
+    timeToString(t: number): string;
+    _setCurrentTime(t: number): void;
+    _setStartTime(t: number): void;
+    _setEndTime(t: number): void;
+    getStartTime(): number;
+    getEndTime(): number;
+    getTrimedTimes(): {
+        start: number;
+        end: number;
+    };
+    getCroppedArea(): DOMRect;
+    showCropArea(): void;
+    hideCropArea(): void;
+    showControls(): void;
+    hideControls(): void;
+    stopUpdates(): void;
+    unbind(): void;
+}
+export {};
