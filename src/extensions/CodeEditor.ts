@@ -2141,7 +2141,7 @@ export class CodeEditor
 
         if( langString === undefined )
         {
-            return "AlignLeft gray";
+            return "AlignLeft fg-neutral-500";
         }
 
         const iconPlusClasses = CodeEditor.languages[ langString ]?.icon;
@@ -2150,7 +2150,7 @@ export class CodeEditor
             return iconPlusClasses[ extension! ] ?? iconPlusClasses;
         }
 
-        return "AlignLeft gray";
+        return "AlignLeft fg-neutral-500";
     }
 
     _onNewTab( e: any )
@@ -5821,15 +5821,15 @@ export class CodeEditor
                 {
                     case "variable":
                         iconName = "Cuboid";
-                        iconClass = "lightblue";
+                        iconClass = "fg-blue-400";
                         break;
                     case "method":
                         iconName = "Box";
-                        iconClass = "heliotrope";
+                        iconClass = "fg-fuchsia-500";
                         break;
                     case "class":
                         iconName = "CircleNodes";
-                        iconClass = "orange";
+                        iconClass = "fg-orange-500";
                         break;
                 }
             }
@@ -5840,7 +5840,7 @@ export class CodeEditor
                 else if( this._mustHightlightWord( currSuggestion, CodeEditor.types ) )
                 {
                     iconName = "Type";
-                    iconClass = "lightblue";
+                    iconClass = "fg-blue-400";
                 }
             }
 
@@ -6377,23 +6377,23 @@ const CE = ( CodeEditor as any );
 
 CE.languages =
 {
-    'Plain Text': { ext: "txt", blockComments: false, singleLineComments: false, numbers: false, icon: "AlignLeft gray" },
-    'JavaScript': { ext: "js", icon: "Js goldenrod" },
-    'TypeScript': { ext: "ts", icon: "Ts pipelineblue" },
-    'C': { ext: [ 'c', 'h' ], usePreprocessor: true, icon: { 'c': "C pictonblue", 'h': "C heliotrope" } },
-    'C++': { ext: [ "cpp", "hpp" ], usePreprocessor: true, icon: { 'cpp': "CPlusPlus pictonblue", 'hpp': "CPlusPlus heliotrope" } },
-    'CSS': { ext: "css", icon: "Hash dodgerblue" },
+    'Plain Text': { ext: "txt", blockComments: false, singleLineComments: false, numbers: false, icon: "AlignLeft fg-neutral-500" },
+    'JavaScript': { ext: "js", icon: "Js fg-yellow-500" },
+    'TypeScript': { ext: "ts", icon: "Ts fg-blue-600" },
+    'C': { ext: [ 'c', 'h' ], usePreprocessor: true, icon: { 'c': "C fg-sky-400", 'h': "C fg-fuchsia-500" } },
+    'C++': { ext: [ "cpp", "hpp" ], usePreprocessor: true, icon: { 'cpp': "CPlusPlus fg-sky-400", 'hpp': "CPlusPlus fg-fuchsia-500" } },
+    'CSS': { ext: "css", icon: "Hash fg-blue-700" },
     'CMake': { ext: "cmake", singleLineCommentToken: '#', blockComments: false, ignoreCase: true },
     'GLSL': { ext: "glsl", usePreprocessor: true },
     'WGSL': { ext: "wgsl", usePreprocessor: true },
-    'JSON': { ext: "json", blockComments: false, singleLineComments: false, icon: "Json jsonyellow" },
-    'XML': { ext: "xml", tags: true, icon: "Rss orange" },
+    'JSON': { ext: "json", blockComments: false, singleLineComments: false, icon: "Json fg-yellow-400" },
+    'XML': { ext: "xml", tags: true, icon: "Rss fg-orange-500" },
     'Rust': { ext: "rs", icon: "Rust fg-primary" },
-    'Python': { ext: "py", singleLineCommentToken: '#', icon: "Python munsellblue" },
-    'HTML': { ext: "html", tags: true, singleLineComments: false, blockCommentsTokens: [ '<!--', '-->' ], numbers: false, icon: "Code orange" },
-    'Batch': { ext: "bat", blockComments: false, singleLineCommentToken: '::', ignoreCase: true, icon: "Windows lightblue" },
+    'Python': { ext: "py", singleLineCommentToken: '#', icon: "Python fg-cyan-600" },
+    'HTML': { ext: "html", tags: true, singleLineComments: false, blockCommentsTokens: [ '<!--', '-->' ], numbers: false, icon: "Code fg-orange-500" },
+    'Batch': { ext: "bat", blockComments: false, singleLineCommentToken: '::', ignoreCase: true, icon: "Windows fg-blue-400" },
     'Markdown': { ext: "md", blockComments: false, singleLineCommentToken: '::', tags: true, numbers: false, icon: "Markdown fg-primary" },
-    'PHP': { ext: "php", icon: "Php blueviolet" },
+    'PHP': { ext: "php", icon: "Php fg-purple-700" },
 };
 
 CE.nativeTypes =

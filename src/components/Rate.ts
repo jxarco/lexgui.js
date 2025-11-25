@@ -82,10 +82,10 @@ export class Rate extends BaseComponent
                 this.set( parseFloat( star.dataset["idx"] ) - ( half ? 0.5 : 0.0 ) );
             }, false );
 
-            const filledStarIcon = LX.makeIcon( "Star", { svgClass: `lg fill-current metallicyellow` } );
+            const filledStarIcon = LX.makeIcon( "Star", { svgClass: `lg fill-current fg-yellow-500` } );
             filledStarsContainer.appendChild( filledStarIcon );
 
-            const halfStarIcon = LX.makeIcon( "StarHalf", { svgClass: `lg fill-current metallicyellow` } );
+            const halfStarIcon = LX.makeIcon( "StarHalf", { svgClass: `lg fill-current fg-yellow-500` } );
             halfStarsContainer.appendChild( halfStarIcon );
         }
 

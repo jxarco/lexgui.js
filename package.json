@@ -35,6 +35,7 @@
         "url": "https://github.com/jxarco/lexgui.js/issues"
     },
     "scripts": {
+        "colors": "node generate-colors.js",
         "clean:css": "rimraf build/lexgui.css && rimraf build/lexgui.min.css",
         "clean": "rimraf build",
         "bundle:ts": "rollup -c rollup.ts.build.config.js",

@@ -21,7 +21,7 @@ const starterTheme = LX.getTheme();
     } );
 
     const commandButton = new LX.Button(null, `Search command...<span class="ml-auto">${ LX.makeKbd( ["Ctrl", "Space"], false, "bg-tertiary border px-1 rounded" ).innerHTML }</span>`, () => { LX.setCommandbarState( true ) }, {
-        width: "256px", className: "right", buttonClass: "px-4 border fg-tertiary bg-primary" }
+        width: "256px", className: "right", buttonClass: "p-4 fg-tertiary bg-primary" }
     );
     menubar.root.appendChild( commandButton.root );
 
@@ -47,14 +47,14 @@ const starterTheme = LX.getTheme();
 
 // Header
 {
-    const header = LX.makeContainer( [ null, "auto" ], "flex flex-col border-top border-bottom gap-3 px-10 py-8 items-center", `
-        <a>Get started with LexGUI.js <span class="text-sm fg-secondary">${ LX.version }</span></a>
-        <p class="fg-primary font-semibold tracking-tight" style="font-size:2.25rem">Build your Application Interface</p>
+    const header = LX.makeContainer( [ null, "auto" ], "flex flex-col gap-3 py-8 items-center", `
+        <a class="text-md">Get started with LexGUI.js <span class="text-sm fg-secondary">${ LX.version }</span></a>
+        <p class="fg-primary font-semibold tracking-tight" style="font-size:2.75rem">Build your Application Interface</p>
         <p class="fg-primary font-light text-xxl text-center text-balance" style="max-width:48rem">A set of beautifully-designed, accessible components.
         No complex frameworks. Pure JavaScript and CSS. Open Source.</p>
     `, area );
 
-    const headerButtons = LX.makeContainer( [ "auto", "auto" ], "flex flex-row", ``, header );
+    const headerButtons = LX.makeContainer( [ "auto", "auto" ], "flex flex-row mt-2", ``, header );
     const getStartedButton = new LX.Button( null, "Get Started", () => window.open( "./docs/", "_blank" ), { buttonClass: "contrast" } );
     const componentsButton = new LX.Button( null, "View Components", () => window.open( "./docs/?p=components", "_blank" ), { buttonClass: "tertiary" } );
     headerButtons.appendChild( getStartedButton.root );
