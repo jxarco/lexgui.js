@@ -89,7 +89,7 @@ export class AssetView
     path: string[] = [];
     rootPath: string = "";
     selectedItem: any = null;
-    allowedTypes: string[] = [];
+    allowedTypes: any;
     allowNextPage: boolean = false;
     contentPage: number = 1;
     searchValue: string = "";
@@ -175,7 +175,13 @@ export class AssetView
             [ contentArea, right ] = contentArea.split({ type: "horizontal", sizes: ["80%", "20%"]});
         }
 
-        this.allowedTypes = options.allowedTypes || ["None", "Image", "Mesh", "Script", "JSON", "Clip"];
+        this.allowedTypes = {
+            "None": {},
+            "Image": { color: "yellow-500" },
+            "JSON": { color: "sky-200" },
+            "Video": { color: "indigo-400" },
+            ...( options.allowedTypes ?? {} )
+        };
 
         this._processData( this.data, null );
 
@@ -245,6 +251,13 @@ export class AssetView
         itemEl.className = "lexassetitem " + item.type.toLowerCase();
         itemEl.tabIndex = -1;
         LX.insertChildAtIndex( this.content, itemEl, childIndex );
+
+        const typeColor = this.allowedTypes[ type ]?.color;
+        if( typeColor )
+        {
+            // Add type tag
+            LX.makeElement( 'span', `rounded-full w-2 h-2 z-100 flex absolute ml-2 mt-2 bg-${ typeColor }`, "", itemEl );
+        }
 
         if( !item.uid )
         {
@@ -726,7 +739,7 @@ export class AssetView
                 null,
                 { name: "Ascending", icon: "SortAsc", callback: () => this._sortData( undefined, AssetView.CONTENT_SORT_ASC ) },
                 { name: "Descending", icon: "SortDesc", callback: () => this._sortData( undefined, AssetView.CONTENT_SORT_DESC ) }
-            ], { side: "right", align: "start" });
+            ], { side: "bottom", align: "start" });
         };
 
         const _onChangeView = ( value: any, event: any ) =>
@@ -735,7 +748,7 @@ export class AssetView
                 { name: "Grid", icon: "LayoutGrid", callback: () => this._setContentLayout( AssetView.LAYOUT_GRID ) },
                 { name: "Compact", icon: "LayoutList", callback: () => this._setContentLayout( AssetView.LAYOUT_COMPACT ) },
                 { name: "List", icon: "List", callback: () => this._setContentLayout( AssetView.LAYOUT_LIST ) }
-            ], { side: "right", align: "start" });
+            ], { side: "bottom", align: "start" });
         };
 
         const _onChangePage = ( value: any, event: any ) =>
@@ -757,9 +770,11 @@ export class AssetView
 
         this.toolsPanel.refresh = () =>
         {
+            const typeEntries = Object.keys( this.allowedTypes );
+
             this.toolsPanel.clear();
             this.toolsPanel.sameLine();
-            this.toolsPanel.addSelect( "Filter", this.allowedTypes, this.filter ?? this.allowedTypes[ 0 ], ( v: any ) => {
+            this.toolsPanel.addSelect( "Filter", typeEntries, this.filter ?? typeEntries[ 0 ], ( v: any ) => {
                 this._refreshContent( undefined, v );
             }, { width: "30%", minWidth: "128px", overflowContainer: null } );
             this.toolsPanel.addText( null, this.searchValue ?? "", ( v: string ) => this._refreshContent.call( this, v, undefined ), { placeholder: "Search assets.." } );

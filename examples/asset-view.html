@@ -51,6 +51,12 @@
         // skipPreview: true,
         // rootPath: "../",
         // onlyFolders: false,
+        allowedTypes: {
+            "Mesh": { color: "rose-800" },
+            "Script": { color: "orange-500" },
+            "Clip": { color: "fuchsia-600" },
+            "SIGML": { color: "emerald-300" },
+        },
         itemContextMenuOptions: [
             { name: "Move", callback: ( item ) => { console.log(item) } }
         ]

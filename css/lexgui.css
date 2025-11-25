@@ -4708,13 +4708,8 @@ ul.lexassetscontent {
     background: linear-gradient(180deg, var(--global-color-quaternary) 10%, var(--global-background-secondary));
     cursor: pointer;
     text-align: center;
-    border-top-left-radius: 2px;
-    border-top-right-radius: 2px;
-    border-bottom-left-radius: 4px;
-    border-bottom-right-radius: 4px;
     position: relative;
-    border-top: 4px solid rgba(0, 0, 0, 0);
-    border-radius: 8px;
+    border-radius: 10%;
 }
 
 .lexassetscontent .lexitemdesc {
@@ -4767,38 +4762,6 @@ ul.lexassetscontent {
     color: var(--global-text-tertiary);
 }
 
-.lexassetscontent li.folder {
-    border-top: unset;
-}
-
-.lexassetscontent li.image {
-    border-color: rgb(239, 188, 78);
-}
-
-.lexassetscontent li.script {
-    border-color: rgb(207, 127, 36);
-}
-
-.lexassetscontent li.json {
-    border-color: rgb(163, 213, 225);
-}
-
-.lexassetscontent li.mesh {
-    border-color: rgb(156, 68, 68);
-}
-
-.lexassetscontent li.clip {
-    border-color: rgb(176, 97, 187);
-}
-
-.lexassetscontent li.sigml {
-    border-color: rgb(154, 188, 101);
-}
-
-.lexassetscontent li.video {
-    border-color: rgb(84, 119, 214);
-}
-
 .lexassetscontent li:hover {
     outline: 2px solid var(--global-color-accent);
 }
@@ -4821,6 +4784,7 @@ ul.lexassetscontent {
     text-align: center;
     display: block;
     padding: 0.1em;
+    padding-inline: 0.75em;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
