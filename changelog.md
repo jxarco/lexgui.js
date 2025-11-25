@@ -10,6 +10,7 @@ AssetView:
 - `AssetView.addItem` (previously `_addItem`) now updates the tree using optional `updateTree` param.
 - Fixed some empty folder path issues.
 - Fixed `lastModifiedDate` on preview some assets.
+- Fixed clearing preview panel on delete item.
 - Removed not used "Properties" item context menu entry.
 
 ## 0.7.14 (master)

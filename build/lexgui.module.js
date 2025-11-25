@@ -17243,6 +17243,11 @@ class AssetView {
             this.tree.refresh();
         }
 
+        if( this.previewPanel )
+        {
+            this.previewPanel.clear();
+        }
+
         this._processData( this.data );
     }
 
