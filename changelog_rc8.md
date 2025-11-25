@@ -25,9 +25,11 @@ Additions:
 - AssetView ctrl+wheel to increase grid item size
 - Support options.submit in Form entries
 - Added "dev" icons, Vscode, godot, unity, UE, go, css, android, etc.
+- New colors page in main demo page
 
 Styling:
 - Main theme colors updates
 - Improved color consistency with darker tones
 - Use Inter font as default font
-- More TW classes
+- Tailwind color palette classes and vars
+- More Utility Tailwind classes
