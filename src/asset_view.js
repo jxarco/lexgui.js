@@ -91,6 +91,7 @@ class AssetView {
         this.previewActions = options.previewActions ?? [];
         this.contextMenu = options.contextMenu ?? [];
         this.onRefreshContent = options.onRefreshContent;
+        this.onItemDragged = options.onItemDragged;
 
         // Append temporarily to the dom
         document.body.appendChild( this.root );
@@ -534,6 +535,7 @@ class AssetView {
                 switch( event.type )
                 {
                     case LX.TreeEvent.NODE_SELECTED:
+                    {
                         if( event.multiple )
                         {
                             return;
@@ -566,10 +568,29 @@ class AssetView {
                             this.selectedItem = node;
                         }
                         break;
+                    }
                     case LX.TreeEvent.NODE_DRAGGED:
-                        node.folder = value;
+                    {
+                        if( node.parent )
+                        {
+                            const idx = node.parent.children.indexOf( node );
+                            node.parent.children.splice( idx, 1 );
+                        }
+
+                        node.folder = node.parent = value;
+
+                        if( !value.children ) value.children = [];
+
+                        value.children.push( node );
+
+                        if( this.onItemDragged )
+                        {
+                            this.onItemDragged( node, value );
+                        }
+
                         this._refreshContent();
                         break;
+                    }
                 }
             },
         });
