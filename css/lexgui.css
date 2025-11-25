@@ -547,6 +547,7 @@ a svg, svg path {
     height: fit-content;
     margin: auto 0;
     max-width: 512px;
+    margin-right: 1.5rem;
 }
 
 .lextoast .lextoastcontent div {
@@ -556,8 +557,15 @@ a svg, svg path {
 }
 
 .lextoast .lextoastcontent .title {
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
     font-size: var(--global-font-size-lg);
     color: var(--global-text-primary);
+}
+
+.lextoast .lextoastcontent:not(:has(.desc)) .title {
+    font-size: var(--global-font-size);
 }
 
 .lextoast .lextoastcontent .desc {
@@ -6492,6 +6500,8 @@ ul.lexassetscontent {
 .h-15 { height: 3.75rem }
 .h-16 { height: 4rem }
 .h-32 { height: 8rem }
+.h-48 { height: 12rem }
+.h-64 { height: 16rem }
 
 .resize-none { resize: none }
 

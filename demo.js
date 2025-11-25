@@ -12,6 +12,7 @@ const starterTheme = LX.getTheme();
         { name: "Docs", callback: () => { window.open("./docs/") } },
         { name: "Components", callback: () => { window.open("./docs/?p=components") } },
         { name: "Examples", callback: () => { window.open("./examples/") } },
+        { name: "Colors", callback: () => { window.open("./colors/") } }
     ] );
 
     menubar.setButtonImage("lexgui.js", `images/icon_${ starterTheme }.png`, () => { window.open("https://jxarco.github.io/lexgui.js/") }, { float: "left"} );

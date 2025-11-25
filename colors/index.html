@@ -1,0 +1,201 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Colors - LexGUI.js </title>
+    <link rel="stylesheet" href="../build/lexgui.css">
+    <link rel="icon" href="images/favicon.png">
+
+    <script type="importmap">
+        {
+          "imports": {
+            "lexgui": "../build/lexgui.module.js",
+            "lexgui/extensions/": "../build/extensions/"
+          }
+        }
+    </script>
+
+</head>
+
+<body>
+
+</body>
+
+<script type="module">
+
+    import { LX } from 'lexgui';
+
+    window.LX = LX;
+
+    const area = await LX.init({ layoutMode: "document", rootClass: "wrapper" });
+    const starterTheme = LX.getTheme();
+
+    // Menubar
+    {
+        const menubar = area.addMenubar([
+            { name: "Docs", callback: () => { window.open("../docs/") } },
+            { name: "Components", callback: () => { window.open("../docs/?p=components") } },
+            { name: "Examples", callback: () => { window.open("../examples/") } },
+            { name: "Colors", callback: () => { window.href = "" } }
+        ]);
+
+        menubar.setButtonImage("lexgui.js", `../images/icon_${starterTheme}.png`, () => { window.open("https://jxarco.github.io/lexgui.js/") }, { float: "left" });
+
+        LX.addSignal("@on_new_color_scheme", (el, value) => {
+            menubar.setButtonImage("lexgui.js", `../images/icon_${value}.png`);
+        });
+
+        const commandButton = new LX.Button(null, `Search command...<span class="ml-auto">${LX.makeKbd(["Ctrl", "Space"], false, "bg-tertiary border px-1 rounded").innerHTML}</span>`, () => { LX.setCommandbarState(true) }, {
+            width: "256px", className: "right", buttonClass: "p-4 fg-tertiary bg-primary"
+        }
+        );
+        menubar.root.appendChild(commandButton.root);
+
+        menubar.addButtons([
+            {
+                title: "Github",
+                icon: "Github@solid",
+                callback: (event) => window.open("https://github.com/jxarco/lexgui.js/", "_blank")
+            },
+            {
+                title: "Switch Theme",
+                icon: starterTheme == "dark" ? "Moon" : "Sun",
+                swap: starterTheme == "dark" ? "Sun" : "Moon",
+                callback: (value, event) => { LX.switchTheme() }
+            },
+            {
+                title: "Switch Spacing",
+                icon: "AlignVerticalSpaceAround",
+                callback: (value, event) => { LX.switchSpacing() }
+            }
+        ], { float: "right" });
+    }
+
+    let copyFormat = "hex";
+    let lastCopied = null;
+
+    const header = LX.makeContainer([null, "auto"], "flex flex-col gap-3 py-8 items-center", `
+    <a class="text-md">Get started with LexGUI.js <span class="text-sm fg-secondary">${LX.version}</span></a>
+    <p class="fg-primary font-semibold tracking-tight" style="font-size:2.75rem">Use Tailwind Colors</p>
+    <p class="fg-primary font-light text-xxl text-center text-balance" style="max-width:48rem">The complete Tailwind color palette in HEX, RGB, HSL, CSS variables, and classes. Ready to copy and paste into your project.</p>`, area);
+
+    const updateExampleString = () =>
+    {
+        switch( copyFormat )
+        {
+            case "hex": exampleString.innerHTML = lastCopied?.hex ?? "#fed7aa"; break;
+            case "rgb": exampleString.innerHTML = lastCopied?.rgb ?? "rgb(254,215,170)"; break;
+            case "hsl": exampleString.innerHTML = lastCopied?.hsl ?? "hsl(32.1,97.7%,83.1%)"; break;
+            case "oklch": exampleString.innerHTML = lastCopied?.oklch ?? "oklch(0.90,0.07,71)"; break;
+            case "className": exampleString.innerHTML = lastCopied?.className ?? "orange-200"; break;
+            case "var": exampleString.innerHTML = lastCopied?.var ?? "--orange-200"; break;
+        }
+    }
+
+    const headerButtons = LX.makeContainer( [ "100%", "auto" ], "flex flex-row mt-2 gap-2 justify-center", ``, header );
+    LX.makeContainer( [ "auto", "auto" ], "text-md content-center", `Format`, headerButtons );
+    const formatSelect = new LX.Select( null, ["hex", "rgb", "hsl", "oklch", "className", "var"], copyFormat, (v) => {
+        copyFormat = v;
+        updateExampleString();
+    }, { skipReset: true } );
+    headerButtons.appendChild( formatSelect.root );
+    const exampleString = LX.makeContainer( [ "auto", "auto" ], "text-md content-center fg-tertiary font-medium", `#fed7aa`, headerButtons );
+
+    function createColorBlock(name, value) {
+        const block = document.createElement('div');
+        block.className = "w-full flex flex-col gap-2 fg-tertiary hover:fg-primary cursor-pointer";
+        block.innerHTML = `
+            <div class="h-32 bg-${ name } rounded-lg border">
+                ${ LX.makeIcon( "Clipboard", { svgClass: "copySvg ml-auto mr-2 mt-2 opacity-0" } ).innerHTML }
+            </div>
+            <div class="hex self-center font-code text-md" data-copy="${value.hex}">${ name }</div>
+        `;
+        block.querySelector(".copySvg").style.transition = "opacity 0.15s linear, color 0.15s linear";
+        block.colorData = value;
+
+        block.addEventListener( "mouseover", e => {
+            block.querySelector(".copySvg").classList.toggle( "opacity-0", false );
+        });
+        block.addEventListener( "mouseleave", e => {
+            block.querySelector(".copySvg").classList.toggle( "opacity-0", true );
+        });
+
+        block.addEventListener( "click", e => {
+            lastCopied = LX.deepCopy( block.colorData );
+            lastCopied.className = name;
+            lastCopied.var = `--${ name }`;
+            let val = lastCopied[ copyFormat ];
+            navigator.clipboard.writeText( val );
+            block.querySelector(".copySvg").classList.add( "fg-success" );
+            setTimeout( () => block.querySelector(".copySvg").classList.remove( "fg-success" ), 1500 );
+
+            updateExampleString();
+            LX.toast( `${ LX.makeIcon( "CircleCheck" ).innerHTML } Copied ${ val } to clipboard.`, null, { position: "top-center", timeout: 3000 } );
+        });
+
+        return block;
+    }
+
+    const container = LX.makeContainer( ["80%", "auto"], "self-center p-12 flex flex-col gap-4", "", area );
+
+    LX.requestJSON( "../registry/colors.json", ( colors ) => 
+    {
+        // loop through each color
+        for( const key in colors )
+        {
+            const value = colors[ key ];
+
+            if( Array.isArray( value ) )
+            {
+                // e.g. slate[ {scale, hex}, ... ]
+                const colorClass = LX.makeContainer( ["100%", "auto"], "font-semibold text-md p-2", LX.toTitleCase( key ), container );
+                const group = LX.makeContainer( ["100%", "auto"], "flex flex-row gap-2", "", container );
+
+                value.forEach(entry => {
+                    group.appendChild(createColorBlock(`${key}-${entry.scale}`, entry));
+                });
+            }
+        }
+    });
+
+    // Footer
+    {
+        const footer = new LX.Footer({
+            className: "border-top",
+            parent: LX.root,
+            columns: [
+                {
+                    title: "LexGUI",
+                    items: [
+                        { title: "Source code on Github", link: "https://github.com/jxarco/lexgui.js/" }
+                    ]
+                },
+                {
+                    title: "Projects",
+                    items: [
+                        { title: "Animics", link: "https://animics.gti.upf.edu/" },
+                        { title: "Performs", link: "https://performs.gti.upf.edu/" }
+                    ]
+                },
+                {
+                    title: "References",
+                    items: [
+                        { title: "shadcn/ui", link: "https://ui.shadcn.com/" },
+                        { title: "Radix UI", link: "https://www.radix-ui.com/" },
+                    ]
+                }
+            ],
+            credits: `2019-${new Date().getUTCFullYear()} Alex Rodríguez and contributors. Website source code on GitHub.`,
+            socials: [
+                { title: "Github", link: "https://github.com/jxarco/lexgui.js/", icon: "Github" },
+                { title: "Discord", link: "https://discord.gg/vwqVrMZBXv", icon: "Discord" }
+            ]
+        });
+    }
+
+</script>
+
+</html>
