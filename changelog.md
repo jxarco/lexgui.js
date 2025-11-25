@@ -5,9 +5,10 @@
 Minor fixes.
 
 AssetView:
-- Support for renaming items.
-- Support for `options.onItemDragged`.
-- Support select and preview also from the asset explorer.
+- Added support for renaming items.
+- Added support for `options.onItemDragged`.
+- Added support for `options.itemContextMenuOptions` to customize item context menu entries.
+- Added support select and preview also from the asset explorer.
 - `AssetView.addItem` (previously `_addItem`) now updates the tree using optional `updateTree` param.
 - Fixed some empty folder path issues.
 - Fixed `lastModifiedDate` on preview some assets.

@@ -49,7 +49,10 @@
         // skipBrowser: true,
         // skipPreview: true,
         // rootPath: "../",
-        // onlyFolders: false
+        // onlyFolders: false,
+        itemContextMenuOptions: [
+            { name: "Move", callback: ( item ) => { console.log(item) } }
+        ]
     });
     bottomArea.attach(assetView);
 

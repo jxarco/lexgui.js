@@ -89,7 +89,7 @@ class AssetView {
         this.onlyFolders = options.onlyFolders ?? true;
         this.allowMultipleSelection = options.allowMultipleSelection ?? false;
         this.previewActions = options.previewActions ?? [];
-        this.contextMenu = options.contextMenu ?? [];
+        this.itemContextMenuOptions = options.itemContextMenuOptions;
         this.onRefreshContent = options.onRefreshContent;
         this.onItemDragged = options.onItemDragged;
 
@@ -362,28 +362,37 @@ class AssetView {
             }
         });
 
-        if( this.contextMenu )
-        {
-            itemEl.addEventListener('contextmenu', function( e ) {
-                e.preventDefault();
+        itemEl.addEventListener('contextmenu', function( e ) {
+            e.preventDefault();
 
-                const multiple = that.content.querySelectorAll('.selected').length;
+            const multiple = that.content.querySelectorAll('.selected').length;
 
-                LX.addContextMenu( multiple > 1 ? (multiple + " selected") :
-                            isFolder ? item.id : item.type, e, m => {
-                    if( multiple <= 1 )
-                    {
-                        m.add("Rename", that._renameItem.bind( that, item ));
-                    }
-                    if( !isFolder )
-                    {
-                        m.add("Clone", that._cloneItem.bind( that, item ));
-                    }
+            LX.addContextMenu( multiple > 1 ? ( multiple + " selected" ) : isFolder ? item.id : item.type, e, m =>
+            {
+                if( multiple <= 1 )
+                {
+                    m.add("Rename", that._renameItem.bind( that, item ));
+                }
+
+                if( !isFolder )
+                {
+                    m.add("Clone", that._cloneItem.bind( that, item ));
+                }
+
+                m.add("Delete", that._deleteItem.bind( that, item ));
+
+                if( that.itemContextMenuOptions )
+                {
                     m.add("");
-                    m.add("Delete", that._deleteItem.bind( that, item ));
-                });
+
+                    for( let o of that.itemContextMenuOptions )
+                    {
+                        if( !o.name || !o.callback ) continue;
+                        m.add( o.name, o.callback?.bind( that, item ) );
+                    }
+                }
             });
-        }
+        });
 
         itemEl.addEventListener("dragstart", function( e ) {
             e.preventDefault();
@@ -1073,7 +1082,7 @@ class AssetView {
             onRename( newName );
         }, { buttonClass: "contrast" });
 
-        const p = new LX.Popover( item.domEl, [ panel ], { align: "start", side: "right", sideOffset: 4 });
+        const p = new LX.Popover( item.domEl, [ panel ], { align: "center", side: "bottom", sideOffset: -128 });
     }
 
     _lastModifiedToStringDate( lm ) {
