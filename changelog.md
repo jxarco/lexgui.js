@@ -2,7 +2,23 @@
 
 ## dev
 
-## 0.7.14 (master)
+## 0.7.15 (master)
+
+Minor fixes.
+Docs updated.
+
+AssetView:
+- Added support for renaming items.
+- Added support for `options.onItemDragged`.
+- Added support for `options.itemContextMenuOptions` to customize item context menu entries.
+- Added support select and preview also from the asset explorer.
+- `AssetView.addItem` (previously `_addItem`) now updates the tree using optional `updateTree` param.
+- Fixed some empty folder path issues.
+- Fixed `lastModifiedDate` on preview some assets.
+- Fixed clearing preview panel on delete item.
+- Removed not used "Properties" item context menu entry.
+
+## 0.7.14
 
 CodeEditor:
 - Added support for add/remove multi-line indentation.

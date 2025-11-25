@@ -15,8 +15,8 @@ const NodeTree = LX.NodeTree;
 const TreeEvent = LX.TreeEvent;
 const ContextMenu = LX.ContextMenu;
 
-export class AssetViewEvent {
-
+export class AssetViewEvent
+{
     static NONE             = 0;
     static ASSET_SELECTED   = 1;
     static ASSET_DELETED    = 2;
@@ -84,7 +84,8 @@ export class AssetView
     prevData: any[] = [];
     nextData: any[] = [];
     data: any[] = [];
-    currentData: any[];
+    currentData: any[] = [];
+    currentFolder: any;
     path: string[] = [];
     rootPath: string = "";
     selectedItem: any = null;
@@ -106,6 +107,8 @@ export class AssetView
     previewActions: any[] = [];
     contextMenu: any[] = [];
     onRefreshContent: any = null;
+    itemContextMenuOptions: any = null;
+    onItemDragged: any = null;
 
     onevent: any = null;
 
@@ -144,8 +147,9 @@ export class AssetView
         this.onlyFolders = options.onlyFolders ?? this.onlyFolders;
         this.allowMultipleSelection = options.allowMultipleSelection ?? this.allowMultipleSelection;
         this.previewActions = options.previewActions ?? [];
-        this.contextMenu = options.contextMenu ?? [];
+        this.itemContextMenuOptions = options.itemContextMenuOptions;
         this.onRefreshContent = options.onRefreshContent;
+        this.onItemDragged = options.onItemDragged;
         this.gridScale = options.gridScale ?? this.gridScale;
 
         if( this.gridScale !== 1.0 )
@@ -175,6 +179,7 @@ export class AssetView
 
         this._processData( this.data, null );
 
+        this.currentFolder = null;
         this.currentData = this.data;
         this.path = ['@'];
 
@@ -210,14 +215,303 @@ export class AssetView
         this.currentData = this.data;
         this.path = [ '@' ];
 
-        if( !this.skipBrowser && this.area )
+        if( !this.skipBrowser )
         {
-            this._createTreePanel( this.area );
+            this.tree.refresh( {
+                id: '/',
+                children: this.data
+            } );
         }
 
         this._refreshContent();
 
         this.onevent = onevent;
+    }
+
+    /**
+    * @method addItem
+    */
+
+    addItem( item: any, childIndex: number | undefined, updateTree: boolean = true )
+    {
+        const isListLayout = ( this.layout == AssetView.LAYOUT_LIST );
+        const isGridLayout = ( this.layout == AssetView.LAYOUT_GRID ); // default
+        const type = item.type.charAt( 0 ).toUpperCase() + item.type.slice( 1 );
+        const extension = LX.getExtension( item.id );
+        const isFolder = type === "Folder";
+        const that = this;
+
+        let itemEl = document.createElement('li');
+        itemEl.className = "lexassetitem " + item.type.toLowerCase();
+        itemEl.tabIndex = -1;
+        LX.insertChildAtIndex( this.content, itemEl, childIndex );
+
+        if( !item.uid )
+        {
+            item.uid = LX.guidGenerator();
+        }
+
+        if( item.lastModified && !item.lastModifiedDate )
+        {
+            item.lastModifiedDate = this._lastModifiedToStringDate( item.lastModified );
+        }
+
+        if( !this.useNativeTitle )
+        {
+            let desc = document.createElement( 'span' );
+            desc.className = 'lexitemdesc';
+            desc.id = `floatingTitle_${ item.uid }`;
+            desc.innerHTML = `File: ${ item.id }<br>Type: ${ type }`;
+            LX.insertChildAtIndex( this.content, desc, childIndex ? childIndex + 1 : undefined );
+
+            itemEl.addEventListener( "mousemove", ( e: MouseEvent ) => {
+
+                if( !isGridLayout )
+                {
+                    return;
+                }
+
+                const target: any = e.target;
+                const dialog = itemEl.closest('dialog');
+                const rect = itemEl.getBoundingClientRect();
+                const targetRect = target.getBoundingClientRect();
+
+                let localOffsetX = rect.x + e.offsetX;
+                let localOffsetY = rect.y + e.offsetY;
+
+                if( dialog )
+                {
+                    const dialogRect = dialog.getBoundingClientRect();
+                    localOffsetX -= dialogRect.x;
+                    localOffsetY -= dialogRect.y;
+                }
+
+                if( target.classList.contains( "lexassettitle" ) )
+                {
+                    localOffsetY += ( targetRect.y - rect.y );
+                }
+
+                desc.style.left = ( localOffsetX ) + "px";
+                desc.style.top = ( localOffsetY - 36 ) + "px";
+            } );
+        }
+        else
+        {
+            itemEl.title = type + ": " + item.id;
+        }
+
+        if( this.allowMultipleSelection )
+        {
+            let checkbox = document.createElement( 'input' );
+            checkbox.type = "checkbox";
+            checkbox.className = "lexcheckbox";
+            checkbox.checked = item.selected;
+            checkbox.addEventListener('change', ( e: any ) => {
+                item.selected = !item.selected;
+                if( this.onevent )
+                {
+                    const event = new AssetViewEvent(AssetViewEvent.ASSET_CHECKED, e.shiftKey ? [item] : item );
+                    event.multiple = !!e.shiftKey;
+                    this.onevent( event );
+                }
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+            });
+
+            itemEl.appendChild( checkbox );
+        }
+
+        let title = document.createElement('span');
+        title.className = "lexassettitle";
+        title.innerText = item.id;
+        itemEl.appendChild( title );
+
+        if( !this.skipPreview )
+        {
+            if( item.type === 'video' )
+            {
+                const itemVideo = LX.makeElement( 'video', 'absolute left-0 top-0 w-full border-none pointer-events-none', '', itemEl );
+                itemVideo.setAttribute( 'disablePictureInPicture', false );
+                itemVideo.setAttribute( 'disableRemotePlayback', false );
+                itemVideo.setAttribute( 'loop', true );
+                itemVideo.setAttribute( 'async', true );
+                itemVideo.style.transition = 'opacity 0.2s ease-out';
+                itemVideo.style.opacity = item.preview ? '0' : '1';
+                itemVideo.src = item.src;
+                itemVideo.volume = item.videoVolume ?? 0.4;
+            }
+
+            let preview = null;
+
+            const previewSrc    = item.preview ?? item.src;
+            const hasImage = previewSrc && (
+                (() => {
+                    const ext = LX.getExtension( previewSrc.split( '?' )[ 0 ].split( '#' )[ 0 ]); // get final source without url parameters/anchors
+                    return ext ? ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'avif'].includes( ext.toLowerCase() ) : false;
+                })()
+                || previewSrc.startsWith( 'data:image/' )
+            );
+
+            if( hasImage || isFolder || !isGridLayout )
+            {
+                const defaultPreviewPath    = `${ this.rootPath }images/file.png`;
+                const defaultFolderPath     = `${ this.rootPath }images/folder.png`;
+
+                preview = document.createElement('img');
+                let realSrc = item.unknownExtension ? defaultPreviewPath : ( isFolder ? defaultFolderPath : previewSrc );
+                preview.src = ( isGridLayout || isFolder ? realSrc : defaultPreviewPath );
+                itemEl.appendChild( preview );
+            }
+            else
+            {
+                preview = document.createElement( 'svg' );
+                preview.className = 'asset-file-preview';
+                itemEl.appendChild( preview );
+
+                let textEl = document.createElement( 'text' );
+                textEl.innerText = ( !extension || extension == item.id ) ? item.type.toUpperCase() : ( `${ extension.toUpperCase() }` ); // If no extension, e.g. Clip, use the type...
+                preview.appendChild( textEl );
+
+                var newLength = textEl.innerText.length;
+                var charsPerLine = 2.5;
+                var newEmSize = charsPerLine / newLength;
+                var textBaseSize = 64;
+
+                if( newEmSize < 1 )
+                {
+                    var newFontSize = newEmSize * textBaseSize;
+                    textEl.style.fontSize = newFontSize + 'px';
+                    preview.style.paddingTop = `calc(50% - ${ ( textEl.offsetHeight * 0.5 + 10 ) }px)`;
+                }
+            }
+        }
+
+        // Add item type info
+        let itemInfoHtml = type;
+
+        if( isListLayout )
+        {
+            if( item.bytesize ) itemInfoHtml += ` | ${ LX.formatBytes( item.bytesize ) }`;
+            if( item.lastModifiedDate ) itemInfoHtml += ` | ${ item.lastModifiedDate }`;
+        }
+
+        LX.makeContainer( [ 'auto', 'auto' ], 'lexassetinfo', itemInfoHtml, itemEl );
+
+        itemEl.addEventListener('click', function( e )
+        {
+            e.stopImmediatePropagation();
+            e.stopPropagation();
+
+            const isDoubleClick = ( e.detail == LX.MOUSE_DOUBLE_CLICK );
+
+            if( !isDoubleClick )
+            {
+                if( !e.shiftKey )
+                {
+                    that.content.querySelectorAll( '.lexassetitem').forEach( i => i.classList.remove( 'selected' ) );
+                }
+
+                this.classList.add( 'selected' );
+                that.selectedItem = item;
+
+                if( !that.skipPreview )
+                {
+                    that._previewAsset( item );
+                }
+            }
+            else if( isFolder )
+            {
+                that._enterFolder( item );
+                return;
+            }
+
+            if( that.onevent )
+            {
+                const event = new AssetViewEvent(isDoubleClick ? AssetViewEvent.ASSET_DBLCLICKED : AssetViewEvent.ASSET_SELECTED, e.shiftKey ? [item] : item );
+                event.multiple = !!e.shiftKey;
+                that.onevent( event );
+            }
+        });
+
+        itemEl.addEventListener('contextmenu', function( e )
+        {
+            e.preventDefault();
+
+            const multiple = that.content.querySelectorAll('.selected').length;
+
+            LX.addContextMenu( multiple > 1 ? ( multiple + " selected" ) : isFolder ? item.id : item.type, e, ( m: typeof ContextMenu ) =>
+            {
+                if( multiple <= 1 )
+                {
+                    m.add("Rename", that._renameItem.bind( that, item ));
+                }
+
+                if( !isFolder )
+                {
+                    m.add("Clone", that._cloneItem.bind( that, item ));
+                }
+
+                m.add("Delete", that._deleteItem.bind( that, item ));
+
+                if( that.itemContextMenuOptions )
+                {
+                    m.add("");
+
+                    for( let o of that.itemContextMenuOptions )
+                    {
+                        if( !o.name || !o.callback ) continue;
+                        m.add( o.name, o.callback?.bind( that, item ) );
+                    }
+                }
+            });
+        });
+
+        itemEl.addEventListener("dragstart", function( e ) {
+            e.preventDefault();
+        }, false );
+
+        itemEl.addEventListener( "mouseenter", ( e: MouseEvent ) =>
+        {
+            if( !that.useNativeTitle && isGridLayout )
+            {
+                const desc: HTMLElement | null = that.content.querySelector( `#floatingTitle_${ item.uid }` );
+                if( desc ) desc.style.display = "unset";
+            }
+
+            if( item.type !== "video" ) return;
+            e.preventDefault();
+            const video: any = itemEl.querySelector( "video" );
+            video.style.opacity = "1";
+            video.play();
+        } );
+
+        itemEl.addEventListener( "mouseleave", ( e: MouseEvent ) =>
+        {
+            if( !that.useNativeTitle && isGridLayout )
+            {
+                setTimeout( () => {
+                    const desc: HTMLElement | null = that.content.querySelector( `#floatingTitle_${ item.uid }` );
+                    if( desc ) desc.style.display = "none";
+                }, 100 );
+            }
+
+            if( item.type !== "video" ) return;
+            e.preventDefault();
+            const video: any = itemEl.querySelector( "video" );
+            video.pause();
+            video.currentTime = 0;
+            if( item.preview )
+            {
+                video.style.opacity = "0";
+            }
+        } );
+
+        if( !this.skipBrowser && updateTree )
+        {
+            this.tree.refresh();
+        }
+
+        return itemEl;
     }
 
     /**
@@ -265,21 +559,26 @@ export class AssetView
     * @method _updatePath
     */
 
-    _updatePath( data: any )
+    _updatePath()
     {
         this.path.length = 0;
 
-        const _pushParentsId = ( i: any ) => {
-            if( !i ) return;
-            let list = i.children ? i.children : i;
-            let c = list[ 0 ];
-            if( !c ) return;
-            if( !c.folder ) return;
-            this.path.push( c.folder.id ?? '@' );
-            _pushParentsId( c.folder.folder );
-        };
+        if( this.currentFolder && this.currentFolder.parent )
+        {
+            this.path.push( this.currentFolder.id );
 
-        _pushParentsId( data );
+            const _pushParentsId = ( i: any ) => {
+                if( !i ) return;
+                this.path.push( i.parent ? i.id : '@' );
+                _pushParentsId( i.parent );
+            };
+
+            _pushParentsId( this.currentFolder.parent );
+        }
+        else
+        {
+            this.path.push( '@' );
+        }
 
         LX.emitSignal( "@on_folder_change", this.path.reverse().join('/') );
     }
@@ -317,24 +616,62 @@ export class AssetView
                 switch( event.type )
                 {
                     case LX.TreeEvent.NODE_SELECTED:
-                        if( !event.multiple )
+                    {
+                        if( event.multiple )
                         {
-                            this._enterFolder( node );
+                            return;
                         }
                         if( !node.parent )
                         {
-                            this.prevData.push( this.currentData );
+                            if( this.currentFolder )
+                            {
+                                this.prevData.push( this.currentFolder );
+                            }
+
+                            this.currentFolder = null;
                             this.currentData = this.data;
                             this._refreshContent();
+                            this._updatePath();
+                        }
+                        else
+                        {
+                            this._enterFolder( node.type === "folder" ? node : node.parent );
 
-                            this.path = ['@'];
-                            LX.emitSignal("@on_folder_change", this.path.join('/'));
+                            this._previewAsset( node );
+
+                            if( node.type !== "folder" )
+                            {
+                                this.content.querySelectorAll( '.lexassetitem').forEach( i => i.classList.remove( 'selected' ) );
+                                const dom = node.domEl;
+                                dom?.classList.add( 'selected' );
+                            }
+
+                            this.selectedItem = node;
                         }
                         break;
+                    }
                     case LX.TreeEvent.NODE_DRAGGED:
-                        node.folder = value;
+                    {
+                        if( node.parent )
+                        {
+                            const idx = node.parent.children.indexOf( node );
+                            node.parent.children.splice( idx, 1 );
+                        }
+
+                        node.folder = node.parent = value;
+
+                        if( !value.children ) value.children = [];
+
+                        value.children.push( node );
+
+                        if( this.onItemDragged )
+                        {
+                            this.onItemDragged( node, value );
+                        }
+
                         this._refreshContent();
                         break;
+                    }
                 }
             },
         });
@@ -445,22 +782,17 @@ export class AssetView
                         value: "Left",
                         icon: "ArrowLeft",
                         callback: () => {
-                            if( !this.prevData.length ) return;
-                            this.nextData.push( this.currentData );
-                            this.currentData = this.prevData.pop();
-                            this._refreshContent();
-                            this._updatePath( this.currentData );
+                            if( !this.prevData.length || !this.currentFolder ) return;
+                            this.nextData.push( this.currentFolder );
+                            this._enterFolder( this.prevData.pop(), false )
                         }
                     },
                     {
                         value: "Right",
                         icon: "ArrowRight",
                         callback: () => {
-                            if(!this.nextData.length) return;
-                            this.prevData.push( this.currentData );
-                            this.currentData = this.nextData.pop();
-                            this._refreshContent();
-                            this._updatePath( this.currentData );
+                            if( !this.nextData.length || !this.currentFolder ) return;
+                            this._enterFolder( this.nextData.pop() );
                         }
                     },
                     {
@@ -471,7 +803,7 @@ export class AssetView
                 ], { noSelection: true } );
 
                 this.toolsPanel.addText(null, this.path.join('/'), null, {
-                    inputClass: "nobg", disabled: true, signal: "@on_folder_change",
+                    width: "75%", inputClass: "nobg", disabled: true, signal: "@on_folder_change",
                     style: { fontWeight: "600", fontSize: "15px" }
                 });
 
@@ -513,7 +845,6 @@ export class AssetView
 
     _refreshContent( searchValue?: string, filter?: string )
     {
-        const isGridLayout = ( this.layout == AssetView.LAYOUT_GRID ); // default
         const isCompactLayout = ( this.layout == AssetView.LAYOUT_COMPACT );
         const isListLayout = ( this.layout == AssetView.LAYOUT_LIST );
 
@@ -521,275 +852,6 @@ export class AssetView
         this.searchValue = searchValue ?? ( this.searchValue ?? "" );
         this.content.innerHTML = "";
         this.content.className = `lexassetscontent${ isCompactLayout ? " compact" : ( isListLayout ? " list" : "" ) }`;
-        let that = this;
-
-        const _addItem = function( item: any )
-        {
-            const type = item.type.charAt( 0 ).toUpperCase() + item.type.slice( 1 );
-            const extension = LX.getExtension( item.id );
-            const isFolder = type === "Folder";
-
-            let itemEl = document.createElement('li');
-            itemEl.className = "lexassetitem " + item.type.toLowerCase();
-            itemEl.tabIndex = -1;
-            that.content.appendChild( itemEl );
-
-            if( !item.uid )
-            {
-                item.uid = LX.guidGenerator();
-            }
-
-            if( item.lastModified && !item.lastModifiedDate )
-            {
-                item.lastModifiedDate = that._lastModifiedToStringDate( item.lastModified );
-            }
-
-            if( !that.useNativeTitle )
-            {
-                let desc = document.createElement( 'span' );
-                desc.className = 'lexitemdesc';
-                desc.id = `floatingTitle_${ item.uid }`;
-                desc.innerHTML = `File: ${ item.id }<br>Type: ${ type }`;
-                that.content.appendChild( desc );
-
-                itemEl.addEventListener( "mousemove", ( e: MouseEvent ) =>
-                {
-                    if( !isGridLayout )
-                    {
-                        return;
-                    }
-
-                    const dialog = itemEl.closest('dialog');
-                    const rect = itemEl.getBoundingClientRect();
-                    const target = e.target as any;
-                    const targetRect = target.getBoundingClientRect();
-
-                    let localOffsetX = rect.x + e.offsetX;
-                    let localOffsetY = rect.y + e.offsetY;
-
-                    if( dialog )
-                    {
-                        const dialogRect = dialog.getBoundingClientRect();
-                        localOffsetX -= dialogRect.x;
-                        localOffsetY -= dialogRect.y;
-                    }
-
-                    if( target.classList.contains( "lexassettitle" ) )
-                    {
-                        localOffsetY += ( targetRect.y - rect.y );
-                    }
-
-                    desc.style.left = ( localOffsetX ) + "px";
-                    desc.style.top = ( localOffsetY - 36 ) + "px";
-                } );
-            }
-            else
-            {
-                itemEl.title = type + ": " + item.id;
-            }
-
-            if( that.allowMultipleSelection )
-            {
-                let checkbox = document.createElement( 'input' );
-                checkbox.type = "checkbox";
-                checkbox.className = "lexcheckbox";
-                checkbox.checked = item.selected;
-                checkbox.addEventListener('change', ( e: any ) => {
-                    item.selected = !item.selected;
-                    if( that.onevent )
-                    {
-                        const event = new AssetViewEvent( AssetViewEvent.ASSET_CHECKED, e.shiftKey ? [ item ] : item );
-                        event.multiple = !!e.shiftKey;
-                        that.onevent( event );
-                    }
-                    e.stopPropagation();
-                    e.stopImmediatePropagation();
-                });
-
-                itemEl.appendChild( checkbox );
-            }
-
-            let title = document.createElement('span');
-            title.className = "lexassettitle";
-            title.innerText = item.id;
-            itemEl.appendChild( title );
-
-            if( !that.skipPreview )
-            {
-                if( item.type === 'video' )
-                {
-                    const itemVideo = LX.makeElement( 'video', 'absolute left-0 top-0 w-full border-none pointer-events-none', '', itemEl );
-                    itemVideo.setAttribute( 'disablePictureInPicture', false );
-                    itemVideo.setAttribute( 'disableRemotePlayback', false );
-                    itemVideo.setAttribute( 'loop', true );
-                    itemVideo.setAttribute( 'async', true );
-                    itemVideo.style.transition = 'opacity 0.2s ease-out';
-                    itemVideo.style.opacity = item.preview ? '0' : '1';
-                    itemVideo.src = item.src;
-                    itemVideo.volume = item.videoVolume ?? 0.4;
-                }
-
-                let preview = null;
-
-                const previewSrc    = item.preview ?? item.src;
-                const hasImage = previewSrc && (
-                    (() => {
-                        const ext = LX.getExtension( previewSrc.split( '?' )[ 0 ].split( '#' )[ 0 ]); // get final source without url parameters/anchors
-                        return ext ? ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'avif'].includes( ext.toLowerCase() ) : false;
-                    })()
-                    || previewSrc.startsWith( 'data:image/' )
-                );
-
-                if( hasImage || isFolder || !isGridLayout )
-                {
-                    const defaultPreviewPath    = `${ that.rootPath }images/file.png`;
-                    const defaultFolderPath     = `${ that.rootPath }images/folder.png`;
-
-                    preview = document.createElement('img');
-                    let realSrc = item.unknownExtension ? defaultPreviewPath : ( isFolder ? defaultFolderPath : previewSrc );
-                    preview.src = ( isGridLayout || isFolder ? realSrc : defaultPreviewPath );
-                    itemEl.appendChild( preview );
-                }
-                else
-                {
-                    preview = document.createElement( 'svg' );
-                    preview.className = 'asset-file-preview';
-                    itemEl.appendChild( preview );
-
-                    let textEl = document.createElement( 'text' );
-                    textEl.innerText = ( !extension || extension == item.id ) ? item.type.toUpperCase() : ( `.${ extension.toUpperCase() }` ); // If no extension, e.g. Clip, use the type...
-                    preview.appendChild( textEl );
-
-                    var newLength = textEl.innerText.length;
-                    var charsPerLine = 2.5;
-                    var newEmSize = charsPerLine / newLength;
-                    var textBaseSize = 64;
-
-                    if( newEmSize < 1 )
-                    {
-                        var newFontSize = newEmSize * textBaseSize;
-                        textEl.style.fontSize = newFontSize + 'px';
-                        preview.style.paddingTop = `calc(50% - ${ ( textEl.offsetHeight * 0.5 + 10 ) }px)`;
-                    }
-                }
-            }
-
-            // Add item type info
-            let itemInfoHtml = type;
-
-            if( isListLayout )
-            {
-                if( item.bytesize ) itemInfoHtml += ` | ${ LX.formatBytes( item.bytesize ) }`;
-                if( item.lastModifiedDate ) itemInfoHtml += ` | ${ item.lastModifiedDate }`;
-            }
-
-            LX.makeContainer( [ 'auto', 'auto' ], 'lexassetinfo', itemInfoHtml, itemEl );
-
-            itemEl.addEventListener('click', function( e )
-            {
-                e.stopImmediatePropagation();
-                e.stopPropagation();
-
-                const isDoubleClick = ( e.detail == LX.MOUSE_DOUBLE_CLICK );
-
-                if( !isDoubleClick )
-                {
-                    if( !e.shiftKey )
-                    {
-                        that.content.querySelectorAll( '.lexassetitem').forEach( i => i.classList.remove( 'selected' ) );
-                    }
-
-                    this.classList.add( 'selected' );
-                    that.selectedItem = item;
-
-                    if( !that.skipPreview )
-                    {
-                        that._previewAsset( item );
-                    }
-                }
-                else if( isFolder )
-                {
-                    that._enterFolder( item );
-                    return;
-                }
-
-                if( that.onevent )
-                {
-                    const event = new AssetViewEvent(isDoubleClick ? AssetViewEvent.ASSET_DBLCLICKED : AssetViewEvent.ASSET_SELECTED, e.shiftKey ? [item] : item );
-                    event.multiple = !!e.shiftKey;
-                    that.onevent( event );
-                }
-            });
-
-            if( that.contextMenu )
-            {
-                itemEl.addEventListener( 'contextmenu', function( e ) {
-                    e.preventDefault();
-
-                    const multiple = that.content.querySelectorAll('.selected').length;
-
-                    LX.addContextMenu( multiple > 1 ? (multiple + " selected") :
-                                isFolder ? item.id : item.type, e, ( m: typeof ContextMenu ) => {
-                        if( multiple <= 1 )
-                        {
-                            m.add("Rename");
-                        }
-                        if( !isFolder )
-                        {
-                            m.add("Clone", that._cloneItem.bind( that, item ));
-                        }
-                        if( multiple <= 1 )
-                        {
-                            m.add("Properties");
-                        }
-                        m.add("");
-                        m.add("Delete", that._deleteItem.bind( that, item ));
-                    });
-                });
-            }
-
-            itemEl.addEventListener("dragstart", function( e ) {
-                e.preventDefault();
-            }, false );
-
-            itemEl.addEventListener( "mouseenter", ( e ) =>
-            {
-                if( !that.useNativeTitle && isGridLayout )
-                {
-                    const desc: any = that.content.querySelector( `#floatingTitle_${ item.uid }` );
-                    if( desc ) desc.style.display = "unset";
-                }
-
-                if( item.type !== "video" ) return;
-                e.preventDefault();
-                const video: any = itemEl.querySelector( "video" );
-                video.style.opacity = "1";
-                video.play();
-            } );
-
-            itemEl.addEventListener( "mouseleave", ( e ) =>
-            {
-                if( !that.useNativeTitle && isGridLayout )
-                {
-                    setTimeout( () => {
-                        const desc: any = that.content.querySelector( `#floatingTitle_${ item.id }` );
-                        if( desc ) desc.style.display = "none";
-                    }, 100 );
-                }
-
-                if( item.type !== "video" ) return;
-                e.preventDefault();
-                const video: any = itemEl.querySelector( "video" );
-                video.pause();
-                video.currentTime = 0;
-                if( item.preview )
-                {
-                    video.style.opacity = "0";
-                }
-            } );
-
-            return itemEl;
-        }
 
         const fr = new FileReader();
 
@@ -826,7 +888,7 @@ export class AssetView
                 } });
             }else
             {
-                item.domEl = _addItem( item );
+                item.domEl = this.addItem( item, undefined, false );
             }
         }
 
@@ -847,7 +909,12 @@ export class AssetView
 
     _previewAsset( file: any )
     {
-        const is_base_64 = file.src && file.src.includes( "data:image/" );
+        if( this.skipPreview )
+        {
+            return;
+        }
+
+        const is_base_64 = file.src && file.src.includes("data:image/");
 
         this.previewPanel.clear();
         this.previewPanel.branch("Asset");
@@ -859,6 +926,11 @@ export class AssetView
             {
                 this.previewPanel.addImage( null, file.src, { style: { width: "100%" } } );
             }
+        }
+
+        if( file.lastModified && !file.lastModifiedDate )
+        {
+            file.lastModifiedDate = this._lastModifiedToStringDate( file.lastModified );
         }
 
         const options = { disabled: true };
@@ -972,15 +1044,27 @@ export class AssetView
         this._refreshContent();
     }
 
-    _enterFolder( folderItem: any )
+    _enterFolder( folderItem: any, storeCurrent: boolean = true )
     {
-        this.prevData.push( this.currentData );
-        this.currentData = folderItem.children;
+        const child = this.currentData[ 0 ];
+        const sameFolder = child?.parent?.id === folderItem.id;
+
+        if( storeCurrent )
+        {
+            this.prevData.push( this.currentFolder ?? { id: "/", children: this.data } );
+        }
+
+        this.currentFolder = folderItem;
+        this.currentData = this.currentFolder.children;
         this.contentPage = 1;
-        this._refreshContent();
+
+        if( !sameFolder )
+        {
+            this._refreshContent();
+        }
 
         // Update path
-        this._updatePath( this.currentData );
+        this._updatePath();
 
         // Trigger event
         if( this.onevent )
@@ -1008,7 +1092,16 @@ export class AssetView
             this.onevent( event );
         }
 
-        this.tree?.refresh();
+        if( !this.skipBrowser )
+        {
+            this.tree.refresh();
+        }
+
+        if( this.previewPanel )
+        {
+            this.previewPanel.clear();
+        }
+
         this._processData( this.data );
     }
 
@@ -1034,6 +1127,60 @@ export class AssetView
         }
 
         this._processData( this.data );
+    }
+
+    _renameItem( item: any )
+    {
+        const idx = this.currentData.indexOf( item );
+        if( idx < 0 )
+        {
+            return;
+        }
+
+        const oldName = item.id;
+        const wasSelected = LX.hasClass( item.domEl, "selected" );
+
+        const onRename = ( value: string ) =>
+        {
+            p.destroy();
+
+            const hoverTitle: HTMLElement | null = this.content.querySelector( `#floatingTitle_${ item.id.replace( /\s/g, '_' ).replaceAll( ".", "_" ) }` );
+            if( hoverTitle ) hoverTitle.remove();
+            item.domEl.remove();
+
+            item.id = value;
+            item.domEl = this.addItem( item, idx * 2 );
+
+            if( this.onevent )
+            {
+                const event = new AssetViewEvent( AssetViewEvent.ASSET_RENAMED, item, oldName );
+                this.onevent( event );
+            }
+
+            if( wasSelected )
+            {
+                this._previewAsset( item );
+            }
+
+            if( !this.skipBrowser )
+            {
+                this.tree.refresh();
+            }
+
+            this._processData( this.data );
+        }
+
+        let newName = item.id;
+        const panel = new LX.Panel();
+        panel.addText( null, item.id, ( v: string, e: any ) => {
+            newName = v;
+            if( e.constructor === KeyboardEvent ) onRename( v );
+        });
+        panel.addButton( null, "Save", () => {
+            onRename( newName );
+        }, { buttonClass: "contrast" });
+
+        const p = new LX.Popover( item.domEl, [ panel ], { align: "center", side: "bottom", sideOffset: -128 });
     }
 
     _lastModifiedToStringDate( lm: number ): string

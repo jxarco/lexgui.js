@@ -49,9 +49,15 @@
         // useNativeTitle: true,
         // skipBrowser: true,
         // skipPreview: true,
-        // rootPath: "../"
+        // rootPath: "../",
+        // onlyFolders: false,
+        itemContextMenuOptions: [
+            { name: "Move", callback: ( item ) => { console.log(item) } }
+        ]
     });
     bottomArea.attach(assetView);
+
+    window.av = assetView;
 
     let assetData = [
         {
@@ -92,9 +98,9 @@
             lastModified: 1740588312813
         },
         {
-            id: "test.json",
+            id: "json_sample.json",
             type: "JSON",
-            src: "../data/test.json",
+            src: "../data/json_sample.json",
             lastModified: 1740581312813
         },
         {
@@ -161,7 +167,11 @@
                 {
                     id: "empty_folder",
                     type: "folder",
-                    children: []
+                    children: [{
+                        id: "another_empty_folder",
+                        type: "folder",
+                        children: []
+                    }]
                 }
             ]
         },
@@ -204,7 +214,7 @@
                 console.log(event.item.id + " cloned");
                 break;
             case LX.AssetViewEvent.ASSET_RENAMED:
-                console.log(event.item.id + " is now called " + event.value);
+                console.log(event.value + " is now called " + event.item.id);
                 break;
         }
     });
