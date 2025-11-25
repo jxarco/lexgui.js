@@ -53,6 +53,8 @@
     });
     bottomArea.attach(assetView);
 
+    window.av = assetView;
+
     let assetData = [
         {
             id: "dog.png",
@@ -161,7 +163,11 @@
                 {
                     id: "empty_folder",
                     type: "folder",
-                    children: []
+                    children: [{
+                        id: "another_empty_folder",
+                        type: "folder",
+                        children: []
+                    }]
                 }
             ]
         },

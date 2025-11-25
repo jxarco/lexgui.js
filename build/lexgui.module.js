@@ -16391,6 +16391,7 @@ class AssetView {
 
         this._processData( this.data, null );
 
+        this.currentFolder = null;
         this.currentData = this.data;
         this.path = ['@'];
 
@@ -16481,21 +16482,26 @@ class AssetView {
     * @method _updatePath
     */
 
-    _updatePath( data ) {
+    _updatePath() {
 
         this.path.length = 0;
 
-        const push_parents_id = i => {
-            if( !i ) return;
-            let list = i.children ? i.children : i;
-            let c = list[ 0 ];
-            if( !c ) return;
-            if( !c.folder ) return;
-            this.path.push( c.folder.id ?? '@' );
-            push_parents_id( c.folder.folder );
-        };
+        if( this.currentFolder && this.currentFolder.parent )
+        {
+            this.path.push( this.currentFolder.id );
 
-        push_parents_id( data );
+            const push_parents_id = i => {
+                if( !i ) return;
+                this.path.push( i.parent ? i.id : '@' );
+                push_parents_id( i.parent );
+            };
+
+            push_parents_id( this.currentFolder.parent );
+        }
+        else
+        {
+            this.path.push( '@' );
+        }
 
         LX.emit( "@on_folder_change", this.path.reverse().join('/') );
     }
@@ -16539,12 +16545,15 @@ class AssetView {
                         }
                         if( !node.parent )
                         {
-                            this.prevData.push( this.currentData );
+                            if( this.currentFolder )
+                            {
+                                this.prevData.push( this.currentFolder );
+                            }
+
+                            this.currentFolder = null;
                             this.currentData = this.data;
                             this._refreshContent();
-
-                            this.path = ['@'];
-                            LX.emit("@on_folder_change", this.path.join('/'));
+                            this._updatePath();
                         }
                         else
                         {
@@ -16662,22 +16671,17 @@ class AssetView {
                         value: "Left",
                         icon: "ArrowLeft",
                         callback: domEl => {
-                            if(!this.prevData.length) return;
-                            this.nextData.push( this.currentData );
-                            this.currentData = this.prevData.pop();
-                            this._refreshContent();
-                            this._updatePath( this.currentData );
+                            if( !this.prevData.length || !this.currentFolder ) return;
+                            this.nextData.push( this.currentFolder );
+                            this._enterFolder( this.prevData.pop(), false );
                         }
                     },
                     {
                         value: "Right",
                         icon: "ArrowRight",
                         callback: domEl => {
-                            if(!this.nextData.length) return;
-                            this.prevData.push( this.currentData );
-                            this.currentData = this.nextData.pop();
-                            this._refreshContent();
-                            this._updatePath( this.currentData );
+                            if( !this.nextData.length || !this.currentFolder ) return;
+                            this._enterFolder( this.nextData.pop() );
                         }
                     },
                     {
@@ -16688,7 +16692,7 @@ class AssetView {
                 ], { noSelection: true } );
 
                 this.toolsPanel.addText(null, this.path.join('/'), null, {
-                    inputClass: "nobg", disabled: true, signal: "@on_folder_change",
+                    width: "75%", inputClass: "nobg", disabled: true, signal: "@on_folder_change",
                     style: { fontWeight: "600", fontSize: "15px" }
                 });
 
@@ -17177,13 +17181,18 @@ class AssetView {
         this._refreshContent();
     }
 
-    _enterFolder( folderItem ) {
+    _enterFolder( folderItem, storeCurrent = true ) {
 
         const child = this.currentData[ 0 ];
         const sameFolder = child?.parent?.id === folderItem.id;
 
-        this.prevData.push( this.currentData );
-        this.currentData = folderItem.children;
+        if( storeCurrent )
+        {
+            this.prevData.push( this.currentFolder ?? { id: "/", children: this.data } );
+        }
+
+        this.currentFolder = folderItem;
+        this.currentData = this.currentFolder.children;
         this.contentPage = 1;
 
         if( !sameFolder )
@@ -17192,7 +17201,7 @@ class AssetView {
         }
 
         // Update path
-        this._updatePath( this.currentData );
+        this._updatePath();
 
         // Trigger event
         if( this.onevent )
