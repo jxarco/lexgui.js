@@ -131,7 +131,7 @@ export class Table extends BaseComponent
         // Append header
         if( this.filter || this.customFilters || this._toggleColumns )
         {
-            const headerContainer = LX.makeContainer( [ "100%", "auto" ], "flex flex-row" );
+            const headerContainer = LX.makeContainer( [ "100%", "auto" ], "flex flex-row mb-2" );
 
             if( this.filter )
             {
@@ -308,6 +308,7 @@ export class Table extends BaseComponent
         }
 
         const table = document.createElement( 'table' );
+        LX.addClass( table, options.tableClass );
         container.appendChild( table );
 
         this.refresh = () => {

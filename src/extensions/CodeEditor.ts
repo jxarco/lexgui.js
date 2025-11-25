@@ -892,7 +892,7 @@ export class CodeEditor
                 box.appendChild( searchPanel.root );
 
                 searchPanel.sameLine( 4 );
-                searchPanel.addText( null, "", null, { placeholder: "Find" } );
+                searchPanel.addText( null, "", null, { placeholder: "Find", inputClass: "bg-secondary" } );
                 searchPanel.addButton( null, "up", () => this.search( null, true ), { icon: "ArrowUp", title: "Previous Match", tooltip: true } );
                 searchPanel.addButton( null, "down", () => this.search(), { icon: "ArrowDown", title: "Next Match", tooltip: true } );
                 searchPanel.addButton( null, "x", this.hideSearchBox.bind( this ), { icon: "X", title: "Close", tooltip: true } );
@@ -1214,7 +1214,7 @@ export class CodeEditor
                     return;
                 }
 
-                if( e.ctrlKey )
+                if( e.ctrlKey && this.onRun )
                 {
                     this.onRun( this.getText() );
                     return;
@@ -3090,7 +3090,10 @@ export class CodeEditor
                 return true;
             case 's': // save
                 e.preventDefault();
-                this.onSave( this.getText() );
+                if( this.onSave )
+                {
+                    this.onSave( this.getText() );
+                }
                 return true;
             case 'u': // k+u, uncomment line
                 e.preventDefault();

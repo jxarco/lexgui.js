@@ -235,7 +235,7 @@ export class Tour
             const closeIcon = LX.makeIcon( "X" );
             closer.appendChild( closeIcon );
 
-            closeIcon.listen( "click", () => {
+            LX.listen( closeIcon, "click", () => {
                 this.stop();
             } );
         }

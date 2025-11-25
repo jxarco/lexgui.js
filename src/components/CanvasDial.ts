@@ -19,7 +19,7 @@ class CanvasDial {
         element.style.width = element.style.height = options.size || "100%";
         element.style.minWidth = element.style.minHeight = "50px";
 
-        element.bgcolor = options.bgColor || LX.getThemeColor( "global-dark-background" );
+        element.bgcolor = options.bgColor || LX.getThemeColor( "global-background" );
         element.pointscolor = options.pointsColor || LX.getThemeColor( "global-color-accent-light" );
         element.linecolor = options.lineColor || "#555";
         element.value = value || [];
@@ -33,6 +33,12 @@ class CanvasDial {
         element.draggable_y = options.draggableY ?? true;
         element.smooth = (options.smooth && typeof( options.smooth ) == 'number' ? options.smooth : 0.3) || false;
         element.move_out = options.moveOutAction ?? LX.CURVE_MOVEOUT_DELETE;
+
+        LX.addSignal( "@on_new_color_scheme", ( el: HTMLElement, value: string ) => {
+            element.bgcolor = options.bgColor || LX.getThemeColor( "global-background" );
+            element.pointscolor = options.pointsColor || LX.getThemeColor( "global-color-accent-light" );
+            this.redraw();
+        } );
 
         this.element = element;
 

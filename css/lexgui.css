@@ -1,6 +1,7 @@
 /* lexgui.css @jxarco */
 
 /* cssnano start ignore */
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 @font-face { font-family: "GeistSans"; src: url("https://raw.githubusercontent.com/jxarco/lexgui.js/master/data/GeistSans.ttf"); }
 @font-face { font-family: "CascadiaCode"; src: url("https://raw.githubusercontent.com/jxarco/lexgui.js/master/data/CascadiaCode.ttf"); font-weight: 400; }
 /* cssnano end ignore */
@@ -9,9 +10,9 @@
     /* default color scheme */
     color-scheme: dark;
 
-    --global-font: "GeistSans", sans-serif;
+    --global-font: "Inter", sans-serif;
     --global-code-font: "CascadiaCode", monospace;
-    --global-title-font: "GeistSans", sans-serif;
+    --global-title-font: "Inter", sans-serif;
     --global-font-size-xs: 0.625rem; /* 10px */
     --global-font-size-sm: 0.75rem; /* 12px */
     --global-font-size: 0.875rem; /* 14px */
@@ -19,17 +20,17 @@
     --global-font-size-xl: 1.125rem; /* 18px */
     --global-font-size-xxl: 1.375rem; /* 22px */
 
-    --global-text-primary: light-dark(#0a0a0a, #f5f5f5);
-    --global-text-secondary: light-dark(#262626, #e0e0e0);
-    --global-text-tertiary: light-dark(#404040, #cccccc);
-    --global-text-quaternary: light-dark(#595959, #b3b3b3);
-    --global-text-quinary: light-dark(#737373, #999999);
+    --global-text-primary: light-dark(#0a0a0a, #e5e5e5);
+    --global-text-secondary: light-dark(#262626, #d5d5d5);
+    --global-text-tertiary: light-dark(#404040, #c1c1c1);
+    --global-text-quaternary: light-dark(#595959, #b2b2b2);
+    --global-text-quinary: light-dark(#737373, #a1a1a1);  /* muted text */
 
-    --global-color-primary: light-dark(#f5f5f5, #0a0a0a);
-    --global-color-secondary: light-dark(#e0e0e0, #262626);
-    --global-color-tertiary: light-dark(#cccccc, #404040);
-    --global-color-quaternary: light-dark(#b3b3b3, #595959);
-    --global-color-quinary: light-dark(#999999, #737373);
+    --global-color-primary: light-dark(#f5f5f5, #171717);
+    --global-color-secondary: light-dark(#e0e0e0, #262626); /* muted background */
+    --global-color-tertiary: light-dark(#cccccc, #353535);
+    --global-color-quaternary: light-dark(#b3b3b3, #555);
+    --global-color-quinary: light-dark(#999999, #646464);
 
     --global-color-accent: #2d69da;
     --global-color-accent-light: #0d99ff;
@@ -38,17 +39,23 @@
     --global-color-error: #f54c4c;
     --global-color-warning: #ffc107;
 
-    --global-intense-background: light-dark(#fefefe, #040405);
-    --global-medium-background: #252525;
+    --global-background: light-dark(#fefefe, #0a0a0a);
+    --global-background-secondary: light-dark(#eeeeee, #1a1a1a);
     --global-blur-background: light-dark(#f7f7f7d8, #1f1f1fe7);
     --global-color-transparent: #00000000;
-    --global-border-color: light-dark(oklch(92.2% 0 0), oklch(100% 0 0 / .1));
+    --global-border-color: light-dark(#e5e5e5, #ffffff1a);
 
-    --global-padding-xs: 0.25rem;
-    --global-padding-sm: 0.375rem;
-    --global-padding-md: 0.5rem;
-    --global-padding-lg: 0.75rem;
-    --global-padding-xl: 1rem;
+    --global-chart-color-1: oklch(0.488 0.243 264.376);
+    --global-chart-color-2: oklch(0.696 0.17 162.48);
+    --global-chart-color-3: oklch(0.769 0.188 70.08);
+    --global-chart-color-4: oklch(0.627 0.265 303.9);
+    --global-chart-color-5: oklch(0.645 0.246 16.439);
+
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.375rem;
+    --spacing-md: 0.5rem;
+    --spacing-lg: 0.75rem;
+    --spacing-xl: 1rem;
 
     --svg-size-xxs: 0.5rem;
     --svg-size-xs: 0.7rem;
@@ -65,11 +72,11 @@
 }
 
 :root[data-spacing="compact"] {
-    --global-padding-xs: 0.15rem;
-    --global-padding-sm: 0.25rem;
-    --global-padding-md: 0.35rem;
-    --global-padding-lg: 0.5rem;
-    --global-padding-xl: 0.75rem;
+    --spacing-xs: 0.15rem 0.25rem; /* keep minimum inline padding */
+    --spacing-sm: 0.25rem;
+    --spacing-md: 0.35rem;
+    --spacing-lg: 0.5rem;
+    --spacing-xl: 0.75rem;
 }
 
 :root[data-theme="light"] { color-scheme: light }
@@ -204,7 +211,7 @@ body {
     padding: 0;
     overflow: hidden;
     font-family: var(--global-font);
-    background-color: var(--global-color-primary);
+    background-color: var(--global-background);
 }
 
 #lexroot {
@@ -653,7 +660,7 @@ a svg, svg path {
 /* Footer */
 
 .lexfooter {
-    background-color: var(--global-color-primary);
+    background-color: var(--global-background);
     padding: 0.5rem;
     width: 100%;
     font-size: var(--global-font-size);
@@ -733,7 +740,7 @@ a svg, svg path {
 
 .lexdialog {
     outline: none;
-    border: 1px solid #aaaaaa48;
+    border: 1px solid var(--global-border-color);
     background: none;
     margin: 0;
     padding: 0;
@@ -742,9 +749,9 @@ a svg, svg path {
     min-height: max-content;
     overflow: hidden;
     box-shadow: 0 2px 6px #101010bb;
-    border-radius: 8px;
+    border-radius: 12px;
     z-index: 101;
-    background-color: var(--global-color-secondary);
+    background-color: var(--global-background-secondary);
 }
 
 .lexdialog:has(.lexselect) {
@@ -758,7 +765,7 @@ a svg, svg path {
     font-size: var(--global-font-size-xl);
     color: var(--global-text-secondary);
     text-shadow: 0px 1px 6px #22222283;
-    padding: var(--global-padding-lg);
+    padding: var(--spacing-lg);
     border-top-left-radius: 8px;
     border-top-right-radius: 8px;
     outline: none;
@@ -832,7 +839,7 @@ a svg, svg path {
 .lexdialog.pocket .lexdialogtitle {
     width: 100%;
     font-size: var(--global-font-size-lg);
-    background: var(--global-intense-background);
+    background: var(--global-background);
 }
 
 .lexdialog.pocket .lexdialogcontent {
@@ -1107,7 +1114,7 @@ a svg, svg path {
     z-index: 150;
     display: flex;
     flex-direction: column;
-    padding: var(--global-padding-xs);
+    padding: var(--spacing-xs);
     border-radius: 6px;
     border: 1px solid #7a797c4f;
     outline: none;
@@ -1119,7 +1126,7 @@ a svg, svg path {
 .lexdropdownmenuitem {
     display: flex;
     flex-direction: row;
-    padding: var(--global-padding-md);
+    padding: var(--spacing-md);
     border-radius: 6px;
     gap: 0.5rem;
     white-space: nowrap;
@@ -1194,7 +1201,7 @@ a svg, svg path {
 /* Area */
 
 .lexarea {
-    background-color: var(--global-color-primary);
+    background-color: var(--global-background);
     margin: 0;
 }
 
@@ -1230,7 +1237,7 @@ a svg, svg path {
 
 .lexpanel {
     margin: 0;
-    padding: var(--global-padding-xs);
+    padding: var(--spacing-xs);
     overflow: hidden;
     overflow-y: scroll;
 }
@@ -1249,8 +1256,8 @@ a svg, svg path {
 }
 
 .lexbranch .lexbranchcontent {
-    padding: var(--global-padding-xs);
-    background-color: var(--global-color-secondary);
+    padding: var(--spacing-xs);
+    background-color: var(--global-background-secondary);
     border-bottom-left-radius: 8px;
     border-bottom-right-radius: 8px;
 }
@@ -1264,10 +1271,10 @@ a svg, svg path {
     font-size: var(--global-font-size-lg);
     font-weight: 500;
     color: var(--global-text-primary);
-    background-color: var(--global-color-secondary);
+    background-color: var(--global-background-secondary);
     text-shadow: 0px 1px 6px #42424260;
     letter-spacing: calc(var(--global-font-size-lg) * 0.025);
-    padding: var(--global-padding-lg);
+    padding: var(--spacing-lg);
     display: flex;
     border-top-left-radius: 8px;
     border-top-right-radius: 8px;
@@ -1321,7 +1328,7 @@ a svg, svg path {
 .lexcomponent {
     display: flex;
     align-items: center;
-    padding: var(--global-padding-xs);
+    padding: var(--spacing-xs);
     font-size: var(--global-font-size);
     color: var(--global-text-primary);
     line-height: 2;
@@ -1419,9 +1426,9 @@ a svg, svg path {
 
 .lexcomponent input:not(.lexcheckbox, .lextoggle, .lexrangeslider) {
     font-family: var(--global-font);
-    padding: var(--global-padding-xs);
+    padding: var(--spacing-sm);
     color: var(--global-text-primary);
-    --background-color: var(--global-color-tertiary);
+    --background-color: var(--global-color-secondary);
     background-color: var(--background-color);
     outline: none;
     border-radius: 6px;
@@ -1453,7 +1460,7 @@ a svg, svg path {
     border-radius: 6px;
     position: relative;
     border: 1px solid transparent;
-    padding: var(--global-padding-xs) 0.75rem;
+    padding: var(--spacing-sm) 0.75rem;
 }
 
 .lexcomponent .lextext:disabled {
@@ -1513,7 +1520,7 @@ a svg, svg path {
     word-break: break-word;
     font-family: var(--global-font);
     background: none;
-    padding: var(--global-padding-md);
+    padding: var(--spacing-md);
     color: var(--global-text-primary);
     outline: none;
     border-radius: 6px;
@@ -1653,7 +1660,7 @@ a svg, svg path {
     font-weight: 600;
     font-size: var(--global-font-size);
     margin: 12px;
-    padding: var(--global-padding-xs) var(--global-padding-lg);
+    padding: var(--spacing-xs) var(--spacing-lg);
     line-height: 1.5;
     display: grid;
     align-content: center;
@@ -1687,13 +1694,13 @@ a svg, svg path {
 /* Button Component */
 
 .lexbutton {
-    --button-color: var(--global-color-tertiary);
-    --border-color: var(--global-color-quinary);
+    --button-color: var(--global-color-secondary);
+    --border-color: var(--global-border-color);
     background-color: var(--button-color);
     border: 1px solid transparent;
     border-radius: 6px;
     min-width: 1.8rem;
-    min-height: 22px !important;
+    height: calc(var(--spacing-md) * 4);
     align-content: center;
     color: var(--global-text-primary);
     outline: none;
@@ -1707,24 +1714,29 @@ a svg, svg path {
 }
 
 /* Colors */
-.lexbutton.primary { --button-color: var(--global-color-primary); --border-color: var(--global-color-quaternary); color: var(--global-text-primary); }
-.lexbutton.secondary { --button-color: var(--global-color-secondary); --border-color: var(--global-color-quaternary); color: var(--global-text-primary);  }
-.lexbutton.accent { --button-color: var(--global-color-accent); --border-color: var(--global-color-quaternary); color: #fefefe;  }
-.lexbutton.contrast { --button-color: var(--global-text-primary); --border-color: var(--global-color-quaternary); color: var(--global-color-primary);  }
+.lexbutton.primary { --button-color: var(--global-color-primary); color: var(--global-text-primary); }
+.lexbutton.secondary { --button-color: var(--global-color-secondary); color: var(--global-text-primary);  }
+.lexbutton.accent { --button-color: var(--global-color-accent); color: #fefefe;  }
+.lexbutton.contrast { --button-color: var(--global-text-primary); color: var(--global-color-primary);  }
 .lexbutton.success { --button-color: var(--global-color-success); --border-color: #013101; color: var(--border-color);  }
 .lexbutton.error { --button-color: var(--global-color-error); --border-color: #310108; color: var(--border-color);  }
 .lexbutton.warning { --button-color: var(--global-color-warning); --border-color: #793205; color: var(--border-color);  }
 
 /* Few Sizes */
+.lexbutton.no-h { height: unset; }
 .lexbutton.xs { width: 35%; margin: 0 auto; }
 .lexbutton.sm { width: 65%; margin: 0 auto; }
 
 /* Styles */
-.lexbutton.outline {
-    border-color: var(--button-color);
+.lexbutton.outline { border-color: var(--button-color); background: none; }
+.lexbutton.outline.accent, 
+.lexbutton.outline.contrast,
+.lexbutton.outline.success,
+.lexbutton.outline.error,
+.lexbutton.outline.warning { color: var(--button-color);  }
+/* .lexbutton.outline:not(.primary, .secondary) {
     color: var(--button-color);
-    background: none;
-}
+} */
 .lexbutton.dashed {
     border-style: dashed;
     border-color: var(--border-color);
@@ -1789,10 +1801,10 @@ a svg, svg path {
 
 .lexcombobuttons .lexcombobuttonsbox {
     display: flex;
-    background-color: var(--global-color-tertiary);
+    background-color: var(--global-color-secondary);
     width: max-content;
     justify-self: center;
-    padding: var(--global-padding-xs);
+    padding: var(--spacing-xs);
     border-radius: 8px;
     gap: 0.2em;
 }
@@ -1809,7 +1821,7 @@ a svg, svg path {
     display: flex;
     padding: 0.35em 1em;
     transition: 0.2s;
-    --button-color: var(--global-color-tertiary);
+    --button-color: var(--global-color-secondary);
 }
 
 .lexcombobuttons .lexbutton.combo:hover {
@@ -2257,7 +2269,7 @@ dialog .lexselect .lexselectoptions {
     height: 16px;
     min-width: 16px !important;
     min-height: 16px !important;
-    background-color: var(--global-intense-background);
+    background-color: var(--global-background);
     border: 1px solid var(--global-text-tertiary) !important;
 }
 
@@ -2310,13 +2322,13 @@ dialog .lexselect .lexselectoptions {
     border-radius: 4px;
     border: 2px solid var(--global-color-transparent);
     margin-right: 2px;
-    background-color: var(--global-color-tertiary);
+    background-color: var(--global-color-secondary);
     transition: 0.1s linear;
     cursor: text;
 }
 
 .lexvector .vecbox:hover {
-    background-color: color-mix(in srgb, var(--global-color-tertiary), #000 7%);
+    background-color: color-mix(in srgb, var(--global-color-secondary), #000 7%);
 }
 
 .lexcomponent .numberbox .drag-icon,
@@ -2395,7 +2407,7 @@ input[type=number] {
     width: 100%;
     display: flex;
     flex-direction: column;
-    background-color: var(--global-color-tertiary);
+    background-color: var(--global-color-secondary);
     border: 1px solid var(--global-color-transparent);
     border-radius: 6px;
     margin-right: 2px;
@@ -2409,7 +2421,7 @@ input[type=number] {
 }
 
 .lexcomponent .numberbox:hover {
-    background-color: color-mix(in srgb, var(--global-color-tertiary), #000 7%);
+    background-color: color-mix(in srgb, var(--global-color-secondary), #000 7%);
 }
 
 .lexcomponent .numberbox:has(input:focus) {
@@ -2417,7 +2429,7 @@ input[type=number] {
 }
 
 .lexcomponent .numberbox .input-box {
-    padding-block: var(--global-padding-xs);
+    padding-block: var(--spacing-xs);
 }
 
 .lexcomponent .numberbox .input-box input {
@@ -2627,7 +2639,7 @@ input[type=number] {
 
 .lexcomponent .lexpad .lexinnerpad {
     border-radius: 4px;
-    background-color: light-dark(var(--global-color-tertiary), var(--global-intense-background));
+    background-color: light-dark(var(--global-color-tertiary), var(--global-background));
 }
 
 .lexcomponent .lexpad .lexinnerpad .lexpadthumb {
@@ -2706,7 +2718,6 @@ input[type=number] {
 
 .lextree .lextreetools {
     background: var(--global-color-tertiary);
-    padding: 2px;
     padding-inline: 8px;
     display: flex;
     align-items: center;
@@ -2814,7 +2825,7 @@ input[type=number] {
 
 .lextree .lextreeitem:hover {
     color: var(--global-text-primary);
-    background: var(--global-color-secondary);
+    background: var(--global-color-primary);
 }
 
 .lextree .lextreeitem.selected {
@@ -2995,7 +3006,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 
 .lexmenubar {
     width: 100%;
-    background-color: var(--global-color-primary);
+    background-color: var(--global-background);
     display: flex;
     overflow: hidden;
     height: 100%;
@@ -3038,7 +3049,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 
 .lexmenubar .lexmenubuttons {
     display: inline-flex;
-    background-color: var(--global-color-secondary);
+    background-color: var(--global-color-primary);
     height: 75%;
     margin: auto;
     border-radius: 6px;
@@ -3150,7 +3161,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexcontextmenu .lexmenuboxentry.cmtitle {
-    background: light-dark(var(--global-color-tertiary), var(--global-intense-background));
+    background: light-dark(var(--global-color-tertiary), var(--global-background));
     font-weight: 600;
     cursor: default;
 }
@@ -3291,8 +3302,8 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 
 .lexsidebar .lexsidebarentry {
     width: 100%;
-    padding-inline: var(--global-padding-md);
-    padding-block: var(--global-padding-sm);
+    padding-inline: var(--spacing-md);
+    padding-block: var(--spacing-sm);
     margin-block: 0.15rem;
     border-radius: 8px;
     cursor: pointer;
@@ -3460,7 +3471,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexsidebar .lexavatar {
-    background-color: var(--global-intense-background);
+    background-color: var(--global-background);
 }
 
 .lexsidebar:not(.collapsing) .lexavatar:has(svg) {
@@ -3597,7 +3608,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 
 .lexoverlaybuttons .lexbutton {
     --button-color: var(--global-color-secondary);
-    padding: var(--global-padding-sm) var(--global-padding-sm);
+    padding: var(--spacing-sm) var(--spacing-sm);
     font-size: var(--global-font-size-lg);
     border-radius: 10px;
     justify-content: center;
@@ -3674,7 +3685,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexareatabs.dockingtab {
-    background-color: #9ebbd65e !important;
+    background-color: var(--global-color-tertiary) !important;
 }
 
 .lexareatabs .lexareatab {
@@ -3702,14 +3713,14 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexareatabs.row {
-    background-color: var(--global-color-tertiary);
+    background-color: var(--global-color-secondary);
     border-radius: 8px;
     padding: 3px;
     gap: 0.1em;
 }
 
 .lexareatabs.row .lexareatab {
-    padding: var(--global-padding-md) 1.45em;
+    padding: var(--spacing-md) 1.45em;
     transition: 0.1s;
     background: none;
     border-radius: 6px;
@@ -3824,7 +3835,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     position: absolute;
     top: 0;
     left: 0;
-    padding: var(--global-padding-xs);
+    padding: var(--spacing-xs);
     padding-inline-start: 8px;
     border-top-left-radius: 6px;
     border-top-right-radius: 6px;
@@ -3880,8 +3891,9 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 /* List Component */
 
 .lexlist {
-    background: var(--global-color-primary);
+    background: var(--global-background);
     border-radius: 4px;
+    border: 1px solid var(--global-border-color);
     padding: 4px;
     display: grid;
 }
@@ -3941,7 +3953,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 .lexcomponent:has(.lexcheckboxsubmenu)[data-opened=true],
 .lexcomponent:has(.lextogglesubmenu)[data-opened=true],
 .lexcomponent:has(.lexcustomcontainer)[data-opened=true] {
-    background-color: light-dark(var(--global-color-tertiary), var(--global-medium-background));
+    background-color: light-dark(var(--global-color-tertiary), var(--global-background-secondary));
 }
 
 .lexarray .lexcomponent {
@@ -3972,9 +3984,9 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     display: inline-flex;
     flex-wrap: wrap;
     line-height: 12px;
-    background-color: var(--global-color-tertiary);
+    background-color: var(--global-color-secondary);
     border-radius: 8px;
-    padding: var(--global-padding-xs);
+    padding: var(--spacing-xs);
 }
 
 .lextags input {
@@ -3985,7 +3997,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     padding: 6px;
     background-color: var(--global-color-primary);
     margin: 2px;
-    border-radius: 6px;
+    border-radius: 8px;
     min-width: 16px;
     justify-content: center;
     color: var(--global-text-primary);
@@ -4041,12 +4053,12 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 .lextable table {
     width: 100%;
     border: 1px solid;
-    border-color: var(--global-color-tertiary);
+    border-color: var(--global-color-secondary);
     border-collapse: separate;
     border-radius: 8px;
     border-spacing: 0px;
     overflow: hidden;
-    background-color: var(--global-color-primary);
+    background-color: var(--global-background);
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
@@ -4072,7 +4084,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lextable tr:has(input:checked) {
-    background-color: var(--global-color-tertiary);
+    background-color: var(--global-color-secondary);
 }
 
 .lextable tr:hover, .lextable tr.dragging {
@@ -4085,7 +4097,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lextable th, .lextable td {
-    padding-block: var(--global-padding-sm);
+    padding-block: var(--spacing-sm);
     padding-inline: 12px;
     text-align: left;
     align-content: center;
@@ -4105,7 +4117,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     cursor: pointer;
     transition: all 0.1s linear;
     white-space: nowrap;
-    background-color: var(--global-color-tertiary);
+    background-color: var(--global-color-primary);
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
@@ -4167,7 +4179,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     border-top: 2px solid;
     overflow: hidden;
     white-space: nowrap;
-    border-color: light-dark(#dbd8d8c0, #5c5b5b7a);
+    border-color: var(--global-border-color);
 }
 
 .lextable thead:first-child tr:first-child th:first-child, .lextable tbody:first-child tr:first-child td:first-child {
@@ -4598,7 +4610,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     min-height: 190px;
     height: 100%;
     border-radius: 6px;
-    background-color: var(--global-color-primary);
+    background-color: var(--global-background);
 }
 
 .lexassetbrowser .lexarea {
@@ -4625,7 +4637,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexassetscontent.dragging {
-    background-color: var(--global-intense-background);
+    background-color: var(--global-background);
 }
 
 ul.lexassetscontent {
@@ -4670,7 +4682,7 @@ ul.lexassetscontent {
     padding: 0;
     box-shadow: 0 0 2px rgba(0, 0, 0, .14);
     overflow: hidden;
-    background-color: var(--global-color-quaternary);
+    background: linear-gradient(180deg, var(--global-color-quaternary) 10%, var(--global-background-secondary));
     cursor: pointer;
     text-align: center;
     border-top-left-radius: 2px;
@@ -4679,6 +4691,7 @@ ul.lexassetscontent {
     border-bottom-right-radius: 4px;
     position: relative;
     border-top: 4px solid rgba(0, 0, 0, 0);
+    border-radius: 8px;
 }
 
 .lexassetscontent .lexitemdesc {
@@ -4729,6 +4742,10 @@ ul.lexassetscontent {
     font-feature-settings: "ss02", 'ss19',  "ss20";
     font-weight: 800;
     color: var(--global-text-tertiary);
+}
+
+.lexassetscontent li.folder {
+    border-top: unset;
 }
 
 .lexassetscontent li.image {
@@ -4785,7 +4802,10 @@ ul.lexassetscontent {
     text-overflow: ellipsis;
     white-space: nowrap;
     align-content: center;
-    background-color: var(--global-intense-background);
+    background-color: var(--global-blur-background);
+    --webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    text-shadow: 2px 2px #00000096;
     transition: all 0.1s;
     z-index: 1;
 }
@@ -4963,7 +4983,7 @@ ul.lexassetscontent {
     display: flex;
     position: relative;
     overflow: inherit;
-    background-color: var(--global-color-secondary);
+    background-color: var(--global-color-primary);
 }
 
 .codebasearea * {
@@ -4982,14 +5002,14 @@ ul.lexassetscontent {
     border-radius: 0px !important;
     margin: 0px !important;
     border: none;
-    background-color: var(--global-color-secondary) !important;
+    background-color: var(--global-color-primary) !important;
     border-bottom: 1px solid transparent;
     transition: none;
     display: flex !important;
 }
 
 .codebasearea .lexareatab:hover {
-    background-color: var(--global-color-tertiary) !important;
+    background-color: var(--global-color-secondary) !important;
 }
 
 .codebasearea .lexareatab:first-child {
@@ -5001,7 +5021,7 @@ ul.lexassetscontent {
 }
 
 .codebasearea .lexareatab.selected {
-    background-color: light-dark(var(--global-color-secondary), var(--global-medium-background)) !important;
+    background-color: light-dark(var(--global-color-secondary), var(--global-background-secondary)) !important;
     border-bottom: 1px solid var(--global-color-accent);
     color: var(--global-text-primary) !important;
 }
@@ -5050,7 +5070,7 @@ ul.lexassetscontent {
 }
 
 .lexcodetabinfo {
-    background-color: var(--global-color-secondary);
+    background-color: var(--global-color-primary);
     position: absolute;
     z-index: 3;
     bottom: 0px;
@@ -5126,7 +5146,7 @@ ul.lexassetscontent {
 }
 
 .lexcodeeditor pre.active-line {
-    background-color: #333437a9;
+    background-color: color-mix(in srgb, var(--global-color-primary), var(--global-text-primary) 5%);
 }
 
 .lexcodeeditor.disabled pre.active-line {
@@ -5163,7 +5183,7 @@ ul.lexassetscontent {
 }
 
 .lexcodeeditor pre .line-gutter {
-    color: var(--global-text-tertiary);
+    color: var(--global-color-quinary);
     width: 48px;
     height: var(--code-editor-row-height);
     font-size: var(--code-editor-font-size);
@@ -5180,7 +5200,7 @@ ul.lexassetscontent {
 }
 
 .lexcodeeditor pre.active-line .line-gutter {
-    color: var(--global-text-primary);
+    color: var(--global-text-quaternary);
 }
 
 .lexcodeeditor.no-gutter pre .line-gutter {
@@ -5247,7 +5267,7 @@ ul.lexassetscontent {
 
 .lexcodescrollbar div {
     /* thumb */
-    background-color: #bbbbbb3d !important;
+    background-color: var(--global-color-secondary) !important;
     box-sizing: border-box;
     margin: 0;
     padding: 0;
@@ -5263,7 +5283,7 @@ ul.lexassetscontent {
 
 .lexcodescrollbar div:hover {
     /* thumb */
-    background-color: #bbbbbb8c !important;
+    background-color: var(--global-color-tertiary) !important;
 }
 
 .lexcodeeditor .lexcodeselection,
@@ -5294,13 +5314,13 @@ ul.lexassetscontent {
 }
 
 .lexcodeeditor .searchbox {
-    background-color: var(--global-color-secondary);
+    background-color: var(--global-color-primary);
     position: absolute;
     right: 6px;
     top: 26px;
     z-index: 100;
-    border-radius: 4px;
-    border: 1px solid var(--global-color-tertiary);
+    border-radius: 8px;
+    border: 1px solid var(--global-border-color);
     box-shadow: 0 0px 4px #101010;
     overflow-y: scroll;
     transform: translateY(-96px);
@@ -5318,7 +5338,7 @@ ul.lexassetscontent {
 }
 
 .lexcodeeditor .autocomplete {
-    background-color: var(--global-medium-background);
+    background-color: var(--global-color-primary);
     width: 256px;
     max-height: 132px;
     position: absolute;
@@ -5326,8 +5346,8 @@ ul.lexassetscontent {
     top: 0;
     visibility: hidden;
     z-index: 100;
-    border-radius: 4px;
-    border: 1px solid var(--global-color-tertiary);
+    border-radius: 8px;
+    border: 1px solid var(--global-border-color);
     box-shadow: 0 0px 4px #101010;
     overflow-x: hidden;
     overflow-y: scroll;
@@ -5352,7 +5372,7 @@ ul.lexassetscontent {
 }
 
 .lexcodeeditor .autocomplete pre:hover {
-    background-color: var(--global-color-tertiary);
+    background-color: var(--global-color-secondary);
     cursor: pointer;
 }
 
@@ -5942,7 +5962,7 @@ ul.lexassetscontent {
 }
 
 .lexvideoeditor .lexcontrolspanel {
-    background-color: var(--global-intense-background);
+    background-color: var(--global-background);
     margin: 0;
     display: flex;
     align-content: center;
@@ -6026,6 +6046,7 @@ ul.lexassetscontent {
 /* Colors */
 /* Using !important to override anything written in main stylesheet */
 
+.bg-background { --background-color: var(--global-background); background-color: var(--background-color)!important }
 .bg-primary { --background-color: var(--global-color-primary); background-color: var(--background-color)!important }
 .bg-secondary { --background-color: var(--global-color-secondary); background-color: var(--background-color)!important }
 .bg-tertiary { --background-color: var(--global-color-tertiary); background-color: var(--background-color)!important }

@@ -90,7 +90,7 @@ export class Button extends BaseComponent
 
         var wValue: any = document.createElement( 'button' );
         wValue.title = options.tooltip ? "" : ( options.title ?? "" );
-        wValue.className = "lexbutton p-1 " + ( options.buttonClass ?? "" );
+        wValue.className = "lexbutton px-3 " + ( options.buttonClass ?? "" );
         this.root.appendChild( wValue );
 
         if( options.selected )

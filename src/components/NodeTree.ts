@@ -456,7 +456,7 @@ export class NodeTree
                     {
                         action.callback( node, swapValue, event );
                     }
-                }, { icon: action.icon, swap: action.swap, title: action.name, hideName:true, className: "p-0 m-0", buttonClass: "p-0 m-0 bg-none" } );
+                }, { icon: action.icon, swap: action.swap, title: action.name, hideName:true, className: "p-0 m-0", buttonClass: "p-0 m-0 bg-none no-h" } );
                 actionBtn.root.style.minWidth = "fit-content";
                 actionBtn.root.style.margin = "0"; // adding classes does not work
                 actionBtn.root.style.padding = "0"; // adding classes does not work

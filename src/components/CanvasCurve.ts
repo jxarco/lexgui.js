@@ -21,7 +21,7 @@ export class CanvasCurve {
         element.style.minWidth = "50px";
         element.style.minHeight = "20px";
 
-        element.bgcolor = options.bgColor || LX.getThemeColor( "global-intense-background" );
+        element.bgcolor = options.bgColor || LX.getThemeColor( "global-background" );
         element.pointscolor = options.pointsColor || LX.getThemeColor( "global-color-accent" );
         element.activepointscolor = options.activePointsColor || LX.getThemeColor( "global-color-accent-light" );
         element.linecolor = options.lineColor || "#555";
@@ -38,7 +38,7 @@ export class CanvasCurve {
         element.move_out = options.moveOutAction ?? LX.CURVE_MOVEOUT_DELETE;
 
         LX.addSignal( "@on_new_color_scheme", ( el: HTMLElement, value: string ) => {
-            element.bgcolor = options.bgColor || LX.getThemeColor( "global-intense-background" );
+            element.bgcolor = options.bgColor || LX.getThemeColor( "global-background" );
             element.pointscolor = options.pointsColor || LX.getThemeColor( "global-color-accent" );
             element.activepointscolor = options.activePointsColor || LX.getThemeColor( "global-color-accent-light" );
             this.redraw();

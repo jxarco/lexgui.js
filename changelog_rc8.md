@@ -27,5 +27,7 @@ Additions:
 - Added "dev" icons, Vscode, godot, unity, UE, go, css, android, etc.
 
 Styling:
-- More TW classes
 - Main theme colors updates
+- Improved color consistency with darker tones
+- Use Inter font as default font
+- More TW classes

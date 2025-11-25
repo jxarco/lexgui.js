@@ -21,7 +21,7 @@ const starterTheme = LX.getTheme();
     } );
 
     const commandButton = new LX.Button(null, `Search command...<span class="ml-auto">${ LX.makeKbd( ["Ctrl", "Space"], false, "bg-tertiary border px-1 rounded" ).innerHTML }</span>`, () => { LX.setCommandbarState( true ) }, {
-        width: "256px", className: "right", buttonClass: "border fg-tertiary bg-secondary" }
+        width: "256px", className: "right", buttonClass: "px-4 border fg-tertiary bg-primary" }
     );
     menubar.root.appendChild( commandButton.root );
 
@@ -49,14 +49,14 @@ const starterTheme = LX.getTheme();
 {
     const header = LX.makeContainer( [ null, "auto" ], "flex flex-col border-top border-bottom gap-3 px-10 py-8 items-center", `
         <a>Get started with LexGUI.js <span class="text-sm fg-secondary">${ LX.version }</span></a>
-        <h1 style="font-size:2.5rem">Build your application interface</h1>
-        <p class="font-light text-xl text-center" style="max-width:48rem">A set of beautifully-designed, accessible components.
+        <p class="fg-primary font-semibold tracking-tight" style="font-size:2.25rem">Build your Application Interface</p>
+        <p class="fg-primary font-light text-xxl text-center text-balance" style="max-width:48rem">A set of beautifully-designed, accessible components.
         No complex frameworks. Pure JavaScript and CSS. Open Source.</p>
     `, area );
 
     const headerButtons = LX.makeContainer( [ "auto", "auto" ], "flex flex-row", ``, header );
-    const getStartedButton = new LX.Button( null, "Get Started", () => window.open( "./docs/", "_blank" ), { buttonClass: "contrast p-1 px-3" } );
-    const componentsButton = new LX.Button( null, "View Components", () => window.open( "./docs/?p=components", "_blank" ), { buttonClass: "tertiary p-1 px-3" } );
+    const getStartedButton = new LX.Button( null, "Get Started", () => window.open( "./docs/", "_blank" ), { buttonClass: "contrast" } );
+    const componentsButton = new LX.Button( null, "View Components", () => window.open( "./docs/?p=components", "_blank" ), { buttonClass: "tertiary" } );
     headerButtons.appendChild( getStartedButton.root );
     headerButtons.appendChild( componentsButton.root );
 }
@@ -257,7 +257,7 @@ const starterTheme = LX.getTheme();
             panel.addText("Text", "LexGUI.js @jxarco", null, {placeholder: "e.g. ColorPicker", icon: "Type"});
             panel.addColor("Font Color", "#303b8d", null);
             panel.addNumber("Font Size", 36, null, { min: 1, max: 48, step: 1, units: "px"});
-            panel.addSelect("Font Family", ["Arial", "GeistSans", "Monospace", "CascadiaCode"], "GeistSans");
+            panel.addSelect("Font Family", ["Arial", "GeistSans", "Inter", "Monospace", "CascadiaCode"], "GeistSans");
             panel.addRange("Threshold Range", [2, 7], (v) => console.log(v), { min: 0, max: 10, step: 1, className: "accent" });
             panel.addVector2("2D Position", [300, 350], null, { min: 0, max: 1024 });
             const opacityValues = [
@@ -305,7 +305,7 @@ const starterTheme = LX.getTheme();
 
     // Examples
     {
-        const examplesContainer = LX.makeContainer( [ null, "auto" ], "grid grid-cols-4 gap-3 bg-primary rounded-lg p-6 overflow-hidden" );
+        const examplesContainer = LX.makeContainer( [ null, "auto" ], "grid grid-cols-4 gap-3 bg-background rounded-lg p-6 overflow-hidden" );
         tabs.add( "Examples", examplesContainer, { xselected: true } );
 
         {
@@ -537,7 +537,7 @@ const starterTheme = LX.getTheme();
                         LX.toast( "Message sent!", "To:" + mail.email, { timeout: 5000, action: { name: "Undo", callback: ( toast, actionName, event ) => {
                             toast.close();
                         } } } );
-                    }, { className: "ml-auto", buttonClass: "contrast px-2" } );
+                    }, { className: "ml-auto", buttonClass: "contrast" } );
                     previewButtons.appendChild( sendButton.root );
                 };
             }
@@ -546,7 +546,7 @@ const starterTheme = LX.getTheme();
 
     // Tasks
     {
-        const tasksContainer = LX.makeContainer( [ null, "auto" ], "col bg-primary border rounded-lg p-6 overflow-hidden" );
+        const tasksContainer = LX.makeContainer( [ null, "auto" ], "col bg-background border rounded-lg p-6 overflow-hidden" );
         tabs.add( "Tasks", tasksContainer, { xselected: true } );
 
         const header = LX.makeContainer( [ null, "auto" ], "col p-4", `
@@ -572,6 +572,7 @@ const starterTheme = LX.getTheme();
             sortable: true,
             toggleColumns: true,
             filter: "Name",
+            // tableClass: "bg-primary",
             customFilters: [
                 { name: "Status", options: ["Backlog", "Todo", "In Progress", "Done", "Canceled"] },
                 { name: "Priority", options: ["Low", "Medium", "High"] },
