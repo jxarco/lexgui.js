@@ -2,7 +2,10 @@
 
 ## dev
 
+## 0.7.15 (master)
+
 Minor fixes.
+Docs updated.
 
 AssetView:
 - Added support for renaming items.
@@ -15,7 +18,7 @@ AssetView:
 - Fixed clearing preview panel on delete item.
 - Removed not used "Properties" item context menu entry.
 
-## 0.7.14 (master)
+## 0.7.14
 
 CodeEditor:
 - Added support for add/remove multi-line indentation.
