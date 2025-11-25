@@ -4709,6 +4709,7 @@ ul.lexassetscontent {
     cursor: pointer;
     text-align: center;
     position: relative;
+    outline: 1px solid light-dark(#dfdfdf, #ffffff2c);
     border-radius: 10%;
 }
 
@@ -4790,9 +4791,7 @@ ul.lexassetscontent {
     white-space: nowrap;
     align-content: center;
     background-color: var(--global-blur-background);
-    --webkit-backdrop-filter: blur(8px);
-    backdrop-filter: blur(8px);
-    text-shadow: 2px 2px #00000096;
+    text-shadow: 0 0 2px #00000048;
     transition: all 0.1s;
     z-index: 1;
 }
