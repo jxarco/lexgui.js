@@ -63,7 +63,7 @@ NPM Package: [npmjs.com/package/lexgui](https://www.npmjs.com/package/lexgui)
 import { LX } from 'lexgui';
 
 // Using extensions
-import { CodeEditor } from 'lexgui/extensions/codeeditor.js';
+import { CodeEditor } from 'lexgui/extensions/CodeEditor.js';
 
 // Create main area
 let area = await LX.init();

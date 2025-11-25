@@ -606,7 +606,7 @@ const starterTheme = LX.getTheme();
         const codeArea = new LX.Area();
         codeContainer.appendChild( codeArea.root );
 
-        let editor = new LX.CodeEditor(codeArea, {
+        let editor = new CodeEditor(codeArea, {
             // allowAddScripts: false,
             // autocomplete: false,
             // disableEdition: true,
