@@ -198,7 +198,7 @@
 
         // Init library and get main area
         let area = await LX.init( { rootClass: "wrapper" } );
-        let menubar = null;
+        let menubar = null, sheetArea = null;
 
         const localHost = window.location.protocol !== "https:";
         const starterTheme = LX.getTheme();
@@ -208,11 +208,6 @@
                 icon: starterTheme == "dark" ? "Moon" : "Sun",
                 swap: starterTheme == "dark" ? "Sun" : "Moon",
                 callback:  (value, event) => { LX.switchTheme() }
-            },
-            {
-                title: "Switch Spacing",
-                icon: "AlignVerticalSpaceAround",
-                callback:  (value, event) => { LX.switchSpacing() }
             }
         ];
         const sidebarOptions = {
@@ -413,18 +408,8 @@
         {
             menubar = area.addMenubar();
 
-            const sheetArea = new LX.Area({ skipAppend: true });
+            sheetArea = new LX.Area({ skipAppend: true });
             sheetArea.addSidebar( sidebarCallback, sidebarOptions );
-
-            menubarButtons.splice( 0, 0,
-                {
-                    title: "Menu",
-                    icon: "PanelLeft",
-                    callback: (value, event) => {
-                        window.__currentSheet = new LX.Sheet("256px", [ sheetArea ] );
-                    }
-                }
-            );
         }
         else
         {
@@ -432,7 +417,7 @@
             menubar = sidebar.siblingArea.addMenubar();
         }
 
-        menubar.addButtons( menubarButtons );
+        menubar.addButtons( menubarButtons, { float: mobile ? "right" : "center" } );
 
         menubar.setButtonImage("lexgui.js", `../images/icon_${ starterTheme }.png`, () => {window.open("https://jxarco.github.io/lexgui.js/")}, {float: "left"})
         LX.addSignal( "@on_new_color_scheme", ( el, value ) => {
@@ -441,6 +426,16 @@
 
         menubar.siblingArea.root.style.overflowY = "scroll";
         menubar.siblingArea.root.appendChild( content );
+
+        if( mobile )
+        {
+            menubar.root.querySelector( ".lexmenubuttons" ).style.marginLeft = "auto";
+
+            const commandButton = new LX.Button(null, LX.makeIcon( "Menu" ).innerHTML, () => {
+                window.__currentSheet = new LX.Sheet("256px", [ sheetArea ] );
+            }, { buttonClass: "p-4 bg-none fg-tertiary" } );
+            menubar.root.prepend( commandButton.root );
+        }
 
         const params = new URLSearchParams( document.location.search );
         const queryPage = params.get( "p" );
