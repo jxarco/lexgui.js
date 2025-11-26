@@ -8571,7 +8571,7 @@ let Area$3 = class Area {
         bar.attach(menubar);
         bar.isMenubar = true;
         if (options.sticky ?? true) {
-            bar.root.className += " sticky top-0";
+            bar.root.className += " sticky top-0 z-1000";
         }
         if (options.parentClass) {
             bar.root.className += ` ${options.parentClass}`;
