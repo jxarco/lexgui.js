@@ -39,10 +39,10 @@
             { name: "Docs", callback: () => { window.open("../docs/") } },
             { name: "Components", callback: () => { window.open("../docs/?p=components") } },
             { name: "Examples", callback: () => { window.open("../examples/") } },
-            { name: "Colors", callback: () => { window.href = "" } }
+            { name: "Colors", callback: () => { window.location.href = "" } }
         ]);
 
-        menubar.setButtonImage("lexgui.js", `../images/icon_${starterTheme}.png`, () => { window.open("https://jxarco.github.io/lexgui.js/") }, { float: "left" });
+    menubar.setButtonImage("lexgui.js", `../images/icon_${ starterTheme }.png`, () => {  window.location.href = window.origin }, { float: "left"} );
 
         LX.addSignal("@on_new_color_scheme", (el, value) => {
             menubar.setButtonImage("lexgui.js", `../images/icon_${value}.png`);

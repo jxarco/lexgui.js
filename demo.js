@@ -5,53 +5,93 @@ window.LX = LX;
 
 const area = await LX.init( { layoutMode: "document", rootClass: "wrapper" } );
 const starterTheme = LX.getTheme();
+const mobile = navigator && /Android|iPhone/i.test( navigator.userAgent );
+const menubarButtons = [
+    { name: "Docs", callback: () => { window.open("./docs/") } },
+    { name: "Components", callback: () => { window.open("./docs/?p=components") } },
+    { name: "Examples", callback: () => { window.open("./examples/") } },
+    { name: "Colors", callback: () => { window.location.href = window.origin + window.location.pathname + "./colors/"; } }
+];
+let menubar = null, sheetArea = null;
 
-// Menubar
+if( mobile )
 {
-    const menubar = area.addMenubar( [
-        { name: "Docs", callback: () => { window.open("./docs/") } },
-        { name: "Components", callback: () => { window.open("./docs/?p=components") } },
-        { name: "Examples", callback: () => { window.open("./examples/") } },
-        { name: "Colors", callback: () => { window.open("./colors/") } }
-    ] );
+    menubar = area.addMenubar();
 
-    menubar.setButtonImage("lexgui.js", `images/icon_${ starterTheme }.png`, () => { window.open("https://jxarco.github.io/lexgui.js/") }, { float: "left"} );
+    sheetArea = new LX.Area({ skipAppend: true });
+    sheetArea.addSidebar( ( m ) => {
 
-    LX.addSignal( "@on_new_color_scheme", ( el, value ) => {
-        menubar.setButtonImage("lexgui.js", `images/icon_${ value }.png` );
+        m.group( "Menu" );
+
+        for( let b of menubarButtons )
+        {
+            m.add( b.name, { callback: b.callback } );
+        }
+
+    }, {
+        headerTitle: `lexgui.js`,
+        headerSubtitle: `v${ LX.version }`,
+        headerImage: "../images/favicon.png",
+        footerTitle: "jxarco",
+            footerSubtitle: "alexroco.30@gmail.com",
+            footerImage: "https://avatars.githubusercontent.com/u/25059187?s=400&u=ad8907b748c13e4e1a7cdd3882826acb6a2928b5&v=4",
+        collapsed: false,
+        collapsable: false,
+        displaySelected: false
     } );
+}
+else
+{
+    menubar = area.addMenubar( menubarButtons );
 
     const commandButton = new LX.Button(null, `Search command...<span class="ml-auto">${ LX.makeKbd( ["Ctrl", "Space"], false, "bg-tertiary border px-1 rounded" ).innerHTML }</span>`, () => { LX.setCommandbarState( true ) }, {
         width: "256px", className: "right", buttonClass: "p-4 fg-tertiary bg-primary" }
     );
     menubar.root.appendChild( commandButton.root );
+}
 
-    menubar.addButtons( [
-        {
-            title: "Github",
-            icon: "Github@solid",
-            callback:  (event) => window.open( "https://github.com/jxarco/lexgui.js/", "_blank" )
-        },
-        {
-            title: "Switch Theme",
-            icon: starterTheme == "dark" ? "Moon" : "Sun",
-            swap: starterTheme == "dark" ? "Sun" : "Moon",
-            callback:  (value, event) => { LX.switchTheme() }
-        },
-        {
-            title: "Switch Spacing",
-            icon: "AlignVerticalSpaceAround",
-            callback:  (value, event) => { LX.switchSpacing() }
-        }
-    ], { float: "right" });
+menubar.setButtonImage("lexgui.js", `images/icon_${ starterTheme }.png`, () => {  window.location.href = window.origin + window.location.pathname }, { float: "left"} );
+LX.addSignal( "@on_new_color_scheme", ( el, value ) => {
+    menubar.setButtonImage("lexgui.js", `images/icon_${ value }.png` );
+} );
+
+menubar.siblingArea.root.style.overflowY = "scroll";
+
+menubar.addButtons( [
+    {
+        title: "Github",
+        icon: "Github@solid",
+        callback:  (event) => window.open( "https://github.com/jxarco/lexgui.js/", "_blank" )
+    },
+    {
+        title: "Switch Theme",
+        icon: starterTheme == "dark" ? "Moon" : "Sun",
+        swap: starterTheme == "dark" ? "Sun" : "Moon",
+        callback:  (value, event) => { LX.switchTheme() }
+    },
+    {
+        title: "Switch Spacing",
+        icon: "AlignVerticalSpaceAround",
+        callback:  (value, event) => { LX.switchSpacing() }
+    }
+], { float: "right" });
+
+if( mobile )
+{
+    menubar.root.querySelector( ".lexmenubuttons" ).style.marginLeft = "auto";
+
+    const commandButton = new LX.Button(null, LX.makeIcon( "Menu" ).innerHTML, () => {
+        window.__currentSheet = new LX.Sheet("256px", [ sheetArea ] );
+    }, { buttonClass: "p-4 bg-none fg-tertiary" } );
+    menubar.root.prepend( commandButton.root );
 }
 
 // Header
 {
-    const header = LX.makeContainer( [ null, "auto" ], "flex flex-col gap-3 py-8 items-center", `
+    const header = LX.makeContainer( [ null, "auto" ], "flex flex-col gap-4 pt-8 pb-4 items-center", `
         <a class="text-md">Get started with LexGUI.js <span class="text-sm fg-secondary">${ LX.version }</span></a>
-        <p class="fg-primary font-semibold tracking-tight" style="font-size:2.75rem">Build your Application Interface</p>
-        <p class="fg-primary font-light text-xxl text-center text-balance" style="max-width:48rem">A set of beautifully-designed, accessible components.
+        <p class="fg-primary font-medium tracking-tight leading-none text-center text-balance" style="font-size:2.75rem">Build your Application Interface</p>
+        <p class="fg-primary font-light text-xl text-center text-balance" style="max-width:48rem">A set of beautifully-designed, accessible components.
         No complex frameworks. Pure JavaScript and CSS. Open Source.</p>
     `, area );
 
@@ -64,10 +104,13 @@ const starterTheme = LX.getTheme();
 
 // Content
 {
-    const tabs = area.addTabs( { parentClass: "p-4", sizes: [ "auto", "auto" ], contentClass: "p-6 pt-0" } );
+    let tabs = null;
 
     // Editor
+    if( !mobile )
     {
+        tabs = area.addTabs( { parentClass: "p-4", sizes: [ "auto", "auto" ], contentClass: "p-6 pt-0" } );
+
         const editorContainer = LX.makeContainer( [ null, "800px" ], "flex flex-col bg-primary border rounded-lg overflow-hidden" );
         tabs.add( "Editor", editorContainer, { selected: true } );
 
@@ -306,8 +349,16 @@ const starterTheme = LX.getTheme();
 
     // Examples
     {
-        const examplesContainer = LX.makeContainer( [ null, "auto" ], "grid grid-cols-4 gap-3 bg-background rounded-lg p-6 overflow-hidden" );
-        tabs.add( "Examples", examplesContainer, { xselected: true } );
+        const examplesContainer = LX.makeContainer( [ null, "auto" ], `${ mobile ? "flex flex-col" : "grid grid-cols-4" } gap-3 bg-background rounded-lg p-6 overflow-hidden` );
+
+        if( tabs )
+        {
+            tabs.add( "Examples", examplesContainer, { xselected: true } );
+        }
+        else
+        {
+            area.attach( examplesContainer );
+        }
 
         {
             const panel = new LX.Panel( { className: "rounded-lg border p-4 flex flex-col gap-4" } );
@@ -363,6 +414,7 @@ const starterTheme = LX.getTheme();
     }
 
     // Mail
+    if( !mobile )
     {
         const mailContainer = LX.makeContainer( [ null, "800px" ], "flex flex-col bg-primary border rounded-lg overflow-hidden" );
         tabs.add( "Mail", mailContainer, { xselected: true, badge: { content: "5", className: "xs fg-white bg-error", asChild: true } } );
@@ -546,6 +598,7 @@ const starterTheme = LX.getTheme();
     }
 
     // Tasks
+    if( !mobile )
     {
         const tasksContainer = LX.makeContainer( [ null, "auto" ], "col bg-background border rounded-lg p-6 overflow-hidden" );
         tabs.add( "Tasks", tasksContainer, { xselected: true } );
@@ -599,6 +652,7 @@ const starterTheme = LX.getTheme();
     }
 
     // Code
+    if( !mobile )
     {
         const codeContainer = LX.makeContainer( [ "auto", "800px" ], "flex flex-col border rounded-lg overflow-hidden" );
         tabs.add( "Code", codeContainer );
