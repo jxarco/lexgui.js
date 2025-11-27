@@ -1,5 +1,5 @@
 import typescript from 'rollup-plugin-typescript2';
-// import terser from '@rollup/plugin-terser';
+import terser from '@rollup/plugin-terser';
 import postcss from 'rollup-plugin-postcss';
 import cssnano from 'cssnano';
 
@@ -14,26 +14,26 @@ export default [
                 name: "lexgui",
                 banner: '// This is a generated file. Do not edit.'
             },
-            // {
-            //     file: 'build/lexgui.module.min.js',
-            //     format: 'esm',
-            //     sourcemap: false,
-            //     plugins: [terser()]
-            // },
-            // {
-            //     file: 'build/lexgui.js',
-            //     format: 'umd',
-            //     name: "lexgui",
-            //     sourcemap: true,
-            //     banner: '// This is a generated file. Do not edit.'
-            // },
-            // {
-            //     file: 'build/lexgui.min.js',
-            //     format: 'umd',
-            //     name: "lexgui",
-            //     sourcemap: false,
-            //     plugins: [terser()]
-            // }
+            {
+                file: 'build/lexgui.module.min.js',
+                format: 'esm',
+                sourcemap: false,
+                plugins: [terser()]
+            },
+            {
+                file: 'build/lexgui.js',
+                format: 'umd',
+                name: "lexgui",
+                sourcemap: true,
+                banner: '// This is a generated file. Do not edit.'
+            },
+            {
+                file: 'build/lexgui.min.js',
+                format: 'umd',
+                name: "lexgui",
+                sourcemap: false,
+                plugins: [terser()]
+            }
         ],
         plugins: [
             postcss({
@@ -54,26 +54,26 @@ export default [
                 sourcemap: true,
                 banner: '// This is a generated file. Do not edit.'
             },
-            // {
-            //     file: 'build/lexgui.module.min.js',
-            //     format: 'esm',
-            //     sourcemap: false,
-            //     plugins: [terser()]
-            // },
-            // {
-            //     file: 'build/lexgui.js',
-            //     format: 'umd',
-            //     name: "lexgui",
-            //     sourcemap: true,
-            //     banner: '// This is a generated file. Do not edit.'
-            // },
-            // {
-            //     file: 'build/lexgui.min.js',
-            //     format: 'umd',
-            //     name: "lexgui",
-            //     sourcemap: false,
-            //     plugins: [terser()]
-            // }
+            {
+                file: 'build/lexgui.all.module.min.js',
+                format: 'esm',
+                sourcemap: false,
+                plugins: [terser()]
+            },
+            {
+                file: 'build/lexgui.all.js',
+                format: 'umd',
+                name: "lexgui",
+                sourcemap: true,
+                banner: '// This is a generated file. Do not edit.'
+            },
+            {
+                file: 'build/lexgui.all.min.js',
+                format: 'umd',
+                name: "lexgui",
+                sourcemap: false,
+                plugins: [terser()]
+            }
         ],
         plugins: [
             postcss({

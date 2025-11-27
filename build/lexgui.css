@@ -3889,7 +3889,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     height: 128px;
     object-fit: cover;
     border-radius: 6px;
-    outline: 2px solid var(--global-text-tertiary);
+    outline: 2px solid var(--global-border-color);
 }
 
 .lexcard:hover a {
