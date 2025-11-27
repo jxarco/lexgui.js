@@ -33,10 +33,10 @@ class DocMaker {
             header.id = id;
         this.root.appendChild(header);
     }
-    paragraph(string, sup = false) {
+    paragraph(string, sup = false, className) {
         console.assert(string !== undefined);
         let paragraph = document.createElement(sup ? 'sup' : 'p');
-        paragraph.className = "leading-relaxed";
+        paragraph.className = "leading-relaxed " + (className ?? "");
         paragraph.innerHTML = string;
         this.root.appendChild(paragraph);
     }

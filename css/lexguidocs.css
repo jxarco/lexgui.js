@@ -56,7 +56,7 @@
 	cursor: pointer;
 }
 
-.code-container button.copied svg {
+button.copied svg {
 	color: #42d065;
 }
 
@@ -100,8 +100,7 @@ code {
 	font-family: "CascadiaCode", monospace;
 	font-size: 14px;
 	line-height: calc(var(--line-height) - 1px);
-	/* margin: 16px calc(-1 * var(--page-padding)); */
-	background-color: #282828;
+	background-color: var(--global-color-primary);
 	text-align: unset !important;
 	text-justify: unset !important;
 }
@@ -126,7 +125,9 @@ code:not(.inline) {
 	overflow: auto;
 	box-sizing: border-box;
 	position: relative;
-	border-radius: 6px;
+	border-radius: 1rem;
+	line-height: 1.5;
+	border: 1px solid var(--global-border-color);
 }
 
 code.inline.table {

@@ -166,6 +166,16 @@
             codeEditor.root.querySelector("button.grid.absolute.z-100.p-3").remove();
             codeEditor.setText( code, "JavaScript" );
 
+            let copyButton = document.createElement('button');
+            copyButton.title = "Copy to Clipboard";
+            copyButton.className = "border-none bg-none absolute top-0 right-0 mt-4 mr-6";
+            copyButton.appendChild(LX.makeIcon( "Copy" ));
+            copyButton.addEventListener('click', function() {
+                this.dataset["snippet"] = codeEditor.getText();
+                docMaker._copySnippet( this );
+            } );
+            codeArea.attach( copyButton );
+
             const runButton = new LX.Button( null, "Run", (value, event) => {
                 runCode();
             }, { buttonClass: "contrast" } );

@@ -1,75 +1,65 @@
 <script type="module">
     import { LX } from 'lexgui';
 
-    docMaker.header( "AreaOverlayButtons.", "h1", "area-overlay-buttons" );
-    docMaker.paragraph( `Component that allows you to create an overlay of buttons on top of an area. It is useful for creating interactive areas with multiple buttons that can be used to trigger different actions.` );
-    docMaker.lineBreak();
+    const content = document.getElementById('content');
+    const componentName = "AreaOverlayButtons";
+
+    docMaker.header(componentName + ".", "h1", componentName.toLowerCase());
+    docMaker.paragraph( `Component that allows you to create an overlay of buttons on top of an area. It is useful for creating interactive areas with multiple buttons that can be used to trigger different actions.`, false, "fg-tertiary");
 
     {
-        const area = new LX.Area( { skipAppend: true, height: "200px" } );
-        content.appendChild( area.root );
+        window.__addInteractiveCodeExample( content, componentName, panel => {
+            const area = new LX.Area( { skipAppend: true, height: "128px" } );
+            panel.attach( area );
 
-        const overlayButtons = area.addOverlayButtons([
-            [
+            const overlayButtons = area.addOverlayButtons([
+                [
+                    {
+                        name: "Select",
+                        icon: "MousePointer",
+                        callback: (value, event) => console.log(value),
+                        selectable: true
+                    },
+                    {
+                        name: "Move",
+                        icon: "Move",
+                        callback: (value, event) => console.log(value),
+                        selectable: true
+                    },
+                    {
+                        name: "Rotate",
+                        icon: "RotateRight",
+                        callback: (value, event) => console.log(value),
+                        selectable: true
+                    }
+                ],
+                null, // Separator
                 {
-                    name: "Select",
-                    icon: "MousePointer",
-                    callback: (value, event) => console.log(value),
-                    selectable: true
+                    name: "Render Mode",
+                    options: ["Lit", "Unlit", "Wireframe"],
+                    value: "Lit",
+                    callback: (value, event) => console.log(value)
                 },
-                {
-                    name: "Move",
-                    icon: "Move",
-                    callback: (value, event) => console.log(value),
-                    selectable: true
-                },
-                {
-                    name: "Rotate",
-                    icon: "RotateRight",
-                    callback: (value, event) => console.log(value),
-                    selectable: true
-                }
-            ],
-            null, // Separator
-            {
-                name: "Render Mode",
-                options: ["Lit", "Unlit", "Wireframe"],
-                value: "Lit",
-                callback: (value, event) => console.log(value)
-            },
-            [
-                {
-                    name: "Enable Snap",
-                    icon: "Frame",
-                    callback: (value, event) => console.log(value),
-                    selectable: true
-                },
-                {
-                    name: "Snap Values",
-                    value: 10,
-                    options: [10, 100, 1000],
-                    callback: value => console.log(value)
-                }
-            ]
-        ], { float: "htc" });
-
-        area.root.className += " border rounded-lg shadow-lg bg-tertiary overflow-hidden";
+                [
+                    {
+                        name: "Enable Snap",
+                        icon: "Frame",
+                        callback: (value, event) => console.log(value),
+                        selectable: true
+                    },
+                    {
+                        name: "Snap Values",
+                        value: 10,
+                        options: [10, 100, 1000],
+                        callback: value => console.log(value)
+                    }
+                ]
+            ], { float: "htc" });
+        });
     }
 
-    docMaker.header("Quick Usage", "h2");
-    docMaker.code(`@const@ overlayButtons = area.@[mtd]addOverlayButtons@([
-    [
-        { name: @"Select"@, icon: @"MousePointer"@, callback: (value, event) => console.@[mtd]log@(value), selectable: @true@ },
-        { name: @"Move"@, icon: @"Move"@, callback: (value, event) => console.@[mtd]log@(value), selectable: @true@ },
-        { name: @"Rotate"@, icon: @"RotateRight"@, callback: (value, event) => console.@[mtd]log@(value), selectable: @true@ }
-    ],
-    @null@, @[com]// Separator@
-    { name: @"Render Mode"@, options: [@"Lit"@, @"Unlit"@, @"Wireframe"@], value: @"Lit"@, callback: (value, event) => console.@[mtd]log@(value) },
-    [
-        { name: @"Enable Snap"@, icon: @"Frame"@, callback: (value, event) => console.@[mtd]log@(value), selectable: @true@ },
-        { name: @"Snap Values"@, value: @10@, options: [@10@, @100@, @1000@], callback: value => console.@[mtd]log@(value) }
-    ]
-], { float: @"htc"@ });`, "js");
+    docMaker.header("Usage", "h2");
+    docMaker.paragraph( `Call ${docMaker.iCode("Area.addOverlayButtons(buttonsArray, options)")} to add a ${ componentName } Component to your area.` );
 
     docMaker.header("API Reference", "h2");
     docMaker.classCtor( "class LX.AreaOverlayButtons", [

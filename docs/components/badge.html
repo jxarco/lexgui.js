@@ -2,33 +2,37 @@
 
     import { LX } from 'lexgui';
 
-    docMaker.header( "Badge.", "h1", "badge" );
-    docMaker.paragraph( `Used to display short text or status labels, such as categories, states, or tags.` );
-    docMaker.lineBreak();
+    const content = document.getElementById('content');
+    const componentName = "Badge";
+
+    docMaker.header(componentName + ".", "h1", componentName.toLowerCase());
+    docMaker.paragraph( `Used to display short text or status labels, such as categories, states, or tags.`, false, "fg-tertiary");
 
     {
-        const area = new LX.Area( { className: "flex flex-col border rounded-lg shadow-lg bg-secondary overflow-hidden p-12 gap-1", skipAppend: true, height: "auto" } );
-        content.appendChild( area.root );
+        window.__addInteractiveCodeExample( content, componentName, panel => {
+            const area = new LX.Area( { className: "flex flex-col p-12 gap-1", skipAppend: true, height: "auto" } );
+            panel.attach( area );
 
-        const panel = area.addPanel( { className: "flex flex-row gap-1 place-content-center" } );
-        panel.attach( LX.badge("Badge", "border-none", { asElement: true }) );
-        panel.attach( LX.badge("Contrast", "contrast", { asElement: true }) );
-        panel.attach( LX.badge("Destructive", "error", { asElement: true }) );
-        panel.attach( LX.badge("Outline", "primary border", { asElement: true }) );
-        const panelB = area.addPanel( { className: "flex flex-row gap-1 place-content-center" } );
-        panelB.attach( LX.badge( LX.makeIcon( "BadgeCheck", { svgClass: "sm" } ).innerHTML + "Verified", "accent", { asElement: true }) );
-        panelB.attach( LX.badge("8", "contrast", { asElement: true, chip: true }) );
-        panelB.attach( LX.badge("99", "error", { asElement: true, chip: true }) );
-        panelB.attach( LX.badge("20+", "primary border", { asElement: true, chip: true }) );
-        const panelC = area.addPanel( { className: "flex flex-row gap-1 place-content-center" } );
-        const chipParent = LX.makeContainer( ["auto", "auto"], "py-1 px-8 bg-tertiary rounded-lg", "Parent Chip", panelC );
-        LX.badge("9", "error fg-white", { asElement: true, xchip: true, parent: chipParent });
+            const panelA = area.addPanel( { className: "flex flex-row gap-1 place-content-center" } );
+            panelA.attach( LX.badge("Badge", "border-none", { asElement: true }) );
+            panelA.attach( LX.badge("Contrast", "contrast", { asElement: true }) );
+            panelA.attach( LX.badge("Destructive", "error fg-primary", { asElement: true }) );
+            panelA.attach( LX.badge("Outline", "primary border", { asElement: true }) );
+
+            const panelB = area.addPanel( { className: "flex flex-row gap-1 place-content-center" } );
+            panelB.attach( LX.badge( LX.makeIcon( "BadgeCheck", { svgClass: "sm" } ).innerHTML + "Verified", "accent", { asElement: true }) );
+            panelB.attach( LX.badge("8", "contrast", { asElement: true, chip: true }) );
+            panelB.attach( LX.badge("99", "error fg-primary", { asElement: true, chip: true }) );
+            panelB.attach( LX.badge("20+", "primary border", { asElement: true, chip: true }) );
+
+            const panelC = area.addPanel( { className: "flex flex-row gap-1 place-content-center" } );
+            const chipParent = LX.makeContainer( ["auto", "auto"], "py-1 px-8 bg-tertiary rounded-lg", "Parent Chip", panelC );
+            LX.badge("9", "error fg-white", { asElement: true, xchip: true, parent: chipParent });
+        });
     }
 
-    docMaker.lineBreak();
-
-    docMaker.header("Quick Usage", "h2");
-    docMaker.code(`@[cls]LX@.@[mtd]badge@( badgeText, @"accent outline"@, { asElement: @true@ } );`, "js");
+    docMaker.header("Usage", "h2");
+    docMaker.paragraph( `Call ${docMaker.iCode("LX.badge(text, className, options)")} to get a ${ componentName } Component html. If you need the whole element, use ${docMaker.iCode("asElement")} option.` );
 
     docMaker.header("API Reference", "h2");
     docMaker.classCtor( "function LX.badge", [

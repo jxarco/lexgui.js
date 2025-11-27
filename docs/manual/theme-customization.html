@@ -12,6 +12,7 @@
         <span class="p-1 px-2 bg-secondary rounded-lg">secondary</span>
         <span class="p-1 px-2 bg-tertiary rounded-lg">tertiary</span>
         <span class="p-1 px-2 bg-quaternary rounded-lg">quaternary</span>
+        <span class="p-1 px-2 bg-quinary rounded-lg">quinary</span>
         <span class="p-1 px-2 bg-accent rounded-lg">accent</span>
         <span class="p-1 px-2 bg-success rounded-lg fg-contrast">success</span>
         <span class="p-1 px-2 bg-error rounded-lg">error</span>
@@ -26,6 +27,7 @@
         <span class="p-1 px-2 fg-secondary rounded-lg">secondary</span>
         <span class="p-1 px-2 fg-tertiary rounded-lg">tertiary</span>
         <span class="p-1 px-2 fg-quaternary rounded-lg">quaternary</span>
+        <span class="p-1 px-2 fg-quinary rounded-lg">quinary</span>
         <span class="p-1 px-2 fg-accent rounded-lg">accent</span>
         <span class="p-1 px-2 fg-success rounded-lg">success</span>
         <span class="p-1 px-2 fg-error rounded-lg">error</span>
@@ -33,13 +35,12 @@
         </div>
     ` );
 
+    docMaker.header( "Tailwind Colors", "h3" );
+    docMaker.paragraph( `You can use Tailwind color palette as class names and CSS variables: ${docMaker.iCode("violet-500")} or ${docMaker.iCode("var(--violet-500)")}. Check the ${ docMaker.iLink( "Colors", "https://jxarco.github.io/lexgui.js/colors/" ) } page in the LexGUI main page to see all possible colors.` );
+
     docMaker.header( "Sizes <span class='desc'>(for supported components)</span>", "h3" );
     docMaker.bulletList( [
-        "xs",
-        "sm",
-        "md (default)",
-        "lg",
-        "xl"
+        "xs", "sm", "md (default)", "lg", "xl", "2xl", "3xl"
     ] );
 
     docMaker.header( "Styles <span class='desc'>(for supported components)</span>", "h3" );

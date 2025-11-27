@@ -5,7 +5,7 @@ export declare class DocMaker {
     setDomTarget(element: Element): void;
     lineBreak(target?: Element): void;
     header(string: string, type: string, id: string): void;
-    paragraph(string: string, sup?: boolean): void;
+    paragraph(string: string, sup?: boolean, className?: string): void;
     code(text: string, language?: string): void;
     list(list: any[], type: string, target?: Element): void;
     bulletList(list: any[]): void;
