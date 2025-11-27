@@ -71,9 +71,9 @@ export class Calendar {
 
     _previousMonth( skipCallback?: boolean )
     {
-        this.month = Math.max( 0, this.month - 1 );
+        this.month = Math.max( 1, this.month - 1 );
 
-        if( this.month == 0 )
+        if( this.month == 1 )
         {
             this.month = 12;
             this.year--;
@@ -89,11 +89,11 @@ export class Calendar {
 
     _nextMonth( skipCallback?: boolean )
     {
-        this.month = Math.min( this.month + 1, 12 );
+        this.month = Math.min( this.month + 1, 13 );
 
-        if( this.month == 12 )
+        if( this.month == 13 )
         {
-            this.month = 0;
+            this.month = 1;
             this.year++;
         }
 
@@ -258,8 +258,7 @@ export class Calendar {
     fromMonthYear( month: number, year?: number )
     {
         // Month is 0-based (0 = January, ... 11 = December)
-        month--;
-
+        month = Math.max( month - 1, 0 );
         year = year ?? new Date().getFullYear();
 
         const weekDay = new Date( year, month, 1 ).getDay();

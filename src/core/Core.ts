@@ -61,13 +61,13 @@ LX.init = async function( options: any = {} )
 
     if( this.layoutMode == "document" )
     {
-        document.addEventListener( "scroll", e => {
-            // Get all active menuboxes
-            const mbs = document.body.querySelectorAll( ".lexdropdownmenu" );
-            mbs.forEach( ( mb: any ) => {
-                mb._updatePosition();
-            } );
-        } );
+        // document.addEventListener( "scroll", e => {
+        //     // Get all active menuboxes
+        //     const mbs = document.body.querySelectorAll( ".lexdropdownmenu" );
+        //     mbs.forEach( ( mb: any ) => {
+        //         mb._updatePosition();
+        //     } );
+        // } );
     }
 
     this.spacingMode = options.spacingMode ?? "default";

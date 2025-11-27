@@ -176,6 +176,43 @@ function stripHTML( html: string )
 LX.stripHTML = stripHTML;
 
 /**
+ * @method stripTags
+ * @description Cleans any DOM element tags to get only the text
+ * @param {String} str
+ * @param {String} allowed
+ * https://locutus.io/php/strings/strip_tags/index.html
+ */
+function stripTags( str: string, allowed: string | undefined )
+{
+    // making sure the allowed arg is a string containing only tags in lowercase (<a><b><c>)
+    allowed = ( ( ( allowed || '' ) + '' ).toLowerCase().match( /<[a-z][a-z0-9]*>/g ) || [] ).join( '' );
+
+    const tags = /<\/?([a-z0-9]*)\b[^>]*>?/gi;
+    const commentsAndPhpTags = /<!--[\s\S]*?-->|<\?(?:php)?[\s\S]*?\?>/gi;
+
+    let after = str;
+    // removes the '<' char at the end of the string to replicate PHP's behaviour
+    after = after.substring(after.length - 1) === '<' ? after.substring(0, after.length - 1) : after;
+
+    // recursively remove tags to ensure that the returned string doesn't contain forbidden tags after previous passes (e.g. '<<bait/>switch/>')
+    while( true )
+    {
+        const before = after;
+        after = before.replace(commentsAndPhpTags, '').replace(tags, function ($0, $1) {
+            return allowed.indexOf('<' + $1.toLowerCase() + '>') > -1 ? $0 : ''
+        });
+
+        // return once no more tags are removed
+        if( before === after )
+        {
+            return after
+        }
+    }
+}
+
+LX.stripTags = stripTags;
+
+/**
  * @method parsePixelSize
  * @description Parses any css size and returns a number of pixels
  * @param {Number|String} size

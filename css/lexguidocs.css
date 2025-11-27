@@ -74,8 +74,7 @@
 	font-size: 32px;
 	line-height: 48px;
 	margin-left: -2px;
-	margin-top: 0.67em;
-	margin-bottom: 0.67em;
+	margin-block: 0.5em;
 	font-optical-sizing: auto;
 	font-weight: 600;
 	font-style: normal;
@@ -87,16 +86,14 @@
 	line-height: 36px;
 	font-weight: normal;
 	margin-left: -1px;
-	margin-top: 0.83em;
-	margin-bottom: 0.83em;
+	margin-block: 0.75em;
 }
 
 #content h3 {
 	font-size: 20px;
 	line-height: 28px;
 	font-weight: normal;
-	margin-top: 0.95em;
-	margin-bottom: 0.95em;
+	margin-block: 0.75em;
 }
 
 code {

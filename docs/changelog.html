@@ -10,7 +10,6 @@
         const params = new URLSearchParams( document.location.search );
         const content = document.getElementById('content');
         const area = new LX.Area( { skipAppend: true, height: "auto" } );
-
         const container = LX.makeContainer( ["100%", "auto"], "", "", area );
 
         const _parseMD = ( text ) => {
@@ -19,8 +18,10 @@
             let masterVersion = false;
             let currentList = [];
 
-            for( let line of lines )
+            for( let l = 0; l < lines.length; ++l )
             {
+                let line = lines[ l ];
+
                 if( !masterVersion && !(masterVersion = line.includes( "(master)" )) )
                 {
                     continue;   
@@ -48,7 +49,21 @@
                         codeIndex = line.indexOf( '`' );
                     }
 
-                    if( line[ 0 ] == '-' )
+                    if( line == '' )
+                    {
+                        // I was doing another list
+                        if( currentList.length )
+                        {
+                            // close list
+                            docMaker.bulletList( currentList );
+                            currentList = [];
+                        }
+
+                        const p = lines[ l - 1 ] ?? "",
+                                n = lines[ l + 1 ] ?? "";
+                        if( p[ 0 ] != "#" && n[ 0 ] != "#" ) docMaker.lineBreak();
+                    }
+                    else if( line[ 0 ] == '-' )
                     {
                         // I was doing another list
                         if( currentList.length && currentList[ currentList.length - 1 ].constructor === Array )
@@ -58,7 +73,6 @@
                         }
 
                         currentList.push( line.substring( 2 ) );
-                        continue;
                     }
                     else if( currentList.length )
                     {
@@ -81,10 +95,8 @@
                             docMaker.bulletList( currentList );
                             currentList = [];
                         }
-                        continue;
                     }
-
-                    if( line.length )
+                    else if( line.length )
                     {
                         docMaker.paragraph( line );
                     }

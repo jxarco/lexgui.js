@@ -237,7 +237,7 @@ export class Table extends BaseComponent
                                     f.default = [ todayStringDate, todayStringDate ];
                                 }
 
-                                const calendar = new CalendarRange( f.value, {
+                                const calendar = new CalendarRange( f.value ?? f.default, {
                                     onChange: ( dateRange: any ) => {
                                         f.value = dateRange;
                                         spanName.innerHTML = icon.innerHTML + f.name + ( separatorHtml + LX.badge( `${ calendar.getFullDate() }`, "bg-tertiary fg-secondary text-sm border-0" ) );
@@ -270,7 +270,7 @@ export class Table extends BaseComponent
                         }
                         else if( f.type == "date" )
                         {
-                            delete f.default;
+                            delete f.value;
                         }
                     }
                     this.refresh();
@@ -554,7 +554,9 @@ export class Table extends BaseComponent
                             const filterColIndex = data.head.indexOf( acfName );
                             if( filterColIndex > -1 )
                             {
-                                acfMap[ acfName ] = acfMap[ acfName ] || ( bodyData[ filterColIndex ] === acfValue );
+                                const cellValue = bodyData[ filterColIndex ];
+                                const strippedValue = LX.stripTags( cellValue ) ?? cellValue;
+                                acfMap[ acfName ] = acfMap[ acfName ] || ( strippedValue === acfValue );
                             }
                         }
 
@@ -594,11 +596,8 @@ export class Table extends BaseComponent
                                 const filterColIndex = data.head.indexOf( acfName );
                                 if( filterColIndex > -1 )
                                 {
-                                    if( !f.default )
+                                    if( !f.value )
                                     {
-                                        const date = new Date();
-                                        const todayStringDate = `${ date.getDate() }/${ date.getMonth() + 1 }/${ date.getFullYear() }`;
-                                        f.value = [ todayStringDate, todayStringDate ];
                                         acfMap[ acfName ] = true;
                                         continue;
                                     }

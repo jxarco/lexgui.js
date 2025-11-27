@@ -4447,8 +4447,8 @@ class Calendar {
         };
     }
     _previousMonth(skipCallback) {
-        this.month = Math.max(0, this.month - 1);
-        if (this.month == 0) {
+        this.month = Math.max(1, this.month - 1);
+        if (this.month == 1) {
             this.month = 12;
             this.year--;
         }
@@ -4458,9 +4458,9 @@ class Calendar {
         }
     }
     _nextMonth(skipCallback) {
-        this.month = Math.min(this.month + 1, 12);
-        if (this.month == 12) {
-            this.month = 0;
+        this.month = Math.min(this.month + 1, 13);
+        if (this.month == 13) {
+            this.month = 1;
             this.year++;
         }
         this.fromMonthYear(this.month, this.year);
@@ -4581,7 +4581,7 @@ class Calendar {
     }
     fromMonthYear(month, year) {
         // Month is 0-based (0 = January, ... 11 = December)
-        month--;
+        month = Math.max(month - 1, 0);
         year = year ?? new Date().getFullYear();
         const weekDay = new Date(year, month, 1).getDay();
         const firstDay = weekDay === 0 ? 6 : weekDay - 1; // 0 = Monday, 1 = Tuesday...
@@ -4911,7 +4911,7 @@ class Table extends BaseComponent$1 {
                                     const todayStringDate = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
                                     f.default = [todayStringDate, todayStringDate];
                                 }
-                                const calendar = new CalendarRange(f.value, {
+                                const calendar = new CalendarRange(f.value ?? f.default, {
                                     onChange: (dateRange) => {
                                         f.value = dateRange;
                                         spanName.innerHTML = icon.innerHTML + f.name + (separatorHtml + LX.badge(`${calendar.getFullDate()}`, "bg-tertiary fg-secondary text-sm border-0"));
@@ -4938,7 +4938,7 @@ class Table extends BaseComponent$1 {
                             f.end = f.max;
                         }
                         else if (f.type == "date") {
-                            delete f.default;
+                            delete f.value;
                         }
                     }
                     this.refresh();
@@ -5154,7 +5154,9 @@ class Table extends BaseComponent$1 {
                             acfMap[acfName] = acfMap[acfName] ?? false;
                             const filterColIndex = data.head.indexOf(acfName);
                             if (filterColIndex > -1) {
-                                acfMap[acfName] = acfMap[acfName] || (bodyData[filterColIndex] === acfValue);
+                                const cellValue = bodyData[filterColIndex];
+                                const strippedValue = LX.stripTags(cellValue) ?? cellValue;
+                                acfMap[acfName] = acfMap[acfName] || (strippedValue === acfValue);
                             }
                         }
                         const show = Object.values(acfMap).reduce((acc, e) => acc && e, true);
@@ -5181,10 +5183,7 @@ class Table extends BaseComponent$1 {
                                 acfMap[acfName] = acfMap[acfName] ?? false;
                                 const filterColIndex = data.head.indexOf(acfName);
                                 if (filterColIndex > -1) {
-                                    if (!f.default) {
-                                        const date = new Date();
-                                        const todayStringDate = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
-                                        f.value = [todayStringDate, todayStringDate];
+                                    if (!f.value) {
                                         acfMap[acfName] = true;
                                         continue;
                                     }
@@ -8855,6 +8854,34 @@ function stripHTML(html) {
 }
 LX.stripHTML = stripHTML;
 /**
+ * @method stripTags
+ * @description Cleans any DOM element tags to get only the text
+ * @param {String} str
+ * @param {String} allowed
+ * https://locutus.io/php/strings/strip_tags/index.html
+ */
+function stripTags(str, allowed) {
+    // making sure the allowed arg is a string containing only tags in lowercase (<a><b><c>)
+    allowed = (((allowed || '') + '').toLowerCase().match(/<[a-z][a-z0-9]*>/g) || []).join('');
+    const tags = /<\/?([a-z0-9]*)\b[^>]*>?/gi;
+    const commentsAndPhpTags = /<!--[\s\S]*?-->|<\?(?:php)?[\s\S]*?\?>/gi;
+    let after = str;
+    // removes the '<' char at the end of the string to replicate PHP's behaviour
+    after = after.substring(after.length - 1) === '<' ? after.substring(0, after.length - 1) : after;
+    // recursively remove tags to ensure that the returned string doesn't contain forbidden tags after previous passes (e.g. '<<bait/>switch/>')
+    while (true) {
+        const before = after;
+        after = before.replace(commentsAndPhpTags, '').replace(tags, function ($0, $1) {
+            return allowed.indexOf('<' + $1.toLowerCase() + '>') > -1 ? $0 : '';
+        });
+        // return once no more tags are removed
+        if (before === after) {
+            return after;
+        }
+    }
+}
+LX.stripTags = stripTags;
+/**
  * @method parsePixelSize
  * @description Parses any css size and returns a number of pixels
  * @param {Number|String} size
@@ -12429,15 +12456,7 @@ LX.init = async function (options = {}) {
     }
     this.layoutMode = options.layoutMode ?? "app";
     document.documentElement.setAttribute("data-layout", this.layoutMode);
-    if (this.layoutMode == "document") {
-        document.addEventListener("scroll", e => {
-            // Get all active menuboxes
-            const mbs = document.body.querySelectorAll(".lexdropdownmenu");
-            mbs.forEach((mb) => {
-                mb._updatePosition();
-            });
-        });
-    }
+    if (this.layoutMode == "document") ;
     this.spacingMode = options.spacingMode ?? "default";
     document.documentElement.setAttribute("data-spacing", this.spacingMode);
     this.container.appendChild(this.modal);

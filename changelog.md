@@ -6,14 +6,20 @@
 
 From 0.8.0, the full library is written in TypeScript to facilitate integrations in newer frameworks. Build are still available as a JS module with its extensions.
 
-Table Component now sort Date strings by date.
-Added support for `Ctrl+Wheel` to increase grid item size in AssetView.
-Added support for `options.submit` in Form entries.
-Added "dev" icons, Vscode, Godot, Unity, UnrealEngine, Go, Css, Android, and more.
-New `colors/` page in main demo page.
-Fixed Area Tabs drag & drop issues.
-Fixed "All components" example on mobile devices.
-Fixed multiline indentation on empty lines.
+Updates:
+- Table Component now sort Date strings by date.
+- Added support for `Ctrl+Wheel` to increase grid item size in AssetView.
+- Added support for `options.submit` in Form entries.
+- Added "dev" icons, Vscode, Godot, Unity, UnrealEngine, Go, Css, Android, and more.
+- New `colors/` page in main demo page.
+- Added new utils `LX.stripTags(str)`.
+
+Fixes:
+- Area Tabs drag & drop is now working not deleting tab content.
+- "All components" example works now on mobile devices.
+- Calendar and CalendarRange month changes now correctly.
+- Table Calendar filters now work as expected solving some minor issues.
+- Code Editor multiline indentation now works properly on empty lines.
 
 API Changes:
 - `BaseComponent` enum types moved to `ComponentType`.
