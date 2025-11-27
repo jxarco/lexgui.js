@@ -81,7 +81,7 @@
             menubar.setButtonIcon("Github", "Github", () => {window.open("https://github.com/jxarco/lexgui.js/")}, { float: "left" });
             menubar.siblingArea.root.classList.add( "overflow-scroll" );
 
-            panel = leftArea.addPanel({ height: "auto", className: "flex flex-col gap-1" });
+            panel = leftArea.addPanel({ height: "auto", className: "flex flex-col gap-2" });
             iFrameArea = rightArea;
         }
 
@@ -105,17 +105,19 @@
             for( let ex of examples )
             {
                 const id = ex.replace(" ", "-").toLowerCase();
-                const options = {
-                    img: "previews/" + id + ".png",
-                    callback: function() {
-                        iframe.src = id + ".html";
-                        if( window.__currentSheet )
-                        {
-                            window.__currentSheet.destroy();
-                        }
+                const title = LX.makeContainer( ["auto", "auto"], "p-2 text-md fg-secondary font-semibold", ex, panel );
+                const container = LX.makeContainer( ["100%", "auto"], "border overflow-hidden rounded-xl cursor-pointer", "", panel );
+                const image = document.createElement( "img" );
+                image.src = "previews/" + id + ".png";
+                image.className = "w-full h-32 hover:scale-lg";
+                container.appendChild( image );
+                container.addEventListener( "click", (e) => {
+                    iframe.src = id + ".html";
+                    if( window.__currentSheet )
+                    {
+                        window.__currentSheet.destroy();
                     }
-                };
-                panel.addCard( ex, options );
+                });
             }
         }
     </script>

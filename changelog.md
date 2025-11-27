@@ -13,6 +13,8 @@ Updates:
 - Added "dev" icons, Vscode, Godot, Unity, UnrealEngine, Go, Css, Android, and more.
 - New `colors/` page in main demo page.
 - Added new utils `LX.stripTags(str)`.
+- Added Card Component docs.
+- Improved all docs.
 
 Fixes:
 - Area Tabs drag & drop is now working not deleting tab content.
@@ -33,8 +35,9 @@ API Changes:
 - ItemArray Component renamed to ArrayInput.
 - Removed support for Blank panel component.
 - AssetView is now an extension.
+- NodeGraph extension renamed to GraphEditor.
 - Docmaker Extension API full changed (see docs).
-- NodeGraph extension renamed to GraphEditor
+- Refactored `Card` Component (see docs).
 
 Styling:
 - Main Theme colors updates.

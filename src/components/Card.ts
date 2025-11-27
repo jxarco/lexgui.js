@@ -2,6 +2,7 @@
 
 import { LX } from './../core/Namespace';
 import { BaseComponent, ComponentType } from './BaseComponent';
+import { Button } from './Button';
 import { IEvent } from './Event';
 
 /**
@@ -17,48 +18,62 @@ export class Card extends BaseComponent
 
         super( ComponentType.CARD, name, null, options );
 
-        let container = document.createElement('div');
-        container.className = "lexcard";
-        container.style.width = "100%";
-        this.root.appendChild( container );
+        this.root.classList.add( "place-content-center" );
 
-        if( options.img )
+        const container = LX.makeContainer( [ "100%", "auto" ], "lexcard max-w-sm flex flex-col gap-4 bg-primary border rounded-xl py-6", "", this.root );
+
+        if( options.header )
         {
-            let img = document.createElement('img');
-            img.src = options.img;
-            container.appendChild( img );
+            const hasAction = ( options.header.action !== undefined );
+            let header = LX.makeContainer( [ "100%", "auto" ], `flex ${ hasAction ? "flex-row gap-4" : "flex-col gap-1" } px-6`, "", container );
 
-            if( options.link != undefined )
+            if( hasAction )
             {
-                img.style.cursor = "pointer";
-                img.addEventListener('click', function() {
-                    const hLink = container.querySelector('a');
-                    if( hLink )
-                    {
-                        hLink.click();
-                    }
-                });
+                const actionBtn = new Button( null, options.header.action.name, options.header.action.callback );
+                header.appendChild( actionBtn.root );
+
+                const titleDescBox = LX.makeContainer( [ "75%", "auto" ], `flex flex-col gap-1`, "" );
+                header.prepend( titleDescBox );
+                header = titleDescBox;
+            }
+
+            if( options.header.title )
+            {
+                LX.makeElement( "div", "text-md leading-none font-semibold", options.header.title, header );
+            }
+
+            if( options.header.description )
+            {
+                LX.makeElement( "div", "text-sm fg-tertiary", options.header.description, header );
             }
         }
 
-        let cardNameDom = document.createElement('span');
-        cardNameDom.innerText = name;
-        container.appendChild( cardNameDom );
-
-        if( options.link != undefined )
+        if( options.content )
         {
-            let cardLinkDom = document.createElement( 'a' );
-            cardLinkDom.innerText = name;
-            cardLinkDom.href = options.link;
-            cardLinkDom.target = options.target ?? "";
-            cardNameDom.innerText = "";
-            cardNameDom.appendChild( cardLinkDom );
+            const content = LX.makeContainer( [ "100%", "auto" ], "flex flex-col gap-2 px-6", "", container );
+            const elements = [].concat( options.content );
+            for( let e of ( elements as any[] ) )
+            {
+                content.appendChild( e.root ? e.root : e );
+            }
+        }
+
+        if( options.footer )
+        {
+            const footer = LX.makeContainer( [ "100%", "auto" ], "flex flex-col gap-1 px-6", "", container );
+            const elements = [].concat( options.footer );
+
+            for( let e of ( elements as any[] ) )
+            {
+                footer.appendChild( e.root ? e.root : e );
+            }
         }
 
         if( options.callback )
         {
+            container.classList.add( "selectable" );
             container.style.cursor = "pointer";
-            container.addEventListener("click", ( e ) => {
+            container.addEventListener("click", ( e: MouseEvent ) => {
                 this._trigger( new IEvent( name, null, e ), options.callback );
             });
         }

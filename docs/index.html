@@ -130,8 +130,9 @@
 
             const area = new LX.Area({ className: "flex flex-col gap-3 docs", skipAppend: true, height: "auto" });
             content.appendChild( area.root );
-            const panel = window.__panel = area.addPanel();
-            panel.branch( componentName );
+            const container = LX.makeContainer( ["100%", "auto"], "flex flex-col bg-background border rounded-xxl overflow-hidden", "", area );
+            const panel = window.__panel = new LX.Panel({ className: "p-6" });
+            container.appendChild( panel.root );
             onPanel( panel );
 
             const runCode = () => {
@@ -140,20 +141,29 @@
                 script.innerHTML = `
                     const panel = window.__panel;
                     panel.clear();
-                    panel.branch("${ componentName }");
                     ${ codeEditor.getText() }
                 `;
                 script.async = false;
                 document.getElementsByTagName( 'head' )[ 0 ].appendChild( script );
             }
 
-            const codeArea = new LX.Area({ className: "rounded overflow-hidden", skipAppend: true, height: "auto" });
-            area.attach( codeArea.root );
-            const codeEditor = new CodeEditor( codeArea, { name: `${componentName.toLowerCase().replace( /\s/g, '_' )}.js`, onrun: runCode, skipInfo: true, allowAddScripts: false, language: "JavaScript" } );
-
             let code = onPanel.toString();
             let lines = code.split( '\n' ).slice( 1, -1 );
             code = lines.map( line => line.substr( 12 ) ).join( '\n' );
+            const heightByLines = Math.min( 4 + lines.length * 1.25, 32 );
+
+            const codeArea = new LX.Area({ className: "overflow-hidden border-top py-6", skipAppend: true, height: `${ heightByLines }rem` });
+            container.appendChild( codeArea.root );
+            const codeEditor = new CodeEditor( codeArea, {
+                name: `${componentName.toLowerCase().replace( /\s/g, '_' )}.js`,
+                onrun: runCode,
+                skipInfo: true,
+                skipTabs: true,
+                allowAddScripts: false,
+                language: "JavaScript"
+            } );
+
+            codeEditor.root.querySelector("button.grid.absolute.z-100.p-3").remove();
             codeEditor.setText( code, "JavaScript" );
 
             const runButton = new LX.Button( null, "Run", (value, event) => {
@@ -276,7 +286,7 @@
 
         const generalComponents = [ "Area Overlay Buttons", "Badge", "Button", "Combo Buttons", "Radio Group" ];
         const dataInputComponents = [ "Array", "Checkbox", "Color", "Curve", "Custom", "Date Picker", "File", "Form", "Layers", "Map 2D", "Number", "OTP Input", "Pad", "Range", "Rate", "Select", "Size", "Tags", "Text", "Text Area", "Toggle", "Vector" ];
-        const dataDisplayComponents = [ "Code Snippet", "Data Tree", "List", "Table", "Title" ];
+        const dataDisplayComponents = [ "Card", "Code Snippet", "Data Tree", "List", "Table", "Title" ];
         const feedbackComponents = [ "Progress", "Skeleton", "Toast" ];
         const navigationComponents = [ "Breadcrumb", "Dropdown", "Menubar", "Sidebar", "Tab Sections", "Tabs" ];
         const overlayComponents = [ "Dialog", "Popover", "Sheet", "Tour" ];
@@ -284,6 +294,7 @@
         const componentVersion = {
             "Area Overlay Buttons": "6.10",
             "Breadcrumb": "7.0",
+            "Card": "8.0",
             "Date Picker": "5.9",
             "Popover": "5.9",
             "Map 2D": "6.3",

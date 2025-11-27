@@ -47,11 +47,11 @@ export class DocMaker
         this.root.appendChild( header );
     }
 
-    paragraph( string: string, sup: boolean = false )
+    paragraph( string: string, sup: boolean = false, className?: string )
     {
         console.assert( string !== undefined );
         let paragraph = document.createElement(sup ? 'sup' : 'p');
-        paragraph.className = "leading-relaxed";
+        paragraph.className = "leading-relaxed " + ( className ?? "" );
         paragraph.innerHTML = string;
         this.root.appendChild( paragraph );
     }

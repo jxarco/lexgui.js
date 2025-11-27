@@ -1,0 +1,63 @@
+<script type="module">
+    import { LX } from 'lexgui';
+
+    const content = document.getElementById('content');
+    const componentName = "Card";
+
+    docMaker.header(componentName + ".", "h1", componentName.toLowerCase());
+    docMaker.paragraph(`Displays a card with header, content, and footer.`, false, "fg-tertiary");
+
+    {
+        window.__addInteractiveCodeExample( content, componentName, panel => {
+            panel.addCard("MyPersonalCard", {
+                header: {
+                    title: "Login to your account",
+                    description: "Enter your email below to login to your account",
+                    action: { name: "SignUp", callback: () => { console.log("signed up!!") } }
+                },
+                content: [ new LX.Form( null, {
+                        email: { label: "Email", placeholder: "m@example.com" },
+                        password: { label: "Password", type: "password" }
+                    }, ( d ) => {
+                        console.log( d )
+                    }, { primaryActionName: "Login" } ) 
+                ],
+                footer: [ new LX.Button( null, "Login with Google" ) ]
+            });
+        });
+    }
+
+    docMaker.header("Usage", "h2");
+
+    docMaker.paragraph( `Call ${docMaker.iCode("Panel.addCard(name, options)")} to add a ${ componentName } Component to your panel or
+    create it anywhere using ${docMaker.iCode(`new LX.${ componentName.replace( /\s/g, '' ) }`)} to append its root to any container.` );
+
+    docMaker.header("API Reference", "h2");
+
+    {
+        const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
+        const panel = area.addPanel();
+        content.appendChild( area.root );
+
+        panel.addTable( null, {
+            head: [ "Parameter", "Type", "Description", "Default" ],
+            body: [
+                ["name", "String", "Component name", "—"],
+                ["options", "Object", "Basic options for a component", "—"]
+            ].map( v => {
+                return [ docMaker.iCode( v[ 0 ], "table" ), docMaker.iCode( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? docMaker.iCode( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+        docMaker.lineBreak( panel.root );
+        panel.addTable( null, {
+            head: [ "Option", "Type", "Description", "Default" ],
+            body: [
+                ["header", "Object", "Contains diffent header options { title, description, action }", "—"],
+                ["content", "HTMLElement|Array", "Element or list of elements to be added to the card body", "—"],
+                ["footer", "HTMLElement|Array", "Element or list of elements to be added to the card footer", "—"],
+            ].map( v => {
+                return [ docMaker.iCode( v[ 0 ], "table" ), docMaker.iCode( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? docMaker.iCode( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+    }
+</script>
