@@ -539,6 +539,7 @@ a svg, svg path {
     gap: 0.15em;
     z-index: 100;
     padding: 0;
+    z-index: 1000;
 }
 
 .notifications ol.list {

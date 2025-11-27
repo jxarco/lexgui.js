@@ -11,7 +11,7 @@ const menubarButtons = [
     { name: "Docs", callback: () => { window.open("./docs/") } },
     { name: "Components", callback: () => { window.open("./docs/?p=components") } },
     { name: "Examples", callback: () => { window.open("./examples/") } },
-    { name: "Colors", callback: () => { window.location.href = window.location.origin + ( localHost ? "" : window.location.pathname ) + "/colors/"; } }
+    { name: "Colors", callback: () => { window.location.href = window.location.origin + ( localHost ? "/" : window.location.pathname ) + "colors/"; } }
 ];
 let menubar = null, sheetArea = null;
 
