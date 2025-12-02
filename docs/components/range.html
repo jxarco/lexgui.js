@@ -22,7 +22,7 @@
     docMaker.paragraph( `Call ${docMaker.iCode("Panel.addRange(name, value, callback, options)")} to add a ${ componentName } Component to your panel or
     create it anywhere using ${docMaker.iCode(`new LX.${ componentName.replace( /\s/g, '' ) }`)} to append its root to any container.` );
     docMaker.lineBreak();
-    docMaker.paragraph(`In case you are using limits, store the component and call <code class='inline'>rangeComponent.setLimits( min, max, step )</code> to change its 
+    docMaker.paragraph(`In case you are using limits, store the component and call <code class='inline'>rangeComponent.setLimits( min, max, step )</code> to change its
         parameters once the component has been created.` );
 
     docMaker.header("API Reference", "h2");

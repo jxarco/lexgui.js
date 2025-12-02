@@ -29,7 +29,7 @@
         [".root", "HTMLElement", "Container element of the area"],
         [".sections", "Array", "If split, the two split areas"]
     ] );
-    
+
     docMaker.header( "Methods", "h2", "methods" );
 
     docMaker.classMethod( ".addMenubar", `Creates a Menubar inside the area using data in Array format to create each of the entries and subentries.`, [
@@ -37,7 +37,7 @@
         ["options", "Object"],
     ], `${ docMaker.iPage( "Menubar", "components/menubar.html" ) }` );
 
-    docMaker.classMethod( ".addOverlayButtons", `Creates a group of buttons that can be positioned at specific area locations. 
+    docMaker.classMethod( ".addOverlayButtons", `Creates a group of buttons that can be positioned at specific area locations.
 <code class='inline ref'>options.float = <span class="str">"htc"</span></code> where h: horizontal; v: vertical; t: top; m: middle; b: bottom; l: left; c: center; r: right.`, [
         ["buttons", "Array"],
         ["options", "Object"],

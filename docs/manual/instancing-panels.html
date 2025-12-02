@@ -1,7 +1,7 @@
 <script type="module">
 
     docMaker.header( "Instancing Panels.", "h1", "instancing-panels" );
-            
+
     docMaker.paragraph( `Panels are the DOM elements that will enclose your UI components. The pipeline is simple, create a Panel, attach it to an Area and fill it!
         An area could contain multiple panels since at the end a panel is only an specific type of container (div) element.` );
     docMaker.paragraph( `You could do it manually instancing a new ${docMaker.iCode("LX.Panel")} and attaching it using ${docMaker.iCode("Area.attach(content)")} but you might want to call ${docMaker.iCode("Area.addPanel(options)")} to get an instanced panel already attached to that area:` );
@@ -22,7 +22,7 @@
         ["style", "Object", "CSS Style object to be applied to the panel"]
     ] );
     docMaker.paragraph( `Once you have an instantiated panel, you can start adding UI components!` );
-    
+
     docMaker.lineBreak();
     docMaker.lineBreak();
 

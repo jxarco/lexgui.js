@@ -19,8 +19,8 @@
     docMaker.paragraph( `Call ${docMaker.iCode("Panel.addNumber(name, value, callback, options)")} to add a ${ componentName } Component to your panel or
     create it anywhere using ${docMaker.iCode(`new LX.${ componentName.replace( /\s/g, '' ) }`)} to append its root to any container.` );
     docMaker.lineBreak();
-    docMaker.paragraph(`You can change the value of this component manually, using the mouse wheel, and dragging (up/down). In the last two cases, pressing <em>Alt</em> and 
-        <em>Left Shift</em> will apply a factor of <code class='inline'>0.1</code> and <code class='inline'>10</code> in that order. In case you are using limits, store the component and call <code class='inline'>numberComponent.setLimits( min, max, step )</code> to change its 
+    docMaker.paragraph(`You can change the value of this component manually, using the mouse wheel, and dragging (up/down). In the last two cases, pressing <em>Alt</em> and
+        <em>Left Shift</em> will apply a factor of <code class='inline'>0.1</code> and <code class='inline'>10</code> in that order. In case you are using limits, store the component and call <code class='inline'>numberComponent.setLimits( min, max, step )</code> to change its
         parameters once the component has been created.` );
 
     docMaker.note( `Setting <code class='inline'>min</code>, <code class='inline'>max</code> values will automatically add a slider below the number input.`, false, "Tip", "Info" );
@@ -60,6 +60,6 @@
                 return [ docMaker.iCode( v[ 0 ], "table" ), docMaker.iCode( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? docMaker.iCode( v[ 3 ], "table desc" ) : v[ 3 ] ];
             } )
         }, {});
-    }    
-    
+    }
+
 </script>

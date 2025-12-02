@@ -5,7 +5,7 @@
     docMaker.header( "Changelog.", "h1", "changelog" );
 
     docMaker.paragraph( `Latest updates and announcements.` );
-    
+
     {
         const params = new URLSearchParams( document.location.search );
         const content = document.getElementById('content');
@@ -24,7 +24,7 @@
 
                 if( !masterVersion && !(masterVersion = line.includes( "(master)" )) )
                 {
-                    continue;   
+                    continue;
                 }
 
                 if( line[ 0 ] == '#' )

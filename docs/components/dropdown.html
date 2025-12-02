@@ -3,13 +3,13 @@
     const content = document.getElementById( 'content' );
 
     docMaker.header( "Dropdown Menus.", "h1", "context-menu" );
-            
+
     docMaker.paragraph( `Context menus provide quick access to relevant actions and options based on the user's current context, enhancing the overall user experience. LexGUI offers two possible ways to create a custom Context Menu using Dropdowns.` );
     docMaker.lineBreak();
 
     docMaker.header("Usage", "h2");
 
-    docMaker.paragraph( `The first method is to use the ${ docMaker.iCode("LX.addContextMenu(title, event, callback, options)") } function, which allows you to create a reduced Context Menu, 
+    docMaker.paragraph( `The first method is to use the ${ docMaker.iCode("LX.addContextMenu(title, event, callback, options)") } function, which allows you to create a reduced Context Menu,
     that can be triggered not only on right-click but in any custom event at any place where the mouse/trigger element is.` );
     docMaker.lineBreak();
 
@@ -38,7 +38,7 @@
     m.@[mtd]add@( @"Delete"@ );
 });` );
 
-    docMaker.paragraph( `As you can observe, the usage format resembles that of other UI elements such as dialogs or menubars. You pass the menu as a parameter, 
+    docMaker.paragraph( `As you can observe, the usage format resembles that of other UI elements such as dialogs or menubars. You pass the menu as a parameter,
     allowing the user to populate it with all the desired entries and subentries.` );
     docMaker.paragraph( `The <code class='inline'>options (Object)</code> when creating a Context Menu are the following:` );
     docMaker.codeBulletList( [

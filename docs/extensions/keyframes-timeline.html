@@ -14,7 +14,7 @@
 
         if ( window.keyframeTimeline ){ window.keyframeTimeline.__terminate = true; }
         window.keyframeTimeline = keyframestimeline;
-        
+
         const animation = {
             duration: 10,
             tracks: [
@@ -61,7 +61,7 @@
                     break;
                 case ' ':
                     this.changeState();
-                    break; 
+                    break;
 
                 case "Shift":
                     this.canvas.style.cursor = "crosshair";
@@ -79,14 +79,14 @@
         function render(timestamp){
 
             // avoids multiple instances of keyframestimeline to render. Just render the last one
-            // clicking on other documentation entries WILL NOT terminate render. 
+            // clicking on other documentation entries WILL NOT terminate render.
             // TODO it should terminate as soon as documentation page is changed
             if ( keyframestimeline.__terminate ){
                 return;
             }
 
             requestAnimationFrame( render );
-            
+
             if ( keyframestimeline.playing ){
                 const dt = ( timestamp - lastTimestamp ) * 0.001;
                 keyframestimeline.setTime( (keyframestimeline.currentTime + dt) % keyframestimeline.animationClip.duration)
@@ -132,7 +132,7 @@ panel.@[mtd]attach@(kfTimeline.root);` );
         [".dim", "Number", `Number of values per keyframe. It can be modified, as long as it makes sense with ${docMaker.iCode("times")} and ${docMaker.iCode("values")} attributes.`],
         [".groupId", "String", `${docMaker.iCode("Read-Only")} Group to which it is attached. Use ${docMaker.iCode("setTracksGroup")} instead of directly modifying it.`],
         [".groupTrackIdx", "Number", `${docMaker.iCode("Read-Only")} Index of the track inside the group array.`],
-        
+
         [".curves", "Boolean", `Whether to render this track as centered keyframes or curves.`],
         [".curvesRange", "[Number, Number]", `range of values [min, max] that the track will hold.`],
 
@@ -156,8 +156,8 @@ panel.@[mtd]attach@(kfTimeline.root);` );
     docMaker.codeBulletList( [
         [".lastKeyFramesSelected", "Array of [trackIdx, keyframeIdx, keyframe time]", `${docMaker.iCode("Read-Only")} the currently selected keyframes across all tracks, sorted ascendently.`],
         [".keyValuePerPixel", "Number", `Applicable to tracks with dim = 1, amount of normalized value ( [ 0, 1 ] ) to add per pixel moved while holding ${docMaker.iCode("alt")}. Default to 1/${docMaker.iCode("trackHeight")}.`],
-        [".defaultCurves", "Boolean", `Applicable to tracks with dim = 1, the default way of rendering tracks with dim = 1. If true, it renders them with curves.`],  
-        [".defaultCurvesRange", "[Number, Number]", `Applicable to tracks with dim = 1, the default range of values [min, max] that a track holds.`],  
+        [".defaultCurves", "Boolean", `Applicable to tracks with dim = 1, the default way of rendering tracks with dim = 1. If true, it renders them with curves.`],
+        [".defaultCurvesRange", "[Number, Number]", `Applicable to tracks with dim = 1, the default range of values [min, max] that a track holds.`],
     ] );
 
     docMaker.header( "Callbacks", "h2", "" );
@@ -166,7 +166,7 @@ panel.@[mtd]attach@(kfTimeline.root);` );
     docMaker.classMethod( "onAddNewTrack", `Triggered after creating a track through the ${docMaker.iCode("addNewTrack")} function. This callback can be used to change the default id of the track, modify the dimension of the values or to insert some initial values. To include this track into a group, use the ${docMaker.iCode("setTracksGroup")} function.`, [
         ["track", "Object"],
     ] );
-    
+
     docMaker.classMethod( "onItemSelected", `Triggered after calling ${docMaker.iCode("selectItems")}.`, [
         ["currentSelectedItems", "Array of Numbers for tracks or Strings for groups"],
         ["itemsAdded", "Array of Numbers for tracks or Strings for groups"],
@@ -176,7 +176,7 @@ panel.@[mtd]attach@(kfTimeline.root);` );
     docMaker.classMethod( "onSelectKeyFrame", `Triggered after selecting a keyframe.`, [
         ["currentSelection", "[trackIdx, keyframeIdx, time of keyframe]"],
     ] );
-    
+
     docMaker.classMethod( "onDeselectKeyFrames", `Triggered before deselecting all keyframes.`, [
         ["selectedKeyframes", "Array of [trackIdx, keyframeIdx, timestamp of keyframe]"],
     ] );
@@ -189,7 +189,7 @@ panel.@[mtd]attach@(kfTimeline.root);` );
     docMaker.classMethod( "onUpdateTrack", `Triggered after changing keyframe values through ${docMaker.iCode("Alt")} in a curves track, pasting values, undoing-redoing and adding keyframes.`, [
         ["tracks", "Array of Number"],
     ] );
-    
+
     docMaker.classMethod( "onOptimizeTracks", `Triggered after optimizing tracks. It receives either a valid track index or a -1 indicating that all tracks have been optimized at once.`, [
         ["trackIndex", "Number"],
     ] );
@@ -225,7 +225,7 @@ panel.@[mtd]attach@(kfTimeline.root);` );
     docMaker.classMethod( ".optimizeTracks", `Removes similar keyframes of all track, given the ${docMaker.iCode("optimizeThreshold")} attribute. If ${docMaker.iCode("onlyEqualTime")} is set, only keyframes with the same time will be removed, keepin the first occurrence.`, [
         ["onlyEqualTime", "Boolean"],
     ], "" );
-    
+
     docMaker.classMethod( ".copySelectedContent", `Copies the lastKeyFramesSelected elements into clipboard.`, [
     ], "" );
     docMaker.classMethod( ".pasteContent", `Paste copied keyframes into the tracks, positioned at ${docMaker.iCode("time")}.`, [
@@ -258,7 +258,7 @@ panel.@[mtd]attach@(kfTimeline.root);` );
         ["time", "Number"],
         ["mode", "Number"],
     ], "Number" );
-        
+
     docMaker.classMethod( ".processSelectionKeyFrame", `Helper function to select a keyframe and set the timeline time to that keyframe (only if ${docMaker.iCode("multipleSelection")} is ${docMaker.iCode("false")} ). If ${docMaker.iCode("multipleSelection")} is ${docMaker.iCode("true")}, previous selected keyframes are kept selected.`, [
         ["trackIdx", "Number"],
         ["frameIdx", "Number"],
@@ -270,7 +270,7 @@ panel.@[mtd]attach@(kfTimeline.root);` );
         ["frameIdx", "Number"],
         ["skipCallback", "Boolean"],
     ], "[trackIdx, frameIdx, frameTime]" );
-           
+
     docMaker.classMethod( ".deselectKeyFrame", `Deselects a keyframe.`, [
         ["trackIdx", "Number"],
         ["frameIdx", "Number"],

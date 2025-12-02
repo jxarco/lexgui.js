@@ -13,7 +13,7 @@
         tabs.add( "App", document.createElement("div"), { selected: true } );
         tabs.add( "Editor", document.createElement("div") );
         tabs.add( "Examples", document.createElement("div") );
-        
+
         area.root.className += " p-2 border rounded-lg shadow-lg bg-secondary overflow-hidden";
     }
 
@@ -48,7 +48,7 @@ tabs.@[mtd]add@( @"Examples"@, examplesContainer );
         [".tabs", "Object", "Map containing information for each of the generated tabs"],
         [".tabDOMs", "Object", "Map containing the DOM elements for each of the generated tabs"],
     ] );
-    
+
     docMaker.header( "Methods", "h3", "methods" );
 
     docMaker.classMethod( ".add", `Adds a new tab inside the tab container. As options, you can use:`, [

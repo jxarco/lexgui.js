@@ -13,14 +13,14 @@
         ["id", "String", "Unique string that identifies this element"],
         ["options", "Object"]
     ] );
-    
+
     docMaker.paragraph(`Each timeline has to be appended to an existing panel, where the possible ${docMaker.iCode(`options`)} are the following:` );
     docMaker.codeBulletList( [
         ["title", "String", `Set a title for the timeline.`],
         ["loop", "Boolean", "Set looping mode animation by default."],
         ["skipVisibility", "Boolean", "When it's true, the un/active track button is disabled."],
         ["skipLock", "Boolean", "When it's true, the un/lock track button is disabled."],
-        ["disableNewTracks", "Boolean", "When it's true, add new tracks option is disabled."],                
+        ["disableNewTracks", "Boolean", "When it's true, add new tracks option is disabled."],
         ["onCreateBeforeTopBar", "Function", `Callback to add components on the top bar before the 'current time' component.`],
         ["onCreateAfterTopBar", "Function", `Callback to add components on the top bar after the 'duration' component.`],
         ["onCreateControlsButtons", "Function", `Callback to add components on the top bar after the default ones (play, stop, loop).`],
@@ -28,18 +28,18 @@
         ["onShowOptimizeMenu", "Function", `Callback to add an optimize menu on the right side, before the configuration menu. If undefined, the menu will appear and use the default implementation. Set it to null, to deactivate it.`],
         ["onShowConfiguration", "Function", `Callback to add components to the configuration menu.`]
     ] );
-        
+
     docMaker.header( "Callbacks", "h2", "" );
     docMaker.header( "Constructor Callbacks", "h3", "" );
     docMaker.paragraph( `These are used to build the interface of the timeline. Setting them outside the constructor will require a call to ${docMaker.iCode("updateHeader")} for them to take effect:`);
     docMaker.classMethod( "onCreateBeforeTopBar", `Callback to add components on the top bar before the 'current time' component.`, [
         ["panel", "LX panel"]
     ] );
-    
+
     docMaker.classMethod( "onCreateAfterTopBar", `Callback to add components on the top bar after the 'duration' component.`, [
         ["panel", "LX panel"]
     ] );
-    
+
     docMaker.classMethod( "onCreateControlsButtons", `Callback to add components on the top bar after the default ones (play, stop, loop).`, [
         ["panel", "LX panel"]
     ] );
@@ -58,7 +58,7 @@
 
     docMaker.header( "Callbacks", "h3", "" );
     docMaker.paragraph( `These are used to react to some event and can be set at any time. Constructor's ${docMaker.iCode("options")} will not recognize this functions. `);
-    
+
     docMaker.classMethod( "onBeforeDrawContent", `Called before rendering the track elements.`, [
         ["ctx", "canvas context"]
     ] );
@@ -72,7 +72,7 @@
     docMaker.classMethod( "onSetTime", `Triggered after changing the current time using the ${docMaker.iCode("setTime")} function or the interface.`, [
         ["currentTime", "Number"]
     ] );
-    
+
     docMaker.classMethod( "onSetDuration", `Triggered after calling ${docMaker.iCode("setDuration")}.`, [
         ["currentDuration", "Number"]
     ] );
@@ -80,7 +80,7 @@
     docMaker.classMethod( "onChangeLoopMode", `Triggered after calling ${docMaker.iCode("setLoopMode")} or clicking on the loop button.`, [
         ["currentLoopMode", "Boolean"]
     ] );
-    
+
     docMaker.classMethod( "onMouse", `Triggered after processing the mouse event over the canvas. The box selection of elements does not trigger this event. Receives the mouse event with the ${docMaker.iCode(".track")} attribute if clicked over a valid track; and the current time of the mouse location.`, [
         ["event", "MouseEvent"],
         ["time", "Number"],
@@ -94,7 +94,7 @@
     ] );
 
     docMaker.classMethod( "onAddNewTrackButton", `Triggered after clicking on the "add track" button (if enabled). This callback overrides the default implementation, that is adding a track to the animationClip and making it visible.`, [ ] );
-    
+
     docMaker.classMethod( "onAddNewTrack", `Triggered after creating a track through the ${docMaker.iCode("addNewTrack")} function. This callback can be used to change the default id of the track, modify the dimension of the values or to insert some initial values.`, [
         ["track", "Object"],
     ] );
@@ -123,7 +123,7 @@
         ["track", "Object"],
         ["previousState", "Boolean"]
     ] );
-          
+
     docMaker.header( "Properties", "h2", "" );
     const baseAnimationClipOptions = [
             [".id", "String", "Id of the animation"],
@@ -133,18 +133,18 @@
         ];
     docMaker.codeBulletList( [
         [".root", "LX.Area", `${docMaker.iCode("Read-Only")} Container where the whole timeline is created`],
-        [".uniqueID", "String", `${docMaker.iCode("Read-Only")}.`],  
+        [".uniqueID", "String", `${docMaker.iCode("Read-Only")}.`],
         [".timelineTitle", "String", `Use ${docMaker.iCode("updateHeader")} after modifying it to update the interface`],
         [".animationClip", "Object", `${docMaker.iCode("Read-Only")} Contains all the information of an animation. Setting an animationClip must be done through ${docMaker.iCode("setAnimationClip")}. Check each class for full details`],
         baseAnimationClipOptions,
-        [".playing", "Boolean", `${docMaker.iCode("Read-Only")}. Use ${docMaker.iCode("setState")} to modify its value`],  
+        [".playing", "Boolean", `${docMaker.iCode("Read-Only")}. Use ${docMaker.iCode("setState")} to modify its value`],
         [".loop", "Boolean", `${docMaker.iCode("Read-Only")}. Whether the loop button is set or not.`],
-        [".duration", "Number", `${docMaker.iCode("Read-Only")}. Use ${docMaker.iCode("setDuration")} to modify its value`],  
-        [".currentTime", "Number", `${docMaker.iCode("Read-Only")}. Use ${docMaker.iCode("setTime")} to modify its value`],  
-        [".historyMaxSteps", "Int", `Sets the maximum number of states for the history (undo & redo).`],  
+        [".duration", "Number", `${docMaker.iCode("Read-Only")}. Use ${docMaker.iCode("setDuration")} to modify its value`],
+        [".currentTime", "Number", `${docMaker.iCode("Read-Only")}. Use ${docMaker.iCode("setTime")} to modify its value`],
+        [".historyMaxSteps", "Int", `Sets the maximum number of states for the history (undo & redo).`],
         [".trackHeight", "Number", `${docMaker.iCode("Read-Only")}. Size of the tracks drawn.`],
         [".optimizeThreshold", "Number", `Used to optimize tracks, if it has an optimization function`],
-        [".visualOriginTime", "Number", `Sets the horizontal scroll of the timeline, displaying the specified time (seconds) at pixel 0 (left). Allows negative values`] 
+        [".visualOriginTime", "Number", `Sets the horizontal scroll of the timeline, displaying the specified time (seconds) at pixel 0 (left). Allows negative values`]
     ] );
 
     docMaker.header( "Methods", "h2", "" );
@@ -214,7 +214,7 @@
         ["skipCallback", "Boolean"],
         ["updateTrackTree", "Boolean"],
     ] );
-    
+
     docMaker.classMethod( ".setTrackState", `Set whether the track should be active or not.\
     ${docMaker.iCode("updateTrackTree")} changes the eye icon of the track, if it is visible in the timeline. If multiple ${docMaker.iCode("setTrackState")} are to be called, set ${docMaker.iCode("updateTrackTree")} only on the last call.`, [
         ["trackIdx", "Numbers"],
@@ -222,7 +222,7 @@
         ["skipCallback", "Boolean"],
         ["updateTrackTree", "Boolean"],
     ] );
-    
+
     docMaker.classMethod( ".setTrackLock", `Set whether the track should be locked or not. Locked tracks cannot be edited (adding or deleting keyframes).\
         ${docMaker.iCode("updateTrackTree")} changes the lock icon of the track, if it is visible in the timeline. If multiple ${docMaker.iCode("setTrackLock")} are to be called, set ${docMaker.iCode("updateTrackTree")} only on the last call.`, [
         ["trackIdx", "Numbers"],
@@ -230,7 +230,7 @@
         ["skipCallback", "Boolean"],
         ["updateTrackTree", "Boolean"],
     ] );
-    
+
     docMaker.classMethod( ".saveState", `Saves the current state of the track into the history.`, [
         ["trackIdx", "Number"],
         ["combineWithPrevious", "Boolean"],

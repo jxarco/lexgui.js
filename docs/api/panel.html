@@ -26,7 +26,7 @@
         [".root", "HTMLElement", "Container element of the panel"],
         [".components", "Object", "Data of all the components created inside the panel"]
     ] );
-    
+
     docMaker.header( "Methods", "h2", "methods" );
 
     docMaker.classMethod( ".attach", `Appends a child to the panel root. If "content" has a root, then appends it, if not, append "content".`, [
@@ -37,7 +37,7 @@
         ["name", "String"],
         ["options", "Object"],
     ] );
-    
+
     docMaker.classMethod( ".clear", `Clear the panel root and all of its components.`, [] );
 
     docMaker.classMethod( ".clearQueue", `Removes the queued container, so components will be appended in its corresponding branch/container.`, [] );
@@ -64,7 +64,7 @@
         ["container", "HTMLElement"]
     ] );
 
-    docMaker.classMethod( ".sameLine", `Sets the following N components to be inlined when created. If N is <code class='inline'><span class="kwd">null</span></code>, every component created will be 
+    docMaker.classMethod( ".sameLine", `Sets the following N components to be inlined when created. If N is <code class='inline'><span class="kwd">null</span></code>, every component created will be
 inlined until <code class='inline'>Panel.endLine</code> is called.`, [
         ["numberOfComponents", "Number"],
         ["className", "String"],

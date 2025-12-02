@@ -117,8 +117,8 @@
     docMaker.header( "Menubar Icons and Logos", "h3", "menubar-icons" );
 
     docMaker.paragraph( `You can also add an icon and/or a logo button to your menubar using ${docMaker.iCode("Menubar.setButtonIcon(title, src, callback, options)")}:` );
-    docMaker.code( `menubar.@[mtd]setButtonIcon@(@"Github"@, @"Github"@, () => { 
-    window.@[mtd]open@(@"https://github.com/jxarco/lexgui.js/"@) 
+    docMaker.code( `menubar.@[mtd]setButtonIcon@(@"Github"@, @"Github"@, () => {
+    window.@[mtd]open@(@"https://github.com/jxarco/lexgui.js/"@)
 });` );
 
     docMaker.paragraph( `and ${docMaker.iCode("Menubar.setButtonImage(title, src, callback, options)")}:` );
@@ -149,13 +149,13 @@
                 [".icons", "Array", "List of the sidebar items with the data: name, DOM element and callback", "—"],
                 [".items", "Object", "Map containing the icons for each entry", "—"],
                 [".root", "HTMLElement", "Container element of the menubar", "—"],
-                [".shorts", "Object", "Map containing the shortcuts for each entry", "—"]    
+                [".shorts", "Object", "Map containing the shortcuts for each entry", "—"]
             ].map( v => {
                 return [ docMaker.iCode( v[ 0 ], "table" ), docMaker.iCode( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? docMaker.iCode( v[ 3 ], "table desc" ) : v[ 3 ] ];
             } )
         }, {});
     }
-    
+
     docMaker.header( "Methods", "h3", "methods" );
 
     docMaker.classMethod( ".add", `Creates a Menubar entry/subentry using the path.`, [

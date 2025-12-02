@@ -13,7 +13,7 @@
         clipstimeline.resize();
         if ( window.clipsTimeline ){ window.clipsTimeline.__terminate = true; }
         window.clipsTimeline = clipstimeline;
-        
+
         const animation = {
             duration: 10,
             tracks: [
@@ -55,7 +55,7 @@
                     break;
                 case ' ':
                     this.changeState();
-                    break; 
+                    break;
 
                 case "Shift":
                     this.canvas.style.cursor = "crosshair";
@@ -73,14 +73,14 @@
         function render(timestamp){
 
             // avoids multiple instances of clipstimeline to render. Just render the last one
-            // clicking on other documentation entries WILL NOT terminate render. 
+            // clicking on other documentation entries WILL NOT terminate render.
             // TODO it should terminate as soon as documentation page is changed
             if ( clipstimeline.__terminate ){
                 return;
             }
 
             requestAnimationFrame( render );
-            
+
             if ( clipstimeline.playing ){
                 const dt = ( timestamp - lastTimestamp ) * 0.001;
                 clipstimeline.setTime( (clipstimeline.currentTime + dt) % clipstimeline.animationClip.duration)
@@ -146,7 +146,7 @@ panel.@[mtd]attach@(clipTimeline.root);` );
 
     docMaker.paragraph( `Clips can contain any other attributes and will be accessible at all times.`);
     docMaker.paragraph( `The ${docMaker.iCode("cloneClips")} should be implemented by the user so the system knows how to properly duplicate clips.`);
-    
+
     docMaker.header( "Constructor", "h2", "" );
     docMaker.classCtor( "class LX.ClipsTimeline", [
         ["id", "String", "Unique string that identifies this element"],
@@ -166,7 +166,7 @@ panel.@[mtd]attach@(clipTimeline.root);` );
     docMaker.classMethod( "onUpdateTrack", `Triggered after adding clips, pasting clips and undoing-redoing.`, [
         ["tracks", "Array of Number"],
     ] );
-    
+
     docMaker.classMethod( "onContentMoved", `Triggered after moving clips horizontally or moving the fadein, fadeout and duration sliders. Calls it for each clip.`, [
         ["clip", "Object"],
         ["deltaTime", "Number"],

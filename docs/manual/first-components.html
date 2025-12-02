@@ -1,11 +1,11 @@
 <script type="module">
 
     docMaker.header( "Adding First Components.", "h1", "first-components" );
-            
-    docMaker.paragraph( `A component is a <em>fundamental building block that represents a graphical user interface (GUI) element</em>, from basic elements like buttons 
+
+    docMaker.paragraph( `A component is a <em>fundamental building block that represents a graphical user interface (GUI) element</em>, from basic elements like buttons
     and text fields to more complex elements such as navigation menus, or feedback dialogs.` );
     docMaker.lineBreak();
-    docMaker.paragraph( `LexGUI provides a wide range of components that developers can use to construct intuitive and visually appealing interfaces. 
+    docMaker.paragraph( `LexGUI provides a wide range of components that developers can use to construct intuitive and visually appealing interfaces.
     These components are designed to be customizable, allowing developers to adjust their appearance and behavior to suit the specific requirements of their application.
     To add a new component you can use a ${docMaker.iLink("Panel", "instancing_panels.html")}, that at the same time is usually attached to an area,
     calling ${docMaker.iCode("Panel.add<em>_componentClassName_</em>()")} and passing specific parameters. You can also create components instancing them using ${docMaker.iCode("new")}
@@ -21,8 +21,8 @@ yourContainer.@[mtd]appendChild@( buttonComponent.root );
 
     docMaker.header( "Getter and Setters", "h2", "getter-and-setters" );
 
-    docMaker.paragraph( `LexGUI supports retrieving and modifying values for any component that has been added. 
-    This functionality provides developers with a way to interact with and manipulate the UI elements within their applications. For a component to be accesible 
+    docMaker.paragraph( `LexGUI supports retrieving and modifying values for any component that has been added.
+    This functionality provides developers with a way to interact with and manipulate the UI elements within their applications. For a component to be accesible
     from the parent Panel, it has to be created using a ${docMaker.iCode("name")}. In case it is not used, the component will no be registered and thus inaccessible. ${docMaker.iCode("getValue/setValue")} won't work!` );
     docMaker.code( `@[com]// Getting Values by Component Name@
 @const@ color = panel.@[mtd]getValue@(@'Background'@);
@@ -30,9 +30,9 @@ yourContainer.@[mtd]appendChild@( buttonComponent.root );
 @[com]// Settings Values@
 panel.@[mtd]setValue@(@'Font Color'@, color);
 ` );
-    docMaker.note( `You must ensure that the new value provided is compatible with the component data type and constraints. 
+    docMaker.note( `You must ensure that the new value provided is compatible with the component data type and constraints.
     Incorrect data types or out-of-range values may result in unexpected behavior or errors.`, true );
-    
+
     docMaker.header( "Reset Value", "h2", "reset-value" );
 
     docMaker.paragraph( `In most cases where you set a Component Name, you will have the option to reset the component value to its default value by pressing a <em>reset
@@ -44,7 +44,7 @@ panel.@[mtd]setValue@(@'Font Color'@, color);
 
     docMaker.header( "Inline Components", "h2", "inline-components" );
 
-    docMaker.paragraph( `You can also add multiple components in the same panel row to create well-organized and visually optimized user interface layouts by calling ${docMaker.iCode("panel.sameLine(number)")}, 
+    docMaker.paragraph( `You can also add multiple components in the same panel row to create well-organized and visually optimized user interface layouts by calling ${docMaker.iCode("panel.sameLine(number)")},
     where ${docMaker.iCode("number")} is the number of components to be inlined. In case of adding a dynamic number of components, you might want to use <span class="str">null</span> as the number and call ${docMaker.iCode("panel.endLine(className)")} after
      all the components have been added. Use ${docMaker.iCode("className")} to customize the inline components parent container.` );
 

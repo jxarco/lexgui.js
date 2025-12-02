@@ -20,7 +20,7 @@
 
     docMaker.header("Usage", "h2");
 
-    docMaker.paragraph( `To fill the dialog content, a panel is automatically created inside the root so it's possible 
+    docMaker.paragraph( `To fill the dialog content, a panel is automatically created inside the root so it's possible
     to begin branching and adding components. The same way as menubars, you can fill the panel inside the creation callback. The following code creates a classic dialog:` );
     docMaker.code( `@const@ dialog = @new@ LX.@[cls]Dialog@(@"Title"@, p => {
     @[com]// Start adding components@
@@ -35,7 +35,7 @@
     @[com]// result is the user's response@
     console.@[mtd]log@(result);
 }, options);` );
-    
+
     docMaker.paragraph( `For pop-ups, you can use:` );
     docMaker.code( `LX.@[mtd]popup@(@"Message"@, @"Title"@, options);` );
 

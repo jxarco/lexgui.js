@@ -5,7 +5,7 @@
     const componentName = "Custom";
 
     docMaker.header(componentName + ".", "h1", componentName.toLowerCase());
-    docMaker.paragraph(`Lexgui supports generating custom components based on specific object data. By calling the function ${docMaker.iCode("LX.ADD_CUSTOM_COMPONENT( name, options )")}, 
+    docMaker.paragraph(`Lexgui supports generating custom components based on specific object data. By calling the function ${docMaker.iCode("LX.ADD_CUSTOM_COMPONENT( name, options )")},
         you can register a new Panel method that will create your custom components. Once the component has been registered, call ${docMaker.iCode("Panel.add&lt;ComponentName&gt;(name, value, callback)")} to add the Custom Component to your panel.`);
     docMaker.header("Usage", "h2");
     docMaker.paragraph(`Within the options of ${docMaker.iCode("LX.ADD_CUSTOM_COMPONENT")}, you can add the following data:`);

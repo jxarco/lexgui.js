@@ -1,8 +1,8 @@
 <script type="module">
 
     docMaker.header( "Theme customization.", "h1", "theme-customization" );
-            
-    docMaker.paragraph( `Even though LexGUI has a pretty locked appearance, you can still customize it. HTML elements and some components can be created using a specific class that will colorize, 
+
+    docMaker.paragraph( `Even though LexGUI has a pretty locked appearance, you can still customize it. HTML elements and some components can be created using a specific class that will colorize,
     change style or resize it. Below is the guide for the possible options:` );
 
     docMaker.header( "Background Color <span class='desc'></span>", "h3" );
@@ -51,7 +51,7 @@
         <span class="p-1 px-2 fg-accent rounded-lg border-dashed border-colored">dashed</span>
         </div>
     ` );
-    
+
     docMaker.lineBreak();
     docMaker.paragraph( `LexGUI uses a dark theme by default. You can change the theme by overriding your device or browser color scheme but the easiest way is to use ${docMaker.iCode("LX.setTheme")}
      where you can use "light" or "dark". If any of your content depends on the selected theme (usually JavaScript code, not CSS), make sure you are listening to the ${docMaker.iCode("@on_new_color_scheme")} signal being emited when the theme changes.` );
@@ -61,7 +61,7 @@
     @this@.redraw( bgColor );
 } );
 ` );
-    
+
     docMaker.lineBreak();
     docMaker.lineBreak();
 

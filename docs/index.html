@@ -74,7 +74,7 @@
 
                     const tempDiv = document.createElement("div");
                     tempDiv.innerHTML = html;
-                    
+
                     const scripts = tempDiv.querySelectorAll("script");
                     scripts.forEach(script => script.remove());
                     content.innerHTML = "";
@@ -356,7 +356,7 @@
                     callback: open.bind( this, "components/" + url, ["Components", "Data Display"] ),
                     content: componentVersion[ c ] ? LX.badge( componentVersion[ c ], badgeClass, { asElement: true, callback: open.bind( this, "changelog.html", `#${ componentVersion[ c ] }` ) }) : undefined
                 } );
-                
+
                 LX.registerCommandbarEntry( c, open.bind( this, "components/" + url, null ) );
             }
             m.add( "Data Inputs", { skipSelection: true } );

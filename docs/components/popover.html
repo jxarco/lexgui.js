@@ -6,7 +6,7 @@
 
     docMaker.header(componentName + ".", "h1", componentName.toLowerCase());
     docMaker.paragraph( `Displays rich content in a portal, triggered by another elements, such as buttons.` );
-    
+
     {
         window.__addInteractiveCodeExample( content, componentName, panel => {
             const area = new LX.Area( { className: "flex flex-col p-12 gap-1", skipAppend: true, height: "auto" } );
