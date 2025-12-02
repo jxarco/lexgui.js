@@ -30,6 +30,177 @@ if (!LX) {
     g.LX = LX;
 }
 
+// Branch.ts @jxarco
+/**
+ * @class Branch
+ */
+class Branch {
+    name;
+    components;
+    closed;
+    root;
+    content;
+    grabber;
+    panel;
+    onclick;
+    oncontextmenu;
+    constructor(name, options = {}) {
+        this.name = name;
+        var root = document.createElement('div');
+        root.className = "lexbranch";
+        if (options.id) {
+            root.id = options.id;
+        }
+        if (options.className) {
+            root.className += " " + options.className;
+        }
+        root.style.margin = "0 auto";
+        var that = this;
+        this.closed = options.closed ?? false;
+        this.root = root;
+        this.components = [];
+        this.panel = null;
+        // Create element
+        const title = document.createElement('div');
+        title.className = "lexbranchtitle";
+        if (options.icon) {
+            const branchIcon = LX.makeIcon(options.icon, { iconClass: "mr-2" });
+            title.appendChild(branchIcon);
+        }
+        title.innerHTML += (name || "Branch");
+        const collapseIcon = LX.makeIcon("Right", { iconClass: "switch-branch-button", svgClass: "sm" });
+        title.appendChild(collapseIcon);
+        root.appendChild(title);
+        var branchContent = document.createElement('div');
+        branchContent.id = name.replace(/\s/g, '');
+        branchContent.className = "lexbranchcontent";
+        root.appendChild(branchContent);
+        this.content = branchContent;
+        this._addBranchSeparator();
+        if (this.closed) {
+            title.classList.add("closed");
+            root.classList.add("closed");
+            this.grabber.setAttribute("hidden", true);
+            LX.doAsync(() => {
+                this.content.setAttribute("hidden", true);
+            }, 10);
+        }
+        this.onclick = function () {
+            // e.stopPropagation();
+            title.classList.toggle("closed");
+            title.parentElement.classList.toggle("closed");
+            that.content.toggleAttribute("hidden");
+            that.grabber.toggleAttribute("hidden");
+            LX.emitSignal("@on_branch_closed", title.classList.contains("closed"));
+        };
+        this.oncontextmenu = function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (title.parentElement.classList.contains("dialog")) {
+                return;
+            }
+            LX.addContextMenu("Dock", e, (m) => {
+                e.preventDefault();
+                m.add('Floating', that._onMakeFloating.bind(that));
+            }, { icon: "WindowRestore" });
+        };
+        title.addEventListener('click', this.onclick);
+        title.addEventListener('contextmenu', this.oncontextmenu);
+    }
+    _onMakeFloating() {
+        const dialog = new LX.Dialog(this.name, (p) => {
+            // Add components
+            for (let w of this.components) {
+                p.root.appendChild(w.root);
+            }
+        }, { dockable: true });
+        const childIndex = Array.from(this.root.parentElement.childNodes).indexOf(this.root);
+        console.assert(childIndex >= 0, "Branch not found!");
+        dialog.branchData = {
+            name: this.name,
+            components: this.components,
+            closed: this.closed,
+            panel: this.panel,
+            childIndex
+        };
+        this.root.remove();
+    }
+    _addBranchSeparator() {
+        const element = document.createElement('div');
+        element.className = "lexcomponentseparator";
+        element.style.width = "100%";
+        element.style.background = "none";
+        const grabber = document.createElement('div');
+        grabber.innerHTML = "&#9662;";
+        element.appendChild(grabber);
+        LX.doAsync(() => {
+            grabber.style.marginLeft = ((parseFloat(LX.DEFAULT_NAME_WIDTH) / 100.0) * this.content.offsetWidth) + "px";
+        }, 10);
+        const line = document.createElement('div');
+        line.style.width = "1px";
+        line.style.marginLeft = "6px";
+        line.style.marginTop = "2px";
+        line.style.height = "0px"; // get in time
+        grabber.appendChild(line);
+        grabber.addEventListener("mousedown", innerMouseDown);
+        this.grabber = grabber;
+        function getBranchHeight() {
+            return that.root.offsetHeight - that.root.children[0].offsetHeight;
+        }
+        let that = this;
+        function innerMouseDown(e) {
+            var doc = that.root.ownerDocument;
+            doc.addEventListener("mouseup", innerMouseUp);
+            doc.addEventListener("mousemove", innerMouseMove);
+            e.stopPropagation();
+            e.preventDefault();
+            const h = getBranchHeight();
+            line.style.height = (h - 3) + "px";
+            document.body.classList.add('nocursor');
+        }
+        function innerMouseMove(e) {
+            let dt = e.movementX;
+            if (dt != 0) {
+                const margin = parseFloat(grabber.style.marginLeft);
+                grabber.style.marginLeft = LX.clamp(margin + dt, 32, that.content.offsetWidth - 32) + "px";
+            }
+        }
+        function innerMouseUp(e) {
+            that._updateComponents();
+            line.style.height = "0px";
+            var doc = that.root.ownerDocument;
+            doc.removeEventListener("mouseup", innerMouseUp);
+            doc.removeEventListener("mousemove", innerMouseMove);
+            document.body.classList.remove('nocursor');
+        }
+        this.content.appendChild(element);
+    }
+    _updateComponents() {
+        var size = this.grabber.style.marginLeft;
+        // Update sizes of components inside
+        for (let i = 0; i < this.components.length; i++) {
+            let component = this.components[i];
+            const element = component.root;
+            if (element.children.length < 2) {
+                continue;
+            }
+            let name = element.children[0];
+            let value = element.children[1];
+            name.style.width = size;
+            name.style.minWidth = size;
+            switch (component.type) {
+                case LX.BaseComponent.CUSTOM:
+                case LX.BaseComponent.ARRAY:
+                    continue;
+            }
+            value.style.width = "-moz-calc( 100% - " + size + " )";
+            value.style.width = "-webkit-calc( 100% - " + size + " )";
+            value.style.width = "calc( 100% - " + size + " )";
+        }
+    }
+}
+LX.Branch = Branch;
+
 // BaseComponent.ts @jxarco
 var ComponentType;
 (function (ComponentType) {
@@ -343,6 +514,152 @@ class TreeEvent {
 }
 LX.TreeEvent = TreeEvent;
 
+// TextInput.ts @jxarco
+/**
+ * @class TextInput
+ * @description TextInput Component
+ */
+class TextInput extends BaseComponent {
+    valid;
+    _triggerEvent;
+    _lastValueTriggered;
+    constructor(name, value, callback, options = {}) {
+        super(ComponentType.TEXT, name, String(value), options);
+        this.onGetValue = () => {
+            return value;
+        };
+        this.onSetValue = (newValue, skipCallback, event) => {
+            let skipTrigger = (this._lastValueTriggered == newValue);
+            if (!options.ignoreValidation) {
+                skipTrigger = skipTrigger || (!this.valid(newValue));
+            }
+            if (skipTrigger) {
+                return;
+            }
+            this._lastValueTriggered = value = newValue;
+            wValue.value = newValue;
+            delete this._triggerEvent;
+            if (!skipCallback) {
+                this._trigger(new IEvent(name, newValue, event), callback);
+            }
+        };
+        this.onResize = (rect) => {
+            const realNameWidth = (this.root.domName?.style.width ?? "0px");
+            container.style.width = options.inputWidth ?? `calc( 100% - ${realNameWidth})`;
+        };
+        this.valid = (v, matchField) => {
+            v = v ?? this.value();
+            if (!options.pattern)
+                return true;
+            const errs = LX.validateValueAtPattern(v, options.pattern, matchField);
+            return (errs.length == 0);
+        };
+        let container = document.createElement('div');
+        container.className = (options.warning ? " lexwarning" : "");
+        container.style.display = "flex";
+        container.style.position = "relative";
+        this.root.appendChild(container);
+        this.disabled = (options.disabled || options.warning) ?? (options.url ? true : false);
+        let wValue = null;
+        if (!this.disabled) {
+            wValue = document.createElement('input');
+            wValue.className = "lextext " + (options.inputClass ?? "");
+            wValue.type = options.type || "";
+            wValue.value = value || "";
+            wValue.style.textAlign = (options.float ?? "");
+            wValue.setAttribute("placeholder", options.placeholder ?? "");
+            if (options.required) {
+                wValue.setAttribute("required", options.required);
+            }
+            if (options.pattern) {
+                wValue.setAttribute("pattern", LX.buildTextPattern(options.pattern));
+            }
+            const trigger = options.trigger ?? "default";
+            if (trigger == "default") {
+                wValue.addEventListener("keyup", (e) => {
+                    if (e.key == "Enter") {
+                        this._triggerEvent = e;
+                        wValue.blur();
+                    }
+                });
+                wValue.addEventListener("focusout", (e) => {
+                    this._triggerEvent = this._triggerEvent ?? e;
+                    this.set(e.target.value, false, this._triggerEvent);
+                });
+            }
+            else if (trigger == "input") {
+                wValue.addEventListener("input", (e) => {
+                    this.set(e.target.value, false, e);
+                });
+            }
+            wValue.addEventListener("mousedown", function (e) {
+                e.stopImmediatePropagation();
+                e.stopPropagation();
+            });
+            if (options.icon) {
+                wValue.style.paddingLeft = "1.75rem";
+                const icon = LX.makeIcon(options.icon, { iconClass: "absolute z-1 ml-2", svgClass: "sm" });
+                container.appendChild(icon);
+            }
+        }
+        else if (options.url) {
+            wValue = document.createElement('a');
+            wValue.href = options.url;
+            wValue.target = "_blank";
+            wValue.innerHTML = value ?? "";
+            wValue.style.textAlign = options.float ?? "";
+            wValue.className = "lextext ellipsis-overflow";
+        }
+        else {
+            wValue = document.createElement('input');
+            wValue.disabled = true;
+            wValue.value = value;
+            wValue.style.textAlign = options.float ?? "";
+            wValue.className = "lextext ellipsis-overflow " + (options.inputClass ?? "");
+        }
+        if (options.fit) {
+            wValue.classList.add("size-content");
+        }
+        Object.assign(wValue.style, options.style ?? {});
+        container.appendChild(wValue);
+        LX.doAsync(this.onResize.bind(this));
+    }
+}
+LX.TextInput = TextInput;
+
+// Title.ts @jxarco
+/**
+ * @class Title
+ * @description Title Component
+ */
+class Title extends BaseComponent {
+    constructor(name, options = {}) {
+        console.assert(name.length !== 0, "Can't create Title Component without text!");
+        // Note: Titles are not registered in Panel.components by now
+        super(ComponentType.TITLE, null, null, options);
+        this.root.className = `lextitle ${this.root.className}`;
+        if (options.icon) {
+            let icon = LX.makeIcon(options.icon, { iconClass: "mr-2" });
+            icon.querySelector("svg").style.color = options.iconColor || "";
+            this.root.appendChild(icon);
+        }
+        let text = document.createElement("span");
+        text.innerText = name;
+        this.root.appendChild(text);
+        Object.assign(this.root.style, options.style ?? {});
+        if (options.link != undefined) {
+            let linkDom = document.createElement('a');
+            linkDom.innerText = name;
+            linkDom.href = options.link;
+            linkDom.target = options.target ?? "";
+            linkDom.className = "lextitle link";
+            Object.assign(linkDom.style, options.style ?? {});
+            this.root.replaceWith(linkDom);
+        }
+    }
+}
+LX.Title = Title;
+
 // Button.ts @jxarco
 /**
  * @class Button
@@ -524,569 +841,6 @@ class Button extends BaseComponent {
     }
 }
 LX.Button = Button;
-
-// Menubar.ts @jxarco
-/**
- * @class Menubar
- */
-class Menubar {
-    root;
-    siblingArea;
-    buttonContainer;
-    items = [];
-    buttons = {};
-    icons = {};
-    shorts = {};
-    focused = false;
-    _currentDropdown;
-    constructor(items, options = {}) {
-        this.root = document.createElement("div");
-        this.root.className = "lexmenubar";
-        if (options.float) {
-            this.root.style.justifyContent = options.float;
-        }
-        this.items = items ?? [];
-        this.createEntries();
-    }
-    _resetMenubar(focus) {
-        this.root.querySelectorAll(".lexmenuentry").forEach((e) => {
-            e.classList.remove('selected');
-            delete e.dataset["built"];
-        });
-        if (this._currentDropdown) {
-            this._currentDropdown.destroy();
-            this._currentDropdown = null;
-        }
-        // Next time we need to click again
-        this.focused = focus ?? false;
-    }
-    /**
-     * @method createEntries
-     */
-    createEntries() {
-        for (let item of this.items) {
-            let key = item.name;
-            let pKey = LX.getSupportedDOMName(key);
-            // Item already created
-            if (this.root.querySelector("#" + pKey)) {
-                continue;
-            }
-            let entry = document.createElement('div');
-            entry.className = "lexmenuentry";
-            entry.id = pKey;
-            entry.innerHTML = "<span>" + key + "</span>";
-            entry.tabIndex = 1;
-            this.root.appendChild(entry);
-            const _showEntry = () => {
-                this._resetMenubar(true);
-                entry.classList.add("selected");
-                entry.dataset["built"] = "true";
-                this._currentDropdown = LX.addDropdownMenu(entry, item.submenu ?? [], { side: "bottom", align: "start", onBlur: () => {
-                        this._resetMenubar();
-                    } });
-            };
-            entry.addEventListener("mousedown", (e) => {
-                e.preventDefault();
-            });
-            entry.addEventListener("mouseup", (e) => {
-                e.preventDefault();
-                const f = item['callback'];
-                if (f) {
-                    f.call(this, key, entry, e);
-                    return;
-                }
-                _showEntry();
-                this.focused = true;
-                return false;
-            });
-            entry.addEventListener("mouseover", (e) => {
-                if (this.focused && !(entry.dataset["built"] ?? false)) {
-                    _showEntry();
-                }
-            });
-        }
-    }
-    /**
-     * @method getButton
-     * @param {String} name
-     */
-    getButton(name) {
-        return this.buttons[name];
-    }
-    /**
-     * @method getSubitems
-     * @param {Object} item: parent item
-     * @param {Array} tokens: split path strings
-    */
-    getSubitem(item, tokens) {
-        for (const s of item) {
-            if (s?.name != tokens[0]) {
-                continue;
-            }
-            if (tokens.length == 1) {
-                return s;
-            }
-            else if (s.submenu) {
-                tokens.shift();
-                return this.getSubitem(s.submenu, tokens);
-            }
-        }
-    }
-    /**
-     * @method getItem
-     * @param {String} path
-    */
-    getItem(path) {
-        // Process path
-        const tokens = path.split('/');
-        return this.getSubitem(this.items, tokens);
-    }
-    /**
-     * @method setButtonIcon
-     * @param {String} name
-     * @param {String} icon
-     * @param {Function} callback
-     * @param {Object} options
-     */
-    setButtonIcon(name, icon, callback, options = {}) {
-        if (!name) {
-            throw ("Set Button Name!");
-        }
-        let button = this.buttons[name];
-        // If the button already exists, delete it
-        // since only one button of this type can exist
-        if (button) {
-            delete this.buttons[name];
-            LX.deleteElement(button.root);
-        }
-        // Otherwise, create it
-        button = new Button(name, undefined, callback, {
-            title: name,
-            buttonClass: "lexmenubutton main bg-none",
-            disabled: options.disabled,
-            icon,
-            svgClass: "xl",
-            hideName: true,
-            swap: options.swap
-        });
-        if (options.float == "right") {
-            button.root.right = true;
-        }
-        if (this.root.lastChild && this.root.lastChild.right) {
-            this.root.lastChild.before(button.root);
-        }
-        else if (options.float == "left") {
-            this.root.prepend(button.root);
-        }
-        else {
-            this.root.appendChild(button.root);
-        }
-        this.buttons[name] = button;
-    }
-    /**
-     * @method setButtonImage
-     * @param {String} name
-     * @param {String} src
-     * @param {Function} callback
-     * @param {Object} options
-     */
-    setButtonImage(name, src, callback, options = {}) {
-        if (!name) {
-            throw ("Set Button Name!");
-        }
-        let button = this.buttons[name];
-        if (button) {
-            button.querySelector('img').src = src;
-            return;
-        }
-        // Otherwise, create it
-        button = document.createElement('div');
-        const disabled = options.disabled ?? false;
-        button.className = "lexmenubutton main" + (disabled ? " disabled" : "");
-        button.title = name;
-        button.innerHTML = "<a><image src='" + src + "' class='lexicon' style='height:32px;'></a>";
-        if (options.float == "right") {
-            button.right = true;
-        }
-        if (this.root.lastChild && this.root.lastChild.right) {
-            this.root.lastChild.before(button);
-        }
-        else if (options.float == "left") {
-            this.root.prepend(button);
-        }
-        else {
-            this.root.appendChild(button);
-        }
-        const _b = button.querySelector('a');
-        _b.addEventListener("mousedown", (e) => {
-            e.preventDefault();
-        });
-        _b.addEventListener("mouseup", (e) => {
-            if (callback && !disabled) {
-                callback.call(this, _b, e);
-            }
-        });
-        this.buttons[name] = button;
-    }
-    /**
-     * @method addButton
-     * @param {Array} buttons
-     * @param {Object} options
-     * float: center (Default), right
-     */
-    addButtons(buttons, options = {}) {
-        if (!buttons) {
-            throw ("No buttons to add!");
-        }
-        if (!this.buttonContainer) {
-            this.buttonContainer = document.createElement("div");
-            this.buttonContainer.className = "lexmenubuttons";
-            this.buttonContainer.classList.add(options.float ?? "center");
-            if (options.float == "right") {
-                this.buttonContainer.right = true;
-            }
-            if (this.root.lastChild && this.root.lastChild.right) {
-                this.root.lastChild.before(this.buttonContainer);
-            }
-            else {
-                this.root.appendChild(this.buttonContainer);
-            }
-        }
-        for (const data of buttons) {
-            const title = data.title;
-            const button = new Button(title, data.label, data.callback, {
-                title,
-                buttonClass: "bg-none",
-                disabled: data.disabled,
-                icon: data.icon,
-                hideName: true,
-                swap: data.swap,
-                iconPosition: "start"
-            });
-            this.buttonContainer.appendChild(button.root);
-            if (title) {
-                this.buttons[title] = button;
-            }
-        }
-    }
-}
-
-// Branch.ts @jxarco
-/**
- * @class Branch
- */
-class Branch {
-    name;
-    components;
-    closed;
-    root;
-    content;
-    grabber;
-    panel;
-    onclick;
-    oncontextmenu;
-    constructor(name, options = {}) {
-        this.name = name;
-        var root = document.createElement('div');
-        root.className = "lexbranch";
-        if (options.id) {
-            root.id = options.id;
-        }
-        if (options.className) {
-            root.className += " " + options.className;
-        }
-        root.style.margin = "0 auto";
-        var that = this;
-        this.closed = options.closed ?? false;
-        this.root = root;
-        this.components = [];
-        this.panel = null;
-        // Create element
-        const title = document.createElement('div');
-        title.className = "lexbranchtitle";
-        if (options.icon) {
-            const branchIcon = LX.makeIcon(options.icon, { iconClass: "mr-2" });
-            title.appendChild(branchIcon);
-        }
-        title.innerHTML += (name || "Branch");
-        const collapseIcon = LX.makeIcon("Right", { iconClass: "switch-branch-button", svgClass: "sm" });
-        title.appendChild(collapseIcon);
-        root.appendChild(title);
-        var branchContent = document.createElement('div');
-        branchContent.id = name.replace(/\s/g, '');
-        branchContent.className = "lexbranchcontent";
-        root.appendChild(branchContent);
-        this.content = branchContent;
-        this._addBranchSeparator();
-        if (this.closed) {
-            title.classList.add("closed");
-            root.classList.add("closed");
-            this.grabber.setAttribute("hidden", true);
-            LX.doAsync(() => {
-                this.content.setAttribute("hidden", true);
-            }, 10);
-        }
-        this.onclick = function () {
-            // e.stopPropagation();
-            title.classList.toggle("closed");
-            title.parentElement.classList.toggle("closed");
-            that.content.toggleAttribute("hidden");
-            that.grabber.toggleAttribute("hidden");
-            LX.emitSignal("@on_branch_closed", title.classList.contains("closed"));
-        };
-        this.oncontextmenu = function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-            if (title.parentElement.classList.contains("dialog")) {
-                return;
-            }
-            LX.addContextMenu("Dock", e, (m) => {
-                e.preventDefault();
-                m.add('Floating', that._onMakeFloating.bind(that));
-            }, { icon: "WindowRestore" });
-        };
-        title.addEventListener('click', this.onclick);
-        title.addEventListener('contextmenu', this.oncontextmenu);
-    }
-    _onMakeFloating() {
-        const dialog = new LX.Dialog(this.name, (p) => {
-            // Add components
-            for (let w of this.components) {
-                p.root.appendChild(w.root);
-            }
-        }, { dockable: true });
-        const childIndex = Array.from(this.root.parentElement.childNodes).indexOf(this.root);
-        console.assert(childIndex >= 0, "Branch not found!");
-        dialog.branchData = {
-            name: this.name,
-            components: this.components,
-            closed: this.closed,
-            panel: this.panel,
-            childIndex
-        };
-        this.root.remove();
-    }
-    _addBranchSeparator() {
-        const element = document.createElement('div');
-        element.className = "lexcomponentseparator";
-        element.style.width = "100%";
-        element.style.background = "none";
-        const grabber = document.createElement('div');
-        grabber.innerHTML = "&#9662;";
-        element.appendChild(grabber);
-        LX.doAsync(() => {
-            grabber.style.marginLeft = ((parseFloat(LX.DEFAULT_NAME_WIDTH) / 100.0) * this.content.offsetWidth) + "px";
-        }, 10);
-        const line = document.createElement('div');
-        line.style.width = "1px";
-        line.style.marginLeft = "6px";
-        line.style.marginTop = "2px";
-        line.style.height = "0px"; // get in time
-        grabber.appendChild(line);
-        grabber.addEventListener("mousedown", innerMouseDown);
-        this.grabber = grabber;
-        function getBranchHeight() {
-            return that.root.offsetHeight - that.root.children[0].offsetHeight;
-        }
-        let that = this;
-        function innerMouseDown(e) {
-            var doc = that.root.ownerDocument;
-            doc.addEventListener("mouseup", innerMouseUp);
-            doc.addEventListener("mousemove", innerMouseMove);
-            e.stopPropagation();
-            e.preventDefault();
-            const h = getBranchHeight();
-            line.style.height = (h - 3) + "px";
-            document.body.classList.add('nocursor');
-        }
-        function innerMouseMove(e) {
-            let dt = e.movementX;
-            if (dt != 0) {
-                const margin = parseFloat(grabber.style.marginLeft);
-                grabber.style.marginLeft = LX.clamp(margin + dt, 32, that.content.offsetWidth - 32) + "px";
-            }
-        }
-        function innerMouseUp(e) {
-            that._updateComponents();
-            line.style.height = "0px";
-            var doc = that.root.ownerDocument;
-            doc.removeEventListener("mouseup", innerMouseUp);
-            doc.removeEventListener("mousemove", innerMouseMove);
-            document.body.classList.remove('nocursor');
-        }
-        this.content.appendChild(element);
-    }
-    _updateComponents() {
-        var size = this.grabber.style.marginLeft;
-        // Update sizes of components inside
-        for (let i = 0; i < this.components.length; i++) {
-            let component = this.components[i];
-            const element = component.root;
-            if (element.children.length < 2) {
-                continue;
-            }
-            let name = element.children[0];
-            let value = element.children[1];
-            name.style.width = size;
-            name.style.minWidth = size;
-            switch (component.type) {
-                case LX.BaseComponent.CUSTOM:
-                case LX.BaseComponent.ARRAY:
-                    continue;
-            }
-            value.style.width = "-moz-calc( 100% - " + size + " )";
-            value.style.width = "-webkit-calc( 100% - " + size + " )";
-            value.style.width = "calc( 100% - " + size + " )";
-        }
-    }
-}
-LX.Branch = Branch;
-
-// TextInput.ts @jxarco
-/**
- * @class TextInput
- * @description TextInput Component
- */
-class TextInput extends BaseComponent {
-    valid;
-    _triggerEvent;
-    _lastValueTriggered;
-    constructor(name, value, callback, options = {}) {
-        super(ComponentType.TEXT, name, String(value), options);
-        this.onGetValue = () => {
-            return value;
-        };
-        this.onSetValue = (newValue, skipCallback, event) => {
-            let skipTrigger = (this._lastValueTriggered == newValue);
-            if (!options.ignoreValidation) {
-                skipTrigger = skipTrigger || (!this.valid(newValue));
-            }
-            if (skipTrigger) {
-                return;
-            }
-            this._lastValueTriggered = value = newValue;
-            wValue.value = newValue;
-            delete this._triggerEvent;
-            if (!skipCallback) {
-                this._trigger(new IEvent(name, newValue, event), callback);
-            }
-        };
-        this.onResize = (rect) => {
-            const realNameWidth = (this.root.domName?.style.width ?? "0px");
-            container.style.width = options.inputWidth ?? `calc( 100% - ${realNameWidth})`;
-        };
-        this.valid = (v, matchField) => {
-            v = v ?? this.value();
-            if (!options.pattern)
-                return true;
-            const errs = LX.validateValueAtPattern(v, options.pattern, matchField);
-            return (errs.length == 0);
-        };
-        let container = document.createElement('div');
-        container.className = (options.warning ? " lexwarning" : "");
-        container.style.display = "flex";
-        container.style.position = "relative";
-        this.root.appendChild(container);
-        this.disabled = (options.disabled || options.warning) ?? (options.url ? true : false);
-        let wValue = null;
-        if (!this.disabled) {
-            wValue = document.createElement('input');
-            wValue.className = "lextext " + (options.inputClass ?? "");
-            wValue.type = options.type || "";
-            wValue.value = value || "";
-            wValue.style.textAlign = (options.float ?? "");
-            wValue.setAttribute("placeholder", options.placeholder ?? "");
-            if (options.required) {
-                wValue.setAttribute("required", options.required);
-            }
-            if (options.pattern) {
-                wValue.setAttribute("pattern", LX.buildTextPattern(options.pattern));
-            }
-            const trigger = options.trigger ?? "default";
-            if (trigger == "default") {
-                wValue.addEventListener("keyup", (e) => {
-                    if (e.key == "Enter") {
-                        this._triggerEvent = e;
-                        wValue.blur();
-                    }
-                });
-                wValue.addEventListener("focusout", (e) => {
-                    this._triggerEvent = this._triggerEvent ?? e;
-                    this.set(e.target.value, false, this._triggerEvent);
-                });
-            }
-            else if (trigger == "input") {
-                wValue.addEventListener("input", (e) => {
-                    this.set(e.target.value, false, e);
-                });
-            }
-            wValue.addEventListener("mousedown", function (e) {
-                e.stopImmediatePropagation();
-                e.stopPropagation();
-            });
-            if (options.icon) {
-                wValue.style.paddingLeft = "1.75rem";
-                const icon = LX.makeIcon(options.icon, { iconClass: "absolute z-1 ml-2", svgClass: "sm" });
-                container.appendChild(icon);
-            }
-        }
-        else if (options.url) {
-            wValue = document.createElement('a');
-            wValue.href = options.url;
-            wValue.target = "_blank";
-            wValue.innerHTML = value ?? "";
-            wValue.style.textAlign = options.float ?? "";
-            wValue.className = "lextext ellipsis-overflow";
-        }
-        else {
-            wValue = document.createElement('input');
-            wValue.disabled = true;
-            wValue.value = value;
-            wValue.style.textAlign = options.float ?? "";
-            wValue.className = "lextext ellipsis-overflow " + (options.inputClass ?? "");
-        }
-        if (options.fit) {
-            wValue.classList.add("size-content");
-        }
-        Object.assign(wValue.style, options.style ?? {});
-        container.appendChild(wValue);
-        LX.doAsync(this.onResize.bind(this));
-    }
-}
-LX.TextInput = TextInput;
-
-// Title.ts @jxarco
-/**
- * @class Title
- * @description Title Component
- */
-class Title extends BaseComponent {
-    constructor(name, options = {}) {
-        console.assert(name.length !== 0, "Can't create Title Component without text!");
-        // Note: Titles are not registered in Panel.components by now
-        super(ComponentType.TITLE, null, null, options);
-        this.root.className = `lextitle ${this.root.className}`;
-        if (options.icon) {
-            let icon = LX.makeIcon(options.icon, { iconClass: "mr-2" });
-            icon.querySelector("svg").style.color = options.iconColor || "";
-            this.root.appendChild(icon);
-        }
-        let text = document.createElement("span");
-        text.innerText = name;
-        this.root.appendChild(text);
-        Object.assign(this.root.style, options.style ?? {});
-        if (options.link != undefined) {
-            let linkDom = document.createElement('a');
-            linkDom.innerText = name;
-            linkDom.href = options.link;
-            linkDom.target = options.target ?? "";
-            linkDom.className = "lextitle link";
-            Object.assign(linkDom.style, options.style ?? {});
-            this.root.replaceWith(linkDom);
-        }
-    }
-}
-LX.Title = Title;
 
 // ComboButtons.ts @jxarco
 /**
@@ -7574,6 +7328,252 @@ class Panel {
 }
 LX.Panel = Panel;
 
+// Menubar.ts @jxarco
+/**
+ * @class Menubar
+ */
+class Menubar {
+    root;
+    siblingArea;
+    buttonContainer;
+    items = [];
+    buttons = {};
+    icons = {};
+    shorts = {};
+    focused = false;
+    _currentDropdown;
+    constructor(items, options = {}) {
+        this.root = document.createElement("div");
+        this.root.className = "lexmenubar";
+        if (options.float) {
+            this.root.style.justifyContent = options.float;
+        }
+        this.items = items ?? [];
+        this.createEntries();
+    }
+    _resetMenubar(focus) {
+        this.root.querySelectorAll(".lexmenuentry").forEach((e) => {
+            e.classList.remove('selected');
+            delete e.dataset["built"];
+        });
+        if (this._currentDropdown) {
+            this._currentDropdown.destroy();
+            this._currentDropdown = null;
+        }
+        // Next time we need to click again
+        this.focused = focus ?? false;
+    }
+    /**
+     * @method createEntries
+     */
+    createEntries() {
+        for (let item of this.items) {
+            let key = item.name;
+            let pKey = LX.getSupportedDOMName(key);
+            // Item already created
+            if (this.root.querySelector("#" + pKey)) {
+                continue;
+            }
+            let entry = document.createElement('div');
+            entry.className = "lexmenuentry";
+            entry.id = pKey;
+            entry.innerHTML = "<span>" + key + "</span>";
+            entry.tabIndex = 1;
+            this.root.appendChild(entry);
+            const _showEntry = () => {
+                this._resetMenubar(true);
+                entry.classList.add("selected");
+                entry.dataset["built"] = "true";
+                this._currentDropdown = LX.addDropdownMenu(entry, item.submenu ?? [], { side: "bottom", align: "start", onBlur: () => {
+                        this._resetMenubar();
+                    } });
+            };
+            entry.addEventListener("mousedown", (e) => {
+                e.preventDefault();
+            });
+            entry.addEventListener("mouseup", (e) => {
+                e.preventDefault();
+                const f = item['callback'];
+                if (f) {
+                    f.call(this, key, entry, e);
+                    return;
+                }
+                _showEntry();
+                this.focused = true;
+                return false;
+            });
+            entry.addEventListener("mouseover", (e) => {
+                if (this.focused && !(entry.dataset["built"] ?? false)) {
+                    _showEntry();
+                }
+            });
+        }
+    }
+    /**
+     * @method getButton
+     * @param {String} name
+     */
+    getButton(name) {
+        return this.buttons[name];
+    }
+    /**
+     * @method getSubitems
+     * @param {Object} item: parent item
+     * @param {Array} tokens: split path strings
+    */
+    getSubitem(item, tokens) {
+        for (const s of item) {
+            if (s?.name != tokens[0]) {
+                continue;
+            }
+            if (tokens.length == 1) {
+                return s;
+            }
+            else if (s.submenu) {
+                tokens.shift();
+                return this.getSubitem(s.submenu, tokens);
+            }
+        }
+    }
+    /**
+     * @method getItem
+     * @param {String} path
+    */
+    getItem(path) {
+        // Process path
+        const tokens = path.split('/');
+        return this.getSubitem(this.items, tokens);
+    }
+    /**
+     * @method setButtonIcon
+     * @param {String} name
+     * @param {String} icon
+     * @param {Function} callback
+     * @param {Object} options
+     */
+    setButtonIcon(name, icon, callback, options = {}) {
+        if (!name) {
+            throw ("Set Button Name!");
+        }
+        let button = this.buttons[name];
+        // If the button already exists, delete it
+        // since only one button of this type can exist
+        if (button) {
+            delete this.buttons[name];
+            LX.deleteElement(button.root);
+        }
+        // Otherwise, create it
+        button = new Button(name, undefined, callback, {
+            title: name,
+            buttonClass: "lexmenubutton main bg-none",
+            disabled: options.disabled,
+            icon,
+            svgClass: "xl",
+            hideName: true,
+            swap: options.swap
+        });
+        if (options.float == "right") {
+            button.root.right = true;
+        }
+        if (this.root.lastChild && this.root.lastChild.right) {
+            this.root.lastChild.before(button.root);
+        }
+        else if (options.float == "left") {
+            this.root.prepend(button.root);
+        }
+        else {
+            this.root.appendChild(button.root);
+        }
+        this.buttons[name] = button;
+    }
+    /**
+     * @method setButtonImage
+     * @param {String} name
+     * @param {String} src
+     * @param {Function} callback
+     * @param {Object} options
+     */
+    setButtonImage(name, src, callback, options = {}) {
+        if (!name) {
+            throw ("Set Button Name!");
+        }
+        let button = this.buttons[name];
+        if (button) {
+            button.querySelector('img').src = src;
+            return;
+        }
+        // Otherwise, create it
+        button = document.createElement('div');
+        const disabled = options.disabled ?? false;
+        button.className = "lexmenubutton main" + (disabled ? " disabled" : "");
+        button.title = name;
+        button.innerHTML = "<a><image src='" + src + "' class='lexicon' style='height:32px;'></a>";
+        if (options.float == "right") {
+            button.right = true;
+        }
+        if (this.root.lastChild && this.root.lastChild.right) {
+            this.root.lastChild.before(button);
+        }
+        else if (options.float == "left") {
+            this.root.prepend(button);
+        }
+        else {
+            this.root.appendChild(button);
+        }
+        const _b = button.querySelector('a');
+        _b.addEventListener("mousedown", (e) => {
+            e.preventDefault();
+        });
+        _b.addEventListener("mouseup", (e) => {
+            if (callback && !disabled) {
+                callback.call(this, _b, e);
+            }
+        });
+        this.buttons[name] = button;
+    }
+    /**
+     * @method addButton
+     * @param {Array} buttons
+     * @param {Object} options
+     * float: center (Default), right
+     */
+    addButtons(buttons, options = {}) {
+        if (!buttons) {
+            throw ("No buttons to add!");
+        }
+        if (!this.buttonContainer) {
+            this.buttonContainer = document.createElement("div");
+            this.buttonContainer.className = "lexmenubuttons";
+            this.buttonContainer.classList.add(options.float ?? "center");
+            if (options.float == "right") {
+                this.buttonContainer.right = true;
+            }
+            if (this.root.lastChild && this.root.lastChild.right) {
+                this.root.lastChild.before(this.buttonContainer);
+            }
+            else {
+                this.root.appendChild(this.buttonContainer);
+            }
+        }
+        for (const data of buttons) {
+            const title = data.title;
+            const button = new Button(title, data.label, data.callback, {
+                title,
+                buttonClass: "bg-none",
+                disabled: data.disabled,
+                icon: data.icon,
+                hideName: true,
+                swap: data.swap,
+                iconPosition: "start"
+            });
+            this.buttonContainer.appendChild(button.root);
+            if (title) {
+                this.buttons[title] = button;
+            }
+        }
+    }
+}
+
 // Tabs.ts @jxarco
 /**
  * @class Tabs
@@ -9449,15 +9449,16 @@ function makeCodeSnippet(code, size, options = {}) {
     snippet.className = "lexcodesnippet " + (options.className ?? "");
     snippet.style.width = size ? size[0] : "auto";
     snippet.style.height = size ? size[1] : "auto";
-    const area = new Area({ noAppend: true });
-    let editor = new LX.CodeEditor(area, {
+    const area = new Area({ xskipAppend: true });
+    new LX.CodeEditor(area, {
         skipInfo: true,
         disableEdition: true,
         allowAddScripts: false,
         name: options.tabName,
-        callback: () => {
+        callback: (instance) => {
+            instance.setText(code, options.language ?? "Plain Text");
             if (options.linesAdded) {
-                const code = editor.root.querySelector(".code");
+                const code = instance.root.querySelector(".code");
                 for (let ls of options.linesAdded) {
                     const l = ls;
                     if (l.constructor == Number) {
@@ -9472,7 +9473,7 @@ function makeCodeSnippet(code, size, options = {}) {
                 }
             }
             if (options.linesRemoved) {
-                const code = editor.root.querySelector(".code");
+                const code = instance.root.querySelector(".code");
                 for (let ls of options.linesRemoved) {
                     const l = ls;
                     if (l.constructor == Number) {
@@ -9486,27 +9487,26 @@ function makeCodeSnippet(code, size, options = {}) {
                     }
                 }
             }
+            if (options.windowMode) {
+                const windowActionButtons = document.createElement("div");
+                windowActionButtons.className = "lexwindowbuttons";
+                const aButton = document.createElement("span");
+                aButton.style.background = "#ee4f50";
+                const bButton = document.createElement("span");
+                bButton.style.background = "#f5b720";
+                const cButton = document.createElement("span");
+                cButton.style.background = "#53ca29";
+                windowActionButtons.appendChild(aButton);
+                windowActionButtons.appendChild(bButton);
+                windowActionButtons.appendChild(cButton);
+                const tabs = instance.root.querySelector(".lexareatabs");
+                tabs.prepend(windowActionButtons);
+            }
+            if (!(options.lineNumbers ?? true)) {
+                instance.root.classList.add("no-gutter");
+            }
         }
     });
-    editor.setText(code, options.language ?? "Plain Text");
-    if (options.windowMode) {
-        const windowActionButtons = document.createElement("div");
-        windowActionButtons.className = "lexwindowbuttons";
-        const aButton = document.createElement("span");
-        aButton.style.background = "#ee4f50";
-        const bButton = document.createElement("span");
-        bButton.style.background = "#f5b720";
-        const cButton = document.createElement("span");
-        cButton.style.background = "#53ca29";
-        windowActionButtons.appendChild(aButton);
-        windowActionButtons.appendChild(bButton);
-        windowActionButtons.appendChild(cButton);
-        const tabs = editor.root.querySelector(".lexareatabs");
-        tabs.prepend(windowActionButtons);
-    }
-    if (!(options.lineNumbers ?? true)) {
-        editor.root.classList.add("no-gutter");
-    }
     snippet.appendChild(area.root);
     return snippet;
 }

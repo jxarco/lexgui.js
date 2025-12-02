@@ -2,7 +2,7 @@
 
 import { LX } from './../core/Namespace';
 import { BaseComponent, ComponentType } from './BaseComponent';
-import { IEvent } from './Event';
+import { IEvent } from './../core/Event';
 import { vec2 } from './../core/Vec2';
 
 /**

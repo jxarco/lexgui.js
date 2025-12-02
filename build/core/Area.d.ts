@@ -1,6 +1,6 @@
-import { Menubar } from './Menubar';
 import { Panel } from './Panel';
-import { Tabs } from './Tabs';
+import { Menubar } from '../components/Menubar';
+import { Tabs } from '../components/Tabs';
 export declare class AreaOverlayButtons {
     area: Area;
     options: any;

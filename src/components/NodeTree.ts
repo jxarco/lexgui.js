@@ -1,10 +1,10 @@
 // NodeTree.ts @jxarco
 
 import { LX } from './../core/Namespace';
+import { TreeEvent } from './../core/Event';
 import { BaseComponent, ComponentType } from './BaseComponent';
 import { ContextMenu } from './ContextMenu';
 import { Button } from './Button';
-import { TreeEvent } from './Event';
 
 /**
  * @class NodeTree

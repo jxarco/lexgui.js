@@ -1,10 +1,10 @@
 // Area.ts @jxarco
 
-import { LX } from './../core/Namespace';
-import { ContextMenu } from './ContextMenu';
-import { Menubar } from './Menubar';
+import { LX } from './Namespace';
 import { Panel } from './Panel';
-import { Tabs } from './Tabs';
+import { ContextMenu } from '../components/ContextMenu';
+import { Menubar } from '../components/Menubar';
+import { Tabs } from '../components/Tabs';
 
 export class AreaOverlayButtons {
 

@@ -3,7 +3,7 @@
 import { LX } from './../core/Namespace';
 import { BaseComponent, ComponentType } from './BaseComponent';
 import { Button } from './Button';
-import { IEvent } from './Event';
+import { IEvent } from './../core/Event';
 
 /**
  * @class Vector

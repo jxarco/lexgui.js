@@ -1,7 +1,7 @@
 // Dialog.ts @jxarco
 
 import { LX } from './../core/Namespace';
-import { Panel } from './Panel';
+import { Panel } from '../core/Panel';
 
 /**
  * @class Dialog

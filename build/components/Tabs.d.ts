@@ -1,4 +1,4 @@
-import { Area } from './Area';
+import { Area } from './../core/Area';
 /**
  * @class Tabs
  */

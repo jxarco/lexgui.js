@@ -1,8 +1,8 @@
 // Utils.ts @jxarco
 
 import { LX } from './Namespace';
-import { Area } from "../components/Area";
-import { Panel } from "../components/Panel";
+import { Area } from "./Area";
+import { Panel } from "./Panel";
 import { vec2 } from './Vec2';
 
 function clamp( num: number, min: number, max: number ) { return Math.min( Math.max( num, min ), max ); }
@@ -866,17 +866,19 @@ function makeCodeSnippet( code: string, size: any[], options: any = {} )
     snippet.className = "lexcodesnippet " + ( options.className ?? "" );
     snippet.style.width = size ? size[ 0 ] : "auto";
     snippet.style.height = size ? size[ 1 ] : "auto";
-    const area = new Area( { noAppend: true } );
+    const area = new Area( { xskipAppend: true } );
     let editor = new LX.CodeEditor( area, {
         skipInfo: true,
         disableEdition: true,
         allowAddScripts: false,
         name: options.tabName,
-        callback: () =>
+        callback: ( instance: typeof LX.CodeEditor ) =>
         {
+            instance.setText( code, options.language ?? "Plain Text" );
+
             if( options.linesAdded )
             {
-                const code = editor.root.querySelector( ".code" );
+                const code = instance.root.querySelector( ".code" );
                 for( let ls of options.linesAdded )
                 {
                     const l: number|number[] = ls;
@@ -896,7 +898,7 @@ function makeCodeSnippet( code: string, size: any[], options: any = {} )
 
             if( options.linesRemoved )
             {
-                const code = editor.root.querySelector( ".code" );
+                const code = instance.root.querySelector( ".code" );
                 for( let ls of options.linesRemoved )
                 {
                     const l: number|number[] = ls;
@@ -913,32 +915,30 @@ function makeCodeSnippet( code: string, size: any[], options: any = {} )
                     }
                 }
             }
+
+            if( options.windowMode )
+            {
+                const windowActionButtons = document.createElement( "div" );
+                windowActionButtons.className = "lexwindowbuttons";
+                const aButton = document.createElement( "span" );
+                aButton.style.background = "#ee4f50";
+                const bButton = document.createElement( "span" );
+                bButton.style.background = "#f5b720";
+                const cButton = document.createElement( "span" );
+                cButton.style.background = "#53ca29";
+                windowActionButtons.appendChild( aButton );
+                windowActionButtons.appendChild( bButton );
+                windowActionButtons.appendChild( cButton );
+                const tabs = instance.root.querySelector( ".lexareatabs" );
+                tabs.prepend( windowActionButtons );
+            }
+
+            if( !( options.lineNumbers ?? true ) )
+            {
+                instance.root.classList.add( "no-gutter" );
+            }
         }
     } );
-
-    editor.setText( code, options.language ?? "Plain Text" );
-
-    if( options.windowMode )
-    {
-        const windowActionButtons = document.createElement( "div" );
-        windowActionButtons.className = "lexwindowbuttons";
-        const aButton = document.createElement( "span" );
-        aButton.style.background = "#ee4f50";
-        const bButton = document.createElement( "span" );
-        bButton.style.background = "#f5b720";
-        const cButton = document.createElement( "span" );
-        cButton.style.background = "#53ca29";
-        windowActionButtons.appendChild( aButton );
-        windowActionButtons.appendChild( bButton );
-        windowActionButtons.appendChild( cButton );
-        const tabs = editor.root.querySelector( ".lexareatabs" );
-        tabs.prepend( windowActionButtons );
-    }
-
-    if( !( options.lineNumbers ?? true ) )
-    {
-        editor.root.classList.add( "no-gutter" );
-    }
 
     snippet.appendChild( area.root );
 

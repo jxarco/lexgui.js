@@ -2,7 +2,7 @@
 
 import { LX } from './../core/Namespace';
 import { Popover } from './Popover';
-import { Panel } from './Panel';
+import { Panel } from '../core/Panel';
 
 export class Tour
 {

@@ -5,10 +5,10 @@ export * from "./core/Vec2";
 export * from "./core/Icons";
 
 // Layout
-export * from "./components/Event";
-export * from "./components/Branch";
-export * from "./components/Panel";
-export * from "./components/Area";
+export * from "./core/Event";
+export * from "./core/Branch";
+export * from "./core/Panel";
+export * from "./core/Area";
 
 // Basic Components
 export * from "./components/BaseComponent";

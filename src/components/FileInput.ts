@@ -2,7 +2,7 @@
 
 import { LX } from './../core/Namespace';
 import { BaseComponent, ComponentType } from './BaseComponent';
-import { Panel } from './Panel';
+import { Panel } from '../core/Panel';
 import { Button } from './Button';
 
 /**
