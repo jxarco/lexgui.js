@@ -5,12 +5,8 @@
     const componentName = "Table";
 
     docMaker.header(componentName + ".", "h1", componentName.toLowerCase());
-    docMaker.paragraph(`Represents a dynamic table with user-input data.`);
-    docMaker.header("Quick Usage", "h2");
-    docMaker.paragraph( `Call ${docMaker.iCode("Panel.addTable(name, data, options)")} to add a ${ componentName } Component to your panel or
-    create it anywhere using ${docMaker.iCode(`new LX.${ componentName.replace( /\s/g, '' ) }`)} to append its root to any container.` );
-    docMaker.note( `You can use default row actions as String such as 'delete' or 'menu', which have predefined icons and callbacks.
-        For the 'menu' action, you must fill the possible menus inside the created Dropdown using ${docMaker.iCode("options.onMenuAction")}.` );
+    docMaker.paragraph(`Represents a dynamic table with user-input data.`, false, "fg-tertiary");
+   
 
     {
         window.__addInteractiveCodeExample( content, componentName, panel => {
@@ -55,6 +51,12 @@
         });
     }
 
+    docMaker.header("Usage", "h2");
+    docMaker.paragraph( `Call ${docMaker.iCode("Panel.addTable(name, data, options)")} to add a ${ componentName } Component to your panel or
+    create it anywhere using ${docMaker.iCode(`new LX.${ componentName.replace( /\s/g, '' ) }`)} to append its root to any container.` );
+    docMaker.note( `You can use default row actions as String such as 'delete' or 'menu', which have predefined icons and callbacks.
+        For the 'menu' action, you must fill the possible menus inside the created Dropdown using ${docMaker.iCode("options.onMenuAction")}.` );
+
     docMaker.header("API Reference", "h2");
 
     {
@@ -98,6 +100,6 @@
 
     docMaker.note( `The return value in the ${docMaker.iCode("rowActions")} item callbacks are used to refresh (true) or not (false) the table DOM.`, true );
 
-    docMaker.paragraph( `Check the ${ docMaker.iPage( "Table API reference", "api/table" ) } to know more details about the Table Component.` );
+    docMaker.paragraph( `Check the ${ docMaker.iPage( "Table API reference", "api/table.html" ) } to know more details about the Table Component.` );
 
 </script>

@@ -6,12 +6,8 @@
 
     // Data Tree
     docMaker.header(componentName + ".", "h1", componentName.toLowerCase());
-    docMaker.paragraph(`Represents a <strong>data hierarchy visualization Tree</strong>. Enables developers to display hierarchical data in an organized
-     and visually appealing manner. This feature is especially useful when presenting data with parent-child
-      relationships, such as file directories, organizational structures, family trees, and more.` );
-      docMaker.header("Quick Usage", "h2");
-    docMaker.paragraph( `Call ${docMaker.iCode("Panel.addTree(name, data, options)")} to add a ${ componentName } Component to your panel or
-    create it anywhere using ${docMaker.iCode(`new LX.${ componentName.replace( /\s/g, '' ) }`)} to append its root to any container.` );
+    docMaker.paragraph(`Represents a data hierarchy visualization Tree. Especially useful when presenting data with parent-child
+      relationships, such as file directories, organizational structures, family trees, and more.`, false, "fg-tertiary");
 
     {
         window.__addInteractiveCodeExample( content, componentName, panel => {
@@ -51,6 +47,10 @@
             });
         });
     }
+
+    docMaker.header("Usage", "h2");
+    docMaker.paragraph( `Call ${docMaker.iCode("Panel.addTree(name, data, options)")} to add a ${ componentName } Component to your panel or
+    create it anywhere using ${docMaker.iCode(`new LX.${ componentName.replace( /\s/g, '' ) }`)} to append its root to any container.` );
 
     docMaker.header("API Reference", "h2");
 

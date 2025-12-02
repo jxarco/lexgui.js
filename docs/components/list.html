@@ -5,12 +5,8 @@
     const componentName = "List";
 
     docMaker.header(componentName + ".", "h1", componentName.toLowerCase());
-    docMaker.paragraph(`Represents a list of selectable elements.`);
-    docMaker.header("Quick Usage", "h2");
-    docMaker.paragraph( `Call ${docMaker.iCode("Panel.addList(name, values, value, callback, options)")} to add a ${ componentName } Component to your panel or
-    create it anywhere using ${docMaker.iCode(`new LX.${ componentName.replace( /\s/g, '' ) }`)} to append its root to any container.` );
-    docMaker.lineBreak();
-    docMaker.paragraph(`Note: It's possible to preppend an icon to the element name inside the list using an Array for the item [item, icon].`, true );
+    docMaker.paragraph(`Represents a list of selectable elements.`, false, "fg-tertiary");
+    
     {
         window.__addInteractiveCodeExample( content, componentName, panel => {
             panel.addList("Volley Teams", ["GPTeam", ["Blat Panthers", "PawPrint"], "Blat Bunny"], "Blat Panthers", (value, event) => {
@@ -18,6 +14,12 @@
             });
         });
     }
+
+    docMaker.header("Usage", "h2");
+    docMaker.paragraph( `Call ${docMaker.iCode("Panel.addList(name, values, value, callback, options)")} to add a ${ componentName } Component to your panel or
+    create it anywhere using ${docMaker.iCode(`new LX.${ componentName.replace( /\s/g, '' ) }`)} to append its root to any container.` );
+
+    docMaker.note(`It's possible to preppend an icon to the element name inside the list using an Array for the item [item, icon].`, false, "Tip", "Info");
 
     docMaker.header("API Reference", "h2");
 

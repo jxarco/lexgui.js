@@ -6,10 +6,7 @@
 
     // Color
     docMaker.header(componentName + ".", "h1", componentName.toLowerCase());
-    docMaker.paragraph(`Represents a color input. Allows users to select a color using a custom color picker.`);
-    docMaker.header("Quick Usage", "h2");
-    docMaker.paragraph( `Call ${docMaker.iCode("Panel.addColor(name, value, callback, options)")} to add a ${ componentName } Component to your panel or
-    create it anywhere using ${docMaker.iCode(`new LX.${ componentName.replace( /\s/g, '' ) }`)} to append its root to any container.` );
+    docMaker.paragraph(`Represents a color input. Allows users to select a color using a custom color picker.`, false, "fg-tertiary");
 
     {
         window.__addInteractiveCodeExample( content, componentName, panel => {
@@ -21,6 +18,10 @@
             });
         });
     }
+
+    docMaker.header("Usage", "h2");
+    docMaker.paragraph( `Call ${docMaker.iCode("Panel.addColor(name, value, callback, options)")} to add a ${ componentName } Component to your panel or
+    create it anywhere using ${docMaker.iCode(`new LX.${ componentName.replace( /\s/g, '' ) }`)} to append its root to any container.` );
 
     docMaker.header("API Reference", "h2");
 

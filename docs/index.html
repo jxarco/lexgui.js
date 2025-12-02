@@ -150,9 +150,9 @@
             let code = onPanel.toString();
             let lines = code.split( '\n' ).slice( 1, -1 );
             code = lines.map( line => line.substr( 12 ) ).join( '\n' );
-            const heightByLines = Math.min( 4 + lines.length * 1.25, 32 );
+            const heightByLines = Math.min( 5 + lines.length * 1.25, 32 );
 
-            const codeArea = new LX.Area({ className: "overflow-hidden border-top py-6", skipAppend: true, height: `${ heightByLines }rem` });
+            const codeArea = new LX.Area({ className: "overflow-hidden border-top py-8", skipAppend: true, height: `${ heightByLines }rem` });
             container.appendChild( codeArea.root );
             const codeEditor = new CodeEditor( codeArea, {
                 name: `${componentName.toLowerCase().replace( /\s/g, '_' )}.js`,
@@ -167,8 +167,8 @@
             codeEditor.setText( code, "JavaScript" );
 
             let copyButton = document.createElement('button');
-            copyButton.title = "Copy to Clipboard";
-            copyButton.className = "border-none bg-none absolute top-0 right-0 mt-4 mr-6";
+            LX.asTooltip( copyButton, "Copy to Clipboard" );
+            copyButton.className = "border-none bg-none absolute top-0 right-0 mt-3 mr-6";
             copyButton.appendChild(LX.makeIcon( "Copy" ));
             copyButton.addEventListener('click', function() {
                 this.dataset["snippet"] = codeEditor.getText();
@@ -419,6 +419,7 @@
             m.add( "API Reference/BaseComponent", { callback: apiReferenceCallback } );
             m.add( "API Reference/Branch", { callback: apiReferenceCallback } );
             m.add( "API Reference/Panel", { callback: apiReferenceCallback } );
+            m.add( "API Reference/Table", { callback: apiReferenceCallback } );
             m.separator();
             m.add( "LexGUI Examples", { icon: "Monitor", skipSelection: true, callback: open.bind( this, "../examples/", "_blank" ) } );
             m.add( "Source Code", { icon: "Code", skipSelection: true, callback: open.bind( this, "https://github.com/jxarco/lexgui.js/", "_blank" ) } );

@@ -5,10 +5,7 @@
     const componentName = "Pad";
 
     docMaker.header(componentName + ".", "h1", componentName.toLowerCase());
-    docMaker.paragraph(`Represents a 2-dimension pad.`);
-    docMaker.header("Quick Usage", "h2");
-    docMaker.paragraph( `Call ${docMaker.iCode("Panel.addPad(name, value, callback, options)")} to add a ${ componentName } Component to your panel or
-    create it anywhere using ${docMaker.iCode(`new LX.${ componentName.replace( /\s/g, '' ) }`)} to append its root to any container.` );
+    docMaker.paragraph(`Represents a 2-dimension pad.`, false, "fg-tertiary");
 
     {
         window.__addInteractiveCodeExample( content, componentName, panel => {
@@ -17,6 +14,10 @@
             }, { padSize: "100px", min: -1, max: 2 });
         });
     }
+
+    docMaker.header("Usage", "h2");
+    docMaker.paragraph( `Call ${docMaker.iCode("Panel.addPad(name, value, callback, options)")} to add a ${ componentName } Component to your panel or
+    create it anywhere using ${docMaker.iCode(`new LX.${ componentName.replace( /\s/g, '' ) }`)} to append its root to any container.` );
 
     docMaker.header("API Reference", "h2");
 

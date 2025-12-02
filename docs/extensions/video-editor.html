@@ -1,4 +1,4 @@
-<script type="text/javascript">
+<script type="module">
     // Header
     docMaker.header("Video Editor.", "h1", "video-editor");
 
@@ -6,7 +6,7 @@
     docMaker.paragraph("Adds a rich video trimming/cropping UI with a time bar. It integrates with LX panels/areas and exposes controls for playback, start/end trimming, current time, and crop region, all with theming and responsive interaction.");
 
     // Quick usage
-    docMaker.header("Quick Usage", "h2");
+    docMaker.header("Usage", "h2");
     docMaker.paragraph("Instantiate the editor by providing an LX area and options. You can supply a video source or element, enable crop, and react to time changes:");
     docMaker.code(`@const@ editor = @new@ @[cls]LX@.@[cls]VideoEditor@(area, {
   src: @"video.mp4"@,

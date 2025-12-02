@@ -6,10 +6,7 @@
 
     // Date Picker
     docMaker.header(componentName + ".", "h1", componentName.toLowerCase());
-    docMaker.paragraph(`Represents a date field that allows users to enter and edit dates.`);
-    docMaker.header("Quick Usage", "h2");
-    docMaker.paragraph( `Call ${docMaker.iCode("Panel.addDate(name, dateValue, callback, options)")} to add a ${ componentName } Component to your panel or
-    create it anywhere using ${docMaker.iCode(`new LX.${ componentName.replace( /\s/g, '' ) }`)} to append its root to any container.` );
+    docMaker.paragraph(`Represents a date field that allows users to enter and edit dates.`, false, "fg-tertiary");
 
     {
         window.__addInteractiveCodeExample( content, componentName, panel => {
@@ -22,6 +19,10 @@
             });
         });
     }
+
+    docMaker.header("Usage", "h2");
+    docMaker.paragraph( `Call ${docMaker.iCode("Panel.addDate(name, dateValue, callback, options)")} to add a ${ componentName } Component to your panel or
+    create it anywhere using ${docMaker.iCode(`new LX.${ componentName.replace( /\s/g, '' ) }`)} to append its root to any container.` );
 
     docMaker.header("API Reference", "h2");
 

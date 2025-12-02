@@ -1,56 +1,37 @@
-<script type="text/javascript">
+<script type="module">
 
-    docMaker.header("Breadcrumb", "h1", "breadcrumb");
+    const componentName = "Breadcrumb";
+
+    docMaker.header(componentName + ".", "h1", componentName.toLowerCase());
     docMaker.paragraph(`Breadcrumb displays the hierarchical path to the current resource. It collapses middle parts when the path is too long, shows separators, supports dropdowns 
-    for intermediate nodes, links, and icons.`);
-    docMaker.lineBreak();
+    for intermediate nodes, links, and icons.`, false, "fg-tertiary");
 
     {
-        const area = new LX.Area( { skipAppend: true, height: "auto" } );
-        content.appendChild( area.root );
+        window.__addInteractiveCodeExample( content, componentName, panel => {
+            const area = new LX.Area( { className: "flex flex-col p-12 gap-1", skipAppend: true, height: "auto" } );
+            panel.attach( area );
 
-        const bc = LX.makeBreadcrumb([
-            { title: "Home", url: "/" },
-            { title: "Projects", url: "/projects" },
-            { title: "MyApp", items: [
-                { title: "Overview", url: "/projects/myapp/overview" },
-                { title: "Settings", url: "/projects/myapp/settings" }
-                ] },
-            { title: "Editor" }
-        ], { maxItems: 4, separatorIcon: "ChevronRight" });
-        area.attach( bc );
-        area.root.className += " items-center p-4 border rounded-lg shadow-lg bg-secondary overflow-hidden";
+            area.attach( LX.makeBreadcrumb([
+                { title: "Home", url: "/" },
+                { title: "Projects", url: "/projects" },
+                { title: "MyApp", items: [
+                    { title: "Overview", url: "/projects/myapp/overview" },
+                    { title: "Settings", url: "/projects/myapp/settings" }
+                    ] },
+                { title: "Editor" }
+            ], { maxItems: 4, separatorIcon: "ChevronRight" }) );
+
+            area.attach( LX.makeBreadcrumb([
+                { title: "Home", url: "/" },
+                { title: "Projects", url: "/projects" },
+                { title: "MyApp", items: [
+                    { title: "Overview", url: "/projects/myapp/overview" },
+                    { title: "Settings", url: "/projects/myapp/settings" }
+                    ] },
+                { title: "Editor" }
+            ], { maxItems: 3, separatorIcon: "ChevronRight" }) );
+        });
     }
-
-    {
-        const area = new LX.Area( { skipAppend: true, height: "auto" } );
-        content.appendChild( area.root );
-
-        const bc = LX.makeBreadcrumb([
-            { title: "Home", url: "/" },
-            { title: "Projects", url: "/projects" },
-            { title: "MyApp", items: [
-                { title: "Overview", url: "/projects/myapp/overview" },
-                { title: "Settings", url: "/projects/myapp/settings" }
-                ] },
-            { title: "Editor" }
-        ], { maxItems: 3, separatorIcon: "ChevronRight" });
-        area.attach( bc );
-        area.root.className += " my-3 items-center p-4 border rounded-lg shadow-lg bg-secondary overflow-hidden";
-    }
-
-    docMaker.header("Quick Usage", "h2");
-    docMaker.code(`@const@ bc = @[cls]LX@.@[mtd]makeBreadcrumb@([
-  { title: @"Home"@, url: @"/"@ },
-  { title: @"Projects"@, url: @"/projects"@ },
-  { title: @"MyApp"@, items: [
-      { title: @"Overview"@, url: @"/projects/myapp/overview"@ },
-      { title: @"Settings"@, url: @"/projects/myapp/settings"@ }
-    ] },
-  { title: @"Editor"@ }
-], { maxItems: @4@, separatorIcon: @"ChevronRight"@ });
-
-document.body.@[mtd]appendChild@(bc);`, "js");
 
     docMaker.header("API Reference", "h2");
     docMaker.classCtor("function LX.makeBreadcrumb", [ [ "items", "Array" ], [ "options", "Object = {}" ] ]);

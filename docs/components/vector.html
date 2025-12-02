@@ -6,14 +6,7 @@
 
     // Vector
     docMaker.header(componentName + ".", "h1", componentName.toLowerCase());
-    docMaker.paragraph(`Similar to the Number component, it represents a decimal vector input. It's composed by multiple ${ docMaker.iPage( "number", "components/number.html" ) } components.`);
-    docMaker.header("Quick Usage", "h2");
-    docMaker.paragraph( `Call ${docMaker.iCode("Panel.addVectorN(name, value, callback, options)")}, where N is a number in the range [2, 4], to add a ${ componentName } Component to your panel or
-    create it anywhere using ${docMaker.iCode(`new LX.${ componentName.replace( /\s/g, '' ) }`)} to append its root to any container.` );
-    docMaker.lineBreak();
-    docMaker.paragraph(`In case you are using limits, store the component and call <code class='inline'>vectorComponent.setLimits( min, max, step )</code> to change its parameters at any given time.` );
-    docMaker.lineBreak();
-    docMaker.paragraph( `Note: Since a Vector Component is a composition of multiple Number Component, you can change its value the same way as the Number inputs.`, true );
+    docMaker.paragraph(`Similar to the Number component, it represents a decimal vector input. It's composed by multiple ${ docMaker.iPage( "number", "components/number.html" ) } components.`, false, "fg-tertiary");
 
     {
         window.__addInteractiveCodeExample( content, componentName, panel => {
@@ -30,6 +23,14 @@
             });
         });
     }
+
+    docMaker.header("Usage", "h2");
+    docMaker.paragraph( `Call ${docMaker.iCode("Panel.addVectorN(name, value, callback, options)")}, where N is a number in the range [2, 4], to add a ${ componentName } Component to your panel or
+    create it anywhere using ${docMaker.iCode(`new LX.${ componentName.replace( /\s/g, '' ) }`)} to append its root to any container.` );
+    docMaker.lineBreak();
+    docMaker.paragraph(`In case you are using limits, store the component and call <code class='inline'>vectorComponent.setLimits( min, max, step )</code> to change its parameters at any given time.` );
+
+    docMaker.note( `Since a Vector Component is a composition of multiple Number Component, you can change its value the same way as the Number inputs.`, false, "Tip", "Info" );
 
     docMaker.header("API Reference", "h2");
 

@@ -1,82 +1,41 @@
-<script type="text/javascript">
+<script type="module">
 
-    docMaker.header("Code Snippet", "h1", "code-snippet");
+    const content = document.getElementById('content');
+    const componentName = "Code Snippet";
 
-    docMaker.paragraph("The Code Snippet helper wraps a read-only instance of the CodeEditor to render syntax-highlighted, annotated code samples. It supports diff-style added/removed line marking, optional window chrome, custom naming/tabs, and toggling gutters (line numbers).");
-    docMaker.lineBreak();
+    docMaker.header(componentName + ".", "h1", componentName.toLowerCase());
+    docMaker.paragraph(`The Code Snippet helper wraps a read-only instance of the CodeEditor to render syntax-highlighted, annotated code samples. It supports diff-style added/removed line marking,
+     optional window chrome, custom naming/tabs, and toggling gutters (line numbers).`, false, "fg-tertiary");
 
     {
-        const area = new LX.Area( { skipAppend: true, height: "auto", className: "flex flex-col gap-4" } );
-        content.appendChild( area.root );
+        window.code = `class Test {
+    constructor() {
+        this.foo = 1;
+        this.foo = 2;
+    }
+    getFoo() {
+        return this.foo;
+    }
+}`;
 
-        const code = `import { LX } from 'lexgui';
+        window.__addInteractiveCodeExample( content, componentName, panel => {
+            const area = new LX.Area( { className: "flex flex-col p-2 gap-1", skipAppend: true, height: "auto" } );
+            panel.attach( area );
 
-  class Test {
-
-      constructor() {
-
-          this.foo = 1;
-
-          var div = document.createElement('div');
-          div.style.width = "100px"
-          div.style.height = "100px"
-
-          // single line comment
-
-          document.body.appendChild( div );
-
-          let a = 1; /* single line block comment */ let b = 2;
-
-          /*
-              multiple line block comment
-          */
-      }
-  }`;
-
-        let snippet = null;
-        let lineNumbers = true;
-        let windowMode = true;
-
-        const panel = area.addPanel({className: "flex flex-row justify-center"});
-        panel.addToggle( null, true, ( v ) => { lineNumbers = v; generateSnippet(); }, { label: "Line Numbers", width: "fit-content", className: "contrast" } );
-        LX.makeContainer( [`auto`, "0.75rem"], "mx-2 border-right border-colored fg-quaternary self-center items-center", "", panel );
-        panel.addToggle( null, true, ( v ) => { windowMode = v; generateSnippet(); }, { label: "Window Mode", width: "fit-content", className: "contrast" } );
-
-        const generateSnippet = () =>
-        {
-            if( snippet ) snippet.remove();
-
-            snippet = LX.makeCodeSnippet(code, ["780px", "auto"], {
+            const snippet = LX.makeCodeSnippet(code, ["780px", "auto"], {
                 tabName: "script.js",
                 language: "JavaScript",
-                linesAdded: [2, [10, 12]],
-                linesRemoved: [14, 16],
-                lineNumbers,
-                windowMode
+                linesAdded: [4, [6, 8]],
+                linesRemoved: [3],
+                lineNumbers: true,
+                windowMode: true
             });
 
             area.attach( snippet );
-        }
-
-        generateSnippet();        
-        
-        area.root.className += " items-center p-4 border rounded-lg shadow-lg bg-secondary overflow-hidden";
+            
+        });
     }
 
-    docMaker.header("Quick Usage", "h2");
-    docMaker.code(`@const@ snippet = @[cls]LX@.@[mtd]makeCodeSnippet@(
-  code,
-  [@"780px"@, @"auto"@],
-  {
-    language: @"JavaScript"@,
-    windowMode: @true@,
-    lineNumbers: @true@,
-    tabName: @"example.js"@,
-    linesAdded: [@2@, [@10@, @12@]],
-    linesRemoved: [@14@, @16@],
-  }
-);
-document.body.@[mtd]appendChild@(snippet);`, "js");
 
     docMaker.header("API Reference", "h2");
     docMaker.classCtor("function LX.makeCodeSnippet", [ [ "code", "String" ], [ "size", "Array" ], [ "options", "Object = {}" ] ]);

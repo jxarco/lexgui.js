@@ -1,37 +1,28 @@
 <script type="module">
     import { LX } from 'lexgui';
 
-    docMaker.header( "Popover.", "h1", "popover" );
+    const content = document.getElementById('content');
+    const componentName = "Popover";
+
+    docMaker.header(componentName + ".", "h1", componentName.toLowerCase());
     docMaker.paragraph( `Displays rich content in a portal, triggered by another elements, such as buttons.` );
-    docMaker.lineBreak();
-
+    
     {
-        const area = new LX.Area( { className: "border rounded-lg shadow-lg bg-secondary overflow-hidden p-8", skipAppend: true, height: "auto" } );
-        content.appendChild( area.root );
+        window.__addInteractiveCodeExample( content, componentName, panel => {
+            const area = new LX.Area( { className: "flex flex-col p-12 gap-1", skipAppend: true, height: "auto" } );
+            panel.attach( area );
 
-        const popoverArea = new LX.Area( { className: "p-4", skipAppend: true } );
-        const popoverPanel = popoverArea.addPanel();
-        const formData = { username: "", password: { icon: "Key", value: "", type: "password" } };
-        popoverPanel.addForm("Test form", formData, (value, event) => {
-            console.log(value);
-        }, { primaryActionName: "Login", secondaryActionName: "Sign Up" });
+            const popoverArea = new LX.Area( { className: "p-4", skipAppend: true } );
+            const popoverPanel = popoverArea.addPanel();
+            const formData = { username: "", password: { icon: "Key", value: "", type: "password" } };
+            popoverPanel.addForm("Test form", formData, (value, event) => {
+                console.log(value);
+            }, { primaryActionName: "Login", secondaryActionName: "Sign Up" });
 
-        const panel = area.addPanel();
-        panel.addButton( null, "Open Popover", ( v, event ) => { new LX.Popover( event.target, [ popoverArea ], { side: "bottom" } ) }, { width: "20%", buttonClass: "contrast", className: "self-center" } );
+            const p = area.addPanel();
+            p.addButton( null, "Open Popover", ( v, event ) => { new LX.Popover( event.target, [ popoverArea ], { side: "bottom" } ) }, { width: "20%", buttonClass: "contrast", className: "self-center" } );
+        });
     }
-
-    docMaker.header("Quick Usage", "h2");
-    docMaker.code(`@const@ popoverArea = @new@ @[cls]LX@.@[cls]Area@( { className: @"p-4"@, skipAppend: @true@ } );
-@const@ popoverPanel = popoverArea.@[mtd]addPanel@();
-@const@ formData = { username: @""@, password: { icon: @"Key"@, value: @""@, type: @"password"@ } };
-popoverPanel.@[mtd]addForm@(@"Test form"@, formData, (value, event) => {
-    console.log(value);
-}, { primaryActionName: @"Login"@, secondaryActionName: @"Sign Up"@ });
-
-@const@ panel = area.@[mtd]addPanel@();
-panel.addButton( @null@, @"Open Popover"@, (v, event) => { @new@ @[cls]LX@.@[cls]Popover@( event.target, [ popoverArea ] ) }, {
-    width: @"20%"@, buttonClass: @"contrast"@, className: @"self-center"@
-} );`, "js");
 
     docMaker.note( `${ docMaker.iCode( "onPopover()" ) } is called on any passed component that defines it.`, false, "Tip", "Info" );
 

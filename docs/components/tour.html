@@ -1,14 +1,17 @@
-<script type="text/javascript">
+<script type="module">
 
-    docMaker.header( "Tour.", "h1", "tour" );
-            
+    const content = document.getElementById('content');
+    const componentName = "Tour";
+
+    docMaker.header(componentName + ".", "h1", componentName.toLowerCase());
     docMaker.paragraph( `A dynamic popup component that guides users step-by-step through the interface of an application. It highlights key features, explains functionality,
-     and improves onboarding by providing contextual instructions and tips directly within the app.` );
+     and improves onboarding by providing contextual instructions and tips directly within the app.`, false, "fg-tertiary");
+
     docMaker.lineBreak();
 
     docMaker.image(`images/tour.png`, "dialogs" );
 
-    docMaker.header("Quick Usage", "h2");
+    docMaker.header("Usage", "h2");
 
     docMaker.paragraph( `To create a guided tour in LexGUI.js, instantiate a new ${ docMaker.iCode( "LX.Tour" ) } with an array of step definitions and optional configuration settings. Each step is an object describing a UI element to highlight,
      along with a title, descriptive content, the preferred side for the tooltip relative to the element and its alignment. Use the ${ docMaker.iCode( "reference" ) } field to bind the step to a DOM element or component,

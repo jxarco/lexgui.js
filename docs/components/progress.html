@@ -5,10 +5,7 @@
     const componentName = "Progress";
 
     docMaker.header("Progress.", "h1", "progress");
-    docMaker.paragraph(`Represents an indicator showing the completion progress of a task, displayed as a progress bar.`);
-    docMaker.header("Quick Usage", "h2");
-    docMaker.paragraph( `Call ${docMaker.iCode("Panel.addProgress(name, value, options)")} to add a ${ componentName } Component to your panel or
-    create it anywhere using ${docMaker.iCode(`new LX.${ componentName.replace( /\s/g, '' ) }`)} to append its root to any container.` );
+    docMaker.paragraph(`Represents an indicator showing the completion progress of a task, displayed as a progress bar.`, false, "fg-tertiary");
 
     {
         window.__addInteractiveCodeExample( content, componentName, panel => {
@@ -23,6 +20,10 @@
             });
         });
     }
+
+    docMaker.header("Usage", "h2");
+    docMaker.paragraph( `Call ${docMaker.iCode("Panel.addProgress(name, value, options)")} to add a ${ componentName } Component to your panel or
+    create it anywhere using ${docMaker.iCode(`new LX.${ componentName.replace( /\s/g, '' ) }`)} to append its root to any container.` );
 
     docMaker.header("API Reference", "h2");
 

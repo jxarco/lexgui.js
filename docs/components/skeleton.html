@@ -1,60 +1,50 @@
-<script type="text/javascript">
+<script type="module">
 
-    docMaker.header( "Skeleton.", "h1", "skeleton" );
-            
-    docMaker.paragraph( `Use to show a placeholder while page content is loading.` );
-    docMaker.lineBreak();
+    const componentName = "Skeleton";
 
-    {
-        const area = new LX.Area( { skipAppend: true, height: "auto" } );
-        content.appendChild( area.root );
-        const skeleton = new LX.Skeleton(  `
-            <div class="w-12 h-12 rounded-full lexskeletonpart"></div>
-            <div class="flex flex-col w-full p-2 gap-2">
-                <div class="w-full h-4 lexskeletonpart"></div>
-                <div class="w-2/3 h-4 lexskeletonpart"></div>
-            </div>
-        ` );
-        area.attach( skeleton );
-        area.root.className += " p-4 border rounded-lg shadow-lg bg-secondary overflow-hidden";
-    }
-
-    docMaker.lineBreak();
+    docMaker.header(componentName + ".", "h1", componentName.toLowerCase());
+    docMaker.paragraph( `Use to show a placeholder while page content is still loading.`, false, "fg-tertiary");
 
     {
-        const area = new LX.Area( { skipAppend: true, height: "auto" } );
-        content.appendChild( area.root );
-        const skeleton = new LX.Skeleton(  `
-            <div class="flex flex-row w-full p-2 gap-2">
-                <div class="flex flex-col w-1/3 p-2 gap-2">
-                    <div class="w-full h-32 lexskeletonpart"></div>
+        window.__addInteractiveCodeExample( content, componentName, panel => {
+            const area = new LX.Area( { className: "flex flex-col p-12 gap-1", skipAppend: true, height: "auto" } );
+            panel.attach( area );
+
+            area.attach( new LX.Skeleton(  `
+                <div class="w-12 h-12 rounded-full lexskeletonpart"></div>
+                <div class="flex flex-col w-full p-2 gap-2">
                     <div class="w-full h-4 lexskeletonpart"></div>
                     <div class="w-2/3 h-4 lexskeletonpart"></div>
                 </div>
-                <div class="flex flex-col w-1/3 p-2 gap-2">
-                    <div class="w-full h-32 lexskeletonpart"></div>
-                    <div class="w-full h-4 lexskeletonpart"></div>
-                    <div class="w-2/3 h-4 lexskeletonpart"></div>
+            ` ) );
+
+            area.attach( new LX.Skeleton(  `
+                <div class="flex flex-row w-full p-2 gap-2">
+                    <div class="flex flex-col w-1/3 p-2 gap-2">
+                        <div class="w-full h-32 lexskeletonpart"></div>
+                        <div class="w-full h-4 lexskeletonpart"></div>
+                        <div class="w-2/3 h-4 lexskeletonpart"></div>
+                    </div>
+                    <div class="flex flex-col w-1/3 p-2 gap-2">
+                        <div class="w-full h-32 lexskeletonpart"></div>
+                        <div class="w-full h-4 lexskeletonpart"></div>
+                        <div class="w-2/3 h-4 lexskeletonpart"></div>
+                    </div>
+                    <div class="flex flex-col w-1/3 p-2 gap-2">
+                        <div class="w-full h-32 lexskeletonpart"></div>
+                        <div class="w-full h-4 lexskeletonpart"></div>
+                        <div class="w-2/3 h-4 lexskeletonpart"></div>
+                    </div>
                 </div>
-                <div class="flex flex-col w-1/3 p-2 gap-2">
-                    <div class="w-full h-32 lexskeletonpart"></div>
-                    <div class="w-full h-4 lexskeletonpart"></div>
-                    <div class="w-2/3 h-4 lexskeletonpart"></div>
-                </div>
-            </div>
-        ` );
-        area.attach( skeleton );
-        area.root.className += " p-4 border rounded-lg shadow-lg bg-secondary overflow-hidden";
+            ` ) );
+        });
     }
 
-    docMaker.lineBreak();
+    docMaker.header("Usage", "h2");
 
     docMaker.paragraph( `To create a skeleton in LexGUI.js, instantiate a new ${ docMaker.iCode( "LX.Skeleton" ) } with either a html string with all your elements or an array containing all the elements that are contained in the skeleton element. The specific
     elements that should have the highlights need to have the ${ docMaker.iCode( "lexskeletonpart" ) }.` );
 
     docMaker.note( `Make sure to destroy the skeleton once your content is loaded using ${ docMaker.iCode( "LX.Skeleton.destroy()" ) }.` );
-
-    docMaker.lineBreak();
-    docMaker.lineBreak();
 
 </script>

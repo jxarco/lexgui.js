@@ -1,37 +1,28 @@
 <script type="module">
     import { LX } from 'lexgui';
 
-    docMaker.header( "Sheet.", "h1", "sheet" );
-    docMaker.paragraph( `Display content that complements the main content of the screen.` );
-    docMaker.lineBreak();
+    const content = document.getElementById('content');
+    const componentName = "Sheet";
+
+    docMaker.header(componentName + ".", "h1", componentName.toLowerCase());
+    docMaker.paragraph( `Display content that complements the main content of the screen.`, false, "fg-tertiary");
 
     {
-        const area = new LX.Area( { className: "border rounded-lg shadow-lg bg-secondary overflow-hidden p-8", skipAppend: true, height: "auto" } );
-        content.appendChild( area.root );
+        window.__addInteractiveCodeExample( content, componentName, panel => {
+            const area = new LX.Area( { className: "flex flex-col p-12 gap-1", skipAppend: true, height: "auto" } );
+            panel.attach( area );
 
-        const sheetArea = new LX.Area( { className: "p-4", skipAppend: true } );
-        const sheetPanel = sheetArea.addPanel();
-        const formData = { username: "", password: { icon: "Key", value: "", type: "password" } };
-        sheetPanel.addForm("Test form", formData, (value, event) => {
-            console.log(value);
-        }, { primaryActionName: "Login", secondaryActionName: "Sign Up" });
+            const sheetArea = new LX.Area( { className: "p-4", skipAppend: true } );
+            const sheetPanel = sheetArea.addPanel();
+            const formData = { username: "", password: { icon: "Key", value: "", type: "password" } };
+            sheetPanel.addForm("Test form", formData, (value, event) => {
+                console.log(value);
+            }, { primaryActionName: "Login", secondaryActionName: "Sign Up" });
 
-        const panel = area.addPanel();
-        panel.addButton( null, "Open Sheet", () => { new LX.Sheet( "400px", [ sheetArea ], { side: "right" } ) }, { width: "20%", buttonClass: "contrast", className: "self-center" } );
+            const p = area.addPanel();
+            p.addButton( null, "Open Sheet", () => { new LX.Sheet( "400px", [ sheetArea ], { side: "right" } ) }, { width: "20%", buttonClass: "contrast", className: "self-center" } );
+        });
     }
-
-    docMaker.header("Quick Usage", "h2");
-    docMaker.code(`@const@ sheetArea = @new@ @[cls]LX@.@[cls]Area@( { className: @"p-4"@, skipAppend: @true@ } );
-@const@ sheetPanel = sheetArea.@[mtd]addPanel@();
-@const@ formData = { username: @""@, password: { icon: @"Key"@, value: @""@, type: @"password"@ } };
-sheetPanel.@[mtd]addForm@(@"Test form"@, formData, (value, event) => {
-    console.log(value);
-}, { primaryActionName: @"Login"@, secondaryActionName: @"Sign Up"@ });
-
-@const@ panel = area.@[mtd]addPanel@();
-panel.addButton( @null@, @"Open Sheet"@, () => { @new@ @[cls]LX@.@[cls]Sheet@( @"400px"@, [ sheetArea ] ) }, {
-    width: @"20%"@, buttonClass: @"contrast"@, className: @"self-center"@
-} );`, "js");
 
     docMaker.note( `${ docMaker.iCode( "onSheet()" ) } is called on any passed component that defines it.`, false, "Tip", "Info" );
 

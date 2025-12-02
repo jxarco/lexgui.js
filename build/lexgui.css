@@ -1044,7 +1044,7 @@ a svg, svg path {
 /* Generic Popover */
 
 .lexpopover {
-    background-color: var(--global-color-primary);
+    background-color: var(--global-background);
     border-radius: 0.5rem;
     border: 1px solid #7a797c4f;
     padding: 0.25rem;

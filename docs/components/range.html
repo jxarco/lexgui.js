@@ -5,13 +5,7 @@
     const componentName = "Range Input";
 
     docMaker.header(componentName + ".", "h1", componentName.toLowerCase());
-    docMaker.paragraph(`Represents a decimal input handled by a slider.`);
-    docMaker.header("Quick Usage", "h2");
-    docMaker.paragraph( `Call ${docMaker.iCode("Panel.addRange(name, value, callback, options)")} to add a ${ componentName } Component to your panel or
-    create it anywhere using ${docMaker.iCode(`new LX.${ componentName.replace( /\s/g, '' ) }`)} to append its root to any container.` );
-    docMaker.lineBreak();
-    docMaker.paragraph(`In case you are using limits, store the component and call <code class='inline'>rangeComponent.setLimits( min, max, step )</code> to change its 
-        parameters once the component has been created.` );
+    docMaker.paragraph(`Represents a decimal input handled by a slider.`, false, "fg-tertiary");
 
     {
         window.__addInteractiveCodeExample( content, componentName, panel => {
@@ -23,6 +17,13 @@
             }, { min: 1, max: 10, step: 0.1, className: "accent" });
         });
     }
+
+    docMaker.header("Usage", "h2");
+    docMaker.paragraph( `Call ${docMaker.iCode("Panel.addRange(name, value, callback, options)")} to add a ${ componentName } Component to your panel or
+    create it anywhere using ${docMaker.iCode(`new LX.${ componentName.replace( /\s/g, '' ) }`)} to append its root to any container.` );
+    docMaker.lineBreak();
+    docMaker.paragraph(`In case you are using limits, store the component and call <code class='inline'>rangeComponent.setLimits( min, max, step )</code> to change its 
+        parameters once the component has been created.` );
 
     docMaker.header("API Reference", "h2");
 

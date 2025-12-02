@@ -5,13 +5,8 @@
     const componentName = "Size Input";
 
     docMaker.header(componentName + ".", "h1", componentName.toLowerCase());
-    docMaker.paragraph(`Represents a N dimension number size input.`);
-    docMaker.header("Quick Usage", "h2");
-    docMaker.paragraph( `Call ${docMaker.iCode("Panel.addSize(name, value, callback, options)")} to add a ${ componentName } Component to your panel or
-    create it anywhere using ${docMaker.iCode(`new LX.${ componentName.replace( /\s/g, '' ) }`)} to append its root to any container.` );
-    docMaker.lineBreak();
-    docMaker.paragraph( `Note: Since a Size Component is a composition of multiple Number Component, you can change its value the same way as the Number inputs.
-            Minimum size is always 0.`, true );
+    docMaker.paragraph(`Represents a N dimension number size input.`, false, "fg-tertiary");
+
     {
         window.__addInteractiveCodeExample( content, componentName, panel => {
             panel.addSize("Screen Resolution", [1280, 720], (value, event) => {
@@ -19,6 +14,13 @@
             }, { units: "p" });
         });
     }
+
+    docMaker.header("Usage", "h2");
+    docMaker.paragraph( `Call ${docMaker.iCode("Panel.addSize(name, value, callback, options)")} to add a ${ componentName } Component to your panel or
+    create it anywhere using ${docMaker.iCode(`new LX.${ componentName.replace( /\s/g, '' ) }`)} to append its root to any container.` );
+
+    docMaker.note( `Since a Size Component is a composition of multiple Number Component, you can change its value the same way as the Number inputs.
+            Minimum size is always 0.`, false, "Tip", "Info" );
 
     docMaker.header("API Reference", "h2");
 

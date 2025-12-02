@@ -5,23 +5,8 @@
     const componentName = "Tab Sections";
 
     docMaker.header(componentName + ".", "h1", componentName.toLowerCase());
-    docMaker.paragraph(`Represents panel sections as tabs, either in horizontal or vertical mode. Quickly switch between the different sets of information.`);
-    docMaker.header("Quick Usage", "h2");
-    docMaker.paragraph( `Call ${docMaker.iCode("Panel.addTabSections(name, tabs, options)")} to add a ${ componentName } Component to your panel or
-    create it anywhere using ${docMaker.iCode(`new LX.${ componentName.replace( /\s/g, '' ) }`)} to append its root to any container.` );
-    docMaker.lineBreak();
-    docMaker.paragraph(`<code class='inline'>tabs</code> is an <code class="inline">Array</code> of objects which have:` );
-    docMaker.codeBulletList([
-        ["name", "String", "Name of the tab (if icon, use as title)"],
-        ["icon", "String", "Icon path to be used as the tab icon (optional)"],
-        ["iconClass", "String", "Class to be added to the icon (optional)"],
-        ["svgClass", "String", "Class to be added to the inner SVG of the icon (optional)"],
-        ["onCreate", "Function", "Function to be called at tab creation"],
-        ["onSelect", "Function", "Function to be called on select tab (optional)"]
-    ]);
-
-    docMaker.note( `The parameters of the ${ docMaker.iCode("onCreate") } option are a ${ docMaker.iCode("Panel") } to construct components and a native ${ docMaker.iCode("HTMLDivElement") } to append any type of content. In the case of
-    ${ docMaker.iCode("onSelect") }, it receives only the div container.` )
+    docMaker.paragraph(`Represents panel sections as tabs, either in horizontal or vertical mode. Quickly switch between the different sets of information.`, false, "fg-tertiary");
+    
 
     {
         window.__addInteractiveCodeExample( content, componentName, panel => {
@@ -46,6 +31,23 @@
             ], { vertical: false });
         });
     }
+
+    docMaker.header("Usage", "h2");
+    docMaker.paragraph( `Call ${docMaker.iCode("Panel.addTabSections(name, tabs, options)")} to add a ${ componentName } Component to your panel or
+    create it anywhere using ${docMaker.iCode(`new LX.${ componentName.replace( /\s/g, '' ) }`)} to append its root to any container.` );
+    docMaker.lineBreak();
+    docMaker.paragraph(`<code class='inline'>tabs</code> is an <code class="inline">Array</code> of objects which have:` );
+    docMaker.codeBulletList([
+        ["name", "String", "Name of the tab (if icon, use as title)"],
+        ["icon", "String", "Icon path to be used as the tab icon (optional)"],
+        ["iconClass", "String", "Class to be added to the icon (optional)"],
+        ["svgClass", "String", "Class to be added to the inner SVG of the icon (optional)"],
+        ["onCreate", "Function", "Function to be called at tab creation"],
+        ["onSelect", "Function", "Function to be called on select tab (optional)"]
+    ]);
+
+    docMaker.note( `The parameters of the ${ docMaker.iCode("onCreate") } option are a ${ docMaker.iCode("Panel") } to construct components and a native ${ docMaker.iCode("HTMLDivElement") } to append any type of content. In the case of
+    ${ docMaker.iCode("onSelect") }, it receives only the div container.` )
 
     docMaker.header("API Reference", "h2");
 
