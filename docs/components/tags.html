@@ -37,5 +37,14 @@
             } )
         }, {});
         docMaker.lineBreak( panel.root );
+        panel.addTable( null, {
+            head: [ "Parameter", "Type", "Description", "Default" ],
+            body: [
+                ["skipDuplicates", "Boolean", "Does not add an already existing tag", "true"],
+            ].map( v => {
+                return [ docMaker.iCode( v[ 0 ], "table" ), docMaker.iCode( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? docMaker.iCode( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+        docMaker.lineBreak( panel.root );
     }
 </script>
