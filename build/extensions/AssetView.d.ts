@@ -1,4 +1,4 @@
-import { Pagination } from '../components/Pagination';
+import { LX } from '../core/Namespace';
 declare const Area: any;
 declare const Panel: any;
 declare const NodeTree: any;
@@ -65,7 +65,7 @@ export declare class AssetView {
     get assetsPerPage(): any;
     set assetsPerPage(v: any);
     _lastSortBy: string;
-    _paginator: Pagination | undefined;
+    _paginator: typeof LX.Pagination | undefined;
     constructor(options?: any);
     /**
     * @method load

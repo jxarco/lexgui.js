@@ -1,6 +1,5 @@
 // This is a generated file. Do not edit.
 import { LX } from '../core/Namespace.js';
-import { Pagination } from '../components/Pagination.js';
 
 // AssetView.ts @jxarco
 if (!LX) {
@@ -542,7 +541,7 @@ class AssetView {
                 className: 'lexassetcontentpanel flex flex-col content-center overflow-hidden',
                 height: "calc(100%)"
             });
-            this._paginator = new Pagination({
+            this._paginator = new LX.Pagination({
                 className: "ml-auto",
                 pages: Math.max(Math.ceil(this.data.length / this.assetsPerPage), 1),
                 onChange: () => this._refreshContent()
