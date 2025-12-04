@@ -8,6 +8,7 @@ From 0.8.0, the full library is written in TypeScript to facilitate integrations
 
 Updates:
 - Table Component now sort Date strings by date.
+- Added support for `options.hiddenColumns` in Table Component.
 - Added support for `Ctrl+Wheel` to increase grid item size in AssetView.
 - Added support for `options.submit` in Form entries.
 - Added "dev" icons, Vscode, Godot, Unity, UnrealEngine, Go, Css, Android, and more.

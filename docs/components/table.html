@@ -11,22 +11,23 @@
     {
         window.__addInteractiveCodeExample( content, componentName, panel => {
             panel.addTable(null, {
-                head: ["Name", "Status", "Priority"],
+                head: ["Name", "Status", "Priority", "HiddenByDefault"],
                 body: [
-                    ["Alice", "In Progress", "High"],
-                    ["Bob", "Backlog", "Medium"],
-                    ["Prince", "Canceled", "Low"],
-                    ["Sean", "Done", "High"],
-                    ["Carter", "In Progress", "Medium"],
-                    ["James", "Backlog", "Low"],
-                    ["Mickey", "Todo", "Low"],
-                    ["Charlie", "Canceled", "Low"],
-                    ["Potato", "Todo", "High"]
+                    ["Alice", "In Progress", "High", 0],
+                    ["Bob", "Backlog", "Medium", 1],
+                    ["Prince", "Canceled", "Low", 2],
+                    ["Sean", "Done", "High", 3],
+                    ["Carter", "In Progress", "Medium", 4],
+                    ["James", "Backlog", "Low", 5],
+                    ["Mickey", "Todo", "Low", 6],
+                    ["Charlie", "Canceled", "Low", 7],
+                    ["Potato", "Todo", "High", 8]
                 ]
             }, {
                 selectable: true,
                 sortable: true,
                 toggleColumns: true,
+                hiddenColumns: [ "HiddenByDefault" ],
                 filter: "Name",
                 customFilters: [
                     { name: "Status", options: ["Backlog", "Todo", "In Progress", "Done", "Canceled"] },
@@ -78,20 +79,21 @@
         panel.addTable( null, {
             head: [ "Option", "Type", "Description", "Default" ],
             body: [
-                ["head", "Array", "Table headers (each of the headers per column)", "—"],
                 ["body", "Array", "Table body (data per row for each column)", "—"],
+                ["centered", "Boolean/Array", "Center text within columns. true for all, Array for center selected cols", "—"],
                 ["columnActions", "Array", `Allow to add actions per column ${docMaker.iCode("action: { name, icon, callback }")}`, "—"],
-                ["rowActions", "Array", `Allow to add actions per row ${docMaker.iCode("action: { icon, callback }")}`, "—"],
+                ["customFilters", "Array", "Add selectors to filter by specific option values", "false"],
+                ["filter", "String", "Name of the column to filter by text input (if any)", "false"],
+                ["filterValue", "String", "Initial filter value", "—"],
+                ["head", "Array", "Table headers (each of the headers per column)", "—"],
+                ["hiddenColumns", "Array", `If ${docMaker.iCode("toggleColumns")} enabled, array containing Cols (name or idx) hidden by default.`, "—"],
                 ["onMenuAction", "Function", `Function callback to fill the "menu" context`, "—"],
+                ["rowActions", "Array", `Allow to add actions per row ${docMaker.iCode("action: { icon, callback }")}`, "—"],
                 ["selectable", "Boolean", "Each row can be selected", "false"],
                 ["sortable", "Boolean", "Rows can be sorted by the user manually", "false"],
-                ["centered", "Boolean/Array", "Center text within columns. true for all, Array for center selected cols", "—"],
                 ["sortColumns", "Boolean", "Columns can be sorted", "true"],
                 ["tableClass", "String", "Extra table dom class names", "—"],
                 ["toggleColumns", "Boolean", "Columns visibility can be toggled", "false"],
-                ["filter", "String", "Name of the column to filter by text input (if any)", "false"],
-                ["filterValue", "String", "Initial filter value", "—"],
-                ["customFilters", "Array", "Add selectors to filter by specific option values", "false"]
             ].map( v => {
                 return [ docMaker.iCode( v[ 0 ], "table" ), docMaker.iCode( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? docMaker.iCode( v[ 3 ], "table desc" ) : v[ 3 ] ];
             } )

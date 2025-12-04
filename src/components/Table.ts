@@ -24,6 +24,7 @@ export class Table extends BaseComponent
     _toggleColumns: boolean;
     _sortColumns: boolean;
     _resetCustomFiltersBtn: Button | null = null;
+    _hiddenColumns: any[] = [];
 
     private _centered: any;
     get centered(): any { return this._centered; }
@@ -59,12 +60,19 @@ export class Table extends BaseComponent
         this._toggleColumns = options.toggleColumns ?? false;
         this._sortColumns = options.sortColumns ?? true;
         this._currentFilter = options.filterValue;
+        this._hiddenColumns = options.hiddenColumns ?? [];
 
         data.head = data.head ?? [];
         data.body = data.body ?? [];
         data.checkMap = { };
         data.colVisibilityMap = { };
-        data.head.forEach( ( col: any, index: number ) => { data.colVisibilityMap[ index ] = true; })
+        data.head.forEach( ( colName: any, index: number ) =>
+        {
+            const idx = this._hiddenColumns.indexOf( colName );
+            const visible = ( !this._toggleColumns ) || ( idx === -1 );
+            data.colVisibilityMap[ index ] = visible;
+        })
+
         this.data = data;
 
         const getDate = ( text: string ): Date | null =>

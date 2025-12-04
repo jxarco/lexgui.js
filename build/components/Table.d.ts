@@ -14,6 +14,7 @@ export declare class Table extends BaseComponent {
     _toggleColumns: boolean;
     _sortColumns: boolean;
     _resetCustomFiltersBtn: Button | null;
+    _hiddenColumns: any[];
     private _centered;
     get centered(): any;
     set centered(v: any);
