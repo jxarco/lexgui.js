@@ -10654,6 +10654,9 @@ class Spinner {
         const svgClass = `animate-spin ${size} ${options.svgClass ?? ""}`.trim();
         this.root = LX.makeIcon(icon, { iconClass, svgClass });
     }
+    html() {
+        return this.root.innerHTML;
+    }
     destroy() {
         this.root.remove();
     }

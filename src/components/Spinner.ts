@@ -20,6 +20,11 @@ export class Spinner
         this.root = LX.makeIcon( icon, { iconClass, svgClass } );
     }
 
+    html()
+    {
+        return this.root.innerHTML;
+    }
+
     destroy()
     {
         this.root.remove();
