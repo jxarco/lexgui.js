@@ -44,6 +44,7 @@ export * from "./components/Map2D";
 export * from "./components/Pad";
 export * from "./components/Curve";
 export * from "./components/Dial";
+export * from "./components/Spinner";
 
 // Composite Components
 export * from "./components/Sidebar";

@@ -10641,6 +10641,25 @@ LX.ICONS = (() => {
     return { ...RAW_ICONS, ...aliasIcons };
 })();
 
+// Spinner.ts @jxarco
+/**
+ * @class Spinner
+ */
+class Spinner {
+    root;
+    constructor(options = {}) {
+        const icon = options.icon ?? "LoaderCircle";
+        const size = options.size ?? "md";
+        const iconClass = `flex ${options.iconClass ?? ""}`.trim();
+        const svgClass = `animate-spin ${size} ${options.svgClass ?? ""}`.trim();
+        this.root = LX.makeIcon(icon, { iconClass, svgClass });
+    }
+    destroy() {
+        this.root.remove();
+    }
+}
+LX.Spinner = Spinner;
+
 // Sidebar.ts @jxarco
 /**
  * @class Sidebar
@@ -12969,5 +12988,5 @@ LX.REGISTER_COMPONENT = function (customComponentName, options = {}) {
     };
 };
 
-export { Area, AreaOverlayButtons, ArrayInput, BaseComponent, Branch, Button, Checkbox, ColorInput, ComboButtons, ComponentType, ContextMenu, Counter, Curve, DatePicker, Dial, Dialog, DropdownMenu, FileInput, Footer, Form, IEvent, LX, Layers, List, Map2D, NodeTree, NumberInput, OTPInput, Pad, Panel, PocketDialog, Popover, Progress, RadioGroup, RangeInput, Rate, Select, Sheet, Sidebar, SizeInput, Skeleton, TabSections, Table, Tabs, Tags, TextArea, TextInput, Title, Toggle, Tour, Tree, TreeEvent, Vector, addDropdownMenu, vec2 };
+export { Area, AreaOverlayButtons, ArrayInput, BaseComponent, Branch, Button, Checkbox, ColorInput, ComboButtons, ComponentType, ContextMenu, Counter, Curve, DatePicker, Dial, Dialog, DropdownMenu, FileInput, Footer, Form, IEvent, LX, Layers, List, Map2D, NodeTree, NumberInput, OTPInput, Pad, Panel, PocketDialog, Popover, Progress, RadioGroup, RangeInput, Rate, Select, Sheet, Sidebar, SizeInput, Skeleton, Spinner, TabSections, Table, Tabs, Tags, TextArea, TextInput, Title, Toggle, Tour, Tree, TreeEvent, Vector, addDropdownMenu, vec2 };
 //# sourceMappingURL=lexgui.module.js.map
