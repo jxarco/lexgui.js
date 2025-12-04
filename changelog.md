@@ -16,9 +16,9 @@ Added Card Component docs.
 Improved all docs.
 
 Table:
-- Support for Pagination.
+- Support for Pagination (`options.pagination` and `options.rowsPerPage`).
 - Sort Date strings by date.
-- Added support for `options.hiddenColumns`.
+- Added support for `options.hiddenColumns` and `options.showSelectedNumber`.
 - `options.centered` now allows column indices or names.
 - Added row `idx` to `options.rowActions` callback parameters `(idx, bodyData, table, event)`.
 

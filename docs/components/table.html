@@ -26,8 +26,9 @@
                 ]
             }, {
                 pagination: true,
-                rowsPerPage: 4,
+                rowsPerPage: 5,
                 selectable: true,
+                showSelectedNumber: true,
                 sortable: true,
                 toggleColumns: true,
                 hiddenColumns: [ "HiddenByDefault" ],
@@ -92,8 +93,11 @@
                 ["head", "Array", "Table headers (each of the headers per column)", "—"],
                 ["hiddenColumns", "Array", `If ${docMaker.iCode("toggleColumns")} enabled, array containing Cols (name or idx) hidden by default`, "—"],
                 ["onMenuAction", "Function", `Function callback to fill the "menu" context`, "—"],
+                ["pagination", "Boolean", `Enables table pagination`, "false"],
                 ["rowActions", "Array", `Allow to add actions per row ${docMaker.iCode("action: { icon, callback }")}`, "—"],
+                ["rowsPerPage", "Number", `If using pagination, number of table rows per page`, "12"],
                 ["selectable", "Boolean", "Each row can be selected", "false"],
+                ["showSelectedNumber", "Boolean", `If ${docMaker.iCode("selectable")}, display the current number of selected rows`, "true"],
                 ["sortable", "Boolean", "Rows can be sorted by the user manually", "false"],
                 ["sortColumns", "Boolean", "Columns can be sorted", "true"],
                 ["tableClass", "String", "Extra table dom class names", "—"],

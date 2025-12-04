@@ -17,6 +17,7 @@ export declare class Table extends BaseComponent {
     _resetCustomFiltersBtn: Button | null;
     _hiddenColumns: any[];
     _paginator: Pagination | undefined;
+    _showSelectedNumber: boolean;
     private _centered;
     get centered(): any;
     set centered(v: any);

@@ -4619,6 +4619,7 @@ class Table extends BaseComponent {
     _resetCustomFiltersBtn = null;
     _hiddenColumns = [];
     _paginator;
+    _showSelectedNumber;
     _centered;
     get centered() { return this._centered; }
     set centered(v) { this._setCentered(v); }
@@ -4647,6 +4648,7 @@ class Table extends BaseComponent {
         this.activeCustomFilters = {};
         this._toggleColumns = options.toggleColumns ?? false;
         this._sortColumns = options.sortColumns ?? true;
+        this._showSelectedNumber = options.showSelectedNumber ?? true;
         this._currentFilter = options.filterValue;
         this._hiddenColumns = options.hiddenColumns ?? [];
         data.head = data.head ?? [];
@@ -4658,8 +4660,8 @@ class Table extends BaseComponent {
             const visible = (!this._toggleColumns) || (idx === -1);
             data.colVisibilityMap[index] = visible;
         });
-        if (options.pagination) {
-            this._rowsPerPage = options.rowsPerPage ?? this._rowsPerPage;
+        if (options.pagination ?? false) {
+            this._rowsPerPage = options.rowsPerPage ?? 12;
             this._paginator = new Pagination({
                 pages: this._getNumPages(),
                 onChange: this._onChangePage.bind(this)
@@ -4717,6 +4719,7 @@ class Table extends BaseComponent {
             data.body = data.body.sort(compareFn.bind(this, idx, sign));
             this.refresh();
         };
+        const that = this;
         // Append header
         if (this.filter || this.customFilters || this._toggleColumns) {
             const headerContainer = LX.makeContainer(["100%", "auto"], "flex flex-row mb-2");
@@ -4908,6 +4911,8 @@ class Table extends BaseComponent {
                             data.checkMap[rowId] = this.checked;
                             el.querySelector("input[type='checkbox']").checked = this.checked;
                         }
+                        const sRows = that.getSelectedRows();
+                        LX.emitSignal("@rows_selected_changed", sRows.length);
                     });
                     this.rowOffsetCount++;
                     hrow.appendChild(th);
@@ -5173,6 +5178,8 @@ class Table extends BaseComponent {
                                     headInput.checked = data.checkMap[":root"] = true;
                                 }
                             }
+                            const sRows = that.getSelectedRows();
+                            LX.emitSignal("@rows_selected_changed", sRows.length);
                         });
                         row.appendChild(td);
                     }
@@ -5232,6 +5239,10 @@ class Table extends BaseComponent {
                     }
                     body.appendChild(row);
                 }
+                if (options.selectable) {
+                    const sRows = this.getSelectedRows();
+                    LX.emitSignal("@rows_selected_changed", sRows.length);
+                }
                 if (body.childNodes.length == 0) {
                     const row = document.createElement('tr');
                     const td = document.createElement('td');
@@ -5252,10 +5263,24 @@ class Table extends BaseComponent {
                 }
             }
         };
-        // Pagination
-        if (this._paginator) {
-            const paginationContainer = LX.makeContainer(["100%", "auto"], "flex p-2 justify-end", "", container);
-            paginationContainer.appendChild(this._paginator.root);
+        const showSelected = this._showSelectedNumber && options.selectable;
+        // Make footer
+        if (showSelected || this._paginator) {
+            const footerContainer = LX.makeContainer(["100%", "auto"], "flex flex-row px-3 my-1 align-center", "", container);
+            // Show num selected rows
+            if (showSelected) {
+                const selectedRowsLabelContainer = LX.makeContainer(["100%", "auto"], "flex justify-start items-center fg-secondary", "0 row(s) selected.", footerContainer);
+                LX.addSignal("@rows_selected_changed", (target, n) => {
+                    if (!this._showSelectedNumber)
+                        return;
+                    selectedRowsLabelContainer.innerHTML = n === 0 ? "" : `${n ?? 0} row(s) selected.`;
+                });
+            }
+            // Pagination
+            if (this._paginator) {
+                const paginationContainer = LX.makeContainer(["100%", "auto"], "flex justify-end", "", footerContainer);
+                paginationContainer.appendChild(this._paginator.root);
+            }
         }
         this.refresh();
         LX.doAsync(this.onResize.bind(this));

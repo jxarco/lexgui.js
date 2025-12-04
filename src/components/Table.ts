@@ -27,6 +27,7 @@ export class Table extends BaseComponent
     _resetCustomFiltersBtn: Button | null = null;
     _hiddenColumns: any[] = [];
     _paginator: Pagination | undefined;
+    _showSelectedNumber: boolean;
 
     private _centered: any;
     get centered(): any { return this._centered; }
@@ -66,6 +67,7 @@ export class Table extends BaseComponent
         this.activeCustomFilters = {};
         this._toggleColumns = options.toggleColumns ?? false;
         this._sortColumns = options.sortColumns ?? true;
+        this._showSelectedNumber = options.showSelectedNumber ?? true;
         this._currentFilter = options.filterValue;
         this._hiddenColumns = options.hiddenColumns ?? [];
 
@@ -80,9 +82,9 @@ export class Table extends BaseComponent
             data.colVisibilityMap[ index ] = visible;
         })
 
-        if( options.pagination )
+        if( options.pagination ?? false )
         {
-            this._rowsPerPage = options.rowsPerPage ?? this._rowsPerPage;
+            this._rowsPerPage = options.rowsPerPage ?? 12;
 
             this._paginator = new Pagination( {
                 pages: this._getNumPages(),
@@ -150,6 +152,8 @@ export class Table extends BaseComponent
             data.body = data.body.sort( compareFn.bind( this, idx, sign ) );
             this.refresh();
         }
+
+        const that = this;
 
         // Append header
         if( this.filter || this.customFilters || this._toggleColumns )
@@ -380,6 +384,9 @@ export class Table extends BaseComponent
                             data.checkMap[ rowId ] = this.checked;
                             el.querySelector( "input[type='checkbox']" ).checked = this.checked;
                         }
+
+                        const sRows = that.getSelectedRows();
+                        LX.emitSignal( "@rows_selected_changed", sRows.length );
                     });
 
                     this.rowOffsetCount++;
@@ -740,6 +747,9 @@ export class Table extends BaseComponent
                                     headInput.checked = data.checkMap[ ":root" ] = true;
                                 }
                             }
+
+                            const sRows = that.getSelectedRows();
+                            LX.emitSignal( "@rows_selected_changed", sRows.length );
                         });
 
                         row.appendChild( td );
@@ -823,6 +833,12 @@ export class Table extends BaseComponent
                     body.appendChild( row );
                 }
 
+                if( options.selectable )
+                {
+                    const sRows = this.getSelectedRows();
+                    LX.emitSignal( "@rows_selected_changed", sRows.length );
+                }
+
                 if( body.childNodes.length == 0 )
                 {
                     const row = document.createElement( 'tr' );
@@ -848,11 +864,30 @@ export class Table extends BaseComponent
             }
         }
 
-        // Pagination
-        if( this._paginator )
+        const showSelected = this._showSelectedNumber && options.selectable;
+
+        // Make footer
+        if( showSelected || this._paginator )
         {
-            const paginationContainer = LX.makeContainer( [ "100%", "auto" ], "flex p-2 justify-end", "", container );
-            paginationContainer.appendChild( this._paginator.root );
+            const footerContainer = LX.makeContainer( [ "100%", "auto" ], "flex flex-row px-3 my-1 align-center", "", container );
+
+            // Show num selected rows
+            if( showSelected )
+            {
+                const selectedRowsLabelContainer = LX.makeContainer( [ "100%", "auto" ], "flex justify-start items-center fg-secondary", "0 row(s) selected.", footerContainer );
+                LX.addSignal( "@rows_selected_changed", ( target: HTMLElement, n: number ) =>
+                {
+                    if( !this._showSelectedNumber ) return;
+                    selectedRowsLabelContainer.innerHTML = n === 0 ? "" : `${ n ?? 0 } row(s) selected.`;
+                });
+            }
+
+            // Pagination
+            if( this._paginator )
+            {
+                const paginationContainer = LX.makeContainer( [ "100%", "auto" ], "flex justify-end", "", footerContainer );
+                paginationContainer.appendChild( this._paginator.root );
+            }
         }
 
         this.refresh();
