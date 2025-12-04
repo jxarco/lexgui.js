@@ -4519,7 +4519,7 @@ class Pagination {
         if (typeof options.onItemsPerPageChange === 'function') {
             this.onItemsPerPageChange = options.onItemsPerPageChange;
         }
-        this.root = LX.makeContainer(["auto", "auto"], "flex flex-row gap-2");
+        this.root = LX.makeContainer(["auto", "auto"], "flex flex-row gap-2 " + (options.className ?? ""));
         if (options.allowChangeItemsPerPage ?? false) {
             const itemsPerPageSelectContainer = LX.makeContainer(["auto", "auto"], "flex flex-row items-center", "", this.root);
             const itemsPerPageSelect = new Select(null, Pagination.ITEMS_PER_PAGE_VALUES, this._itemsPerPage, (v) => {

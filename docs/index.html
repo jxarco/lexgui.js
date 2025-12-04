@@ -126,12 +126,12 @@
                 });
         }
 
-        window.__addInteractiveCodeExample = function( content, componentName, onPanel ) {
-
+        window.__addInteractiveCodeExample = function( content, componentName, onPanel, panelClass )
+        {
             const area = new LX.Area({ className: "flex flex-col gap-3 docs", skipAppend: true, height: "auto" });
             content.appendChild( area.root );
             const container = LX.makeContainer( ["100%", "auto"], "flex flex-col bg-background border rounded-xxl overflow-hidden", "", area );
-            const panel = window.__panel = new LX.Panel({ className: "p-6" });
+            const panel = window.__panel = new LX.Panel({ className: panelClass ?? "p-6" });
             container.appendChild( panel.root );
             onPanel( panel );
 

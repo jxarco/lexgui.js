@@ -7,6 +7,7 @@
 From 0.8.0, the full library is written in TypeScript to facilitate integrations in newer frameworks. Build are still available as a JS module with its extensions.
 
 Aded new Spinner and Pagination Components.
+Refactor AssetView extension to use new Pagination Component.
 Added support for `Ctrl+Wheel` to increase grid item size in AssetView.
 Added support for `options.submit` in Form entries.
 Added new utils `LX.stripTags(str)`.

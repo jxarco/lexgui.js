@@ -58,7 +58,7 @@ export class Pagination
             this.onItemsPerPageChange = options.onItemsPerPageChange;
         }
 
-        this.root = LX.makeContainer( [ "auto", "auto" ], "flex flex-row gap-2" );
+        this.root = LX.makeContainer( [ "auto", "auto" ], "flex flex-row gap-2 " + ( options.className ?? "" ) );
 
         if( options.allowChangeItemsPerPage ?? false )
         {

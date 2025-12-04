@@ -1,87 +1,67 @@
 <script type="module">
 
-    docMaker.header( "Asset View.", "h1", "asset-view" );
+    const content = document.getElementById('content');
+    const componentName = "Asset View";
 
-    docMaker.paragraph( `Displays assets by type with optional folder hierarchy and tree navigation, in a file-explorer-style layout.` );
-    docMaker.lineBreak();
+    docMaker.header(componentName + ".", "h1", componentName.toLowerCase());
+    docMaker.paragraph( `Displays assets by type with optional folder hierarchy and tree navigation, in a file-explorer-style layout.`, false, "fg-tertiary");
 
     {
-        const area = new LX.Area( { skipAppend: true, height: "700px" } );
-        content.appendChild( area.root );
-        const assetView = new LX.AssetView({ xskipPreview: true });
-        const assetData = [
-            { id: "dog.png", type: "image", path: "https://pngfre.com/wp-content/uploads/1653714420512-1-904x1024.png" },
-            { id: "teacher-video-Ψ.mp4", type: "video", preview: "https://godotengine.org/assets/press/logo_vertical_color_dark.png", src: "https://catsl.eelvex.net/static/vid/teacher-video-Ψ.mp4" },
-            { id: "sigml_test.sigml", type: "sigml", src: "../data/sigml_test.sigml", lastModified: 1740588312813 },
-            { id: "test.json", type: "JSON", src: "../data/test.json", lastModified: 1740581312813 },
-            { id: "godot", type: "folder", children: [
-                    { id: "color.png", type: "image", src: "https://godotengine.org/assets/press/icon_color.png" },
-                    { id: "monochrome_light.png", type: "image", src: "https://godotengine.org/assets/press/icon_monochrome_light.png" },
-                    { id: "example.png", type: "image", src: "../data/godot_pixelart.png" },
-                    { id: "vertical_color.png", type: "image", src: "https://godotengine.org/assets/press/logo_vertical_color_dark.png" },
-                    { id: "doggies", type: "folder",
-                        children: [
-                            { id: "pepe.png", type: "image", src: "https://pngfre.com/wp-content/uploads/1653714420512-1-904x1024.png" }
-                        ]
-                    }
-                ]
-            },
-            { id: "blacky.png", type: "image", src: "https://www.pngall.com/wp-content/uploads/5/Black-Dog-PNG.png" },
-            { id: "german.png", type: "image", src: "https://static.vecteezy.com/system/resources/previews/017/420/504/original/portrait-of-a-dog-png.png" },
-            { id: "unreal", type: "folder",
-                children: [
-                    { id: "color.png", type: "image", src: "https://cdn2.unrealengine.com/ue-logotype-2023-vertical-white-1686x2048-bbfded26daa7.png" },
-                    { id: "demo.js", type: "script", src: "../data/script.js" },
-                    { id: "empty_folder", type: "folder", children: [] }
-                ]
-            },
-            { id: "brow_lowerer.png", type: "clip", src: "../data/brow_lowerer.png", lastModified: 1740181312813 }
-        ];
+        window.__addInteractiveCodeExample( content, componentName, panel => {
+            const area = new LX.Area( { skipAppend: true, height: "700px" } );
+            panel.attach( area.root );
 
-        assetView.load(assetData);
-        area.attach(assetView);
-        area.root.className += " border rounded-lg shadow-lg bg-secondary overflow-hidden";
+            const assetView = new LX.AssetView({
+                skipPreview: false,
+                allowedTypes: {
+                    "Mesh": { color: "rose-800" },
+                    "Script": { color: "orange-500" },
+                    "Clip": { color: "fuchsia-600" },
+                    "SIGML": { color: "emerald-300" },
+                },
+                itemContextMenuOptions: [
+                    { name: "Move", callback: ( item ) => { console.log(item) } }
+                ]
+            });
+            area.attach(assetView);
+
+            const assetData = [
+                { id: "dog.png", type: "image", src: "https://pngfre.com/wp-content/uploads/1653714420512-1-904x1024.png" },
+                { id: "teacher-video-Ψ.mp4", type: "video", preview: "https://godotengine.org/assets/press/logo_vertical_color_dark.png", src: "https://catsl.eelvex.net/static/vid/teacher-video-Ψ.mp4" },
+                { id: "sigml_test.sigml", type: "sigml", src: "../data/sigml_test.sigml", lastModified: 1740588312813 },
+                { id: "test.json", type: "JSON", src: "../data/test.json", lastModified: 1740581312813 },
+                { id: "godot", type: "folder", children: [
+                        { id: "color.png", type: "image", src: "https://godotengine.org/assets/press/icon_color.png" },
+                        { id: "monochrome_light.png", type: "image", src: "https://godotengine.org/assets/press/icon_monochrome_light.png" },
+                        { id: "example.png", type: "image", src: "../data/godot_pixelart.png" },
+                        { id: "vertical_color.png", type: "image", src: "https://godotengine.org/assets/press/logo_vertical_color_dark.png" },
+                        { id: "doggies", type: "folder",
+                            children: [
+                                { id: "pepe.png", type: "image", src: "https://pngfre.com/wp-content/uploads/1653714420512-1-904x1024.png" }
+                            ]
+                        }
+                    ]
+                },
+                { id: "blacky.png", type: "image", src: "https://www.pngall.com/wp-content/uploads/5/Black-Dog-PNG.png" },
+                { id: "german.png", type: "image", src: "https://static.vecteezy.com/system/resources/previews/017/420/504/original/portrait-of-a-dog-png.png" },
+                { id: "unreal", type: "folder",
+                    children: [
+                        { id: "color.png", type: "image", src: "https://cdn2.unrealengine.com/ue-logotype-2023-vertical-white-1686x2048-bbfded26daa7.png" },
+                        { id: "demo.js", type: "script", src: "../data/script.js" },
+                        { id: "empty_folder", type: "folder", children: [] }
+                    ]
+                },
+                { id: "brow_lowerer.png", type: "clip", src: "../data/brow_lowerer.png", lastModified: 1740181312813 },
+            ];
+
+            assetView.load(assetData);
+        }, "");
     }
-
-    docMaker.lineBreak();
 
     docMaker.header("Usage", "h2");
 
-    docMaker.paragraph( `Load your data using ${ docMaker.iCode( "LX.AssetView.load( data, onevent )" ) }:` );
-
-    docMaker.code( `@const@ assetData = [
-    { id: @"dog.png"@, type: @"image"@, path: @"https://pngfre.com/wp-content/uploads/1653714420512-1-904x1024.png"@ },
-    { id: @"sigml_test.sigml"@, type: @"sigml"@, src: @"../data/sigml_test.sigml"@, lastModified: @1740588312813@ },
-    { id: @"test.json"@, type: @"JSON"@, src: @"../data/test.json"@, lastModified: @1740581312813@ },
-    { id: @"godot"@, type: @"folder"@, children: [
-            { id: @"color.png"@, type: @"image"@, src: @"https://godotengine.org/assets/press/icon_color.png"@ },
-            { id: @"monochrome_light.png"@, type: @"image"@, src: @"https://godotengine.org/assets/press/icon_monochrome_light.png"@ },
-            { id: @"example.png"@, type: @"image"@, src: @"../data/godot_pixelart.png"@ },
-            { id: @"vertical_color.png"@, type: @"image"@, src: @"https://godotengine.org/assets/press/logo_vertical_color_dark.png"@ },
-            { id: @"doggies"@, type: @"folder"@,
-                children: [
-                    { id: @"pepe.png"@, type: @"image"@, src: @"https://pngfre.com/wp-content/uploads/1653714420512-1-904x1024.png"@ }
-                ]
-            }
-        ]
-    },
-    { id: @"blacky.png"@, type: @"image"@, src: @"https://www.pngall.com/wp-content/uploads/5/Black-Dog-PNG.png"@ },
-    { id: @"german.png"@, type: @"image"@, src: @"https://static.vecteezy.com/system/resources/previews/017/420/504/original/portrait-of-a-dog-png.png"@ },
-    { id: @"unreal"@, type: @"folder"@,
-        children: [
-            { id: @"color.png"@, type: @"image"@, src: @"https://cdn2.unrealengine.com/ue-logotype-2023-vertical-white-1686x2048-bbfded26daa7.png"@ },
-            { id: @"demo.js"@, type: @"script"@, src: @"../data/script.js"@ },
-            { id: @"empty_folder"@, type: @"folder"@, children: [] }
-        ]
-    },
-    { id: @"brow_lowerer.png"@, type: @"clip"@, src: @"../data/brow_lowerer.png"@, lastModified: @1740181312813@ }
-];
-
-assetView.@[mtd]load@(assetData);
-` );
-
-
-    docMaker.paragraph( `The parameter ${ docMaker.iCode( "onevent" ) } in a Function callback where you can process the following events:` );
+    docMaker.paragraph( `Load your data using ${ docMaker.iCode( "LX.AssetView.load( data, onevent )" ) }.
+        The parameter ${ docMaker.iCode( "onevent" ) } in a Function callback where you can process the following events:` );
 
     docMaker.codeBulletList( [
         [ "AssetViewEvent.ASSET_SELECTED", "Asset has been selected" ],

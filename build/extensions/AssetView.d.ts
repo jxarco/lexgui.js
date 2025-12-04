@@ -1,3 +1,4 @@
+import { Pagination } from '../components/Pagination';
 declare const Area: any;
 declare const Panel: any;
 declare const NodeTree: any;
@@ -27,7 +28,6 @@ export declare class AssetView {
     static LAYOUT_LIST: number;
     static CONTENT_SORT_ASC: number;
     static CONTENT_SORT_DESC: number;
-    static MAX_PAGE_ELEMENTS: number;
     root: HTMLElement;
     area: typeof Area | null;
     content: HTMLElement;
@@ -45,8 +45,6 @@ export declare class AssetView {
     rootPath: string;
     selectedItem: any;
     allowedTypes: any;
-    allowNextPage: boolean;
-    contentPage: number;
     searchValue: string;
     filter: string;
     gridScale: number;
@@ -63,7 +61,11 @@ export declare class AssetView {
     itemContextMenuOptions: any;
     onItemDragged: any;
     onevent: any;
+    private _assetsPerPage;
+    get assetsPerPage(): any;
+    set assetsPerPage(v: any);
     _lastSortBy: string;
+    _paginator: Pagination | undefined;
     constructor(options?: any);
     /**
     * @method load
@@ -108,6 +110,7 @@ export declare class AssetView {
     _deleteItem(item: any): void;
     _cloneItem(item: any): void;
     _renameItem(item: any): void;
+    _setAssetsPerPage(n: number): void;
     _lastModifiedToStringDate(lm: number): string;
 }
 export {};

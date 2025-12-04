@@ -117,8 +117,8 @@ export class Panel {
         return component.value();
     }
 
-    setValue( name: string, value: any, skipCallback?: boolean ) {
-
+    setValue( name: string, value: any, skipCallback?: boolean )
+    {
         let component = this.components[ name ];
 
         if( !component )
@@ -134,8 +134,8 @@ export class Panel {
      * @param {Element} content child element to append to panel
      */
 
-    attach( content: any ) {
-
+    attach( content: any )
+    {
         console.assert( content, "No content to attach!" );
         content.parent = this;
         this.root.appendChild( content.root ? content.root : content );
@@ -145,8 +145,8 @@ export class Panel {
      * @method clear
      */
 
-    clear() {
-
+    clear()
+    {
         this.branches = [];
         this._branchOpen = false;
         this._currentBranch = null;

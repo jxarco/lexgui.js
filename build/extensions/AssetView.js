@@ -1,5 +1,6 @@
 // This is a generated file. Do not edit.
 import { LX } from '../core/Namespace.js';
+import { Pagination } from '../components/Pagination.js';
 
 // AssetView.ts @jxarco
 if (!LX) {
@@ -53,7 +54,6 @@ class AssetView {
     static LAYOUT_LIST = 2;
     static CONTENT_SORT_ASC = 0;
     static CONTENT_SORT_DESC = 1;
-    static MAX_PAGE_ELEMENTS = 50;
     root;
     area = null;
     content; // "!" to avoid TS strict property initialization error
@@ -71,8 +71,6 @@ class AssetView {
     rootPath = "";
     selectedItem = null;
     allowedTypes;
-    allowNextPage = false;
-    contentPage = 1;
     searchValue = "";
     filter = "None";
     gridScale = 1.0;
@@ -90,7 +88,11 @@ class AssetView {
     itemContextMenuOptions = null;
     onItemDragged = null;
     onevent = null;
+    _assetsPerPage = 24;
+    get assetsPerPage() { return this._assetsPerPage; }
+    set assetsPerPage(v) { this._setAssetsPerPage(v); }
     _lastSortBy = "";
+    _paginator;
     constructor(options = {}) {
         this.rootPath = "https://raw.githubusercontent.com/jxarco/lexgui.js/master/";
         this.layout = options.layout ?? this.layout;
@@ -452,6 +454,18 @@ class AssetView {
             id: '/',
             children: this.data
         };
+        this.leftPanel.sameLine(2, "justify-center");
+        this.leftPanel.addButton(null, "GoBackButton", () => {
+            if (!this.prevData.length || !this.currentFolder)
+                return;
+            this.nextData.push(this.currentFolder);
+            this._enterFolder(this.prevData.pop(), false);
+        }, { buttonClass: "bg-none", title: "Go Back", tooltip: true, icon: "ArrowLeft" });
+        this.leftPanel.addButton(null, "GoForwardButton", () => {
+            if (!this.nextData.length || !this.currentFolder)
+                return;
+            this._enterFolder(this.nextData.pop());
+        }, { buttonClass: "bg-none", title: "Go Forward", tooltip: true, icon: "ArrowRight" });
         const tree = this.leftPanel.addTree("Content Browser", tree_data, {
             // icons: tree_icons,
             filter: false,
@@ -523,10 +537,23 @@ class AssetView {
             this.contentPanel.clear();
         }
         else {
-            area.root.classList.add("flex", "flex-col");
-            this.toolsPanel = area.addPanel({ className: 'flex flex-col overflow-hidden', height: "auto" });
-            this.toolsPanel.root.style.flex = "none";
-            this.contentPanel = area.addPanel({ className: 'lexassetcontentpanel flex flex-col overflow-hidden' });
+            this.toolsPanel = area.addPanel({ className: 'overflow-hidden', height: "auto" });
+            this.contentPanel = area.addPanel({
+                className: 'lexassetcontentpanel flex flex-col content-center overflow-hidden',
+                height: "calc(100%)"
+            });
+            this._paginator = new Pagination({
+                className: "ml-auto",
+                pages: Math.max(Math.ceil(this.data.length / this.assetsPerPage), 1),
+                onChange: () => this._refreshContent()
+            });
+            const resizeObserver = new ResizeObserver(entries => {
+                const e = entries[0];
+                if (e) {
+                    this.contentPanel.root.style.height = `calc(100% - ${(e.contentRect.height + 8)}px )`;
+                }
+            });
+            resizeObserver.observe(this.toolsPanel.root);
             this.contentPanel.root.addEventListener('wheel', (e) => {
                 if (!e.ctrlKey)
                     return;
@@ -553,76 +580,37 @@ class AssetView {
                 { name: "List", icon: "List", callback: () => this._setContentLayout(AssetView.LAYOUT_LIST) }
             ], { side: "bottom", align: "start" });
         };
-        const _onChangePage = (value, event) => {
-            if (!this.allowNextPage) {
-                return;
-            }
-            const lastPage = this.contentPage;
-            this.contentPage += value;
-            this.contentPage = Math.min(this.contentPage, (((this.currentData.length - 1) / AssetView.MAX_PAGE_ELEMENTS) | 0) + 1);
-            this.contentPage = Math.max(this.contentPage, 1);
-            if (lastPage != this.contentPage) {
-                this._refreshContent();
-            }
-        };
         this.toolsPanel.refresh = () => {
-            const typeEntries = Object.keys(this.allowedTypes);
             this.toolsPanel.clear();
+            const typeEntries = Object.keys(this.allowedTypes);
             this.toolsPanel.sameLine();
-            this.toolsPanel.addSelect("Filter", typeEntries, this.filter ?? typeEntries[0], (v) => {
-                this._refreshContent(undefined, v);
-            }, { width: "30%", minWidth: "128px", overflowContainer: null });
-            this.toolsPanel.addText(null, this.searchValue ?? "", (v) => this._refreshContent.call(this, v, undefined), { placeholder: "Search assets.." });
+            this.toolsPanel.addText(null, this.searchValue ?? "", (v) => this._refreshContent.call(this, v, undefined), { width: "100%", placeholder: "Search assets.." });
+            this.toolsPanel.endLine();
+            this.toolsPanel.sameLine();
+            const refreshButton = this.toolsPanel.addButton(null, "", this._refreshContent.bind(this), { title: "Refresh", tooltip: true, icon: "Refresh" });
             this.toolsPanel.addButton(null, "", _onSort.bind(this), { title: "Sort", tooltip: true, icon: (this.sortMode === AssetView.CONTENT_SORT_ASC) ? "SortAsc" : "SortDesc" });
             this.toolsPanel.addButton(null, "", _onChangeView.bind(this), { title: "View", tooltip: true, icon: (this.layout === AssetView.LAYOUT_GRID) ? "LayoutGrid" : "LayoutList" });
-            // Content Pages
-            this.toolsPanel.addButton(null, "", _onChangePage.bind(this, -1), { title: "Previous Page", icon: "ChevronsLeft", className: "ml-auto" });
-            this.toolsPanel.addButton(null, "", _onChangePage.bind(this, 1), { title: "Next Page", icon: "ChevronsRight" });
-            const textString = "Page " + this.contentPage + " / " + ((((this.currentData.length - 1) / AssetView.MAX_PAGE_ELEMENTS) | 0) + 1);
-            this.toolsPanel.addText(null, textString, null, {
-                inputClass: "nobg", disabled: true, signal: "@on_page_change", maxWidth: "16ch"
-            });
+            this.toolsPanel.addSelect(null, typeEntries, this.filter ?? typeEntries[0], (v) => {
+                this._refreshContent(undefined, v);
+            }, { overflowContainer: null });
+            // Float to the end
             this.toolsPanel.endLine();
-            if (!this.skipBrowser) {
-                this.toolsPanel.sameLine();
-                this.toolsPanel.addComboButtons(null, [
-                    {
-                        value: "Left",
-                        icon: "ArrowLeft",
-                        callback: () => {
-                            if (!this.prevData.length || !this.currentFolder)
-                                return;
-                            this.nextData.push(this.currentFolder);
-                            this._enterFolder(this.prevData.pop(), false);
-                        }
-                    },
-                    {
-                        value: "Right",
-                        icon: "ArrowRight",
-                        callback: () => {
-                            if (!this.nextData.length || !this.currentFolder)
-                                return;
-                            this._enterFolder(this.nextData.pop());
-                        }
-                    },
-                    {
-                        value: "Refresh",
-                        icon: "Refresh",
-                        callback: () => { this._refreshContent(); }
-                    }
-                ], { noSelection: true });
-                this.toolsPanel.addText(null, this.path.join('/'), null, {
-                    width: "75%", inputClass: "nobg", disabled: true, signal: "@on_folder_change",
-                    style: { fontWeight: "600", fontSize: "15px" }
-                });
-                this.toolsPanel.endLine();
+            if (this._paginator) {
+                const inlineContainer = refreshButton.root.parentElement;
+                inlineContainer.appendChild(this._paginator.root);
             }
         };
-        this.toolsPanel.refresh();
         // Start content panel
         this.content = document.createElement('ul');
         this.content.className = "lexassetscontent";
         this.contentPanel.attach(this.content);
+        if (!this.skipBrowser) {
+            this.contentPanel.addText(null, this.path.join('/'), null, {
+                inputClass: "bg-none fg-quinary text-end",
+                disabled: true,
+                signal: "@on_folder_change"
+            });
+        }
         this.content.addEventListener('dragenter', function (e) {
             e.preventDefault();
             this.classList.add('dragging');
@@ -639,6 +627,8 @@ class AssetView {
             this.querySelectorAll('.lexassetitem').forEach(i => i.classList.remove('selected'));
         });
         this._refreshContent();
+        // After content to update the size of the content based on the toolbar
+        LX.doAsync(() => this.toolsPanel.refresh(), 100);
     }
     _refreshContent(searchValue, filter) {
         const isCompactLayout = (this.layout == AssetView.LAYOUT_COMPACT);
@@ -647,18 +637,23 @@ class AssetView {
         this.searchValue = searchValue ?? (this.searchValue ?? "");
         this.content.innerHTML = "";
         this.content.className = `lexassetscontent${isCompactLayout ? " compact" : (isListLayout ? " list" : "")}`;
+        if (!this.currentData.length) {
+            return;
+        }
         const fr = new FileReader();
         const filteredData = this.currentData.filter(_i => {
             return (this.filter != "None" ? _i.type.toLowerCase() == this.filter.toLowerCase() : true) &&
                 _i.id.toLowerCase().includes(this.searchValue.toLowerCase());
         });
-        if (filter || searchValue) {
-            this.contentPage = 1;
-        }
+        // if( filter || searchValue )
+        // {
+        //     this.contentPage = 1;
+        // }
+        this._paginator?.setPages(Math.max(Math.ceil(this.data.length / this.assetsPerPage), 1));
         // Show all data if using filters
-        const startIndex = (this.contentPage - 1) * AssetView.MAX_PAGE_ELEMENTS;
-        const endIndex = Math.min(startIndex + AssetView.MAX_PAGE_ELEMENTS, filteredData.length);
-        for (let i = startIndex; i < endIndex; ++i) {
+        const start = this._paginator ? (this._paginator.page - 1) * this.assetsPerPage : 0;
+        const end = this._paginator ? Math.min(start + this.assetsPerPage, filteredData.length) : filteredData.length;
+        for (let i = start; i < end; ++i) {
             let item = filteredData[i];
             if (item.path) {
                 LX.request({ url: item.path, dataType: 'blob', success: (f) => {
@@ -677,9 +672,9 @@ class AssetView {
                 item.domEl = this.addItem(item, undefined, false);
             }
         }
-        this.allowNextPage = filteredData.length - 1 > AssetView.MAX_PAGE_ELEMENTS;
-        const textString = "Page " + this.contentPage + " / " + ((((filteredData.length - 1) / AssetView.MAX_PAGE_ELEMENTS) | 0) + 1);
-        LX.emitSignal("@on_page_change", textString);
+        // this.allowNextPage = filteredData.length - 1 > AssetView.MAX_PAGE_ELEMENTS;
+        // const textString = "Page " + this.contentPage + " / " + ((((filteredData.length - 1) / AssetView.MAX_PAGE_ELEMENTS )|0) + 1);
+        // LX.emitSignal( "@on_page_change", textString );
         if (this.onRefreshContent) {
             this.onRefreshContent(searchValue, filter);
         }
@@ -804,7 +799,7 @@ class AssetView {
         }
         this.currentFolder = folderItem;
         this.currentData = this.currentFolder.children;
-        this.contentPage = 1;
+        // this.contentPage = 1;
         if (!sameFolder) {
             this._refreshContent();
         }
@@ -890,6 +885,10 @@ class AssetView {
             onRename(newName);
         }, { buttonClass: "contrast" });
         const p = new LX.Popover(item.domEl, [panel], { align: "center", side: "bottom", sideOffset: -128 });
+    }
+    _setAssetsPerPage(n) {
+        this._assetsPerPage = n;
+        this._refreshContent();
     }
     _lastModifiedToStringDate(lm) {
         const d = new Date(lm).toLocaleString();
