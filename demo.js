@@ -90,14 +90,14 @@ if( mobile )
 // Header
 {
     const header = LX.makeContainer( [ null, "auto" ], "flex flex-col gap-4 pt-8 pb-4 items-center", `
-        <a class="text-md">Get started with LexGUI.js <span class="text-sm fg-secondary">${ LX.version }</span></a>
+        <a href="docs?p=changelog" class="flex flex-row gap-1 items-center text-sm p-1 px-4 rounded-full fg-primary decoration-none hover:bg-secondary cursor-pointer"><span class="flex bg-accent w-2 h-2 rounded-full"></span>
+            New Components: Spinner, Pagination and more${ LX.makeIcon( "ArrowRight", { svgClass: "sm" } ).innerHTML }</a>
         <p class="fg-primary font-medium tracking-tight leading-none text-center text-balance" style="font-size:2.75rem">Build your Application Interface</p>
-        <p class="fg-primary font-light text-xl text-center text-balance" style="max-width:48rem">A set of beautifully-designed, accessible components.
-        No complex frameworks. Pure JavaScript and CSS. Open Source.</p>
+        <p class="fg-primary font-light text-xl text-center text-balance" style="max-width:48rem">A modern UI kit, inspired by shadcn, built for the web. Pure JavaScript, CSS, zero dependencies. Fully Open Source.</p>
     `, area );
 
     const headerButtons = LX.makeContainer( [ "auto", "auto" ], "flex flex-row mt-2", ``, header );
-    const getStartedButton = new LX.Button( null, "Get Started", () => window.open( "./docs/", "_blank" ), { buttonClass: "contrast" } );
+    const getStartedButton = new LX.Button( null, `Get Started <span class="text-lg">${ LX.version }</span>`, () => window.open( "./docs/", "_blank" ), { buttonClass: "contrast" } );
     const componentsButton = new LX.Button( null, "View Components", () => window.open( "./docs/?p=components", "_blank" ), { buttonClass: "tertiary" } );
     headerButtons.appendChild( getStartedButton.root );
     headerButtons.appendChild( componentsButton.root );
