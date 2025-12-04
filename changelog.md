@@ -7,15 +7,19 @@
 From 0.8.0, the full library is written in TypeScript to facilitate integrations in newer frameworks. Build are still available as a JS module with its extensions.
 
 Updates:
-- Table Component now sort Date strings by date.
-- Added support for `options.hiddenColumns` in Table Component.
-- Added support for `Ctrl+Wheel` to increase grid item size in AssetView.
-- Added support for `options.submit` in Form entries.
-- Added "dev" icons, Vscode, Godot, Unity, UnrealEngine, Go, Css, Android, and more.
-- New `colors/` page in main demo page.
-- Added new utils `LX.stripTags(str)`.
-- Added Card Component docs.
-- Improved all docs.
+
+Table:
+- Sort Date strings by date.
+- Added support for `options.hiddenColumns`.
+- `options.centered` now allows column indices or names.
+
+Added support for `Ctrl+Wheel` to increase grid item size in AssetView.
+Added support for `options.submit` in Form entries.
+Added "dev" icons, Vscode, Godot, Unity, UnrealEngine, Go, Css, Android, and more.
+New `colors/` page in main demo page.
+Added new utils `LX.stripTags(str)`.
+Added Card Component docs.
+Improved all docs.
 
 Fixes:
 - Area Tabs drag & drop is now working not deleting tab content.

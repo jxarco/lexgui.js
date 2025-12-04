@@ -4783,7 +4783,7 @@ class Table extends BaseComponent {
                     th.innerHTML = `<span>${headData}</span>`;
                     th.querySelector("span").appendChild(LX.makeIcon("MenuArrows", { svgClass: "sm" }));
                     const idx = data.head.indexOf(headData);
-                    if (this._centered?.indexOf && this._centered.indexOf(idx) > -1) {
+                    if (this._centered?.indexOf && ((this._centered.indexOf(idx) > -1) || (this._centered.indexOf(headData) > -1))) {
                         th.classList.add("centered");
                     }
                     const menuOptions = [];
@@ -5028,11 +5028,12 @@ class Table extends BaseComponent {
                         });
                         row.appendChild(td);
                     }
-                    for (const rowData of bodyData) {
+                    for (let idx = 0; idx < bodyData.length; ++idx) {
+                        const rowData = bodyData[idx];
                         const td = document.createElement('td');
                         td.innerHTML = `${rowData}`;
-                        const idx = bodyData.indexOf(rowData);
-                        if (this._centered?.indexOf && this._centered.indexOf(idx) > -1) {
+                        const headData = data.head[idx];
+                        if (this._centered?.indexOf && ((this._centered.indexOf(idx) > -1) || (this._centered.indexOf(headData) > -1))) {
                             td.classList.add("centered");
                         }
                         row.appendChild(td);

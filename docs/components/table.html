@@ -29,6 +29,7 @@
                 toggleColumns: true,
                 hiddenColumns: [ "HiddenByDefault" ],
                 filter: "Name",
+                centered: [ "Name" ],
                 customFilters: [
                     { name: "Status", options: ["Backlog", "Todo", "In Progress", "Done", "Canceled"] },
                     { name: "Priority", options: ["Low", "Medium", "High"] },
@@ -80,13 +81,13 @@
             head: [ "Option", "Type", "Description", "Default" ],
             body: [
                 ["body", "Array", "Table body (data per row for each column)", "—"],
-                ["centered", "Boolean/Array", "Center text within columns. true for all, Array for center selected cols", "—"],
+                ["centered", "Boolean|Array", `Center text within columns. ${docMaker.iCode("true")} for all, array (name or idx) to center specific`, "—"],
                 ["columnActions", "Array", `Allow to add actions per column ${docMaker.iCode("action: { name, icon, callback }")}`, "—"],
                 ["customFilters", "Array", "Add selectors to filter by specific option values", "false"],
                 ["filter", "String", "Name of the column to filter by text input (if any)", "false"],
                 ["filterValue", "String", "Initial filter value", "—"],
                 ["head", "Array", "Table headers (each of the headers per column)", "—"],
-                ["hiddenColumns", "Array", `If ${docMaker.iCode("toggleColumns")} enabled, array containing Cols (name or idx) hidden by default.`, "—"],
+                ["hiddenColumns", "Array", `If ${docMaker.iCode("toggleColumns")} enabled, array containing Cols (name or idx) hidden by default`, "—"],
                 ["onMenuAction", "Function", `Function callback to fill the "menu" context`, "—"],
                 ["rowActions", "Array", `Allow to add actions per row ${docMaker.iCode("action: { icon, callback }")}`, "—"],
                 ["selectable", "Boolean", "Each row can be selected", "false"],
