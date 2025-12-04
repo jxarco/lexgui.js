@@ -27,6 +27,7 @@ Fixes:
 - Calendar and CalendarRange month changes now correctly.
 - Table Calendar filters now work as expected solving some minor issues.
 - Code Editor multiline indentation now works properly on empty lines.
+- Fixed Sidebar selected entries CSS in light theme.
 
 API Changes:
 - `BaseComponent` enum types moved to `ComponentType`.

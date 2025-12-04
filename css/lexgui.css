@@ -3363,11 +3363,9 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     background-color: var(--global-color-accent);
 }
 
-.lexsidebar .lexsidebarentry.selected .lexsidebarentrycontent > a {
-    color: #f4f4f4;
-}
-
-.lexsidebar .lexsidebarentry.selected .lexsidebarentryicon svg path {
+.lexsidebar .lexsidebarentry.selected .lexsidebarentrycontent > a,
+.lexsidebar .lexsidebarentry.selected .lexsidebarentryicon svg path,
+.lexsidebar .lexsidebarentry.selected span {
     color: #f4f4f4;
 }
 
