@@ -4,7 +4,7 @@
 	--border-style: 1px solid #444;
 	--panel-width: 300px;
 	--page-padding: 24px;
-	--max-width: 1100px;
+	--max-width: 80%;
 	--icon-size: 20px;
 	--stylish-color: light-dark(#fd18a5, #e2c886);
 }
@@ -24,7 +24,7 @@
 
 #content .lexarea.docs {
 	margin-block: 1.5em;
-	width: 80% !important;
+	width: 90% !important;
 	justify-self: center;
 }
 

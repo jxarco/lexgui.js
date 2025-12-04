@@ -963,6 +963,12 @@ a svg, svg path {
     }
 }
 
+@media (min-width: 2300px) {
+    .lexcontainer.wrapper {
+        max-width: 2140px;
+    }
+}
+
 .lextooltip {
     position: fixed;
     background-color: var(--global-text-primary);
@@ -1510,7 +1516,7 @@ a svg, svg path {
     border: 1px solid #7a797c4f;
 }
 
-.lexcomponent .lextext.nobg {
+.lexcomponent .lextext.bg-none {
     background: none;
     border: 1px solid transparent;
 }
@@ -1520,7 +1526,7 @@ a svg, svg path {
     border: 1px dashed #7a797c4f;
 }
 
-.lexcomponent .lextext.nobg:hover {
+.lexcomponent .lextext.bg-none:hover {
     background: none;
 }
 
@@ -1562,7 +1568,7 @@ a svg, svg path {
     border: 1px solid #7a797c4f;
 }
 
-.lexcomponent textarea.nobg {
+.lexcomponent textarea.bg-none {
     background: none;
     border: 1px solid transparent;
 }
@@ -1572,7 +1578,7 @@ a svg, svg path {
     border: 1px dashed #7a797c4f;
 }
 
-.lexcomponent textarea.outline:hover, .lexcomponent .lextext.nobg:hover {
+.lexcomponent textarea.outline:hover, .lexcomponent .lextext.bg-none:hover {
     background: none;
 }
 
@@ -4625,7 +4631,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 ul.lexassetscontent {
-    /* height: 100%; */
+    height: 100%;
     -webkit-text-size-adjust: 100%;
     padding: 0 1em;
     margin: 0;

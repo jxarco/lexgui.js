@@ -627,7 +627,7 @@ export class Panel {
 
     addLabel( value: string, options: any = {} ) {
         options.disabled = true;
-        options.inputClass = ( options.inputClass ?? "" ) + " nobg";
+        options.inputClass = ( options.inputClass ?? "" ) + " bg-none";
         const component = this.addText( null, value, null, options );
         component.type = ComponentType.LABEL;
         return component;

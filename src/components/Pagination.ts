@@ -66,7 +66,7 @@ export class Pagination
             const itemsPerPageSelect = new Select( null, Pagination.ITEMS_PER_PAGE_VALUES, this._itemsPerPage, ( v: number ) => {
                 this._itemsPerPage = v;
                 this.onItemsPerPageChange?.( this._itemsPerPage );
-            } );
+            }, { overflowContainer: null } );
             itemsPerPageSelectContainer.appendChild( itemsPerPageSelect.root );
         }
 

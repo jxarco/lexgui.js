@@ -1051,7 +1051,7 @@ class Form extends BaseComponent {
             entryData.placeholder = entryData.placeholder ?? (entryData.label ?? `Enter ${entry}`);
             entryData.ignoreValidation = true;
             if (!(options.skipLabels ?? false)) {
-                const label = new TextInput(null, entryData.label ?? entry, null, { disabled: true, inputClass: "formlabel nobg" });
+                const label = new TextInput(null, entryData.label ?? entry, null, { disabled: true, inputClass: "formlabel bg-none" });
                 container.appendChild(label.root);
             }
             entryData.textComponent = new TextInput(null, entryData.constructor == Object ? entryData.value : entryData, (value, event) => {
@@ -4525,7 +4525,7 @@ class Pagination {
             const itemsPerPageSelect = new Select(null, Pagination.ITEMS_PER_PAGE_VALUES, this._itemsPerPage, (v) => {
                 this._itemsPerPage = v;
                 this.onItemsPerPageChange?.(this._itemsPerPage);
-            });
+            }, { overflowContainer: null });
             itemsPerPageSelectContainer.appendChild(itemsPerPageSelect.root);
         }
         this.pagesRoot = LX.makeContainer(["auto", "auto"], "flex flex-row overflow-scroll", "", this.root);
@@ -7035,7 +7035,7 @@ class Panel {
      */
     addLabel(value, options = {}) {
         options.disabled = true;
-        options.inputClass = (options.inputClass ?? "") + " nobg";
+        options.inputClass = (options.inputClass ?? "") + " bg-none";
         const component = this.addText(null, value, null, options);
         component.type = ComponentType.LABEL;
         return component;

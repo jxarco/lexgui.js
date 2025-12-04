@@ -45,6 +45,7 @@ API Changes:
 - NodeGraph extension renamed to GraphEditor.
 - Docmaker Extension API full changed (see docs).
 - Refactored `Card` Component (see docs).
+- Inputs Class `nobg` renamed to `bg-none` for consistency.
 
 Styling:
 - Main Theme colors updates.

@@ -69,7 +69,7 @@ export class Form extends BaseComponent
 
             if( !( options.skipLabels ?? false ) )
             {
-                const label = new TextInput( null, entryData.label ?? entry, null, { disabled: true, inputClass: "formlabel nobg" } );
+                const label = new TextInput( null, entryData.label ?? entry, null, { disabled: true, inputClass: "formlabel bg-none" } );
                 container.appendChild( label.root );
             }
 
