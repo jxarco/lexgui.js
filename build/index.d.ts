@@ -40,6 +40,7 @@ export * from "./components/Pad";
 export * from "./components/Curve";
 export * from "./components/Dial";
 export * from "./components/Spinner";
+export * from "./components/Pagination";
 export * from "./components/Sidebar";
 export * from "./components/ContextMenu";
 export * from "./components/DropdownMenu";

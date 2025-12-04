@@ -103,8 +103,8 @@
     --global-color-quinary: light-dark(#999999, #646464);
 
     --global-color-accent: var(--blue-700);
-    --global-color-accent-light: var(--blue-400);;
-    --global-color-accent-dark: var(--blue-900);;
+    --global-color-accent-light: var(--blue-400);
+    --global-color-accent-dark: var(--blue-900);
     --global-color-success: var(--green-500);
     --global-color-error: var(--red-600);
     --global-color-warning: var(--yellow-500);
@@ -6053,6 +6053,8 @@ ul.lexassetscontent {
 .bg-quaternary { --background-color: var(--global-color-quaternary); background-color: var(--background-color) !important }
 .bg-quinary { --background-color: var(--global-color-quinary); background-color: var(--background-color) !important }
 .bg-accent { --background-color: var(--global-color-accent); background-color: var(--background-color) !important }
+.bg-accent-light { --background-color: var(--global-color-accent-light); background-color: var(--background-color) !important }
+.bg-accent-dark { --background-color: var(--global-color-accent-dark); background-color: var(--background-color) !important }
 .bg-contrast { --background-color: var(--global-text-primary); background-color: var(--background-color) !important }
 .bg-success { --background-color: var(--global-color-success); background-color: var(--background-color) !important }
 .bg-error { --background-color: var(--global-color-error); background-color: var(--background-color) !important }
@@ -6066,6 +6068,8 @@ ul.lexassetscontent {
 .hover\:bg-quaternary:hover { background-color: var(--global-color-quaternary) !important }
 .hover\:bg-quinary:hover { background-color: var(--global-color-quinary) !important }
 .hover\:bg-accent:hover { background-color: var(--global-color-accent) !important }
+.hover\:bg-accent-light:hover { background-color: var(--global-color-accent-light) !important }
+.hover\:bg-accent-dark:hover { background-color: var(--global-color-accent-dark) !important }
 .hover\:bg-contrast:hover { background-color: var(--global-text-primary) !important }
 .hover\:bg-success:hover { background-color: var(--global-color-success) !important }
 .hover\:bg-error:hover { background-color: var(--global-color-error) !important }
@@ -6080,6 +6084,8 @@ ul.lexassetscontent {
 .fg-quaternary { color: var(--global-text-quaternary) !important }
 .fg-quinary { color: var(--global-text-quinary) !important }
 .fg-accent { color: var(--global-color-accent) !important }
+.fg-accent-light { color: var(--global-color-accent-light) !important }
+.fg-accent-dark { color: var(--global-color-accent-dark) !important }
 .fg-contrast { color: var(--global-color-primary) !important }
 .fg-success { color: var(--global-color-success) !important }
 .fg-error { color: var(--global-color-error) !important }
@@ -6091,6 +6097,8 @@ ul.lexassetscontent {
 .hover\:fg-quaternary:hover { color: var(--global-text-quaternary) !important }
 .hover\:fg-quinary:hover { color: var(--global-text-quinary) !important }
 .hover\:fg-accent:hover { color: var(--global-color-accent) !important }
+.hover\:fg-accent-light:hover { color: var(--global-color-accent-light) !important }
+.hover\:fg-accent-dark:hover { color: var(--global-color-accent-dark) !important }
 .hover\:fg-contrast:hover { color: var(--global-color-primary) !important }
 .hover\:fg-success:hover { color: var(--global-color-success) !important }
 .hover\:fg-error:hover { color: var(--global-color-error) !important }

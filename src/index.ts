@@ -45,6 +45,7 @@ export * from "./components/Pad";
 export * from "./components/Curve";
 export * from "./components/Dial";
 export * from "./components/Spinner";
+export * from "./components/Pagination";
 
 // Composite Components
 export * from "./components/Sidebar";
