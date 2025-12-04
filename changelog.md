@@ -16,9 +16,11 @@ Added Card Component docs.
 Improved all docs.
 
 Table:
+- Support for Pagination.
 - Sort Date strings by date.
 - Added support for `options.hiddenColumns`.
 - `options.centered` now allows column indices or names.
+- Added row `idx` to `options.rowActions` callback parameters `(idx, bodyData, table, event)`.
 
 Bugfixes:
 - Area Tabs drag & drop is now working not deleting tab content.

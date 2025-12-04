@@ -946,7 +946,7 @@
                 { name: "ID", type: "range", min: 0, max: 9, step: 1, units: "hr" },
             ],
             rowActions: [
-                { icon: "Edit", title: "Edit Row", callback: (tableData) => { } }, // custom: you can change the data and refresh will be called later!
+                { icon: "Edit", title: "Edit Row", callback: (idx, bodyData) => { } }, // custom: you can change the data and refresh will be called later!
                 "delete",
                 "menu"
             ],

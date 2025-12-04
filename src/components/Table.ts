@@ -6,6 +6,7 @@ import { Button } from './Button';
 import { TextInput } from './TextInput';
 import { Popover } from './Popover';
 import { CalendarRange } from './CalendarRange';
+import { Pagination } from './Pagination';
 
 /**
  * @class Table
@@ -25,10 +26,15 @@ export class Table extends BaseComponent
     _sortColumns: boolean;
     _resetCustomFiltersBtn: Button | null = null;
     _hiddenColumns: any[] = [];
+    _paginator: Pagination | undefined;
 
     private _centered: any;
     get centered(): any { return this._centered; }
     set centered( v: any ) { this._setCentered( v ); }
+
+    private _rowsPerPage: number = -1;
+    get rowsPerPage(): any { return this._rowsPerPage; }
+    set rowsPerPage( v: any ) { this._setRowsPerPage( v ); }
 
     constructor( name: string, data: any, options: any = {} )
     {
@@ -54,6 +60,7 @@ export class Table extends BaseComponent
             container.classList.add( "centered" );
         }
 
+        this.data = data;
         this.filter = options.filter ?? false;
         this.customFilters = options.customFilters;
         this.activeCustomFilters = {};
@@ -73,7 +80,15 @@ export class Table extends BaseComponent
             data.colVisibilityMap[ index ] = visible;
         })
 
-        this.data = data;
+        if( options.pagination )
+        {
+            this._rowsPerPage = options.rowsPerPage ?? this._rowsPerPage;
+
+            this._paginator = new Pagination( {
+                pages: this._getNumPages(),
+                onChange: this._onChangePage.bind( this )
+            } );
+        }
 
         const getDate = ( text: string ): Date | null =>
         {
@@ -482,8 +497,9 @@ export class Table extends BaseComponent
                     {
                         // Modify inner data first
                         // Origin row should go to the target row, and the rest should be moved up/down
-                        const fromIdx = rIdx - 1;
-                        const targetIdx = movePending[ 1 ] - 1;
+                        const pageOffset = this._paginator ? ( this._paginator.page - 1 ) * this.rowsPerPage : 0;
+                        const fromIdx = rIdx - 1 + pageOffset;
+                        const targetIdx = movePending[ 1 ] - 1 + pageOffset;
 
                         LX.emitSignal( "@on_table_sort", { instance: this, fromIdx, targetIdx } );
 
@@ -507,10 +523,10 @@ export class Table extends BaseComponent
                             }
                         }
 
-                        data.body[targetIdx] = b;
+                        data.body[ targetIdx ] = b;
 
                         const parent = movePending[ 0 ].parentNode;
-                        LX.insertChildAtIndex( parent, movePending[ 0 ], targetIdx + targetOffset );
+                        LX.insertChildAtIndex( parent, movePending[ 0 ], targetIdx + targetOffset - pageOffset );
                         movePending = null;
                     }
 
@@ -531,6 +547,9 @@ export class Table extends BaseComponent
                     fromRow.style.transform = `translateY(${ fromRow.dY }px)`;
                 };
 
+                const filtered = [];
+
+                // Filter rows
                 for( let r = 0; r < data.body.length; ++r )
                 {
                     const bodyData = data.body[ r ];
@@ -628,8 +647,25 @@ export class Table extends BaseComponent
                         }
                     }
 
+                    filtered.push( bodyData );
+                }
+
+                if( this._paginator )
+                {
+                    this._paginator.setPages( this._getNumPages( filtered.length ) );
+                }
+
+                const start = this._paginator ? ( this._paginator.page - 1 ) * this.rowsPerPage : 0;
+                const end = this._paginator ? Math.min( start + this.rowsPerPage, filtered.length ) : filtered.length;
+
+                // Render filtered rows
+                for( let r = start; r < end; ++r )
+                {
+                    const bodyData = filtered[ r ];
+
+                    const idx = this.data.body.indexOf( bodyData );
                     const row = document.createElement( 'tr' );
-                    const rowId = LX.getSupportedDOMName( bodyData.join( '-' ) ).substr(0, 32);
+                    const rowId = this._makeRowId( bodyData );
                     row.setAttribute( "rowId", rowId );
 
                     if( options.sortable ?? false )
@@ -709,13 +745,13 @@ export class Table extends BaseComponent
                         row.appendChild( td );
                     }
 
-                    for( let idx = 0; idx < bodyData.length; ++idx )
+                    for( let colIdx = 0; colIdx < bodyData.length; ++colIdx )
                     {
-                        const rowData = bodyData[ idx ];
+                        const rowData = bodyData[ colIdx ];
                         const td = document.createElement( 'td' );
                         td.innerHTML = `${ rowData }`;
-                        const headData = data.head[ idx ];
-                        if( this._centered?.indexOf && ( ( this._centered.indexOf( idx ) > -1 ) || ( this._centered.indexOf( headData ) > -1 ) ) )
+                        const headData = data.head[ colIdx ];
+                        if( this._centered?.indexOf && ( ( this._centered.indexOf( colIdx ) > -1 ) || ( this._centered.indexOf( headData ) > -1 ) ) )
                         {
                             td.classList.add( "centered" );
                         }
@@ -739,10 +775,10 @@ export class Table extends BaseComponent
                             if( action == "delete" )
                             {
                                 button = LX.makeIcon( "Trash3", { title: "Delete Row" } );
-                                button.addEventListener( 'click', function() {
-                                    // Don't need to refresh table..
-                                    data.body.splice( r, 1 );
-                                    row.remove();
+                                button.addEventListener( 'click', () =>
+                                {
+                                    data.body.splice( idx, 1 );
+                                    this.refresh();
                                 });
                             }
                             else if( action == "menu" )
@@ -754,7 +790,7 @@ export class Table extends BaseComponent
                                         return;
                                     }
 
-                                    const menuOptions = options.onMenuAction( r, data );
+                                    const menuOptions = options.onMenuAction( idx, data );
                                     console.assert( menuOptions.length, "Add items to the Menu Action Dropdown!" );
 
                                     LX.addDropdownMenu( e.target, menuOptions, { side: "bottom", align: "end" });
@@ -768,7 +804,7 @@ export class Table extends BaseComponent
                                 if( action.callback )
                                 {
                                     button.addEventListener( 'click', ( e: MouseEvent ) => {
-                                        const mustRefresh = action.callback( bodyData, table, e );
+                                        const mustRefresh = action.callback( idx, bodyData, table, e );
                                         if( mustRefresh )
                                         {
                                             this.refresh();
@@ -812,6 +848,13 @@ export class Table extends BaseComponent
             }
         }
 
+        // Pagination
+        if( this._paginator )
+        {
+            const paginationContainer = LX.makeContainer( [ "100%", "auto" ], "flex p-2 justify-end", "", container );
+            paginationContainer.appendChild( this._paginator.root );
+        }
+
         this.refresh();
 
         LX.doAsync( this.onResize.bind( this ) );
@@ -823,7 +866,7 @@ export class Table extends BaseComponent
 
         for( const row of this.data.body )
         {
-            const rowId = LX.getSupportedDOMName( row.join( '-' ) ).substr( 0, 32 );
+            const rowId = this._makeRowId( row );
             if( this.data.checkMap[ rowId ] === true )
             {
                 selectedRows.push( row );
@@ -831,6 +874,29 @@ export class Table extends BaseComponent
         }
 
         return selectedRows;
+    }
+
+    _makeRowId( row: any[] )
+    {
+        return LX.getSupportedDOMName( row.join( '-' ) ).substr( 0, 32 );
+    }
+
+    _onChangePage( page: number )
+    {
+        this.refresh();
+    }
+
+    _getNumPages( total?: number )
+    {
+        if( this.rowsPerPage === -1 ) return 1;
+        total = total ?? this.data.body?.length;
+        return Math.ceil( ( total ?? 0 ) / this.rowsPerPage );
+    }
+
+    _setRowsPerPage( n: number )
+    {
+        this._rowsPerPage = n;
+        this.refresh();
     }
 
     _setCentered( v: any )

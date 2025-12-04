@@ -10,7 +10,7 @@
 
     {
         window.__addInteractiveCodeExample( content, componentName, panel => {
-            panel.addTable(null, {
+            window.t = panel.addTable(null, {
                 head: ["Name", "Status", "Priority", "HiddenByDefault"],
                 body: [
                     ["Alice", "In Progress", "High", 0],
@@ -21,9 +21,12 @@
                     ["James", "Backlog", "Low", 5],
                     ["Mickey", "Todo", "Low", 6],
                     ["Charlie", "Canceled", "Low", 7],
-                    ["Potato", "Todo", "High", 8]
+                    ["Chris", "Todo", "High", 8],
+                    ["Jonas", "Todo", "Low", 9]
                 ]
             }, {
+                pagination: true,
+                rowsPerPage: 4,
                 selectable: true,
                 sortable: true,
                 toggleColumns: true,
@@ -103,6 +106,15 @@
 
     docMaker.note( `The return value in the ${docMaker.iCode("rowActions")} item callbacks are used to refresh (true) or not (false) the table DOM.`, true );
 
-    docMaker.paragraph( `Check the ${ docMaker.iPage( "Table API reference", "api/table.html" ) } to know more details about the Table Component.` );
+    docMaker.header( "Properties", "h3", "properties" );
+    docMaker.codeBulletList( [
+        [".centered", "Boolean|Array", "Center row data for all (true) or more columns"],
+        [".data", "Object", "Table data including check and column visibility data"],
+    ] );
+
+    docMaker.header( "Methods", "h3", "methods" );
+
+    docMaker.classMethod( ".getSelectedRows", `Returns selected table rows`, [], "Array" );
+    docMaker.classMethod( ".refresh", `Rebuilds the table DOM based on settings.`, [] );
 
 </script>

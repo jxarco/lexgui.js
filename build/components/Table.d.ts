@@ -1,5 +1,6 @@
 import { BaseComponent } from './BaseComponent';
 import { Button } from './Button';
+import { Pagination } from './Pagination';
 /**
  * @class Table
  * @description Table Component
@@ -15,10 +16,18 @@ export declare class Table extends BaseComponent {
     _sortColumns: boolean;
     _resetCustomFiltersBtn: Button | null;
     _hiddenColumns: any[];
+    _paginator: Pagination | undefined;
     private _centered;
     get centered(): any;
     set centered(v: any);
+    private _rowsPerPage;
+    get rowsPerPage(): any;
+    set rowsPerPage(v: any);
     constructor(name: string, data: any, options?: any);
     getSelectedRows(): any[];
+    _makeRowId(row: any[]): any;
+    _onChangePage(page: number): void;
+    _getNumPages(total?: number): number;
+    _setRowsPerPage(n: number): void;
     _setCentered(v: any): void;
 }
