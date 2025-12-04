@@ -2,6 +2,7 @@
 
 import { LX } from './../core/Namespace';
 import { Button } from './Button';
+import { Select } from './Select';
 
 /**
  * @class Pagination
@@ -9,7 +10,10 @@ import { Button } from './Button';
 
 export class Pagination
 {
+    static ITEMS_PER_PAGE_VALUES: number[] = [ 8, 12, 24, 48, 96 ];
+
     root: HTMLElement;
+    pagesRoot: HTMLElement;
 
     page: number = 1;
     pages: number = 1;
@@ -17,8 +21,11 @@ export class Pagination
     _alwaysShowEdges: boolean = true;
     _useEllipsis: boolean = true;
     _maxButtons: number = 3;
+    _itemsPerPage: number = 12;
+    _itemsPerPageValues: number[] = Pagination.ITEMS_PER_PAGE_VALUES;
 
     onChange: (page: number) => void = () => {};
+    onItemsPerPageChange: (n: number) => void = () => {};
 
     constructor( options: any = {} )
     {
@@ -28,13 +35,42 @@ export class Pagination
         this._alwaysShowEdges = options.alwaysShowEdges ?? this._alwaysShowEdges;
         this._useEllipsis = options.useEllipsis ?? this._useEllipsis;
         this._maxButtons = options.maxButtons ?? this._maxButtons;
+        this._itemsPerPage = options.itemsPerPage ?? this._itemsPerPage;
+
+        if( this._itemsPerPageValues.indexOf( this._itemsPerPage ) === -1 )
+        {
+            this._itemsPerPageValues.push( this._itemsPerPage );
+            this._itemsPerPageValues = this._itemsPerPageValues.sort( ( a: number, b: number ) =>
+            {
+                if( a < b ) return -1;
+                if( a > b ) return 1;
+                return 0;
+            });
+        }
 
         if( typeof options.onChange === 'function' )
         {
             this.onChange = options.onChange;
         }
 
-        this.root = LX.makeContainer( [ "auto", "auto" ], "flex flex-row overflow-scroll" );
+        if( typeof options.onItemsPerPageChange === 'function' )
+        {
+            this.onItemsPerPageChange = options.onItemsPerPageChange;
+        }
+
+        this.root = LX.makeContainer( [ "auto", "auto" ], "flex flex-row gap-2" );
+
+        if( options.allowChangeItemsPerPage ?? false )
+        {
+            const itemsPerPageSelectContainer = LX.makeContainer( [ "auto", "auto" ], "flex flex-row items-center", "", this.root );
+            const itemsPerPageSelect = new Select( null, Pagination.ITEMS_PER_PAGE_VALUES, this._itemsPerPage, ( v: number ) => {
+                this._itemsPerPage = v;
+                this.onItemsPerPageChange?.( this._itemsPerPage );
+            } );
+            itemsPerPageSelectContainer.appendChild( itemsPerPageSelect.root );
+        }
+
+        this.pagesRoot = LX.makeContainer( [ "auto", "auto" ], "flex flex-row overflow-scroll", "", this.root );
 
         this.refresh();
     }
@@ -77,12 +113,12 @@ export class Pagination
 
     refresh()
     {
-        this.root.innerHTML = "";
+        this.pagesRoot.innerHTML = "";
 
         // Previous page button
         this._makeButton( LX.makeIcon( "ChevronLeft" ).innerHTML, this.page === 1, () => this.prev(), `bg-none ${ this.page === 1 ? "" : "hover:bg-tertiary" }` );
 
-        const pagesContainer = LX.makeContainer( [ "auto", "auto" ], "flex flex-row items-center", "", this.root );
+        const pagesContainer = LX.makeContainer( [ "auto", "auto" ], "flex flex-row items-center", "", this.pagesRoot );
         const maxButtons = this._maxButtons + 2; // + next and prev
         
         if( this.pages <= maxButtons )
@@ -172,7 +208,7 @@ export class Pagination
         const btn = new Button( null, label, onclick, { disabled, buttonClass } );
         btn.root.querySelector( "button" ).style.paddingInline = "0.5rem";
 
-        parent = parent ?? this.root;
+        parent = parent ?? this.pagesRoot;
         parent.appendChild( btn.root );
 
         return btn.root;

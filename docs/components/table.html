@@ -84,6 +84,7 @@
         panel.addTable( null, {
             head: [ "Option", "Type", "Description", "Default" ],
             body: [
+                ["allowChangeItemsPerPage", "Boolean", `Use ${docMaker.iCode("allowChangeItemsPerPage")} Pagination parameter `, "—"],
                 ["body", "Array", "Table body (data per row for each column)", "—"],
                 ["centered", "Boolean|Array", `Center text within columns. ${docMaker.iCode("true")} for all, array (name or idx) to center specific`, "—"],
                 ["columnActions", "Array", `Allow to add actions per column ${docMaker.iCode("action: { name, icon, callback }")}`, "—"],

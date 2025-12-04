@@ -88,7 +88,13 @@ export class Table extends BaseComponent
 
             this._paginator = new Pagination( {
                 pages: this._getNumPages(),
-                onChange: this._onChangePage.bind( this )
+                itemsPerPage: this._rowsPerPage,
+                allowChangeItemsPerPage: options.allowChangeItemsPerPage ?? true,
+                onChange: this._onChangePage.bind( this ),
+                onItemsPerPageChange: ( v: number ) =>
+                {
+                    this.rowsPerPage = v;
+                }
             } );
         }
 

@@ -21,6 +21,7 @@
                 maxButtons: 4,
                 useEllipsis: true,
                 alwaysShowEdges: false,
+                allowChangeItemsPerPage: true,
                 onChange: (page) => {
                     console.log('User selected page:', page);
                 }
@@ -44,11 +45,12 @@
         panel.addTable( null, {
             head: [ "Option", "Type", "Description", "Default" ],
             body: [
-                ["alwaysShowEdges", `Boolean`, `Forces first and last page buttons to always be visible.`, `true`],
-                ["maxButtons", `Number`, `Maximum number of pagination buttons displayed at once.`, `3`],
-                ["page", `Number`, `Initial current page number.`, `1`],
-                ["pages", `Number`, `Total number of available pages.`, `1`],
-                ["useEllipsis", `Boolean`, `Enables ellipsis indicators when page ranges are truncated.`, `—`],
+                ["allowChangeItemsPerPage", `Boolean`, `Allows to change ${ docMaker.iCode( "itemsPerPage" ) } parameter in a Selector`, `false`],
+                ["alwaysShowEdges", `Boolean`, `Forces first and last page buttons to always be visible`, `true`],
+                ["maxButtons", `Number`, `Maximum number of pagination buttons displayed at once`, `3`],
+                ["page", `Number`, `Initial current page number`, `1`],
+                ["pages", `Number`, `Total number of available pages`, `1`],
+                ["useEllipsis", `Boolean`, `Enables ellipsis indicators when page ranges are truncated`, `—`],
             ].map( v => {
                 return [ docMaker.iCode( v[ 0 ], "table" ), docMaker.iCode( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? docMaker.iCode( v[ 3 ], "table desc" ) : v[ 3 ] ];
             } )

@@ -4484,23 +4484,51 @@ LX.CalendarRange = CalendarRange;
  * @class Pagination
  */
 class Pagination {
+    static ITEMS_PER_PAGE_VALUES = [8, 12, 24, 48, 96];
     root;
+    pagesRoot;
     page = 1;
     pages = 1;
     _alwaysShowEdges = true;
     _useEllipsis = true;
     _maxButtons = 3;
+    _itemsPerPage = 12;
+    _itemsPerPageValues = Pagination.ITEMS_PER_PAGE_VALUES;
     onChange = () => { };
+    onItemsPerPageChange = () => { };
     constructor(options = {}) {
         this.pages = options.pages ?? 1;
         this.page = LX.clamp(options.page ?? 1, 1, this.pages);
         this._alwaysShowEdges = options.alwaysShowEdges ?? this._alwaysShowEdges;
         this._useEllipsis = options.useEllipsis ?? this._useEllipsis;
         this._maxButtons = options.maxButtons ?? this._maxButtons;
+        this._itemsPerPage = options.itemsPerPage ?? this._itemsPerPage;
+        if (this._itemsPerPageValues.indexOf(this._itemsPerPage) === -1) {
+            this._itemsPerPageValues.push(this._itemsPerPage);
+            this._itemsPerPageValues = this._itemsPerPageValues.sort((a, b) => {
+                if (a < b)
+                    return -1;
+                if (a > b)
+                    return 1;
+                return 0;
+            });
+        }
         if (typeof options.onChange === 'function') {
             this.onChange = options.onChange;
         }
-        this.root = LX.makeContainer(["auto", "auto"], "flex flex-row overflow-scroll");
+        if (typeof options.onItemsPerPageChange === 'function') {
+            this.onItemsPerPageChange = options.onItemsPerPageChange;
+        }
+        this.root = LX.makeContainer(["auto", "auto"], "flex flex-row gap-2");
+        if (options.allowChangeItemsPerPage ?? false) {
+            const itemsPerPageSelectContainer = LX.makeContainer(["auto", "auto"], "flex flex-row items-center", "", this.root);
+            const itemsPerPageSelect = new Select(null, Pagination.ITEMS_PER_PAGE_VALUES, this._itemsPerPage, (v) => {
+                this._itemsPerPage = v;
+                this.onItemsPerPageChange?.(this._itemsPerPage);
+            });
+            itemsPerPageSelectContainer.appendChild(itemsPerPageSelect.root);
+        }
+        this.pagesRoot = LX.makeContainer(["auto", "auto"], "flex flex-row overflow-scroll", "", this.root);
         this.refresh();
     }
     setPage(n) {
@@ -4526,10 +4554,10 @@ class Pagination {
         this.setPage(this.page - 1);
     }
     refresh() {
-        this.root.innerHTML = "";
+        this.pagesRoot.innerHTML = "";
         // Previous page button
         this._makeButton(LX.makeIcon("ChevronLeft").innerHTML, this.page === 1, () => this.prev(), `bg-none ${this.page === 1 ? "" : "hover:bg-tertiary"}`);
-        const pagesContainer = LX.makeContainer(["auto", "auto"], "flex flex-row items-center", "", this.root);
+        const pagesContainer = LX.makeContainer(["auto", "auto"], "flex flex-row items-center", "", this.pagesRoot);
         const maxButtons = this._maxButtons + 2; // + next and prev
         if (this.pages <= maxButtons) {
             for (let i = 1; i <= this.pages; i++) {
@@ -4591,7 +4619,7 @@ class Pagination {
     _makeButton(label, disabled, onclick, buttonClass, parent) {
         const btn = new Button(null, label, onclick, { disabled, buttonClass });
         btn.root.querySelector("button").style.paddingInline = "0.5rem";
-        parent = parent ?? this.root;
+        parent = parent ?? this.pagesRoot;
         parent.appendChild(btn.root);
         return btn.root;
     }
@@ -4664,7 +4692,12 @@ class Table extends BaseComponent {
             this._rowsPerPage = options.rowsPerPage ?? 12;
             this._paginator = new Pagination({
                 pages: this._getNumPages(),
-                onChange: this._onChangePage.bind(this)
+                itemsPerPage: this._rowsPerPage,
+                allowChangeItemsPerPage: options.allowChangeItemsPerPage ?? true,
+                onChange: this._onChangePage.bind(this),
+                onItemsPerPageChange: (v) => {
+                    this.rowsPerPage = v;
+                }
             });
         }
         const getDate = (text) => {
