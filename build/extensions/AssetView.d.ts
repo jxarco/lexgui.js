@@ -10,13 +10,14 @@ export declare class AssetViewEvent {
     static ASSET_CLONED: number;
     static ASSET_DBLCLICKED: number;
     static ASSET_CHECKED: number;
+    static ASSET_MOVED: number;
     static ENTER_FOLDER: number;
     type: number;
     item: any;
     value: any;
     multiple: boolean;
     constructor(type: number, item: any, value?: any);
-    string(): "assetview_event_none" | "assetview_event_selected" | "assetview_event_deleted" | "assetview_event_renamed" | "assetview_event_cloned" | "assetview_event_dblclicked" | "assetview_event_checked" | "assetview_event_enter_folder" | undefined;
+    string(): "assetview_event_none" | "assetview_event_selected" | "assetview_event_deleted" | "assetview_event_renamed" | "assetview_event_cloned" | "assetview_event_dblclicked" | "assetview_event_checked" | "assetview_event_moved" | "assetview_event_enter_folder" | undefined;
 }
 /**
  * @class AssetView
@@ -107,6 +108,7 @@ export declare class AssetView {
     _processDrop(e: DragEvent): void;
     _sortData(sortBy?: string, sortMode?: number): void;
     _enterFolder(folderItem: any, storeCurrent?: boolean): void;
+    _moveItemToFolder(item: any, folder: any): void;
     _deleteItem(item: any): void;
     _cloneItem(item: any): void;
     _renameItem(item: any): void;

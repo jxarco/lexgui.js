@@ -19,7 +19,8 @@ class AssetViewEvent {
     static ASSET_CLONED = 4;
     static ASSET_DBLCLICKED = 5;
     static ASSET_CHECKED = 6;
-    static ENTER_FOLDER = 7;
+    static ASSET_MOVED = 7;
+    static ENTER_FOLDER = 8;
     type;
     item;
     value;
@@ -38,6 +39,7 @@ class AssetViewEvent {
             case AssetViewEvent.ASSET_CLONED: return "assetview_event_cloned";
             case AssetViewEvent.ASSET_DBLCLICKED: return "assetview_event_dblclicked";
             case AssetViewEvent.ASSET_CHECKED: return "assetview_event_checked";
+            case AssetViewEvent.ASSET_MOVED: return "assetview_event_moved";
             case AssetViewEvent.ENTER_FOLDER: return "assetview_event_enter_folder";
         }
     }
@@ -278,6 +280,8 @@ class AssetView {
                 preview = document.createElement('img');
                 let realSrc = item.unknownExtension ? defaultPreviewPath : (isFolder ? defaultFolderPath : previewSrc);
                 preview.src = (isGridLayout || isFolder ? realSrc : defaultPreviewPath);
+                preview.setAttribute("draggable", "false");
+                preview.className = "pointer-events-none";
                 itemEl.appendChild(preview);
             }
             else {
@@ -352,9 +356,66 @@ class AssetView {
                 }
             });
         });
-        itemEl.addEventListener("dragstart", function (e) {
-            e.preventDefault();
+        itemEl.addEventListener("dragstart", (e) => {
+            window.__av_item_dragged = item;
+            var img = new Image();
+            img.src = '';
+            if (e.dataTransfer) {
+                e.dataTransfer.setDragImage(img, 0, 0);
+                e.dataTransfer.effectAllowed = "move";
+            }
+            const desc = that.content.querySelector(`#floatingTitle_${item.uid}`);
+            if (desc)
+                desc.style.display = "none";
         }, false);
+        itemEl.addEventListener("dragend", (e) => {
+            delete window.__av_item_dragged;
+        }, false);
+        itemEl.addEventListener("dragenter", (e) => {
+            e.preventDefault(); // Prevent default action (open as link for some elements)
+            let dragged = window.__av_item_dragged;
+            if (!dragged) {
+                return;
+            }
+            if (!isFolder || (dragged.uid == item.uid)) {
+                return;
+            }
+            LX.addClass(item.domEl, "animate-pulse");
+        });
+        itemEl.addEventListener("dragleave", (e) => {
+            e.preventDefault(); // Prevent default action (open as link for some elements)
+            let dragged = window.__av_item_dragged;
+            if (!dragged) {
+                return;
+            }
+            LX.removeClass(item.domEl, "animate-pulse");
+        });
+        itemEl.addEventListener("drop", (e) => {
+            e.preventDefault(); // Prevent default action (open as link for some elements)
+            let dragged = window.__av_item_dragged;
+            if (!dragged) {
+                return;
+            }
+            if (!isFolder || (dragged.uid == item.uid)) {
+                console.error("[AssetView Error] Cannot drop: Target item is not a folder or target is the dragged element!");
+                return;
+            }
+            // Animate dragged element
+            const draggedEl = dragged.domEl;
+            if (draggedEl) {
+                draggedEl.classList.add("moving-to-folder");
+                // When animation ends, finalize move
+                draggedEl.addEventListener("animationend", () => {
+                    draggedEl.classList.remove("moving-to-folder");
+                    that._moveItemToFolder(dragged, item);
+                    that._refreshContent();
+                }, { once: true });
+            }
+            if (this.onevent) {
+                const event = new AssetViewEvent(AssetViewEvent.ASSET_MOVED, dragged, item);
+                this.onevent(event);
+            }
+        });
         itemEl.addEventListener("mouseenter", (e) => {
             if (!that.useNativeTitle && isGridLayout) {
                 const desc = that.content.querySelector(`#floatingTitle_${item.uid}`);
@@ -644,10 +705,6 @@ class AssetView {
             return (this.filter != "None" ? _i.type.toLowerCase() == this.filter.toLowerCase() : true) &&
                 _i.id.toLowerCase().includes(this.searchValue.toLowerCase());
         });
-        // if( filter || searchValue )
-        // {
-        //     this.contentPage = 1;
-        // }
         this._paginator?.setPages(Math.max(Math.ceil(this.data.length / this.assetsPerPage), 1));
         // Show all data if using filters
         const start = this._paginator ? (this._paginator.page - 1) * this.assetsPerPage : 0;
@@ -810,6 +867,21 @@ class AssetView {
             this.onevent(event);
         }
     }
+    _moveItemToFolder(item, folder) {
+        const idx = this.currentData.indexOf(item);
+        if (idx < 0) {
+            console.error("[AssetView Error] Cannot delete. Item not found.");
+            return;
+        }
+        this.currentData.splice(idx, 1);
+        const oldParent = item.parent;
+        if (oldParent) {
+            oldParent.children = oldParent.children.filter((c) => c !== item);
+        }
+        // add to new folder
+        folder.children.push(item);
+        item.parent = folder;
+    }
     _deleteItem(item) {
         const idx = this.currentData.indexOf(item);
         if (idx < 0) {
@@ -817,6 +889,10 @@ class AssetView {
             return;
         }
         this.currentData.splice(idx, 1);
+        const oldParent = item.parent;
+        if (oldParent) {
+            oldParent.children = oldParent.children.filter((c) => c !== item);
+        }
         this._refreshContent(this.searchValue, this.filter);
         if (this.onevent) {
             const event = new AssetViewEvent(AssetViewEvent.ASSET_DELETED, item);

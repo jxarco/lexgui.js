@@ -352,6 +352,9 @@ export class NodeTree
             item.addEventListener("dragenter", ( e: any ) => {
                 e.target.classList.add("draggingover");
             });
+            item.addEventListener("dragend", ( e: any ) => {
+                e.target.classList.remove("draggingover");
+            });
             item.addEventListener("dragleave", ( e: any ) => {
                 e.target.classList.remove("draggingover");
             });

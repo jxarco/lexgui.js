@@ -24,7 +24,8 @@ export class AssetViewEvent
     static ASSET_CLONED     = 4;
     static ASSET_DBLCLICKED = 5;
     static ASSET_CHECKED    = 6;
-    static ENTER_FOLDER     = 7;
+    static ASSET_MOVED      = 7;
+    static ENTER_FOLDER     = 8;
 
     type: number;
     item: any;
@@ -49,6 +50,7 @@ export class AssetViewEvent
             case AssetViewEvent.ASSET_CLONED: return "assetview_event_cloned";
             case AssetViewEvent.ASSET_DBLCLICKED: return "assetview_event_dblclicked";
             case AssetViewEvent.ASSET_CHECKED: return "assetview_event_checked";
+            case AssetViewEvent.ASSET_MOVED: return "assetview_event_moved";
             case AssetViewEvent.ENTER_FOLDER: return "assetview_event_enter_folder";
         }
     }
@@ -373,6 +375,8 @@ export class AssetView
                 preview = document.createElement('img');
                 let realSrc = item.unknownExtension ? defaultPreviewPath : ( isFolder ? defaultFolderPath : previewSrc );
                 preview.src = ( isGridLayout || isFolder ? realSrc : defaultPreviewPath );
+                preview.setAttribute( "draggable", "false" );
+                preview.className = "pointer-events-none";
                 itemEl.appendChild( preview );
             }
             else
@@ -479,9 +483,93 @@ export class AssetView
             });
         });
 
-        itemEl.addEventListener("dragstart", function( e ) {
-            e.preventDefault();
+        itemEl.addEventListener("dragstart", ( e: DragEvent ) => {
+            ( window as any ).__av_item_dragged = item;
+
+            var img = new Image();
+            img.src = '';
+            if( e.dataTransfer )
+            {
+                e.dataTransfer.setDragImage( img, 0, 0 );
+                e.dataTransfer.effectAllowed = "move";
+            }
+
+            const desc: HTMLElement | null = that.content.querySelector( `#floatingTitle_${ item.uid }` );
+            if( desc ) desc.style.display = "none";
         }, false );
+
+        itemEl.addEventListener("dragend", ( e: DragEvent ) => {
+            delete ( window as any ).__av_item_dragged;
+        }, false );
+
+        itemEl.addEventListener("dragenter", ( e: DragEvent ) =>
+        {
+            e.preventDefault(); // Prevent default action (open as link for some elements)
+            let dragged = ( window as any ).__av_item_dragged;
+            if( !dragged )
+            {
+                return;
+            }
+
+            if( !isFolder || ( dragged.uid == item.uid ) )
+            {
+                return;
+            }
+
+            LX.addClass( item.domEl, "animate-pulse" );
+        } );
+
+        itemEl.addEventListener("dragleave", ( e: any ) =>
+        {
+            e.preventDefault(); // Prevent default action (open as link for some elements)
+            let dragged = ( window as any ).__av_item_dragged;
+            if( !dragged )
+            {
+                return;
+            }
+
+            LX.removeClass( item.domEl, "animate-pulse" );
+        } );
+
+        itemEl.addEventListener("drop", ( e: DragEvent ) =>
+        {
+            e.preventDefault(); // Prevent default action (open as link for some elements)
+            let dragged = ( window as any ).__av_item_dragged;
+            if( !dragged )
+            {
+                return;
+            }
+
+            if( !isFolder || ( dragged.uid == item.uid ) )
+            {
+                console.error( "[AssetView Error] Cannot drop: Target item is not a folder or target is the dragged element!" );
+                return;
+            }
+
+            // Animate dragged element
+            const draggedEl = dragged.domEl;
+            if( draggedEl )
+            {
+                draggedEl.classList.add("moving-to-folder");
+
+                // When animation ends, finalize move
+                draggedEl.addEventListener("animationend", () => {
+
+                    draggedEl.classList.remove("moving-to-folder");
+
+                    that._moveItemToFolder( dragged, item );
+
+                    that._refreshContent();
+
+                }, { once: true });
+            }
+
+            if( this.onevent )
+            {
+                const event = new AssetViewEvent( AssetViewEvent.ASSET_MOVED, dragged, item );
+                this.onevent( event );
+            }
+        });
 
         itemEl.addEventListener( "mouseenter", ( e: MouseEvent ) =>
         {
@@ -873,11 +961,6 @@ export class AssetView
                 _i.id.toLowerCase().includes(this.searchValue.toLowerCase())
         } );
 
-        // if( filter || searchValue )
-        // {
-        //     this.contentPage = 1;
-        // }
-
         this._paginator?.setPages( Math.max( Math.ceil( this.data.length / this.assetsPerPage ), 1 ) );
 
         // Show all data if using filters
@@ -1090,6 +1173,28 @@ export class AssetView
         }
     }
 
+    _moveItemToFolder( item: any, folder: any )
+    {
+        const idx = this.currentData.indexOf( item );
+        if( idx < 0 )
+        {
+            console.error( "[AssetView Error] Cannot delete. Item not found." );
+            return;
+        }
+
+        this.currentData.splice( idx, 1 );
+
+        const oldParent = item.parent;
+        if( oldParent )
+        {
+            oldParent.children = oldParent.children.filter( ( c: any ) => c !== item );
+        }
+
+        // add to new folder
+        folder.children.push( item );
+        item.parent = folder;
+    }
+
     _deleteItem( item: any )
     {
         const idx = this.currentData.indexOf( item );
@@ -1100,6 +1205,13 @@ export class AssetView
         }
 
         this.currentData.splice( idx, 1 );
+
+        const oldParent = item.parent;
+        if( oldParent )
+        {
+            oldParent.children = oldParent.children.filter( ( c: any ) => c !== item );
+        }
+
         this._refreshContent( this.searchValue, this.filter );
 
         if( this.onevent)

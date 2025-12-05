@@ -7,10 +7,9 @@
 From 0.8.0, the full library is written in TypeScript to facilitate integrations in newer frameworks. Build are still available as a JS module with its extensions.
 
 Aded new Spinner and Pagination Components.
-Refactor AssetView extension to use new Pagination Component.
-Added support for `Ctrl+Wheel` to increase grid item size in AssetView.
 Added support for `options.submit` in Form entries.
 Added new utils `LX.stripTags(str)`.
+Refactored `Card` Component (see docs).
 Added "dev" icons, Vscode, Godot, Unity, UnrealEngine, Go, Css, Android, and more.
 New `colors/` page in main demo page.
 Added Card Component docs.
@@ -22,6 +21,10 @@ Table:
 - Added support for `options.hiddenColumns` and `options.showSelectedNumber`.
 - `options.centered` now allows column indices or names.
 - Added row `idx` to `options.rowActions` callback parameters `(idx, bodyData, table, event)`.
+
+AssetView:
+- Added support for `Ctrl+Wheel` to increase grid item size in AssetView.
+- Replace old pagination implementation for new Pagination Component.
 
 Bugfixes:
 - Area Tabs drag & drop is now working not deleting tab content.
@@ -45,7 +48,6 @@ API Changes:
 - AssetView is now an extension.
 - NodeGraph extension renamed to GraphEditor.
 - Docmaker Extension API full changed (see docs).
-- Refactored `Card` Component (see docs).
 - Inputs Class `nobg` renamed to `bg-none` for consistency.
 
 Styling:
