@@ -182,7 +182,7 @@
     video.src = "../data/video.mp4";
     videoArea.attach(video);
 
-    const videoEditor = new LX.VideoEditor(leftArea, { videoArea, video, crop: true, loop: true })
+    const videoEditor = new LX.VideoEditor(leftArea, { videoArea, video, crop: true, loop: true, handleStyle: {backgroundColor: "white"} });
     videoEditor.loadVideo();
 
     const canvas = document.createElement('canvas');
