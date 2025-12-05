@@ -598,6 +598,30 @@ function guidGenerator()
 LX.guidGenerator = guidGenerator;
 
 /**
+ * @method escapeRegExp
+ * @description Helper to escape regexp chars
+ */
+function escapeRegExp( str: string )
+{
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+LX.escapeRegExp = escapeRegExp;
+
+/**
+ * @method wildcardToRegExp
+ * @description Helper to get regexs from string using wildcard chars
+ */
+function wildcardToRegExp( pattern: string )
+{
+    const escaped = pattern.replace(/([.+^${}()|[\]\\])/g, '\\$1');
+    const converted = escaped.replace(/\*/g, '.*').replace(/\?/g, '.');
+    return new RegExp('^' + converted + '$', 'i');
+}
+
+LX.wildcardToRegExp = wildcardToRegExp;
+
+/**
  * @method buildTextPattern
  * @description Create a validation pattern using specific options
  * @param {Object} options
