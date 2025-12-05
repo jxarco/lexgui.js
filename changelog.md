@@ -10,6 +10,7 @@ Aded new Spinner and Pagination Components.
 Added support for `options.submit` in Form entries.
 Added new utils `LX.stripTags(str)`.
 Refactored `Card` Component (see docs).
+Dropdown item icons can be passed as already generated icons with `LX.makeIcon`.
 Added "dev" icons, Vscode, Godot, Unity, UnrealEngine, Go, Css, Android, and more.
 New `colors/` page in main demo page.
 Added Card Component docs.

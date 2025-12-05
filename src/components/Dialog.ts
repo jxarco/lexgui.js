@@ -172,7 +172,7 @@ export class Dialog
         root.style.left = position[ 0 ] ?? "50%";
         root.style.top = position[ 1 ] ?? "50%";
 
-        panel.root.style.height = title ? "calc( 100% - " + ( titleDiv.offsetHeight + 30 ) + "px )" : "calc( 100% - 51px )";
+        panel.root.style.height = title ? "calc( 100% - " + ( titleDiv.offsetHeight + 30 ) + "px )" : "calc(100%)";
     }
 
     destroy()

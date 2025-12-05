@@ -188,7 +188,7 @@ export class DropdownMenu
         const menuItem: any = document.createElement('div');
         menuItem.className = "lexdropdownmenuitem" + ( ( item.name || item.options ) ? "" : " label" ) + ( item.disabled ?? false ? " disabled" : "" ) + ( ` ${ item.className ?? "" }` );
         menuItem.dataset["id"] = pKey;
-        menuItem.innerHTML = `<span>${ key }</span>`;
+        menuItem.innerHTML = `<span class="ellipsis-overflow">${ key }</span>`;
         menuItem.tabIndex = "1";
         parentDom.appendChild( menuItem );
 
@@ -236,7 +236,7 @@ export class DropdownMenu
         }
         else if( item.icon )
         {
-            const icon = LX.makeIcon( item.icon, { svgClass: disabled ? "fg-tertiary" : item.svgClass ?? item.className } );
+            const icon = item.icon.constructor === String ? LX.makeIcon( item.icon, { svgClass: disabled ? "fg-tertiary" : item.svgClass ?? item.className } ) : item.icon;
             menuItem.prepend( icon );
         }
         else if( item.checked == undefined && applyIconPadding ) // no checkbox, no icon, apply padding if there's checkbox or icon in other items

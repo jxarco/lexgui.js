@@ -11823,7 +11823,7 @@ class DropdownMenu {
         const menuItem = document.createElement('div');
         menuItem.className = "lexdropdownmenuitem" + ((item.name || item.options) ? "" : " label") + (item.disabled ?? false ? " disabled" : "") + (` ${item.className ?? ""}`);
         menuItem.dataset["id"] = pKey;
-        menuItem.innerHTML = `<span>${key}</span>`;
+        menuItem.innerHTML = `<span class="ellipsis-overflow">${key}</span>`;
         menuItem.tabIndex = "1";
         parentDom.appendChild(menuItem);
         if (item.constructor === String) // Label case
@@ -11859,7 +11859,7 @@ class DropdownMenu {
             menuItem.setAttribute("data-radioname", this._radioGroup.name);
         }
         else if (item.icon) {
-            const icon = LX.makeIcon(item.icon, { svgClass: disabled ? "fg-tertiary" : item.svgClass ?? item.className });
+            const icon = item.icon.constructor === String ? LX.makeIcon(item.icon, { svgClass: disabled ? "fg-tertiary" : item.svgClass ?? item.className }) : item.icon;
             menuItem.prepend(icon);
         }
         else if (item.checked == undefined && applyIconPadding) // no checkbox, no icon, apply padding if there's checkbox or icon in other items
@@ -12489,7 +12489,7 @@ class Dialog {
         }
         root.style.left = position[0] ?? "50%";
         root.style.top = position[1] ?? "50%";
-        panel.root.style.height = title ? "calc( 100% - " + (titleDiv.offsetHeight + 30) + "px )" : "calc( 100% - 51px )";
+        panel.root.style.height = title ? "calc( 100% - " + (titleDiv.offsetHeight + 30) + "px )" : "calc(100%)";
     }
     destroy() {
         this.root.remove();

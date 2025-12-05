@@ -813,20 +813,21 @@ a svg, svg path {
     word-break: break-all;
     color: var(--global-text-primary);
     font-size: var(--global-font-size);
-    border-bottom-left-radius: 8px;
-    border-bottom-right-radius: 8px;
+    border-bottom-left-radius: 0.5rem;
+    border-bottom-right-radius: 0.5rem;
     margin-left: 0px !important;
 }
 
 .lexdialogcontent.notitle {
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
+    border-top-left-radius: 0.5rem;
+    border-top-right-radius: 0.5rem;
 }
 
 .lexdialogcloser {
     font-size: var(--global-font-size-lg);
     color: var(--global-text-secondary);
     cursor: pointer;
+    z-index: 1;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
@@ -835,8 +836,8 @@ a svg, svg path {
 
 .lexdialogcloser.notitle {
     position: absolute;
-    top: 0.5em;
-    right: 0;
+    top: 0.75em;
+    right: 0.75em;
 }
 
 .lexdialogcloser:hover {
@@ -1145,7 +1146,7 @@ a svg, svg path {
     left: 0px;
     top: 0px;
     min-width: 172px;
-    max-width: 244px;
+    max-width: 220px;
     z-index: 150;
     display: flex;
     flex-direction: column;
@@ -1183,6 +1184,10 @@ a svg, svg path {
 .lexdropdownmenuitem.label {
     font-weight: 600;
     cursor: default;
+}
+
+.lexdropdownmenuitem span {
+    max-width: 99%;
 }
 
 .lexdropdownmenuitem:not(.label, .disabled):hover {
