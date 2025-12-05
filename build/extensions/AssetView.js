@@ -705,7 +705,7 @@ class AssetView {
             return (this.filter != "None" ? _i.type.toLowerCase() == this.filter.toLowerCase() : true) &&
                 _i.id.toLowerCase().includes(this.searchValue.toLowerCase());
         });
-        this._paginator?.setPages(Math.max(Math.ceil(this.data.length / this.assetsPerPage), 1));
+        this._paginator?.setPages(Math.max(Math.ceil(filteredData.length / this.assetsPerPage), 1));
         // Show all data if using filters
         const start = this._paginator ? (this._paginator.page - 1) * this.assetsPerPage : 0;
         const end = this._paginator ? Math.min(start + this.assetsPerPage, filteredData.length) : filteredData.length;
@@ -728,9 +728,6 @@ class AssetView {
                 item.domEl = this.addItem(item, undefined, false);
             }
         }
-        // this.allowNextPage = filteredData.length - 1 > AssetView.MAX_PAGE_ELEMENTS;
-        // const textString = "Page " + this.contentPage + " / " + ((((filteredData.length - 1) / AssetView.MAX_PAGE_ELEMENTS )|0) + 1);
-        // LX.emitSignal( "@on_page_change", textString );
         if (this.onRefreshContent) {
             this.onRefreshContent(searchValue, filter);
         }
