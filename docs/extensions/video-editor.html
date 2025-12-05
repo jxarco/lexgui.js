@@ -42,8 +42,18 @@ editor.@[mtd]onCropArea@ = (rect) => {
         ["src", "String", "Video URL"],
         ["video", "HTMLVideoElement", "Video native element"],
         ["crop", "Boolean", "Enable crop functionality"],
-        ["controls", "Boolean", "Enable playing ontrols for the video"]
+        ["controls", "Boolean", "Enable playing ontrols for the video"],
+        ["handleStyle", "Object", "Style properties for the resize handles"]
     ] );
+
+    docMaker.header("Statics", "h4");
+    
+    docMaker.codeBulletList([
+      ["CROP_HANDLE_L", `${docMaker.iCode(`setCropAreaHandles`)}, enables the left resize handle.`],
+      ["CROP_HANDLE_R", `${docMaker.iCode(`setCropAreaHandles`)}, enables the right resize handle.`],
+      ["CROP_HANDLE_T", `${docMaker.iCode(`setCropAreaHandles`)}, enables the top resize handle.`],
+      ["CROP_HANDLE_B", `${docMaker.iCode(`setCropAreaHandles`)}, enables the bottom resize handle.`],
+    ]);
 
     docMaker.header("Methods", "h4");
 
@@ -51,8 +61,10 @@ editor.@[mtd]onCropArea@ = (rect) => {
         ["showCropArea()", "Displays the crop overlay and masks the underlying video."],
         ["hideCropArea()", "Hides the crop overlay and clears masking."],
         ["showControls() / hideControls()", "Toggle the visibility of the playback/trimming controls."],
-        ["resizeCropArea(event)", "Internal: adjusts crop size based on pointer position while respecting bounds."],
-        ["dragCropArea(event)", "Internal: moves crop area, clamped to video bounds."],
+        ["resize()", "Triggered when parent area resizes. Call this functions to force a resize."],
+        ["resizeCropArea(sx: number, sy: number, isNormalized: boolean = true)", "Adjusts crop size based on pixel or normalized sizes. Sizes are restricted by the video size and current crop area position."],
+        ["moveCropArea(x: number, y: number, isNormalized: boolean = true)", "Adjusts crop location based on pixel or normalized coordinates. The position is restricted by the video size and current crop area size."],
+        ["setCropAreaHandles(flags: number)", `Sets which resize handles to display based on flags. Use the ${docMaker.iCode(`|`)} operator to enable multiple handles (e.g. ${docMaker.iCode(`CROP_HANDLE_L | CROP_HANDLE_B`)})`],
         ["getStartTime()", "Returns current trim start time."],
         ["getEndTime()", "Returns current trim end time."],
         ["getTrimedTimes()", "Returns both start and end as `{ start, end }`."],
@@ -68,8 +80,10 @@ editor.@[mtd]onCropArea@ = (rect) => {
         ["onChangeStart", "Triggered when trim start marker moves."],
         ["onChangeEnd", "Triggered when trim end marker moves."],
         ["onSetTime", "Called when the actual video time is set (after conversion)."],
+        ["onChangeSpeed", "Triggered when changing speed the gui."],
         ["onVideoLoaded", "Fired once the video is fully loaded and initialized."],
         ["onCropArea", "Called when cropping region changes after dragging/resizing."],
+        ["onResize", "Called when parent area resizes."],
     ]);
 
     docMaker.note("If you dynamically resize the parent area, the editor listens to resize events and adjusts the time bar and crop overlay accordingly. Call `unbind()` before discarding the instance to avoid lingering listeners.", false, "Tip", "Info");

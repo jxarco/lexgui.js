@@ -20,6 +20,8 @@ export class Tags extends BaseComponent
         let defaultValue = LX.deepCopy( arrayValue );
         super( ComponentType.TAGS, name, defaultValue, options );
 
+        this.options.skipDuplicates = options.skipDuplicates ?? true;
+
         this.onGetValue = () => {
             return LX.deepCopy( value );
         };
@@ -73,18 +75,17 @@ export class Tags extends BaseComponent
             tagsContainer.appendChild( tagInput );
 
             tagInput.onkeydown = e => {
-                const val = tagInput.value.replace( /\s/g, '' );
                 if( e.key == ' ' || e.key == 'Enter' )
                 {
+                    const val = tagInput.value.replace( /\s/g, '' );
                     e.preventDefault();
-                    if( !val.length || value.indexOf( val ) > -1 )
+                    if (!val.length || (options.skipDuplicates && value.indexOf(val) > -1 ) )
                         return;
                     value.push( val );
                     this.set( value, false, e );
+                    tagsContainer.querySelector("input")?.focus(); // generateTags creates a new tagInput instance
                 }
             };
-
-            tagInput.focus();
         }
 
         this.generateTags( arrayValue );

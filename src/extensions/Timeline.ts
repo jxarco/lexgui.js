@@ -2654,7 +2654,7 @@ export class KeyFramesTimeline extends Timeline
         const startTime = this.visualTimeRange[ 0 ];
         const endTime = this.visualTimeRange[ 1 ] + 0.0000001;
         //draw lines
-        ctx.strokeStyle = "white";
+        ctx.strokeStyle = KeyFramesTimeline.FONT_COLOR_PRIMARY;
         ctx.beginPath();
 
         if( keyframes.length > 1){

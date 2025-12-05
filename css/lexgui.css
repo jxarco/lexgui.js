@@ -5990,6 +5990,8 @@ ul.lexassetscontent {
   background-color: #ffffff;
   cursor: pointer;
   border-radius: 5px;
+  border-style: solid;
+  border-width: 1.5px;
 }
 
 .resize-handle.tl {
@@ -6014,6 +6016,27 @@ ul.lexassetscontent {
   bottom: -5px;
   right: -5px;
   cursor: nwse-resize;
+}
+
+.resize-handle.r {
+  top: 50%;
+  right: -5px;
+  cursor: ew-resize;
+}
+.resize-handle.l {
+  top: 50%;
+  left: -5px;
+  cursor: ew-resize;
+}
+.resize-handle.t {
+  top: -5px;
+  left: 50%;
+  cursor: ns-resize;
+}
+.resize-handle.b {
+  bottom: -5px;
+  left: 50%;
+  cursor: ns-resize;
 }
 
 /* Class utilities */

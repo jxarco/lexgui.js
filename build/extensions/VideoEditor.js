@@ -301,8 +301,8 @@ class TimeBar {
         this._draw();
     }
     resize(size) {
-        this.canvas.width = size[0];
-        this.canvas.height = size[1];
+        this.canvas.width = Math.max(0, size[0]);
+        this.canvas.height = Math.max(0, size[1]);
         let newWidth = size[0] - this.offset * 2;
         newWidth = newWidth < 0.00001 ? 0.00001 : newWidth; // actual width of the line = canvas.width - offsetleft - offsetRight
         const startRatio = (this.startX - this.offset) / this.lineWidth;
@@ -320,6 +320,14 @@ LX.TimeBar = TimeBar;
  * @class VideoEditor
  */
 class VideoEditor {
+    static CROP_HANDLE_L = 0x01;
+    static CROP_HANDLE_R = 0x02;
+    static CROP_HANDLE_T = 0x04;
+    static CROP_HANDLE_B = 0x08;
+    static CROP_HANDLE_TL = VideoEditor.CROP_HANDLE_L | VideoEditor.CROP_HANDLE_T;
+    static CROP_HANDLE_BL = VideoEditor.CROP_HANDLE_L | VideoEditor.CROP_HANDLE_B;
+    static CROP_HANDLE_TR = VideoEditor.CROP_HANDLE_R | VideoEditor.CROP_HANDLE_T;
+    static CROP_HANDLE_BR = VideoEditor.CROP_HANDLE_R | VideoEditor.CROP_HANDLE_B;
     playing = false;
     videoReady = false;
     controls = true;
@@ -333,15 +341,14 @@ class VideoEditor {
     video;
     loop = false;
     isDragging = false;
-    isResizing = false;
+    isResizing = null; // holds the HTMLElement of the crop handle, if resizing
     crop = false;
     dragOffsetX = 0.0;
     dragOffsetY = 0.0;
     currentTimeString = "";
     timebar;
     mainArea;
-    cropArea;
-    brCrop;
+    cropArea; // HTMLElement with normCoord attribute;
     controlsArea;
     controlsPanelLeft;
     controlsPanelRight;
@@ -356,6 +363,9 @@ class VideoEditor {
     onResize;
     onChangeSpeed;
     _updateTime = true;
+    _onCropMouseUp;
+    _onCropMouseMove;
+    resize;
     constructor(area, options = {}) {
         this.speed = options.speed ?? this.speed;
         this.mainArea = area;
@@ -372,9 +382,9 @@ class VideoEditor {
         this.cropArea = document.createElement("div");
         this.cropArea.id = "cropArea";
         this.cropArea.className = "resize-area hidden";
-        this.brCrop = document.createElement("div");
-        this.brCrop.className = " resize-handle br"; // bottom right
-        this.cropArea.append(this.brCrop);
+        this.cropArea.normCoords = { x: 0, y: 0, w: 1, h: 1 };
+        const flags = 0x0f;
+        this.setCropAreaHandles(flags);
         this.crop = options.crop;
         this.dragOffsetX = 0;
         this.dragOffsetY = 0;
@@ -419,8 +429,8 @@ class VideoEditor {
         this.controlsPanelLeft.refresh = () => {
             this.controlsPanelLeft.clear();
             this.controlsPanelLeft.sameLine();
-            this.controlsPanelLeft.addButton('', "", () => {
-                this.playing = !this.playing;
+            let playbtn = this.controlsPanelLeft.addButton('Play', "", (v) => {
+                this.playing = v;
                 if (this.playing) {
                     if (this.video.currentTime + 0.000001 >= this.endTime) {
                         this.video.currentTime = this.startTime;
@@ -430,33 +440,22 @@ class VideoEditor {
                 else {
                     this.video.pause();
                 }
-                this.controlsPanelLeft.refresh();
-            }, { width: '40px', icon: (this.playing ? 'Pause@solid' : 'Play@solid'), className: "justify-center" });
-            // if( this.speedDialog )
-            // {
-            //     this.speedDialog.close();
-            // }
-            // this.speedDialog = null;
+            }, { width: '40px', icon: 'Play@solid', swap: 'Pause@solid', hideName: true, className: "justify-center" });
+            playbtn.setState(this.playing, true);
             this.controlsPanelLeft.addButton('', '', (v, e) => {
-                // if( this.speedDialog) {
-                //     this.speedDialog.close();
-                //     this.speedDialog = null;
-                //     return;
-                // }
                 const panel = new LX.Panel();
-                panel.addNumber("Speed", this.speed, (v) => {
+                panel.addRange("Speed", this.speed, (v) => {
                     this.speed = v;
                     this.video.playbackRate = v;
                     if (this.onChangeSpeed) {
                         this.onChangeSpeed(v);
                     }
-                }, { min: 0, max: 2.5, step: 0.01, nameWidth: "50px" });
+                }, { min: 0, max: 2.5, step: 0.01, hideName: true });
                 new LX.Popover(e.target, [panel], { align: "start", side: "top", sideOffset: 12 });
             }, { width: '40px', title: 'speed', icon: "Timer@solid", className: "justify-center" });
-            this.controlsPanelLeft.addButton('', 'Loop', () => {
-                this.loop = !this.loop;
-                this.controlsPanelLeft.refresh();
-            }, { width: '40px', title: 'loop', icon: ('Repeat@solid'), className: `justify-center`, buttonClass: `${(this.loop ? 'bg-accent' : '')}` });
+            this.controlsPanelLeft.addButton('', 'Loop', (v) => {
+                this.loop = v;
+            }, { width: '40px', title: 'loop', icon: ('Repeat@solid'), className: `justify-center`, selectable: true, selected: this.loop });
             this.controlsPanelLeft.addLabel(this.startTimeString, { width: "100px" });
             this.controlsPanelLeft.endLine();
             let availableWidth = leftArea.root.clientWidth - controlsLeft.root.clientWidth;
@@ -478,16 +477,18 @@ class VideoEditor {
         this.timebar.onChangeCurrent = this._setCurrentTime.bind(this);
         this.timebar.onChangeStart = this._setStartTime.bind(this);
         this.timebar.onChangeEnd = this._setEndTime.bind(this);
-        window.addEventListener('resize', () => {
+        this.resize = () => {
             if (this.onResize) {
                 this.onResize([videoArea.root.clientWidth, videoArea.root.clientHeight]);
             }
             bottomArea.setSize([this.controlsArea.root.clientWidth, 40]);
             let availableWidth = this.controlsArea.root.clientWidth - controlsLeft.root.clientWidth - controlsRight.root.clientWidth;
             this.timebar.resize([availableWidth, timeBarArea.root.clientHeight]);
-            this.dragCropArea({ clientX: -1, clientY: -1 });
-            this.resizeCropArea({ clientX: window.screen.width, clientY: window.screen.height });
-        });
+            this.moveCropArea(this.cropArea.normCoords.x, this.cropArea.normCoords.y, true);
+            this.resizeCropArea(this.cropArea.normCoords.w, this.cropArea.normCoords.h, true);
+        };
+        area.onresize = this.resize.bind(this);
+        window.addEventListener('resize', area.onresize);
         this.onKeyUp = (e) => {
             if (this.controls && e.key == " ") {
                 e.preventDefault();
@@ -506,18 +507,6 @@ class VideoEditor {
             }
         };
         window.addEventListener("keyup", this.onKeyUp);
-        videoArea.onresize = () => {
-            if (bottomArea.parentArea) {
-                bottomArea.setSize([bottomArea.parentArea.root.clientWidth, 40]);
-            }
-            const ratio = this.video.clientHeight / this.video.videoHeight;
-            this.cropArea.style.height = this.video.clientHeight + "px";
-            this.cropArea.style.width = this.video.videoWidth * ratio + "px";
-        };
-        timeBarArea.onresize = (v) => {
-            let availableWidth = this.controlsArea.root.clientWidth - controlsLeft.root.clientWidth - controlsRight.root.clientWidth - 20;
-            this.timebar.resize([availableWidth, v.height]);
-        };
         const parent = controlsArea.parentElement ? controlsArea.parentElement : controlsArea.root.parentElement;
         // Add canvas event listeneres
         parent.addEventListener("mousedown", (e) => {
@@ -525,107 +514,183 @@ class VideoEditor {
             //     this.timebar.onMouseDown(e);
             // }
         });
-        parent.addEventListener("mouseup", (e) => {
-            // if( this.controls) {
-            //     this.timebar.onMouseUp(e);
+        this._onCropMouseUp = (event) => {
+            // if(this.controls) {
+            //     this.timebar.onMouseUp(event);
             // }
+            event.preventDefault();
+            event.stopPropagation();
             if ((this.isDragging || this.isResizing) && this.onCropArea) {
-                if (this.onCropArea) {
-                    this.onCropArea(this.getCroppedArea());
-                }
+                this.onCropArea(this.getCroppedArea());
             }
             this.isDragging = false;
             this.isResizing = false;
-        });
-        parent.addEventListener("mousemove", (e) => {
-            // if( this.controls) {
-            //     this.timebar.onMouseMove(e);
+            document.removeEventListener("mouseup", this._onCropMouseUp); // self destroy. Added during mouseDown on cropArea and handles
+            document.removeEventListener("mousemove", this._onCropMouseMove); // self destroy. Added during mouseDown on cropArea and handles
+        };
+        this._onCropMouseMove = (event) => {
+            // if(this.controls) {
+            //     this.timebar.onMouseMove(event);
             // }
+            window.getSelection()?.removeAllRanges();
+            event.preventDefault();
+            event.stopPropagation();
             if (this.isResizing) {
-                this.resizeCropArea(e);
+                const rectCrop = this.cropArea.getBoundingClientRect();
+                const rectVideo = this.video.getBoundingClientRect();
+                const mov = this.isResizing.movement;
+                let x = rectCrop.left, y = rectCrop.top, w = rectCrop.width, h = rectCrop.height;
+                if (mov & VideoEditor.CROP_HANDLE_L) {
+                    let mouseX = Math.min(rectCrop.right - 4, Math.max(rectVideo.left, event.clientX)); // -4 because of border
+                    w = rectCrop.left + rectCrop.width - mouseX;
+                    x = mouseX;
+                    if (mouseX < rectCrop.left) {
+                        this.moveCropArea(x, y, false);
+                        this.resizeCropArea(w, h, false);
+                    }
+                    else {
+                        this.resizeCropArea(w, h, false);
+                        this.moveCropArea(x, y, false);
+                    }
+                }
+                if (mov & VideoEditor.CROP_HANDLE_R) {
+                    w = event.clientX - rectCrop.left;
+                    this.resizeCropArea(w, h, false);
+                }
+                if (mov & VideoEditor.CROP_HANDLE_T) {
+                    const mouseY = Math.min(rectCrop.bottom - 4, Math.max(rectVideo.top, event.clientY));
+                    h = rectCrop.top + rectCrop.height - mouseY;
+                    y = mouseY;
+                    if (mouseY < rectCrop.top) {
+                        this.moveCropArea(x, y, false);
+                        this.resizeCropArea(w, h, false);
+                    }
+                    else {
+                        this.resizeCropArea(w, h, false);
+                        this.moveCropArea(x, y, false);
+                    }
+                }
+                if (mov & VideoEditor.CROP_HANDLE_B) {
+                    h = event.clientY - rectCrop.top;
+                    this.resizeCropArea(w, h, false);
+                }
             }
             if (this.isDragging) {
-                this.dragCropArea(e);
+                this.moveCropArea(event.clientX - this.dragOffsetX, event.clientY - this.dragOffsetY, false);
             }
-        });
+        };
         this.cropArea.addEventListener("mousedown", (e) => {
             if (e.target === this.cropArea) {
                 const rect = this.cropArea.getBoundingClientRect();
                 this.isDragging = true;
                 this.dragOffsetX = e.clientX - rect.left;
                 this.dragOffsetY = e.clientY - rect.top;
+                document.addEventListener("mouseup", this._onCropMouseUp);
+                document.addEventListener("mousemove", this._onCropMouseMove);
             }
-        });
-        document.querySelectorAll(".resize-handle").forEach(handle => {
-            handle.addEventListener("mousedown", (e) => {
-                e.stopPropagation();
-                if (handle.classList[1] === 'br') {
-                    this.isResizing = true;
-                }
-            });
         });
         this.onChangeStart = null;
         this.onChangeEnd = null;
     }
-    resizeCropArea(e) {
-        const mouseX = e.clientX;
-        const mouseY = e.clientY;
-        const isCropHidden = this.cropArea.classList.contains("hidden");
-        const nodes = this.cropArea.parentElement?.childNodes ?? [];
-        const rectCrop = this.cropArea.getBoundingClientRect();
-        const rectVideo = this.video.getBoundingClientRect();
-        let width = Math.max(0, Math.min(mouseX - rectCrop.left, rectVideo.width));
-        let height = Math.max(0, Math.min(mouseY - rectCrop.top, rectVideo.height));
-        if ((rectCrop.left + width) > rectVideo.right) {
-            width = Math.min(rectVideo.width, rectVideo.right - rectCrop.left);
+    setCropAreaHandles(flags /*Integer*/) {
+        const resizers = this.cropArea.getElementsByClassName("resize-handle");
+        // remove existing resizer handles
+        for (let i = resizers.length - 1; i > -1; --i) {
+            resizers.remove();
         }
-        if ((rectCrop.top + height) > rectVideo.bottom) {
-            height = Math.min(rectVideo.height, rectVideo.bottom - rectCrop.top);
+        const buildResizer = (className, movement /*integer*/) => {
+            const handle = document.createElement("div");
+            handle.className = " resize-handle " + className;
+            handle.movement = movement;
+            this.cropArea.append(handle);
+            handle.addEventListener("mousedown", (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                this.isResizing = handle;
+                document.addEventListener("mouseup", this._onCropMouseUp);
+                document.addEventListener("mousemove", this._onCropMouseMove);
+            });
+        };
+        if (flags & VideoEditor.CROP_HANDLE_L) {
+            buildResizer("l", VideoEditor.CROP_HANDLE_L);
         }
-        if (!isCropHidden) {
-            for (let i = 0; i < nodes.length; i++) {
-                const node = nodes[i];
-                if (node == this.cropArea)
-                    continue;
-                const rectEl = node.getBoundingClientRect();
-                node.style.webkitMask = `linear-gradient(#000 0 0) ${rectCrop.x - rectEl.left}px ${rectCrop.y - rectEl.top}px / ${width}px ${height}px, linear-gradient(rgba(0, 0, 0, 0.3) 0 0)`;
-                node.style.webkitMaskRepeat = 'no-repeat';
-            }
+        if (flags & VideoEditor.CROP_HANDLE_R) {
+            buildResizer("r", VideoEditor.CROP_HANDLE_R);
         }
-        this.cropArea.style.width = width + "px";
-        this.cropArea.style.height = height + "px";
+        if (flags & VideoEditor.CROP_HANDLE_T) {
+            buildResizer("t", VideoEditor.CROP_HANDLE_T);
+        }
+        if (flags & VideoEditor.CROP_HANDLE_B) {
+            buildResizer("b", VideoEditor.CROP_HANDLE_B);
+        }
+        if ((flags & VideoEditor.CROP_HANDLE_TL) == VideoEditor.CROP_HANDLE_TL) {
+            buildResizer("tl", VideoEditor.CROP_HANDLE_TL);
+        }
+        if ((flags & VideoEditor.CROP_HANDLE_BL) == VideoEditor.CROP_HANDLE_BL) {
+            buildResizer("bl", VideoEditor.CROP_HANDLE_BL);
+        }
+        if ((flags & VideoEditor.CROP_HANDLE_TR) == VideoEditor.CROP_HANDLE_TR) {
+            buildResizer("tr", VideoEditor.CROP_HANDLE_TR);
+        }
+        if ((flags & VideoEditor.CROP_HANDLE_BR) == VideoEditor.CROP_HANDLE_BR) {
+            buildResizer("br", VideoEditor.CROP_HANDLE_BR);
+        }
     }
-    dragCropArea(e) {
+    resizeCropArea(sx, sy, isNormalized = true) {
         const rectVideo = this.video.getBoundingClientRect();
-        const rectCrop = this.cropArea.getBoundingClientRect();
-        let x = e.clientX - this.dragOffsetX;
-        let y = e.clientY - this.dragOffsetY;
-        if (x < rectVideo.left) {
-            x = rectVideo.left;
+        if (!isNormalized) {
+            sx = (rectVideo.width) ? (sx / rectVideo.width) : 1;
+            sy = (rectVideo.height) ? (sy / rectVideo.height) : 1;
         }
-        if (x + rectCrop.width > rectVideo.right) {
-            x = Math.max(rectVideo.left, rectVideo.right - rectCrop.width);
-        }
-        if (y < rectVideo.top) {
-            y = rectVideo.top;
-        }
-        if (y + rectCrop.height > rectVideo.bottom) {
-            y = Math.max(rectVideo.top, rectVideo.bottom - rectCrop.height);
-        }
+        sx = Math.min(1 - this.cropArea.normCoords.x, Math.max(0, sx));
+        sy = Math.min(1 - this.cropArea.normCoords.y, Math.max(0, sy));
+        this.cropArea.normCoords.w = sx;
+        this.cropArea.normCoords.h = sy;
+        const widthPx = rectVideo.width * sx;
+        const heightPx = rectVideo.height * sy;
+        const xPx = rectVideo.width * this.cropArea.normCoords.x + rectVideo.left;
+        const yPx = rectVideo.height * this.cropArea.normCoords.y + rectVideo.top;
         if (!this.cropArea.classList.contains("hidden")) {
-            const nodes = this.cropArea.parentElement?.childNodes ?? [];
+            const nodes = this.cropArea.parentElement.childNodes;
             for (let i = 0; i < nodes.length; i++) {
-                const node = nodes[i];
-                if (node == this.cropArea)
-                    continue;
-                const rectEl = node.getBoundingClientRect();
-                node.style.webkitMask = `linear-gradient(#000 0 0) ${x - rectEl.left}px ${y - rectEl.top}px / ${rectCrop.width}px ${rectCrop.height}px, linear-gradient(rgba(0, 0, 0, 0.3) 0 0)`;
-                node.style.webkitMaskRepeat = 'no-repeat';
+                if (nodes[i] != this.cropArea) {
+                    const rectEl = nodes[i].getBoundingClientRect();
+                    nodes[i].style.webkitMask = `linear-gradient(#000 0 0) ${xPx - rectEl.left}px ${yPx - rectEl.top}px / ${widthPx}px ${heightPx}px, linear-gradient(rgba(0, 0, 0, 0.3) 0 0)`;
+                    nodes[i].style.webkitMaskRepeat = 'no-repeat';
+                }
             }
         }
-        const parentRect = this.cropArea.parentElement?.getBoundingClientRect();
-        this.cropArea.style.left = x - parentRect.left + "px";
-        this.cropArea.style.top = y - parentRect.top + "px";
+        this.cropArea.style.width = widthPx + "px";
+        this.cropArea.style.height = heightPx + "px";
+    }
+    // screen pixel (event.clientX) or video normalized (0 is top left of video, 1 bot right)
+    moveCropArea(x, y, isNormalized = true) {
+        const rectVideo = this.video.getBoundingClientRect();
+        if (!isNormalized) {
+            x = (rectVideo.width) ? ((x - rectVideo.left) / rectVideo.width) : 0;
+            y = (rectVideo.height) ? ((y - rectVideo.top) / rectVideo.height) : 0;
+        }
+        x = Math.max(0, Math.min(1 - this.cropArea.normCoords.w, x));
+        y = Math.max(0, Math.min(1 - this.cropArea.normCoords.h, y));
+        this.cropArea.normCoords.x = x;
+        this.cropArea.normCoords.y = y;
+        const xPx = rectVideo.width * x + rectVideo.left;
+        const yPx = rectVideo.height * y + rectVideo.top;
+        const widthPx = rectVideo.width * this.cropArea.normCoords.w;
+        const heightPx = rectVideo.height * this.cropArea.normCoords.h;
+        if (!this.cropArea.classList.contains("hidden")) {
+            const nodes = this.cropArea.parentElement.childNodes;
+            for (let i = 0; i < nodes.length; i++) {
+                if (nodes[i] != this.cropArea) {
+                    const rectEl = nodes[i].getBoundingClientRect();
+                    nodes[i].style.webkitMask = `linear-gradient(#000 0 0) ${xPx - rectEl.left}px ${yPx - rectEl.top}px / ${widthPx}px ${heightPx}px, linear-gradient(rgba(0, 0, 0, 0.3) 0 0)`;
+                    nodes[i].style.webkitMaskRepeat = 'no-repeat';
+                }
+            }
+        }
+        const rectParent = this.cropArea.parentElement.getBoundingClientRect();
+        this.cropArea.style.left = xPx - rectParent.left + "px";
+        this.cropArea.style.top = yPx - rectParent.top + "px";
     }
     async loadVideo(options = {}) {
         this.videoReady = false;
@@ -678,8 +743,8 @@ class VideoEditor {
         }
         this.cropArea.style.height = this.video.clientHeight + "px";
         this.cropArea.style.width = this.video.clientWidth + "px";
-        this.resizeCropArea({ clientX: window.screen.width, clientY: window.screen.height });
-        this.dragCropArea({ clientX: -1, clientY: -1 });
+        this.moveCropArea(0, 0, true);
+        this.resizeCropArea(1, 1, true);
         if (this.crop) {
             this.showCropArea();
         }
@@ -814,6 +879,8 @@ class VideoEditor {
         this.controlsPanelLeft.refresh();
         this.video.src = "";
         window.removeEventListener("keyup", this.onKeyUp);
+        document.removeEventListener("mouseup", this._onCropMouseUp);
+        document.removeEventListener("mousemove", this._onCropMouseMove);
     }
 }
 LX.VideoEditor = VideoEditor;
