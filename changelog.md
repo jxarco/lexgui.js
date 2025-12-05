@@ -29,6 +29,7 @@ AssetView:
 - Replace item Old ContextMenus for Dropdowns.
 - Improved clone item renaming.
 - Support `Open in Editor` for Script items.
+- String search filter now allows expressions using wildcards (`*` and `?`).
 
 Bugfixes:
 - Area Tabs drag & drop is now working not deleting tab content.

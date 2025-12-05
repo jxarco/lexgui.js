@@ -955,6 +955,20 @@ export class AssetView
         LX.doAsync( () => this.toolsPanel.refresh(), 100 );
     }
 
+    _makeNameFilterFn( searchValue: string ): (name: string) => boolean
+    {
+        const q = searchValue.trim();
+
+        if( q.includes( "*" ) || q.includes( "?" ) )
+        {
+            const regex = LX.wildcardToRegExp( q );
+            return ( name ) => regex.test( name );
+        }
+
+        // default case, only check include
+        return ( name ) => name.toLowerCase().includes( q.toLowerCase() );
+    }
+
     _refreshContent( searchValue?: string, filter?: string )
     {
         const isCompactLayout = ( this.layout == AssetView.LAYOUT_COMPACT );
@@ -971,10 +985,13 @@ export class AssetView
         }
 
         const fr = new FileReader();
+        const nameFilterFn = this._makeNameFilterFn( this.searchValue );
 
-        const filteredData = this.currentData.filter( _i => {
-            return (this.filter != "None" ? _i.type.toLowerCase() == this.filter.toLowerCase() : true) &&
-                _i.id.toLowerCase().includes(this.searchValue.toLowerCase())
+        const filteredData = this.currentData.filter( ( _i ) =>
+        {
+            const typeMatch = this.filter !== "None" ? _i.type.toLowerCase() === this.filter.toLowerCase() : true;
+            const nameMatch = nameFilterFn( _i.id );
+            return typeMatch && nameMatch;
         } );
 
         this._paginator?.setPages( Math.max( Math.ceil( filteredData.length / this.assetsPerPage ), 1 ) );
