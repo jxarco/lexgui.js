@@ -521,6 +521,7 @@ class CodeEditor {
                         LX.removeClas(this.cursorsDOM, 'show');
                     }
                 } });
+            LX.addClass(this.tabs.root.parentElement, "rounded-t-lg");
             if (!this.disableEdition) {
                 this.tabs.root.parentElement.addEventListener('dblclick', (e) => {
                     if (options.allowAddScripts ?? true) {
@@ -1178,7 +1179,6 @@ class CodeEditor {
                 const s = getComputedStyle(r);
                 this.fontSize = parseInt(s.getPropertyValue("--code-editor-font-size"));
                 this.charWidth = this._measureChar();
-                this.processLines();
             }
             LX.emitSignal("@font-size", this.fontSize);
             // Get final sizes for editor elements based on Tabs and status bar offsets
@@ -1192,6 +1192,8 @@ class CodeEditor {
                 this.vScrollbar.root.style.height = `calc(100% - ${this._fullVerticalOffset}px)`;
                 this.hScrollbar.root.style.bottom = `${this._verticalBottomOffset}px`;
                 this.codeArea.root.style.height = `calc(100% - ${this._fullVerticalOffset}px)`;
+                // Process lines on finish computing final sizes
+                this.processLines();
             }, 50);
             if (options.callback) {
                 options.callback.call(this, this);
