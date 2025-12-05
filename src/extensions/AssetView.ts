@@ -13,7 +13,6 @@ const Area = LX.Area;
 const Panel = LX.Panel;
 const NodeTree = LX.NodeTree;
 const TreeEvent = LX.TreeEvent;
-const ContextMenu = LX.ContextMenu;
 
 export class AssetViewEvent
 {
@@ -115,6 +114,7 @@ export class AssetView
 
     _lastSortBy: string = "";
     _paginator: typeof LX.Pagination | undefined;
+    _scriptCodeDialog: typeof LX.Dialog | undefined;
 
     constructor( options: any = {} )
     {
@@ -456,31 +456,50 @@ export class AssetView
 
             const multiple = that.content.querySelectorAll('.selected').length;
 
-            LX.addContextMenu( multiple > 1 ? ( multiple + " selected" ) : isFolder ? item.id : item.type, e, ( m: typeof ContextMenu ) =>
+            const options: any[] = [
+                {
+                    name: ( multiple > 1 ) ? ( multiple + " selected" ) : item.id,
+                    icon: LX.makeIcon( "CircleSmall", { svgClass: `fill-current fg-${ typeColor }` } ),
+                    className: "text-sm", disabled: true
+                },
+                null
+            ];
+
+            if( multiple <= 1 )
             {
-                if( multiple <= 1 )
+                options.push( { name: "Rename", icon: "TextCursor", callback: that._renameItem.bind( that, item ) } );
+            }
+
+            if( !isFolder )
+            {
+                options.push( { name: "Clone", icon: "Copy", callback: that._cloneItem.bind( that, item ) });
+            }
+
+            options.push( { name: "Move", icon: "FolderInput", callback: that._moveItem.bind( that, item ) } );
+
+            if( type == "Script" && LX.has( "CodeEditor" ) )
+            {
+                options.push( { name: "Open in Editor", icon: "Code", callback: that._openScriptInEditor.bind( that, item ) } );
+            }
+
+            if( that.itemContextMenuOptions )
+            {
+                options.push( null );
+
+                for( let o of that.itemContextMenuOptions )
                 {
-                    m.add("Rename", that._renameItem.bind( that, item ));
+                    if( !o.name || !o.callback ) continue;
+                    options.push( { name: o.name, icon: o.icon, callback: o.callback?.bind( that, item ) } );
                 }
+            }
 
-                if( !isFolder )
-                {
-                    m.add("Clone", that._cloneItem.bind( that, item ));
-                }
+            options.push( null, { name: "Delete", icon: "Trash2", className: "fg-error", callback: that._deleteItem.bind( that, item ) } );
 
-                m.add("Delete", that._deleteItem.bind( that, item ));
+            LX.addClass( that.contentPanel.root, "pointer-events-none" );
 
-                if( that.itemContextMenuOptions )
-                {
-                    m.add("");
-
-                    for( let o of that.itemContextMenuOptions )
-                    {
-                        if( !o.name || !o.callback ) continue;
-                        m.add( o.name, o.callback?.bind( that, item ) );
-                    }
-                }
-            });
+            LX.addDropdownMenu( e.target, options, { side: "right", align: "start", event: e, onBlur: () => {
+                LX.removeClass( that.contentPanel.root, "pointer-events-none" );
+            } });
         });
 
         const onDrop = function( src: any, target: any )
@@ -850,7 +869,7 @@ export class AssetView
 
         const _onSort = ( value: any, event: any ) =>
         {
-            new LX.DropdownMenu( event.target, [
+            LX.addDropdownMenu( event.target, [
                 { name: "Name", icon: "ALargeSmall", callback: () => this._sortData( "id" ) },
                 { name: "Type", icon: "Type", callback: () => this._sortData( "type" ) },
                 null,
@@ -861,7 +880,7 @@ export class AssetView
 
         const _onChangeView = ( value: any, event: any ) =>
         {
-            new LX.DropdownMenu( event.target, [
+            LX.addDropdownMenu( event.target, [
                 { name: "Grid", icon: "LayoutGrid", callback: () => this._setContentLayout( AssetView.LAYOUT_GRID ) },
                 { name: "Compact", icon: "LayoutList", callback: () => this._setContentLayout( AssetView.LAYOUT_COMPACT ) },
                 { name: "List", icon: "List", callback: () => this._setContentLayout( AssetView.LAYOUT_LIST ) }
@@ -1224,6 +1243,11 @@ export class AssetView
         this._processData( this.data );
     }
 
+    _moveItem( item: any )
+    {
+
+    }
+
     _cloneItem( item: any )
     {
         const idx = this.currentData.indexOf( item );
@@ -1300,6 +1324,25 @@ export class AssetView
         }, { buttonClass: "contrast" });
 
         const p = new LX.Popover( item.domEl, [ panel ], { align: "center", side: "bottom", sideOffset: -128 });
+    }
+
+    _openScriptInEditor( script: any )
+    {
+        if( this._scriptCodeDialog )
+        {
+            this._scriptCodeDialog.destroy();
+        }
+
+        this._scriptCodeDialog = new LX.Dialog( null, ( p: typeof Panel ) => {
+            const area = new LX.Area({ className: "rounded-lg" });
+            p.attach( area );
+            let editor = new LX.CodeEditor( area, {
+                allowAddScripts: false,
+                files: [ script.src ]
+            } );
+        }, { size: ["50%", "600px"], closable: true, onBeforeClose: () => {
+            delete this._scriptCodeDialog;
+        } });
     }
 
     _setAssetsPerPage( n: number )

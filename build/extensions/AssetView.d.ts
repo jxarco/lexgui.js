@@ -67,6 +67,7 @@ export declare class AssetView {
     set assetsPerPage(v: any);
     _lastSortBy: string;
     _paginator: typeof LX.Pagination | undefined;
+    _scriptCodeDialog: typeof LX.Dialog | undefined;
     constructor(options?: any);
     /**
     * @method load
@@ -107,8 +108,10 @@ export declare class AssetView {
     _enterFolder(folderItem: any, storeCurrent?: boolean): void;
     _moveItemToFolder(item: any, folder: any): void;
     _deleteItem(item: any): void;
+    _moveItem(item: any): void;
     _cloneItem(item: any): void;
     _renameItem(item: any): void;
+    _openScriptInEditor(script: any): void;
     _setAssetsPerPage(n: number): void;
     _lastModifiedToStringDate(lm: number): string;
 }

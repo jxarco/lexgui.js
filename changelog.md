@@ -27,6 +27,8 @@ AssetView:
 - Added support for `Ctrl+Wheel` to increase grid item size in AssetView.
 - Replace old pagination implementation for new Pagination Component.
 - Assets can now be dragged into either content or explorer folders.
+- Replace item Old ContextMenus for Dropdowns.
+- Support `Open in Editor` for Script items.
 
 Bugfixes:
 - Area Tabs drag & drop is now working not deleting tab content.
