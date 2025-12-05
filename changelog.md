@@ -8,12 +8,11 @@ From 0.8.0, the full library is written in TypeScript to facilitate integrations
 
 Aded new Spinner and Pagination Components.
 Added support for `options.submit` in Form entries.
-Added new utils `LX.stripTags(str)`.
+Added new utils: `LX.stripTags`, `LX.escapeRegExp`, and `LX.wildcardToRegExp`.
 Refactored `Card` Component (see docs).
 Dropdown item icons can be passed as already generated icons with `LX.makeIcon`.
 Added "dev" icons, Vscode, Godot, Unity, UnrealEngine, Go, Css, Android, and more.
 New `colors/` page in main demo page.
-Added Card Component docs.
 Improved all docs.
 
 Table:
@@ -28,6 +27,7 @@ AssetView:
 - Replace old pagination implementation for new Pagination Component.
 - Assets can now be dragged into either content or explorer folders.
 - Replace item Old ContextMenus for Dropdowns.
+- Improved clone item renaming.
 - Support `Open in Editor` for Script items.
 
 Bugfixes:

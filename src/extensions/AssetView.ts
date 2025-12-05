@@ -185,7 +185,7 @@ export class AssetView
             ...( options.allowedTypes ?? {} )
         };
 
-        this._processData( this.data, null );
+        this._processData( this.data );
 
         this.currentFolder = null;
         this.currentData = this.data;
@@ -216,19 +216,15 @@ export class AssetView
     {
         this.prevData.length = 0;
         this.nextData.length = 0;
-
         this.data = data;
 
-        this._processData( this.data, null );
+        this._processData( this.data );
         this.currentData = this.data;
         this.path = [ '@' ];
 
         if( !this.skipBrowser )
         {
-            this.tree.refresh( {
-                id: '/',
-                children: this.data
-            } );
+            this.tree.refresh( { id: '/', children: this.data } );
         }
 
         this._refreshContent();
@@ -525,8 +521,6 @@ export class AssetView
 
                     that._moveItemToFolder( src, target );
 
-                    that._refreshContent();
-
                 }, { once: true });
             }
 
@@ -661,17 +655,20 @@ export class AssetView
 
     _processData( data: any, parent?: any )
     {
+        // Processing an item
         if( data.constructor !== Array )
         {
-            data[ 'folder' ] = parent;
+            data.parent = parent;
+            data.dir = parent.children;
             data.children = data.children ?? [];
         }
 
-        let list = data.constructor === Array ? data : data.children;
+        // Get the new parent
+        const newParent = parent ? data : { id: '/', children: this.data };
 
-        for( var i = 0; i < list.length; ++i )
+        for( let item of newParent.children )
         {
-            this._processData( list[ i ], data );
+            this._processData( item, newParent );
         }
     }
 
@@ -719,11 +716,6 @@ export class AssetView
         }
 
         // Process data to show in tree
-        let tree_data = {
-            id: '/',
-            children: this.data
-        }
-
         this.leftPanel.sameLine( 2, "justify-center" );
         this.leftPanel.addButton( null, "GoBackButton", () => {
             if( !this.prevData.length || !this.currentFolder ) return;
@@ -736,7 +728,8 @@ export class AssetView
             this._enterFolder( this.nextData.pop() );
         }, { buttonClass: "bg-none", title: "Go Forward", tooltip: true, icon: "ArrowRight" } );
 
-        const tree = this.leftPanel.addTree( "Content Browser", tree_data, {
+        const treeData = { id: '/', children: this.data };
+        const tree = this.leftPanel.addTree( "Content Browser", treeData, {
             // icons: tree_icons,
             filter: false,
             onlyFolders: this.onlyFolders,
@@ -790,11 +783,15 @@ export class AssetView
                             node.parent.children.splice( idx, 1 );
                         }
 
-                        node.folder = node.parent = value;
-
-                        if( !value.children ) value.children = [];
+                        if( !value.children )
+                        {
+                            value.children = [];
+                        }
 
                         value.children.push( node );
+
+                        node.parent = value;
+                        node.dir = value.children;
 
                         if( this.onItemDragged )
                         {
@@ -1183,46 +1180,64 @@ export class AssetView
         }
     }
 
-    _moveItemToFolder( item: any, folder: any )
+    _removeItemFromParent( item: any )
     {
-        const idx = this.currentData.indexOf( item );
-        if( idx < 0 )
-        {
-            console.error( "[AssetView Error] Cannot delete. Item not found." );
-            return;
-        }
-
-        this.currentData.splice( idx, 1 );
-
         const oldParent = item.parent;
         if( oldParent )
         {
-            oldParent.children = oldParent.children.filter( ( c: any ) => c !== item );
+            const idx = oldParent.children.indexOf( item );
+            if( idx < 0 )
+            {
+                return false;
+            }
+            oldParent.children.splice( idx, 1 );
+        }
+        else
+        {
+            const oldDir = item.dir;
+            if( oldDir )
+            {
+                const idx = oldDir.indexOf( item );
+                if( idx < 0 )
+                {
+                    return false;
+                }
+
+                oldDir.splice( idx, 1 );
+            }
         }
 
-        // add to new folder
+        return true;
+    }
+
+    _moveItemToFolder( item: any, folder: any )
+    {
+        const ok = this._removeItemFromParent( item );
+        if( !ok )
+        {
+            console.error( "[AssetView Error] Cannot move. Item not found." );
+            return;
+        }
+
         folder.children.push( item );
         item.parent = folder;
+        item.dir = folder.children;
+
+        this._refreshContent();
+        this.tree?.refresh();
     }
 
     _deleteItem( item: any )
     {
-        const idx = this.currentData.indexOf( item );
-        if( idx < 0 )
+        const ok = this._removeItemFromParent( item );
+        if( !ok )
         {
             console.error( "[AssetView Error] Cannot delete. Item not found." );
             return;
         }
 
-        this.currentData.splice( idx, 1 );
-
-        const oldParent = item.parent;
-        if( oldParent )
-        {
-            oldParent.children = oldParent.children.filter( ( c: any ) => c !== item );
-        }
-
         this._refreshContent( this.searchValue, this.filter );
+        this.tree?.refresh();
 
         if( this.onevent)
         {
@@ -1230,17 +1245,10 @@ export class AssetView
             this.onevent( event );
         }
 
-        if( !this.skipBrowser )
-        {
-            this.tree.refresh();
-        }
-
         if( this.previewPanel )
         {
             this.previewPanel.clear();
         }
-
-        this._processData( this.data );
     }
 
     _moveItem( item: any )
@@ -1250,16 +1258,32 @@ export class AssetView
 
     _cloneItem( item: any )
     {
-        const idx = this.currentData.indexOf( item );
-        if( idx < 0 )
+        if( item.type === "folder" )
         {
+            console.error( "[AssetView Error] Cannot clone a folder." );
             return;
         }
 
+        const parent = item.parent;
+        const dir = item.dir ?? [];
+        const idx = dir.indexOf( item );
+        if( idx < 0 )
+        {
+            console.error( "[AssetView Error] Cannot clone. Item not found." );
+            return false;
+        }
+
         delete item.domEl;
-        delete item.folder;
-        const new_item = LX.deepCopy( item );
-        this.currentData.splice( idx, 0, new_item );
+        delete item.dir;
+        delete item.parent;
+
+        const newItem = LX.deepCopy( item );
+        newItem.id = this._getClonedName( item.id, dir );
+        newItem.uid = LX.guidGenerator(); // generate new uid
+        newItem.dir = item.dir = dir;
+        newItem.parent = item.parent = parent;
+
+        dir.splice( idx + 1, 0, newItem );
 
         this._refreshContent( this.searchValue, this.filter );
 
@@ -1268,8 +1292,6 @@ export class AssetView
             const event = new AssetViewEvent( AssetViewEvent.ASSET_CLONED, item );
             this.onevent( event );
         }
-
-        this._processData( this.data );
     }
 
     _renameItem( item: any )
@@ -1349,6 +1371,60 @@ export class AssetView
     {
         this._assetsPerPage = n;
         this._refreshContent();
+    }
+
+    _getClonedName( originalName: string, siblings: any[] ): string
+    {
+        const dotIndex = originalName.lastIndexOf( "." );
+        let base = originalName;
+        let ext = "";
+
+        if( dotIndex > 0 )
+        {
+            base = originalName.substring( 0, dotIndex );
+            ext = originalName.substring( dotIndex ); // includes the dot
+        }
+
+        // core name without (N)
+        const match = base.match(/^(.*)\s\((\d+)\)$/);
+        if( match )
+        {
+            base = match[ 1 ];
+        }
+
+        let maxN = 0;
+
+        for( const s of siblings )
+        {
+            if( !s.id ) continue;
+
+            let sBase = s.id;
+            let sExt = "";
+
+            const sDot = sBase.lastIndexOf( "." );
+            if( sDot > 0 )
+            {
+                sExt = sBase.substring( sDot );
+                sBase = sBase.substring( 0, sDot );
+            }
+
+            // Only compare same extension and same base!
+            if( sExt !== ext ) continue;
+
+            const m = sBase.match( new RegExp("^" + LX.escapeRegExp( base ) + "\\s\\((\\d+)\\)$") );
+            if( m )
+            {
+                const num = parseInt( m[ 1 ] );
+                if( num > maxN ) maxN = num;
+            }
+            else if( sBase === base )
+            {
+                // Base name exists without number
+                maxN = Math.max( maxN, 0 );
+            }
+        }
+
+        return `${base} (${ maxN + 1 })${ ext }`;
     }
 
     _lastModifiedToStringDate( lm: number ): string
