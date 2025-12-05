@@ -2538,6 +2538,7 @@ class Tags extends BaseComponent {
         let arrayValue = value.replace(/\s/g, '').split(',');
         let defaultValue = LX.deepCopy(arrayValue);
         super(ComponentType.TAGS, name, defaultValue, options);
+        this.options.skipDuplicates = options.skipDuplicates ?? true;
         this.onGetValue = () => {
             return LX.deepCopy(value);
         };
@@ -2577,16 +2578,16 @@ class Tags extends BaseComponent {
             tagInput.placeholder = "Add tag...";
             tagsContainer.appendChild(tagInput);
             tagInput.onkeydown = e => {
-                const val = tagInput.value.replace(/\s/g, '');
                 if (e.key == ' ' || e.key == 'Enter') {
+                    const val = tagInput.value.replace(/\s/g, '');
                     e.preventDefault();
-                    if (!val.length || value.indexOf(val) > -1)
+                    if (!val.length || (options.skipDuplicates && value.indexOf(val) > -1))
                         return;
                     value.push(val);
                     this.set(value, false, e);
+                    tagsContainer.querySelector("input")?.focus(); // generateTags creates a new tagInput instance
                 }
             };
-            tagInput.focus();
         };
         this.generateTags(arrayValue);
         LX.doAsync(this.onResize.bind(this));
@@ -9187,6 +9188,17 @@ function deepCopy(obj) {
     return JSON.parse(JSON.stringify(obj));
 }
 LX.deepCopy = deepCopy;
+function concatTypedArray(arrays, ArrayType) {
+    let size = arrays.reduce((acc, arr) => acc + arr.length, 0);
+    let result = new ArrayType(size); // generate just one array
+    let offset = 0;
+    for (let i = 0; i < arrays.length; ++i) {
+        result.set(arrays[i], offset); // copy values
+        offset += arrays[i].length;
+    }
+    return result;
+}
+LX.concatTypedArray = concatTypedArray;
 /**
  * @method setTheme
  * @description Set dark or light theme

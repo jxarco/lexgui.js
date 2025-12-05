@@ -13,19 +13,9 @@ Refactored `Card` Component (see docs).
 Dropdown item icons can be passed as already generated icons with `LX.makeIcon`.
 Area Tabs drag & drop is now working without deleting tab content.
 Calendar and CalendarRange month changes now correctly.
-Table Calendar filters now work as expected solving some minor issues.
 Code Editor multiline indentation now works properly on empty lines.
-"All components" example works now on mobile devices.
+Fixed line color of Timeline curve tracks in light theme.
 Added "dev" icons, Vscode, Godot, Unity, UnrealEngine, Go, Css, Android, and more.
-New `colors/` page in main demo page.
-Improved all docs.
-
-Table:
-- Support for Pagination (`options.pagination` and `options.rowsPerPage`).
-- Sort Date strings by date.
-- Added support for `options.hiddenColumns` and `options.showSelectedNumber`.
-- `options.centered` now allows column indices or names.
-- Added row `idx` to `options.rowActions` callback parameters `(idx, bodyData, table, event)`.
 
 AssetView:
 - Added support for `Ctrl+Wheel` to increase grid item size in AssetView.
@@ -37,9 +27,28 @@ AssetView:
 - Support `Open in Editor` for Script items.
 - String search filter now allows expressions using wildcards (`*` and `?`).
 
+Table Component:
+- Support for Pagination (`options.pagination` and `options.rowsPerPage`).
+- Sort Date strings by date.
+- Added support for `options.hiddenColumns` and `options.showSelectedNumber`.
+- `options.centered` now allows column indices or names.
+- Added row `idx` to `options.rowActions` callback parameters `(idx, bodyData, table, event)`.
+- Calendar filters now work as expected solving some minor issues.
+
 Sidebar:
 - Fixed selected entries CSS in light theme.
 - Fixed entries separator not being visible due to content shrink.
+
+Tags Component:
+- Added skipDuplicates option
+- Focus input only when writing
+
+VideoEditor:
+- `dragCropArea` renamed to `moveCropArea`.
+- `moveCropArea` and `resizeCropArea` now expect values (either pixel or normalized coords) instead of an event.
+- Resize and move events now work even while dragging outside of the area's scope.
+- Added `setCropAreaHandles` to specify which resize handles should be visible.
+- Added `options.handleStyle` to edit resize handle's style.
 
 API Changes:
 - `BaseComponent` enum types moved to `ComponentType`.
@@ -57,7 +66,10 @@ API Changes:
 - Docmaker Extension API full changed (see docs).
 - Inputs Class `nobg` renamed to `bg-none` for consistency.
 
-Styling:
+Pages and Styling:
+- "All components" example works now on mobile devices.
+- New `colors/` page in main demo page.
+- Improved and extended docs.
 - Main Theme colors updates.
 - Improved color consistency with darker tones.
 - Use `Inter` (https://fonts.google.com/specimen/Inter) as default font.

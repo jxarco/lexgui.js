@@ -278,6 +278,22 @@ function deepCopy( obj: any )
 
 LX.deepCopy = deepCopy;
 
+function concatTypedArray( arrays: any[], ArrayType: any )
+{
+    let size = arrays.reduce( ( acc,arr ) => acc + arr.length, 0 );
+    let result = new ArrayType( size ); // generate just one array
+    let offset = 0;
+    for( let i = 0; i < arrays.length; ++i )
+    {
+        result.set( arrays[ i ], offset ); // copy values
+        offset += arrays[ i ].length;
+    }
+
+    return result;
+}
+
+LX.concatTypedArray = concatTypedArray;
+
 /**
  * @method setTheme
  * @description Set dark or light theme
