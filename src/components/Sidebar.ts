@@ -77,7 +77,7 @@ export class Sidebar {
         const mobile = navigator && /Android|iPhone/i.test( navigator.userAgent );
 
         this.root = document.createElement( "div" );
-        this.root.className = "lexsidebar " + ( options.className ?? "" );
+        this.root.className = "lexsidebar flex flex-col " + ( options.className ?? "" );
         this.callback = options.callback ?? null;
         this._displaySelected = options.displaySelected ?? false;
         this.side = options.side ?? "left";
@@ -123,7 +123,7 @@ export class Sidebar {
         {
             this.header = options.header ?? this._generateDefaultHeader( options );
             console.assert( this.header.constructor === HTMLDivElement, "Use an HTMLDivElement to build your custom header" );
-            this.header.className = "lexsidebarheader";
+            this.header.className = "lexsidebarheader flex-auto";
             this.root.appendChild( this.header );
 
             if( this.collapsable )
@@ -171,7 +171,7 @@ export class Sidebar {
         // Content
         {
             this.content = document.createElement( 'div' );
-            this.content.className = "lexsidebarcontent";
+            this.content.className = "lexsidebarcontent flex-auto-fill";
             this.root.appendChild( this.content );
         }
 
@@ -180,17 +180,9 @@ export class Sidebar {
         {
             this.footer = options.footer ?? this._generateDefaultFooter( options );
             console.assert( this.footer.constructor === HTMLDivElement, "Use an HTMLDivElement to build your custom footer" );
-            this.footer.className = "lexsidebarfooter";
+            this.footer.className = "lexsidebarfooter flex-auto";
             this.root.appendChild( this.footer );
         }
-
-        const resizeObserver = new ResizeObserver( entries => {
-            const contentOffset = ( this.header?.offsetHeight ?? 0 ) +
-            ( this.filter?.offsetHeight ?? 0 ) +
-            ( this.footer?.offsetHeight ?? 0 );
-            this.content.style.height = `calc(100% - ${ contentOffset }px)`;
-        } );
-        resizeObserver.observe( this.root );
     }
 
     _generateDefaultHeader( options: any = {} ) {

@@ -825,16 +825,17 @@ export class AssetView
 
     _createContentPanel( area: typeof Area )
     {
+        area.root.classList.add( "flex", "flex-col" );
+
         if( this.toolsPanel )
         {
             this.contentPanel.clear();
         }
         else
         {
-            this.toolsPanel = area.addPanel({ className: 'overflow-hidden', height: "auto" });
+            this.toolsPanel = area.addPanel({ className: 'flex-auto', height: "auto" });
             this.contentPanel = area.addPanel({
-                className: 'lexassetcontentpanel flex flex-col content-center overflow-hidden',
-                height: "calc(100%)"
+                className: 'lexassetcontentpanel flex flex-col flex-auto-fill content-center overflow-hidden'
             });
 
             this._paginator = new LX.Pagination( {
@@ -842,16 +843,6 @@ export class AssetView
                 pages: Math.max( Math.ceil( this.data.length / this.assetsPerPage ), 1 ),
                 onChange: () => this._refreshContent()
             } );
-
-            const resizeObserver = new ResizeObserver( entries => {
-                const e = entries[ 0 ];
-                if( e )
-                {
-                    this.contentPanel.root.style.height = `calc(100% - ${ ( e.contentRect.height + 8 ) }px )`;
-                }
-            });
-
-            resizeObserver.observe( this.toolsPanel.root );
 
             this.contentPanel.root.addEventListener( 'wheel', ( e: WheelEvent ) =>
             {

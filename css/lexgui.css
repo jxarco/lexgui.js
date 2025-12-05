@@ -3297,6 +3297,8 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     margin: 0 auto;
     margin-top: 0.4rem;
     margin-bottom: 0.4rem;
+    display: flex;
+    flex-shrink: 0;
 }
 
 .lexsidebar .lexsidebarfilter {
@@ -6088,14 +6090,19 @@ ul.lexassetscontent {
 
 /* Layout */
 
-.flex { display: flex }
-.inline-flex { display: inline-flex !important }
-.inline-grid { display: inline-grid !important }
-.flex-fill { flex: 1 0 0% }
-.grid { display: grid }
 .block { display: block }
 .inline-block { display: inline-block }
 .hidden { display: none !important }
+.grid { display: grid }
+.inline-grid { display: inline-grid !important }
+.flex { display: flex }
+.inline-flex { display: inline-flex !important }
+.flex-fill { flex: 1 0 0% }
+.flex-auto { flex: 0 0 auto }
+.flex-auto-fill { flex: 1 1 auto }
+.flex-col { flex-direction: column }
+.flex-row { flex-direction: row }
+.flex-wrap { flex-wrap: wrap }
 
 /* Grid columns and rows */
 .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
@@ -6168,10 +6175,6 @@ ul.lexassetscontent {
 .line-clamp-2 { -webkit-line-clamp: 2; line-clamp: 2 }
 .line-clamp-3 { -webkit-line-clamp: 3; line-clamp: 3 }
 .line-clamp-4 { -webkit-line-clamp: 4; line-clamp: 4 }
-
-.flex-col { flex-direction: column }
-.flex-row { flex-direction: row }
-.flex-wrap { flex-wrap: wrap }
 
 .items-start { place-items: start }
 .items-center { place-items: center }

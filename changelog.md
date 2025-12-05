@@ -11,6 +11,11 @@ Added support for `options.submit` in Form entries.
 Added new utils: `LX.stripTags`, `LX.escapeRegExp`, and `LX.wildcardToRegExp`.
 Refactored `Card` Component (see docs).
 Dropdown item icons can be passed as already generated icons with `LX.makeIcon`.
+Area Tabs drag & drop is now working without deleting tab content.
+Calendar and CalendarRange month changes now correctly.
+Table Calendar filters now work as expected solving some minor issues.
+Code Editor multiline indentation now works properly on empty lines.
+"All components" example works now on mobile devices.
 Added "dev" icons, Vscode, Godot, Unity, UnrealEngine, Go, Css, Android, and more.
 New `colors/` page in main demo page.
 Improved all docs.
@@ -31,13 +36,9 @@ AssetView:
 - Support `Open in Editor` for Script items.
 - String search filter now allows expressions using wildcards (`*` and `?`).
 
-Bugfixes:
-- Area Tabs drag & drop is now working not deleting tab content.
-- "All components" example works now on mobile devices.
-- Calendar and CalendarRange month changes now correctly.
-- Table Calendar filters now work as expected solving some minor issues.
-- Code Editor multiline indentation now works properly on empty lines.
-- Fixed Sidebar selected entries CSS in light theme.
+Sidebar:
+- Fixed selected entries CSS in light theme.
+- Fixed entries separator not being visible due to content shrink.
 
 API Changes:
 - `BaseComponent` enum types moved to `ComponentType`.
