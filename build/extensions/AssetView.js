@@ -94,6 +94,7 @@ class AssetView {
     _lastSortBy = "";
     _paginator;
     _scriptCodeDialog;
+    _moveItemDialog;
     constructor(options = {}) {
         this.rootPath = "https://raw.githubusercontent.com/jxarco/lexgui.js/master/";
         this.layout = options.layout ?? this.layout;
@@ -144,7 +145,7 @@ class AssetView {
             "Video": { color: "indigo-400" },
             ...(options.allowedTypes ?? {})
         };
-        this._processData(this.data, null);
+        this._processData(this.data);
         this.currentFolder = null;
         this.currentData = this.data;
         this.path = ['@'];
@@ -166,14 +167,11 @@ class AssetView {
         this.prevData.length = 0;
         this.nextData.length = 0;
         this.data = data;
-        this._processData(this.data, null);
+        this._processData(this.data);
         this.currentData = this.data;
         this.path = ['@'];
         if (!this.skipBrowser) {
-            this.tree.refresh({
-                id: '/',
-                children: this.data
-            });
+            this.tree.refresh({ id: '/', children: this.data });
         }
         this._refreshContent();
         this.onevent = onevent;
@@ -384,7 +382,6 @@ class AssetView {
                 draggedEl.addEventListener("animationend", () => {
                     draggedEl.classList.remove("moving-to-folder");
                     that._moveItemToFolder(src, target);
-                    that._refreshContent();
                 }, { once: true });
             }
             if (that.onevent) {
@@ -488,13 +485,16 @@ class AssetView {
     * @method _processData
     */
     _processData(data, parent) {
+        // Processing an item
         if (data.constructor !== Array) {
-            data['folder'] = parent;
+            data.parent = parent;
+            data.dir = parent.children;
             data.children = data.children ?? [];
         }
-        let list = data.constructor === Array ? data : data.children;
-        for (var i = 0; i < list.length; ++i) {
-            this._processData(list[i], data);
+        // Get the new parent
+        const newParent = parent ? data : { id: '/', children: this.data };
+        for (let item of newParent.children) {
+            this._processData(item, newParent);
         }
     }
     /**
@@ -528,10 +528,6 @@ class AssetView {
             this.leftPanel = area.addPanel({ className: 'lexassetbrowserpanel' });
         }
         // Process data to show in tree
-        let tree_data = {
-            id: '/',
-            children: this.data
-        };
         this.leftPanel.sameLine(2, "justify-center");
         this.leftPanel.addButton(null, "GoBackButton", () => {
             if (!this.prevData.length || !this.currentFolder)
@@ -544,7 +540,8 @@ class AssetView {
                 return;
             this._enterFolder(this.nextData.pop());
         }, { buttonClass: "bg-none", title: "Go Forward", tooltip: true, icon: "ArrowRight" });
-        const tree = this.leftPanel.addTree("Content Browser", tree_data, {
+        const treeData = { id: '/', children: this.data };
+        const tree = this.leftPanel.addTree("Content Browser", treeData, {
             // icons: tree_icons,
             filter: false,
             onlyFolders: this.onlyFolders,
@@ -584,10 +581,12 @@ class AssetView {
                                 const idx = node.parent.children.indexOf(node);
                                 node.parent.children.splice(idx, 1);
                             }
-                            node.folder = node.parent = value;
-                            if (!value.children)
+                            if (!value.children) {
                                 value.children = [];
+                            }
                             value.children.push(node);
+                            node.parent = value;
+                            node.dir = value.children;
                             if (this.onItemDragged) {
                                 this.onItemDragged(node, value);
                             }
@@ -611,27 +610,20 @@ class AssetView {
     * @method _createContentPanel
     */
     _createContentPanel(area) {
+        area.root.classList.add("flex", "flex-col");
         if (this.toolsPanel) {
             this.contentPanel.clear();
         }
         else {
-            this.toolsPanel = area.addPanel({ className: 'overflow-hidden', height: "auto" });
+            this.toolsPanel = area.addPanel({ className: 'flex-auto', height: "auto" });
             this.contentPanel = area.addPanel({
-                className: 'lexassetcontentpanel flex flex-col content-center overflow-hidden',
-                height: "calc(100%)"
+                className: 'lexassetcontentpanel flex flex-col flex-auto-fill content-center overflow-hidden'
             });
             this._paginator = new LX.Pagination({
                 className: "ml-auto",
                 pages: Math.max(Math.ceil(this.data.length / this.assetsPerPage), 1),
                 onChange: () => this._refreshContent()
             });
-            const resizeObserver = new ResizeObserver(entries => {
-                const e = entries[0];
-                if (e) {
-                    this.contentPanel.root.style.height = `calc(100% - ${(e.contentRect.height + 8)}px )`;
-                }
-            });
-            resizeObserver.observe(this.toolsPanel.root);
             this.contentPanel.root.addEventListener('wheel', (e) => {
                 if (!e.ctrlKey)
                     return;
@@ -708,6 +700,15 @@ class AssetView {
         // After content to update the size of the content based on the toolbar
         LX.doAsync(() => this.toolsPanel.refresh(), 100);
     }
+    _makeNameFilterFn(searchValue) {
+        const q = searchValue.trim();
+        if (q.includes("*") || q.includes("?")) {
+            const regex = LX.wildcardToRegExp(q);
+            return (name) => regex.test(name);
+        }
+        // default case, only check include
+        return (name) => name.toLowerCase().includes(q.toLowerCase());
+    }
     _refreshContent(searchValue, filter) {
         const isCompactLayout = (this.layout == AssetView.LAYOUT_COMPACT);
         const isListLayout = (this.layout == AssetView.LAYOUT_LIST);
@@ -719,9 +720,11 @@ class AssetView {
             return;
         }
         const fr = new FileReader();
-        const filteredData = this.currentData.filter(_i => {
-            return (this.filter != "None" ? _i.type.toLowerCase() == this.filter.toLowerCase() : true) &&
-                _i.id.toLowerCase().includes(this.searchValue.toLowerCase());
+        const nameFilterFn = this._makeNameFilterFn(this.searchValue);
+        const filteredData = this.currentData.filter((_i) => {
+            const typeMatch = this.filter !== "None" ? _i.type.toLowerCase() === this.filter.toLowerCase() : true;
+            const nameMatch = nameFilterFn(_i.id);
+            return typeMatch && nameMatch;
         });
         this._paginator?.setPages(Math.max(Math.ceil(filteredData.length / this.assetsPerPage), 1));
         // Show all data if using filters
@@ -879,62 +882,161 @@ class AssetView {
             this.onevent(event);
         }
     }
-    _moveItemToFolder(item, folder) {
-        const idx = this.currentData.indexOf(item);
-        if (idx < 0) {
-            console.error("[AssetView Error] Cannot delete. Item not found.");
-            return;
-        }
-        this.currentData.splice(idx, 1);
+    _removeItemFromParent(item) {
         const oldParent = item.parent;
         if (oldParent) {
-            oldParent.children = oldParent.children.filter((c) => c !== item);
+            const idx = oldParent.children.indexOf(item);
+            if (idx < 0) {
+                return false;
+            }
+            oldParent.children.splice(idx, 1);
         }
-        // add to new folder
+        else {
+            const oldDir = item.dir;
+            if (oldDir) {
+                const idx = oldDir.indexOf(item);
+                if (idx < 0) {
+                    return false;
+                }
+                oldDir.splice(idx, 1);
+            }
+        }
+        return true;
+    }
+    _moveItemToFolder(item, folder) {
+        const ok = this._removeItemFromParent(item);
+        if (!ok) {
+            console.error("[AssetView Error] Cannot move. Item not found.");
+            return;
+        }
         folder.children.push(item);
         item.parent = folder;
+        item.dir = folder.children;
+        this._refreshContent();
+        this.tree?.refresh();
     }
     _deleteItem(item) {
-        const idx = this.currentData.indexOf(item);
-        if (idx < 0) {
+        const ok = this._removeItemFromParent(item);
+        if (!ok) {
             console.error("[AssetView Error] Cannot delete. Item not found.");
             return;
         }
-        this.currentData.splice(idx, 1);
-        const oldParent = item.parent;
-        if (oldParent) {
-            oldParent.children = oldParent.children.filter((c) => c !== item);
-        }
         this._refreshContent(this.searchValue, this.filter);
+        this.tree?.refresh();
         if (this.onevent) {
             const event = new AssetViewEvent(AssetViewEvent.ASSET_DELETED, item);
             this.onevent(event);
         }
-        if (!this.skipBrowser) {
-            this.tree.refresh();
-        }
         if (this.previewPanel) {
             this.previewPanel.clear();
         }
-        this._processData(this.data);
     }
     _moveItem(item) {
+        if (this._moveItemDialog) {
+            this._moveItemDialog.destroy();
+        }
+        let targetFolder = null;
+        let bcContainer;
+        const _openFolder = function (p, container, updateBc = true) {
+            container.innerHTML = "";
+            targetFolder = p;
+            for (let pi of (targetFolder.children ?? targetFolder)) {
+                const row = LX.makeContainer(["100%", "auto"], "flex flex-row px-1 items-center", "", container);
+                const isFolder = (pi.type === "folder");
+                const rowItem = LX.makeContainer(["100%", "auto"], `move-item flex flex-row gap-1 py-1 px-3 cursor-pointer ${isFolder ? "fg-primary font-medium" : "fg-quinary"} rounded-xxl ${isFolder ? "hover:bg-secondary" : "hover:bg-primary"}`, `${isFolder ? LX.makeIcon("FolderOpen", { svgClass: "" }).innerHTML : ""}${pi.id}`, row);
+                if (isFolder) {
+                    rowItem.addEventListener("click", () => {
+                        container.querySelectorAll(".move-item").forEach((el) => LX.removeClass(el, "bg-quinary"));
+                        LX.addClass(rowItem, "bg-quinary");
+                        targetFolder = pi;
+                    });
+                    const fPathButton = new LX.Button(null, "FPathButton", () => {
+                        _openFolder(pi, container);
+                    }, { icon: "ChevronRight", className: "ml-auto h-8", buttonClass: "bg-none hover:bg-secondary" });
+                    row.appendChild(fPathButton.root);
+                }
+            }
+            if (!updateBc) {
+                return;
+            }
+            const path = [];
+            if (targetFolder && targetFolder.parent) {
+                path.push(targetFolder.id);
+                const _pushParentsId = (i) => {
+                    if (!i)
+                        return;
+                    path.push(i.parent ? i.id : '@');
+                    _pushParentsId(i.parent);
+                };
+                _pushParentsId(targetFolder.parent);
+            }
+            else {
+                path.push('@');
+            }
+            bcContainer.innerHTML = "";
+            bcContainer.appendChild(LX.makeBreadcrumb(path.reverse().map(p => { return { title: p }; }), {
+                maxItems: 4, separatorIcon: "ChevronRight"
+            }));
+        };
+        this._moveItemDialog = new LX.Dialog(`Moving: ${item.id}`, (p) => {
+            const area = new LX.Area({ className: "flex flex-col rounded-lg" });
+            p.attach(area);
+            const content = LX.makeContainer(["auto", "100%"], "flex flex-auto-fill flex-col overflow-scroll py-2 gap-1", ``);
+            {
+                const headerPanel = area.addPanel({ className: "p-2 border-bottom flex flex-auto", height: "auto" });
+                headerPanel.sameLine(2, "w-full");
+                headerPanel.addButton(null, "BackButton", () => {
+                    if (targetFolder && targetFolder.parent)
+                        _openFolder(targetFolder.parent, content);
+                }, { icon: "ArrowLeft", title: "Back", tooltip: true, className: "flex-auto", buttonClass: "bg-none hover:bg-secondary" });
+                bcContainer = LX.makeElement("div");
+                headerPanel.addContent("ITEM_MOVE_PATH", bcContainer, { signal: "@item_move_path", className: "flex-auto-fill" });
+            }
+            area.attach(content);
+            _openFolder(this.data, content);
+            {
+                const footerPanel = area.addPanel({ className: "p-2 border-top flex flex-auto justify-between", height: "auto" });
+                footerPanel.addButton(null, "NewFolderButton", () => {
+                }, { width: "auto", icon: "FolderPlus", title: "Create Folder", tooltip: true, className: "ml-2", buttonClass: "bg-none hover:bg-secondary" });
+                footerPanel.sameLine(2, "mr-2");
+                footerPanel.addButton(null, "Cancel", () => {
+                    this._moveItemDialog.close();
+                }, { buttonClass: "bg-none fg-error" });
+                footerPanel.addButton(null, "Move", () => {
+                    this._moveItemToFolder(item, targetFolder);
+                    this._moveItemDialog.close();
+                }, { className: "", buttonClass: "contrast" });
+            }
+        }, { modal: true, size: ["616px", "500px"], closable: true, onBeforeClose: () => {
+                delete this._moveItemDialog;
+            } });
     }
     _cloneItem(item) {
-        const idx = this.currentData.indexOf(item);
-        if (idx < 0) {
+        if (item.type === "folder") {
+            console.error("[AssetView Error] Cannot clone a folder.");
             return;
         }
+        const parent = item.parent;
+        const dir = item.dir ?? [];
+        const idx = dir.indexOf(item);
+        if (idx < 0) {
+            console.error("[AssetView Error] Cannot clone. Item not found.");
+            return false;
+        }
         delete item.domEl;
-        delete item.folder;
-        const new_item = LX.deepCopy(item);
-        this.currentData.splice(idx, 0, new_item);
+        delete item.dir;
+        delete item.parent;
+        const newItem = LX.deepCopy(item);
+        newItem.id = this._getClonedName(item.id, dir);
+        newItem.uid = LX.guidGenerator(); // generate new uid
+        newItem.dir = item.dir = dir;
+        newItem.parent = item.parent = parent;
+        dir.splice(idx + 1, 0, newItem);
         this._refreshContent(this.searchValue, this.filter);
         if (this.onevent) {
             const event = new AssetViewEvent(AssetViewEvent.ASSET_CLONED, item);
             this.onevent(event);
         }
-        this._processData(this.data);
     }
     _renameItem(item) {
         const idx = this.currentData.indexOf(item);
@@ -993,6 +1095,46 @@ class AssetView {
     _setAssetsPerPage(n) {
         this._assetsPerPage = n;
         this._refreshContent();
+    }
+    _getClonedName(originalName, siblings) {
+        const dotIndex = originalName.lastIndexOf(".");
+        let base = originalName;
+        let ext = "";
+        if (dotIndex > 0) {
+            base = originalName.substring(0, dotIndex);
+            ext = originalName.substring(dotIndex); // includes the dot
+        }
+        // core name without (N)
+        const match = base.match(/^(.*)\s\((\d+)\)$/);
+        if (match) {
+            base = match[1];
+        }
+        let maxN = 0;
+        for (const s of siblings) {
+            if (!s.id)
+                continue;
+            let sBase = s.id;
+            let sExt = "";
+            const sDot = sBase.lastIndexOf(".");
+            if (sDot > 0) {
+                sExt = sBase.substring(sDot);
+                sBase = sBase.substring(0, sDot);
+            }
+            // Only compare same extension and same base!
+            if (sExt !== ext)
+                continue;
+            const m = sBase.match(new RegExp("^" + LX.escapeRegExp(base) + "\\s\\((\\d+)\\)$"));
+            if (m) {
+                const num = parseInt(m[1]);
+                if (num > maxN)
+                    maxN = num;
+            }
+            else if (sBase === base) {
+                // Base name exists without number
+                maxN = Math.max(maxN, 0);
+            }
+        }
+        return `${base} (${maxN + 1})${ext}`;
     }
     _lastModifiedToStringDate(lm) {
         const d = new Date(lm).toLocaleString();

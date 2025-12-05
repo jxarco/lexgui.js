@@ -68,6 +68,7 @@ export declare class AssetView {
     _lastSortBy: string;
     _paginator: typeof LX.Pagination | undefined;
     _scriptCodeDialog: typeof LX.Dialog | undefined;
+    _moveItemDialog: typeof LX.Dialog | undefined;
     constructor(options?: any);
     /**
     * @method load
@@ -101,18 +102,21 @@ export declare class AssetView {
     * @method _createContentPanel
     */
     _createContentPanel(area: typeof Area): void;
+    _makeNameFilterFn(searchValue: string): (name: string) => boolean;
     _refreshContent(searchValue?: string, filter?: string): void;
     _previewAsset(file: any): void;
     _processDrop(e: DragEvent): void;
     _sortData(sortBy?: string, sortMode?: number): void;
     _enterFolder(folderItem: any, storeCurrent?: boolean): void;
+    _removeItemFromParent(item: any): boolean;
     _moveItemToFolder(item: any, folder: any): void;
     _deleteItem(item: any): void;
     _moveItem(item: any): void;
-    _cloneItem(item: any): void;
+    _cloneItem(item: any): false | undefined;
     _renameItem(item: any): void;
     _openScriptInEditor(script: any): void;
     _setAssetsPerPage(n: number): void;
+    _getClonedName(originalName: string, siblings: any[]): string;
     _lastModifiedToStringDate(lm: number): string;
 }
 export {};

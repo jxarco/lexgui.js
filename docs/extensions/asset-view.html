@@ -48,7 +48,9 @@
                     children: [
                         { id: "color.png", type: "image", src: "https://cdn2.unrealengine.com/ue-logotype-2023-vertical-white-1686x2048-bbfded26daa7.png" },
                         { id: "js_sample.js", type: "script", src: "../data/js_sample.js" },
-                        { id: "empty_folder", type: "folder", children: [] }
+                        { id: "empty_folder", type: "folder", children: [
+                            { id: "another_empty_folder", type: "folder", children: [] }
+                        ] }
                     ]
                 },
                 { id: "brow_lowerer.png", type: "clip", src: "../data/brow_lowerer.png", lastModified: 1740181312813 },
@@ -70,6 +72,7 @@
         [ "AssetViewEvent.ASSET_CLONED", "Asset has been cloned" ],
         [ "AssetViewEvent.ASSET_DBLCLICKED", "Asset has been double clicked" ],
         [ "AssetViewEvent.ASSET_CHECKED", "Asset has been checked" ],
+        [ "AssetViewEvent.ASSET_MOVED", "Asset has been moved" ],
         [ "AssetViewEvent.ENTER_FOLDER", "Folder has been entered" ],
     ] );
 

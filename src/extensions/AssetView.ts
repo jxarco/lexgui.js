@@ -115,6 +115,7 @@ export class AssetView
     _lastSortBy: string = "";
     _paginator: typeof LX.Pagination | undefined;
     _scriptCodeDialog: typeof LX.Dialog | undefined;
+    _moveItemDialog: typeof LX.Dialog | undefined;
 
     constructor( options: any = {} )
     {
@@ -1261,7 +1262,122 @@ export class AssetView
 
     _moveItem( item: any )
     {
+        if( this._moveItemDialog )
+        {
+            this._moveItemDialog.destroy();
+        }
 
+        let targetFolder: any = null;
+        let bcContainer: HTMLElement;
+
+        const _openFolder = function( p: any, container: any, updateBc: boolean = true )
+        {
+            container.innerHTML = "";
+
+            targetFolder = p;
+
+            for( let pi of ( targetFolder.children ?? targetFolder ) )
+            {
+                const row = LX.makeContainer( [ "100%", "auto" ], "flex flex-row px-1 items-center", "", container );
+                const isFolder = ( pi.type === "folder" );
+
+                const rowItem = LX.makeContainer( [ "100%", "auto" ],
+                    `move-item flex flex-row gap-1 py-1 px-3 cursor-pointer ${ isFolder ? "fg-primary font-medium" : "fg-quinary" } rounded-xxl ${ isFolder ? "hover:bg-secondary" : "hover:bg-primary" }`,
+                    `${ isFolder ? LX.makeIcon( "FolderOpen", { svgClass: "" } ).innerHTML : "" }${ pi.id }`,
+                    row
+                );
+
+                if( isFolder )
+                {
+                    rowItem.addEventListener( "click", () =>
+                    {
+                        container.querySelectorAll( ".move-item" ).forEach( ( el: any ) => LX.removeClass( el, "bg-quinary" ) );
+                        LX.addClass( rowItem, "bg-quinary" );
+                        targetFolder = pi;
+                    } );
+
+                    const fPathButton = new LX.Button( null, "FPathButton", () => {
+                        _openFolder( pi, container );
+                    }, { icon: "ChevronRight", className: "ml-auto h-8", buttonClass: "bg-none hover:bg-secondary" } );
+                    row.appendChild( fPathButton.root );
+                }
+            }
+
+            if( !updateBc )
+            {
+                return;
+            }
+
+            const path = [];
+
+            if( targetFolder && targetFolder.parent )
+            {
+                path.push( targetFolder.id );
+
+                const _pushParentsId = ( i: any ) => {
+                    if( !i ) return;
+                    path.push( i.parent ? i.id : '@' );
+                    _pushParentsId( i.parent );
+                };
+
+                _pushParentsId( targetFolder.parent );
+            }
+            else
+            {
+                path.push( '@' );
+            }
+
+            bcContainer.innerHTML = "";
+            bcContainer.appendChild( LX.makeBreadcrumb( path.reverse().map( p => { return { title: p } } ), {
+                maxItems: 4, separatorIcon: "ChevronRight"
+            }) );
+        };
+
+        this._moveItemDialog = new LX.Dialog( `Moving: ${ item.id }`, ( p: typeof Panel ) =>
+        {
+            const area = new LX.Area({ className: "flex flex-col rounded-lg" });
+            p.attach( area );
+
+            const content = LX.makeContainer( [ "auto", "100%" ], "flex flex-auto-fill flex-col overflow-scroll py-2 gap-1", `` );
+
+            {
+                const headerPanel = area.addPanel({ className: "p-2 border-bottom flex flex-auto", height: "auto" });
+                headerPanel.sameLine( 2, "w-full" );
+                headerPanel.addButton( null, "BackButton", () =>
+                {
+                    if( targetFolder && targetFolder.parent ) _openFolder( targetFolder.parent, content );
+                }, { icon: "ArrowLeft", title: "Back", tooltip: true, className: "flex-auto", buttonClass: "bg-none hover:bg-secondary" } );
+
+                bcContainer = LX.makeElement( "div" );
+
+                headerPanel.addContent( "ITEM_MOVE_PATH", bcContainer, { signal: "@item_move_path", className: "flex-auto-fill" } );
+            }
+
+            area.attach( content );
+
+            _openFolder( this.data, content );
+
+            {
+                const footerPanel = area.addPanel({ className: "p-2 border-top flex flex-auto justify-between", height: "auto" });
+                footerPanel.addButton( null, "NewFolderButton", () => {
+
+                }, { width: "auto", icon: "FolderPlus", title: "Create Folder", tooltip: true, className: "ml-2", buttonClass: "bg-none hover:bg-secondary" } );
+
+                footerPanel.sameLine( 2, "mr-2" );
+                footerPanel.addButton( null, "Cancel", () => {
+                    this._moveItemDialog.close();
+                }, { buttonClass: "bg-none fg-error" } );
+                footerPanel.addButton( null, "Move", () => {
+
+                    this._moveItemToFolder( item, targetFolder );
+
+                    this._moveItemDialog.close();
+
+                }, { className: "", buttonClass: "contrast" } );
+            }
+        }, { modal: true, size: ["616px", "500px"], closable: true, onBeforeClose: () => {
+            delete this._moveItemDialog;
+        } });
     }
 
     _cloneItem( item: any )
