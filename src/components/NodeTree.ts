@@ -364,6 +364,13 @@ export class NodeTree
                 let dragged = ( window as any ).__tree_node_dragged;
                 if( !dragged )
                 {
+                    // Test if we are moving from AssetView extension
+                    dragged = ( window as any ).__av_item_dragged;
+                    if( dragged )
+                    {
+                        dragged._nodeTarget = node;
+                    }
+
                     return;
                 }
 

@@ -483,6 +483,41 @@ export class AssetView
             });
         });
 
+        const onDrop = function( src: any, target: any )
+        {
+            const targetType = target.type.charAt( 0 ).toUpperCase() + target.type.slice( 1 );
+
+            if( !( targetType === "Folder" ) || ( src.uid == target.uid ) )
+            {
+                console.error( "[AssetView Error] Cannot drop: Target item is not a folder or target is the dragged element!" );
+                return;
+            }
+
+            // Animate dragged element
+            const draggedEl = src.domEl;
+            if( draggedEl )
+            {
+                draggedEl.classList.add("moving-to-folder");
+
+                // When animation ends, finalize move
+                draggedEl.addEventListener("animationend", () => {
+
+                    draggedEl.classList.remove("moving-to-folder");
+
+                    that._moveItemToFolder( src, target );
+
+                    that._refreshContent();
+
+                }, { once: true });
+            }
+
+            if( that.onevent )
+            {
+                const event = new AssetViewEvent( AssetViewEvent.ASSET_MOVED, src, target );
+                that.onevent( event );
+            }
+        };
+
         itemEl.addEventListener("dragstart", ( e: DragEvent ) => {
             ( window as any ).__av_item_dragged = item;
 
@@ -498,7 +533,14 @@ export class AssetView
             if( desc ) desc.style.display = "none";
         }, false );
 
-        itemEl.addEventListener("dragend", ( e: DragEvent ) => {
+        itemEl.addEventListener("dragend", ( e: DragEvent ) =>
+        {
+            e.preventDefault(); // Prevent default action (open as link for some elements)
+            let dragged = ( window as any ).__av_item_dragged;
+            if( dragged && dragged._nodeTarget ) // We dropped into a NodeTree element
+            {
+                onDrop( dragged, dragged._nodeTarget );
+            }
             delete ( window as any ).__av_item_dragged;
         }, false );
 
@@ -506,16 +548,7 @@ export class AssetView
         {
             e.preventDefault(); // Prevent default action (open as link for some elements)
             let dragged = ( window as any ).__av_item_dragged;
-            if( !dragged )
-            {
-                return;
-            }
-
-            if( !isFolder || ( dragged.uid == item.uid ) )
-            {
-                return;
-            }
-
+            if( !dragged || !isFolder || ( dragged.uid == item.uid ) ) return;
             LX.addClass( item.domEl, "animate-pulse" );
         } );
 
@@ -535,40 +568,7 @@ export class AssetView
         {
             e.preventDefault(); // Prevent default action (open as link for some elements)
             let dragged = ( window as any ).__av_item_dragged;
-            if( !dragged )
-            {
-                return;
-            }
-
-            if( !isFolder || ( dragged.uid == item.uid ) )
-            {
-                console.error( "[AssetView Error] Cannot drop: Target item is not a folder or target is the dragged element!" );
-                return;
-            }
-
-            // Animate dragged element
-            const draggedEl = dragged.domEl;
-            if( draggedEl )
-            {
-                draggedEl.classList.add("moving-to-folder");
-
-                // When animation ends, finalize move
-                draggedEl.addEventListener("animationend", () => {
-
-                    draggedEl.classList.remove("moving-to-folder");
-
-                    that._moveItemToFolder( dragged, item );
-
-                    that._refreshContent();
-
-                }, { once: true });
-            }
-
-            if( this.onevent )
-            {
-                const event = new AssetViewEvent( AssetViewEvent.ASSET_MOVED, dragged, item );
-                this.onevent( event );
-            }
+            if( dragged ) onDrop( dragged, item );
         });
 
         itemEl.addEventListener( "mouseenter", ( e: MouseEvent ) =>
@@ -996,10 +996,6 @@ export class AssetView
             this.onRefreshContent( searchValue, filter );
         }
     }
-
-    /**
-    * @method _previewAsset
-    */
 
     _previewAsset( file: any )
     {

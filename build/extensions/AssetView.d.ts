@@ -101,9 +101,6 @@ export declare class AssetView {
     */
     _createContentPanel(area: typeof Area): void;
     _refreshContent(searchValue?: string, filter?: string): void;
-    /**
-    * @method _previewAsset
-    */
     _previewAsset(file: any): void;
     _processDrop(e: DragEvent): void;
     _sortData(sortBy?: string, sortMode?: number): void;

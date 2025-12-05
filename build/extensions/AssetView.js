@@ -356,6 +356,28 @@ class AssetView {
                 }
             });
         });
+        const onDrop = function (src, target) {
+            const targetType = target.type.charAt(0).toUpperCase() + target.type.slice(1);
+            if (!(targetType === "Folder") || (src.uid == target.uid)) {
+                console.error("[AssetView Error] Cannot drop: Target item is not a folder or target is the dragged element!");
+                return;
+            }
+            // Animate dragged element
+            const draggedEl = src.domEl;
+            if (draggedEl) {
+                draggedEl.classList.add("moving-to-folder");
+                // When animation ends, finalize move
+                draggedEl.addEventListener("animationend", () => {
+                    draggedEl.classList.remove("moving-to-folder");
+                    that._moveItemToFolder(src, target);
+                    that._refreshContent();
+                }, { once: true });
+            }
+            if (that.onevent) {
+                const event = new AssetViewEvent(AssetViewEvent.ASSET_MOVED, src, target);
+                that.onevent(event);
+            }
+        };
         itemEl.addEventListener("dragstart", (e) => {
             window.__av_item_dragged = item;
             var img = new Image();
@@ -369,17 +391,19 @@ class AssetView {
                 desc.style.display = "none";
         }, false);
         itemEl.addEventListener("dragend", (e) => {
+            e.preventDefault(); // Prevent default action (open as link for some elements)
+            let dragged = window.__av_item_dragged;
+            if (dragged && dragged._nodeTarget) // We dropped into a NodeTree element
+             {
+                onDrop(dragged, dragged._nodeTarget);
+            }
             delete window.__av_item_dragged;
         }, false);
         itemEl.addEventListener("dragenter", (e) => {
             e.preventDefault(); // Prevent default action (open as link for some elements)
             let dragged = window.__av_item_dragged;
-            if (!dragged) {
+            if (!dragged || !isFolder || (dragged.uid == item.uid))
                 return;
-            }
-            if (!isFolder || (dragged.uid == item.uid)) {
-                return;
-            }
             LX.addClass(item.domEl, "animate-pulse");
         });
         itemEl.addEventListener("dragleave", (e) => {
@@ -393,28 +417,8 @@ class AssetView {
         itemEl.addEventListener("drop", (e) => {
             e.preventDefault(); // Prevent default action (open as link for some elements)
             let dragged = window.__av_item_dragged;
-            if (!dragged) {
-                return;
-            }
-            if (!isFolder || (dragged.uid == item.uid)) {
-                console.error("[AssetView Error] Cannot drop: Target item is not a folder or target is the dragged element!");
-                return;
-            }
-            // Animate dragged element
-            const draggedEl = dragged.domEl;
-            if (draggedEl) {
-                draggedEl.classList.add("moving-to-folder");
-                // When animation ends, finalize move
-                draggedEl.addEventListener("animationend", () => {
-                    draggedEl.classList.remove("moving-to-folder");
-                    that._moveItemToFolder(dragged, item);
-                    that._refreshContent();
-                }, { once: true });
-            }
-            if (this.onevent) {
-                const event = new AssetViewEvent(AssetViewEvent.ASSET_MOVED, dragged, item);
-                this.onevent(event);
-            }
+            if (dragged)
+                onDrop(dragged, item);
         });
         itemEl.addEventListener("mouseenter", (e) => {
             if (!that.useNativeTitle && isGridLayout) {
@@ -732,9 +736,6 @@ class AssetView {
             this.onRefreshContent(searchValue, filter);
         }
     }
-    /**
-    * @method _previewAsset
-    */
     _previewAsset(file) {
         if (this.skipPreview) {
             return;

@@ -5937,6 +5937,11 @@ class NodeTree {
                 e.preventDefault(); // Prevent default action (open as link for some elements)
                 let dragged = window.__tree_node_dragged;
                 if (!dragged) {
+                    // Test if we are moving from AssetView extension
+                    dragged = window.__av_item_dragged;
+                    if (dragged) {
+                        dragged._nodeTarget = node;
+                    }
                     return;
                 }
                 let target = node;

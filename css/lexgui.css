@@ -2855,7 +2855,8 @@ input[type=number] {
 }
 
 .lextree .lextreeitem.draggingover {
-    background: #7b8ae27b;
+    background: light-dark(var(--global-color-accent-light), var(--global-color-accent-dark));
+    color: #f4f4f5;
 }
 
 .lextree .lextreeitem:hover {
