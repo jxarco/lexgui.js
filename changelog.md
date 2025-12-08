@@ -4,8 +4,7 @@
 
 ## 0.8.0 (master)
 
-From 0.8.0, the full library is written in TypeScript to facilitate integrations in newer frameworks. Build are still available as a JS module with its extensions.
-
+From 0.8.0, the full library is written in TypeScript to facilitate integrations in newer frameworks (Builds are still available as a JS module with its extensions).
 Aded new Spinner and Pagination Components.
 Added support for `options.submit` in Form entries.
 Added new utils: `LX.stripTags`, `LX.escapeRegExp`, and `LX.wildcardToRegExp`.
@@ -72,6 +71,7 @@ Pages and Styling:
 - Improved and extended docs.
 - Main Theme colors updates.
 - Improved color consistency with darker tones.
+- Fixed Badge CSS minor issues.
 - Use `Inter` (https://fonts.google.com/specimen/Inter) as default font.
 - Tailwind color palette with classes and css variables.
 - Added more utility Tailwind style classes.

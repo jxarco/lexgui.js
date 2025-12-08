@@ -418,11 +418,11 @@ if( mobile )
     if( !mobile )
     {
         const mailContainer = LX.makeContainer( [ null, "800px" ], "flex flex-col bg-primary border rounded-lg overflow-hidden" );
-        tabs.add( "Mail", mailContainer, { xselected: true, badge: { content: "5", className: "xs fg-white bg-error", asChild: true } } );
+        tabs.add( "Mail", mailContainer, { xselected: true, badge: { content: "5", className: "sm fg-white bg-error", asChild: true } } );
 
         const mailArea = new LX.Area();
         mailContainer.appendChild( mailArea.root );
-        const badgeClass = "ml-auto no-bg font-medium";
+        const badgeClass = "ml-auto bg-none font-medium";
 
         const sidebar = mailArea.addSidebar( m => {
             m.add( "Inbox", { selected: true, icon: "Inbox", content: LX.badge("128", badgeClass, { asElement: true }) } );
