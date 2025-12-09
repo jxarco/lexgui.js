@@ -708,6 +708,31 @@ export class AssetView
         LX.emitSignal( "@on_folder_change", this.path.reverse().join('/') );
     }
 
+    _createNavigationBar( panel: typeof Panel )
+    {
+        panel.sameLine( 4, "justify-center" );
+
+        panel.addButton( null, "GoBackButton", () => {
+            if( !this.prevData.length || !this.currentFolder ) return;
+            this.nextData.push( this.currentFolder );
+            this._enterFolder( this.prevData.pop(), false )
+        }, { buttonClass: "bg-none", title: "Go Back", tooltip: true, icon: "ArrowLeft" } );
+
+        panel.addButton( null, "GoForwardButton", () => {
+            if( !this.nextData.length || !this.currentFolder ) return;
+            this._enterFolder( this.nextData.pop() );
+        }, { buttonClass: "bg-none", title: "Go Forward", tooltip: true, icon: "ArrowRight" } );
+
+        panel.addButton( null, "GoUpButton", () => {
+            const parentFolder = this.currentFolder?.parent;
+            if( parentFolder ) this._enterFolder( parentFolder );
+        }, { buttonClass: "bg-none", title: "Go Upper Folder", tooltip: true, icon: "ArrowUp" } );
+
+        panel.addButton( null, "GoUpButton", () => {
+            this._refreshContent()
+        }, { buttonClass: "bg-none", title: "Refresh", tooltip: true, icon: "Refresh" } );
+    }
+
     _createTreePanel( area: typeof Area )
     {
         if( this.leftPanel )
@@ -719,28 +744,7 @@ export class AssetView
             this.leftPanel = area.addPanel({ className: 'lexassetbrowserpanel' });
         }
 
-        // Process data to show in tree
-        this.leftPanel.sameLine( 4, "justify-center" );
-
-        this.leftPanel.addButton( null, "GoBackButton", () => {
-            if( !this.prevData.length || !this.currentFolder ) return;
-            this.nextData.push( this.currentFolder );
-            this._enterFolder( this.prevData.pop(), false )
-        }, { buttonClass: "bg-none", title: "Go Back", tooltip: true, icon: "ArrowLeft" } );
-
-        this.leftPanel.addButton( null, "GoForwardButton", () => {
-            if( !this.nextData.length || !this.currentFolder ) return;
-            this._enterFolder( this.nextData.pop() );
-        }, { buttonClass: "bg-none", title: "Go Forward", tooltip: true, icon: "ArrowRight" } );
-
-        this.leftPanel.addButton( null, "GoUpButton", () => {
-            const parentFolder = this.currentFolder?.parent;
-            if( parentFolder ) this._enterFolder( parentFolder );
-        }, { buttonClass: "bg-none", title: "Go Upper Folder", tooltip: true, icon: "ArrowUp" } );
-
-        this.leftPanel.addButton( null, "GoUpButton", () => {
-            this._refreshContent()
-        }, { buttonClass: "bg-none", title: "Refresh", tooltip: true, icon: "Refresh" } );
+        this._createNavigationBar( this.leftPanel );
 
         const treeData = { id: '/', children: this.data };
         const tree = this.leftPanel.addTree( "Content Browser", treeData, {
@@ -887,9 +891,11 @@ export class AssetView
 
             const typeEntries = Object.keys( this.allowedTypes );
 
-            this.toolsPanel.sameLine();
-            this.toolsPanel.addText( null, this.searchValue ?? "", ( v: string ) => this._refreshContent( v ), { width: "100%", placeholder: "Search assets.." } );
-            this.toolsPanel.endLine();
+            // Put it in the content panel if no browser
+            if( this.skipBrowser )
+            {
+                this._createNavigationBar( this.toolsPanel );
+            }
 
             this.toolsPanel.sameLine();
             const sortButton = this.toolsPanel.addButton( null, "", _onSort.bind( this ), { title: "Sort", tooltip: true, icon: ( this.sortMode === AssetView.CONTENT_SORT_ASC ) ? "SortAsc" : "SortDesc" } );
@@ -897,9 +903,7 @@ export class AssetView
             this.toolsPanel.addSelect( null, typeEntries, this.filter ?? typeEntries[ 0 ], ( v: any ) => {
                 this._refreshContent( undefined, v );
             }, { overflowContainer: null } );
-
-            // Float to the end
-
+            this.toolsPanel.addText( null, this.searchValue ?? "", ( v: string ) => this._refreshContent( v ), { className: "flex flex-auto-fill", placeholder: "Search assets.." } );
             this.toolsPanel.endLine();
 
             if( this._paginator )
