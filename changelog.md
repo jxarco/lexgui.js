@@ -19,6 +19,7 @@ Fixed default collapsed state using `LX.makeCollapsible`.
 AssetView:
 - Now used as an extension.
 - Refactor event handling API to allow cancellable events (see docs).
+- Added "Create Folder" action (with cancellable event).
 - Added support for `Ctrl+Wheel` to increase grid item size in AssetView.
 - Replace old pagination implementation for new Pagination Component.
 - Add "Go to upper folder" button, next to Back, Forward, and Refresh navigation bar.

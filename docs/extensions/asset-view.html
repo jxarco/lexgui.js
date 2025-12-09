@@ -75,6 +75,7 @@
         [ "check", "Asset has been checked" ],
         [ "move", "Asset has been moved" ],
         [ "enterFolder", "Folder has been entered" ],
+        [ "createFolder", "Folder has been created" ],
     ] );
 
     docMaker.paragraph( `and the cancellable events: ` );
@@ -84,6 +85,7 @@
         [ "beforeRename", "Called before renaming" ],
         [ "beforeClone", "Called before cloning" ],
         [ "beforeMove", "Called before moving" ],
+        [ "beforeCreateFolder", "Called before creating a folder" ]
     ] );
 
     docMaker.note( `An AssetViewEventCallback has the following parameters: ${ docMaker.iCode("event") } (AssetViewEvent) and ${ docMaker.iCode("resolve") } (Function). Users must call

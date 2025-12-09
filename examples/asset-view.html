@@ -210,9 +210,22 @@
         assetView.on( "dblClick", ( event ) => {
             console.log(`${ event.items[ 0 ].id } dbl clicked` );
         } );
+    }
 
+    // Folder events
+    {
         assetView.on( "enterFolder", ( event ) => {
             console.log(`Entered ${ event.to.id } folder` );
+        } );
+
+        assetView.on( "beforeCreateFolder", ( event, resolve ) => {
+            LX.prompt("Perform CreateFolder Action?", "Server Message", () => {
+                resolve();
+            })
+        } );
+
+        assetView.on( "createFolder", ( event ) => {
+            console.log(`${ event.result[ 0 ].id } folder created`);
         } );
     }
 

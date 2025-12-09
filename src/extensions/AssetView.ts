@@ -15,7 +15,7 @@ const NodeTree = LX.NodeTree;
 const TreeEvent = LX.TreeEvent;
 
 export type AssetViewAction = "select" | "dbl_click" | "check" | "clone" | "move" |
-                         "delete" | "rename" | "enter_folder";
+                         "delete" | "rename" | "enter_folder" | "create-folder";
 
 export interface AssetViewItem {
     id: string;
@@ -74,6 +74,7 @@ export class AssetView
     data: AssetViewItem[] = [];
     currentData: AssetViewItem[] = [];
     currentFolder: AssetViewItem | undefined = undefined;
+    rootItem: AssetViewItem;
     path: string[] = [];
     rootPath: string = "";
     selectedItem: AssetViewItem | undefined = undefined;
@@ -175,11 +176,13 @@ export class AssetView
             ...( options.allowedTypes ?? {} )
         };
 
+        this.path = ['@'];
+        this.rootItem = { id: "/", children: this.data, type: "folder", metadata: { uid: LX.guidGenerator() } };
+        this.currentFolder = this.rootItem;
+
         this._processData( this.data );
 
-        this.currentFolder = undefined;
         this.currentData = this.data;
-        this.path = ['@'];
 
         if( !this.skipBrowser )
         {
@@ -216,6 +219,9 @@ export class AssetView
         this.prevData.length = 0;
         this.nextData.length = 0;
         this.data = data;
+
+        // Update root children
+        this.rootItem.children = this.data;
 
         this._processData( this.data );
         this.currentData = this.data;
@@ -472,6 +478,8 @@ export class AssetView
         itemEl.addEventListener('contextmenu', function( e )
         {
             e.preventDefault();
+            e.stopImmediatePropagation();
+            e.stopPropagation();
 
             const multiple = that.content.querySelectorAll('.selected').length;
 
@@ -676,7 +684,7 @@ export class AssetView
         }
 
         // Get the new parent
-        const newParent = parent ? data : { id: '/', children: this.data };
+        const newParent = parent ? data : this.rootItem;
 
         for( let item of newParent.children )
         {
@@ -835,6 +843,8 @@ export class AssetView
 
     _createContentPanel( area: typeof Area )
     {
+        const that = this;
+
         area.root.classList.add( "flex", "flex-col" );
 
         if( this.toolsPanel )
@@ -947,6 +957,28 @@ export class AssetView
         this.content.addEventListener( 'click', function()
         {
             this.querySelectorAll('.lexassetitem').forEach( i => i.classList.remove('selected') );
+        });
+
+        this.content.addEventListener( 'contextmenu', function( e )
+        {
+            e.preventDefault();
+
+            const options: any[] = [
+                {
+                    name: "New Folder",
+                    icon: LX.makeIcon( "FolderPlus" ),
+                    callback: () =>
+                    {
+                        that._requestCreateFolder();
+                    }
+                }
+            ];
+
+            LX.addClass( that.contentPanel.root, "pointer-events-none" );
+
+            LX.addDropdownMenu( e.target, options, { side: "right", align: "start", event: e, onBlur: () => {
+                LX.removeClass( that.contentPanel.root, "pointer-events-none" );
+            } });
         });
 
         this._refreshContent();
@@ -1530,6 +1562,60 @@ export class AssetView
         return newItem;
     }
 
+    _getClonedName( originalName: string, siblings: any[] ): string
+    {
+        const dotIndex = originalName.lastIndexOf( "." );
+        let base = originalName;
+        let ext = "";
+
+        if( dotIndex > 0 )
+        {
+            base = originalName.substring( 0, dotIndex );
+            ext = originalName.substring( dotIndex ); // includes the dot
+        }
+
+        // core name without (N)
+        const match = base.match(/^(.*)\s\((\d+)\)$/);
+        if( match )
+        {
+            base = match[ 1 ];
+        }
+
+        let maxN = -1;
+
+        for( const s of siblings )
+        {
+            if( !s.id ) continue;
+
+            let sBase = s.id;
+            let sExt = "";
+
+            const sDot = sBase.lastIndexOf( "." );
+            if( sDot > 0 )
+            {
+                sExt = sBase.substring( sDot );
+                sBase = sBase.substring( 0, sDot );
+            }
+
+            // Only compare same extension and same base!
+            if( sExt !== ext ) continue;
+
+            const m = sBase.match( new RegExp("^" + LX.escapeRegExp( base ) + "\\s\\((\\d+)\\)$") );
+            if( m )
+            {
+                const num = parseInt( m[ 1 ] );
+                if( num > maxN ) maxN = num;
+            }
+            else if( sBase === base )
+            {
+                // Base name exists without number
+                maxN = Math.max( maxN, 0 );
+            }
+        }
+
+        return maxN === -1 ? originalName : `${base} (${ maxN + 1 })${ ext }`;
+    }
+
     _requestRenameItem( item: AssetViewItem, newName: string )
     {
         const onBeforeRename = this._callbacks["beforeRename"];
@@ -1618,6 +1704,65 @@ export class AssetView
         const p = new LX.Popover( item.domEl, [ panel ], { align: "center", side: "bottom", sideOffset: -128 });
     }
 
+    _requestCreateFolder()
+    {
+        if( !this.currentFolder )
+        {
+            return;
+        }
+
+        const onBeforeCreateFolder = this._callbacks["beforeCreateFolder"];
+        const onCreateFolder = this._callbacks["createFolder"];
+
+        const resolve = () => {
+            const newFolder = this._createFolder();
+            const event: AssetViewEvent = {
+                type: "create-folder",
+                result: [ newFolder ],
+                to: this.currentFolder,
+                userInitiated: true
+            }
+            if( onCreateFolder ) onCreateFolder( event );
+        };
+
+        if( onBeforeCreateFolder )
+        {
+            const event: AssetViewEvent = {
+                type: "create-folder",
+                userInitiated: true
+            }
+
+            onBeforeCreateFolder( event, resolve );
+        }
+        else
+        {
+            resolve();
+        }
+    }
+
+    _createFolder(): AssetViewItem
+    {
+        if( !this.currentFolder )
+        {
+            throw( "_createFolder: Something went wrong!" );
+        }
+
+        const folder = {
+            id: this._getClonedName( "New Folder", this.currentFolder.children ),
+            type: "folder",
+            children: [],
+            parent: this.currentFolder,
+            metadata: {}
+        }
+
+        this.currentFolder.children.push( folder );
+
+        this._refreshContent();
+        this.tree?.refresh();
+
+        return folder;
+    }
+
     _openScriptInEditor( script: any )
     {
         if( this._scriptCodeDialog )
@@ -1641,60 +1786,6 @@ export class AssetView
     {
         this._assetsPerPage = n;
         this._refreshContent();
-    }
-
-    _getClonedName( originalName: string, siblings: any[] ): string
-    {
-        const dotIndex = originalName.lastIndexOf( "." );
-        let base = originalName;
-        let ext = "";
-
-        if( dotIndex > 0 )
-        {
-            base = originalName.substring( 0, dotIndex );
-            ext = originalName.substring( dotIndex ); // includes the dot
-        }
-
-        // core name without (N)
-        const match = base.match(/^(.*)\s\((\d+)\)$/);
-        if( match )
-        {
-            base = match[ 1 ];
-        }
-
-        let maxN = 0;
-
-        for( const s of siblings )
-        {
-            if( !s.id ) continue;
-
-            let sBase = s.id;
-            let sExt = "";
-
-            const sDot = sBase.lastIndexOf( "." );
-            if( sDot > 0 )
-            {
-                sExt = sBase.substring( sDot );
-                sBase = sBase.substring( 0, sDot );
-            }
-
-            // Only compare same extension and same base!
-            if( sExt !== ext ) continue;
-
-            const m = sBase.match( new RegExp("^" + LX.escapeRegExp( base ) + "\\s\\((\\d+)\\)$") );
-            if( m )
-            {
-                const num = parseInt( m[ 1 ] );
-                if( num > maxN ) maxN = num;
-            }
-            else if( sBase === base )
-            {
-                // Base name exists without number
-                maxN = Math.max( maxN, 0 );
-            }
-        }
-
-        return `${base} (${ maxN + 1 })${ ext }`;
     }
 
     _lastModifiedToStringDate( lm: number ): string
