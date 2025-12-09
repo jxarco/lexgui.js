@@ -5,6 +5,7 @@
 ## 8.0.0 (master)
 
 From 8.0 (changed versioning to set `8` as the major version), the full library is written in TypeScript to facilitate integrations in newer frameworks (Builds are still available as a JS module with its extensions).
+Replaced Skypack for jsDelivr CDN.
 Aded new Spinner and Pagination Components.
 Added support for `options.submit` in Form entries.
 Added new utils: `LX.stripTags`, `LX.escapeRegExp`, and `LX.wildcardToRegExp`.

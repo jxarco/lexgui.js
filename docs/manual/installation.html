@@ -6,16 +6,17 @@
 
     docMaker.header( "Project structure", "h2", "project-structure" );
 
-    docMaker.paragraph( `Each <b>lexgui.js</b> project must include at least one HTML file for webpage definition and the JavaScript and CSS build files to execute your lexgui code.
-    While the specific structure and naming conventions mentioned below are not obligatory, they will be consistently referenced throughout this guide:` );
+    docMaker.paragraph( `Each <b>LexGUI</b> project must include at least one HTML file for webpage definition and the JavaScript and CSS build files to execute your lexgui code.
+    While the specific structure and naming conventions mentioned below are not obligatory, they will be consistently referenced throughout this guide.` );
 
     docMaker.codeBulletList( ["index.html"] );
+
     docMaker.code( `&lt;!@DOCTYPE@ @[atn]html@&gt;
 &lt;@html@ @lang@=@"en"@&gt;
 &lt;@head@&gt;
 &lt;@meta@ @[atn]http-equiv@=@"Content-Type"@ @[atn]content@=@"text/html; charset=iso-8859-1"@/&gt;
 &lt;@meta@ @[atn]name@=@"viewport"@ @[atn]content@=@"width=device-width,initial-scale=1.0"@&gt;
-&lt;@title@&gt;My first lexgui.js app&lt;/@title@&gt;
+&lt;@title@&gt;My first LexGUI app&lt;/@title@&gt;
 &lt;@link@ @rel@=@"stylesheet"@ @crossorigin@=@"anonymous"@ @href@=@"https://cdn.jsdelivr.net/npm/lexgui|@^&lt;version&gt;/build/lexgui.css"@&gt;
 &lt;@script@ @type@=@"importmap"@&gt;
 {
@@ -31,7 +32,7 @@
 &lt;/@body@&gt;
 &lt;/@html@&gt;` );
 
-    docMaker.note( `Don't forget to replace &lt;version&gt; with an actual version of lexgui.js, like "${ LX.version }".
+    docMaker.note( `Don't forget to replace &lt;version&gt; with an actual version of LexGUI, like "${ LX.version }".
     The most recent version can be found on the ${ docMaker.iLink("npm version list", "https://www.npmjs.com/package/lexgui?activeTab=versions") }.
     Use <i>lexgui</i> without the version tag to use the latest version.`, true );
 
@@ -42,7 +43,7 @@
 
 
     docMaker.header( "Building components", "h2", "components" );
-    docMaker.paragraph( `By default, lexgui.js provides the core elements for creating web interfaces. Other composite components, such as the code editor or timelines are located in the ${ docMaker.iCode( "extensions/" ) } directory.
+    docMaker.paragraph( `By default, LexGUI provides the core elements for creating web interfaces. Other composite components, such as the code editor or timelines are located in the ${ docMaker.iCode( "extensions/" ) } directory.
     These ones are not required to be installed individually, but they <span class='font-semibold'>do need to be imported separately</span>:` );
     docMaker.code( `@import@ { @[cls]LX@ } @from@ @'lexgui'@;
 

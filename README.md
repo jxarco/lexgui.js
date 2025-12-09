@@ -42,12 +42,12 @@ NPM Package: [npmjs.com/package/lexgui](https://www.npmjs.com/package/lexgui)
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
     <title>My first lexgui.js app</title>
-    <link rel="stylesheet" href="https://cdn.skypack.dev/lexgui@^<version>/build/lexgui.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lexgui@^<version>/build/lexgui.css">
     <script type="importmap">
         {
           "imports": {
-            "lexgui": "https://cdn.skypack.dev/lexgui@^<version>/build/lexgui.module.js",
-            "lexgui/extensions/": "https://cdn.skypack.dev/lexgui@^<version>/build/extensions/"
+            "lexgui": "https://cdn.jsdelivr.net/npm/lexgui@^<version>/build/lexgui.module.js",
+            "lexgui/extensions/": "https://cdn.jsdelivr.net/npm/lexgui@^<version>/build/extensions/"
           }
         }
     </script>
