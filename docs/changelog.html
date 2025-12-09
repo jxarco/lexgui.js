@@ -31,7 +31,7 @@
                 {
                     // its a header
                     const ht = (line.match(/#/g) || []).length;
-                    const headerString = line.substring( ht + 3 ).replaceAll( "#", "" );
+                    const headerString = line.substring( ht ).replaceAll( "#", "" );
                     const endIdx = headerString.indexOf( " " );
                     const id = endIdx > -1 ? headerString.substring( 0, endIdx ) : headerString;
                     docMaker.header( headerString, `h${ ht }`, id );
