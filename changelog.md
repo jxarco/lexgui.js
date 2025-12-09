@@ -14,7 +14,7 @@ Area Tabs drag & drop is now working without deleting tab content.
 Calendar and CalendarRange month changes now correctly.
 Code Editor multiline indentation now works properly on empty lines.
 Fixed line color of Timeline curve tracks in light theme.
-Added "dev" icons, Vscode, Godot, Unity, UnrealEngine, Go, Css, Android, and more.
+Fixed default collapsed state using `LX.makeCollapsible`.
 
 AssetView:
 - Now used as an extension.
@@ -72,6 +72,7 @@ Pages and Styling:
 - Improved and extended docs.
 - Main Theme colors updates.
 - Improved color consistency with darker tones.
+- Added "dev" icons, Vscode, Godot, Unity, UnrealEngine, Go, Css, Android, and more.
 - Fixed Badge CSS minor issues.
 - Use `Inter` (https://fonts.google.com/specimen/Inter) as default font.
 - Tailwind color palette with classes and css variables.

@@ -851,7 +851,7 @@ function makeCollapsible( domEl: any, content: any, parent: any, options: any = 
     const collapsed = ( options.collapsed ?? true );
     const actionIcon: HTMLElement = LX.makeIcon( "Right" );
     actionIcon.classList.add( "collapser" );
-    actionIcon.dataset[ "collapsed" ] = `${ collapsed }`;
+    if( collapsed ) actionIcon.dataset[ "collapsed" ] = `${ collapsed }`;
     actionIcon.style.marginLeft = "auto";
     actionIcon.style.marginRight = "0.2rem";
 
@@ -861,7 +861,7 @@ function makeCollapsible( domEl: any, content: any, parent: any, options: any = 
         if( this.dataset[ "collapsed" ] )
         {
             delete this.dataset[ "collapsed" ];
-            content.style.display = "block";
+            content.style.display = options.display ?? "block";
         }
         else
         {
