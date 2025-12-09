@@ -223,7 +223,7 @@ export class AssetView
 
         if( !this.skipBrowser )
         {
-            this.tree.refresh( { id: '/', children: this.data } );
+            this.tree.refresh( { id: '/', children: this.data, type: "folder", metadata: { uid: LX.guidGenerator() } } );
         }
 
         this._refreshContent();
@@ -878,11 +878,11 @@ export class AssetView
             const typeEntries = Object.keys( this.allowedTypes );
 
             this.toolsPanel.sameLine();
-            this.toolsPanel.addText( null, this.searchValue ?? "", ( v: string ) => this._refreshContent.call( this, v, undefined ), { width: "100%", placeholder: "Search assets.." } );
+            this.toolsPanel.addText( null, this.searchValue ?? "", ( v: string ) => this._refreshContent( v ), { width: "100%", placeholder: "Search assets.." } );
             this.toolsPanel.endLine();
 
             this.toolsPanel.sameLine();
-            const refreshButton = this.toolsPanel.addButton( null, "", this._refreshContent.bind( this ), { title: "Refresh", tooltip: true, icon: "Refresh" } );
+            const refreshButton = this.toolsPanel.addButton( null, "", () => this._refreshContent(), { title: "Refresh", tooltip: true, icon: "Refresh" } );
             this.toolsPanel.addButton( null, "", _onSort.bind( this ), { title: "Sort", tooltip: true, icon: ( this.sortMode === AssetView.CONTENT_SORT_ASC ) ? "SortAsc" : "SortDesc" } );
             this.toolsPanel.addButton( null, "", _onChangeView.bind( this ), { title: "View", tooltip: true, icon: ( this.layout === AssetView.LAYOUT_GRID ) ? "LayoutGrid" : "LayoutList" } );
             this.toolsPanel.addSelect( null, typeEntries, this.filter ?? typeEntries[ 0 ], ( v: any ) => {
