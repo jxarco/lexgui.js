@@ -106,6 +106,7 @@ export class AssetView
     _paginator: typeof LX.Pagination | undefined;
     _scriptCodeDialog: typeof LX.Dialog | undefined;
     _moveItemDialog: typeof LX.Dialog | undefined;
+    _movingItem: AssetViewItem | undefined;
 
     constructor( options: any = {} )
     {
@@ -502,7 +503,7 @@ export class AssetView
                 options.push( { name: "Clone", icon: "Copy", callback: that._requestCloneItem.bind( that, item ) });
             }
 
-            options.push( { name: "Move", icon: "FolderInput", callback: that._moveItem.bind( that, item ) } );
+            options.push( { name: "Move", icon: "FolderInput", callback: () => that._moveItem( item ) } );
 
             if( type == "Script" && LX.has( "CodeEditor" ) )
             {
@@ -1375,14 +1376,17 @@ export class AssetView
         this._refreshContent();
         this.tree?.refresh();
         this._moveItemDialog?.destroy();
+        this._movingItem = undefined;
     }
 
-    _moveItem( item: AssetViewItem )
+    _moveItem( item: AssetViewItem, defaultFolder?: AssetViewItem | AssetViewItem[] )
     {
         if( this._moveItemDialog )
         {
             this._moveItemDialog.destroy();
         }
+
+        this._movingItem = item;
 
         let targetFolder: any = null;
         let bcContainer: HTMLElement;
@@ -1472,12 +1476,12 @@ export class AssetView
 
             area.attach( content );
 
-            _openFolder( this.data, content );
+            _openFolder( defaultFolder ?? this.data, content );
 
             {
                 const footerPanel = area.addPanel({ className: "p-2 border-top flex flex-auto justify-between", height: "auto" });
                 footerPanel.addButton( null, "NewFolderButton", () => {
-
+                    this._requestCreateFolder( targetFolder );
                 }, { width: "auto", icon: "FolderPlus", title: "Create Folder", tooltip: true, className: "ml-2", buttonClass: "bg-none hover:bg-secondary" } );
 
                 footerPanel.sameLine( 2, "mr-2" );
@@ -1704,9 +1708,11 @@ export class AssetView
         const p = new LX.Popover( item.domEl, [ panel ], { align: "center", side: "bottom", sideOffset: -128 });
     }
 
-    _requestCreateFolder()
+    _requestCreateFolder( folder?: AssetViewItem )
     {
-        if( !this.currentFolder )
+        folder = folder ?? this.currentFolder;
+
+        if( !folder )
         {
             return;
         }
@@ -1715,11 +1721,11 @@ export class AssetView
         const onCreateFolder = this._callbacks["createFolder"];
 
         const resolve = () => {
-            const newFolder = this._createFolder();
+            const newFolder = this._createFolder( folder );
             const event: AssetViewEvent = {
                 type: "create-folder",
                 result: [ newFolder ],
-                to: this.currentFolder,
+                to: folder,
                 userInitiated: true
             }
             if( onCreateFolder ) onCreateFolder( event );
@@ -1740,25 +1746,32 @@ export class AssetView
         }
     }
 
-    _createFolder(): AssetViewItem
+    _createFolder( folder?: AssetViewItem ): AssetViewItem
     {
-        if( !this.currentFolder )
+        folder = folder ?? this.currentFolder;
+
+        if( !folder )
         {
             throw( "_createFolder: Something went wrong!" );
         }
 
-        const folder = {
-            id: this._getClonedName( "New Folder", this.currentFolder.children ),
+        const newFolder = {
+            id: this._getClonedName( "New Folder", folder.children ),
             type: "folder",
             children: [],
             parent: this.currentFolder,
             metadata: {}
         }
 
-        this.currentFolder.children.push( folder );
+        folder.children.push( newFolder );
 
         this._refreshContent();
         this.tree?.refresh();
+
+        if( this._moveItemDialog && this._movingItem )
+        {
+            this._moveItem( this._movingItem, folder )
+        }
 
         return folder;
     }
