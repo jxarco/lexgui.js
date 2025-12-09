@@ -17,6 +17,8 @@ Fixed line color of Timeline curve tracks in light theme.
 Added "dev" icons, Vscode, Godot, Unity, UnrealEngine, Go, Css, Android, and more.
 
 AssetView:
+- Now used as an extension.
+- Refactor event handling API to allow cancellable events (see docs).
 - Added support for `Ctrl+Wheel` to increase grid item size in AssetView.
 - Replace old pagination implementation for new Pagination Component.
 - Assets can now be dragged into either content or explorer folders.
@@ -49,7 +51,7 @@ VideoEditor:
 - Added `setCropAreaHandles` to specify which resize handles should be visible.
 - Added `options.handleStyle` to edit resize handle's style.
 
-API Changes:
+General API Changes:
 - `BaseComponent` enum types moved to `ComponentType`.
 - `LX.emit` -> `LX.emitSignal`.
 - `LX.ADD_CUSTOM_COMPONENT` -> `LX.REGISTER_COMPONENT`.
@@ -60,7 +62,6 @@ API Changes:
 - `Element.hasClass/addClass` -> `LX.hasClas/addClass`.
 - ItemArray Component renamed to ArrayInput.
 - Removed support for Blank panel component.
-- AssetView is now an extension.
 - NodeGraph extension renamed to GraphEditor.
 - Docmaker Extension API full changed (see docs).
 - Inputs Class `nobg` renamed to `bg-none` for consistency.

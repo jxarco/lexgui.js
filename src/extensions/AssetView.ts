@@ -20,15 +20,13 @@ export type AssetViewAction = "select" | "dbl_click" | "check" | "clone" | "move
 export interface AssetViewItem {
     id: string;
     type: string;
-    uid?: string;
-    preview?: string;
+    children: AssetViewItem[];
+    parent?: AssetViewItem;
     path?: string;
     src?: string;
-    children?: AssetViewItem[];
-    parent?: AssetViewItem;
     dir?: AssetViewItem[];
     domEl?: HTMLElement;
-    metadata?: any; // optional user data
+    metadata: any; // optional user data
 }
 
 interface AssetViewEvent {
@@ -256,23 +254,23 @@ export class AssetView
             LX.makeElement( 'span', `rounded-full w-2 h-2 z-100 flex absolute ml-2 mt-2 bg-${ typeColor }`, "", itemEl );
         }
 
-        if( !item.uid )
+        const metadata = item.metadata;
+
+        if( !metadata.uid )
         {
-            item.uid = LX.guidGenerator();
+            metadata.uid = LX.guidGenerator();
         }
 
-        item.metadata = item.metadata ?? {};
-
-        if( item.metadata.lastModified && !item.metadata.lastModifiedDate )
+        if( metadata.lastModified && !metadata.lastModifiedDate )
         {
-            item.metadata.lastModifiedDate = this._lastModifiedToStringDate( item.metadata.lastModified );
+            metadata.lastModifiedDate = this._lastModifiedToStringDate( metadata.lastModified );
         }
 
         if( !this.useNativeTitle )
         {
             let desc = document.createElement( 'span' );
             desc.className = 'lexitemdesc';
-            desc.id = `floatingTitle_${ item.uid }`;
+            desc.id = `floatingTitle_${ metadata.uid }`;
             desc.innerHTML = `File: ${ item.id }<br>Type: ${ type }`;
             LX.insertChildAtIndex( this.content, desc, childIndex ? childIndex + 1 : undefined );
 
@@ -317,9 +315,9 @@ export class AssetView
             let checkbox = document.createElement( 'input' );
             checkbox.type = "checkbox";
             checkbox.className = "lexcheckbox";
-            checkbox.checked = item.metadata.selected;
+            checkbox.checked = metadata.selected;
             checkbox.addEventListener('change', ( e: any ) => {
-                item.metadata.selected = !item.metadata.selected;
+                metadata.selected = !metadata.selected;
                 const onCheck = that._callbacks["check"];
                 if( onCheck !== undefined )
                 {
@@ -354,14 +352,14 @@ export class AssetView
                 itemVideo.setAttribute( 'loop', true );
                 itemVideo.setAttribute( 'async', true );
                 itemVideo.style.transition = 'opacity 0.2s ease-out';
-                itemVideo.style.opacity = item.preview ? '0' : '1';
+                itemVideo.style.opacity = metadata.preview ? '0' : '1';
                 itemVideo.src = item.src;
-                itemVideo.volume = item.metadata.volume ?? 0.4;
+                itemVideo.volume = metadata.volume ?? 0.4;
             }
 
             let preview: any = null;
 
-            const previewSrc    = item.preview ?? item.src;
+            const previewSrc    = metadata.preview ?? item.src;
             const hasImage = previewSrc && (
                 (() => {
                     const ext = LX.getExtension( previewSrc.split( '?' )[ 0 ].split( '#' )[ 0 ]); // get final source without url parameters/anchors
@@ -376,7 +374,7 @@ export class AssetView
                 const defaultFolderPath     = `${ this.rootPath }images/folder.png`;
 
                 preview = document.createElement('img');
-                let realSrc = item.metadata.unknownExtension ? defaultPreviewPath : ( isFolder ? defaultFolderPath : previewSrc );
+                let realSrc = metadata.unknownExtension ? defaultPreviewPath : ( isFolder ? defaultFolderPath : previewSrc );
                 preview.src = ( isGridLayout || isFolder ? realSrc : defaultPreviewPath );
                 preview.setAttribute( "draggable", "false" );
                 preview.className = "pointer-events-none";
@@ -411,8 +409,8 @@ export class AssetView
 
         if( isListLayout )
         {
-            if( item.metadata.bytesize ) itemInfoHtml += ` | ${ LX.formatBytes( item.metadata.bytesize ) }`;
-            if( item.metadata.lastModifiedDate ) itemInfoHtml += ` | ${ item.metadata.lastModifiedDate }`;
+            if( metadata.bytesize ) itemInfoHtml += ` | ${ LX.formatBytes( metadata.bytesize ) }`;
+            if( metadata.lastModifiedDate ) itemInfoHtml += ` | ${ metadata.lastModifiedDate }`;
         }
 
         LX.makeContainer( [ 'auto', 'auto' ], 'lexassetinfo', itemInfoHtml, itemEl );
@@ -523,11 +521,11 @@ export class AssetView
             } });
         });
 
-        const onDrop = function( src: any, target: any )
+        const onDrop = function( src: AssetViewItem, target: AssetViewItem )
         {
             const targetType = target.type.charAt( 0 ).toUpperCase() + target.type.slice( 1 );
 
-            if( !( targetType === "Folder" ) || ( src.uid == target.uid ) )
+            if( !( targetType === "Folder" ) || ( src.metadata.uid == target.metadata.uid ) )
             {
                 console.error( "[AssetView Error] Cannot drop: Target item is not a folder or target is the dragged element!" );
                 return;
@@ -558,7 +556,7 @@ export class AssetView
                 e.dataTransfer.effectAllowed = "move";
             }
 
-            const desc: HTMLElement | null = that.content.querySelector( `#floatingTitle_${ item.uid }` );
+            const desc: HTMLElement | null = that.content.querySelector( `#floatingTitle_${ metadata.uid }` );
             if( desc ) desc.style.display = "none";
         }, false );
 
@@ -577,7 +575,7 @@ export class AssetView
         {
             e.preventDefault(); // Prevent default action (open as link for some elements)
             let dragged = ( window as any ).__av_item_dragged;
-            if( !dragged || !isFolder || ( dragged.uid == item.uid ) ) return;
+            if( !dragged || !isFolder || ( dragged.metadata.uid == metadata.uid ) ) return;
             LX.addClass( item.domEl, "animate-pulse" );
         } );
 
@@ -604,7 +602,7 @@ export class AssetView
         {
             if( !that.useNativeTitle && isGridLayout )
             {
-                const desc: HTMLElement | null = that.content.querySelector( `#floatingTitle_${ item.uid }` );
+                const desc: HTMLElement | null = that.content.querySelector( `#floatingTitle_${ metadata.uid }` );
                 if( desc ) desc.style.display = "unset";
             }
 
@@ -620,7 +618,7 @@ export class AssetView
             if( !that.useNativeTitle && isGridLayout )
             {
                 setTimeout( () => {
-                    const desc: HTMLElement | null = that.content.querySelector( `#floatingTitle_${ item.uid }` );
+                    const desc: HTMLElement | null = that.content.querySelector( `#floatingTitle_${ metadata.uid }` );
                     if( desc ) desc.style.display = "none";
                 }, 100 );
             }
@@ -630,7 +628,7 @@ export class AssetView
             const video: any = itemEl.querySelector( "video" );
             video.pause();
             video.currentTime = 0;
-            if( item.preview )
+            if( metadata.preview )
             {
                 video.style.opacity = "0";
             }
@@ -666,14 +664,15 @@ export class AssetView
         }
     }
 
-    _processData( data: any, parent?: any )
+    _processData( data: any, parent?: AssetViewItem )
     {
         // Processing an item
         if( data.constructor !== Array )
         {
             data.parent = parent;
-            data.dir = parent.children;
+            data.dir = parent?.children;
             data.children = data.children ?? [];
+            data.metadata = data.metadata || {};
         }
 
         // Get the new parent
@@ -991,7 +990,6 @@ export class AssetView
         for( let i = start; i < end; ++i )
         {
             let item = filteredData[ i ];
-            item.metadata = item.metadata ?? {};
 
             if( item.path )
             {
@@ -1126,6 +1124,7 @@ export class AssetView
                     id: file.name,
                     src: ( e.currentTarget as any ).result,
                     type,
+                    children: [],
                     metadata: {
                         extension: ext,
                         lastModified: file.lastModified,
@@ -1177,7 +1176,8 @@ export class AssetView
             this.prevData.push( this.currentFolder ?? {
                 id: "/",
                 children: this.data,
-                type: "root"
+                type: "root",
+                metadata: {}
             } );
         }
 
@@ -1506,9 +1506,9 @@ export class AssetView
 
         const newItem: AssetViewItem = LX.deepCopy( item );
         newItem.id = this._getClonedName( item.id, dir );
-        newItem.uid = LX.guidGenerator(); // generate new uid
         newItem.dir = item.dir = dir;
         newItem.parent = item.parent = parent;
+        newItem.metadata.uid = LX.guidGenerator(); // generate new uid
 
         dir.splice( idx + 1, 0, newItem );
 

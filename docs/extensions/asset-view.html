@@ -27,9 +27,9 @@
 
             const assetData = [
                 { id: "dog.png", type: "image", src: "https://pngfre.com/wp-content/uploads/1653714420512-1-904x1024.png" },
-                { id: "teacher-video-Ψ.mp4", type: "video", preview: "https://godotengine.org/assets/press/logo_vertical_color_dark.png", src: "https://catsl.eelvex.net/static/vid/teacher-video-Ψ.mp4" },
-                { id: "sigml_test.sigml", type: "sigml", src: "../data/sigml_test.sigml", lastModified: 1740588312813 },
-                { id: "test.json", type: "JSON", src: "../data/test.json", lastModified: 1740581312813 },
+                { id: "teacher-video-Ψ.mp4", type: "video", src: "https://catsl.eelvex.net/static/vid/teacher-video-Ψ.mp4", metadata: { preview: "https://godotengine.org/assets/press/logo_vertical_color_dark.png" } },
+                { id: "sigml_test.sigml", type: "sigml", src: "../data/sigml_test.sigml", metadata: { lastModified: 1740588312813 } },
+                { id: "test.json", type: "JSON", src: "../data/test.json", metadata: { lastModified: 1740581312813 } },
                 { id: "godot", type: "folder", children: [
                         { id: "color.png", type: "image", src: "https://godotengine.org/assets/press/icon_color.png" },
                         { id: "monochrome_light.png", type: "image", src: "https://godotengine.org/assets/press/icon_monochrome_light.png" },
@@ -49,32 +49,44 @@
                         { id: "color.png", type: "image", src: "https://cdn2.unrealengine.com/ue-logotype-2023-vertical-white-1686x2048-bbfded26daa7.png" },
                         { id: "js_sample.js", type: "script", src: "../data/js_sample.js" },
                         { id: "empty_folder", type: "folder", children: [
-                            { id: "another_empty_folder", type: "folder", children: [] }
+                            { id: "another_empty_folder", type: "folder" }
                         ] }
                     ]
                 },
-                { id: "brow_lowerer.png", type: "clip", src: "../data/brow_lowerer.png", lastModified: 1740181312813 },
+                { id: "brow_lowerer.png", type: "clip", src: "../data/brow_lowerer.png", metadata: { lastModified: 1740181312813 } },
             ];
 
-            assetView.load(assetData);
-        }, "");
+            assetView.load( assetData );
+        } );
     }
 
     docMaker.header("Usage", "h2");
 
-    docMaker.paragraph( `Load your data using ${ docMaker.iCode( "LX.AssetView.load( data, onevent )" ) }.
-        The parameter ${ docMaker.iCode( "onevent" ) } in a Function callback where you can process the following events:` );
+    docMaker.paragraph( `Load your data using ${ docMaker.iCode( "LX.AssetView.load( data )" ) }.
+        Use ${ docMaker.iCode( "LX.on( eventName: string, callback: AssetViewEventCallback )" ) } to add event callbacks for the following UI action events: ` );
 
     docMaker.codeBulletList( [
-        [ "AssetViewEvent.ASSET_SELECTED", "Asset has been selected" ],
-        [ "AssetViewEvent.ASSET_DELETED", "Asset has been deleted" ],
-        [ "AssetViewEvent.ASSET_RENAMED", "Asset has been renamed" ],
-        [ "AssetViewEvent.ASSET_CLONED", "Asset has been cloned" ],
-        [ "AssetViewEvent.ASSET_DBLCLICKED", "Asset has been double clicked" ],
-        [ "AssetViewEvent.ASSET_CHECKED", "Asset has been checked" ],
-        [ "AssetViewEvent.ASSET_MOVED", "Asset has been moved" ],
-        [ "AssetViewEvent.ENTER_FOLDER", "Folder has been entered" ],
+        [ "select", "Asset has been selected" ],
+        [ "delete", "Asset has been deleted" ],
+        [ "rename", "Asset has been renamed" ],
+        [ "clone", "Asset has been cloned" ],
+        [ "dblClick", "Asset has been double clicked" ],
+        [ "check", "Asset has been checked" ],
+        [ "move", "Asset has been moved" ],
+        [ "enterFolder", "Folder has been entered" ],
     ] );
+
+    docMaker.paragraph( `and the cancellable events: ` );
+
+    docMaker.codeBulletList( [
+        [ "beforeDelete", "Called before deleting" ],
+        [ "beforeRename", "Called before renaming" ],
+        [ "beforeClone", "Called before cloning" ],
+        [ "beforeMove", "Called before moving" ],
+    ] );
+
+    docMaker.note( `An AssetViewEventCallback has the following parameters: ${ docMaker.iCode("event") } (AssetViewEvent) and ${ docMaker.iCode("resolve") } (Function). Users must call
+    resolve to perform the action for cancellable events.` );
 
     docMaker.header("API Reference", "h2");
     docMaker.classCtor("class LX.AssetView", [ [ "options", "Object = {}" ] ]);
@@ -89,18 +101,19 @@
         panel.addTable( null, {
             head: [ "Option", "Type", "Description", "Default" ],
             body: [
+                ["allowedTypes", "Array", "Asset allowed types (strings)"],
+                ["allowMultipleSelection", "Boolean", "Allow multiple asset selection", "true"],
+                ["gridScale", "Boolean", "Size of the items in the Grid View", "1"],
+                ["itemContextMenuOptions", "Array", "Customize the asset context menu actions { name, callback }"],
                 ["layout", `<span class='cursor-pointer' title='"LAYOUT_GRID" | "LAYOUT_COMPACT" | "LAYOUT_LIST"'>Enum</span>`, `Layout appearance of the assets`, "AssetView.LAYOUT_GRID"],
+                ["onlyFolders", "Boolean", "Use onlyFolders option in TreeComponent", "true"],
+                ["onRefreshContent", "Function", "Function to call when the content is refreshed"],
+                ["onItemDragged", "Function", "Function to call when an item is moved in the file browser"],
+                ["previewActions", "Array", "Customize asset preview actions { name, callback, type (opt.), path (opt.) }"],
                 ["rootPath", "String", "Override default rootPath for internal data"],
                 ["skipBrowser", "Boolean", "Skip creation of the file browser", "false"],
                 ["skipPreview", "Boolean", "Skip creation of the preview section", "false"],
                 ["useNativeTitle", "Boolean", "Use native element titles instead of custom Lexgui hover titles", "false"],
-                ["onlyFolders", "Boolean", "Use onlyFolders option in TreeComponent", "true"],
-                ["allowMultipleSelection", "Boolean", "Allow multiple asset selection", "true"],
-                ["previewActions", "Array", "Customize asset preview actions { name, callback, type (opt.), path (opt.) }"],
-                ["itemContextMenuOptions", "Array", "Customize the asset context menu actions { name, callback }"],
-                ["allowedTypes", "Array", "Asset allowed types (strings)"],
-                ["onRefreshContent", "Function", "Function to call when the content is refreshed"],
-                ["onItemDragged", "Function", "Function to call when an item is moved in the file browser"],
             ].map( v => {
                 return [ docMaker.iCode( v[ 0 ], "table" ), docMaker.iCode( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] ? v[ 3 ] != "—" ? docMaker.iCode( v[ 3 ], "table desc" ) : v[ 3 ] : "—" ];
             } )
@@ -119,9 +132,6 @@
         ["eventName", "String"],
         ["callback", "AssetViewEventCallback"],
     ] );
-
-    docMaker.note( `An AssetViewEventCallback has the following parameters: ${ docMaker.iCode("event") } (AssetViewEvent) and ${ docMaker.iCode("resolve") } (Function). Users must call
-    resolve to perform the action for cancellable events.` )
 
     docMaker.lineBreak();
     docMaker.lineBreak();

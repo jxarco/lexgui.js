@@ -84,15 +84,18 @@
         {
             id: "Avatar",
             type: "Avatar",
-            preview: "https://models.readyplayer.me/66e30a18eca8fb70dcadde68.png?background=68,68,245"
+            metadata: {
+                preview: "https://models.readyplayer.me/66e30a18eca8fb70dcadde68.png?background=68,68,245",
+                volume: 0.5,
+            }
         },
         {
             id: "video-test",
             type: "video",
-            preview: "https://godotengine.org/assets/press/logo_vertical_color_dark.png",
             src: "https://catsl.eelvex.net/static/vid/teacher-video-Ψ.mp4",
             metadata: {
-                volume: 0.5
+                preview: "https://godotengine.org/assets/press/logo_vertical_color_dark.png",
+                volume: 0.5,
             }
         },
         {
@@ -104,13 +107,17 @@
             id: "sigml_test.sigml",
             type: "sigml",
             src: "../data/sigml_test.sigml",
-            lastModified: 1740588312813
+            metadata: {
+                lastModified: 1740588312813
+            }
         },
         {
             id: "json_sample.json",
             type: "JSON",
             src: "../data/json_sample.json",
-            lastModified: 1740581312813
+            metadata: {
+                lastModified: 1740581312813
+            }
         },
         {
             id: "godot",
@@ -188,7 +195,9 @@
             id: "brow_lowerer.png",
             type: "clip",
             src: "../data/brow_lowerer.png",
-            lastModified: 1740181312813
+            metadata: {
+                lastModified: 1740181312813
+            }
         }
     ];
 
@@ -200,6 +209,10 @@
 
         assetView.on( "dblClick", ( event ) => {
             console.log(`${ event.items[ 0 ].id } dbl clicked` );
+        } );
+
+        assetView.on( "enterFolder", ( event ) => {
+            console.log(`Entered ${ event.to.id } folder` );
         } );
     }
 
@@ -257,43 +270,11 @@
 
     assetView.load( assetData );
 
-    // assetView.load(assetData, ( event, resolve ) => {
-    //     switch (event.type) {
-    //         case LX.AssetViewEvent.ASSET_SELECTED:
-    //             if (event.multiple)
-    //                 console.log("Selected: ", event.item);
-    //             else
-    //                 console.log(event.item.id + " selected");
-    //             break;
-    //         case LX.AssetViewEvent.ASSET_DBLCLICKED:
-    //             console.log(event.item.id + " double clicked");
-    //             if (!event.item.src || event.item.type == "image") break;
-    //             if (window.dialog) window.dialog.destroy();
-    //             window.dialog = new LX.PocketDialog("Editor", p => {
-    //                 const area = new LX.Area();
-    //                 p.attach(area);
-    //                 let editor = new CodeEditor(area, {
-    //                     allowAddScripts: false
-    //                 });
-    //                 editor.loadFile(event.item.src);
-    //             }, { size: ["40%", "600px"], closable: true });
-    //             break;
-    //         case LX.AssetViewEvent.ENTER_FOLDER:
-    //             console.log("Entering folder: " + event.item.id);
-    //             break;
-    //         case LX.AssetViewEvent.ASSET_RENAMED:
-    //             console.log(event.value + " is now called " + event.item.id);
-    //             break;
-    //     }
-    // });
-
-    function loop(dt) {
-
+    function loop( dt )
+    {
         var ctx = canvas.getContext("2d");
-
         ctx.fillStyle = "#b7a9b1";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-
         ctx.font = "48px Monospace";
         ctx.fillStyle = "#ff1999";
 
