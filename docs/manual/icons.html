@@ -19,36 +19,32 @@
         function copySVG( svg, event )
         {
             navigator.clipboard.writeText( svg.dataset[ "name" ] + ( forceSolid ? "@solid" : "" ) );
-            console.log("Copied!");
-
-            svg.classList.add( "fg-success" );
-
-            setTimeout( () => {
-                svg.classList.remove( "fg-success" );
-            }, 2000 );
+            const msg = `${ svg.dataset[ "name" ] } icon copied to clipboard!`;
+            console.log( msg );
+            LX.toast( msg, null, { position: "top-center", timeout: 3000 } );
         }
 
         const toolsContainer = LX.makeContainer( ["100%", "auto"], "flex flex-row mt-8 mb-4 gap-2", "", area );
-        const filterContainer = LX.makeContainer( ["70%", "auto"], "", "", toolsContainer );
+
+        const filterContainer = LX.makeContainer( ["auto", "auto"], "flex flex-auto-fill", "", toolsContainer );
         const filter = new LX.TextInput( null, "", (v) => {
             nameFilter = v;
-            const value = nameFilter.toLowerCase();
-            const icons = allIconsContainer.querySelectorAll( ".icon" );
-            icons.forEach( icon => {
-                const svg = icon.querySelector( "svg" );
-                if( svg.dataset[ "name" ].toLowerCase().includes( value ) )
-                {
-                    icon.classList.remove( "hidden" );
-                }
-                else
-                {
-                    icon.classList.add( "hidden" );
-                }
-            } );
-        }, { icon: "Search", placeholder: "Filter icons", trigger: "input" } );
+            refreshIcons();
+        }, { width: "100%", icon: "Search", placeholder: "Filter icons", trigger: "input" } );
         filterContainer.appendChild( filter.root );
 
-        const variantContainer = LX.makeContainer( ["30%", "auto"], "flex flex-row justify-end", "", toolsContainer );
+        const iconsPerPage = 256;
+        const paginationContainer = LX.makeContainer( ["auto", "auto"], "flex flex-row flex-auto", "", toolsContainer );
+        const paginator = new LX.Pagination({
+            page: 1,
+            itemsPerPage: iconsPerPage,
+            onChange: (page) => {
+                refreshIcons();
+            }
+        });
+        paginationContainer.appendChild( paginator.root );
+
+        const variantContainer = LX.makeContainer( ["auto", "auto"], "flex flex-row flex-auto justify-end", "", toolsContainer );
         const variantToggle = new LX.Toggle( null, forceSolid, (v) => {
             forceSolid = v;
             refreshIcons();
@@ -61,11 +57,7 @@
         }
 
         // Sort icons by name
-        const allIconsSorted = Object.keys( allIcons ).sort().reduce(( acc, key ) => {
-            acc[ key ] = allIcons[ key ];
-            return acc;
-        }, {} );
-
+        const allIconsSorted = Object.keys( allIcons ).sort();
         const allIconsContainer = LX.makeContainer( ["100%", "auto"], "grid mb-8 gap-2", "", area );
         allIconsContainer.style.gridTemplateColumns = "repeat(auto-fill, minmax(56px, 1fr))";
 
@@ -73,30 +65,45 @@
 
             allIconsContainer.innerHTML = "";
 
-            for( const iconName in allIconsSorted )
-            {
-                // Custom variant
-                if( iconName.includes( '@' ) )
-                {
-                    continue;
-                }
+            const filteredIcons = allIconsSorted.filter( i => {
+                return !i.includes( '@' ) && i.toLowerCase().includes( nameFilter );
+            } );
+            const total = filteredIcons.length;
+            const numPages = iconsPerPage === 1 ? 1 : Math.ceil( total / iconsPerPage );
+            paginator.setPages( numPages );
 
-                const iconDiv = LX.makeContainer( ["56px", "56px"], "icon flex border rounded-lg content-center justify-center cursor-pointer bg-primary hover:bg-tertiary", "", allIconsContainer );
-                iconDiv.style.transition = "background-color 0.2s ease-out";
+            const start = ( paginator.page - 1 ) * iconsPerPage;
+            const end = Math.min( start + iconsPerPage, total );
+
+            for( let i = start; i < end; ++i )
+            {
+                const iconName = filteredIcons[ i ];
+                const iconDiv = LX.makeContainer( ["56px", "56px"], "relative icon flex border rounded-lg content-center items-center justify-center cursor-pointer bg-primary hover:bg-tertiary", "", allIconsContainer );
                 LX.asTooltip( iconDiv, iconName, { side: "bottom" } );
 
                 const variant = forceSolid ? "solid" : "regular";
-                const iconSVG = LX.makeIcon( iconName, { svgClass: "xxl pointer-events-none", variant });
-                iconDiv.appendChild( iconSVG );
-                const svg = iconSVG.querySelector( "svg" );
-
-                if( !svg.dataset[ "name" ].toLowerCase().includes( nameFilter ) )
-                {
-                    iconDiv.classList.add( "hidden" );
-                }
+                const icon = LX.makeIcon( iconName, { iconClass: "flex justify-center items-center", svgClass: "absolute xxl pointer-events-none hover:fg-primary", variant });
+                const checkIcon = LX.makeIcon( "Check", { iconClass: "opacity-0 flex justify-center items-center", svgClass: "absolute xxl pointer-events-none fg-success" });
+                icon.style.transition = "opacity 0.2s ease-out";
+                checkIcon.style.transition = "opacity 0.2s ease-out";
+                LX.removeClass( icon, "lexicon" );
+                LX.removeClass( checkIcon, "lexicon" );
+                iconDiv.appendChild( icon );
+                iconDiv.appendChild( checkIcon );
+                const svg = icon.querySelector( "svg" );
+                const checkSvg = icon.querySelector( "svg" );
 
                 LX.listen( iconDiv, "click", () => {
+
+                    LX.addClass( icon, "opacity-0" );
+                    LX.removeClass( checkIcon, "opacity-0" );
+
                     copySVG( svg, event );
+
+                    setTimeout( () => {
+                        LX.addClass( checkIcon, "opacity-0" );
+                        LX.removeClass( icon, "opacity-0" );
+                    }, 2000 );
                 } );
             }
         }
