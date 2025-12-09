@@ -3,6 +3,7 @@
 
 [![NPM Package][npm]][npm-url]
 [![NPM Downloads][npm-downloads]][npmtrends-url]
+[![jsDelivr Downloads][jsdelivr-downloads]][jsdelivr-url]
 
 **lexgui.js** is a lightweight JavaScript library for building web user interfaces. No bloated frameworks, no unnecessary complexity, just pure HTML, CSS, and JavaScript magic. It gives you an easy API for crafting dynamic, interactive editor interfaces without the headache of big libraries.
 
@@ -107,3 +108,5 @@ You can use the [repository issues section](https://github.com/jxarco/lexgui.js/
 [npm-url]: https://www.npmjs.com/package/lexgui
 [npm-downloads]: https://img.shields.io/npm/dw/lexgui
 [npmtrends-url]: https://www.npmtrends.com/lexgui
+[jsdelivr-downloads]: https://data.jsdelivr.com/v1/package/npm/lexgui/badge?style=rounded
+[jsdelivr-url]: https://www.jsdelivr.com/package/npm/lexgui

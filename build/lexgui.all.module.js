@@ -10,7 +10,7 @@ const g$2 = globalThis;
 let LX = g$2.LX;
 if (!LX) {
     LX = {
-        version: "0.8.0",
+        version: "8.0",
         ready: false,
         extensions: [], // Store extensions used
         extraCommandbarEntries: [], // User specific entries for command bar

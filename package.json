@@ -1,10 +1,14 @@
 {
     "name": "lexgui",
-    "version": "0.8.0",
+    "version": "8.0",
     "description": "JS library to create web graphical user interfaces",
     "type": "module",
     "main": "./build/lexgui.js",
     "module": "./build/lexgui.module.js",
+    "exports": {
+        "require": "./build/lexgui.js",
+        "import": "./build/lexgui.module.js"
+    },
     "repository": {
         "type": "git",
         "url": "https://github.com/jxarco/lexgui.js"
