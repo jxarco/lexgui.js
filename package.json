@@ -38,6 +38,7 @@
         "colors": "node generate-colors.js",
         "clean:css": "rimraf build/lexgui.css && rimraf build/lexgui.min.css",
         "clean": "rimraf build",
+        "bundle": "rollup -c",
         "bundle:ts": "rollup -c rollup.ts.build.config.js",
         "build:ts": "tsc --project tsconfig.all.json",
         "build": "npm run bundle:ts"

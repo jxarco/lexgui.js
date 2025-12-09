@@ -58,7 +58,7 @@
             "SIGML": { color: "emerald-300" },
         },
         itemContextMenuOptions: [
-            { name: "Move", callback: ( item ) => { console.log(item) } }
+            { name: "Like", callback: ( item ) => { console.log(item) } }
         ]
     });
     bottomArea.attach(assetView);
@@ -90,7 +90,10 @@
             id: "video-test",
             type: "video",
             preview: "https://godotengine.org/assets/press/logo_vertical_color_dark.png",
-            src: "https://catsl.eelvex.net/static/vid/teacher-video-Ψ.mp4"
+            src: "https://catsl.eelvex.net/static/vid/teacher-video-Ψ.mp4",
+            metadata: {
+                volume: 0.5
+            }
         },
         {
             id: "nyan-pyportal.gif",
@@ -189,41 +192,100 @@
         }
     ];
 
-    assetView.load(assetData, event => {
-        switch (event.type) {
-            case LX.AssetViewEvent.ASSET_SELECTED:
-                if (event.multiple)
-                    console.log("Selected: ", event.item);
-                else
-                    console.log(event.item.id + " selected");
-                break;
-            case LX.AssetViewEvent.ASSET_DBLCLICKED:
-                console.log(event.item.id + " double clicked");
-                if (!event.item.src || event.item.type == "image") break;
-                if (window.dialog) window.dialog.destroy();
-                window.dialog = new LX.PocketDialog("Editor", p => {
-                    const area = new LX.Area();
-                    p.attach(area);
-                    let editor = new CodeEditor(area, {
-                        allowAddScripts: false
-                    });
-                    editor.loadFile(event.item.src);
-                }, { size: ["40%", "600px"], closable: true });
-                break;
-            case LX.AssetViewEvent.ENTER_FOLDER:
-                console.log("Entering folder: " + event.item.id);
-                break;
-            case LX.AssetViewEvent.ASSET_DELETED:
-                console.log(event.item.id + " deleted");
-                break;
-            case LX.AssetViewEvent.ASSET_CLONED:
-                console.log(event.item.id + " cloned");
-                break;
-            case LX.AssetViewEvent.ASSET_RENAMED:
-                console.log(event.value + " is now called " + event.item.id);
-                break;
-        }
-    });
+    // Click events
+    {
+        assetView.on( "select", ( event, resolve ) => {
+            console.log(`${ event.items[ 0 ].id } selected` );
+        } );
+
+        assetView.on( "dblClick", ( event ) => {
+            console.log(`${ event.items[ 0 ].id } dbl clicked` );
+        } );
+    }
+
+    // Rename events
+    {
+        assetView.on( "beforeRename", ( event, resolve ) => {
+            LX.prompt("Perform Rename Action?", "Server Message", () => {
+                resolve();
+            })
+        } );
+
+        assetView.on( "rename", ( event ) => {
+            console.log(`${ event.oldName } renamed to ${ event.newName }`);
+        } );
+    }
+
+    // Delete events
+    {
+        assetView.on( "beforeDelete", ( event, resolve ) => {
+            LX.prompt("Perform Delete Action?", "Server Message", () => {
+                resolve();
+            })
+        } );
+
+        assetView.on( "delete", ( event ) => {
+            console.log(event.items[ 0 ].id + " deleted");
+        } );
+    }
+
+    // Clone events
+    {
+        assetView.on( "beforeClone", ( event, resolve ) => {
+            LX.prompt("Perform Clone Action?", "Server Message", () => {
+                resolve();
+            })
+        } );
+
+        assetView.on( "clone", ( event ) => {
+            console.log(event.items[ 0 ].id + " cloned");
+        } );
+    }
+
+    // Move events
+    {
+        assetView.on( "beforeMove", ( event, resolve ) => {
+            LX.prompt("Perform Move Action?", "Server Message", () => {
+                resolve();
+            })
+        } );
+
+        assetView.on( "move", ( event ) => {
+            console.log(`${ event.items[ 0 ].id } moved to ${ event.to.id }` );
+        } );
+    }
+
+    assetView.load( assetData );
+
+    // assetView.load(assetData, ( event, resolve ) => {
+    //     switch (event.type) {
+    //         case LX.AssetViewEvent.ASSET_SELECTED:
+    //             if (event.multiple)
+    //                 console.log("Selected: ", event.item);
+    //             else
+    //                 console.log(event.item.id + " selected");
+    //             break;
+    //         case LX.AssetViewEvent.ASSET_DBLCLICKED:
+    //             console.log(event.item.id + " double clicked");
+    //             if (!event.item.src || event.item.type == "image") break;
+    //             if (window.dialog) window.dialog.destroy();
+    //             window.dialog = new LX.PocketDialog("Editor", p => {
+    //                 const area = new LX.Area();
+    //                 p.attach(area);
+    //                 let editor = new CodeEditor(area, {
+    //                     allowAddScripts: false
+    //                 });
+    //                 editor.loadFile(event.item.src);
+    //             }, { size: ["40%", "600px"], closable: true });
+    //             break;
+    //         case LX.AssetViewEvent.ENTER_FOLDER:
+    //             console.log("Entering folder: " + event.item.id);
+    //             break;
+    //         case LX.AssetViewEvent.ASSET_RENAMED:
+    //             console.log(event.value + " is now called " + event.item.id);
+    //             break;
+    //     }
+    // });
 
     function loop(dt) {
 

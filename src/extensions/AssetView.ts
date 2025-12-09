@@ -14,48 +14,39 @@ const Panel = LX.Panel;
 const NodeTree = LX.NodeTree;
 const TreeEvent = LX.TreeEvent;
 
-export class AssetViewEvent
-{
-    static NONE             = 0;
-    static ASSET_SELECTED   = 1;
-    static ASSET_DELETED    = 2;
-    static ASSET_RENAMED    = 3;
-    static ASSET_CLONED     = 4;
-    static ASSET_DBLCLICKED = 5;
-    static ASSET_CHECKED    = 6;
-    static ASSET_MOVED      = 7;
-    static ENTER_FOLDER     = 8;
+export type AssetViewAction = "select" | "dbl_click" | "check" | "clone" | "move" |
+                         "delete" | "rename" | "enter_folder";
 
-    type: number;
-    item: any;
-    value: any;
-    multiple: boolean = false; // Multiple selection
+export interface AssetViewItem {
+    id: string;
+    type: string;
+    uid?: string;
+    preview?: string;
+    path?: string;
+    src?: string;
+    children?: AssetViewItem[];
+    parent?: AssetViewItem;
+    dir?: AssetViewItem[];
+    domEl?: HTMLElement;
+    metadata?: any; // optional user data
+}
 
-    constructor( type: number, item: any, value?: any )
-    {
-        this.type = type || LX.TreeEvent.NONE;
-        this.item = item;
-        this.value = value;
-    }
+interface AssetViewEvent {
+    type: AssetViewAction;
+    items?: AssetViewItem[];
+    result?: AssetViewItem[];
+    from?: AssetViewItem;
+    to?: AssetViewItem;
+    oldName?: string;
+    newName?: string;
+    userInitiated: boolean; // clicked by user vs programmatically
+}
 
-    string()
-    {
-        switch( this.type )
-        {
-            case AssetViewEvent.NONE: return "assetview_event_none";
-            case AssetViewEvent.ASSET_SELECTED: return "assetview_event_selected";
-            case AssetViewEvent.ASSET_DELETED: return "assetview_event_deleted";
-            case AssetViewEvent.ASSET_RENAMED: return "assetview_event_renamed";
-            case AssetViewEvent.ASSET_CLONED: return "assetview_event_cloned";
-            case AssetViewEvent.ASSET_DBLCLICKED: return "assetview_event_dblclicked";
-            case AssetViewEvent.ASSET_CHECKED: return "assetview_event_checked";
-            case AssetViewEvent.ASSET_MOVED: return "assetview_event_moved";
-            case AssetViewEvent.ENTER_FOLDER: return "assetview_event_enter_folder";
-        }
-    }
-};
-
-LX.AssetViewEvent = AssetViewEvent;
+/**
+ * Signature for cancelable events.
+ * `resolve()` MUST be called by the user to perform the UI action
+ */
+export type AssetViewEventCallback = ( event: AssetViewEvent, resolve?: () => void ) => void | Promise<void>;
 
 /**
  * @class AssetView
@@ -80,14 +71,14 @@ export class AssetView
     previewPanel: any;
     tree: typeof NodeTree | null = null;
 
-    prevData: any[] = [];
-    nextData: any[] = [];
-    data: any[] = [];
-    currentData: any[] = [];
-    currentFolder: any;
+    prevData: AssetViewItem[] = [];
+    nextData: AssetViewItem[] = [];
+    data: AssetViewItem[] = [];
+    currentData: AssetViewItem[] = [];
+    currentFolder: AssetViewItem | undefined = undefined;
     path: string[] = [];
     rootPath: string = "";
-    selectedItem: any = null;
+    selectedItem: AssetViewItem | undefined = undefined;
     allowedTypes: any;
     searchValue: string = "";
     filter: string = "None";
@@ -106,12 +97,12 @@ export class AssetView
     onRefreshContent: any = null;
     itemContextMenuOptions: any = null;
     onItemDragged: any = null;
-    onevent: any = null;
 
     private _assetsPerPage: number = 24;
     get assetsPerPage(): any { return this._assetsPerPage; }
     set assetsPerPage( v: any ) { this._setAssetsPerPage( v ); }
 
+    _callbacks: Record<string, AssetViewEventCallback> = {};
     _lastSortBy: string = "";
     _paginator: typeof LX.Pagination | undefined;
     _scriptCodeDialog: typeof LX.Dialog | undefined;
@@ -188,7 +179,7 @@ export class AssetView
 
         this._processData( this.data );
 
-        this.currentFolder = null;
+        this.currentFolder = undefined;
         this.currentData = this.data;
         this.path = ['@'];
 
@@ -210,10 +201,19 @@ export class AssetView
     }
 
     /**
-    * @method load
+    * @method on
+    * @description Stores an event callback for the desired action
     */
+    on( eventName: string, callback: AssetViewEventCallback )
+    {
+        this._callbacks[ eventName ] = callback;
+    }
 
-    load( data: any, onevent: any )
+    /**
+    * @method load
+    * @description Loads and processes the input data
+    */
+    load( data: any )
     {
         this.prevData.length = 0;
         this.nextData.length = 0;
@@ -229,15 +229,13 @@ export class AssetView
         }
 
         this._refreshContent();
-
-        this.onevent = onevent;
     }
 
     /**
     * @method addItem
+    * @description Creates an item DOM element
     */
-
-    addItem( item: any, childIndex: number | undefined, updateTree: boolean = true )
+    addItem( item: AssetViewItem, childIndex: number | undefined, updateTree: boolean = true )
     {
         const isListLayout = ( this.layout == AssetView.LAYOUT_LIST );
         const isGridLayout = ( this.layout == AssetView.LAYOUT_GRID ); // default
@@ -263,9 +261,11 @@ export class AssetView
             item.uid = LX.guidGenerator();
         }
 
-        if( item.lastModified && !item.lastModifiedDate )
+        item.metadata = item.metadata ?? {};
+
+        if( item.metadata.lastModified && !item.metadata.lastModifiedDate )
         {
-            item.lastModifiedDate = this._lastModifiedToStringDate( item.lastModified );
+            item.metadata.lastModifiedDate = this._lastModifiedToStringDate( item.metadata.lastModified );
         }
 
         if( !this.useNativeTitle )
@@ -317,14 +317,20 @@ export class AssetView
             let checkbox = document.createElement( 'input' );
             checkbox.type = "checkbox";
             checkbox.className = "lexcheckbox";
-            checkbox.checked = item.selected;
+            checkbox.checked = item.metadata.selected;
             checkbox.addEventListener('change', ( e: any ) => {
-                item.selected = !item.selected;
-                if( this.onevent )
+                item.metadata.selected = !item.metadata.selected;
+                const onCheck = that._callbacks["check"];
+                if( onCheck !== undefined )
                 {
-                    const event = new AssetViewEvent(AssetViewEvent.ASSET_CHECKED, e.shiftKey ? [item] : item );
-                    event.multiple = !!e.shiftKey;
-                    this.onevent( event );
+                    const event: AssetViewEvent = {
+                        type: "check",
+                        items: [ item ],
+                        userInitiated: true
+                    };
+
+                    onCheck( event );
+                    // event.multiple = !!e.shiftKey;
                 }
                 e.stopPropagation();
                 e.stopImmediatePropagation();
@@ -350,10 +356,10 @@ export class AssetView
                 itemVideo.style.transition = 'opacity 0.2s ease-out';
                 itemVideo.style.opacity = item.preview ? '0' : '1';
                 itemVideo.src = item.src;
-                itemVideo.volume = item.videoVolume ?? 0.4;
+                itemVideo.volume = item.metadata.volume ?? 0.4;
             }
 
-            let preview = null;
+            let preview: any = null;
 
             const previewSrc    = item.preview ?? item.src;
             const hasImage = previewSrc && (
@@ -370,7 +376,7 @@ export class AssetView
                 const defaultFolderPath     = `${ this.rootPath }images/folder.png`;
 
                 preview = document.createElement('img');
-                let realSrc = item.unknownExtension ? defaultPreviewPath : ( isFolder ? defaultFolderPath : previewSrc );
+                let realSrc = item.metadata.unknownExtension ? defaultPreviewPath : ( isFolder ? defaultFolderPath : previewSrc );
                 preview.src = ( isGridLayout || isFolder ? realSrc : defaultPreviewPath );
                 preview.setAttribute( "draggable", "false" );
                 preview.className = "pointer-events-none";
@@ -405,8 +411,8 @@ export class AssetView
 
         if( isListLayout )
         {
-            if( item.bytesize ) itemInfoHtml += ` | ${ LX.formatBytes( item.bytesize ) }`;
-            if( item.lastModifiedDate ) itemInfoHtml += ` | ${ item.lastModifiedDate }`;
+            if( item.metadata.bytesize ) itemInfoHtml += ` | ${ LX.formatBytes( item.metadata.bytesize ) }`;
+            if( item.metadata.lastModifiedDate ) itemInfoHtml += ` | ${ item.metadata.lastModifiedDate }`;
         }
 
         LX.makeContainer( [ 'auto', 'auto' ], 'lexassetinfo', itemInfoHtml, itemEl );
@@ -439,11 +445,29 @@ export class AssetView
                 return;
             }
 
-            if( that.onevent )
+            const onSelect = that._callbacks["select"];
+            const onDblClick = that._callbacks["dblClick"];
+            if( isDoubleClick && onDblClick !== undefined )
             {
-                const event = new AssetViewEvent(isDoubleClick ? AssetViewEvent.ASSET_DBLCLICKED : AssetViewEvent.ASSET_SELECTED, e.shiftKey ? [item] : item );
-                event.multiple = !!e.shiftKey;
-                that.onevent( event );
+                const event: AssetViewEvent = {
+                    type: "dbl_click",
+                    items: [ item ],
+                    userInitiated: true
+                };
+
+                onDblClick( event );
+                // event.multiple = !!e.shiftKey;
+            }
+            else if( !isDoubleClick && onSelect !== undefined )
+            {
+                const event: AssetViewEvent = {
+                    type: "select",
+                    items: [ item ],
+                    userInitiated: true
+                };
+
+                onSelect( event );
+                // event.multiple = !!e.shiftKey;
             }
         });
 
@@ -464,12 +488,12 @@ export class AssetView
 
             if( multiple <= 1 )
             {
-                options.push( { name: "Rename", icon: "TextCursor", callback: that._renameItem.bind( that, item ) } );
+                options.push( { name: "Rename", icon: "TextCursor", callback: that._renameItemPopover.bind( that, item ) } );
             }
 
             if( !isFolder )
             {
-                options.push( { name: "Clone", icon: "Copy", callback: that._cloneItem.bind( that, item ) });
+                options.push( { name: "Clone", icon: "Copy", callback: that._requestCloneItem.bind( that, item ) });
             }
 
             options.push( { name: "Move", icon: "FolderInput", callback: that._moveItem.bind( that, item ) } );
@@ -490,7 +514,7 @@ export class AssetView
                 }
             }
 
-            options.push( null, { name: "Delete", icon: "Trash2", className: "fg-error", callback: that._deleteItem.bind( that, item ) } );
+            options.push( null, { name: "Delete", icon: "Trash2", className: "fg-error", callback: that._requestDeleteItem.bind( that, item ) } );
 
             LX.addClass( that.contentPanel.root, "pointer-events-none" );
 
@@ -517,18 +541,9 @@ export class AssetView
 
                 // When animation ends, finalize move
                 draggedEl.addEventListener("animationend", () => {
-
                     draggedEl.classList.remove("moving-to-folder");
-
-                    that._moveItemToFolder( src, target );
-
+                    that._requestMoveItemToFolder( src, target );
                 }, { once: true });
-            }
-
-            if( that.onevent )
-            {
-                const event = new AssetViewEvent( AssetViewEvent.ASSET_MOVED, src, target );
-                that.onevent( event );
             }
         };
 
@@ -631,6 +646,7 @@ export class AssetView
 
     /**
     * @method clear
+    * @description Creates all AssetView container panels
     */
     clear()
     {
@@ -650,10 +666,6 @@ export class AssetView
         }
     }
 
-    /**
-    * @method _processData
-    */
-
     _processData( data: any, parent?: any )
     {
         // Processing an item
@@ -672,10 +684,6 @@ export class AssetView
             this._processData( item, newParent );
         }
     }
-
-    /**
-    * @method _updatePath
-    */
 
     _updatePath()
     {
@@ -700,10 +708,6 @@ export class AssetView
 
         LX.emitSignal( "@on_folder_change", this.path.reverse().join('/') );
     }
-
-    /**
-    * @method _createTreePanel
-    */
 
     _createTreePanel( area: typeof Area )
     {
@@ -754,7 +758,7 @@ export class AssetView
                                 this.prevData.push( this.currentFolder );
                             }
 
-                            this.currentFolder = null;
+                            this.currentFolder = undefined;
                             this.currentData = this.data;
                             this._refreshContent();
                             this._updatePath();
@@ -809,20 +813,12 @@ export class AssetView
         this.tree = tree.innerTree;
     }
 
-    /**
-    * @method _setContentLayout
-    */
-
     _setContentLayout( layoutMode: number )
     {
         this.layout = layoutMode;
         this.toolsPanel.refresh();
         this._refreshContent();
     }
-
-    /**
-    * @method _createContentPanel
-    */
 
     _createContentPanel( area: typeof Area )
     {
@@ -995,16 +991,17 @@ export class AssetView
         for( let i = start; i < end; ++i )
         {
             let item = filteredData[ i ];
+            item.metadata = item.metadata ?? {};
 
             if( item.path )
             {
                 LX.request({ url: item.path, dataType: 'blob', success: ( f: File ) => {
-                    item.bytesize = f.size;
+                    item.metadata.bytesize = f.size;
                     fr.readAsDataURL( f );
                     fr.onload = e => {
                         const target = e.currentTarget as any;
                         item.src = target.result;  // This is a base64 string...
-                        item._path = item.path;
+                        item.metadata.path = item.path;
                         delete item.path;
                         this._refreshContent( searchValue, filter );
                     };
@@ -1022,7 +1019,7 @@ export class AssetView
         }
     }
 
-    _previewAsset( file: any )
+    _previewAsset( file: AssetViewItem )
     {
         if( this.skipPreview )
         {
@@ -1030,6 +1027,8 @@ export class AssetView
         }
 
         const is_base_64 = file.src && file.src.includes("data:image/");
+        
+        file.metadata = file.metadata ?? {};
 
         this.previewPanel.clear();
         this.previewPanel.branch("Asset");
@@ -1043,19 +1042,19 @@ export class AssetView
             }
         }
 
-        if( file.lastModified && !file.lastModifiedDate )
+        if( file.metadata.lastModified && !file.metadata.lastModifiedDate )
         {
-            file.lastModifiedDate = this._lastModifiedToStringDate( file.lastModified );
+            file.metadata.lastModifiedDate = this._lastModifiedToStringDate( file.metadata.lastModified );
         }
 
         const options = { disabled: true };
 
         this.previewPanel.addText("Filename", file.id, null, options);
-        if( file.lastModifiedDate ) this.previewPanel.addText("Last Modified", file.lastModifiedDate, null, options);
-        if( file._path || file.src ) this.previewPanel.addText("URL", file._path ? file._path : file.src, null, options);
+        if( file.metadata.lastModifiedDate ) this.previewPanel.addText("Last Modified", file.metadata.lastModifiedDate, null, options);
+        if( file.metadata.path || file.src ) this.previewPanel.addText("URL", file.metadata.path ? file.metadata.path : file.src, null, options);
         this.previewPanel.addText("Path", this.path.join('/'), null, options);
         this.previewPanel.addText("Type", file.type, null, options);
-        if( file.bytesize ) this.previewPanel.addText("Size", LX.formatBytes( file.bytesize ), null, options);
+        if( file.metadata.bytesize ) this.previewPanel.addText("Size", LX.formatBytes( file.metadata.bytesize ), null, options);
         if( file.type == "folder" ) this.previewPanel.addText("Files", file.children ? file.children.length.toString() : "0", null, options);
 
         this.previewPanel.addSeparator();
@@ -1104,32 +1103,36 @@ export class AssetView
             fr.onload = e => {
 
                 let ext = file.name.substring( file.name.lastIndexOf('.') + 1 ).toLowerCase();
-
-                let item: any = {
-                    "id": file.name,
-                    "src": ( e.currentTarget as any ).result,
-                    "extension": ext,
-                    "lastModified": file.lastModified,
-                    "lastModifiedDate": this._lastModifiedToStringDate( file.lastModified )
-                };
+                let type = null;
 
                 switch(ext)
                 {
                 case 'png':
                 case 'jpg':
-                    item.type = "image"; break;
+                    type = "image"; break;
                 case 'js':
                 case 'css':
-                    item.type = "script"; break;
+                    type = "script"; break;
                 case 'json':
-                    item.type = "json"; break;
+                    type = "json"; break;
                 case 'obj':
-                    item.type = "mesh"; break;
+                    type = "mesh"; break;
                 default:
-                    item.type = ext;
-                    item.unknownExtension = true;
+                    type = ext;
                     break;
                 }
+
+                let item: AssetViewItem = {
+                    id: file.name,
+                    src: ( e.currentTarget as any ).result,
+                    type,
+                    metadata: {
+                        extension: ext,
+                        lastModified: file.lastModified,
+                        lastModifiedDate: this._lastModifiedToStringDate( file.lastModified ),
+                        unknownExtension: type == ext
+                    }
+                };
 
                 this.currentData.push( item );
 
@@ -1147,7 +1150,7 @@ export class AssetView
         sortBy = sortBy ?? ( this._lastSortBy ?? 'id' );
         sortMode = sortMode ?? this.sortMode;
         const sortDesc = ( sortMode === AssetView.CONTENT_SORT_DESC );
-        this.currentData = this.currentData.sort( ( a, b ) => {
+        this.currentData = this.currentData.sort( ( a: any, b: any ) => {
             var r = sortDesc ? b[ sortBy ].localeCompare( a[ sortBy ] ) : a[ sortBy ].localeCompare( b[ sortBy ] );
             if( r == 0 ) r = sortDesc ? b['id'].localeCompare( a['id'] ) : a[ 'id' ].localeCompare( b[ 'id' ] );
             return r;
@@ -1159,47 +1162,58 @@ export class AssetView
         this._refreshContent();
     }
 
-    _enterFolder( folderItem: any, storeCurrent: boolean = true )
+    _enterFolder( folderItem: AssetViewItem | undefined, storeCurrent: boolean = true )
     {
+        if( !folderItem )
+        {
+            return;
+        }
+
         const child = this.currentData[ 0 ];
         const sameFolder = child?.parent?.id === folderItem.id;
 
         if( storeCurrent )
         {
-            this.prevData.push( this.currentFolder ?? { id: "/", children: this.data } );
+            this.prevData.push( this.currentFolder ?? {
+                id: "/",
+                children: this.data,
+                type: "root"
+            } );
         }
 
         this.currentFolder = folderItem;
-        this.currentData = this.currentFolder.children;
-        // this.contentPage = 1;
+        this.currentData = this.currentFolder?.children ?? [];
 
         if( !sameFolder )
         {
             this._refreshContent();
         }
 
-        // Update path
         this._updatePath();
 
-        // Trigger event
-        if( this.onevent )
+        const onEnterFolder = this._callbacks["enterFolder"];
+        if( onEnterFolder !== undefined )
         {
-            const event = new AssetViewEvent( AssetViewEvent.ENTER_FOLDER, folderItem );
-            this.onevent( event );
+            const event: AssetViewEvent = {
+                type: "enter_folder",
+                to: folderItem,
+                userInitiated: true
+            };
+            onEnterFolder( event );
         }
     }
 
-    _removeItemFromParent( item: any )
+    _removeItemFromParent( item: AssetViewItem )
     {
         const oldParent = item.parent;
         if( oldParent )
         {
-            const idx = oldParent.children.indexOf( item );
+            const idx = oldParent.children?.indexOf( item ) ?? -1;
             if( idx < 0 )
             {
                 return false;
             }
-            oldParent.children.splice( idx, 1 );
+            oldParent.children?.splice( idx, 1 );
         }
         else
         {
@@ -1219,24 +1233,38 @@ export class AssetView
         return true;
     }
 
-    _moveItemToFolder( item: any, folder: any )
+    _requestDeleteItem( item: AssetViewItem )
     {
-        const ok = this._removeItemFromParent( item );
-        if( !ok )
+        const onBeforeDelete = this._callbacks["beforeDelete"];
+        const onDelete = this._callbacks["delete"];
+
+        const resolve = () => {
+            this._deleteItem( item );
+            const event: AssetViewEvent = {
+                type: "delete",
+                items: [ item ],
+                userInitiated: true
+            }
+            if( onDelete ) onDelete( event );
+        };
+        
+        if( onBeforeDelete )
         {
-            console.error( "[AssetView Error] Cannot move. Item not found." );
-            return;
+            const event: AssetViewEvent = {
+                type: "delete",
+                items: [ item ],
+                userInitiated: true
+            }
+
+            onBeforeDelete( event, resolve );
         }
-
-        folder.children.push( item );
-        item.parent = folder;
-        item.dir = folder.children;
-
-        this._refreshContent();
-        this.tree?.refresh();
+        else
+        {
+            resolve();
+        }
     }
 
-    _deleteItem( item: any )
+    _deleteItem( item: AssetViewItem )
     {
         const ok = this._removeItemFromParent( item );
         if( !ok )
@@ -1247,20 +1275,64 @@ export class AssetView
 
         this._refreshContent( this.searchValue, this.filter );
         this.tree?.refresh();
+        this.previewPanel?.clear();
+    }
 
-        if( this.onevent)
+    _requestMoveItemToFolder( item: AssetViewItem, folder: AssetViewItem )
+    {
+        const onBeforeMove = this._callbacks["beforeMove"];
+        const onMove = this._callbacks["move"];
+
+        const resolve = () => {
+            this._moveItemToFolder( item, folder );
+            const event: AssetViewEvent = {
+                type: "move",
+                items: [ item ],
+                from: item.parent,
+                to: folder,
+                userInitiated: true
+            }
+            if( onMove ) onMove( event );
+        };
+        
+        if( onBeforeMove )
         {
-            const event = new AssetViewEvent( AssetViewEvent.ASSET_DELETED, item );
-            this.onevent( event );
+            const event: AssetViewEvent = {
+                type: "move",
+                items: [ item ],
+                from: item.parent,
+                to: folder,
+                userInitiated: true
+            }
+
+            onBeforeMove( event, resolve );
         }
-
-        if( this.previewPanel )
+        else
         {
-            this.previewPanel.clear();
+            resolve();
         }
     }
 
-    _moveItem( item: any )
+    _moveItemToFolder( item: AssetViewItem, folder: AssetViewItem )
+    {
+        const ok = this._removeItemFromParent( item );
+        if( !ok )
+        {
+            console.error( "[AssetView Error] Cannot move. Item not found." );
+            return;
+        }
+
+        folder.children = folder.children ?? [];
+        folder.children.push( item );
+        item.parent = folder;
+        item.dir = folder.children;
+
+        this._refreshContent();
+        this.tree?.refresh();
+        this._moveItemDialog?.destroy();
+    }
+
+    _moveItem( item: AssetViewItem )
     {
         if( this._moveItemDialog )
         {
@@ -1314,7 +1386,7 @@ export class AssetView
             {
                 path.push( targetFolder.id );
 
-                const _pushParentsId = ( i: any ) => {
+                const _pushParentsId = ( i: AssetViewItem | undefined ) => {
                     if( !i ) return;
                     path.push( i.parent ? i.id : '@' );
                     _pushParentsId( i.parent );
@@ -1368,11 +1440,7 @@ export class AssetView
                     this._moveItemDialog.close();
                 }, { buttonClass: "bg-none fg-error" } );
                 footerPanel.addButton( null, "Move", () => {
-
-                    this._moveItemToFolder( item, targetFolder );
-
-                    this._moveItemDialog.close();
-
+                    this._requestMoveItemToFolder( item, targetFolder );
                 }, { className: "", buttonClass: "contrast" } );
             }
         }, { modal: true, size: ["616px", "500px"], closable: true, onBeforeClose: () => {
@@ -1380,7 +1448,7 @@ export class AssetView
         } });
     }
 
-    _cloneItem( item: any )
+    _requestCloneItem( item: AssetViewItem )
     {
         if( item.type === "folder" )
         {
@@ -1388,7 +1456,6 @@ export class AssetView
             return;
         }
 
-        const parent = item.parent;
         const dir = item.dir ?? [];
         const idx = dir.indexOf( item );
         if( idx < 0 )
@@ -1397,11 +1464,47 @@ export class AssetView
             return false;
         }
 
+        const onBeforeClone = this._callbacks["beforeClone"];
+        const onClone = this._callbacks["clone"];
+
+        const resolve = () => {
+            const clonedItem = this._cloneItem( item );
+            const event: AssetViewEvent = {
+                type: "clone",
+                items: [ item ],
+                result: [ clonedItem ],
+                userInitiated: true
+            }
+            if( onClone ) onClone( event );
+        };
+        
+        if( onBeforeClone )
+        {
+            const event: AssetViewEvent = {
+                type: "clone",
+                items: [ item ],
+                userInitiated: true
+            }
+
+            onBeforeClone( event, resolve );
+        }
+        else
+        {
+            resolve();
+        }
+    }
+
+    _cloneItem( item: AssetViewItem ): AssetViewItem
+    {
+        const parent = item.parent;
+        const dir = item.dir ?? [];
+        const idx = dir.indexOf( item );
+
         delete item.domEl;
         delete item.dir;
         delete item.parent;
 
-        const newItem = LX.deepCopy( item );
+        const newItem: AssetViewItem = LX.deepCopy( item );
         newItem.id = this._getClonedName( item.id, dir );
         newItem.uid = LX.guidGenerator(); // generate new uid
         newItem.dir = item.dir = dir;
@@ -1411,14 +1514,45 @@ export class AssetView
 
         this._refreshContent( this.searchValue, this.filter );
 
-        if( this.onevent )
+        return newItem;
+    }
+
+    _requestRenameItem( item: AssetViewItem, newName: string )
+    {
+        const onBeforeRename = this._callbacks["beforeRename"];
+        const onRename = this._callbacks["rename"];
+        const oldName = item.id;
+
+        const resolve = () => {
+            
+            this._renameItem( item, newName );
+            const event: AssetViewEvent = {
+                type: "rename",
+                oldName,
+                newName,
+                userInitiated: true
+            }
+            if( onRename ) onRename( event );
+        };
+        
+        if( onBeforeRename )
         {
-            const event = new AssetViewEvent( AssetViewEvent.ASSET_CLONED, item );
-            this.onevent( event );
+            const event: AssetViewEvent = {
+                type: "rename",
+                oldName,
+                newName,
+                userInitiated: true
+            }
+
+            onBeforeRename( event, resolve );
+        }
+        else
+        {
+            resolve();
         }
     }
 
-    _renameItem( item: any )
+    _renameItem( item: AssetViewItem, newName: string )
     {
         const idx = this.currentData.indexOf( item );
         if( idx < 0 )
@@ -1426,37 +1560,36 @@ export class AssetView
             return;
         }
 
-        const oldName = item.id;
         const wasSelected = LX.hasClass( item.domEl, "selected" );
+        const hoverTitle: HTMLElement | null = this.content.querySelector( `#floatingTitle_${ item.id.replace( /\s/g, '_' ).replaceAll( ".", "_" ) }` );
+        if( hoverTitle ) hoverTitle.remove();
+
+        item.domEl?.remove();
+        item.id = newName;
+        item.domEl = this.addItem( item, idx * 2 );
+
+        if( wasSelected )
+        {
+            this._previewAsset( item );
+        }
+
+        this.tree?.refresh();
+
+        this._processData( this.data );
+    }
+
+    _renameItemPopover( item: AssetViewItem )
+    {
+        const idx = this.currentData.indexOf( item );
+        if( idx < 0 )
+        {
+            return;
+        }
 
         const onRename = ( value: string ) =>
         {
             p.destroy();
-
-            const hoverTitle: HTMLElement | null = this.content.querySelector( `#floatingTitle_${ item.id.replace( /\s/g, '_' ).replaceAll( ".", "_" ) }` );
-            if( hoverTitle ) hoverTitle.remove();
-            item.domEl.remove();
-
-            item.id = value;
-            item.domEl = this.addItem( item, idx * 2 );
-
-            if( this.onevent )
-            {
-                const event = new AssetViewEvent( AssetViewEvent.ASSET_RENAMED, item, oldName );
-                this.onevent( event );
-            }
-
-            if( wasSelected )
-            {
-                this._previewAsset( item );
-            }
-
-            if( !this.skipBrowser )
-            {
-                this.tree.refresh();
-            }
-
-            this._processData( this.data );
+            this._requestRenameItem( item, value )
         }
 
         let newName = item.id;

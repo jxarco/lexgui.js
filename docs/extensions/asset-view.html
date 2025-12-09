@@ -112,9 +112,16 @@
     docMaker.classMethod( ".clear", `Clear all AssetView panels`, [] );
 
     docMaker.classMethod( ".load", `Loads and creates all the data elements.`, [
-        ["data", "Object|Array"],
-        ["onevent", "Function"],
+        ["data", "Object|Array"]
     ] );
+
+    docMaker.classMethod( ".on", `Stores an event callback for the desired action.`, [
+        ["eventName", "String"],
+        ["callback", "AssetViewEventCallback"],
+    ] );
+
+    docMaker.note( `An AssetViewEventCallback has the following parameters: ${ docMaker.iCode("event") } (AssetViewEvent) and ${ docMaker.iCode("resolve") } (Function). Users must call
+    resolve to perform the action for cancellable events.` )
 
     docMaker.lineBreak();
     docMaker.lineBreak();
