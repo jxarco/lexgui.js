@@ -2,7 +2,7 @@
 
 ## dev
 
-## 8.0 (master)
+## 8.0.0 (master)
 
 From 8.0 (changed versioning to set `8` as the major version), the full library is written in TypeScript to facilitate integrations in newer frameworks (Builds are still available as a JS module with its extensions).
 Aded new Spinner and Pagination Components.
@@ -82,7 +82,7 @@ Pages and Styling:
 - Tailwind color palette with classes and css variables.
 - Added more utility Tailwind style classes.
 
-## 7.15
+## 7.15.0
 
 Minor fixes.
 Docs updated.
@@ -98,7 +98,7 @@ AssetView:
 - Fixed clearing preview panel on delete item.
 - Removed not used "Properties" item context menu entry.
 
-## 7.14
+## 7.14.0
 
 CodeEditor:
 - Added support for add/remove multi-line indentation.
@@ -111,7 +111,7 @@ CodeEditor:
 - Fixed tab visibility bug when using explorer mode.
 - Fixed line swap minor setting incorrect active line.
 
-## 7.13
+## 7.13.0
 
 Added `LX.validateValueAtPattern`.
 TextInput now receive `options.pattern` as an Object, instead of text.
@@ -127,7 +127,7 @@ CodeEditor:
 - Fixed some issues reseting cursor position.
 - Fixed cursor horizontal scrolling issues.
 
-## 7.12
+## 7.12.0
 
 Added support column actions in Table Component.
 
@@ -140,7 +140,7 @@ Timeline:
 NodeTree:
 - Fixed styling of actions button inputs.
 
-## 7.11
+## 7.11.0
 
 Fixed `Menubar.getSubItem`.
 
@@ -160,7 +160,7 @@ TreeEvent:
 - Added event attribute to store mouse/keyboard/system.
 - Homogenised calls to TreeEvent so node, value and event are consistent.
 
-## 7.10
+## 7.10.0
 
 Removed Fit-Tabs thumb CSS transition on `Tabs.add`.
 Added Popover documentation.
@@ -187,7 +187,7 @@ VideoEditor:
 - Speed and loop buttons added to video controls.
 - Fixed resize controls area bug.
 
-## 7.9
+## 7.9.0
 
 Allow wheel/middle click in menubar buttons.
 Pass RadioGroup name as argument to radio option callback.
@@ -202,7 +202,7 @@ VideoEditor:
 - Force to load all chunks of the video.
 - Loop video manually done to fix sync.
 
-## 7.8
+## 7.8.0
 
 Renamed AssetView "List" view to "Compact". Added better "List" view option.
 Fixed undesired scroll in AssetView.
@@ -218,7 +218,7 @@ CodeEditor:
 Timeline:
 - Add `Timeline.clear()` function.
 
-## 7.7
+## 7.7.0
 
 Fixed RangeInput double-slider issue where the min slider could go past the max slider.
 Fixed legacy ContextMenu reposition bug.
@@ -245,7 +245,7 @@ CodeEditor:
 Timeline:
 - Added setScroll function.
 
-## 7.6
+## 7.6.0
 
 The last color scheme applied (dark|light) is now stored.
 Added `LX.setSystemTheme()` to revert back auto color scheme mode.
@@ -260,7 +260,7 @@ CodeEditor:
 - Added support to use different name for URL/Path loaded files.
 - Added support to load initial files async using `options.filesAsync` list.
 
-## 7.5
+## 7.5.0
 
 CodeEditor:
 - Hotfixed issue not processing lines in some cases.
@@ -274,7 +274,7 @@ VideoEditor:
 Added `options.event` to Dropdown to offset position based on event position.
 Added some more CSS classes.
 
-## 7.4
+## 7.4.0
 
 Added `LX.toKebabCase`.
 
@@ -285,7 +285,7 @@ CodeEditor:
 - New autocomplete item icons based on Symbols.
 - Minor bugs fixed.
 
-## 7.3
+## 7.3.0
 
 VideoEditor:
 - Minor Controls sizes refactor.
@@ -296,7 +296,7 @@ CodeEditor:
 - Added basic symbols detection to feed autocomplete.
 - Fixed resizing and scrollbar issues.
 
-## 7.2
+## 7.2.0
 
 Fixed AssetView Filter select.
 Fixed tooltips on Dialog without modal.
@@ -312,7 +312,7 @@ CodeEditor:
 - Started work on scope detection (enums, structs, methods, classes, etc.) for syntax highlighting.
 - Added support for adding new custom language.
 
-## 7.1
+## 7.1.0
 
 Added support for selecting custom Min, Max range in RangeInput component.
 Added value labels to RangeInput component.
@@ -321,7 +321,7 @@ Added value labels to RangeInput component.
 - Change content and offsets dynamically using `trigger.dataset["tooltipContent" | "tooltipOffsetX" | "tooltipOffsetY"]`.
 Fixed Popovers using `options.reference`.
 
-## 7.0
+## 7.0.0
 
 General/Utils:
 - "Components" have been renamed to "Extensions".
@@ -371,7 +371,7 @@ Improved Documentation:
 - Added addition version to elements in sidebar.
 - Added Changelog section.
 
-## 6.12
+## 6.12.0
 
 Widgets:
 - Button Widget now supports `options.mustConfirm` to confirm the trigger with custom options.
@@ -389,7 +389,7 @@ Fixed PlainText <> symbols in CodeEditor.
 Fixed Calendar `options.fromToday` not including today's date.
 Docs updated.
 
-## 6.11
+## 6.11.0
 
 Widgets:
 - Fixed Progress Widget value clamp and callback.
@@ -402,7 +402,7 @@ Added support for new `LX.Tour` Component to guide users through an app.
 Fixed light-dark themes in docs css.
 Docs updated.
 
-## 6.10
+## 6.10.0
 
 Timeline:
 - Added support for cloning clips and tracks.
@@ -421,7 +421,7 @@ Fixed Commandbar error on checking String Menubar items.
 Fixed Asset View custom title overflow.
 Docs updated.
 
-## 6.9
+## 6.9.0
 
 Timeline:
 - `addKeyframes` now returns new indices.
@@ -443,7 +443,7 @@ Added support for Area Overlaybuttons separators.
 Fixed Menubar buttons using `float: left` alignment.
 Minor fixes CSS.
 
-## 6.8
+## 6.8.0
 
 Widgets:
 - Support `options.onCreate` on register Custom Widget.
@@ -462,7 +462,7 @@ Fixed vertical area split resize when `sizes: "auto"`.
 Docs updated.
 Minor CSS tweaks.
 
-## 6.7
+## 6.7.0
 
 Widgets:
 - Button Widget now allows `options.fileInput` to request a file on click.
@@ -480,7 +480,7 @@ Added `MAKE_NUMBERED_LIST` to docmaker.js component.
 Clean docmaker css.
 Docs updated.
 
-## 6.6
+## 6.6.0
 
 Fixed horizontal scroll in Table Widget.
 Fixed checkbox in Dropdown item.
@@ -488,7 +488,7 @@ Callbacks in collapsable sidebar entries are now executed.
 Add `docmaker.js` script (Documentation maker) as new LX component.
 Added `hover:scale` CSS selectors.
 
-## 6.5
+## 6.5.0
 
 Timeline:
 - Refactored undo-redo.
@@ -500,7 +500,7 @@ Use sidebar inside Sheet element on mobile.
 Removed LX.UTILS. Moved methods to global namespace `LX`.
 Minor fixes in example demos.
 
-## 6.4
+## 6.4.0
 
 Timeline:
 - Paste refactor.
@@ -518,7 +518,7 @@ Fixed making floating branch + docking to panel.
 Fixed graph renaming bug in NodeGraph editor.
 Resize fixes in VideoEditor component.
 
-## 6.3
+## 6.3.0
 
 Widgets:
 - New Map2D Widget (For NNI).
@@ -530,7 +530,7 @@ Improved Context Menu docs section.
 Added a few more icon solid variants.
 Minor fixes.
 
-## 6.2
+## 6.2.0
 
 Widgets:
 - Fixed Title Widget class override.
@@ -543,7 +543,7 @@ Widgets:
 Added a few more icon solid variants.
 Minor CSS tweaks.
 
-## 6.1
+## 6.1.0
 
 Widgets:
 - Support back `options.selected` in ComboButtons Widget as `ValueType|Array<ValueType>`.
@@ -555,7 +555,7 @@ Fixed Dropdown creation crash when no input items.
 Fixed AssetView content on max height and scroll.
 Improved robustness of `LX.getSupportedDOMName`.
 
-## 6.0
+## 6.0.0
 
 `LX.init` now has to called using `await`.
 Use Dropdowns elements in menubar.
@@ -584,7 +584,7 @@ Docs updated:
 - Improved widget list parameters and options.
 - Added live examples for sidebar and menubar.
 
-## 5.11
+## 5.11.0
 
 Widgets:
 - Form: Add more custom options. Fixed issue using a String as Form field.
@@ -593,7 +593,7 @@ Added `LX.makeElement` to expand support for creating other HTML types.
 Added more theme utils methods: `LX.getTheme` and `LX.switchTheme`.
 Minor css fixes.
 
-## 5.10
+## 5.10.0
 
 Fixed Date Calendar popover not opening.
 Fixed creation of AssetView inner areas.
@@ -601,7 +601,7 @@ Fixed Sidebar content resize issue on creation.
 ChangeLanguage CodeEditor commands are no longer shown if no opened editor.
 Minor css fixes.
 
-## 5.9
+## 5.9.0
 
 Widgets:
 - Added new `DatePicker` Widget (also via `Panel.addDate` and using `LX.Calendar` class).
@@ -612,7 +612,7 @@ Added `LX.Popover` class to create generic popovers with custom content.
 Expose `LX.NodeTree` in global namespace.
 Docs updated.
 
-## 5.8
+## 5.8.0
 
 Widgets:
 - Added missing support for `NodeTree.refresh()` on Array data.
@@ -634,7 +634,7 @@ Added missing support for swap functionality in OverlayButtons.
 Added tracking (`letter-spacing`) CSS class utilities.
 Fixed minor issues with ColorPicker mouse tracking.
 
-## 5.7
+## 5.7.0
 
 `LX.makeIcon` now accepts `options` as second parameter (`title`, `iconClass`, `svgClass`).
 Exposed `LX.setStrictViewport(value)` to allow switching manually.
@@ -642,7 +642,7 @@ Fixed ColorPicker minor issues.
 Fixed Examples and SourceCode links in docs.
 Added more CSS class utilities.
 
-## 5.6
+## 5.6.0
 
 Widgets:
 - ColorInput Widget now uses a new custom `ColorPicker`.
@@ -654,7 +654,7 @@ Added `LX.makeKbd(keys, extraClass)` to create keyboard shortcuts.
 Fixed Badges theming issues.
 Docs updated.
 
-## 5.5
+## 5.5.0
 
 Table Widget:
 - Added support `options.filterValue`.
@@ -674,7 +674,7 @@ Allowed users to register extra icons in LX.ICONS using `LX.registerIcon`.
 Icons and Customization docs updated.
 Minor CSS improvements. Added more class utilities.
 
-## 5.4
+## 5.4.0
 
 Widgets:
 - Added support for disabling resize in TextArea Widget `options.resize: false`.
@@ -689,7 +689,7 @@ Added `options.asElement` to return `LX.badge` as HTMLElement instead of html st
 Support for using LX.ICONS on sidebar entry icons. Keep FA icons as legacy by now.
 Minor CSS improvements. Added more class utilities.
 
-## 5.3
+## 5.3.0
 
 Widgets:
 - Fixed Select Widget filter issues.
@@ -703,7 +703,7 @@ Fixed Select Widget inside Dialog when opening above selector.
 Improve styling for supported widgets. Better consistency.
 Added new demo example showcasing all widgets.
 
-## 5.2
+## 5.2.0
 
 Table Widget:
 - Fixed manual-sort not modifying inner data.
@@ -716,7 +716,7 @@ Fixed preview image in AssetView.
 General styling fixes.
 Docs updated.
 
-## 5.1
+## 5.1.0
 
 Widgets:
 - Added support for `text centering` all/specific columns in Table Widget.
@@ -729,7 +729,7 @@ Fixed issue on open/destroy dropdown.
 Fixed label text wrap on Checkbox&Toggle widgets.
 Added `contrast` theme for supported Widgets.
 
-## 5.0
+## 5.0.0
 
 Widgets:
 - Created classes for each widget to create them at any place.
@@ -749,7 +749,7 @@ Added Icons/ page in docs.
 Fixed Menubar entries auto-open when menubar is focused.
 Minor CSS tweaks.
 
-## 4.2
+## 4.2.0
 
 Widgets:
 - RadioGroup: Add name parameter (1st).
@@ -761,7 +761,7 @@ Added `extraClass` parameter for `LX.makeIcon`.
 Fixed Menubar.getButton.
 Fixed some CSS icon alignment issues.
 
-## 4.1
+## 4.1.0
 
 Widgets:
 - Text: Skip callback if no changes.
@@ -775,7 +775,7 @@ Fixed Menubar menus with scroll > 0.
 Removed padding when no PocketDialog content.
 Sidebar docs updated.
 
-## 4.0
+## 4.0.0
 
 Widgets:
 - Support new RadioGroup Widget.
@@ -791,7 +791,7 @@ Fixed few dialog dragging issues.
 Removed debug clog.
 Minor CSS tweaks.
 
-## 3.0
+## 3.0.0
 
 Widgets:
 - Support toggle mode and button disabled in ComboButtons Widget.
@@ -807,7 +807,7 @@ Timeline theme updated support light scheme color.
 Minor CSS tweaks.
 Minor bug fixes.
 
-## 2.0
+## 2.0.0
 
 Widgets:
 - Support for new Table Widget `Panel.addTable()`.
@@ -829,14 +829,14 @@ Add minified build versions.
 Docs updated.
 Minor bug fixes.
 
-## 1.46
+## 1.46.0
 
 Support for creating code snippets `LX.makeCodeSnippet(options)`.
 Added `swapButton.swap()` and Add `swapButton.setState(bool)`.
 Fixed colored buttons in light theme.
 Fixed GoogleSans.ttf usage.
 
-## 1.45
+## 1.45.0
 
 Widgets:
 - New Counter Widget added `Panel.addCounter`.
@@ -853,7 +853,7 @@ Start support for swap icons (now at `Menubar.addButtons`).
 Started theme customization docs page.
 Added theme-swap button to demo and docs.
 
-## 1.44
+## 1.44.0
 
 VideoEditor:
 - Support cropping video area.
@@ -867,7 +867,7 @@ Fix ContextMenu position when scroll > 0.
 Minor bug fixes.
 Docs Updated.
 
-## 1.43
+## 1.43.0
 
 CodeEditor:
 - Support C and CMake highlight.
@@ -880,7 +880,7 @@ Docs Updated. Add interactive widget examples.
 Minor CSS general changes.
 Minor bug fixes.
 
-## 1.42
+## 1.42.0
 
 AssetView:
 - Support custom element title on hover for Content layout mode `options.useNativeTitle`
@@ -897,7 +897,7 @@ Support options.title in Panel.addButton.
 [Area] `options.skip_default_area` -> `options.skipDefaultArea`.
 Minor bug fixes.
 
-## 1.41
+## 1.41.0
 
 AssetView:
 - Renamed all option parameters (remove snake case).
@@ -911,21 +911,21 @@ More Timeline refactor and fixes.
 Removed `LX.UTILS.clamp`. Still can be used in `LX.clamp`.
 Update Fontawesome CSS to v6.7.2.
 
-## 1.40
+## 1.40.0
 
 New widget: Form. Series of Text + Submit Button using form data (Object).
 Fix non-unique "input-filter" id.
 Improved Number/Vector mouse interaction with `pointerLock`.
 Updated docs.
 
-## 1.39
+## 1.39.0
 
 New widget: Pad. Bidimensional slider.
 `LX.makeDraggable` now supports 'absolute' and 'fixed' positions.
 Fix passing onDragStart/onMove functions to Dialogs.
 Minor bug fixes.
 
-## 1.38
+## 1.38.0
 
 Timeline: Fixed timeline signals and added callbacks
 
@@ -936,7 +936,7 @@ Number/Vector widgets:
 Added Size Widget (N dimension number widget).
 Minor bug fixes.
 
-## 1.37
+## 1.37.0
 
 Audio:
 - Start new audio widgets (Knob wip).
@@ -950,7 +950,7 @@ Fixed Number/Vector precision.
 Fixed ContextMenu position on creation over window size.
 Minor bug fixes.
 
-## 1.36
+## 1.36.0
 
 Default skipCallback as `true` on emit widget signal.
 Add some vec2 math functions.
@@ -959,28 +959,28 @@ Apply original `display` when showing Areatab.
 Minor styling tweaks.
 Documentation updates.
 
-## 1.35
+## 1.35.0
 
 Fix `moveOutAction` clamping X value.
 Add values in curve only with MOUSE_LEFT_CLICK.
 Curve redraw and color widget styling fixes.
 Minor general styling improvements.
 
-## 1.34
+## 1.34.0
 
 Fix setValue on Checkbox.
 Fix position of Dropdown menu when content is scrolled.
 `moveOutAction` option to delete or clamp curve points.
 Minor tweaks.
 
-## 1.33
+## 1.33.0
 
 Work on VideoEditor UI component.
 Improvements Timeline.
 Allow to select multiple options in AssetViewer.
 Minor bug fixes.
 
-## 1.32
+## 1.32.0
 
 Timeline:
 - Allow addition of widgets in top bar.
@@ -991,7 +991,7 @@ New VideoEditor component (still wip).
 Added skipCallback for `Widget.set()`. 
 Minor bug fixes.
 
-## 1.31
+## 1.31.0
 
 GraphEditor:
 - Graph/function renaming.
@@ -1000,7 +1000,7 @@ GraphEditor:
 Fixed precision in Number/Vector widgets.
 Minor bug fixes.
 
-## 1.30
+## 1.30.0
 
 GraphEditor:
 - Snap Multiplier (x1, x2, x3)
@@ -1019,7 +1019,7 @@ Improved select animation "fit" tabs.
 Doc updates.
 Minor bug fixes.
 
-## 1.29
+## 1.29.0
 
 GraphEditor:
 - Graphs front end (Nodes, links, groups).
@@ -1030,7 +1030,7 @@ Improved draggable elements.
 Added "onBeforeLoad" callback in File widget.
 Minor bug fixes.
 
-## 1.28
+## 1.28.0
 
 GraphEditor:
 - Big refactor. Almost start from scratch.
@@ -1038,7 +1038,7 @@ GraphEditor:
 Support for adding big icons Sidebars.
 General CSS fixes and improvements.
 
-## 1.27
+## 1.27.0
 
 Code Editor:
 - Tab key follows fixed 4 space layout indentation.
@@ -1048,7 +1048,7 @@ Code Editor:
 
 Support "maxWidth" as options when creating a widget.
 
-## 1.26
+## 1.26.0
 
 Code Editor:
 - Search Next Ocurrence using "Ctrl+D" (Duplicate line moved to "Alt+D")
@@ -1059,7 +1059,7 @@ Code Editor:
 
 Minor fixes.
 
-## 1.25
+## 1.25.0
 
 Code Editor:
 - Added Ctrl+K + C/U Shortcuts to Comment/Uncomment lines.
@@ -1070,7 +1070,7 @@ Added title attribute by default to Widget Name Dom elements.
 Added value getter/setter for LIST widget.
 Added updateValues method for modify list options in LIST widget.
 
-## 1.24
+## 1.24.0
 
 Code Editor:
 - Improved single and multiple cursor usability.
@@ -1078,7 +1078,7 @@ Code Editor:
 - Fixed clicks outside the code area.
 - Minor bug fixes.
 
-## 1.23
+## 1.23.0
 
 Code Editor:
 - Begin integration of multiple cursors ("Ctrl+ArrowDown").
@@ -1089,7 +1089,7 @@ Code Editor:
 
 Minor fixes.
 
-## 1.22
+## 1.22.0
 
 Code Editor:
 - Added REDO using "Ctrl+Y".
@@ -1098,7 +1098,7 @@ Code Editor:
 
 Minor fixes.
 
-## 1.21
+## 1.21.0
 
 Code Editor:
 - Added "Ctrl+F" to find text in code tabs.
@@ -1106,7 +1106,7 @@ Code Editor:
 - Added "Markdown" syntax highlighting. 
 - Improved hightlighting of tag languages (HTML, Markdown, XML).
 
-## 1.20
+## 1.20.0
 
 Code Editor:
 - Active line is now hightlighted.
@@ -1117,7 +1117,7 @@ Code Editor:
 
 Minor fixes.
 
-## 1.19
+## 1.19.0
 
 Code Editor:
 - Add file explorer to Code Editor component. 
