@@ -21,6 +21,7 @@ AssetView:
 - Refactor event handling API to allow cancellable events (see docs).
 - Added support for `Ctrl+Wheel` to increase grid item size in AssetView.
 - Replace old pagination implementation for new Pagination Component.
+- Add "Go to upper folder" button, next to Back, Forward, and Refresh navigation bar.
 - Assets can now be dragged into either content or explorer folders.
 - Added support for native "Move" item action with Folder selection dialog.
 - Replace item Old ContextMenus for Dropdowns.

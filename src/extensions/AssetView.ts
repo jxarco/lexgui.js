@@ -720,7 +720,8 @@ export class AssetView
         }
 
         // Process data to show in tree
-        this.leftPanel.sameLine( 2, "justify-center" );
+        this.leftPanel.sameLine( 4, "justify-center" );
+
         this.leftPanel.addButton( null, "GoBackButton", () => {
             if( !this.prevData.length || !this.currentFolder ) return;
             this.nextData.push( this.currentFolder );
@@ -731,6 +732,15 @@ export class AssetView
             if( !this.nextData.length || !this.currentFolder ) return;
             this._enterFolder( this.nextData.pop() );
         }, { buttonClass: "bg-none", title: "Go Forward", tooltip: true, icon: "ArrowRight" } );
+
+        this.leftPanel.addButton( null, "GoUpButton", () => {
+            const parentFolder = this.currentFolder?.parent;
+            if( parentFolder ) this._enterFolder( parentFolder );
+        }, { buttonClass: "bg-none", title: "Go Upper Folder", tooltip: true, icon: "ArrowUp" } );
+
+        this.leftPanel.addButton( null, "GoUpButton", () => {
+            this._refreshContent()
+        }, { buttonClass: "bg-none", title: "Refresh", tooltip: true, icon: "Refresh" } );
 
         const treeData = { id: '/', children: this.data };
         const tree = this.leftPanel.addTree( "Content Browser", treeData, {
@@ -882,8 +892,7 @@ export class AssetView
             this.toolsPanel.endLine();
 
             this.toolsPanel.sameLine();
-            const refreshButton = this.toolsPanel.addButton( null, "", () => this._refreshContent(), { title: "Refresh", tooltip: true, icon: "Refresh" } );
-            this.toolsPanel.addButton( null, "", _onSort.bind( this ), { title: "Sort", tooltip: true, icon: ( this.sortMode === AssetView.CONTENT_SORT_ASC ) ? "SortAsc" : "SortDesc" } );
+            const sortButton = this.toolsPanel.addButton( null, "", _onSort.bind( this ), { title: "Sort", tooltip: true, icon: ( this.sortMode === AssetView.CONTENT_SORT_ASC ) ? "SortAsc" : "SortDesc" } );
             this.toolsPanel.addButton( null, "", _onChangeView.bind( this ), { title: "View", tooltip: true, icon: ( this.layout === AssetView.LAYOUT_GRID ) ? "LayoutGrid" : "LayoutList" } );
             this.toolsPanel.addSelect( null, typeEntries, this.filter ?? typeEntries[ 0 ], ( v: any ) => {
                 this._refreshContent( undefined, v );
@@ -895,7 +904,7 @@ export class AssetView
 
             if( this._paginator )
             {
-                const inlineContainer = refreshButton.root.parentElement;
+                const inlineContainer = sortButton.root.parentElement;
                 inlineContainer.appendChild( this._paginator.root );
             }
         };
