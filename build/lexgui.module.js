@@ -813,8 +813,12 @@ class Button extends BaseComponent {
                 wValue.querySelector(".file-input").click();
             }
             else if (options.mustConfirm) {
+                const swapInput = wValue.querySelector("input");
                 new LX.PopConfirm(wValue, {
                     onConfirm: () => {
+                        if (options.swap) {
+                            swapInput.checked = true;
+                        }
                         this._trigger(new IEvent(name, value, e), callback);
                     },
                     side: options.confirmSide,
@@ -824,6 +828,9 @@ class Button extends BaseComponent {
                     title: options.confirmTitle,
                     content: options.confirmContent
                 });
+                if (options.swap) {
+                    swapInput.checked = false;
+                }
             }
             else {
                 const swapInput = wValue.querySelector("input");
@@ -838,6 +845,14 @@ class Button extends BaseComponent {
     click() {
         const buttonDOM = this.root.querySelector('button');
         buttonDOM.click();
+    }
+    setSwapIcon(iconName) {
+        const oldIcon = this.root.querySelector(".swap-on");
+        if (!oldIcon) {
+            return;
+        }
+        const swapIcon = LX.makeIcon(iconName, { iconClass: "swap-on" });
+        oldIcon.replaceWith(swapIcon);
     }
 }
 LX.Button = Button;
@@ -9676,7 +9691,8 @@ function makeCollapsible(domEl, content, parent, options = {}) {
     const collapsed = (options.collapsed ?? true);
     const actionIcon = LX.makeIcon("Right");
     actionIcon.classList.add("collapser");
-    actionIcon.dataset["collapsed"] = `${collapsed}`;
+    if (collapsed)
+        actionIcon.dataset["collapsed"] = `${collapsed}`;
     actionIcon.style.marginLeft = "auto";
     actionIcon.style.marginRight = "0.2rem";
     actionIcon.addEventListener("click", function (e) {
@@ -9684,7 +9700,7 @@ function makeCollapsible(domEl, content, parent, options = {}) {
         e.stopPropagation();
         if (this.dataset["collapsed"]) {
             delete this.dataset["collapsed"];
-            content.style.display = "block";
+            content.style.display = options.display ?? "block";
         }
         else {
             this.dataset["collapsed"] = "true";

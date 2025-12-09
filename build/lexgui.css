@@ -1885,6 +1885,10 @@ a svg, svg path {
     margin-left: 0.5rem;
 }
 
+/* .lexbutton.array {
+    padding: var(--global-padding-xs) 0.75rem;
+} */
+
 .lexbutton.array a {
     margin-right: 4px;
     margin-left: auto;

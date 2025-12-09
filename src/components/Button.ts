@@ -206,8 +206,16 @@ export class Button extends BaseComponent
             }
             else if( options.mustConfirm )
             {
+                const swapInput = wValue.querySelector( "input" );
+
                 new LX.PopConfirm( wValue, {
-                    onConfirm: () => {
+                    onConfirm: () =>
+                    {
+                        if( options.swap )
+                        {
+                            swapInput.checked = true;
+                        }
+
                         this._trigger( new IEvent( name, value, e ), callback );
                     },
                     side: options.confirmSide,
@@ -217,6 +225,11 @@ export class Button extends BaseComponent
                     title: options.confirmTitle,
                     content: options.confirmContent
                 } );
+
+                if( options.swap )
+                {
+                    swapInput.checked = false;
+                }
             }
             else
             {
@@ -237,6 +250,18 @@ export class Button extends BaseComponent
     {
         const buttonDOM: HTMLButtonElement = this.root.querySelector( 'button' );
         buttonDOM.click();
+    }
+
+    setSwapIcon( iconName: string )
+    {
+        const oldIcon = this.root.querySelector( ".swap-on" );
+        if( !oldIcon )
+        {
+            return;
+        }
+
+        const swapIcon = LX.makeIcon( iconName, { iconClass: "swap-on" } );
+        oldIcon.replaceWith( swapIcon );
     }
 }
 

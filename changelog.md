@@ -15,6 +15,8 @@ Calendar and CalendarRange month changes now correctly.
 Code Editor multiline indentation now works properly on empty lines.
 Fixed line color of Timeline curve tracks in light theme.
 Fixed default collapsed state using `LX.makeCollapsible`.
+Fixed Button with Swap and mustConfirm.
+Added support for changing Button swap icons `Button.setSwapIcon`.
 
 AssetView:
 - Now used as an extension.
@@ -43,8 +45,8 @@ Sidebar:
 - Fixed entries separator not being visible due to content shrink.
 
 Tags Component:
-- Added skipDuplicates option
-- Focus input only when writing
+- Added skipDuplicates option.
+- Focus input only when writing.
 
 VideoEditor:
 - `dragCropArea` renamed to `moveCropArea`.

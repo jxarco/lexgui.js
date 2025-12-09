@@ -10,4 +10,5 @@ export declare class Button extends BaseComponent {
     swap?: (b?: boolean) => void;
     constructor(name: string | null, value?: string, callback?: any, options?: any);
     click(): void;
+    setSwapIcon(iconName: string): void;
 }
