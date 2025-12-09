@@ -36,6 +36,177 @@
         g$2.LX = exports.LX;
     }
 
+    // Branch.ts @jxarco
+    /**
+     * @class Branch
+     */
+    class Branch {
+        name;
+        components;
+        closed;
+        root;
+        content;
+        grabber;
+        panel;
+        onclick;
+        oncontextmenu;
+        constructor(name, options = {}) {
+            this.name = name;
+            var root = document.createElement('div');
+            root.className = "lexbranch";
+            if (options.id) {
+                root.id = options.id;
+            }
+            if (options.className) {
+                root.className += " " + options.className;
+            }
+            root.style.margin = "0 auto";
+            var that = this;
+            this.closed = options.closed ?? false;
+            this.root = root;
+            this.components = [];
+            this.panel = null;
+            // Create element
+            const title = document.createElement('div');
+            title.className = "lexbranchtitle";
+            if (options.icon) {
+                const branchIcon = exports.LX.makeIcon(options.icon, { iconClass: "mr-2" });
+                title.appendChild(branchIcon);
+            }
+            title.innerHTML += (name || "Branch");
+            const collapseIcon = exports.LX.makeIcon("Right", { iconClass: "switch-branch-button", svgClass: "sm" });
+            title.appendChild(collapseIcon);
+            root.appendChild(title);
+            var branchContent = document.createElement('div');
+            branchContent.id = name.replace(/\s/g, '');
+            branchContent.className = "lexbranchcontent";
+            root.appendChild(branchContent);
+            this.content = branchContent;
+            this._addBranchSeparator();
+            if (this.closed) {
+                title.classList.add("closed");
+                root.classList.add("closed");
+                this.grabber.setAttribute("hidden", true);
+                exports.LX.doAsync(() => {
+                    this.content.setAttribute("hidden", true);
+                }, 10);
+            }
+            this.onclick = function () {
+                // e.stopPropagation();
+                title.classList.toggle("closed");
+                title.parentElement.classList.toggle("closed");
+                that.content.toggleAttribute("hidden");
+                that.grabber.toggleAttribute("hidden");
+                exports.LX.emitSignal("@on_branch_closed", title.classList.contains("closed"));
+            };
+            this.oncontextmenu = function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                if (title.parentElement.classList.contains("dialog")) {
+                    return;
+                }
+                exports.LX.addContextMenu("Dock", e, (m) => {
+                    e.preventDefault();
+                    m.add('Floating', that._onMakeFloating.bind(that));
+                }, { icon: "WindowRestore" });
+            };
+            title.addEventListener('click', this.onclick);
+            title.addEventListener('contextmenu', this.oncontextmenu);
+        }
+        _onMakeFloating() {
+            const dialog = new exports.LX.Dialog(this.name, (p) => {
+                // Add components
+                for (let w of this.components) {
+                    p.root.appendChild(w.root);
+                }
+            }, { dockable: true });
+            const childIndex = Array.from(this.root.parentElement.childNodes).indexOf(this.root);
+            console.assert(childIndex >= 0, "Branch not found!");
+            dialog.branchData = {
+                name: this.name,
+                components: this.components,
+                closed: this.closed,
+                panel: this.panel,
+                childIndex
+            };
+            this.root.remove();
+        }
+        _addBranchSeparator() {
+            const element = document.createElement('div');
+            element.className = "lexcomponentseparator";
+            element.style.width = "100%";
+            element.style.background = "none";
+            const grabber = document.createElement('div');
+            grabber.innerHTML = "&#9662;";
+            element.appendChild(grabber);
+            exports.LX.doAsync(() => {
+                grabber.style.marginLeft = ((parseFloat(exports.LX.DEFAULT_NAME_WIDTH) / 100.0) * this.content.offsetWidth) + "px";
+            }, 10);
+            const line = document.createElement('div');
+            line.style.width = "1px";
+            line.style.marginLeft = "6px";
+            line.style.marginTop = "2px";
+            line.style.height = "0px"; // get in time
+            grabber.appendChild(line);
+            grabber.addEventListener("mousedown", innerMouseDown);
+            this.grabber = grabber;
+            function getBranchHeight() {
+                return that.root.offsetHeight - that.root.children[0].offsetHeight;
+            }
+            let that = this;
+            function innerMouseDown(e) {
+                var doc = that.root.ownerDocument;
+                doc.addEventListener("mouseup", innerMouseUp);
+                doc.addEventListener("mousemove", innerMouseMove);
+                e.stopPropagation();
+                e.preventDefault();
+                const h = getBranchHeight();
+                line.style.height = (h - 3) + "px";
+                document.body.classList.add('nocursor');
+            }
+            function innerMouseMove(e) {
+                let dt = e.movementX;
+                if (dt != 0) {
+                    const margin = parseFloat(grabber.style.marginLeft);
+                    grabber.style.marginLeft = exports.LX.clamp(margin + dt, 32, that.content.offsetWidth - 32) + "px";
+                }
+            }
+            function innerMouseUp(e) {
+                that._updateComponents();
+                line.style.height = "0px";
+                var doc = that.root.ownerDocument;
+                doc.removeEventListener("mouseup", innerMouseUp);
+                doc.removeEventListener("mousemove", innerMouseMove);
+                document.body.classList.remove('nocursor');
+            }
+            this.content.appendChild(element);
+        }
+        _updateComponents() {
+            var size = this.grabber.style.marginLeft;
+            // Update sizes of components inside
+            for (let i = 0; i < this.components.length; i++) {
+                let component = this.components[i];
+                const element = component.root;
+                if (element.children.length < 2) {
+                    continue;
+                }
+                let name = element.children[0];
+                let value = element.children[1];
+                name.style.width = size;
+                name.style.minWidth = size;
+                switch (component.type) {
+                    case exports.LX.BaseComponent.CUSTOM:
+                    case exports.LX.BaseComponent.ARRAY:
+                        continue;
+                }
+                value.style.width = "-moz-calc( 100% - " + size + " )";
+                value.style.width = "-webkit-calc( 100% - " + size + " )";
+                value.style.width = "calc( 100% - " + size + " )";
+            }
+        }
+    }
+    exports.LX.Branch = Branch;
+
     // BaseComponent.ts @jxarco
     exports.ComponentType = void 0;
     (function (ComponentType) {
@@ -349,6 +520,152 @@
     }
     exports.LX.TreeEvent = TreeEvent;
 
+    // TextInput.ts @jxarco
+    /**
+     * @class TextInput
+     * @description TextInput Component
+     */
+    class TextInput extends BaseComponent$1 {
+        valid;
+        _triggerEvent;
+        _lastValueTriggered;
+        constructor(name, value, callback, options = {}) {
+            super(exports.ComponentType.TEXT, name, String(value), options);
+            this.onGetValue = () => {
+                return value;
+            };
+            this.onSetValue = (newValue, skipCallback, event) => {
+                let skipTrigger = (this._lastValueTriggered == newValue);
+                if (!options.ignoreValidation) {
+                    skipTrigger = skipTrigger || (!this.valid(newValue));
+                }
+                if (skipTrigger) {
+                    return;
+                }
+                this._lastValueTriggered = value = newValue;
+                wValue.value = newValue;
+                delete this._triggerEvent;
+                if (!skipCallback) {
+                    this._trigger(new IEvent$1(name, newValue, event), callback);
+                }
+            };
+            this.onResize = (rect) => {
+                const realNameWidth = (this.root.domName?.style.width ?? "0px");
+                container.style.width = options.inputWidth ?? `calc( 100% - ${realNameWidth})`;
+            };
+            this.valid = (v, matchField) => {
+                v = v ?? this.value();
+                if (!options.pattern)
+                    return true;
+                const errs = exports.LX.validateValueAtPattern(v, options.pattern, matchField);
+                return (errs.length == 0);
+            };
+            let container = document.createElement('div');
+            container.className = (options.warning ? " lexwarning" : "");
+            container.style.display = "flex";
+            container.style.position = "relative";
+            this.root.appendChild(container);
+            this.disabled = (options.disabled || options.warning) ?? (options.url ? true : false);
+            let wValue = null;
+            if (!this.disabled) {
+                wValue = document.createElement('input');
+                wValue.className = "lextext " + (options.inputClass ?? "");
+                wValue.type = options.type || "";
+                wValue.value = value || "";
+                wValue.style.textAlign = (options.float ?? "");
+                wValue.setAttribute("placeholder", options.placeholder ?? "");
+                if (options.required) {
+                    wValue.setAttribute("required", options.required);
+                }
+                if (options.pattern) {
+                    wValue.setAttribute("pattern", exports.LX.buildTextPattern(options.pattern));
+                }
+                const trigger = options.trigger ?? "default";
+                if (trigger == "default") {
+                    wValue.addEventListener("keyup", (e) => {
+                        if (e.key == "Enter") {
+                            this._triggerEvent = e;
+                            wValue.blur();
+                        }
+                    });
+                    wValue.addEventListener("focusout", (e) => {
+                        this._triggerEvent = this._triggerEvent ?? e;
+                        this.set(e.target.value, false, this._triggerEvent);
+                    });
+                }
+                else if (trigger == "input") {
+                    wValue.addEventListener("input", (e) => {
+                        this.set(e.target.value, false, e);
+                    });
+                }
+                wValue.addEventListener("mousedown", function (e) {
+                    e.stopImmediatePropagation();
+                    e.stopPropagation();
+                });
+                if (options.icon) {
+                    wValue.style.paddingLeft = "1.75rem";
+                    const icon = exports.LX.makeIcon(options.icon, { iconClass: "absolute z-1 ml-2", svgClass: "sm" });
+                    container.appendChild(icon);
+                }
+            }
+            else if (options.url) {
+                wValue = document.createElement('a');
+                wValue.href = options.url;
+                wValue.target = "_blank";
+                wValue.innerHTML = value ?? "";
+                wValue.style.textAlign = options.float ?? "";
+                wValue.className = "lextext ellipsis-overflow";
+            }
+            else {
+                wValue = document.createElement('input');
+                wValue.disabled = true;
+                wValue.value = value;
+                wValue.style.textAlign = options.float ?? "";
+                wValue.className = "lextext ellipsis-overflow " + (options.inputClass ?? "");
+            }
+            if (options.fit) {
+                wValue.classList.add("size-content");
+            }
+            Object.assign(wValue.style, options.style ?? {});
+            container.appendChild(wValue);
+            exports.LX.doAsync(this.onResize.bind(this));
+        }
+    }
+    exports.LX.TextInput = TextInput;
+
+    // Title.ts @jxarco
+    /**
+     * @class Title
+     * @description Title Component
+     */
+    class Title extends BaseComponent$1 {
+        constructor(name, options = {}) {
+            console.assert(name.length !== 0, "Can't create Title Component without text!");
+            // Note: Titles are not registered in Panel.components by now
+            super(exports.ComponentType.TITLE, null, null, options);
+            this.root.className = `lextitle ${this.root.className}`;
+            if (options.icon) {
+                let icon = exports.LX.makeIcon(options.icon, { iconClass: "mr-2" });
+                icon.querySelector("svg").style.color = options.iconColor || "";
+                this.root.appendChild(icon);
+            }
+            let text = document.createElement("span");
+            text.innerText = name;
+            this.root.appendChild(text);
+            Object.assign(this.root.style, options.style ?? {});
+            if (options.link != undefined) {
+                let linkDom = document.createElement('a');
+                linkDom.innerText = name;
+                linkDom.href = options.link;
+                linkDom.target = options.target ?? "";
+                linkDom.className = "lextitle link";
+                Object.assign(linkDom.style, options.style ?? {});
+                this.root.replaceWith(linkDom);
+            }
+        }
+    }
+    exports.LX.Title = Title;
+
     // Button.ts @jxarco
     /**
      * @class Button
@@ -502,8 +819,12 @@
                     wValue.querySelector(".file-input").click();
                 }
                 else if (options.mustConfirm) {
+                    const swapInput = wValue.querySelector("input");
                     new exports.LX.PopConfirm(wValue, {
                         onConfirm: () => {
+                            if (options.swap) {
+                                swapInput.checked = true;
+                            }
                             this._trigger(new IEvent$1(name, value, e), callback);
                         },
                         side: options.confirmSide,
@@ -513,6 +834,9 @@
                         title: options.confirmTitle,
                         content: options.confirmContent
                     });
+                    if (options.swap) {
+                        swapInput.checked = false;
+                    }
                 }
                 else {
                     const swapInput = wValue.querySelector("input");
@@ -528,571 +852,16 @@
             const buttonDOM = this.root.querySelector('button');
             buttonDOM.click();
         }
-    }
-    exports.LX.Button = Button;
-
-    // Menubar.ts @jxarco
-    /**
-     * @class Menubar
-     */
-    class Menubar {
-        root;
-        siblingArea;
-        buttonContainer;
-        items = [];
-        buttons = {};
-        icons = {};
-        shorts = {};
-        focused = false;
-        _currentDropdown;
-        constructor(items, options = {}) {
-            this.root = document.createElement("div");
-            this.root.className = "lexmenubar";
-            if (options.float) {
-                this.root.style.justifyContent = options.float;
-            }
-            this.items = items ?? [];
-            this.createEntries();
-        }
-        _resetMenubar(focus) {
-            this.root.querySelectorAll(".lexmenuentry").forEach((e) => {
-                e.classList.remove('selected');
-                delete e.dataset["built"];
-            });
-            if (this._currentDropdown) {
-                this._currentDropdown.destroy();
-                this._currentDropdown = null;
-            }
-            // Next time we need to click again
-            this.focused = focus ?? false;
-        }
-        /**
-         * @method createEntries
-         */
-        createEntries() {
-            for (let item of this.items) {
-                let key = item.name;
-                let pKey = exports.LX.getSupportedDOMName(key);
-                // Item already created
-                if (this.root.querySelector("#" + pKey)) {
-                    continue;
-                }
-                let entry = document.createElement('div');
-                entry.className = "lexmenuentry";
-                entry.id = pKey;
-                entry.innerHTML = "<span>" + key + "</span>";
-                entry.tabIndex = 1;
-                this.root.appendChild(entry);
-                const _showEntry = () => {
-                    this._resetMenubar(true);
-                    entry.classList.add("selected");
-                    entry.dataset["built"] = "true";
-                    this._currentDropdown = exports.LX.addDropdownMenu(entry, item.submenu ?? [], { side: "bottom", align: "start", onBlur: () => {
-                            this._resetMenubar();
-                        } });
-                };
-                entry.addEventListener("mousedown", (e) => {
-                    e.preventDefault();
-                });
-                entry.addEventListener("mouseup", (e) => {
-                    e.preventDefault();
-                    const f = item['callback'];
-                    if (f) {
-                        f.call(this, key, entry, e);
-                        return;
-                    }
-                    _showEntry();
-                    this.focused = true;
-                    return false;
-                });
-                entry.addEventListener("mouseover", (e) => {
-                    if (this.focused && !(entry.dataset["built"] ?? false)) {
-                        _showEntry();
-                    }
-                });
-            }
-        }
-        /**
-         * @method getButton
-         * @param {String} name
-         */
-        getButton(name) {
-            return this.buttons[name];
-        }
-        /**
-         * @method getSubitems
-         * @param {Object} item: parent item
-         * @param {Array} tokens: split path strings
-        */
-        getSubitem(item, tokens) {
-            for (const s of item) {
-                if (s?.name != tokens[0]) {
-                    continue;
-                }
-                if (tokens.length == 1) {
-                    return s;
-                }
-                else if (s.submenu) {
-                    tokens.shift();
-                    return this.getSubitem(s.submenu, tokens);
-                }
-            }
-        }
-        /**
-         * @method getItem
-         * @param {String} path
-        */
-        getItem(path) {
-            // Process path
-            const tokens = path.split('/');
-            return this.getSubitem(this.items, tokens);
-        }
-        /**
-         * @method setButtonIcon
-         * @param {String} name
-         * @param {String} icon
-         * @param {Function} callback
-         * @param {Object} options
-         */
-        setButtonIcon(name, icon, callback, options = {}) {
-            if (!name) {
-                throw ("Set Button Name!");
-            }
-            let button = this.buttons[name];
-            // If the button already exists, delete it
-            // since only one button of this type can exist
-            if (button) {
-                delete this.buttons[name];
-                exports.LX.deleteElement(button.root);
-            }
-            // Otherwise, create it
-            button = new Button(name, undefined, callback, {
-                title: name,
-                buttonClass: "lexmenubutton main bg-none",
-                disabled: options.disabled,
-                icon,
-                svgClass: "xl",
-                hideName: true,
-                swap: options.swap
-            });
-            if (options.float == "right") {
-                button.root.right = true;
-            }
-            if (this.root.lastChild && this.root.lastChild.right) {
-                this.root.lastChild.before(button.root);
-            }
-            else if (options.float == "left") {
-                this.root.prepend(button.root);
-            }
-            else {
-                this.root.appendChild(button.root);
-            }
-            this.buttons[name] = button;
-        }
-        /**
-         * @method setButtonImage
-         * @param {String} name
-         * @param {String} src
-         * @param {Function} callback
-         * @param {Object} options
-         */
-        setButtonImage(name, src, callback, options = {}) {
-            if (!name) {
-                throw ("Set Button Name!");
-            }
-            let button = this.buttons[name];
-            if (button) {
-                button.querySelector('img').src = src;
+        setSwapIcon(iconName) {
+            const oldIcon = this.root.querySelector(".swap-on");
+            if (!oldIcon) {
                 return;
             }
-            // Otherwise, create it
-            button = document.createElement('div');
-            const disabled = options.disabled ?? false;
-            button.className = "lexmenubutton main" + (disabled ? " disabled" : "");
-            button.title = name;
-            button.innerHTML = "<a><image src='" + src + "' class='lexicon' style='height:32px;'></a>";
-            if (options.float == "right") {
-                button.right = true;
-            }
-            if (this.root.lastChild && this.root.lastChild.right) {
-                this.root.lastChild.before(button);
-            }
-            else if (options.float == "left") {
-                this.root.prepend(button);
-            }
-            else {
-                this.root.appendChild(button);
-            }
-            const _b = button.querySelector('a');
-            _b.addEventListener("mousedown", (e) => {
-                e.preventDefault();
-            });
-            _b.addEventListener("mouseup", (e) => {
-                if (callback && !disabled) {
-                    callback.call(this, _b, e);
-                }
-            });
-            this.buttons[name] = button;
-        }
-        /**
-         * @method addButton
-         * @param {Array} buttons
-         * @param {Object} options
-         * float: center (Default), right
-         */
-        addButtons(buttons, options = {}) {
-            if (!buttons) {
-                throw ("No buttons to add!");
-            }
-            if (!this.buttonContainer) {
-                this.buttonContainer = document.createElement("div");
-                this.buttonContainer.className = "lexmenubuttons";
-                this.buttonContainer.classList.add(options.float ?? "center");
-                if (options.float == "right") {
-                    this.buttonContainer.right = true;
-                }
-                if (this.root.lastChild && this.root.lastChild.right) {
-                    this.root.lastChild.before(this.buttonContainer);
-                }
-                else {
-                    this.root.appendChild(this.buttonContainer);
-                }
-            }
-            for (const data of buttons) {
-                const title = data.title;
-                const button = new Button(title, data.label, data.callback, {
-                    title,
-                    buttonClass: "bg-none",
-                    disabled: data.disabled,
-                    icon: data.icon,
-                    hideName: true,
-                    swap: data.swap,
-                    iconPosition: "start"
-                });
-                this.buttonContainer.appendChild(button.root);
-                if (title) {
-                    this.buttons[title] = button;
-                }
-            }
+            const swapIcon = exports.LX.makeIcon(iconName, { iconClass: "swap-on" });
+            oldIcon.replaceWith(swapIcon);
         }
     }
-
-    // Branch.ts @jxarco
-    /**
-     * @class Branch
-     */
-    class Branch {
-        name;
-        components;
-        closed;
-        root;
-        content;
-        grabber;
-        panel;
-        onclick;
-        oncontextmenu;
-        constructor(name, options = {}) {
-            this.name = name;
-            var root = document.createElement('div');
-            root.className = "lexbranch";
-            if (options.id) {
-                root.id = options.id;
-            }
-            if (options.className) {
-                root.className += " " + options.className;
-            }
-            root.style.margin = "0 auto";
-            var that = this;
-            this.closed = options.closed ?? false;
-            this.root = root;
-            this.components = [];
-            this.panel = null;
-            // Create element
-            const title = document.createElement('div');
-            title.className = "lexbranchtitle";
-            if (options.icon) {
-                const branchIcon = exports.LX.makeIcon(options.icon, { iconClass: "mr-2" });
-                title.appendChild(branchIcon);
-            }
-            title.innerHTML += (name || "Branch");
-            const collapseIcon = exports.LX.makeIcon("Right", { iconClass: "switch-branch-button", svgClass: "sm" });
-            title.appendChild(collapseIcon);
-            root.appendChild(title);
-            var branchContent = document.createElement('div');
-            branchContent.id = name.replace(/\s/g, '');
-            branchContent.className = "lexbranchcontent";
-            root.appendChild(branchContent);
-            this.content = branchContent;
-            this._addBranchSeparator();
-            if (this.closed) {
-                title.classList.add("closed");
-                root.classList.add("closed");
-                this.grabber.setAttribute("hidden", true);
-                exports.LX.doAsync(() => {
-                    this.content.setAttribute("hidden", true);
-                }, 10);
-            }
-            this.onclick = function () {
-                // e.stopPropagation();
-                title.classList.toggle("closed");
-                title.parentElement.classList.toggle("closed");
-                that.content.toggleAttribute("hidden");
-                that.grabber.toggleAttribute("hidden");
-                exports.LX.emitSignal("@on_branch_closed", title.classList.contains("closed"));
-            };
-            this.oncontextmenu = function (e) {
-                e.preventDefault();
-                e.stopPropagation();
-                if (title.parentElement.classList.contains("dialog")) {
-                    return;
-                }
-                exports.LX.addContextMenu("Dock", e, (m) => {
-                    e.preventDefault();
-                    m.add('Floating', that._onMakeFloating.bind(that));
-                }, { icon: "WindowRestore" });
-            };
-            title.addEventListener('click', this.onclick);
-            title.addEventListener('contextmenu', this.oncontextmenu);
-        }
-        _onMakeFloating() {
-            const dialog = new exports.LX.Dialog(this.name, (p) => {
-                // Add components
-                for (let w of this.components) {
-                    p.root.appendChild(w.root);
-                }
-            }, { dockable: true });
-            const childIndex = Array.from(this.root.parentElement.childNodes).indexOf(this.root);
-            console.assert(childIndex >= 0, "Branch not found!");
-            dialog.branchData = {
-                name: this.name,
-                components: this.components,
-                closed: this.closed,
-                panel: this.panel,
-                childIndex
-            };
-            this.root.remove();
-        }
-        _addBranchSeparator() {
-            const element = document.createElement('div');
-            element.className = "lexcomponentseparator";
-            element.style.width = "100%";
-            element.style.background = "none";
-            const grabber = document.createElement('div');
-            grabber.innerHTML = "&#9662;";
-            element.appendChild(grabber);
-            exports.LX.doAsync(() => {
-                grabber.style.marginLeft = ((parseFloat(exports.LX.DEFAULT_NAME_WIDTH) / 100.0) * this.content.offsetWidth) + "px";
-            }, 10);
-            const line = document.createElement('div');
-            line.style.width = "1px";
-            line.style.marginLeft = "6px";
-            line.style.marginTop = "2px";
-            line.style.height = "0px"; // get in time
-            grabber.appendChild(line);
-            grabber.addEventListener("mousedown", innerMouseDown);
-            this.grabber = grabber;
-            function getBranchHeight() {
-                return that.root.offsetHeight - that.root.children[0].offsetHeight;
-            }
-            let that = this;
-            function innerMouseDown(e) {
-                var doc = that.root.ownerDocument;
-                doc.addEventListener("mouseup", innerMouseUp);
-                doc.addEventListener("mousemove", innerMouseMove);
-                e.stopPropagation();
-                e.preventDefault();
-                const h = getBranchHeight();
-                line.style.height = (h - 3) + "px";
-                document.body.classList.add('nocursor');
-            }
-            function innerMouseMove(e) {
-                let dt = e.movementX;
-                if (dt != 0) {
-                    const margin = parseFloat(grabber.style.marginLeft);
-                    grabber.style.marginLeft = exports.LX.clamp(margin + dt, 32, that.content.offsetWidth - 32) + "px";
-                }
-            }
-            function innerMouseUp(e) {
-                that._updateComponents();
-                line.style.height = "0px";
-                var doc = that.root.ownerDocument;
-                doc.removeEventListener("mouseup", innerMouseUp);
-                doc.removeEventListener("mousemove", innerMouseMove);
-                document.body.classList.remove('nocursor');
-            }
-            this.content.appendChild(element);
-        }
-        _updateComponents() {
-            var size = this.grabber.style.marginLeft;
-            // Update sizes of components inside
-            for (let i = 0; i < this.components.length; i++) {
-                let component = this.components[i];
-                const element = component.root;
-                if (element.children.length < 2) {
-                    continue;
-                }
-                let name = element.children[0];
-                let value = element.children[1];
-                name.style.width = size;
-                name.style.minWidth = size;
-                switch (component.type) {
-                    case exports.LX.BaseComponent.CUSTOM:
-                    case exports.LX.BaseComponent.ARRAY:
-                        continue;
-                }
-                value.style.width = "-moz-calc( 100% - " + size + " )";
-                value.style.width = "-webkit-calc( 100% - " + size + " )";
-                value.style.width = "calc( 100% - " + size + " )";
-            }
-        }
-    }
-    exports.LX.Branch = Branch;
-
-    // TextInput.ts @jxarco
-    /**
-     * @class TextInput
-     * @description TextInput Component
-     */
-    class TextInput extends BaseComponent$1 {
-        valid;
-        _triggerEvent;
-        _lastValueTriggered;
-        constructor(name, value, callback, options = {}) {
-            super(exports.ComponentType.TEXT, name, String(value), options);
-            this.onGetValue = () => {
-                return value;
-            };
-            this.onSetValue = (newValue, skipCallback, event) => {
-                let skipTrigger = (this._lastValueTriggered == newValue);
-                if (!options.ignoreValidation) {
-                    skipTrigger = skipTrigger || (!this.valid(newValue));
-                }
-                if (skipTrigger) {
-                    return;
-                }
-                this._lastValueTriggered = value = newValue;
-                wValue.value = newValue;
-                delete this._triggerEvent;
-                if (!skipCallback) {
-                    this._trigger(new IEvent$1(name, newValue, event), callback);
-                }
-            };
-            this.onResize = (rect) => {
-                const realNameWidth = (this.root.domName?.style.width ?? "0px");
-                container.style.width = options.inputWidth ?? `calc( 100% - ${realNameWidth})`;
-            };
-            this.valid = (v, matchField) => {
-                v = v ?? this.value();
-                if (!options.pattern)
-                    return true;
-                const errs = exports.LX.validateValueAtPattern(v, options.pattern, matchField);
-                return (errs.length == 0);
-            };
-            let container = document.createElement('div');
-            container.className = (options.warning ? " lexwarning" : "");
-            container.style.display = "flex";
-            container.style.position = "relative";
-            this.root.appendChild(container);
-            this.disabled = (options.disabled || options.warning) ?? (options.url ? true : false);
-            let wValue = null;
-            if (!this.disabled) {
-                wValue = document.createElement('input');
-                wValue.className = "lextext " + (options.inputClass ?? "");
-                wValue.type = options.type || "";
-                wValue.value = value || "";
-                wValue.style.textAlign = (options.float ?? "");
-                wValue.setAttribute("placeholder", options.placeholder ?? "");
-                if (options.required) {
-                    wValue.setAttribute("required", options.required);
-                }
-                if (options.pattern) {
-                    wValue.setAttribute("pattern", exports.LX.buildTextPattern(options.pattern));
-                }
-                const trigger = options.trigger ?? "default";
-                if (trigger == "default") {
-                    wValue.addEventListener("keyup", (e) => {
-                        if (e.key == "Enter") {
-                            this._triggerEvent = e;
-                            wValue.blur();
-                        }
-                    });
-                    wValue.addEventListener("focusout", (e) => {
-                        this._triggerEvent = this._triggerEvent ?? e;
-                        this.set(e.target.value, false, this._triggerEvent);
-                    });
-                }
-                else if (trigger == "input") {
-                    wValue.addEventListener("input", (e) => {
-                        this.set(e.target.value, false, e);
-                    });
-                }
-                wValue.addEventListener("mousedown", function (e) {
-                    e.stopImmediatePropagation();
-                    e.stopPropagation();
-                });
-                if (options.icon) {
-                    wValue.style.paddingLeft = "1.75rem";
-                    const icon = exports.LX.makeIcon(options.icon, { iconClass: "absolute z-1 ml-2", svgClass: "sm" });
-                    container.appendChild(icon);
-                }
-            }
-            else if (options.url) {
-                wValue = document.createElement('a');
-                wValue.href = options.url;
-                wValue.target = "_blank";
-                wValue.innerHTML = value ?? "";
-                wValue.style.textAlign = options.float ?? "";
-                wValue.className = "lextext ellipsis-overflow";
-            }
-            else {
-                wValue = document.createElement('input');
-                wValue.disabled = true;
-                wValue.value = value;
-                wValue.style.textAlign = options.float ?? "";
-                wValue.className = "lextext ellipsis-overflow " + (options.inputClass ?? "");
-            }
-            if (options.fit) {
-                wValue.classList.add("size-content");
-            }
-            Object.assign(wValue.style, options.style ?? {});
-            container.appendChild(wValue);
-            exports.LX.doAsync(this.onResize.bind(this));
-        }
-    }
-    exports.LX.TextInput = TextInput;
-
-    // Title.ts @jxarco
-    /**
-     * @class Title
-     * @description Title Component
-     */
-    class Title extends BaseComponent$1 {
-        constructor(name, options = {}) {
-            console.assert(name.length !== 0, "Can't create Title Component without text!");
-            // Note: Titles are not registered in Panel.components by now
-            super(exports.ComponentType.TITLE, null, null, options);
-            this.root.className = `lextitle ${this.root.className}`;
-            if (options.icon) {
-                let icon = exports.LX.makeIcon(options.icon, { iconClass: "mr-2" });
-                icon.querySelector("svg").style.color = options.iconColor || "";
-                this.root.appendChild(icon);
-            }
-            let text = document.createElement("span");
-            text.innerText = name;
-            this.root.appendChild(text);
-            Object.assign(this.root.style, options.style ?? {});
-            if (options.link != undefined) {
-                let linkDom = document.createElement('a');
-                linkDom.innerText = name;
-                linkDom.href = options.link;
-                linkDom.target = options.target ?? "";
-                linkDom.className = "lextitle link";
-                Object.assign(linkDom.style, options.style ?? {});
-                this.root.replaceWith(linkDom);
-            }
-        }
-    }
-    exports.LX.Title = Title;
+    exports.LX.Button = Button;
 
     // ComboButtons.ts @jxarco
     /**
@@ -1212,36 +981,41 @@
         constructor(name, options = {}) {
             options.hideName = true;
             super(exports.ComponentType.CARD, name, null, options);
-            let container = document.createElement('div');
-            container.className = "lexcard";
-            container.style.width = "100%";
-            this.root.appendChild(container);
-            if (options.img) {
-                let img = document.createElement('img');
-                img.src = options.img;
-                container.appendChild(img);
-                if (options.link != undefined) {
-                    img.style.cursor = "pointer";
-                    img.addEventListener('click', function () {
-                        const hLink = container.querySelector('a');
-                        if (hLink) {
-                            hLink.click();
-                        }
-                    });
+            this.root.classList.add("place-content-center");
+            const container = exports.LX.makeContainer(["100%", "auto"], "lexcard max-w-sm flex flex-col gap-4 bg-primary border rounded-xl py-6", "", this.root);
+            if (options.header) {
+                const hasAction = (options.header.action !== undefined);
+                let header = exports.LX.makeContainer(["100%", "auto"], `flex ${hasAction ? "flex-row gap-4" : "flex-col gap-1"} px-6`, "", container);
+                if (hasAction) {
+                    const actionBtn = new Button(null, options.header.action.name, options.header.action.callback);
+                    header.appendChild(actionBtn.root);
+                    const titleDescBox = exports.LX.makeContainer(["75%", "auto"], `flex flex-col gap-1`, "");
+                    header.prepend(titleDescBox);
+                    header = titleDescBox;
+                }
+                if (options.header.title) {
+                    exports.LX.makeElement("div", "text-md leading-none font-semibold", options.header.title, header);
+                }
+                if (options.header.description) {
+                    exports.LX.makeElement("div", "text-sm fg-tertiary", options.header.description, header);
                 }
             }
-            let cardNameDom = document.createElement('span');
-            cardNameDom.innerText = name;
-            container.appendChild(cardNameDom);
-            if (options.link != undefined) {
-                let cardLinkDom = document.createElement('a');
-                cardLinkDom.innerText = name;
-                cardLinkDom.href = options.link;
-                cardLinkDom.target = options.target ?? "";
-                cardNameDom.innerText = "";
-                cardNameDom.appendChild(cardLinkDom);
+            if (options.content) {
+                const content = exports.LX.makeContainer(["100%", "auto"], "flex flex-col gap-2 px-6", "", container);
+                const elements = [].concat(options.content);
+                for (let e of elements) {
+                    content.appendChild(e.root ? e.root : e);
+                }
+            }
+            if (options.footer) {
+                const footer = exports.LX.makeContainer(["100%", "auto"], "flex flex-col gap-1 px-6", "", container);
+                const elements = [].concat(options.footer);
+                for (let e of elements) {
+                    footer.appendChild(e.root ? e.root : e);
+                }
             }
             if (options.callback) {
+                container.classList.add("selectable");
                 container.style.cursor = "pointer";
                 container.addEventListener("click", (e) => {
                     this._trigger(new IEvent$1(name, null, e), options.callback);
@@ -1298,7 +1072,7 @@
                 entryData.placeholder = entryData.placeholder ?? (entryData.label ?? `Enter ${entry}`);
                 entryData.ignoreValidation = true;
                 if (!(options.skipLabels ?? false)) {
-                    const label = new TextInput(null, entryData.label ?? entry, null, { disabled: true, inputClass: "formlabel nobg" });
+                    const label = new TextInput(null, entryData.label ?? entry, null, { disabled: true, inputClass: "formlabel bg-none" });
                     container.appendChild(label.root);
                 }
                 entryData.textComponent = new TextInput(null, entryData.constructor == Object ? entryData.value : entryData, (value, event) => {
@@ -2785,6 +2559,7 @@
             let arrayValue = value.replace(/\s/g, '').split(',');
             let defaultValue = exports.LX.deepCopy(arrayValue);
             super(exports.ComponentType.TAGS, name, defaultValue, options);
+            this.options.skipDuplicates = options.skipDuplicates ?? true;
             this.onGetValue = () => {
                 return exports.LX.deepCopy(value);
             };
@@ -2824,16 +2599,16 @@
                 tagInput.placeholder = "Add tag...";
                 tagsContainer.appendChild(tagInput);
                 tagInput.onkeydown = e => {
-                    const val = tagInput.value.replace(/\s/g, '');
                     if (e.key == ' ' || e.key == 'Enter') {
+                        const val = tagInput.value.replace(/\s/g, '');
                         e.preventDefault();
-                        if (!val.length || value.indexOf(val) > -1)
+                        if (!val.length || (options.skipDuplicates && value.indexOf(val) > -1))
                             return;
                         value.push(val);
                         this.set(value, false, e);
+                        tagsContainer.querySelector("input")?.focus(); // generateTags creates a new tagInput instance
                     }
                 };
-                tagInput.focus();
             };
             this.generateTags(arrayValue);
             exports.LX.doAsync(this.onResize.bind(this));
@@ -4726,6 +4501,157 @@
     }
     exports.LX.CalendarRange = CalendarRange;
 
+    // Pagination.ts @jxarco
+    /**
+     * @class Pagination
+     */
+    class Pagination {
+        static ITEMS_PER_PAGE_VALUES = [8, 12, 24, 48, 96];
+        root;
+        pagesRoot;
+        page = 1;
+        pages = 1;
+        _alwaysShowEdges = true;
+        _useEllipsis = true;
+        _maxButtons = 3;
+        _itemsPerPage = 12;
+        _itemsPerPageValues = Pagination.ITEMS_PER_PAGE_VALUES;
+        onChange = () => { };
+        onItemsPerPageChange = () => { };
+        constructor(options = {}) {
+            this.pages = options.pages ?? 1;
+            this.page = exports.LX.clamp(options.page ?? 1, 1, this.pages);
+            this._alwaysShowEdges = options.alwaysShowEdges ?? this._alwaysShowEdges;
+            this._useEllipsis = options.useEllipsis ?? this._useEllipsis;
+            this._maxButtons = options.maxButtons ?? this._maxButtons;
+            this._itemsPerPage = options.itemsPerPage ?? this._itemsPerPage;
+            if (this._itemsPerPageValues.indexOf(this._itemsPerPage) === -1) {
+                this._itemsPerPageValues.push(this._itemsPerPage);
+                this._itemsPerPageValues = this._itemsPerPageValues.sort((a, b) => {
+                    if (a < b)
+                        return -1;
+                    if (a > b)
+                        return 1;
+                    return 0;
+                });
+            }
+            if (typeof options.onChange === 'function') {
+                this.onChange = options.onChange;
+            }
+            if (typeof options.onItemsPerPageChange === 'function') {
+                this.onItemsPerPageChange = options.onItemsPerPageChange;
+            }
+            this.root = exports.LX.makeContainer(["auto", "auto"], "flex flex-row gap-2 " + (options.className ?? ""));
+            if (options.allowChangeItemsPerPage ?? false) {
+                const itemsPerPageSelectContainer = exports.LX.makeContainer(["auto", "auto"], "flex flex-row items-center", "", this.root);
+                const itemsPerPageSelect = new Select(null, Pagination.ITEMS_PER_PAGE_VALUES, this._itemsPerPage, (v) => {
+                    this._itemsPerPage = v;
+                    this.onItemsPerPageChange?.(this._itemsPerPage);
+                }, { overflowContainer: null });
+                itemsPerPageSelectContainer.appendChild(itemsPerPageSelect.root);
+            }
+            this.pagesRoot = exports.LX.makeContainer(["auto", "auto"], "flex flex-row overflow-scroll", "", this.root);
+            this.refresh();
+        }
+        setPage(n) {
+            const newPage = exports.LX.clamp(n, 1, this.pages);
+            if (newPage === this.page) {
+                return;
+            }
+            this.page = newPage;
+            this.refresh();
+            this._emitChange();
+        }
+        setPages(n) {
+            this.pages = Math.max(1, n);
+            if (this.page > this.pages) {
+                this.page = this.pages;
+            }
+            this.refresh();
+        }
+        next() {
+            this.setPage(this.page + 1);
+        }
+        prev() {
+            this.setPage(this.page - 1);
+        }
+        refresh() {
+            this.pagesRoot.innerHTML = "";
+            // Previous page button
+            this._makeButton(exports.LX.makeIcon("ChevronLeft").innerHTML, this.page === 1, () => this.prev(), `bg-none ${this.page === 1 ? "" : "hover:bg-tertiary"}`);
+            const pagesContainer = exports.LX.makeContainer(["auto", "auto"], "flex flex-row items-center", "", this.pagesRoot);
+            const maxButtons = this._maxButtons + 2; // + next and prev
+            if (this.pages <= maxButtons) {
+                for (let i = 1; i <= this.pages; i++) {
+                    this._makePageButton(pagesContainer, i);
+                }
+            }
+            else {
+                const page = this.page;
+                const total = this.pages;
+                // Always show first and last pages and the middle cluster depends on current page!
+                const showFirst = 1;
+                const showLast = total;
+                const edgesOffset = this._alwaysShowEdges ? 1 : 0;
+                const clusterSize = maxButtons - 2; // reserve spots for first and last
+                const half = Math.floor(clusterSize / 2);
+                let start = Math.max(1 + edgesOffset, page - half);
+                let end = Math.min(total - edgesOffset, page + half);
+                // Adjust cluster if too close to edges
+                if (start <= 2) {
+                    start = 1 + edgesOffset;
+                    end = start + clusterSize - 1;
+                }
+                if (end >= total - 1) {
+                    end = total - edgesOffset;
+                    start = end - clusterSize + 1;
+                }
+                // First page
+                if (this._alwaysShowEdges) {
+                    this._makePageButton(pagesContainer, showFirst);
+                }
+                // Ellipsis after first if needed
+                if (this._useEllipsis && start > 2) {
+                    exports.LX.makeElement('span', "h-6 px-2 text-lg font-semibold whitespace-nowrap", "...", pagesContainer);
+                }
+                // Page button cluster
+                for (let i = start; i <= end; i++) {
+                    this._makePageButton(pagesContainer, i);
+                }
+                // Ellipsis before last if needed
+                if (this._useEllipsis && end < total - 1) {
+                    exports.LX.makeElement('span', "h-6 px-2 text-lg font-semibold whitespace-nowrap", "...", pagesContainer);
+                }
+                // Last page
+                if (this._alwaysShowEdges) {
+                    this._makePageButton(pagesContainer, showLast);
+                }
+            }
+            // Next page button
+            this._makeButton(exports.LX.makeIcon("ChevronRight").innerHTML, this.page === this.pages, () => this.next(), `bg-none ${this.page === this.pages ? "" : "hover:bg-tertiary"}`);
+        }
+        _emitChange() {
+            // Event callback
+            this.onChange?.(this.page);
+            // DOM event for DOM workflows?
+            this.root.dispatchEvent(new CustomEvent('change', {
+                detail: { page: this.page }
+            }));
+        }
+        _makeButton(label, disabled, onclick, buttonClass, parent) {
+            const btn = new Button(null, label, onclick, { disabled, buttonClass });
+            btn.root.querySelector("button").style.paddingInline = "0.5rem";
+            parent = parent ?? this.pagesRoot;
+            parent.appendChild(btn.root);
+            return btn.root;
+        }
+        _makePageButton(container, i) {
+            const buttonClass = i === this.page ? "bg-secondary border" : "bg-none";
+            return this._makeButton(String(i), false, () => this.setPage(i), buttonClass, container);
+        }
+    }
+    exports.LX.Pagination = Pagination;
+
     // Rate.ts @jxarco
     /**
      * @class Table
@@ -4741,9 +4667,15 @@
         _toggleColumns;
         _sortColumns;
         _resetCustomFiltersBtn = null;
+        _hiddenColumns = [];
+        _paginator;
+        _showSelectedNumber;
         _centered;
         get centered() { return this._centered; }
         set centered(v) { this._setCentered(v); }
+        _rowsPerPage = -1;
+        get rowsPerPage() { return this._rowsPerPage; }
+        set rowsPerPage(v) { this._setRowsPerPage(v); }
         constructor(name, data, options = {}) {
             if (!data) {
                 throw ("Data is needed to create a table!");
@@ -4760,18 +4692,36 @@
             if (this._centered === true) {
                 container.classList.add("centered");
             }
+            this.data = data;
             this.filter = options.filter ?? false;
             this.customFilters = options.customFilters;
             this.activeCustomFilters = {};
             this._toggleColumns = options.toggleColumns ?? false;
             this._sortColumns = options.sortColumns ?? true;
+            this._showSelectedNumber = options.showSelectedNumber ?? true;
             this._currentFilter = options.filterValue;
+            this._hiddenColumns = options.hiddenColumns ?? [];
             data.head = data.head ?? [];
             data.body = data.body ?? [];
             data.checkMap = {};
             data.colVisibilityMap = {};
-            data.head.forEach((col, index) => { data.colVisibilityMap[index] = true; });
-            this.data = data;
+            data.head.forEach((colName, index) => {
+                const idx = this._hiddenColumns.indexOf(colName);
+                const visible = (!this._toggleColumns) || (idx === -1);
+                data.colVisibilityMap[index] = visible;
+            });
+            if (options.pagination ?? false) {
+                this._rowsPerPage = options.rowsPerPage ?? 12;
+                this._paginator = new Pagination({
+                    pages: this._getNumPages(),
+                    itemsPerPage: this._rowsPerPage,
+                    allowChangeItemsPerPage: options.allowChangeItemsPerPage ?? true,
+                    onChange: this._onChangePage.bind(this),
+                    onItemsPerPageChange: (v) => {
+                        this.rowsPerPage = v;
+                    }
+                });
+            }
             const getDate = (text) => {
                 // Match DD/MM/YYYY or DD-MM-YYYY
                 const m = text.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{2}|\d{4})$/);
@@ -4824,6 +4774,7 @@
                 data.body = data.body.sort(compareFn.bind(this, idx, sign));
                 this.refresh();
             };
+            const that = this;
             // Append header
             if (this.filter || this.customFilters || this._toggleColumns) {
                 const headerContainer = exports.LX.makeContainer(["100%", "auto"], "flex flex-row mb-2");
@@ -5015,6 +4966,8 @@
                                 data.checkMap[rowId] = this.checked;
                                 el.querySelector("input[type='checkbox']").checked = this.checked;
                             }
+                            const sRows = that.getSelectedRows();
+                            exports.LX.emitSignal("@rows_selected_changed", sRows.length);
                         });
                         this.rowOffsetCount++;
                         hrow.appendChild(th);
@@ -5024,7 +4977,7 @@
                         th.innerHTML = `<span>${headData}</span>`;
                         th.querySelector("span").appendChild(exports.LX.makeIcon("MenuArrows", { svgClass: "sm" }));
                         const idx = data.head.indexOf(headData);
-                        if (this._centered?.indexOf && this._centered.indexOf(idx) > -1) {
+                        if (this._centered?.indexOf && ((this._centered.indexOf(idx) > -1) || (this._centered.indexOf(headData) > -1))) {
                             th.classList.add("centered");
                         }
                         const menuOptions = [];
@@ -5101,8 +5054,9 @@
                         if (movePending) {
                             // Modify inner data first
                             // Origin row should go to the target row, and the rest should be moved up/down
-                            const fromIdx = rIdx - 1;
-                            const targetIdx = movePending[1] - 1;
+                            const pageOffset = this._paginator ? (this._paginator.page - 1) * this.rowsPerPage : 0;
+                            const fromIdx = rIdx - 1 + pageOffset;
+                            const targetIdx = movePending[1] - 1 + pageOffset;
                             exports.LX.emitSignal("@on_table_sort", { instance: this, fromIdx, targetIdx });
                             const b = data.body[fromIdx];
                             let targetOffset = 0;
@@ -5123,7 +5077,7 @@
                             }
                             data.body[targetIdx] = b;
                             const parent = movePending[0].parentNode;
-                            exports.LX.insertChildAtIndex(parent, movePending[0], targetIdx + targetOffset);
+                            exports.LX.insertChildAtIndex(parent, movePending[0], targetIdx + targetOffset - pageOffset);
                             movePending = null;
                         }
                         rIdx = null;
@@ -5141,6 +5095,8 @@
                         fromRow.dY += e.movementY;
                         fromRow.style.transform = `translateY(${fromRow.dY}px)`;
                     };
+                    const filtered = [];
+                    // Filter rows
                     for (let r = 0; r < data.body.length; ++r) {
                         const bodyData = data.body[r];
                         if (this.filter) {
@@ -5207,8 +5163,19 @@
                                 continue;
                             }
                         }
+                        filtered.push(bodyData);
+                    }
+                    if (this._paginator) {
+                        this._paginator.setPages(this._getNumPages(filtered.length));
+                    }
+                    const start = this._paginator ? (this._paginator.page - 1) * this.rowsPerPage : 0;
+                    const end = this._paginator ? Math.min(start + this.rowsPerPage, filtered.length) : filtered.length;
+                    // Render filtered rows
+                    for (let r = start; r < end; ++r) {
+                        const bodyData = filtered[r];
+                        const idx = this.data.body.indexOf(bodyData);
                         const row = document.createElement('tr');
-                        const rowId = exports.LX.getSupportedDOMName(bodyData.join('-')).substr(0, 32);
+                        const rowId = this._makeRowId(bodyData);
                         row.setAttribute("rowId", rowId);
                         if (options.sortable ?? false) {
                             const td = document.createElement('td');
@@ -5266,14 +5233,17 @@
                                         headInput.checked = data.checkMap[":root"] = true;
                                     }
                                 }
+                                const sRows = that.getSelectedRows();
+                                exports.LX.emitSignal("@rows_selected_changed", sRows.length);
                             });
                             row.appendChild(td);
                         }
-                        for (const rowData of bodyData) {
+                        for (let colIdx = 0; colIdx < bodyData.length; ++colIdx) {
+                            const rowData = bodyData[colIdx];
                             const td = document.createElement('td');
                             td.innerHTML = `${rowData}`;
-                            const idx = bodyData.indexOf(rowData);
-                            if (this._centered?.indexOf && this._centered.indexOf(idx) > -1) {
+                            const headData = data.head[colIdx];
+                            if (this._centered?.indexOf && ((this._centered.indexOf(colIdx) > -1) || (this._centered.indexOf(headData) > -1))) {
                                 td.classList.add("centered");
                             }
                             row.appendChild(td);
@@ -5288,10 +5258,9 @@
                                 let button = null;
                                 if (action == "delete") {
                                     button = exports.LX.makeIcon("Trash3", { title: "Delete Row" });
-                                    button.addEventListener('click', function () {
-                                        // Don't need to refresh table..
-                                        data.body.splice(r, 1);
-                                        row.remove();
+                                    button.addEventListener('click', () => {
+                                        data.body.splice(idx, 1);
+                                        this.refresh();
                                     });
                                 }
                                 else if (action == "menu") {
@@ -5300,7 +5269,7 @@
                                         if (!options.onMenuAction) {
                                             return;
                                         }
-                                        const menuOptions = options.onMenuAction(r, data);
+                                        const menuOptions = options.onMenuAction(idx, data);
                                         console.assert(menuOptions.length, "Add items to the Menu Action Dropdown!");
                                         exports.LX.addDropdownMenu(e.target, menuOptions, { side: "bottom", align: "end" });
                                     });
@@ -5311,7 +5280,7 @@
                                     button = exports.LX.makeIcon(action.icon, { title: action.title });
                                     if (action.callback) {
                                         button.addEventListener('click', (e) => {
-                                            const mustRefresh = action.callback(bodyData, table, e);
+                                            const mustRefresh = action.callback(idx, bodyData, table, e);
                                             if (mustRefresh) {
                                                 this.refresh();
                                             }
@@ -5324,6 +5293,10 @@
                             row.appendChild(td);
                         }
                         body.appendChild(row);
+                    }
+                    if (options.selectable) {
+                        const sRows = this.getSelectedRows();
+                        exports.LX.emitSignal("@rows_selected_changed", sRows.length);
                     }
                     if (body.childNodes.length == 0) {
                         const row = document.createElement('tr');
@@ -5345,18 +5318,53 @@
                     }
                 }
             };
+            const showSelected = this._showSelectedNumber && options.selectable;
+            // Make footer
+            if (showSelected || this._paginator) {
+                const footerContainer = exports.LX.makeContainer(["100%", "auto"], "flex flex-row px-3 my-1 align-center", "", container);
+                // Show num selected rows
+                if (showSelected) {
+                    const selectedRowsLabelContainer = exports.LX.makeContainer(["100%", "auto"], "flex justify-start items-center fg-secondary", "0 row(s) selected.", footerContainer);
+                    exports.LX.addSignal("@rows_selected_changed", (target, n) => {
+                        if (!this._showSelectedNumber)
+                            return;
+                        selectedRowsLabelContainer.innerHTML = n === 0 ? "" : `${n ?? 0} row(s) selected.`;
+                    });
+                }
+                // Pagination
+                if (this._paginator) {
+                    const paginationContainer = exports.LX.makeContainer(["100%", "auto"], "flex justify-end", "", footerContainer);
+                    paginationContainer.appendChild(this._paginator.root);
+                }
+            }
             this.refresh();
             exports.LX.doAsync(this.onResize.bind(this));
         }
         getSelectedRows() {
             const selectedRows = [];
             for (const row of this.data.body) {
-                const rowId = exports.LX.getSupportedDOMName(row.join('-')).substr(0, 32);
+                const rowId = this._makeRowId(row);
                 if (this.data.checkMap[rowId] === true) {
                     selectedRows.push(row);
                 }
             }
             return selectedRows;
+        }
+        _makeRowId(row) {
+            return exports.LX.getSupportedDOMName(row.join('-')).substr(0, 32);
+        }
+        _onChangePage(page) {
+            this.refresh();
+        }
+        _getNumPages(total) {
+            if (this.rowsPerPage === -1)
+                return 1;
+            total = total ?? this.data.body?.length;
+            return Math.ceil((total ?? 0) / this.rowsPerPage);
+        }
+        _setRowsPerPage(n) {
+            this._rowsPerPage = n;
+            this.refresh();
         }
         _setCentered(v) {
             if (v.constructor == Boolean) {
@@ -5941,6 +5949,9 @@
                 item.addEventListener("dragenter", (e) => {
                     e.target.classList.add("draggingover");
                 });
+                item.addEventListener("dragend", (e) => {
+                    e.target.classList.remove("draggingover");
+                });
                 item.addEventListener("dragleave", (e) => {
                     e.target.classList.remove("draggingover");
                 });
@@ -5948,6 +5959,11 @@
                     e.preventDefault(); // Prevent default action (open as link for some elements)
                     let dragged = window.__tree_node_dragged;
                     if (!dragged) {
+                        // Test if we are moving from AssetView extension
+                        dragged = window.__av_item_dragged;
+                        if (dragged) {
+                            dragged._nodeTarget = node;
+                        }
                         return;
                     }
                     let target = node;
@@ -7049,7 +7065,7 @@
          */
         addLabel(value, options = {}) {
             options.disabled = true;
-            options.inputClass = (options.inputClass ?? "") + " nobg";
+            options.inputClass = (options.inputClass ?? "") + " bg-none";
             const component = this.addText(null, value, null, options);
             component.type = exports.ComponentType.LABEL;
             return component;
@@ -7574,6 +7590,252 @@
         }
     };
     exports.LX.Panel = Panel$2;
+
+    // Menubar.ts @jxarco
+    /**
+     * @class Menubar
+     */
+    class Menubar {
+        root;
+        siblingArea;
+        buttonContainer;
+        items = [];
+        buttons = {};
+        icons = {};
+        shorts = {};
+        focused = false;
+        _currentDropdown;
+        constructor(items, options = {}) {
+            this.root = document.createElement("div");
+            this.root.className = "lexmenubar";
+            if (options.float) {
+                this.root.style.justifyContent = options.float;
+            }
+            this.items = items ?? [];
+            this.createEntries();
+        }
+        _resetMenubar(focus) {
+            this.root.querySelectorAll(".lexmenuentry").forEach((e) => {
+                e.classList.remove('selected');
+                delete e.dataset["built"];
+            });
+            if (this._currentDropdown) {
+                this._currentDropdown.destroy();
+                this._currentDropdown = null;
+            }
+            // Next time we need to click again
+            this.focused = focus ?? false;
+        }
+        /**
+         * @method createEntries
+         */
+        createEntries() {
+            for (let item of this.items) {
+                let key = item.name;
+                let pKey = exports.LX.getSupportedDOMName(key);
+                // Item already created
+                if (this.root.querySelector("#" + pKey)) {
+                    continue;
+                }
+                let entry = document.createElement('div');
+                entry.className = "lexmenuentry";
+                entry.id = pKey;
+                entry.innerHTML = "<span>" + key + "</span>";
+                entry.tabIndex = 1;
+                this.root.appendChild(entry);
+                const _showEntry = () => {
+                    this._resetMenubar(true);
+                    entry.classList.add("selected");
+                    entry.dataset["built"] = "true";
+                    this._currentDropdown = exports.LX.addDropdownMenu(entry, item.submenu ?? [], { side: "bottom", align: "start", onBlur: () => {
+                            this._resetMenubar();
+                        } });
+                };
+                entry.addEventListener("mousedown", (e) => {
+                    e.preventDefault();
+                });
+                entry.addEventListener("mouseup", (e) => {
+                    e.preventDefault();
+                    const f = item['callback'];
+                    if (f) {
+                        f.call(this, key, entry, e);
+                        return;
+                    }
+                    _showEntry();
+                    this.focused = true;
+                    return false;
+                });
+                entry.addEventListener("mouseover", (e) => {
+                    if (this.focused && !(entry.dataset["built"] ?? false)) {
+                        _showEntry();
+                    }
+                });
+            }
+        }
+        /**
+         * @method getButton
+         * @param {String} name
+         */
+        getButton(name) {
+            return this.buttons[name];
+        }
+        /**
+         * @method getSubitems
+         * @param {Object} item: parent item
+         * @param {Array} tokens: split path strings
+        */
+        getSubitem(item, tokens) {
+            for (const s of item) {
+                if (s?.name != tokens[0]) {
+                    continue;
+                }
+                if (tokens.length == 1) {
+                    return s;
+                }
+                else if (s.submenu) {
+                    tokens.shift();
+                    return this.getSubitem(s.submenu, tokens);
+                }
+            }
+        }
+        /**
+         * @method getItem
+         * @param {String} path
+        */
+        getItem(path) {
+            // Process path
+            const tokens = path.split('/');
+            return this.getSubitem(this.items, tokens);
+        }
+        /**
+         * @method setButtonIcon
+         * @param {String} name
+         * @param {String} icon
+         * @param {Function} callback
+         * @param {Object} options
+         */
+        setButtonIcon(name, icon, callback, options = {}) {
+            if (!name) {
+                throw ("Set Button Name!");
+            }
+            let button = this.buttons[name];
+            // If the button already exists, delete it
+            // since only one button of this type can exist
+            if (button) {
+                delete this.buttons[name];
+                exports.LX.deleteElement(button.root);
+            }
+            // Otherwise, create it
+            button = new Button(name, undefined, callback, {
+                title: name,
+                buttonClass: "lexmenubutton main bg-none",
+                disabled: options.disabled,
+                icon,
+                svgClass: "xl",
+                hideName: true,
+                swap: options.swap
+            });
+            if (options.float == "right") {
+                button.root.right = true;
+            }
+            if (this.root.lastChild && this.root.lastChild.right) {
+                this.root.lastChild.before(button.root);
+            }
+            else if (options.float == "left") {
+                this.root.prepend(button.root);
+            }
+            else {
+                this.root.appendChild(button.root);
+            }
+            this.buttons[name] = button;
+        }
+        /**
+         * @method setButtonImage
+         * @param {String} name
+         * @param {String} src
+         * @param {Function} callback
+         * @param {Object} options
+         */
+        setButtonImage(name, src, callback, options = {}) {
+            if (!name) {
+                throw ("Set Button Name!");
+            }
+            let button = this.buttons[name];
+            if (button) {
+                button.querySelector('img').src = src;
+                return;
+            }
+            // Otherwise, create it
+            button = document.createElement('div');
+            const disabled = options.disabled ?? false;
+            button.className = "lexmenubutton main" + (disabled ? " disabled" : "");
+            button.title = name;
+            button.innerHTML = "<a><image src='" + src + "' class='lexicon' style='height:32px;'></a>";
+            if (options.float == "right") {
+                button.right = true;
+            }
+            if (this.root.lastChild && this.root.lastChild.right) {
+                this.root.lastChild.before(button);
+            }
+            else if (options.float == "left") {
+                this.root.prepend(button);
+            }
+            else {
+                this.root.appendChild(button);
+            }
+            const _b = button.querySelector('a');
+            _b.addEventListener("mousedown", (e) => {
+                e.preventDefault();
+            });
+            _b.addEventListener("mouseup", (e) => {
+                if (callback && !disabled) {
+                    callback.call(this, _b, e);
+                }
+            });
+            this.buttons[name] = button;
+        }
+        /**
+         * @method addButton
+         * @param {Array} buttons
+         * @param {Object} options
+         * float: center (Default), right
+         */
+        addButtons(buttons, options = {}) {
+            if (!buttons) {
+                throw ("No buttons to add!");
+            }
+            if (!this.buttonContainer) {
+                this.buttonContainer = document.createElement("div");
+                this.buttonContainer.className = "lexmenubuttons";
+                this.buttonContainer.classList.add(options.float ?? "center");
+                if (options.float == "right") {
+                    this.buttonContainer.right = true;
+                }
+                if (this.root.lastChild && this.root.lastChild.right) {
+                    this.root.lastChild.before(this.buttonContainer);
+                }
+                else {
+                    this.root.appendChild(this.buttonContainer);
+                }
+            }
+            for (const data of buttons) {
+                const title = data.title;
+                const button = new Button(title, data.label, data.callback, {
+                    title,
+                    buttonClass: "bg-none",
+                    disabled: data.disabled,
+                    icon: data.icon,
+                    hideName: true,
+                    swap: data.swap,
+                    iconPosition: "start"
+                });
+                this.buttonContainer.appendChild(button.root);
+                if (title) {
+                    this.buttons[title] = button;
+                }
+            }
+        }
+    }
 
     // Tabs.ts @jxarco
     /**
@@ -8947,6 +9209,17 @@
         return JSON.parse(JSON.stringify(obj));
     }
     exports.LX.deepCopy = deepCopy;
+    function concatTypedArray(arrays, ArrayType) {
+        let size = arrays.reduce((acc, arr) => acc + arr.length, 0);
+        let result = new ArrayType(size); // generate just one array
+        let offset = 0;
+        for (let i = 0; i < arrays.length; ++i) {
+            result.set(arrays[i], offset); // copy values
+            offset += arrays[i].length;
+        }
+        return result;
+    }
+    exports.LX.concatTypedArray = concatTypedArray;
     /**
      * @method setTheme
      * @description Set dark or light theme
@@ -9227,6 +9500,24 @@
     }
     exports.LX.guidGenerator = guidGenerator;
     /**
+     * @method escapeRegExp
+     * @description Helper to escape regexp chars
+     */
+    function escapeRegExp(str) {
+        return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+    exports.LX.escapeRegExp = escapeRegExp;
+    /**
+     * @method wildcardToRegExp
+     * @description Helper to get regexs from string using wildcard chars
+     */
+    function wildcardToRegExp(pattern) {
+        const escaped = pattern.replace(/([.+^${}()|[\]\\])/g, '\\$1');
+        const converted = escaped.replace(/\*/g, '.*').replace(/\?/g, '.');
+        return new RegExp('^' + converted + '$', 'i');
+    }
+    exports.LX.wildcardToRegExp = wildcardToRegExp;
+    /**
      * @method buildTextPattern
      * @description Create a validation pattern using specific options
      * @param {Object} options
@@ -9406,7 +9697,8 @@
         const collapsed = (options.collapsed ?? true);
         const actionIcon = exports.LX.makeIcon("Right");
         actionIcon.classList.add("collapser");
-        actionIcon.dataset["collapsed"] = `${collapsed}`;
+        if (collapsed)
+            actionIcon.dataset["collapsed"] = `${collapsed}`;
         actionIcon.style.marginLeft = "auto";
         actionIcon.style.marginRight = "0.2rem";
         actionIcon.addEventListener("click", function (e) {
@@ -9414,7 +9706,7 @@
             e.stopPropagation();
             if (this.dataset["collapsed"]) {
                 delete this.dataset["collapsed"];
-                content.style.display = "block";
+                content.style.display = options.display ?? "block";
             }
             else {
                 this.dataset["collapsed"] = "true";
@@ -9450,15 +9742,16 @@
         snippet.className = "lexcodesnippet " + (options.className ?? "");
         snippet.style.width = size ? size[0] : "auto";
         snippet.style.height = size ? size[1] : "auto";
-        const area = new Area$3({ noAppend: true });
-        let editor = new exports.LX.CodeEditor(area, {
+        const area = new Area$3({ xskipAppend: true });
+        new exports.LX.CodeEditor(area, {
             skipInfo: true,
             disableEdition: true,
             allowAddScripts: false,
             name: options.tabName,
-            callback: () => {
+            callback: (instance) => {
+                instance.setText(code, options.language ?? "Plain Text");
                 if (options.linesAdded) {
-                    const code = editor.root.querySelector(".code");
+                    const code = instance.root.querySelector(".code");
                     for (let ls of options.linesAdded) {
                         const l = ls;
                         if (l.constructor == Number) {
@@ -9473,7 +9766,7 @@
                     }
                 }
                 if (options.linesRemoved) {
-                    const code = editor.root.querySelector(".code");
+                    const code = instance.root.querySelector(".code");
                     for (let ls of options.linesRemoved) {
                         const l = ls;
                         if (l.constructor == Number) {
@@ -9487,27 +9780,26 @@
                         }
                     }
                 }
+                if (options.windowMode) {
+                    const windowActionButtons = document.createElement("div");
+                    windowActionButtons.className = "lexwindowbuttons";
+                    const aButton = document.createElement("span");
+                    aButton.style.background = "#ee4f50";
+                    const bButton = document.createElement("span");
+                    bButton.style.background = "#f5b720";
+                    const cButton = document.createElement("span");
+                    cButton.style.background = "#53ca29";
+                    windowActionButtons.appendChild(aButton);
+                    windowActionButtons.appendChild(bButton);
+                    windowActionButtons.appendChild(cButton);
+                    const tabs = instance.root.querySelector(".lexareatabs");
+                    tabs.prepend(windowActionButtons);
+                }
+                if (!(options.lineNumbers ?? true)) {
+                    instance.root.classList.add("no-gutter");
+                }
             }
         });
-        editor.setText(code, options.language ?? "Plain Text");
-        if (options.windowMode) {
-            const windowActionButtons = document.createElement("div");
-            windowActionButtons.className = "lexwindowbuttons";
-            const aButton = document.createElement("span");
-            aButton.style.background = "#ee4f50";
-            const bButton = document.createElement("span");
-            bButton.style.background = "#f5b720";
-            const cButton = document.createElement("span");
-            cButton.style.background = "#53ca29";
-            windowActionButtons.appendChild(aButton);
-            windowActionButtons.appendChild(bButton);
-            windowActionButtons.appendChild(cButton);
-            const tabs = editor.root.querySelector(".lexareatabs");
-            tabs.prepend(windowActionButtons);
-        }
-        if (!(options.lineNumbers ?? true)) {
-            editor.root.classList.add("no-gutter");
-        }
         snippet.appendChild(area.root);
         return snippet;
     }
@@ -10635,6 +10927,28 @@
         return { ...RAW_ICONS, ...aliasIcons };
     })();
 
+    // Spinner.ts @jxarco
+    /**
+     * @class Spinner
+     */
+    class Spinner {
+        root;
+        constructor(options = {}) {
+            const icon = options.icon ?? "LoaderCircle";
+            const size = options.size ?? "md";
+            const iconClass = `flex ${options.iconClass ?? ""}`.trim();
+            const svgClass = `animate-spin ${size} ${options.svgClass ?? ""}`.trim();
+            this.root = exports.LX.makeIcon(icon, { iconClass, svgClass });
+        }
+        html() {
+            return this.root.innerHTML;
+        }
+        destroy() {
+            this.root.remove();
+        }
+    }
+    exports.LX.Spinner = Spinner;
+
     // Sidebar.ts @jxarco
     /**
      * @class Sidebar
@@ -10695,7 +11009,7 @@
         constructor(options = {}) {
             const mobile = navigator && /Android|iPhone/i.test(navigator.userAgent);
             this.root = document.createElement("div");
-            this.root.className = "lexsidebar " + (options.className ?? "");
+            this.root.className = "lexsidebar flex flex-col " + (options.className ?? "");
             this.callback = options.callback ?? null;
             this._displaySelected = options.displaySelected ?? false;
             this.side = options.side ?? "left";
@@ -10728,7 +11042,7 @@
             if (!(options.skipHeader ?? false)) {
                 this.header = options.header ?? this._generateDefaultHeader(options);
                 console.assert(this.header.constructor === HTMLDivElement, "Use an HTMLDivElement to build your custom header");
-                this.header.className = "lexsidebarheader";
+                this.header.className = "lexsidebarheader flex-auto";
                 this.root.appendChild(this.header);
                 if (this.collapsable) {
                     const icon = exports.LX.makeIcon(this.side == "left" ? "PanelLeft" : "PanelRight", { title: "Toggle Sidebar", iconClass: "toggler" });
@@ -10767,23 +11081,16 @@
             // Content
             {
                 this.content = document.createElement('div');
-                this.content.className = "lexsidebarcontent";
+                this.content.className = "lexsidebarcontent flex-auto-fill";
                 this.root.appendChild(this.content);
             }
             // Footer
             if (!(options.skipFooter ?? false)) {
                 this.footer = options.footer ?? this._generateDefaultFooter(options);
                 console.assert(this.footer.constructor === HTMLDivElement, "Use an HTMLDivElement to build your custom footer");
-                this.footer.className = "lexsidebarfooter";
+                this.footer.className = "lexsidebarfooter flex-auto";
                 this.root.appendChild(this.footer);
             }
-            const resizeObserver = new ResizeObserver(entries => {
-                const contentOffset = (this.header?.offsetHeight ?? 0) +
-                    (this.filter?.offsetHeight ?? 0) +
-                    (this.footer?.offsetHeight ?? 0);
-                this.content.style.height = `calc(100% - ${contentOffset}px)`;
-            });
-            resizeObserver.observe(this.root);
         }
         _generateDefaultHeader(options = {}) {
             const header = document.createElement('div');
@@ -11561,7 +11868,7 @@
             const menuItem = document.createElement('div');
             menuItem.className = "lexdropdownmenuitem" + ((item.name || item.options) ? "" : " label") + (item.disabled ?? false ? " disabled" : "") + (` ${item.className ?? ""}`);
             menuItem.dataset["id"] = pKey;
-            menuItem.innerHTML = `<span>${key}</span>`;
+            menuItem.innerHTML = `<span class="ellipsis-overflow">${key}</span>`;
             menuItem.tabIndex = "1";
             parentDom.appendChild(menuItem);
             if (item.constructor === String) // Label case
@@ -11597,7 +11904,7 @@
                 menuItem.setAttribute("data-radioname", this._radioGroup.name);
             }
             else if (item.icon) {
-                const icon = exports.LX.makeIcon(item.icon, { svgClass: disabled ? "fg-tertiary" : item.svgClass ?? item.className });
+                const icon = item.icon.constructor === String ? exports.LX.makeIcon(item.icon, { svgClass: disabled ? "fg-tertiary" : item.svgClass ?? item.className }) : item.icon;
                 menuItem.prepend(icon);
             }
             else if (item.checked == undefined && applyIconPadding) // no checkbox, no icon, apply padding if there's checkbox or icon in other items
@@ -12227,7 +12534,7 @@
             }
             root.style.left = position[0] ?? "50%";
             root.style.top = position[1] ?? "50%";
-            panel.root.style.height = title ? "calc( 100% - " + (titleDiv.offsetHeight + 30) + "px )" : "calc( 100% - 51px )";
+            panel.root.style.height = title ? "calc( 100% - " + (titleDiv.offsetHeight + 30) + "px )" : "calc(100%)";
         }
         destroy() {
             this.root.remove();
@@ -12972,39 +13279,6 @@
     exports.LX.Panel;
     exports.LX.NodeTree;
     exports.LX.TreeEvent;
-    exports.LX.ContextMenu;
-    class AssetViewEvent {
-        static NONE = 0;
-        static ASSET_SELECTED = 1;
-        static ASSET_DELETED = 2;
-        static ASSET_RENAMED = 3;
-        static ASSET_CLONED = 4;
-        static ASSET_DBLCLICKED = 5;
-        static ASSET_CHECKED = 6;
-        static ENTER_FOLDER = 7;
-        type;
-        item;
-        value;
-        multiple = false; // Multiple selection
-        constructor(type, item, value) {
-            this.type = type || exports.LX.TreeEvent.NONE;
-            this.item = item;
-            this.value = value;
-        }
-        string() {
-            switch (this.type) {
-                case AssetViewEvent.NONE: return "assetview_event_none";
-                case AssetViewEvent.ASSET_SELECTED: return "assetview_event_selected";
-                case AssetViewEvent.ASSET_DELETED: return "assetview_event_deleted";
-                case AssetViewEvent.ASSET_RENAMED: return "assetview_event_renamed";
-                case AssetViewEvent.ASSET_CLONED: return "assetview_event_cloned";
-                case AssetViewEvent.ASSET_DBLCLICKED: return "assetview_event_dblclicked";
-                case AssetViewEvent.ASSET_CHECKED: return "assetview_event_checked";
-                case AssetViewEvent.ENTER_FOLDER: return "assetview_event_enter_folder";
-            }
-        }
-    }
-    exports.LX.AssetViewEvent = AssetViewEvent;
     /**
      * @class AssetView
      * @description Asset container with Tree for file system
@@ -13015,7 +13289,6 @@
         static LAYOUT_LIST = 2;
         static CONTENT_SORT_ASC = 0;
         static CONTENT_SORT_DESC = 1;
-        static MAX_PAGE_ELEMENTS = 50;
         root;
         area = null;
         content; // "!" to avoid TS strict property initialization error
@@ -13028,13 +13301,12 @@
         nextData = [];
         data = [];
         currentData = [];
-        currentFolder;
+        currentFolder = undefined;
+        rootItem;
         path = [];
         rootPath = "";
-        selectedItem = null;
+        selectedItem = undefined;
         allowedTypes;
-        allowNextPage = false;
-        contentPage = 1;
         searchValue = "";
         filter = "None";
         gridScale = 1.0;
@@ -13051,8 +13323,14 @@
         onRefreshContent = null;
         itemContextMenuOptions = null;
         onItemDragged = null;
-        onevent = null;
+        _assetsPerPage = 24;
+        get assetsPerPage() { return this._assetsPerPage; }
+        set assetsPerPage(v) { this._setAssetsPerPage(v); }
+        _callbacks = {};
         _lastSortBy = "";
+        _paginator;
+        _scriptCodeDialog;
+        _moveItemDialog;
         constructor(options = {}) {
             this.rootPath = "https://raw.githubusercontent.com/jxarco/lexgui.js/master/";
             this.layout = options.layout ?? this.layout;
@@ -13103,10 +13381,11 @@
                 "Video": { color: "indigo-400" },
                 ...(options.allowedTypes ?? {})
             };
-            this._processData(this.data, null);
-            this.currentFolder = null;
-            this.currentData = this.data;
             this.path = ['@'];
+            this.rootItem = { id: "/", children: this.data, type: "folder", metadata: { uid: exports.LX.guidGenerator() } };
+            this.currentFolder = this.rootItem;
+            this._processData(this.data);
+            this.currentData = this.data;
             if (!this.skipBrowser) {
                 this._createTreePanel(left);
             }
@@ -13119,26 +13398,33 @@
             document.body.removeChild(this.root);
         }
         /**
-        * @method load
+        * @method on
+        * @description Stores an event callback for the desired action
         */
-        load(data, onevent) {
+        on(eventName, callback) {
+            this._callbacks[eventName] = callback;
+        }
+        /**
+        * @method load
+        * @description Loads and processes the input data
+        */
+        load(data) {
             this.prevData.length = 0;
             this.nextData.length = 0;
             this.data = data;
-            this._processData(this.data, null);
+            // Update root children
+            this.rootItem.children = this.data;
+            this._processData(this.data);
             this.currentData = this.data;
             this.path = ['@'];
             if (!this.skipBrowser) {
-                this.tree.refresh({
-                    id: '/',
-                    children: this.data
-                });
+                this.tree.refresh({ id: '/', children: this.data, type: "folder", metadata: { uid: exports.LX.guidGenerator() } });
             }
             this._refreshContent();
-            this.onevent = onevent;
         }
         /**
         * @method addItem
+        * @description Creates an item DOM element
         */
         addItem(item, childIndex, updateTree = true) {
             const isListLayout = (this.layout == AssetView.LAYOUT_LIST);
@@ -13156,16 +13442,17 @@
                 // Add type tag
                 exports.LX.makeElement('span', `rounded-full w-2 h-2 z-100 flex absolute ml-2 mt-2 bg-${typeColor}`, "", itemEl);
             }
-            if (!item.uid) {
-                item.uid = exports.LX.guidGenerator();
+            const metadata = item.metadata;
+            if (!metadata.uid) {
+                metadata.uid = exports.LX.guidGenerator();
             }
-            if (item.lastModified && !item.lastModifiedDate) {
-                item.lastModifiedDate = this._lastModifiedToStringDate(item.lastModified);
+            if (metadata.lastModified && !metadata.lastModifiedDate) {
+                metadata.lastModifiedDate = this._lastModifiedToStringDate(metadata.lastModified);
             }
             if (!this.useNativeTitle) {
                 let desc = document.createElement('span');
                 desc.className = 'lexitemdesc';
-                desc.id = `floatingTitle_${item.uid}`;
+                desc.id = `floatingTitle_${metadata.uid}`;
                 desc.innerHTML = `File: ${item.id}<br>Type: ${type}`;
                 exports.LX.insertChildAtIndex(this.content, desc, childIndex ? childIndex + 1 : undefined);
                 itemEl.addEventListener("mousemove", (e) => {
@@ -13197,13 +13484,18 @@
                 let checkbox = document.createElement('input');
                 checkbox.type = "checkbox";
                 checkbox.className = "lexcheckbox";
-                checkbox.checked = item.selected;
+                checkbox.checked = metadata.selected;
                 checkbox.addEventListener('change', (e) => {
-                    item.selected = !item.selected;
-                    if (this.onevent) {
-                        const event = new AssetViewEvent(AssetViewEvent.ASSET_CHECKED, e.shiftKey ? [item] : item);
-                        event.multiple = !!e.shiftKey;
-                        this.onevent(event);
+                    metadata.selected = !metadata.selected;
+                    const onCheck = that._callbacks["check"];
+                    if (onCheck !== undefined) {
+                        const event = {
+                            type: "check",
+                            items: [item],
+                            userInitiated: true
+                        };
+                        onCheck(event);
+                        // event.multiple = !!e.shiftKey;
                     }
                     e.stopPropagation();
                     e.stopImmediatePropagation();
@@ -13222,12 +13514,12 @@
                     itemVideo.setAttribute('loop', true);
                     itemVideo.setAttribute('async', true);
                     itemVideo.style.transition = 'opacity 0.2s ease-out';
-                    itemVideo.style.opacity = item.preview ? '0' : '1';
+                    itemVideo.style.opacity = metadata.preview ? '0' : '1';
                     itemVideo.src = item.src;
-                    itemVideo.volume = item.videoVolume ?? 0.4;
+                    itemVideo.volume = metadata.volume ?? 0.4;
                 }
                 let preview = null;
-                const previewSrc = item.preview ?? item.src;
+                const previewSrc = metadata.preview ?? item.src;
                 const hasImage = previewSrc && ((() => {
                     const ext = exports.LX.getExtension(previewSrc.split('?')[0].split('#')[0]); // get final source without url parameters/anchors
                     return ext ? ['png', 'jpg', 'jpeg', 'gif', 'bmp', 'avif'].includes(ext.toLowerCase()) : false;
@@ -13237,8 +13529,10 @@
                     const defaultPreviewPath = `${this.rootPath}images/file.png`;
                     const defaultFolderPath = `${this.rootPath}images/folder.png`;
                     preview = document.createElement('img');
-                    let realSrc = item.unknownExtension ? defaultPreviewPath : (isFolder ? defaultFolderPath : previewSrc);
+                    let realSrc = metadata.unknownExtension ? defaultPreviewPath : (isFolder ? defaultFolderPath : previewSrc);
                     preview.src = (isGridLayout || isFolder ? realSrc : defaultPreviewPath);
+                    preview.setAttribute("draggable", "false");
+                    preview.className = "pointer-events-none";
                     itemEl.appendChild(preview);
                 }
                 else {
@@ -13262,10 +13556,10 @@
             // Add item type info
             let itemInfoHtml = type;
             if (isListLayout) {
-                if (item.bytesize)
-                    itemInfoHtml += ` | ${exports.LX.formatBytes(item.bytesize)}`;
-                if (item.lastModifiedDate)
-                    itemInfoHtml += ` | ${item.lastModifiedDate}`;
+                if (metadata.bytesize)
+                    itemInfoHtml += ` | ${exports.LX.formatBytes(metadata.bytesize)}`;
+                if (metadata.lastModifiedDate)
+                    itemInfoHtml += ` | ${metadata.lastModifiedDate}`;
             }
             exports.LX.makeContainer(['auto', 'auto'], 'lexassetinfo', itemInfoHtml, itemEl);
             itemEl.addEventListener('click', function (e) {
@@ -13286,39 +13580,126 @@
                     that._enterFolder(item);
                     return;
                 }
-                if (that.onevent) {
-                    const event = new AssetViewEvent(isDoubleClick ? AssetViewEvent.ASSET_DBLCLICKED : AssetViewEvent.ASSET_SELECTED, e.shiftKey ? [item] : item);
-                    event.multiple = !!e.shiftKey;
-                    that.onevent(event);
+                const onSelect = that._callbacks["select"];
+                const onDblClick = that._callbacks["dblClick"];
+                if (isDoubleClick && onDblClick !== undefined) {
+                    const event = {
+                        type: "dbl_click",
+                        items: [item],
+                        userInitiated: true
+                    };
+                    onDblClick(event);
+                    // event.multiple = !!e.shiftKey;
+                }
+                else if (!isDoubleClick && onSelect !== undefined) {
+                    const event = {
+                        type: "select",
+                        items: [item],
+                        userInitiated: true
+                    };
+                    onSelect(event);
+                    // event.multiple = !!e.shiftKey;
                 }
             });
             itemEl.addEventListener('contextmenu', function (e) {
                 e.preventDefault();
+                e.stopImmediatePropagation();
+                e.stopPropagation();
                 const multiple = that.content.querySelectorAll('.selected').length;
-                exports.LX.addContextMenu(multiple > 1 ? (multiple + " selected") : isFolder ? item.id : item.type, e, (m) => {
-                    if (multiple <= 1) {
-                        m.add("Rename", that._renameItem.bind(that, item));
+                const options = [
+                    {
+                        name: (multiple > 1) ? (multiple + " selected") : item.id,
+                        icon: exports.LX.makeIcon("CircleSmall", { svgClass: `fill-current fg-${typeColor}` }),
+                        className: "text-sm", disabled: true
+                    },
+                    null
+                ];
+                if (multiple <= 1) {
+                    options.push({ name: "Rename", icon: "TextCursor", callback: that._renameItemPopover.bind(that, item) });
+                }
+                if (!isFolder) {
+                    options.push({ name: "Clone", icon: "Copy", callback: that._requestCloneItem.bind(that, item) });
+                }
+                options.push({ name: "Move", icon: "FolderInput", callback: that._moveItem.bind(that, item) });
+                if (type == "Script" && exports.LX.has("CodeEditor")) {
+                    options.push({ name: "Open in Editor", icon: "Code", callback: that._openScriptInEditor.bind(that, item) });
+                }
+                if (that.itemContextMenuOptions) {
+                    options.push(null);
+                    for (let o of that.itemContextMenuOptions) {
+                        if (!o.name || !o.callback)
+                            continue;
+                        options.push({ name: o.name, icon: o.icon, callback: o.callback?.bind(that, item) });
                     }
-                    if (!isFolder) {
-                        m.add("Clone", that._cloneItem.bind(that, item));
-                    }
-                    m.add("Delete", that._deleteItem.bind(that, item));
-                    if (that.itemContextMenuOptions) {
-                        m.add("");
-                        for (let o of that.itemContextMenuOptions) {
-                            if (!o.name || !o.callback)
-                                continue;
-                            m.add(o.name, o.callback?.bind(that, item));
-                        }
-                    }
-                });
+                }
+                options.push(null, { name: "Delete", icon: "Trash2", className: "fg-error", callback: that._requestDeleteItem.bind(that, item) });
+                exports.LX.addClass(that.contentPanel.root, "pointer-events-none");
+                exports.LX.addDropdownMenu(e.target, options, { side: "right", align: "start", event: e, onBlur: () => {
+                        exports.LX.removeClass(that.contentPanel.root, "pointer-events-none");
+                    } });
             });
-            itemEl.addEventListener("dragstart", function (e) {
-                e.preventDefault();
+            const onDrop = function (src, target) {
+                const targetType = target.type.charAt(0).toUpperCase() + target.type.slice(1);
+                if (!(targetType === "Folder") || (src.metadata.uid == target.metadata.uid)) {
+                    console.error("[AssetView Error] Cannot drop: Target item is not a folder or target is the dragged element!");
+                    return;
+                }
+                // Animate dragged element
+                const draggedEl = src.domEl;
+                if (draggedEl) {
+                    draggedEl.classList.add("moving-to-folder");
+                    // When animation ends, finalize move
+                    draggedEl.addEventListener("animationend", () => {
+                        draggedEl.classList.remove("moving-to-folder");
+                        that._requestMoveItemToFolder(src, target);
+                    }, { once: true });
+                }
+            };
+            itemEl.addEventListener("dragstart", (e) => {
+                window.__av_item_dragged = item;
+                var img = new Image();
+                img.src = '';
+                if (e.dataTransfer) {
+                    e.dataTransfer.setDragImage(img, 0, 0);
+                    e.dataTransfer.effectAllowed = "move";
+                }
+                const desc = that.content.querySelector(`#floatingTitle_${metadata.uid}`);
+                if (desc)
+                    desc.style.display = "none";
             }, false);
+            itemEl.addEventListener("dragend", (e) => {
+                e.preventDefault(); // Prevent default action (open as link for some elements)
+                let dragged = window.__av_item_dragged;
+                if (dragged && dragged._nodeTarget) // We dropped into a NodeTree element
+                 {
+                    onDrop(dragged, dragged._nodeTarget);
+                }
+                delete window.__av_item_dragged;
+            }, false);
+            itemEl.addEventListener("dragenter", (e) => {
+                e.preventDefault(); // Prevent default action (open as link for some elements)
+                let dragged = window.__av_item_dragged;
+                if (!dragged || !isFolder || (dragged.metadata.uid == metadata.uid))
+                    return;
+                exports.LX.addClass(item.domEl, "animate-pulse");
+            });
+            itemEl.addEventListener("dragleave", (e) => {
+                e.preventDefault(); // Prevent default action (open as link for some elements)
+                let dragged = window.__av_item_dragged;
+                if (!dragged) {
+                    return;
+                }
+                exports.LX.removeClass(item.domEl, "animate-pulse");
+            });
+            itemEl.addEventListener("drop", (e) => {
+                e.preventDefault(); // Prevent default action (open as link for some elements)
+                let dragged = window.__av_item_dragged;
+                if (dragged)
+                    onDrop(dragged, item);
+            });
             itemEl.addEventListener("mouseenter", (e) => {
                 if (!that.useNativeTitle && isGridLayout) {
-                    const desc = that.content.querySelector(`#floatingTitle_${item.uid}`);
+                    const desc = that.content.querySelector(`#floatingTitle_${metadata.uid}`);
                     if (desc)
                         desc.style.display = "unset";
                 }
@@ -13332,7 +13713,7 @@
             itemEl.addEventListener("mouseleave", (e) => {
                 if (!that.useNativeTitle && isGridLayout) {
                     setTimeout(() => {
-                        const desc = that.content.querySelector(`#floatingTitle_${item.uid}`);
+                        const desc = that.content.querySelector(`#floatingTitle_${metadata.uid}`);
                         if (desc)
                             desc.style.display = "none";
                     }, 100);
@@ -13343,7 +13724,7 @@
                 const video = itemEl.querySelector("video");
                 video.pause();
                 video.currentTime = 0;
-                if (item.preview) {
+                if (metadata.preview) {
                     video.style.opacity = "0";
                 }
             });
@@ -13354,6 +13735,7 @@
         }
         /**
         * @method clear
+        * @description Creates all AssetView container panels
         */
         clear() {
             if (this.previewPanel) {
@@ -13366,22 +13748,20 @@
                 this.toolsPanel.clear();
             }
         }
-        /**
-        * @method _processData
-        */
         _processData(data, parent) {
+            // Processing an item
             if (data.constructor !== Array) {
-                data['folder'] = parent;
+                data.parent = parent;
+                data.dir = parent?.children;
                 data.children = data.children ?? [];
+                data.metadata = data.metadata || {};
             }
-            let list = data.constructor === Array ? data : data.children;
-            for (var i = 0; i < list.length; ++i) {
-                this._processData(list[i], data);
+            // Get the new parent
+            const newParent = parent ? data : this.rootItem;
+            for (let item of newParent.children) {
+                this._processData(item, newParent);
             }
         }
-        /**
-        * @method _updatePath
-        */
         _updatePath() {
             this.path.length = 0;
             if (this.currentFolder && this.currentFolder.parent) {
@@ -13399,9 +13779,28 @@
             }
             exports.LX.emitSignal("@on_folder_change", this.path.reverse().join('/'));
         }
-        /**
-        * @method _createTreePanel
-        */
+        _createNavigationBar(panel) {
+            panel.sameLine(4, "justify-center");
+            panel.addButton(null, "GoBackButton", () => {
+                if (!this.prevData.length || !this.currentFolder)
+                    return;
+                this.nextData.push(this.currentFolder);
+                this._enterFolder(this.prevData.pop(), false);
+            }, { buttonClass: "bg-none", title: "Go Back", tooltip: true, icon: "ArrowLeft" });
+            panel.addButton(null, "GoForwardButton", () => {
+                if (!this.nextData.length || !this.currentFolder)
+                    return;
+                this._enterFolder(this.nextData.pop());
+            }, { buttonClass: "bg-none", title: "Go Forward", tooltip: true, icon: "ArrowRight" });
+            panel.addButton(null, "GoUpButton", () => {
+                const parentFolder = this.currentFolder?.parent;
+                if (parentFolder)
+                    this._enterFolder(parentFolder);
+            }, { buttonClass: "bg-none", title: "Go Upper Folder", tooltip: true, icon: "ArrowUp" });
+            panel.addButton(null, "GoUpButton", () => {
+                this._refreshContent();
+            }, { buttonClass: "bg-none", title: "Refresh", tooltip: true, icon: "Refresh" });
+        }
         _createTreePanel(area) {
             if (this.leftPanel) {
                 this.leftPanel.clear();
@@ -13409,12 +13808,9 @@
             else {
                 this.leftPanel = area.addPanel({ className: 'lexassetbrowserpanel' });
             }
-            // Process data to show in tree
-            let tree_data = {
-                id: '/',
-                children: this.data
-            };
-            const tree = this.leftPanel.addTree("Content Browser", tree_data, {
+            this._createNavigationBar(this.leftPanel);
+            const treeData = { id: '/', children: this.data };
+            const tree = this.leftPanel.addTree("Content Browser", treeData, {
                 // icons: tree_icons,
                 filter: false,
                 onlyFolders: this.onlyFolders,
@@ -13431,7 +13827,7 @@
                                     if (this.currentFolder) {
                                         this.prevData.push(this.currentFolder);
                                     }
-                                    this.currentFolder = null;
+                                    this.currentFolder = undefined;
                                     this.currentData = this.data;
                                     this._refreshContent();
                                     this._updatePath();
@@ -13454,10 +13850,12 @@
                                     const idx = node.parent.children.indexOf(node);
                                     node.parent.children.splice(idx, 1);
                                 }
-                                node.folder = node.parent = value;
-                                if (!value.children)
+                                if (!value.children) {
                                     value.children = [];
+                                }
                                 value.children.push(node);
+                                node.parent = value;
+                                node.dir = value.children;
                                 if (this.onItemDragged) {
                                     this.onItemDragged(node, value);
                                 }
@@ -13469,26 +13867,27 @@
             });
             this.tree = tree.innerTree;
         }
-        /**
-        * @method _setContentLayout
-        */
         _setContentLayout(layoutMode) {
             this.layout = layoutMode;
             this.toolsPanel.refresh();
             this._refreshContent();
         }
-        /**
-        * @method _createContentPanel
-        */
         _createContentPanel(area) {
+            const that = this;
+            area.root.classList.add("flex", "flex-col");
             if (this.toolsPanel) {
                 this.contentPanel.clear();
             }
             else {
-                area.root.classList.add("flex", "flex-col");
-                this.toolsPanel = area.addPanel({ className: 'flex flex-col overflow-hidden', height: "auto" });
-                this.toolsPanel.root.style.flex = "none";
-                this.contentPanel = area.addPanel({ className: 'lexassetcontentpanel flex flex-col overflow-hidden' });
+                this.toolsPanel = area.addPanel({ className: 'flex-auto', height: "auto" });
+                this.contentPanel = area.addPanel({
+                    className: 'lexassetcontentpanel flex flex-col flex-auto-fill content-center overflow-hidden'
+                });
+                this._paginator = new exports.LX.Pagination({
+                    className: "ml-auto",
+                    pages: Math.max(Math.ceil(this.data.length / this.assetsPerPage), 1),
+                    onChange: () => this._refreshContent()
+                });
                 this.contentPanel.root.addEventListener('wheel', (e) => {
                     if (!e.ctrlKey)
                         return;
@@ -13500,7 +13899,7 @@
                 });
             }
             const _onSort = (value, event) => {
-                new exports.LX.DropdownMenu(event.target, [
+                exports.LX.addDropdownMenu(event.target, [
                     { name: "Name", icon: "ALargeSmall", callback: () => this._sortData("id") },
                     { name: "Type", icon: "Type", callback: () => this._sortData("type") },
                     null,
@@ -13509,82 +13908,43 @@
                 ], { side: "bottom", align: "start" });
             };
             const _onChangeView = (value, event) => {
-                new exports.LX.DropdownMenu(event.target, [
+                exports.LX.addDropdownMenu(event.target, [
                     { name: "Grid", icon: "LayoutGrid", callback: () => this._setContentLayout(AssetView.LAYOUT_GRID) },
                     { name: "Compact", icon: "LayoutList", callback: () => this._setContentLayout(AssetView.LAYOUT_COMPACT) },
                     { name: "List", icon: "List", callback: () => this._setContentLayout(AssetView.LAYOUT_LIST) }
                 ], { side: "bottom", align: "start" });
             };
-            const _onChangePage = (value, event) => {
-                if (!this.allowNextPage) {
-                    return;
-                }
-                const lastPage = this.contentPage;
-                this.contentPage += value;
-                this.contentPage = Math.min(this.contentPage, (((this.currentData.length - 1) / AssetView.MAX_PAGE_ELEMENTS) | 0) + 1);
-                this.contentPage = Math.max(this.contentPage, 1);
-                if (lastPage != this.contentPage) {
-                    this._refreshContent();
-                }
-            };
             this.toolsPanel.refresh = () => {
-                const typeEntries = Object.keys(this.allowedTypes);
                 this.toolsPanel.clear();
+                const typeEntries = Object.keys(this.allowedTypes);
+                // Put it in the content panel if no browser
+                if (this.skipBrowser) {
+                    this._createNavigationBar(this.toolsPanel);
+                }
                 this.toolsPanel.sameLine();
-                this.toolsPanel.addSelect("Filter", typeEntries, this.filter ?? typeEntries[0], (v) => {
-                    this._refreshContent(undefined, v);
-                }, { width: "30%", minWidth: "128px", overflowContainer: null });
-                this.toolsPanel.addText(null, this.searchValue ?? "", (v) => this._refreshContent.call(this, v, undefined), { placeholder: "Search assets.." });
-                this.toolsPanel.addButton(null, "", _onSort.bind(this), { title: "Sort", tooltip: true, icon: (this.sortMode === AssetView.CONTENT_SORT_ASC) ? "SortAsc" : "SortDesc" });
+                const sortButton = this.toolsPanel.addButton(null, "", _onSort.bind(this), { title: "Sort", tooltip: true, icon: (this.sortMode === AssetView.CONTENT_SORT_ASC) ? "SortAsc" : "SortDesc" });
                 this.toolsPanel.addButton(null, "", _onChangeView.bind(this), { title: "View", tooltip: true, icon: (this.layout === AssetView.LAYOUT_GRID) ? "LayoutGrid" : "LayoutList" });
-                // Content Pages
-                this.toolsPanel.addButton(null, "", _onChangePage.bind(this, -1), { title: "Previous Page", icon: "ChevronsLeft", className: "ml-auto" });
-                this.toolsPanel.addButton(null, "", _onChangePage.bind(this, 1), { title: "Next Page", icon: "ChevronsRight" });
-                const textString = "Page " + this.contentPage + " / " + ((((this.currentData.length - 1) / AssetView.MAX_PAGE_ELEMENTS) | 0) + 1);
-                this.toolsPanel.addText(null, textString, null, {
-                    inputClass: "nobg", disabled: true, signal: "@on_page_change", maxWidth: "16ch"
-                });
+                this.toolsPanel.addSelect(null, typeEntries, this.filter ?? typeEntries[0], (v) => {
+                    this._refreshContent(undefined, v);
+                }, { overflowContainer: null });
+                this.toolsPanel.addText(null, this.searchValue ?? "", (v) => this._refreshContent(v), { className: "flex flex-auto-fill", placeholder: "Search assets.." });
                 this.toolsPanel.endLine();
-                if (!this.skipBrowser) {
-                    this.toolsPanel.sameLine();
-                    this.toolsPanel.addComboButtons(null, [
-                        {
-                            value: "Left",
-                            icon: "ArrowLeft",
-                            callback: () => {
-                                if (!this.prevData.length || !this.currentFolder)
-                                    return;
-                                this.nextData.push(this.currentFolder);
-                                this._enterFolder(this.prevData.pop(), false);
-                            }
-                        },
-                        {
-                            value: "Right",
-                            icon: "ArrowRight",
-                            callback: () => {
-                                if (!this.nextData.length || !this.currentFolder)
-                                    return;
-                                this._enterFolder(this.nextData.pop());
-                            }
-                        },
-                        {
-                            value: "Refresh",
-                            icon: "Refresh",
-                            callback: () => { this._refreshContent(); }
-                        }
-                    ], { noSelection: true });
-                    this.toolsPanel.addText(null, this.path.join('/'), null, {
-                        width: "75%", inputClass: "nobg", disabled: true, signal: "@on_folder_change",
-                        style: { fontWeight: "600", fontSize: "15px" }
-                    });
-                    this.toolsPanel.endLine();
+                if (this._paginator) {
+                    const inlineContainer = sortButton.root.parentElement;
+                    inlineContainer.appendChild(this._paginator.root);
                 }
             };
-            this.toolsPanel.refresh();
             // Start content panel
             this.content = document.createElement('ul');
             this.content.className = "lexassetscontent";
             this.contentPanel.attach(this.content);
+            if (!this.skipBrowser) {
+                this.contentPanel.addText(null, this.path.join('/'), null, {
+                    inputClass: "bg-none fg-quinary text-end",
+                    disabled: true,
+                    signal: "@on_folder_change"
+                });
+            }
             this.content.addEventListener('dragenter', function (e) {
                 e.preventDefault();
                 this.classList.add('dragging');
@@ -13600,7 +13960,34 @@
             this.content.addEventListener('click', function () {
                 this.querySelectorAll('.lexassetitem').forEach(i => i.classList.remove('selected'));
             });
+            this.content.addEventListener('contextmenu', function (e) {
+                e.preventDefault();
+                const options = [
+                    {
+                        name: "New Folder",
+                        icon: exports.LX.makeIcon("FolderPlus"),
+                        callback: () => {
+                            that._requestCreateFolder();
+                        }
+                    }
+                ];
+                exports.LX.addClass(that.contentPanel.root, "pointer-events-none");
+                exports.LX.addDropdownMenu(e.target, options, { side: "right", align: "start", event: e, onBlur: () => {
+                        exports.LX.removeClass(that.contentPanel.root, "pointer-events-none");
+                    } });
+            });
             this._refreshContent();
+            // After content to update the size of the content based on the toolbar
+            exports.LX.doAsync(() => this.toolsPanel.refresh(), 100);
+        }
+        _makeNameFilterFn(searchValue) {
+            const q = searchValue.trim();
+            if (q.includes("*") || q.includes("?")) {
+                const regex = exports.LX.wildcardToRegExp(q);
+                return (name) => regex.test(name);
+            }
+            // default case, only check include
+            return (name) => name.toLowerCase().includes(q.toLowerCase());
         }
         _refreshContent(searchValue, filter) {
             const isCompactLayout = (this.layout == AssetView.LAYOUT_COMPACT);
@@ -13609,27 +13996,30 @@
             this.searchValue = searchValue ?? (this.searchValue ?? "");
             this.content.innerHTML = "";
             this.content.className = `lexassetscontent${isCompactLayout ? " compact" : (isListLayout ? " list" : "")}`;
-            const fr = new FileReader();
-            const filteredData = this.currentData.filter(_i => {
-                return (this.filter != "None" ? _i.type.toLowerCase() == this.filter.toLowerCase() : true) &&
-                    _i.id.toLowerCase().includes(this.searchValue.toLowerCase());
-            });
-            if (filter || searchValue) {
-                this.contentPage = 1;
+            if (!this.currentData.length) {
+                return;
             }
+            const fr = new FileReader();
+            const nameFilterFn = this._makeNameFilterFn(this.searchValue);
+            const filteredData = this.currentData.filter((_i) => {
+                const typeMatch = this.filter !== "None" ? _i.type.toLowerCase() === this.filter.toLowerCase() : true;
+                const nameMatch = nameFilterFn(_i.id);
+                return typeMatch && nameMatch;
+            });
+            this._paginator?.setPages(Math.max(Math.ceil(filteredData.length / this.assetsPerPage), 1));
             // Show all data if using filters
-            const startIndex = (this.contentPage - 1) * AssetView.MAX_PAGE_ELEMENTS;
-            const endIndex = Math.min(startIndex + AssetView.MAX_PAGE_ELEMENTS, filteredData.length);
-            for (let i = startIndex; i < endIndex; ++i) {
+            const start = this._paginator ? (this._paginator.page - 1) * this.assetsPerPage : 0;
+            const end = this._paginator ? Math.min(start + this.assetsPerPage, filteredData.length) : filteredData.length;
+            for (let i = start; i < end; ++i) {
                 let item = filteredData[i];
                 if (item.path) {
                     exports.LX.request({ url: item.path, dataType: 'blob', success: (f) => {
-                            item.bytesize = f.size;
+                            item.metadata.bytesize = f.size;
                             fr.readAsDataURL(f);
                             fr.onload = e => {
                                 const target = e.currentTarget;
                                 item.src = target.result; // This is a base64 string...
-                                item._path = item.path;
+                                item.metadata.path = item.path;
                                 delete item.path;
                                 this._refreshContent(searchValue, filter);
                             };
@@ -13639,21 +14029,16 @@
                     item.domEl = this.addItem(item, undefined, false);
                 }
             }
-            this.allowNextPage = filteredData.length - 1 > AssetView.MAX_PAGE_ELEMENTS;
-            const textString = "Page " + this.contentPage + " / " + ((((filteredData.length - 1) / AssetView.MAX_PAGE_ELEMENTS) | 0) + 1);
-            exports.LX.emitSignal("@on_page_change", textString);
             if (this.onRefreshContent) {
                 this.onRefreshContent(searchValue, filter);
             }
         }
-        /**
-        * @method _previewAsset
-        */
         _previewAsset(file) {
             if (this.skipPreview) {
                 return;
             }
             const is_base_64 = file.src && file.src.includes("data:image/");
+            file.metadata = file.metadata ?? {};
             this.previewPanel.clear();
             this.previewPanel.branch("Asset");
             if (file.type == 'image' || file.src) {
@@ -13662,19 +14047,19 @@
                     this.previewPanel.addImage(null, file.src, { style: { width: "100%" } });
                 }
             }
-            if (file.lastModified && !file.lastModifiedDate) {
-                file.lastModifiedDate = this._lastModifiedToStringDate(file.lastModified);
+            if (file.metadata.lastModified && !file.metadata.lastModifiedDate) {
+                file.metadata.lastModifiedDate = this._lastModifiedToStringDate(file.metadata.lastModified);
             }
             const options = { disabled: true };
             this.previewPanel.addText("Filename", file.id, null, options);
-            if (file.lastModifiedDate)
-                this.previewPanel.addText("Last Modified", file.lastModifiedDate, null, options);
-            if (file._path || file.src)
-                this.previewPanel.addText("URL", file._path ? file._path : file.src, null, options);
+            if (file.metadata.lastModifiedDate)
+                this.previewPanel.addText("Last Modified", file.metadata.lastModifiedDate, null, options);
+            if (file.metadata.path || file.src)
+                this.previewPanel.addText("URL", file.metadata.path ? file.metadata.path : file.src, null, options);
             this.previewPanel.addText("Path", this.path.join('/'), null, options);
             this.previewPanel.addText("Type", file.type, null, options);
-            if (file.bytesize)
-                this.previewPanel.addText("Size", exports.LX.formatBytes(file.bytesize), null, options);
+            if (file.metadata.bytesize)
+                this.previewPanel.addText("Size", exports.LX.formatBytes(file.metadata.bytesize), null, options);
             if (file.type == "folder")
                 this.previewPanel.addText("Files", file.children ? file.children.length.toString() : "0", null, options);
             this.previewPanel.addSeparator();
@@ -13708,33 +14093,38 @@
                 fr.readAsDataURL(file);
                 fr.onload = e => {
                     let ext = file.name.substring(file.name.lastIndexOf('.') + 1).toLowerCase();
-                    let item = {
-                        "id": file.name,
-                        "src": e.currentTarget.result,
-                        "extension": ext,
-                        "lastModified": file.lastModified,
-                        "lastModifiedDate": this._lastModifiedToStringDate(file.lastModified)
-                    };
+                    let type = null;
                     switch (ext) {
                         case 'png':
                         case 'jpg':
-                            item.type = "image";
+                            type = "image";
                             break;
                         case 'js':
                         case 'css':
-                            item.type = "script";
+                            type = "script";
                             break;
                         case 'json':
-                            item.type = "json";
+                            type = "json";
                             break;
                         case 'obj':
-                            item.type = "mesh";
+                            type = "mesh";
                             break;
                         default:
-                            item.type = ext;
-                            item.unknownExtension = true;
+                            type = ext;
                             break;
                     }
+                    let item = {
+                        id: file.name,
+                        src: e.currentTarget.result,
+                        type,
+                        children: [],
+                        metadata: {
+                            extension: ext,
+                            lastModified: file.lastModified,
+                            lastModifiedDate: this._lastModifiedToStringDate(file.lastModified),
+                            unknownExtension: type == ext
+                        }
+                    };
                     this.currentData.push(item);
                     if (i == (num_files - 1)) {
                         this._refreshContent();
@@ -13759,87 +14149,359 @@
             this._refreshContent();
         }
         _enterFolder(folderItem, storeCurrent = true) {
+            if (!folderItem) {
+                return;
+            }
             const child = this.currentData[0];
             const sameFolder = child?.parent?.id === folderItem.id;
             if (storeCurrent) {
-                this.prevData.push(this.currentFolder ?? { id: "/", children: this.data });
+                this.prevData.push(this.currentFolder ?? {
+                    id: "/",
+                    children: this.data,
+                    type: "root",
+                    metadata: {}
+                });
             }
             this.currentFolder = folderItem;
-            this.currentData = this.currentFolder.children;
-            this.contentPage = 1;
+            this.currentData = this.currentFolder?.children ?? [];
             if (!sameFolder) {
                 this._refreshContent();
             }
-            // Update path
             this._updatePath();
-            // Trigger event
-            if (this.onevent) {
-                const event = new AssetViewEvent(AssetViewEvent.ENTER_FOLDER, folderItem);
-                this.onevent(event);
+            const onEnterFolder = this._callbacks["enterFolder"];
+            if (onEnterFolder !== undefined) {
+                const event = {
+                    type: "enter_folder",
+                    to: folderItem,
+                    userInitiated: true
+                };
+                onEnterFolder(event);
+            }
+        }
+        _removeItemFromParent(item) {
+            const oldParent = item.parent;
+            if (oldParent) {
+                const idx = oldParent.children?.indexOf(item) ?? -1;
+                if (idx < 0) {
+                    return false;
+                }
+                oldParent.children?.splice(idx, 1);
+            }
+            else {
+                const oldDir = item.dir;
+                if (oldDir) {
+                    const idx = oldDir.indexOf(item);
+                    if (idx < 0) {
+                        return false;
+                    }
+                    oldDir.splice(idx, 1);
+                }
+            }
+            return true;
+        }
+        _requestDeleteItem(item) {
+            const onBeforeDelete = this._callbacks["beforeDelete"];
+            const onDelete = this._callbacks["delete"];
+            const resolve = () => {
+                this._deleteItem(item);
+                const event = {
+                    type: "delete",
+                    items: [item],
+                    userInitiated: true
+                };
+                if (onDelete)
+                    onDelete(event);
+            };
+            if (onBeforeDelete) {
+                const event = {
+                    type: "delete",
+                    items: [item],
+                    userInitiated: true
+                };
+                onBeforeDelete(event, resolve);
+            }
+            else {
+                resolve();
             }
         }
         _deleteItem(item) {
-            const idx = this.currentData.indexOf(item);
-            if (idx < 0) {
+            const ok = this._removeItemFromParent(item);
+            if (!ok) {
                 console.error("[AssetView Error] Cannot delete. Item not found.");
                 return;
             }
-            this.currentData.splice(idx, 1);
             this._refreshContent(this.searchValue, this.filter);
-            if (this.onevent) {
-                const event = new AssetViewEvent(AssetViewEvent.ASSET_DELETED, item);
-                this.onevent(event);
+            this.tree?.refresh();
+            this.previewPanel?.clear();
+        }
+        _requestMoveItemToFolder(item, folder) {
+            const onBeforeMove = this._callbacks["beforeMove"];
+            const onMove = this._callbacks["move"];
+            const resolve = () => {
+                this._moveItemToFolder(item, folder);
+                const event = {
+                    type: "move",
+                    items: [item],
+                    from: item.parent,
+                    to: folder,
+                    userInitiated: true
+                };
+                if (onMove)
+                    onMove(event);
+            };
+            if (onBeforeMove) {
+                const event = {
+                    type: "move",
+                    items: [item],
+                    from: item.parent,
+                    to: folder,
+                    userInitiated: true
+                };
+                onBeforeMove(event, resolve);
             }
-            if (!this.skipBrowser) {
-                this.tree.refresh();
+            else {
+                resolve();
             }
-            if (this.previewPanel) {
-                this.previewPanel.clear();
+        }
+        _moveItemToFolder(item, folder) {
+            const ok = this._removeItemFromParent(item);
+            if (!ok) {
+                console.error("[AssetView Error] Cannot move. Item not found.");
+                return;
             }
-            this._processData(this.data);
+            folder.children = folder.children ?? [];
+            folder.children.push(item);
+            item.parent = folder;
+            item.dir = folder.children;
+            this._refreshContent();
+            this.tree?.refresh();
+            this._moveItemDialog?.destroy();
+        }
+        _moveItem(item) {
+            if (this._moveItemDialog) {
+                this._moveItemDialog.destroy();
+            }
+            let targetFolder = null;
+            let bcContainer;
+            const _openFolder = function (p, container, updateBc = true) {
+                container.innerHTML = "";
+                targetFolder = p;
+                for (let pi of (targetFolder.children ?? targetFolder)) {
+                    const row = exports.LX.makeContainer(["100%", "auto"], "flex flex-row px-1 items-center", "", container);
+                    const isFolder = (pi.type === "folder");
+                    const rowItem = exports.LX.makeContainer(["100%", "auto"], `move-item flex flex-row gap-1 py-1 px-3 cursor-pointer ${isFolder ? "fg-primary font-medium" : "fg-quinary"} rounded-xxl ${isFolder ? "hover:bg-secondary" : "hover:bg-primary"}`, `${isFolder ? exports.LX.makeIcon("FolderOpen", { svgClass: "" }).innerHTML : ""}${pi.id}`, row);
+                    if (isFolder) {
+                        rowItem.addEventListener("click", () => {
+                            container.querySelectorAll(".move-item").forEach((el) => exports.LX.removeClass(el, "bg-quinary"));
+                            exports.LX.addClass(rowItem, "bg-quinary");
+                            targetFolder = pi;
+                        });
+                        const fPathButton = new exports.LX.Button(null, "FPathButton", () => {
+                            _openFolder(pi, container);
+                        }, { icon: "ChevronRight", className: "ml-auto h-8", buttonClass: "bg-none hover:bg-secondary" });
+                        row.appendChild(fPathButton.root);
+                    }
+                }
+                if (!updateBc) {
+                    return;
+                }
+                const path = [];
+                if (targetFolder && targetFolder.parent) {
+                    path.push(targetFolder.id);
+                    const _pushParentsId = (i) => {
+                        if (!i)
+                            return;
+                        path.push(i.parent ? i.id : '@');
+                        _pushParentsId(i.parent);
+                    };
+                    _pushParentsId(targetFolder.parent);
+                }
+                else {
+                    path.push('@');
+                }
+                bcContainer.innerHTML = "";
+                bcContainer.appendChild(exports.LX.makeBreadcrumb(path.reverse().map(p => { return { title: p }; }), {
+                    maxItems: 4, separatorIcon: "ChevronRight"
+                }));
+            };
+            this._moveItemDialog = new exports.LX.Dialog(`Moving: ${item.id}`, (p) => {
+                const area = new exports.LX.Area({ className: "flex flex-col rounded-lg" });
+                p.attach(area);
+                const content = exports.LX.makeContainer(["auto", "100%"], "flex flex-auto-fill flex-col overflow-scroll py-2 gap-1", ``);
+                {
+                    const headerPanel = area.addPanel({ className: "p-2 border-bottom flex flex-auto", height: "auto" });
+                    headerPanel.sameLine(2, "w-full");
+                    headerPanel.addButton(null, "BackButton", () => {
+                        if (targetFolder && targetFolder.parent)
+                            _openFolder(targetFolder.parent, content);
+                    }, { icon: "ArrowLeft", title: "Back", tooltip: true, className: "flex-auto", buttonClass: "bg-none hover:bg-secondary" });
+                    bcContainer = exports.LX.makeElement("div");
+                    headerPanel.addContent("ITEM_MOVE_PATH", bcContainer, { signal: "@item_move_path", className: "flex-auto-fill" });
+                }
+                area.attach(content);
+                _openFolder(this.data, content);
+                {
+                    const footerPanel = area.addPanel({ className: "p-2 border-top flex flex-auto justify-between", height: "auto" });
+                    footerPanel.addButton(null, "NewFolderButton", () => {
+                    }, { width: "auto", icon: "FolderPlus", title: "Create Folder", tooltip: true, className: "ml-2", buttonClass: "bg-none hover:bg-secondary" });
+                    footerPanel.sameLine(2, "mr-2");
+                    footerPanel.addButton(null, "Cancel", () => {
+                        this._moveItemDialog.close();
+                    }, { buttonClass: "bg-none fg-error" });
+                    footerPanel.addButton(null, "Move", () => {
+                        this._requestMoveItemToFolder(item, targetFolder);
+                    }, { className: "", buttonClass: "contrast" });
+                }
+            }, { modal: true, size: ["616px", "500px"], closable: true, onBeforeClose: () => {
+                    delete this._moveItemDialog;
+                } });
+        }
+        _requestCloneItem(item) {
+            if (item.type === "folder") {
+                console.error("[AssetView Error] Cannot clone a folder.");
+                return;
+            }
+            const dir = item.dir ?? [];
+            const idx = dir.indexOf(item);
+            if (idx < 0) {
+                console.error("[AssetView Error] Cannot clone. Item not found.");
+                return false;
+            }
+            const onBeforeClone = this._callbacks["beforeClone"];
+            const onClone = this._callbacks["clone"];
+            const resolve = () => {
+                const clonedItem = this._cloneItem(item);
+                const event = {
+                    type: "clone",
+                    items: [item],
+                    result: [clonedItem],
+                    userInitiated: true
+                };
+                if (onClone)
+                    onClone(event);
+            };
+            if (onBeforeClone) {
+                const event = {
+                    type: "clone",
+                    items: [item],
+                    userInitiated: true
+                };
+                onBeforeClone(event, resolve);
+            }
+            else {
+                resolve();
+            }
         }
         _cloneItem(item) {
+            const parent = item.parent;
+            const dir = item.dir ?? [];
+            const idx = dir.indexOf(item);
+            delete item.domEl;
+            delete item.dir;
+            delete item.parent;
+            const newItem = exports.LX.deepCopy(item);
+            newItem.id = this._getClonedName(item.id, dir);
+            newItem.dir = item.dir = dir;
+            newItem.parent = item.parent = parent;
+            newItem.metadata.uid = exports.LX.guidGenerator(); // generate new uid
+            dir.splice(idx + 1, 0, newItem);
+            this._refreshContent(this.searchValue, this.filter);
+            return newItem;
+        }
+        _getClonedName(originalName, siblings) {
+            const dotIndex = originalName.lastIndexOf(".");
+            let base = originalName;
+            let ext = "";
+            if (dotIndex > 0) {
+                base = originalName.substring(0, dotIndex);
+                ext = originalName.substring(dotIndex); // includes the dot
+            }
+            // core name without (N)
+            const match = base.match(/^(.*)\s\((\d+)\)$/);
+            if (match) {
+                base = match[1];
+            }
+            let maxN = -1;
+            for (const s of siblings) {
+                if (!s.id)
+                    continue;
+                let sBase = s.id;
+                let sExt = "";
+                const sDot = sBase.lastIndexOf(".");
+                if (sDot > 0) {
+                    sExt = sBase.substring(sDot);
+                    sBase = sBase.substring(0, sDot);
+                }
+                // Only compare same extension and same base!
+                if (sExt !== ext)
+                    continue;
+                const m = sBase.match(new RegExp("^" + exports.LX.escapeRegExp(base) + "\\s\\((\\d+)\\)$"));
+                if (m) {
+                    const num = parseInt(m[1]);
+                    if (num > maxN)
+                        maxN = num;
+                }
+                else if (sBase === base) {
+                    // Base name exists without number
+                    maxN = Math.max(maxN, 0);
+                }
+            }
+            return maxN === -1 ? originalName : `${base} (${maxN + 1})${ext}`;
+        }
+        _requestRenameItem(item, newName) {
+            const onBeforeRename = this._callbacks["beforeRename"];
+            const onRename = this._callbacks["rename"];
+            const oldName = item.id;
+            const resolve = () => {
+                this._renameItem(item, newName);
+                const event = {
+                    type: "rename",
+                    oldName,
+                    newName,
+                    userInitiated: true
+                };
+                if (onRename)
+                    onRename(event);
+            };
+            if (onBeforeRename) {
+                const event = {
+                    type: "rename",
+                    oldName,
+                    newName,
+                    userInitiated: true
+                };
+                onBeforeRename(event, resolve);
+            }
+            else {
+                resolve();
+            }
+        }
+        _renameItem(item, newName) {
             const idx = this.currentData.indexOf(item);
             if (idx < 0) {
                 return;
             }
-            delete item.domEl;
-            delete item.folder;
-            const new_item = exports.LX.deepCopy(item);
-            this.currentData.splice(idx, 0, new_item);
-            this._refreshContent(this.searchValue, this.filter);
-            if (this.onevent) {
-                const event = new AssetViewEvent(AssetViewEvent.ASSET_CLONED, item);
-                this.onevent(event);
+            const wasSelected = exports.LX.hasClass(item.domEl, "selected");
+            const hoverTitle = this.content.querySelector(`#floatingTitle_${item.id.replace(/\s/g, '_').replaceAll(".", "_")}`);
+            if (hoverTitle)
+                hoverTitle.remove();
+            item.domEl?.remove();
+            item.id = newName;
+            item.domEl = this.addItem(item, idx * 2);
+            if (wasSelected) {
+                this._previewAsset(item);
             }
+            this.tree?.refresh();
             this._processData(this.data);
         }
-        _renameItem(item) {
+        _renameItemPopover(item) {
             const idx = this.currentData.indexOf(item);
             if (idx < 0) {
                 return;
             }
-            const oldName = item.id;
-            const wasSelected = exports.LX.hasClass(item.domEl, "selected");
             const onRename = (value) => {
                 p.destroy();
-                const hoverTitle = this.content.querySelector(`#floatingTitle_${item.id.replace(/\s/g, '_').replaceAll(".", "_")}`);
-                if (hoverTitle)
-                    hoverTitle.remove();
-                item.domEl.remove();
-                item.id = value;
-                item.domEl = this.addItem(item, idx * 2);
-                if (this.onevent) {
-                    const event = new AssetViewEvent(AssetViewEvent.ASSET_RENAMED, item, oldName);
-                    this.onevent(event);
-                }
-                if (wasSelected) {
-                    this._previewAsset(item);
-                }
-                if (!this.skipBrowser) {
-                    this.tree.refresh();
-                }
-                this._processData(this.data);
+                this._requestRenameItem(item, value);
             };
             let newName = item.id;
             const panel = new exports.LX.Panel();
@@ -13852,6 +14514,69 @@
                 onRename(newName);
             }, { buttonClass: "contrast" });
             const p = new exports.LX.Popover(item.domEl, [panel], { align: "center", side: "bottom", sideOffset: -128 });
+        }
+        _requestCreateFolder() {
+            if (!this.currentFolder) {
+                return;
+            }
+            const onBeforeCreateFolder = this._callbacks["beforeCreateFolder"];
+            const onCreateFolder = this._callbacks["createFolder"];
+            const resolve = () => {
+                const newFolder = this._createFolder();
+                const event = {
+                    type: "create-folder",
+                    result: [newFolder],
+                    to: this.currentFolder,
+                    userInitiated: true
+                };
+                if (onCreateFolder)
+                    onCreateFolder(event);
+            };
+            if (onBeforeCreateFolder) {
+                const event = {
+                    type: "create-folder",
+                    userInitiated: true
+                };
+                onBeforeCreateFolder(event, resolve);
+            }
+            else {
+                resolve();
+            }
+        }
+        _createFolder() {
+            if (!this.currentFolder) {
+                throw ("_createFolder: Something went wrong!");
+            }
+            const folder = {
+                id: this._getClonedName("New Folder", this.currentFolder.children),
+                type: "folder",
+                children: [],
+                parent: this.currentFolder,
+                metadata: {}
+            };
+            this.currentFolder.children.push(folder);
+            this._refreshContent();
+            this.tree?.refresh();
+            return folder;
+        }
+        _openScriptInEditor(script) {
+            if (this._scriptCodeDialog) {
+                this._scriptCodeDialog.destroy();
+            }
+            this._scriptCodeDialog = new exports.LX.Dialog(null, (p) => {
+                const area = new exports.LX.Area({ className: "rounded-lg" });
+                p.attach(area);
+                new exports.LX.CodeEditor(area, {
+                    allowAddScripts: false,
+                    files: [script.src]
+                });
+            }, { size: ["50%", "600px"], closable: true, onBeforeClose: () => {
+                    delete this._scriptCodeDialog;
+                } });
+        }
+        _setAssetsPerPage(n) {
+            this._assetsPerPage = n;
+            this._refreshContent();
         }
         _lastModifiedToStringDate(lm) {
             const d = new Date(lm).toLocaleString();
@@ -14538,6 +15263,7 @@
                             exports.LX.removeClas(this.cursorsDOM, 'show');
                         }
                     } });
+                exports.LX.addClass(this.tabs.root.parentElement, "rounded-t-lg");
                 if (!this.disableEdition) {
                     this.tabs.root.parentElement.addEventListener('dblclick', (e) => {
                         if (options.allowAddScripts ?? true) {
@@ -15195,7 +15921,6 @@
                     const s = getComputedStyle(r);
                     this.fontSize = parseInt(s.getPropertyValue("--code-editor-font-size"));
                     this.charWidth = this._measureChar();
-                    this.processLines();
                 }
                 exports.LX.emitSignal("@font-size", this.fontSize);
                 // Get final sizes for editor elements based on Tabs and status bar offsets
@@ -15209,6 +15934,8 @@
                     this.vScrollbar.root.style.height = `calc(100% - ${this._fullVerticalOffset}px)`;
                     this.hScrollbar.root.style.bottom = `${this._verticalBottomOffset}px`;
                     this.codeArea.root.style.height = `calc(100% - ${this._fullVerticalOffset}px)`;
+                    // Process lines on finish computing final sizes
+                    this.processLines();
                 }, 50);
                 if (options.callback) {
                     options.callback.call(this, this);
@@ -18845,10 +19572,10 @@
                 header.id = id;
             this.root.appendChild(header);
         }
-        paragraph(string, sup = false) {
+        paragraph(string, sup = false, className) {
             console.assert(string !== undefined);
             let paragraph = document.createElement(sup ? 'sup' : 'p');
-            paragraph.className = "leading-relaxed";
+            paragraph.className = "leading-relaxed " + (className ?? "");
             paragraph.innerHTML = string;
             this.root.appendChild(paragraph);
         }
@@ -22049,7 +22776,7 @@
         animationClip;
         duration = 1;
         currentTime = 0; // seconds
-        visualTimeRange = [0, 0]; // [start time, end time] - visible range of time. 0 <= time <= duration
+        visualTimeRange = [0, 0]; // [ start time, end time ] - visible range of time. 0 <= time <= duration
         visualOriginTime = 0; // time visible at pixel 0. -infinity < time < infinity
         pixelsPerSecond = 300;
         secondsPerPixel;
@@ -22081,8 +22808,8 @@
         skipLock;
         disableNewTracks;
         optimizeThreshold = 0.01;
-        selectedTracks = []; // [track, track] contains selected (highlighted) tracks. That is, tracks with .isSelected == true. Elements in array are not ordered. Only visible tracks should be selected
-        selectedItems = []; // [trackInfo, "groupId"], contains the visible items (tracks or groups) of the timeline
+        selectedTracks = []; // [ track, track] contains selected (highlighted ) tracks. That is, tracks with .isSelected == true. Elements in array are not ordered. Only visible tracks should be selected
+        selectedItems = []; // [ trackInfo, "groupId"], contains the visible items ( tracks or groups ) of the timeline
         leftPanel; // where tree will be placed
         trackTreesPanel = null;
         trackTreesComponent = null;
@@ -22183,7 +22910,7 @@
             };
             this.resize(this.size);
             /**
-             * updates theme (light - dark) based on LX's current theme
+             * updates theme ( light - dark ) based on LX's current theme
              */
             function updateTheme() {
                 Timeline.BACKGROUND_COLOR = exports.LX.getThemeColor("global-blur-background");
@@ -22334,7 +23061,7 @@
             panel.endLine();
             const styles = window.getComputedStyle(title);
             const titleHeight = title.clientHeight + parseFloat(styles['marginTop']) + parseFloat(styles['marginBottom']);
-            let p = new exports.LX.Panel({ height: "calc(100% - " + titleHeight + "px)" });
+            let p = new exports.LX.Panel({ height: "calc(100% - " + titleHeight + "px )" });
             let treeTracks = [];
             if (this.animationClip && this.selectedItems.length) {
                 treeTracks = this.generateSelectedItemsTreeData();
@@ -22420,8 +23147,8 @@
             return trackInfo.trackIdx;
         }
         /**
-         * Finds tracks (wholy and partially) inside the range minY maxY.
-         * (Full) Canvas local coordinates.
+         * Finds tracks ( wholy and partially ) inside the range minY maxY.
+         * ( Full ) Canvas local coordinates.
          * @param {Number} minY pixels
          * @param {Number} maxY pixels
          * @returns array of trackDatas
@@ -22455,7 +23182,7 @@
          * @param {*} animation
          * @param {Boolean} needsToProcess
          * @param {Object} processOptions
-         * [KeyFrameTimeline] - each track should contain an attribute "dim" to indicate the value dimension (e.g. vector3 -> dim=3). Otherwise dimensions will be infered from track's values and times. Default is 1
+         * [ KeyFrameTimeline ] - each track should contain an attribute "dim" to indicate the value dimension ( e.g. vector3 -> dim=3). Otherwise dimensions will be infered from track's values and times. Default is 1
          */
         setAnimationClip(animation, needsToProcess = true) {
             this.deselectAllElements();
@@ -22570,7 +23297,7 @@
             const w = ctx.canvas.width;
             const h = ctx.canvas.height;
             const scrollableHeight = this.trackTreesComponent.root.scrollHeight;
-            // tree has gaps of 0.25rem (4px) inbetween entries but not in the beginning nor ending. Move half gap upwards.
+            // tree has gaps of 0.25rem (4px ) inbetween entries but not in the beginning nor ending. Move half gap upwards.
             const treeOffset = this.lastTrackTreesComponentOffset = this.trackTreesComponent.innerTree.domEl.offsetTop - this.canvas.offsetTop - 2;
             //zoom
             let startTime = this.visualOriginTime; //seconds
@@ -22692,8 +23419,8 @@
         /**
          * @method setScroll
          * not delta from last state, but full scroll amount.
-         * @param {Number} scrollY either pixels or [0,1]
-         * @param {Boolean} normalized if true, scrollY is in range[0,1] being 1 fully scrolled. Otherwised scrollY represents pixels
+         * @param {Number} scrollY either pixels or [0,1 ]
+         * @param {Boolean} normalized if true, scrollY is in range[0,1 ] being 1 fully scrolled. Otherwised scrollY represents pixels
          * @returns
          */
         setScroll(scrollY, normalized = true) {
@@ -22851,7 +23578,7 @@
                         }
                     }
                     else {
-                        // Move timeline in X (independent of current time)
+                        // Move timeline in X ( independent of current time )
                         var old = this.xToTime(this.lastMouse[0]);
                         var now = this.xToTime(e.offsetX);
                         this.visualOriginTime += (old - now);
@@ -22951,7 +23678,7 @@
             }
         }
         /**
-         * @returns the tree elements (tracks and grouops) shown in the timeline.
+         * @returns the tree elements ( tracks and grouops ) shown in the timeline.
          *  Each item has { treeData: { trackData: track } }, where track is the actual track information of the animationClip.
          *  If not a track, trackData will be undefined
          */
@@ -23074,7 +23801,7 @@
                     }
                 }
             };
-            // update innerTree (visible) selected nodes
+            // update innerTree ( visible ) selected nodes
             if (this.selectedTracks.length) {
                 addToSelection(data);
             }
@@ -23121,13 +23848,12 @@
             }
         }
         /**
-         * @param {Int} trackIdx index of track in the animation (not local index)
+         * @param {Int} trackIdx index of track in the animation ( not local index )
          * @param {Boolean} combineWithPrevious whether to create a new entry or unify changes into a single undo entry
          */
         saveState(trackIdx, combineWithPrevious = false) {
-            if (!this.historySaveEnabler) {
+            if (!this.historySaveEnabler)
                 return;
-            }
             const undoStep = this.historyGenerateTrackStep(trackIdx);
             undoStep.trackIdx = trackIdx;
             if (combineWithPrevious && this.historyUndo.length) {
@@ -23138,15 +23864,14 @@
             }
             if (this.historyUndo.length > this.historyMaxSteps) {
                 this.historyUndo.shift();
-            } // remove first (oldest) element
+            } // remove first ( oldest ) element
             this.historyRedo = [];
         }
         #undoRedo(isUndo = true) {
             let toBeShown = isUndo ? this.historyUndo : this.historyRedo;
             let toBeStored = isUndo ? this.historyRedo : this.historyUndo;
-            if (!toBeShown.length) {
+            if (!toBeShown.length)
                 return false;
-            }
             this.deselectAllElements();
             const combinedState = toBeShown.pop();
             const combinedStateToStore = [];
@@ -23181,8 +23906,8 @@
                 this.size[0] = this.root.parentElement.clientWidth;
                 this.size[1] = this.root.parentElement.clientHeight;
             }
-            //this.content_area.setSize([size[ 0 ], size[ 1 ] - this.header_offset]);
-            this.mainArea.sections[1].root.style.height = "calc(100% - " + this.header_offset + "px)";
+            //this.content_area.setSize([ size[ 0 ], size[ 1 ] - this.header_offset] );
+            this.mainArea.sections[1].root.style.height = "calc(100% - " + this.header_offset + "px )";
             this.size[0] - this.leftPanel.root.clientWidth - 8;
             this.mainArea.sections[1]._update(); // update area's this.size attribute
             this.resizeCanvas();
@@ -23235,7 +23960,7 @@
         }
         /**
          *
-         * @param {Object} options set some values for the track instance (groups and trackIdx not included)
+         * @param {Object} options set some values for the track instance ( groups and trackIdx not included )
          * @returns
          */
         instantiateTrack(options = {}, clone = false) {
@@ -23278,11 +24003,11 @@
     Timeline.FONT_COLOR_QUATERNARY = exports.LX.getThemeColor("global-text-quaternary");
     Timeline.TIME_MARKER_COLOR = exports.LX.getThemeColor("global-color-accent");
     Timeline.TIME_MARKER_COLOR_TEXT = "#ffffff";
-    exports.LX.setThemeColor("lxTimeline-keyframe", "light-dark(#2d69da,#2d69da)");
+    exports.LX.setThemeColor("lxTimeline-keyframe", "light-dark(#2d69da,#2d69da )");
     exports.LX.setThemeColor("lxTimeline-keyframe-selected", "light-dark(#f5c700,#fafa14)");
     exports.LX.setThemeColor("lxTimeline-keyframe-hovered", "light-dark(#f5c700,#fafa14)");
-    exports.LX.setThemeColor("lxTimeline-keyframe-locked", "light-dark(#c62e2e,#ff7d7d)");
-    exports.LX.setThemeColor("lxTimeline-keyframe-edited", "light-dark(#00d000,#00d000)");
+    exports.LX.setThemeColor("lxTimeline-keyframe-locked", "light-dark(#c62e2e,#ff7d7d )");
+    exports.LX.setThemeColor("lxTimeline-keyframe-edited", "light-dark(#00d000,#00d000 )");
     exports.LX.setThemeColor("lxTimeline-keyframe-inactive", "light-dark(#706b6b,#706b6b)");
     Timeline.KEYFRAME_COLOR = exports.LX.getThemeColor("lxTimeline-keyframe");
     Timeline.KEYFRAME_COLOR_SELECTED = Timeline.KEYFRAME_COLOR_HOVERED = exports.LX.getThemeColor("lxTimeline-keyframe-selected");
@@ -23295,7 +24020,7 @@
      * @class KeyFramesTimeline
      */
     class KeyFramesTimeline extends Timeline {
-        static ADDKEY_VALUESINARRAYS = 0x01; // addkeyframes as [ [k0v0, k0v1...], [k1v0, k1v1...] ] instead of [k0v0,k0v1,k1v0,k1v1]
+        static ADDKEY_VALUESINARRAYS = 0x01; // addkeyframes as [ [ k0v0, k0v1...], [ k1v0, k1v1...] ] instead of [ k0v0,k0v1,k1v0,k1v1 ]
         lastKeyFramesSelected;
         keyValuePerPixel;
         defaultCurves;
@@ -23377,9 +24102,8 @@
                     actions.push({
                         title: "Add Here",
                         callback: () => {
-                            if (!e.track) {
+                            if (!e.track)
                                 return;
-                            }
                             const values = new Float32Array(e.track.dim);
                             values.fill(0);
                             this.addKeyFrames(e.track.trackIdx, values, [this.xToTime(e.localX)]);
@@ -23388,9 +24112,8 @@
                     actions.push({
                         title: "Add",
                         callback: () => {
-                            if (!e.track) {
+                            if (!e.track)
                                 return;
-                            }
                             const values = new Float32Array(e.track.dim);
                             values.fill(0);
                             this.addKeyFrames(e.track.trackIdx, values, [this.currentTime]);
@@ -23551,7 +24274,7 @@
                 }
                 // overwrite trackspergroup
                 if (animation.tracksPerGroup) {
-                    // ungroup all tracks (just in case)
+                    // ungroup all tracks (just in case )
                     animationClip.tracks.forEach((v, i) => { v.groupId = null; v.groupTrackIdx = -1; });
                     animationClip.tracksPerGroup = {};
                     let tpg = animation.tracksPerGroup;
@@ -23654,7 +24377,7 @@
                 const v = groupTracks[i];
                 let track = null;
                 if (typeof v == "string") {
-                    // v is an id  (string)
+                    // v is an id  ( string)
                     for (let t = 0; t < tracks.length; ++t) {
                         if (tracks[t].id == v) {
                             track = tracks[t];
@@ -23718,7 +24441,7 @@
             if (e.shiftKey) {
                 // Manual multiple selection
                 if (!discard && track) {
-                    const thresholdPixels = this.keyframeSize * 0.5; // radius of circle (curves) or rotated square (keyframes)
+                    const thresholdPixels = this.keyframeSize * 0.5; // radius of circle ( curves ) or rotated square (keyframes )
                     const keyFrameIdx = this.getCurrentKeyFrame(track, this.xToTime(localX), this.secondsPerPixel * thresholdPixels);
                     if (keyFrameIdx > -1) {
                         track.selected[keyFrameIdx] ?
@@ -23739,7 +24462,7 @@
                     }
                 }
             }
-            else if (!this.movingKeys && !discard) // if not moving timeline and not adding keyframes through e.shiftkey (just a click)
+            else if (!this.movingKeys && !discard) // if not moving timeline and not adding keyframes through e.shiftkey (just a click )
              {
                 if (this.lastKeyFramesSelected.length) {
                     if (this.onDeselectKeyFrames) {
@@ -23748,7 +24471,7 @@
                     this.deselectAllKeyFrames();
                 }
                 if (track) {
-                    const thresholdPixels = this.keyframeSize * 0.5; // radius of circle (curves) or rotated square (keyframes)
+                    const thresholdPixels = this.keyframeSize * 0.5; // radius of circle ( curves ) or rotated square (keyframes )
                     const keyFrameIndex = this.getCurrentKeyFrame(track, this.xToTime(localX), this.secondsPerPixel * thresholdPixels);
                     if (keyFrameIndex > -1) {
                         this.processSelectionKeyFrame(track.trackIdx, keyFrameIndex, false); // Settings this as multiple so time is not being set
@@ -23758,7 +24481,7 @@
             this.canvas.classList.remove('grabbing');
         }
         onMouseDown(e, time) {
-            // function not called if shift is pressed (boxselection)
+            // function not called if shift is pressed (boxselection )
             let localX = e.localX;
             e.localY;
             e.track;
@@ -23794,7 +24517,7 @@
             }
         }
         onMouseMove(e, time) {
-            // function not called if shift is pressed (boxselection)
+            // function not called if shift is pressed (boxselection )
             let localX = e.localX;
             e.localY;
             let track = e.track;
@@ -23857,7 +24580,7 @@
                         }
                     }
                 }
-                // Track.dim == 1:  move keyframes vertically (change values instead of time)
+                // Track.dim == 1:  move keyframes vertically ( change values instead of time )
                 // RELIES ON SORTED ARRAY OF lastKeyFramesSelected
                 if (e.altKey && e.buttons & 0x01) {
                     const tracks = this.animationClip.tracks;
@@ -23887,7 +24610,7 @@
             if (this.grabbing && e.button != 2) ;
             else if (track) {
                 this.unHoverAll();
-                const thresholdPixels = this.keyframeSize * 0.5; // radius of circle (curves) or rotated square (keyframes)
+                const thresholdPixels = this.keyframeSize * 0.5; // radius of circle ( curves ) or rotated square (keyframes )
                 let keyFrameIndex = this.getCurrentKeyFrame(track, this.xToTime(localX), this.secondsPerPixel * thresholdPixels);
                 if (keyFrameIndex > -1) {
                     if (track && track.locked) {
@@ -23908,18 +24631,18 @@
             ctx.save();
             const trackHeight = this.trackHeight;
             const scrollY = -this.currentScrollInPixels;
-            // elements from "ul" should match the visible tracks (and groups) as if this.selectedItems was flattened
+            // elements from "ul" should match the visible tracks ( and groups ) as if this.selectedItems was flattened
             const visibleElements = this.getVisibleItems();
             let offset = scrollY;
-            // compute track from which to start rendering (avoid rendering unseen tracks)
+            // compute track from which to start rendering ( avoid rendering unseen tracks )
             let startElIdx = 0;
-            if (offset < -this.lastTrackTreesComponentOffset) // offset 0 = (0 of canvas) + track-Tree-Offset. This renders tracks under the time zone
+            if (offset < -this.lastTrackTreesComponentOffset) // offset 0 = ( 0 of canvas ) + track-Tree-Offset. This renders tracks under the time zone
              {
                 startElIdx = Math.floor(-(offset + this.lastTrackTreesComponentOffset) / this.trackHeight); // how many tracks to skip
                 offset += startElIdx * this.trackHeight;
             }
             ctx.translate(0, offset);
-            // compute track to end rendering (avoid rendering unseen tracks)
+            // compute track to end rendering ( avoid rendering unseen tracks )
             let endElIdx = startElIdx + Math.ceil((ctx.canvas.height - this.lastTrackTreesComponentOffset - offset) / this.trackHeight);
             endElIdx = endElIdx > visibleElements.length ? visibleElements.length : endElIdx;
             for (let t = startElIdx; t < endElIdx; t++) {
@@ -24001,12 +24724,12 @@
             const values = track.values;
             const defaultPointSize = this.keyframeSize * 0.5; // radius
             const hoverPointSize = this.keyframeSizeHovered * 0.5; // radius
-            const valueRange = track.curvesRange; //[min, max]
+            const valueRange = track.curvesRange; //[ min, max ]
             const displayRange = trackHeight - defaultPointSize * 2;
             const startTime = this.visualTimeRange[0];
             const endTime = this.visualTimeRange[1] + 0.0000001;
             //draw lines
-            ctx.strokeStyle = "white";
+            ctx.strokeStyle = KeyFramesTimeline.FONT_COLOR_PRIMARY;
             ctx.beginPath();
             if (keyframes.length > 1) {
                 let startPosX = this.timeToX(keyframes[0]);
@@ -24108,15 +24831,14 @@
         }
         /**
          * removes equivalent sequential keys either because of equal times or values
-         * (0,0,0,0,1,1,1,0,0,0,0,0,0,0) --> (0,0,1,1,0,0)
+         * ( 0,0,0,0,1,1,1,0,0,0,0,0,0,0 ) --> ( 0, 0,1,1,0, 0 )
          * @param {Int} trackIdx index of track in the animation
          * @param {Boolean} onlyEqualTime if true, removes only keyframes with equal times. Otherwise, values are ALSO compared through the class threshold
          * @param {Boolean} skipCallback if false, triggers "onOptimizeTracks" after optimizing
          */
         optimizeTrack(trackIdx, onlyEqualTime = false, skipCallback = false) {
-            if (!this.animationClip) {
+            if (!this.animationClip)
                 return;
-            }
             const track = this.animationClip.tracks[trackIdx], times = track.times, values = track.values, stride = track.dim, threshold = this.optimizeThreshold;
             if (track.locked) {
                 return;
@@ -24170,10 +24892,11 @@
             if (lastSavedIndex < times.length - 1) {
                 track.times = times.slice(0, lastSavedIndex + 1);
                 track.values = values.slice(0, (lastSavedIndex + 1) * stride);
-                this.updateTrack(track.trackIdx, track); // update control variables (hover, edited, selected)
+                this.updateTrack(track.trackIdx, track); // update control variables (hover, edited, selected )
             }
-            if (this.onOptimizeTracks && !skipCallback)
+            if (this.onOptimizeTracks && !skipCallback) {
                 this.onOptimizeTracks(trackIdx);
+            }
         }
         optimizeTracks(onlyEqualTime = false) {
             if (!this.animationClip)
@@ -24195,8 +24918,9 @@
             // restore old enabler status
             this.historySaveEnabler = oldStateEnabler;
             // callback
-            if (this.onOptimizeTracks)
+            if (this.onOptimizeTracks) {
                 this.onOptimizeTracks(-1); // signal as "all tracks"
+            }
         }
         /**
          * saveState function uses this to generate a "copy" of the track.
@@ -24276,8 +25000,7 @@
             if (!this.lastKeyFramesSelected.length) {
                 return;
             }
-            if (!this.clipboard)
-                this.clipboard = {};
+            this.clipboard = this.clipboard ?? {};
             this.clipboard.keyframes = {}; // reset clipboard
             // sort keyframes selected by track
             let toCopy = {};
@@ -24300,13 +25023,12 @@
                 this.copyKeyFrames(toCopy[trackIdx].track, toCopy[trackIdx].idxs);
             }
         }
-        // copies the current value of the keyframe. This value can be pasted across any track (as long as they are of the same type)
+        // copies the current value of the keyframe. This value can be pasted across any track ( as long as they are of the same type )
         copyKeyFrameValue(track, index) {
             // 1 element clipboard by now
             const start = index * track.dim;
             const values = this.animationClip.tracks[track.trackIdx].values.slice(start, start + track.dim);
-            if (!this.clipboard)
-                this.clipboard = {};
+            this.clipboard = this.clipboard ?? {};
             this.clipboard.value = {
                 type: track.type,
                 values: values
@@ -24315,8 +25037,7 @@
         // each track will have its own entry of copied keyframes. When pasting, only the apropiate track's keyframes are pasted
         copyKeyFrames(track, indices) {
             let trackIdx = track.trackIdx;
-            if (!this.clipboard)
-                this.clipboard = {};
+            this.clipboard = this.clipboard ?? {};
             indices.sort((a, b) => a < b ? -1 : 1); // just in case
             let obj = { track: track, values: [], times: [] };
             for (let i = 0; i < indices.length; i++) {
@@ -24341,10 +25062,11 @@
             }
             track.edited[index] = true;
         }
-        // paste value on selected content (only one keyframe can be selected)
+        // paste value on selected content ( only one keyframe can be selected )
         pasteContentValue() {
-            if (!this.clipboard)
+            if (!this.clipboard) {
                 return false;
+            }
             // copy the value into the only selected keyframe
             if (this.clipboard.value && this.lastKeyFramesSelected.length == 1) {
                 let [trackIdx, keyIdx] = this.lastKeyFramesSelected[0];
@@ -24355,8 +25077,9 @@
         }
         // paste copied keyframes. New keyframes are created and overlapping ones are overwritten
         pasteContent(time = this.currentTime) {
-            if (!this.clipboard)
+            if (!this.clipboard) {
                 return false;
+            }
             // create new keyframes from the ones copied
             if (this.clipboard.keyframes) {
                 for (let trackIdx in this.clipboard.keyframes) {
@@ -24377,7 +25100,7 @@
             return true;
         }
         pasteKeyFrameValue(track, index) {
-            if (track.locked || this.clipboard.value.type != track.type) {
+            if (track.locked || (this.clipboard.value.type != track.type)) {
                 return;
             }
             this.saveState(track.trackIdx);
@@ -24388,9 +25111,8 @@
             }
         }
         pasteKeyFrames(pasteTime = this.currentTime) {
-            if (!this.clipboard.keyframes) {
+            if (!this.clipboard.keyframes)
                 return false;
-            }
             this.unHoverAll();
             this.deselectAllKeyFrames();
             let clipboardTracks = this.clipboard.keyframes;
@@ -24400,9 +25122,8 @@
                     globalStart = clipboardTracks[trackIdx].times[0];
                 }
             }
-            if (globalStart == Infinity) {
+            if (globalStart == Infinity)
                 return false;
-            }
             // disable callback. It will be done once at the end
             const onUpdateTrack = this.onUpdateTrack;
             this.onUpdateTrack = null;
@@ -24433,7 +25154,7 @@
          *
          * @param {Int} trackIdx
          * @param {Array} newValues array of values for each keyframe. It should be a flat array of size track.dim*numKeyframes. Check ADDKEY_VALUESINARRAYS flag
-         * @param {Array of numbers} newTimes must be ordered ascendently
+         * @param {Array of numbers } newTimes must be ordered ascendently
          * @param {Number} timeOffset
          * @param {Int} flags
          *      KeyFramesTimeline.ADDKEY_VALUESINARRAYS: if set, newValues is an array of arrays, one for each entry [ [1,2,3], [5,6,7] ]. Times is still a flat array of values [ 0, 0.2 ]
@@ -24442,15 +25163,14 @@
          */
         addKeyFrames(trackIdx, newValues, newTimes, timeOffset = 0, flags = 0x00) {
             const track = this.animationClip.tracks[trackIdx];
-            if (!newTimes.length || track.locked) {
+            if (!newTimes.length || track.locked)
                 return null;
-            }
             const valueDim = track.dim;
             const trackTimes = track.times;
             const trackValues = track.values;
             const times = new Float32Array(trackTimes.length + newTimes.length);
             const values = new Float32Array(trackValues.length + newTimes.length * valueDim);
-            // let newIdx = this.getNearestKeyFrame( track, newTimes[newTimes.length-1], -1 );
+            // let newIdx = this.getNearestKeyFrame( track, newTimes[ newTimes.length - 1 ], -1 );
             this.saveState(trackIdx);
             let newIdx = newTimes.length - 1;
             let oldIdx = trackTimes.length - 1;
@@ -24514,9 +25234,8 @@
         }
         deleteSelectedContent(skipCallback = false) {
             //*********** WARNING: RELIES ON SORTED lastKeyFramesSelected ***********
-            if (!this.lastKeyFramesSelected.length) {
+            if (!this.lastKeyFramesSelected.length)
                 return;
-            }
             const tracks = this.animationClip.tracks;
             const firstTrack = this.lastKeyFramesSelected[0][0];
             let trackToRemove = firstTrack;
@@ -24580,7 +25299,7 @@
             if ((newTimes[newTimes.length - 1]) > this.duration) {
                 this.setDuration(newTimes[newTimes.length - 1]);
             }
-            // if(this.onUpdateTrack)
+            // if( this.onUpdateTrack )
             //     this.onUpdateTrack( [ trackIdx ] );
             return true;
         }
@@ -24589,14 +25308,15 @@
          * @param {Object} track
          * @param {Number} time
          * @param {Number} mode on of the possible values
-         *  - -1 = nearest frame with t[f] <= time
+         *  - -1 = nearest frame with t[ f ] <= time
          *  - 0 = nearest frame
-         *  - 1 = nearest frame with t[f] >= time
-         * @returns a zero/positive value if successful. On failure returnes -1 meaning either there are no frames ( 0 ), no frame-time is lower (-1) or no frame-time is higher (1)
+         *  - 1 = nearest frame with t[ f ] >= time
+         * @returns a zero/positive value if successful. On failure returnes -1 meaning either there are no frames ( 0 ), no frame-time is lower ( -1 ) or no frame-time is higher (1 )
          */
         getNearestKeyFrame(track, time, mode = 0) {
-            if (!track || !track.times || !track.times.length)
+            if (!track || !track.times || !track.times.length) {
                 return -1;
+            }
             //binary search
             const times = track.times;
             let min = 0, max = times.length - 1;
@@ -24643,7 +25363,7 @@
             return frame;
         }
         /**
-         * Returns the interval of frames between minTime and maxTime (both included)
+         * Returns the interval of frames between minTime and maxTime (both included )
          * @param {Object} track
          * @param {Number} minTime
          * @param {Number} maxTime
@@ -24661,9 +25381,8 @@
             }
             const minFrame = this.getNearestKeyFrame(track, minTime - threshold, 1);
             const maxFrame = this.getNearestKeyFrame(track, maxTime + threshold, -1);
-            if (maxFrame == -1 || minFrame == -1) {
+            if (maxFrame == -1 || minFrame == -1)
                 return null;
-            }
             return [minFrame, maxFrame];
         }
         unHoverAll() {
@@ -24688,7 +25407,7 @@
         }
         /**
          * @param {Int} trackIdx track index of animation clip
-         * @param {Int} frameIdx frame (index) to select inside the track
+         * @param {Int} frameIdx frame ( index ) to select inside the track
          * @param {Boolean} skipCallback
          * @returns
          */
@@ -24696,9 +25415,9 @@
             const track = this.animationClip.tracks[trackIdx];
             if (track.locked || !track.active || track.selected[frameIdx])
                 return null;
-            // [track idx, keyframe, keyframe time]
+            // [ track idx, keyframe, keyframe time ]
             const selection = [track.trackIdx, frameIdx, track.times[frameIdx]];
-            // sort lastkeyframeselected ascending order (track and frame)
+            // sort lastkeyframeselected ascending order ( track and frame )
             let i = 0;
             for (; i < this.lastKeyFramesSelected.length; ++i) {
                 let s = this.lastKeyFramesSelected[i];
@@ -24860,7 +25579,7 @@
         }
         /**
          *
-         * @param {Object} options set some values for the track instance (groups and trackIdx not included)
+         * @param {Object} options set some values for the track instance ( groups and trackIdx not included )
          * @returns
         */
         instantiateTrack(options = {}, clone = false) {
@@ -24915,7 +25634,7 @@
             };
         }
         // use default updateleftpanel
-        // generateSelectedItemsTreeData(){}
+        // generateSelectedItemsTreeData() {}
         addNewTrack(options = {}, updateLeftPanel = true, skipCallback = false) {
             const trackInfo = this.instantiateTrack(options ?? {});
             trackInfo.trackIdx = this.animationClip.tracks.length;
@@ -25001,14 +25720,15 @@
             this.movingKeys = false;
         }
         onMouseDown(e, time) {
-            // function not called if shift is pressed (boxselection)
+            // function not called if shift is pressed (boxselection )
             let localX = e.localX;
             e.localY;
             let track = e.track;
             if (e.button > 0) {
                 return;
             }
-            if (e.ctrlKey && track) { // move clips
+            if (e.ctrlKey && track) // move clips
+             {
                 let x = e.offsetX;
                 // clip selection is done on MouseUP
                 const selectedClips = this.lastClipsSelected;
@@ -25034,7 +25754,8 @@
                 }
                 this.movingKeys = true;
             }
-            else if (!track || track && this.getClipOnTime(track, time, 0.001) == -1) { // clicked on empty space
+            else if (!track || track && this.getClipOnTime(track, time, 0.001) == -1) // clicked on empty space
+             {
                 if (this.lastClipsSelected.length) {
                     this.deselectAllClips();
                     if (this.onSelectClip) {
@@ -25042,9 +25763,10 @@
                     }
                 }
             }
-            else if (track && (this.dragClipMode == "duration" || this.dragClipMode == "fadein" || this.dragClipMode == "fadeout")) { // clicked while mouse was over fadeIn, fadeOut, duration
+            else if (track && (this.dragClipMode == "duration" || this.dragClipMode == "fadein" || this.dragClipMode == "fadeout")) // clicked while mouse was over fadeIn, fadeOut, duration
+             {
                 const clipIdx = this.getClipOnTime(track, this.xToTime(localX), 0.001);
-                this.selectClip(track.trackIdx, clipIdx); // select current clip if any (deselect others)
+                this.selectClip(track.trackIdx, clipIdx); // select current clip if any ( deselect others )
                 if (this.lastClipsSelected.length) {
                     this.saveState(track.trackIdx);
                 }
@@ -25052,7 +25774,7 @@
             }
         }
         onMouseMove(e, time) {
-            // function not called if shift is pressed (boxselection)
+            // function not called if shift is pressed (boxselection )
             if (this.grabbingTimeBar || this.grabbingScroll) {
                 return;
             }
@@ -25063,7 +25785,8 @@
                 if (time < 0 && delta > 0) {
                     delta = 0;
                 }
-                if (this.dragClipMode != "move" && this.lastClipsSelected.length == 1) { // change fade and duration of clips
+                if (this.dragClipMode != "move" && this.lastClipsSelected.length == 1) // change fade and duration of clips
+                 {
                     const track = this.animationClip.tracks[this.lastClipsSelected[0][0]];
                     let clip = track.clips[this.lastClipsSelected[0][1]];
                     if (this.dragClipMode == "fadein") {
@@ -25074,25 +25797,24 @@
                     }
                     else if (this.dragClipMode == "duration") {
                         let duration = Math.max(0, clip.duration + delta);
-                        if (this.lastClipsSelected[0][1] < track.clips.length - 1) { // max next clip's start
+                        if (this.lastClipsSelected[0][1] < track.clips.length - 1) // max next clip's start
+                         {
                             duration = Math.min(track.clips[this.lastClipsSelected[0][1] + 1].start - clip.start - 0.0001, duration);
                         }
                         clip.duration = duration;
-                        if (clip.fadeout != undefined) {
+                        if (clip.fadeout != undefined)
                             clip.fadeout = Math.max(Math.min((clip.fadeout ?? (clip.start + clip.duration)) + delta, clip.start + clip.duration), clip.start);
-                        }
-                        if (clip.fadein != undefined) {
+                        if (clip.fadein != undefined)
                             clip.fadein = Math.max(Math.min((clip.fadein ?? (clip.start + clip.duration)), (clip.fadeout ?? (clip.start + clip.duration))), clip.start);
-                        }
-                        if (this.duration < clip.start + clip.duration) {
+                        if (this.duration < clip.start + clip.duration)
                             this.setDuration(clip.start + clip.duration);
-                        }
                     }
                     if (this.onContentMoved) { // content changed
                         this.onContentMoved(clip, 0);
                     }
                 }
-                else if (this.dragClipMode == "move" && this.lastClipsSelected.length) { // move clips
+                else if (this.dragClipMode == "move" && this.lastClipsSelected.length) // move clips
+                 {
                     //*********** WARNING: RELIES ON SORTED lastClipsSelected ***********
                     const treeOffset = this.lastTrackTreesComponentOffset;
                     let newTrackClipsMove = Math.floor((e.localY - treeOffset) / this.trackHeight);
@@ -25110,15 +25832,16 @@
                                 const newTrack = this.animationClip.tracks[this.lastClipsSelected[i][0] + deltaTracks];
                                 const clip = track.clips[this.lastClipsSelected[i][1]];
                                 const clipsInRange = this.getClipsInRange(newTrack, clip.start, clip.start + clip.duration, 0.0001);
-                                if (clipsInRange) {
-                                    for (let c = 0; c < clipsInRange.length; ++c) {
-                                        if (!newTrack.selected[clipsInRange[c]]) {
-                                            // at least one clip cannot move, abort
-                                            c = clipsInRange.length;
-                                            i = this.lastClipsSelected.length;
-                                            deltaTracks = 0;
-                                            newTrackClipsMove = this.lastTrackClipsMove;
-                                        }
+                                if (!clipsInRange) {
+                                    continue;
+                                }
+                                for (let c = 0; c < clipsInRange.length; ++c) {
+                                    if (!newTrack.selected[clipsInRange[c]]) {
+                                        // at least one clip cannot move, abort
+                                        c = clipsInRange.length;
+                                        i = this.lastClipsSelected.length;
+                                        deltaTracks = 0;
+                                        newTrackClipsMove = this.lastTrackClipsMove;
                                     }
                                 }
                             }
@@ -25127,14 +25850,14 @@
                                 let oldStateEnabler = this.historySaveEnabler;
                                 this.historySaveEnabler = false;
                                 const selectedClips = this.lastClipsSelected;
-                                this.lastClipsSelected = []; // avoid delete and addclips index reassignment loop (not necessary because of order of operations in for)
+                                this.lastClipsSelected = []; // avoid delete and addclips index reassignment loop ( not necessary because of order of operations in for )
                                 for (let i = selectedClips[selectedClips.length - 1][0] + deltaTracks - this.animationClip.tracks.length + 1; i > 0; --i) {
                                     this.addNewTrack(null, i == 1);
                                     if (i == 1) {
                                         this.updateLeftPanel();
                                     }
                                 }
-                                // selected clips MUST be ordered (ascendently)
+                                // selected clips MUST be ordered ( ascendently )
                                 let startSel = deltaTracks > 0 ? selectedClips.length - 1 : 0;
                                 let endSel = startSel;
                                 let currTrack = selectedClips[startSel][0];
@@ -25161,14 +25884,14 @@
                                         // add clips of a track, from first to last
                                         for (let c = startSel; c <= endSel; ++c) {
                                             let newClipIdx = this.addClip(track.clips[selectedClips[c][1]], newTrackIdx, 0);
-                                            selectedClips[c][0] = newClipIdx; // temporarily store new clip index in trackIndex (HACK START)
+                                            selectedClips[c][0] = newClipIdx; // temporarily store new clip index in trackIndex (HACK START )
                                             newTrack.selected[newClipIdx] = true;
                                         }
                                         // delete clips of a track, from last to first
                                         for (let c = endSel; c >= startSel; --c) {
                                             this.#delete(currTrack, selectedClips[c][1]);
-                                            selectedClips[c][1] = selectedClips[c][0]; // put new clip index (HACK)
-                                            selectedClips[c][0] = newTrackIdx; // put new track index (HACK FIX)
+                                            selectedClips[c][1] = selectedClips[c][0]; // put new clip index (HACK )
+                                            selectedClips[c][0] = newTrackIdx; // put new track index (HACK FIX )
                                         }
                                         currTrack = i < selectedClips.length ? selectedClips[idx][0] : -1;
                                         startSel = idx;
@@ -25218,9 +25941,8 @@
                                 moveAccepted = false; // force it to be a leastDelta move only. No jumps
                             }
                         }
-                        if (!moveAccepted) {
+                        if (!moveAccepted)
                             continue;
-                        }
                         let clipsInRange = this.getClipsInRange(track, clip.start + delta, clip.start + clip.duration + delta, 0.01);
                         if (clipsInRange && (clipsInRange[0] != clipIdx || clipsInRange[clipsInRange.length - 1] != clipIdx)) {
                             for (let c = 0; c < clipsInRange.length; ++c) {
@@ -25298,7 +26020,8 @@
                 }
                 return true;
             }
-            else if (e.track && e.buttons == 0) { // mouse not dragging, just hovering
+            else if (e.track && e.buttons == 0) // mouse not dragging, just hovering
+             {
                 this.unHoverAll();
                 let clips = this.getClipsInRange(e.track, time, time, 0.00001);
                 if (!e.track.locked && clips) {
@@ -25308,15 +26031,18 @@
                     if (!clip) {
                         return;
                     }
-                    if (Math.abs(e.localX - this.timeToX(clip.start + clip.duration)) < 8) { // duration
+                    if (Math.abs(e.localX - this.timeToX(clip.start + clip.duration)) < 8) // duration
+                     {
                         this.canvas.style.cursor = "col-resize";
                         this.dragClipMode = "duration";
                     }
-                    else if (clip.fadein != undefined && Math.abs(e.localX - this.timeToX(clip.fadein)) < 8) { // fadein
+                    else if (clip.fadein != undefined && Math.abs(e.localX - this.timeToX(clip.fadein)) < 8) // fadein
+                     {
                         this.canvas.style.cursor = "e-resize";
                         this.dragClipMode = "fadein";
                     }
-                    else if (clip.fadeout != undefined && Math.abs(e.localX - this.timeToX(clip.fadeout)) < 8) { // fadeout
+                    else if (clip.fadeout != undefined && Math.abs(e.localX - this.timeToX(clip.fadeout)) < 8) // fadeout
+                     {
                         this.canvas.style.cursor = "e-resize";
                         this.dragClipMode = "fadeout";
                     }
@@ -25368,8 +26094,9 @@
                 var x = Math.floor(this.timeToX(clip.start)) + 0.5;
                 var x2 = Math.floor(this.timeToX(clip.start + clip.duration)) + 0.5;
                 var w = x2 - x;
-                if (x2 < 0 || x > this.canvas.width)
+                if (x2 < 0 || x > this.canvas.width) {
                     continue;
+                }
                 // Overwrite clip color state depending on its state
                 ctx.globalAlpha = 1;
                 ctx.fillStyle = clip.clipColor || (track.hovered[j] ? Timeline.KEYFRAME_COLOR_HOVERED : (track.selected[j] ? Timeline.TRACK_SELECTED : Timeline.KEYFRAME_COLOR));
@@ -25430,13 +26157,13 @@
         optimizeTracks() {
         }
         /**
-         *
-         * @param {Object} clip  clip to be added
-         * @param {Int} trackIdx (optional) track where to put the clip. -1 will find the first free slot. ***WARNING*** Must call getClipsInRange, before calling this function with a valid trackdIdx
-         * @param {Number} offsetTime (optional) offset time of current time
-         * @param {Number} searchStartTrackIdx (optional) if trackIdx is set to -1, this idx will be used as the starting point to find a valid track
-         * @returns  a zero/positive value if successful. Otherwise, -1
-         */
+        *
+        * @param {Object} clip  clip to be added
+        * @param {Int} trackIdx ( optional ) track where to put the clip. -1 will find the first free slot. ***WARNING*** Must call getClipsInRange, before calling this function with a valid trackdIdx
+        * @param {Number} offsetTime ( optional ) offset time of current time
+        * @param {Number} searchStartTrackIdx ( optional ) if trackIdx is set to -1, this idx will be used as the starting point to find a valid track
+        * @returns  a zero/positive value if successful. Otherwise, -1
+        */
         addClip(clip, trackIdx = -1, offsetTime = 0, searchStartTrackIdx = 0) {
             if (!this.animationClip) {
                 return -1;
@@ -25452,10 +26179,12 @@
             // sanity check
             clip.active = clip.active ?? true;
             // find appropriate track
-            if (trackIdx >= this.animationClip.tracks.length) { // new track ad the end
+            if (trackIdx >= this.animationClip.tracks.length) // new track ad the end
+             {
                 trackIdx = this.addNewTrack();
             }
-            else if (trackIdx < 0) { // find first free track slot
+            else if (trackIdx < 0) // find first free track slot
+             {
                 for (let i = searchStartTrackIdx; i < this.animationClip.tracks.length; i++) {
                     let clipInCurrentSlot = this.animationClip.tracks[i].clips.find((t) => {
                         return exports.LX.compareThresholdRange(newStart, clip.start + clip.duration, t.start, t.start + t.duration);
@@ -25481,7 +26210,7 @@
             //Save track state before add the new clip
             this.saveState(trackIdx);
             // Add clip
-            track.clips.splice(newIdx, 0, clip); //insert clip into newIdx (or push at the end)
+            track.clips.splice(newIdx, 0, clip); //insert clip into newIdx ( or push at the end )
             // Reset this clip's properties
             track.hovered.splice(newIdx, 0, false);
             track.selected.splice(newIdx, 0, false);
@@ -25497,15 +26226,14 @@
         }
         /**
          *  Add an array of clips to the timeline in the first suitable tracks. It tries to put clips in the same track if possible. All clips will be in adjacent tracks to each other
-         * @param {Array of objects} clips
+         * @param {Object[] } clips
          * @param {Number} offsetTime
          * @param {Int} searchStartTrackIdx
          * @returns
          */
         addClips(clips, offsetTime = 0, searchStartTrackIdx = 0) {
-            if (!this.animationClip || !clips.length) {
+            if (!this.animationClip || !clips.length)
                 return false;
-            }
             let clipTrackIdxs = new Int16Array(clips.length);
             let baseTrackIdx = searchStartTrackIdx - 1; // every time the algorithm fails, it increments the starting track Idx
             let currTrackIdx = -1;
@@ -25583,7 +26311,7 @@
             }
             // delete selected clips from last to first. lastClipsSelected is sorted
             const selected = this.lastClipsSelected;
-            this.lastClipsSelected = []; // so this.#delete does not check clipsselected on each loop (all will be destroyed)
+            this.lastClipsSelected = []; // so this.#delete does not check clipsselected on each loop ( all will be destroyed )
             let prevTrack = -1;
             for (let i = selected.length - 1; i > -1; --i) {
                 let s = selected[i];
@@ -25642,10 +26370,10 @@
         }
         /**
          * User defined. Used when copying and pasting
-         * @param {Array of clips} clipsToClone array of original clips. Do not modify clips in this array
-         * @param {Number} timeOffset Value of time that should be added (or subtracted) from the timing attributes
+         * @param {Array of clips } clipsToClone array of original clips. Do not modify clips in this array
+         * @param {Number} timeOffset Value of time that should be added ( or subtracted ) from the timing attributes
          * @param {Int} reason Flag to signal the reason of the clone
-         * @returns {Array of clips}
+         * @returns {Array of clips }
          */
         cloneClips(clipsToClone, timeOffset, reason = 0) {
             let clipsToReturn = JSON.parse(JSON.stringify(clipsToClone));
@@ -25690,8 +26418,9 @@
         }
         pasteContent(time = this.currentTime) {
             this.deselectAllClips();
-            if (!this.clipboard)
+            if (!this.clipboard) {
                 return;
+            }
             time = Math.max(0, time);
             let clipsToAdd = this.cloneClips(this.clipboard, time, ClipsTimeline.CLONEREASON_PASTE);
             this.addClips(clipsToAdd, 0);
@@ -25787,8 +26516,7 @@
             }
             for (let i = 0; i < track.clips.length; ++i) {
                 let t = track.clips[i];
-                if (t.start + t.duration >= (time - threshold) &&
-                    t.start <= (time + threshold)) {
+                if (t.start + t.duration >= (time - threshold) && t.start <= (time + threshold)) {
                     return i;
                 }
             }
@@ -25812,8 +26540,9 @@
                     this.lastClipsSelected.push([trackIdx, clipIdx]); // already sorted
                 }
             }
-            if (this.onSelectClip && !skipCallback)
+            if (this.onSelectClip && !skipCallback) {
                 this.onSelectClip(null);
+            }
         }
         selectClip(trackIdx, clipIndex, deselect = true, skipCallback = false) {
             if (deselect) {
@@ -25880,8 +26609,9 @@
             minTime -= threshold;
             maxTime += threshold;
             const clips = track.clips;
-            if (maxTime < clips[0].start || minTime > (clips[clips.length - 1].start + clips[clips.length - 1].duration))
+            if (maxTime < clips[0].start || minTime > (clips[clips.length - 1].start + clips[clips.length - 1].duration)) {
                 return null;
+            }
             let indices = [];
             for (let i = 0; i < clips.length; ++i) {
                 const c = clips[i];
@@ -25926,8 +26656,8 @@
      * @param {Number} [radius.tr = 0] Top right
      * @param {Number} [radius.br = 0] Bottom right
      * @param {Number} [radius.bl = 0] Bottom left
-     * @param {Boolean} [fill = false] Whether to fill the rectangle.
-     * @param {Boolean} [stroke = true] Whether to stroke the rectangle.
+     * @param {Boolean} [ fill = false ] Whether to fill the rectangle.
+     * @param {Boolean} [ stroke = true ] Whether to stroke the rectangle.
      */
     function drawRoundRect(ctx, x, y, width, height, radius = 5, fill = false, stroke = false) {
         if (typeof radius === 'number') {
@@ -25957,16 +26687,6 @@
             ctx.stroke();
         }
     }
-    exports.LX.concatTypedArray = (arrays, ArrayType) => {
-        let size = arrays.reduce((acc, arr) => acc + arr.length, 0);
-        let result = new ArrayType(size); // generate just one array
-        let offset = 0;
-        for (let i = 0; i < arrays.length; ++i) {
-            result.set(arrays[i], offset); // copy values
-            offset += arrays[i].length;
-        }
-        return result;
-    };
 
     // VideoEditor.ts @evallsg
     if (!exports.LX) {
@@ -26268,8 +26988,8 @@
             this._draw();
         }
         resize(size) {
-            this.canvas.width = size[0];
-            this.canvas.height = size[1];
+            this.canvas.width = Math.max(0, size[0]);
+            this.canvas.height = Math.max(0, size[1]);
             let newWidth = size[0] - this.offset * 2;
             newWidth = newWidth < 0.00001 ? 0.00001 : newWidth; // actual width of the line = canvas.width - offsetleft - offsetRight
             const startRatio = (this.startX - this.offset) / this.lineWidth;
@@ -26287,6 +27007,15 @@
      * @class VideoEditor
      */
     class VideoEditor {
+        static CROP_HANDLE_L = 0x01;
+        static CROP_HANDLE_R = 0x02;
+        static CROP_HANDLE_T = 0x04;
+        static CROP_HANDLE_B = 0x08;
+        static CROP_HANDLE_TL = VideoEditor.CROP_HANDLE_L | VideoEditor.CROP_HANDLE_T;
+        static CROP_HANDLE_BL = VideoEditor.CROP_HANDLE_L | VideoEditor.CROP_HANDLE_B;
+        static CROP_HANDLE_TR = VideoEditor.CROP_HANDLE_R | VideoEditor.CROP_HANDLE_T;
+        static CROP_HANDLE_BR = VideoEditor.CROP_HANDLE_R | VideoEditor.CROP_HANDLE_B;
+        options = {};
         playing = false;
         videoReady = false;
         controls = true;
@@ -26300,15 +27029,14 @@
         video;
         loop = false;
         isDragging = false;
-        isResizing = false;
+        isResizing = null; // holds the HTMLElement of the crop handle, if resizing
         crop = false;
         dragOffsetX = 0.0;
         dragOffsetY = 0.0;
         currentTimeString = "";
         timebar;
         mainArea;
-        cropArea;
-        brCrop;
+        cropArea; // HTMLElement with normCoord attribute;
         controlsArea;
         controlsPanelLeft;
         controlsPanelRight;
@@ -26323,7 +27051,11 @@
         onResize;
         onChangeSpeed;
         _updateTime = true;
+        _onCropMouseUp;
+        _onCropMouseMove;
+        resize;
         constructor(area, options = {}) {
+            this.options = options ?? {};
             this.speed = options.speed ?? this.speed;
             this.mainArea = area;
             let videoArea = null;
@@ -26339,9 +27071,9 @@
             this.cropArea = document.createElement("div");
             this.cropArea.id = "cropArea";
             this.cropArea.className = "resize-area hidden";
-            this.brCrop = document.createElement("div");
-            this.brCrop.className = " resize-handle br"; // bottom right
-            this.cropArea.append(this.brCrop);
+            this.cropArea.normCoords = { x: 0, y: 0, w: 1, h: 1 };
+            const flags = 0x0f;
+            this.setCropAreaHandles(flags);
             this.crop = options.crop;
             this.dragOffsetX = 0;
             this.dragOffsetY = 0;
@@ -26386,8 +27118,8 @@
             this.controlsPanelLeft.refresh = () => {
                 this.controlsPanelLeft.clear();
                 this.controlsPanelLeft.sameLine();
-                this.controlsPanelLeft.addButton('', "", () => {
-                    this.playing = !this.playing;
+                let playbtn = this.controlsPanelLeft.addButton('Play', "", (v) => {
+                    this.playing = v;
                     if (this.playing) {
                         if (this.video.currentTime + 0.000001 >= this.endTime) {
                             this.video.currentTime = this.startTime;
@@ -26397,33 +27129,22 @@
                     else {
                         this.video.pause();
                     }
-                    this.controlsPanelLeft.refresh();
-                }, { width: '40px', icon: (this.playing ? 'Pause@solid' : 'Play@solid'), className: "justify-center" });
-                // if( this.speedDialog )
-                // {
-                //     this.speedDialog.close();
-                // }
-                // this.speedDialog = null;
+                }, { width: '40px', icon: 'Play@solid', swap: 'Pause@solid', hideName: true, className: "justify-center" });
+                playbtn.setState(this.playing, true);
                 this.controlsPanelLeft.addButton('', '', (v, e) => {
-                    // if( this.speedDialog) {
-                    //     this.speedDialog.close();
-                    //     this.speedDialog = null;
-                    //     return;
-                    // }
                     const panel = new exports.LX.Panel();
-                    panel.addNumber("Speed", this.speed, (v) => {
+                    panel.addRange("Speed", this.speed, (v) => {
                         this.speed = v;
                         this.video.playbackRate = v;
                         if (this.onChangeSpeed) {
                             this.onChangeSpeed(v);
                         }
-                    }, { min: 0, max: 2.5, step: 0.01, nameWidth: "50px" });
+                    }, { min: 0, max: 2.5, step: 0.01, hideName: true });
                     new exports.LX.Popover(e.target, [panel], { align: "start", side: "top", sideOffset: 12 });
                 }, { width: '40px', title: 'speed', icon: "Timer@solid", className: "justify-center" });
-                this.controlsPanelLeft.addButton('', 'Loop', () => {
-                    this.loop = !this.loop;
-                    this.controlsPanelLeft.refresh();
-                }, { width: '40px', title: 'loop', icon: ('Repeat@solid'), className: `justify-center`, buttonClass: `${(this.loop ? 'bg-accent' : '')}` });
+                this.controlsPanelLeft.addButton('', 'Loop', (v) => {
+                    this.loop = v;
+                }, { width: '40px', title: 'loop', icon: ('Repeat@solid'), className: `justify-center`, selectable: true, selected: this.loop });
                 this.controlsPanelLeft.addLabel(this.startTimeString, { width: "100px" });
                 this.controlsPanelLeft.endLine();
                 let availableWidth = leftArea.root.clientWidth - controlsLeft.root.clientWidth;
@@ -26445,16 +27166,18 @@
             this.timebar.onChangeCurrent = this._setCurrentTime.bind(this);
             this.timebar.onChangeStart = this._setStartTime.bind(this);
             this.timebar.onChangeEnd = this._setEndTime.bind(this);
-            window.addEventListener('resize', () => {
-                if (this.onResize) {
-                    this.onResize([videoArea.root.clientWidth, videoArea.root.clientHeight]);
-                }
+            this.resize = () => {
                 bottomArea.setSize([this.controlsArea.root.clientWidth, 40]);
                 let availableWidth = this.controlsArea.root.clientWidth - controlsLeft.root.clientWidth - controlsRight.root.clientWidth;
                 this.timebar.resize([availableWidth, timeBarArea.root.clientHeight]);
-                this.dragCropArea({ clientX: -1, clientY: -1 });
-                this.resizeCropArea({ clientX: window.screen.width, clientY: window.screen.height });
-            });
+                this.moveCropArea(this.cropArea.normCoords.x, this.cropArea.normCoords.y, true);
+                this.resizeCropArea(this.cropArea.normCoords.w, this.cropArea.normCoords.h, true);
+                if (this.onResize) {
+                    this.onResize([videoArea.root.clientWidth, videoArea.root.clientHeight]);
+                }
+            };
+            area.onresize = this.resize.bind(this);
+            window.addEventListener('resize', area.onresize);
             this.onKeyUp = (e) => {
                 if (this.controls && e.key == " ") {
                     e.preventDefault();
@@ -26473,18 +27196,6 @@
                 }
             };
             window.addEventListener("keyup", this.onKeyUp);
-            videoArea.onresize = () => {
-                if (bottomArea.parentArea) {
-                    bottomArea.setSize([bottomArea.parentArea.root.clientWidth, 40]);
-                }
-                const ratio = this.video.clientHeight / this.video.videoHeight;
-                this.cropArea.style.height = this.video.clientHeight + "px";
-                this.cropArea.style.width = this.video.videoWidth * ratio + "px";
-            };
-            timeBarArea.onresize = (v) => {
-                let availableWidth = this.controlsArea.root.clientWidth - controlsLeft.root.clientWidth - controlsRight.root.clientWidth - 20;
-                this.timebar.resize([availableWidth, v.height]);
-            };
             const parent = controlsArea.parentElement ? controlsArea.parentElement : controlsArea.root.parentElement;
             // Add canvas event listeneres
             parent.addEventListener("mousedown", (e) => {
@@ -26492,107 +27203,186 @@
                 //     this.timebar.onMouseDown(e);
                 // }
             });
-            parent.addEventListener("mouseup", (e) => {
-                // if( this.controls) {
-                //     this.timebar.onMouseUp(e);
+            this._onCropMouseUp = (event) => {
+                // if(this.controls) {
+                //     this.timebar.onMouseUp(event);
                 // }
+                event.preventDefault();
+                event.stopPropagation();
                 if ((this.isDragging || this.isResizing) && this.onCropArea) {
-                    if (this.onCropArea) {
-                        this.onCropArea(this.getCroppedArea());
-                    }
+                    this.onCropArea(this.getCroppedArea());
                 }
                 this.isDragging = false;
                 this.isResizing = false;
-            });
-            parent.addEventListener("mousemove", (e) => {
-                // if( this.controls) {
-                //     this.timebar.onMouseMove(e);
+                document.removeEventListener("mouseup", this._onCropMouseUp); // self destroy. Added during mouseDown on cropArea and handles
+                document.removeEventListener("mousemove", this._onCropMouseMove); // self destroy. Added during mouseDown on cropArea and handles
+            };
+            this._onCropMouseMove = (event) => {
+                // if(this.controls) {
+                //     this.timebar.onMouseMove(event);
                 // }
+                window.getSelection()?.removeAllRanges();
+                event.preventDefault();
+                event.stopPropagation();
                 if (this.isResizing) {
-                    this.resizeCropArea(e);
+                    const rectCrop = this.cropArea.getBoundingClientRect();
+                    const rectVideo = this.video.getBoundingClientRect();
+                    const mov = this.isResizing.movement;
+                    let x = rectCrop.left, y = rectCrop.top, w = rectCrop.width, h = rectCrop.height;
+                    if (mov & VideoEditor.CROP_HANDLE_L) {
+                        let mouseX = Math.min(rectCrop.right - 4, Math.max(rectVideo.left, event.clientX)); // -4 because of border
+                        w = rectCrop.left + rectCrop.width - mouseX;
+                        x = mouseX;
+                        if (mouseX < rectCrop.left) {
+                            this.moveCropArea(x, y, false);
+                            this.resizeCropArea(w, h, false);
+                        }
+                        else {
+                            this.resizeCropArea(w, h, false);
+                            this.moveCropArea(x, y, false);
+                        }
+                    }
+                    if (mov & VideoEditor.CROP_HANDLE_R) {
+                        w = event.clientX - rectCrop.left;
+                        this.resizeCropArea(w, h, false);
+                    }
+                    if (mov & VideoEditor.CROP_HANDLE_T) {
+                        const mouseY = Math.min(rectCrop.bottom - 4, Math.max(rectVideo.top, event.clientY));
+                        h = rectCrop.top + rectCrop.height - mouseY;
+                        y = mouseY;
+                        if (mouseY < rectCrop.top) {
+                            this.moveCropArea(x, y, false);
+                            this.resizeCropArea(w, h, false);
+                        }
+                        else {
+                            this.resizeCropArea(w, h, false);
+                            this.moveCropArea(x, y, false);
+                        }
+                    }
+                    if (mov & VideoEditor.CROP_HANDLE_B) {
+                        h = event.clientY - rectCrop.top;
+                        this.resizeCropArea(w, h, false);
+                    }
                 }
                 if (this.isDragging) {
-                    this.dragCropArea(e);
+                    this.moveCropArea(event.clientX - this.dragOffsetX, event.clientY - this.dragOffsetY, false);
                 }
-            });
+            };
             this.cropArea.addEventListener("mousedown", (e) => {
                 if (e.target === this.cropArea) {
                     const rect = this.cropArea.getBoundingClientRect();
                     this.isDragging = true;
                     this.dragOffsetX = e.clientX - rect.left;
                     this.dragOffsetY = e.clientY - rect.top;
+                    document.addEventListener("mouseup", this._onCropMouseUp);
+                    document.addEventListener("mousemove", this._onCropMouseMove);
                 }
-            });
-            document.querySelectorAll(".resize-handle").forEach(handle => {
-                handle.addEventListener("mousedown", (e) => {
-                    e.stopPropagation();
-                    if (handle.classList[1] === 'br') {
-                        this.isResizing = true;
-                    }
-                });
             });
             this.onChangeStart = null;
             this.onChangeEnd = null;
         }
-        resizeCropArea(e) {
-            const mouseX = e.clientX;
-            const mouseY = e.clientY;
-            const isCropHidden = this.cropArea.classList.contains("hidden");
-            const nodes = this.cropArea.parentElement?.childNodes ?? [];
-            const rectCrop = this.cropArea.getBoundingClientRect();
-            const rectVideo = this.video.getBoundingClientRect();
-            let width = Math.max(0, Math.min(mouseX - rectCrop.left, rectVideo.width));
-            let height = Math.max(0, Math.min(mouseY - rectCrop.top, rectVideo.height));
-            if ((rectCrop.left + width) > rectVideo.right) {
-                width = Math.min(rectVideo.width, rectVideo.right - rectCrop.left);
+        setCropAreaHandles(flags) {
+            // remove existing resizer handles
+            const resizers = this.cropArea.getElementsByClassName("resize-handle");
+            for (let i = resizers.length - 1; i > -1; --i) {
+                resizers[i].remove();
             }
-            if ((rectCrop.top + height) > rectVideo.bottom) {
-                height = Math.min(rectVideo.height, rectVideo.bottom - rectCrop.top);
-            }
-            if (!isCropHidden) {
-                for (let i = 0; i < nodes.length; i++) {
-                    const node = nodes[i];
-                    if (node == this.cropArea)
-                        continue;
-                    const rectEl = node.getBoundingClientRect();
-                    node.style.webkitMask = `linear-gradient(#000 0 0) ${rectCrop.x - rectEl.left}px ${rectCrop.y - rectEl.top}px / ${width}px ${height}px, linear-gradient(rgba(0, 0, 0, 0.3) 0 0)`;
-                    node.style.webkitMaskRepeat = 'no-repeat';
+            const buildResizer = (className, movement) => {
+                const handle = document.createElement("div");
+                handle.className = " resize-handle " + className;
+                handle.movement = movement;
+                if (this.options.handleStyle) {
+                    Object.assign(handle.style, this.options.handleStyle);
                 }
+                this.cropArea.append(handle);
+                handle.addEventListener("mousedown", (e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    this.isResizing = handle;
+                    document.addEventListener("mouseup", this._onCropMouseUp);
+                    document.addEventListener("mousemove", this._onCropMouseMove);
+                });
+            };
+            if (flags & VideoEditor.CROP_HANDLE_L) {
+                buildResizer("l", VideoEditor.CROP_HANDLE_L);
             }
-            this.cropArea.style.width = width + "px";
-            this.cropArea.style.height = height + "px";
+            if (flags & VideoEditor.CROP_HANDLE_R) {
+                buildResizer("r", VideoEditor.CROP_HANDLE_R);
+            }
+            if (flags & VideoEditor.CROP_HANDLE_T) {
+                buildResizer("t", VideoEditor.CROP_HANDLE_T);
+            }
+            if (flags & VideoEditor.CROP_HANDLE_B) {
+                buildResizer("b", VideoEditor.CROP_HANDLE_B);
+            }
+            if ((flags & VideoEditor.CROP_HANDLE_TL) == VideoEditor.CROP_HANDLE_TL) {
+                buildResizer("tl", VideoEditor.CROP_HANDLE_TL);
+            }
+            if ((flags & VideoEditor.CROP_HANDLE_BL) == VideoEditor.CROP_HANDLE_BL) {
+                buildResizer("bl", VideoEditor.CROP_HANDLE_BL);
+            }
+            if ((flags & VideoEditor.CROP_HANDLE_TR) == VideoEditor.CROP_HANDLE_TR) {
+                buildResizer("tr", VideoEditor.CROP_HANDLE_TR);
+            }
+            if ((flags & VideoEditor.CROP_HANDLE_BR) == VideoEditor.CROP_HANDLE_BR) {
+                buildResizer("br", VideoEditor.CROP_HANDLE_BR);
+            }
         }
-        dragCropArea(e) {
+        resizeCropArea(sx, sy, isNormalized = true) {
             const rectVideo = this.video.getBoundingClientRect();
-            const rectCrop = this.cropArea.getBoundingClientRect();
-            let x = e.clientX - this.dragOffsetX;
-            let y = e.clientY - this.dragOffsetY;
-            if (x < rectVideo.left) {
-                x = rectVideo.left;
+            if (!isNormalized) {
+                sx = (rectVideo.width) ? (sx / rectVideo.width) : 1;
+                sy = (rectVideo.height) ? (sy / rectVideo.height) : 1;
             }
-            if (x + rectCrop.width > rectVideo.right) {
-                x = Math.max(rectVideo.left, rectVideo.right - rectCrop.width);
-            }
-            if (y < rectVideo.top) {
-                y = rectVideo.top;
-            }
-            if (y + rectCrop.height > rectVideo.bottom) {
-                y = Math.max(rectVideo.top, rectVideo.bottom - rectCrop.height);
-            }
+            sx = Math.min(1 - this.cropArea.normCoords.x, Math.max(0, sx));
+            sy = Math.min(1 - this.cropArea.normCoords.y, Math.max(0, sy));
+            this.cropArea.normCoords.w = sx;
+            this.cropArea.normCoords.h = sy;
+            const widthPx = rectVideo.width * sx;
+            const heightPx = rectVideo.height * sy;
+            const xPx = rectVideo.width * this.cropArea.normCoords.x + rectVideo.left;
+            const yPx = rectVideo.height * this.cropArea.normCoords.y + rectVideo.top;
             if (!this.cropArea.classList.contains("hidden")) {
-                const nodes = this.cropArea.parentElement?.childNodes ?? [];
+                const nodes = this.cropArea.parentElement.childNodes;
                 for (let i = 0; i < nodes.length; i++) {
-                    const node = nodes[i];
-                    if (node == this.cropArea)
-                        continue;
-                    const rectEl = node.getBoundingClientRect();
-                    node.style.webkitMask = `linear-gradient(#000 0 0) ${x - rectEl.left}px ${y - rectEl.top}px / ${rectCrop.width}px ${rectCrop.height}px, linear-gradient(rgba(0, 0, 0, 0.3) 0 0)`;
-                    node.style.webkitMaskRepeat = 'no-repeat';
+                    if (nodes[i] != this.cropArea) {
+                        const rectEl = nodes[i].getBoundingClientRect();
+                        nodes[i].style.webkitMask = `linear-gradient(#000 0 0) ${xPx - rectEl.left}px ${yPx - rectEl.top}px / ${widthPx}px ${heightPx}px, linear-gradient(rgba(0, 0, 0, 0.3) 0 0)`;
+                        nodes[i].style.webkitMaskRepeat = 'no-repeat';
+                    }
                 }
             }
-            const parentRect = this.cropArea.parentElement?.getBoundingClientRect();
-            this.cropArea.style.left = x - parentRect.left + "px";
-            this.cropArea.style.top = y - parentRect.top + "px";
+            this.cropArea.style.width = widthPx + "px";
+            this.cropArea.style.height = heightPx + "px";
+        }
+        // screen pixel (event.clientX) or video normalized (0 is top left of video, 1 bot right)
+        moveCropArea(x, y, isNormalized = true) {
+            const rectVideo = this.video.getBoundingClientRect();
+            if (!isNormalized) {
+                x = (rectVideo.width) ? ((x - rectVideo.left) / rectVideo.width) : 0;
+                y = (rectVideo.height) ? ((y - rectVideo.top) / rectVideo.height) : 0;
+            }
+            x = Math.max(0, Math.min(1 - this.cropArea.normCoords.w, x));
+            y = Math.max(0, Math.min(1 - this.cropArea.normCoords.h, y));
+            this.cropArea.normCoords.x = x;
+            this.cropArea.normCoords.y = y;
+            const xPx = rectVideo.width * x + rectVideo.left;
+            const yPx = rectVideo.height * y + rectVideo.top;
+            const widthPx = rectVideo.width * this.cropArea.normCoords.w;
+            const heightPx = rectVideo.height * this.cropArea.normCoords.h;
+            if (!this.cropArea.classList.contains("hidden")) {
+                const nodes = this.cropArea.parentElement.childNodes;
+                for (let i = 0; i < nodes.length; i++) {
+                    if (nodes[i] != this.cropArea) {
+                        const rectEl = nodes[i].getBoundingClientRect();
+                        nodes[i].style.webkitMask = `linear-gradient(#000 0 0) ${xPx - rectEl.left}px ${yPx - rectEl.top}px / ${widthPx}px ${heightPx}px, linear-gradient(rgba(0, 0, 0, 0.3) 0 0)`;
+                        nodes[i].style.webkitMaskRepeat = 'no-repeat';
+                    }
+                }
+            }
+            const rectParent = this.cropArea.parentElement.getBoundingClientRect();
+            this.cropArea.style.left = xPx - rectParent.left + "px";
+            this.cropArea.style.top = yPx - rectParent.top + "px";
         }
         async loadVideo(options = {}) {
             this.videoReady = false;
@@ -26645,8 +27435,8 @@
             }
             this.cropArea.style.height = this.video.clientHeight + "px";
             this.cropArea.style.width = this.video.clientWidth + "px";
-            this.resizeCropArea({ clientX: window.screen.width, clientY: window.screen.height });
-            this.dragCropArea({ clientX: -1, clientY: -1 });
+            this.moveCropArea(0, 0, true);
+            this.resizeCropArea(1, 1, true);
             if (this.crop) {
                 this.showCropArea();
             }
@@ -26781,6 +27571,8 @@
             this.controlsPanelLeft.refresh();
             this.video.src = "";
             window.removeEventListener("keyup", this.onKeyUp);
+            document.removeEventListener("mouseup", this._onCropMouseUp);
+            document.removeEventListener("mousemove", this._onCropMouseMove);
         }
     }
     exports.LX.VideoEditor = VideoEditor;
@@ -26789,7 +27581,6 @@
     exports.AreaOverlayButtons = AreaOverlayButtons;
     exports.ArrayInput = ArrayInput;
     exports.AssetView = AssetView;
-    exports.AssetViewEvent = AssetViewEvent;
     exports.BaseComponent = BaseComponent$1;
     exports.BoundingBox = BoundingBox;
     exports.Branch = Branch;
@@ -26823,6 +27614,7 @@
     exports.NumberInput = NumberInput;
     exports.OTPInput = OTPInput;
     exports.Pad = Pad;
+    exports.Pagination = Pagination;
     exports.Panel = Panel$2;
     exports.PocketDialog = PocketDialog$1;
     exports.Popover = Popover;
@@ -26835,6 +27627,7 @@
     exports.Sidebar = Sidebar;
     exports.SizeInput = SizeInput;
     exports.Skeleton = Skeleton;
+    exports.Spinner = Spinner;
     exports.TabSections = TabSections;
     exports.Table = Table;
     exports.Tabs = Tabs;

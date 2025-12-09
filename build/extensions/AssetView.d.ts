@@ -2,23 +2,33 @@ import { LX } from '../core/Namespace';
 declare const Area: any;
 declare const Panel: any;
 declare const NodeTree: any;
-export declare class AssetViewEvent {
-    static NONE: number;
-    static ASSET_SELECTED: number;
-    static ASSET_DELETED: number;
-    static ASSET_RENAMED: number;
-    static ASSET_CLONED: number;
-    static ASSET_DBLCLICKED: number;
-    static ASSET_CHECKED: number;
-    static ASSET_MOVED: number;
-    static ENTER_FOLDER: number;
-    type: number;
-    item: any;
-    value: any;
-    multiple: boolean;
-    constructor(type: number, item: any, value?: any);
-    string(): "assetview_event_none" | "assetview_event_selected" | "assetview_event_deleted" | "assetview_event_renamed" | "assetview_event_cloned" | "assetview_event_dblclicked" | "assetview_event_checked" | "assetview_event_moved" | "assetview_event_enter_folder" | undefined;
+export type AssetViewAction = "select" | "dbl_click" | "check" | "clone" | "move" | "delete" | "rename" | "enter_folder" | "create-folder";
+export interface AssetViewItem {
+    id: string;
+    type: string;
+    children: AssetViewItem[];
+    parent?: AssetViewItem;
+    path?: string;
+    src?: string;
+    dir?: AssetViewItem[];
+    domEl?: HTMLElement;
+    metadata: any;
 }
+interface AssetViewEvent {
+    type: AssetViewAction;
+    items?: AssetViewItem[];
+    result?: AssetViewItem[];
+    from?: AssetViewItem;
+    to?: AssetViewItem;
+    oldName?: string;
+    newName?: string;
+    userInitiated: boolean;
+}
+/**
+ * Signature for cancelable events.
+ * `resolve()` MUST be called by the user to perform the UI action
+ */
+export type AssetViewEventCallback = (event: AssetViewEvent, resolve?: () => void) => void | Promise<void>;
 /**
  * @class AssetView
  * @description Asset container with Tree for file system
@@ -37,14 +47,15 @@ export declare class AssetView {
     contentPanel: any;
     previewPanel: any;
     tree: typeof NodeTree | null;
-    prevData: any[];
-    nextData: any[];
-    data: any[];
-    currentData: any[];
-    currentFolder: any;
+    prevData: AssetViewItem[];
+    nextData: AssetViewItem[];
+    data: AssetViewItem[];
+    currentData: AssetViewItem[];
+    currentFolder: AssetViewItem | undefined;
+    rootItem: AssetViewItem;
     path: string[];
     rootPath: string;
-    selectedItem: any;
+    selectedItem: AssetViewItem | undefined;
     allowedTypes: any;
     searchValue: string;
     filter: string;
@@ -61,62 +72,63 @@ export declare class AssetView {
     onRefreshContent: any;
     itemContextMenuOptions: any;
     onItemDragged: any;
-    onevent: any;
     private _assetsPerPage;
     get assetsPerPage(): any;
     set assetsPerPage(v: any);
+    _callbacks: Record<string, AssetViewEventCallback>;
     _lastSortBy: string;
     _paginator: typeof LX.Pagination | undefined;
     _scriptCodeDialog: typeof LX.Dialog | undefined;
     _moveItemDialog: typeof LX.Dialog | undefined;
     constructor(options?: any);
     /**
-    * @method load
+    * @method on
+    * @description Stores an event callback for the desired action
     */
-    load(data: any, onevent: any): void;
+    on(eventName: string, callback: AssetViewEventCallback): void;
+    /**
+    * @method load
+    * @description Loads and processes the input data
+    */
+    load(data: any): void;
     /**
     * @method addItem
+    * @description Creates an item DOM element
     */
-    addItem(item: any, childIndex: number | undefined, updateTree?: boolean): HTMLLIElement;
+    addItem(item: AssetViewItem, childIndex: number | undefined, updateTree?: boolean): HTMLLIElement;
     /**
     * @method clear
+    * @description Creates all AssetView container panels
     */
     clear(): void;
-    /**
-    * @method _processData
-    */
-    _processData(data: any, parent?: any): void;
-    /**
-    * @method _updatePath
-    */
+    _processData(data: any, parent?: AssetViewItem): void;
     _updatePath(): void;
-    /**
-    * @method _createTreePanel
-    */
+    _createNavigationBar(panel: typeof Panel): void;
     _createTreePanel(area: typeof Area): void;
-    /**
-    * @method _setContentLayout
-    */
     _setContentLayout(layoutMode: number): void;
-    /**
-    * @method _createContentPanel
-    */
     _createContentPanel(area: typeof Area): void;
     _makeNameFilterFn(searchValue: string): (name: string) => boolean;
     _refreshContent(searchValue?: string, filter?: string): void;
-    _previewAsset(file: any): void;
+    _previewAsset(file: AssetViewItem): void;
     _processDrop(e: DragEvent): void;
     _sortData(sortBy?: string, sortMode?: number): void;
-    _enterFolder(folderItem: any, storeCurrent?: boolean): void;
-    _removeItemFromParent(item: any): boolean;
-    _moveItemToFolder(item: any, folder: any): void;
-    _deleteItem(item: any): void;
-    _moveItem(item: any): void;
-    _cloneItem(item: any): false | undefined;
-    _renameItem(item: any): void;
+    _enterFolder(folderItem: AssetViewItem | undefined, storeCurrent?: boolean): void;
+    _removeItemFromParent(item: AssetViewItem): boolean;
+    _requestDeleteItem(item: AssetViewItem): void;
+    _deleteItem(item: AssetViewItem): void;
+    _requestMoveItemToFolder(item: AssetViewItem, folder: AssetViewItem): void;
+    _moveItemToFolder(item: AssetViewItem, folder: AssetViewItem): void;
+    _moveItem(item: AssetViewItem): void;
+    _requestCloneItem(item: AssetViewItem): false | undefined;
+    _cloneItem(item: AssetViewItem): AssetViewItem;
+    _getClonedName(originalName: string, siblings: any[]): string;
+    _requestRenameItem(item: AssetViewItem, newName: string): void;
+    _renameItem(item: AssetViewItem, newName: string): void;
+    _renameItemPopover(item: AssetViewItem): void;
+    _requestCreateFolder(): void;
+    _createFolder(): AssetViewItem;
     _openScriptInEditor(script: any): void;
     _setAssetsPerPage(n: number): void;
-    _getClonedName(originalName: string, siblings: any[]): string;
     _lastModifiedToStringDate(lm: number): string;
 }
 export {};

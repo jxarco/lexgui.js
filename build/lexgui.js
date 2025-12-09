@@ -36,6 +36,177 @@
         g.LX = exports.LX;
     }
 
+    // Branch.ts @jxarco
+    /**
+     * @class Branch
+     */
+    class Branch {
+        name;
+        components;
+        closed;
+        root;
+        content;
+        grabber;
+        panel;
+        onclick;
+        oncontextmenu;
+        constructor(name, options = {}) {
+            this.name = name;
+            var root = document.createElement('div');
+            root.className = "lexbranch";
+            if (options.id) {
+                root.id = options.id;
+            }
+            if (options.className) {
+                root.className += " " + options.className;
+            }
+            root.style.margin = "0 auto";
+            var that = this;
+            this.closed = options.closed ?? false;
+            this.root = root;
+            this.components = [];
+            this.panel = null;
+            // Create element
+            const title = document.createElement('div');
+            title.className = "lexbranchtitle";
+            if (options.icon) {
+                const branchIcon = exports.LX.makeIcon(options.icon, { iconClass: "mr-2" });
+                title.appendChild(branchIcon);
+            }
+            title.innerHTML += (name || "Branch");
+            const collapseIcon = exports.LX.makeIcon("Right", { iconClass: "switch-branch-button", svgClass: "sm" });
+            title.appendChild(collapseIcon);
+            root.appendChild(title);
+            var branchContent = document.createElement('div');
+            branchContent.id = name.replace(/\s/g, '');
+            branchContent.className = "lexbranchcontent";
+            root.appendChild(branchContent);
+            this.content = branchContent;
+            this._addBranchSeparator();
+            if (this.closed) {
+                title.classList.add("closed");
+                root.classList.add("closed");
+                this.grabber.setAttribute("hidden", true);
+                exports.LX.doAsync(() => {
+                    this.content.setAttribute("hidden", true);
+                }, 10);
+            }
+            this.onclick = function () {
+                // e.stopPropagation();
+                title.classList.toggle("closed");
+                title.parentElement.classList.toggle("closed");
+                that.content.toggleAttribute("hidden");
+                that.grabber.toggleAttribute("hidden");
+                exports.LX.emitSignal("@on_branch_closed", title.classList.contains("closed"));
+            };
+            this.oncontextmenu = function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                if (title.parentElement.classList.contains("dialog")) {
+                    return;
+                }
+                exports.LX.addContextMenu("Dock", e, (m) => {
+                    e.preventDefault();
+                    m.add('Floating', that._onMakeFloating.bind(that));
+                }, { icon: "WindowRestore" });
+            };
+            title.addEventListener('click', this.onclick);
+            title.addEventListener('contextmenu', this.oncontextmenu);
+        }
+        _onMakeFloating() {
+            const dialog = new exports.LX.Dialog(this.name, (p) => {
+                // Add components
+                for (let w of this.components) {
+                    p.root.appendChild(w.root);
+                }
+            }, { dockable: true });
+            const childIndex = Array.from(this.root.parentElement.childNodes).indexOf(this.root);
+            console.assert(childIndex >= 0, "Branch not found!");
+            dialog.branchData = {
+                name: this.name,
+                components: this.components,
+                closed: this.closed,
+                panel: this.panel,
+                childIndex
+            };
+            this.root.remove();
+        }
+        _addBranchSeparator() {
+            const element = document.createElement('div');
+            element.className = "lexcomponentseparator";
+            element.style.width = "100%";
+            element.style.background = "none";
+            const grabber = document.createElement('div');
+            grabber.innerHTML = "&#9662;";
+            element.appendChild(grabber);
+            exports.LX.doAsync(() => {
+                grabber.style.marginLeft = ((parseFloat(exports.LX.DEFAULT_NAME_WIDTH) / 100.0) * this.content.offsetWidth) + "px";
+            }, 10);
+            const line = document.createElement('div');
+            line.style.width = "1px";
+            line.style.marginLeft = "6px";
+            line.style.marginTop = "2px";
+            line.style.height = "0px"; // get in time
+            grabber.appendChild(line);
+            grabber.addEventListener("mousedown", innerMouseDown);
+            this.grabber = grabber;
+            function getBranchHeight() {
+                return that.root.offsetHeight - that.root.children[0].offsetHeight;
+            }
+            let that = this;
+            function innerMouseDown(e) {
+                var doc = that.root.ownerDocument;
+                doc.addEventListener("mouseup", innerMouseUp);
+                doc.addEventListener("mousemove", innerMouseMove);
+                e.stopPropagation();
+                e.preventDefault();
+                const h = getBranchHeight();
+                line.style.height = (h - 3) + "px";
+                document.body.classList.add('nocursor');
+            }
+            function innerMouseMove(e) {
+                let dt = e.movementX;
+                if (dt != 0) {
+                    const margin = parseFloat(grabber.style.marginLeft);
+                    grabber.style.marginLeft = exports.LX.clamp(margin + dt, 32, that.content.offsetWidth - 32) + "px";
+                }
+            }
+            function innerMouseUp(e) {
+                that._updateComponents();
+                line.style.height = "0px";
+                var doc = that.root.ownerDocument;
+                doc.removeEventListener("mouseup", innerMouseUp);
+                doc.removeEventListener("mousemove", innerMouseMove);
+                document.body.classList.remove('nocursor');
+            }
+            this.content.appendChild(element);
+        }
+        _updateComponents() {
+            var size = this.grabber.style.marginLeft;
+            // Update sizes of components inside
+            for (let i = 0; i < this.components.length; i++) {
+                let component = this.components[i];
+                const element = component.root;
+                if (element.children.length < 2) {
+                    continue;
+                }
+                let name = element.children[0];
+                let value = element.children[1];
+                name.style.width = size;
+                name.style.minWidth = size;
+                switch (component.type) {
+                    case exports.LX.BaseComponent.CUSTOM:
+                    case exports.LX.BaseComponent.ARRAY:
+                        continue;
+                }
+                value.style.width = "-moz-calc( 100% - " + size + " )";
+                value.style.width = "-webkit-calc( 100% - " + size + " )";
+                value.style.width = "calc( 100% - " + size + " )";
+            }
+        }
+    }
+    exports.LX.Branch = Branch;
+
     // BaseComponent.ts @jxarco
     exports.ComponentType = void 0;
     (function (ComponentType) {
@@ -349,6 +520,152 @@
     }
     exports.LX.TreeEvent = TreeEvent;
 
+    // TextInput.ts @jxarco
+    /**
+     * @class TextInput
+     * @description TextInput Component
+     */
+    class TextInput extends BaseComponent {
+        valid;
+        _triggerEvent;
+        _lastValueTriggered;
+        constructor(name, value, callback, options = {}) {
+            super(exports.ComponentType.TEXT, name, String(value), options);
+            this.onGetValue = () => {
+                return value;
+            };
+            this.onSetValue = (newValue, skipCallback, event) => {
+                let skipTrigger = (this._lastValueTriggered == newValue);
+                if (!options.ignoreValidation) {
+                    skipTrigger = skipTrigger || (!this.valid(newValue));
+                }
+                if (skipTrigger) {
+                    return;
+                }
+                this._lastValueTriggered = value = newValue;
+                wValue.value = newValue;
+                delete this._triggerEvent;
+                if (!skipCallback) {
+                    this._trigger(new IEvent(name, newValue, event), callback);
+                }
+            };
+            this.onResize = (rect) => {
+                const realNameWidth = (this.root.domName?.style.width ?? "0px");
+                container.style.width = options.inputWidth ?? `calc( 100% - ${realNameWidth})`;
+            };
+            this.valid = (v, matchField) => {
+                v = v ?? this.value();
+                if (!options.pattern)
+                    return true;
+                const errs = exports.LX.validateValueAtPattern(v, options.pattern, matchField);
+                return (errs.length == 0);
+            };
+            let container = document.createElement('div');
+            container.className = (options.warning ? " lexwarning" : "");
+            container.style.display = "flex";
+            container.style.position = "relative";
+            this.root.appendChild(container);
+            this.disabled = (options.disabled || options.warning) ?? (options.url ? true : false);
+            let wValue = null;
+            if (!this.disabled) {
+                wValue = document.createElement('input');
+                wValue.className = "lextext " + (options.inputClass ?? "");
+                wValue.type = options.type || "";
+                wValue.value = value || "";
+                wValue.style.textAlign = (options.float ?? "");
+                wValue.setAttribute("placeholder", options.placeholder ?? "");
+                if (options.required) {
+                    wValue.setAttribute("required", options.required);
+                }
+                if (options.pattern) {
+                    wValue.setAttribute("pattern", exports.LX.buildTextPattern(options.pattern));
+                }
+                const trigger = options.trigger ?? "default";
+                if (trigger == "default") {
+                    wValue.addEventListener("keyup", (e) => {
+                        if (e.key == "Enter") {
+                            this._triggerEvent = e;
+                            wValue.blur();
+                        }
+                    });
+                    wValue.addEventListener("focusout", (e) => {
+                        this._triggerEvent = this._triggerEvent ?? e;
+                        this.set(e.target.value, false, this._triggerEvent);
+                    });
+                }
+                else if (trigger == "input") {
+                    wValue.addEventListener("input", (e) => {
+                        this.set(e.target.value, false, e);
+                    });
+                }
+                wValue.addEventListener("mousedown", function (e) {
+                    e.stopImmediatePropagation();
+                    e.stopPropagation();
+                });
+                if (options.icon) {
+                    wValue.style.paddingLeft = "1.75rem";
+                    const icon = exports.LX.makeIcon(options.icon, { iconClass: "absolute z-1 ml-2", svgClass: "sm" });
+                    container.appendChild(icon);
+                }
+            }
+            else if (options.url) {
+                wValue = document.createElement('a');
+                wValue.href = options.url;
+                wValue.target = "_blank";
+                wValue.innerHTML = value ?? "";
+                wValue.style.textAlign = options.float ?? "";
+                wValue.className = "lextext ellipsis-overflow";
+            }
+            else {
+                wValue = document.createElement('input');
+                wValue.disabled = true;
+                wValue.value = value;
+                wValue.style.textAlign = options.float ?? "";
+                wValue.className = "lextext ellipsis-overflow " + (options.inputClass ?? "");
+            }
+            if (options.fit) {
+                wValue.classList.add("size-content");
+            }
+            Object.assign(wValue.style, options.style ?? {});
+            container.appendChild(wValue);
+            exports.LX.doAsync(this.onResize.bind(this));
+        }
+    }
+    exports.LX.TextInput = TextInput;
+
+    // Title.ts @jxarco
+    /**
+     * @class Title
+     * @description Title Component
+     */
+    class Title extends BaseComponent {
+        constructor(name, options = {}) {
+            console.assert(name.length !== 0, "Can't create Title Component without text!");
+            // Note: Titles are not registered in Panel.components by now
+            super(exports.ComponentType.TITLE, null, null, options);
+            this.root.className = `lextitle ${this.root.className}`;
+            if (options.icon) {
+                let icon = exports.LX.makeIcon(options.icon, { iconClass: "mr-2" });
+                icon.querySelector("svg").style.color = options.iconColor || "";
+                this.root.appendChild(icon);
+            }
+            let text = document.createElement("span");
+            text.innerText = name;
+            this.root.appendChild(text);
+            Object.assign(this.root.style, options.style ?? {});
+            if (options.link != undefined) {
+                let linkDom = document.createElement('a');
+                linkDom.innerText = name;
+                linkDom.href = options.link;
+                linkDom.target = options.target ?? "";
+                linkDom.className = "lextitle link";
+                Object.assign(linkDom.style, options.style ?? {});
+                this.root.replaceWith(linkDom);
+            }
+        }
+    }
+    exports.LX.Title = Title;
+
     // Button.ts @jxarco
     /**
      * @class Button
@@ -502,8 +819,12 @@
                     wValue.querySelector(".file-input").click();
                 }
                 else if (options.mustConfirm) {
+                    const swapInput = wValue.querySelector("input");
                     new exports.LX.PopConfirm(wValue, {
                         onConfirm: () => {
+                            if (options.swap) {
+                                swapInput.checked = true;
+                            }
                             this._trigger(new IEvent(name, value, e), callback);
                         },
                         side: options.confirmSide,
@@ -513,6 +834,9 @@
                         title: options.confirmTitle,
                         content: options.confirmContent
                     });
+                    if (options.swap) {
+                        swapInput.checked = false;
+                    }
                 }
                 else {
                     const swapInput = wValue.querySelector("input");
@@ -528,571 +852,16 @@
             const buttonDOM = this.root.querySelector('button');
             buttonDOM.click();
         }
-    }
-    exports.LX.Button = Button;
-
-    // Menubar.ts @jxarco
-    /**
-     * @class Menubar
-     */
-    class Menubar {
-        root;
-        siblingArea;
-        buttonContainer;
-        items = [];
-        buttons = {};
-        icons = {};
-        shorts = {};
-        focused = false;
-        _currentDropdown;
-        constructor(items, options = {}) {
-            this.root = document.createElement("div");
-            this.root.className = "lexmenubar";
-            if (options.float) {
-                this.root.style.justifyContent = options.float;
-            }
-            this.items = items ?? [];
-            this.createEntries();
-        }
-        _resetMenubar(focus) {
-            this.root.querySelectorAll(".lexmenuentry").forEach((e) => {
-                e.classList.remove('selected');
-                delete e.dataset["built"];
-            });
-            if (this._currentDropdown) {
-                this._currentDropdown.destroy();
-                this._currentDropdown = null;
-            }
-            // Next time we need to click again
-            this.focused = focus ?? false;
-        }
-        /**
-         * @method createEntries
-         */
-        createEntries() {
-            for (let item of this.items) {
-                let key = item.name;
-                let pKey = exports.LX.getSupportedDOMName(key);
-                // Item already created
-                if (this.root.querySelector("#" + pKey)) {
-                    continue;
-                }
-                let entry = document.createElement('div');
-                entry.className = "lexmenuentry";
-                entry.id = pKey;
-                entry.innerHTML = "<span>" + key + "</span>";
-                entry.tabIndex = 1;
-                this.root.appendChild(entry);
-                const _showEntry = () => {
-                    this._resetMenubar(true);
-                    entry.classList.add("selected");
-                    entry.dataset["built"] = "true";
-                    this._currentDropdown = exports.LX.addDropdownMenu(entry, item.submenu ?? [], { side: "bottom", align: "start", onBlur: () => {
-                            this._resetMenubar();
-                        } });
-                };
-                entry.addEventListener("mousedown", (e) => {
-                    e.preventDefault();
-                });
-                entry.addEventListener("mouseup", (e) => {
-                    e.preventDefault();
-                    const f = item['callback'];
-                    if (f) {
-                        f.call(this, key, entry, e);
-                        return;
-                    }
-                    _showEntry();
-                    this.focused = true;
-                    return false;
-                });
-                entry.addEventListener("mouseover", (e) => {
-                    if (this.focused && !(entry.dataset["built"] ?? false)) {
-                        _showEntry();
-                    }
-                });
-            }
-        }
-        /**
-         * @method getButton
-         * @param {String} name
-         */
-        getButton(name) {
-            return this.buttons[name];
-        }
-        /**
-         * @method getSubitems
-         * @param {Object} item: parent item
-         * @param {Array} tokens: split path strings
-        */
-        getSubitem(item, tokens) {
-            for (const s of item) {
-                if (s?.name != tokens[0]) {
-                    continue;
-                }
-                if (tokens.length == 1) {
-                    return s;
-                }
-                else if (s.submenu) {
-                    tokens.shift();
-                    return this.getSubitem(s.submenu, tokens);
-                }
-            }
-        }
-        /**
-         * @method getItem
-         * @param {String} path
-        */
-        getItem(path) {
-            // Process path
-            const tokens = path.split('/');
-            return this.getSubitem(this.items, tokens);
-        }
-        /**
-         * @method setButtonIcon
-         * @param {String} name
-         * @param {String} icon
-         * @param {Function} callback
-         * @param {Object} options
-         */
-        setButtonIcon(name, icon, callback, options = {}) {
-            if (!name) {
-                throw ("Set Button Name!");
-            }
-            let button = this.buttons[name];
-            // If the button already exists, delete it
-            // since only one button of this type can exist
-            if (button) {
-                delete this.buttons[name];
-                exports.LX.deleteElement(button.root);
-            }
-            // Otherwise, create it
-            button = new Button(name, undefined, callback, {
-                title: name,
-                buttonClass: "lexmenubutton main bg-none",
-                disabled: options.disabled,
-                icon,
-                svgClass: "xl",
-                hideName: true,
-                swap: options.swap
-            });
-            if (options.float == "right") {
-                button.root.right = true;
-            }
-            if (this.root.lastChild && this.root.lastChild.right) {
-                this.root.lastChild.before(button.root);
-            }
-            else if (options.float == "left") {
-                this.root.prepend(button.root);
-            }
-            else {
-                this.root.appendChild(button.root);
-            }
-            this.buttons[name] = button;
-        }
-        /**
-         * @method setButtonImage
-         * @param {String} name
-         * @param {String} src
-         * @param {Function} callback
-         * @param {Object} options
-         */
-        setButtonImage(name, src, callback, options = {}) {
-            if (!name) {
-                throw ("Set Button Name!");
-            }
-            let button = this.buttons[name];
-            if (button) {
-                button.querySelector('img').src = src;
+        setSwapIcon(iconName) {
+            const oldIcon = this.root.querySelector(".swap-on");
+            if (!oldIcon) {
                 return;
             }
-            // Otherwise, create it
-            button = document.createElement('div');
-            const disabled = options.disabled ?? false;
-            button.className = "lexmenubutton main" + (disabled ? " disabled" : "");
-            button.title = name;
-            button.innerHTML = "<a><image src='" + src + "' class='lexicon' style='height:32px;'></a>";
-            if (options.float == "right") {
-                button.right = true;
-            }
-            if (this.root.lastChild && this.root.lastChild.right) {
-                this.root.lastChild.before(button);
-            }
-            else if (options.float == "left") {
-                this.root.prepend(button);
-            }
-            else {
-                this.root.appendChild(button);
-            }
-            const _b = button.querySelector('a');
-            _b.addEventListener("mousedown", (e) => {
-                e.preventDefault();
-            });
-            _b.addEventListener("mouseup", (e) => {
-                if (callback && !disabled) {
-                    callback.call(this, _b, e);
-                }
-            });
-            this.buttons[name] = button;
-        }
-        /**
-         * @method addButton
-         * @param {Array} buttons
-         * @param {Object} options
-         * float: center (Default), right
-         */
-        addButtons(buttons, options = {}) {
-            if (!buttons) {
-                throw ("No buttons to add!");
-            }
-            if (!this.buttonContainer) {
-                this.buttonContainer = document.createElement("div");
-                this.buttonContainer.className = "lexmenubuttons";
-                this.buttonContainer.classList.add(options.float ?? "center");
-                if (options.float == "right") {
-                    this.buttonContainer.right = true;
-                }
-                if (this.root.lastChild && this.root.lastChild.right) {
-                    this.root.lastChild.before(this.buttonContainer);
-                }
-                else {
-                    this.root.appendChild(this.buttonContainer);
-                }
-            }
-            for (const data of buttons) {
-                const title = data.title;
-                const button = new Button(title, data.label, data.callback, {
-                    title,
-                    buttonClass: "bg-none",
-                    disabled: data.disabled,
-                    icon: data.icon,
-                    hideName: true,
-                    swap: data.swap,
-                    iconPosition: "start"
-                });
-                this.buttonContainer.appendChild(button.root);
-                if (title) {
-                    this.buttons[title] = button;
-                }
-            }
+            const swapIcon = exports.LX.makeIcon(iconName, { iconClass: "swap-on" });
+            oldIcon.replaceWith(swapIcon);
         }
     }
-
-    // Branch.ts @jxarco
-    /**
-     * @class Branch
-     */
-    class Branch {
-        name;
-        components;
-        closed;
-        root;
-        content;
-        grabber;
-        panel;
-        onclick;
-        oncontextmenu;
-        constructor(name, options = {}) {
-            this.name = name;
-            var root = document.createElement('div');
-            root.className = "lexbranch";
-            if (options.id) {
-                root.id = options.id;
-            }
-            if (options.className) {
-                root.className += " " + options.className;
-            }
-            root.style.margin = "0 auto";
-            var that = this;
-            this.closed = options.closed ?? false;
-            this.root = root;
-            this.components = [];
-            this.panel = null;
-            // Create element
-            const title = document.createElement('div');
-            title.className = "lexbranchtitle";
-            if (options.icon) {
-                const branchIcon = exports.LX.makeIcon(options.icon, { iconClass: "mr-2" });
-                title.appendChild(branchIcon);
-            }
-            title.innerHTML += (name || "Branch");
-            const collapseIcon = exports.LX.makeIcon("Right", { iconClass: "switch-branch-button", svgClass: "sm" });
-            title.appendChild(collapseIcon);
-            root.appendChild(title);
-            var branchContent = document.createElement('div');
-            branchContent.id = name.replace(/\s/g, '');
-            branchContent.className = "lexbranchcontent";
-            root.appendChild(branchContent);
-            this.content = branchContent;
-            this._addBranchSeparator();
-            if (this.closed) {
-                title.classList.add("closed");
-                root.classList.add("closed");
-                this.grabber.setAttribute("hidden", true);
-                exports.LX.doAsync(() => {
-                    this.content.setAttribute("hidden", true);
-                }, 10);
-            }
-            this.onclick = function () {
-                // e.stopPropagation();
-                title.classList.toggle("closed");
-                title.parentElement.classList.toggle("closed");
-                that.content.toggleAttribute("hidden");
-                that.grabber.toggleAttribute("hidden");
-                exports.LX.emitSignal("@on_branch_closed", title.classList.contains("closed"));
-            };
-            this.oncontextmenu = function (e) {
-                e.preventDefault();
-                e.stopPropagation();
-                if (title.parentElement.classList.contains("dialog")) {
-                    return;
-                }
-                exports.LX.addContextMenu("Dock", e, (m) => {
-                    e.preventDefault();
-                    m.add('Floating', that._onMakeFloating.bind(that));
-                }, { icon: "WindowRestore" });
-            };
-            title.addEventListener('click', this.onclick);
-            title.addEventListener('contextmenu', this.oncontextmenu);
-        }
-        _onMakeFloating() {
-            const dialog = new exports.LX.Dialog(this.name, (p) => {
-                // Add components
-                for (let w of this.components) {
-                    p.root.appendChild(w.root);
-                }
-            }, { dockable: true });
-            const childIndex = Array.from(this.root.parentElement.childNodes).indexOf(this.root);
-            console.assert(childIndex >= 0, "Branch not found!");
-            dialog.branchData = {
-                name: this.name,
-                components: this.components,
-                closed: this.closed,
-                panel: this.panel,
-                childIndex
-            };
-            this.root.remove();
-        }
-        _addBranchSeparator() {
-            const element = document.createElement('div');
-            element.className = "lexcomponentseparator";
-            element.style.width = "100%";
-            element.style.background = "none";
-            const grabber = document.createElement('div');
-            grabber.innerHTML = "&#9662;";
-            element.appendChild(grabber);
-            exports.LX.doAsync(() => {
-                grabber.style.marginLeft = ((parseFloat(exports.LX.DEFAULT_NAME_WIDTH) / 100.0) * this.content.offsetWidth) + "px";
-            }, 10);
-            const line = document.createElement('div');
-            line.style.width = "1px";
-            line.style.marginLeft = "6px";
-            line.style.marginTop = "2px";
-            line.style.height = "0px"; // get in time
-            grabber.appendChild(line);
-            grabber.addEventListener("mousedown", innerMouseDown);
-            this.grabber = grabber;
-            function getBranchHeight() {
-                return that.root.offsetHeight - that.root.children[0].offsetHeight;
-            }
-            let that = this;
-            function innerMouseDown(e) {
-                var doc = that.root.ownerDocument;
-                doc.addEventListener("mouseup", innerMouseUp);
-                doc.addEventListener("mousemove", innerMouseMove);
-                e.stopPropagation();
-                e.preventDefault();
-                const h = getBranchHeight();
-                line.style.height = (h - 3) + "px";
-                document.body.classList.add('nocursor');
-            }
-            function innerMouseMove(e) {
-                let dt = e.movementX;
-                if (dt != 0) {
-                    const margin = parseFloat(grabber.style.marginLeft);
-                    grabber.style.marginLeft = exports.LX.clamp(margin + dt, 32, that.content.offsetWidth - 32) + "px";
-                }
-            }
-            function innerMouseUp(e) {
-                that._updateComponents();
-                line.style.height = "0px";
-                var doc = that.root.ownerDocument;
-                doc.removeEventListener("mouseup", innerMouseUp);
-                doc.removeEventListener("mousemove", innerMouseMove);
-                document.body.classList.remove('nocursor');
-            }
-            this.content.appendChild(element);
-        }
-        _updateComponents() {
-            var size = this.grabber.style.marginLeft;
-            // Update sizes of components inside
-            for (let i = 0; i < this.components.length; i++) {
-                let component = this.components[i];
-                const element = component.root;
-                if (element.children.length < 2) {
-                    continue;
-                }
-                let name = element.children[0];
-                let value = element.children[1];
-                name.style.width = size;
-                name.style.minWidth = size;
-                switch (component.type) {
-                    case exports.LX.BaseComponent.CUSTOM:
-                    case exports.LX.BaseComponent.ARRAY:
-                        continue;
-                }
-                value.style.width = "-moz-calc( 100% - " + size + " )";
-                value.style.width = "-webkit-calc( 100% - " + size + " )";
-                value.style.width = "calc( 100% - " + size + " )";
-            }
-        }
-    }
-    exports.LX.Branch = Branch;
-
-    // TextInput.ts @jxarco
-    /**
-     * @class TextInput
-     * @description TextInput Component
-     */
-    class TextInput extends BaseComponent {
-        valid;
-        _triggerEvent;
-        _lastValueTriggered;
-        constructor(name, value, callback, options = {}) {
-            super(exports.ComponentType.TEXT, name, String(value), options);
-            this.onGetValue = () => {
-                return value;
-            };
-            this.onSetValue = (newValue, skipCallback, event) => {
-                let skipTrigger = (this._lastValueTriggered == newValue);
-                if (!options.ignoreValidation) {
-                    skipTrigger = skipTrigger || (!this.valid(newValue));
-                }
-                if (skipTrigger) {
-                    return;
-                }
-                this._lastValueTriggered = value = newValue;
-                wValue.value = newValue;
-                delete this._triggerEvent;
-                if (!skipCallback) {
-                    this._trigger(new IEvent(name, newValue, event), callback);
-                }
-            };
-            this.onResize = (rect) => {
-                const realNameWidth = (this.root.domName?.style.width ?? "0px");
-                container.style.width = options.inputWidth ?? `calc( 100% - ${realNameWidth})`;
-            };
-            this.valid = (v, matchField) => {
-                v = v ?? this.value();
-                if (!options.pattern)
-                    return true;
-                const errs = exports.LX.validateValueAtPattern(v, options.pattern, matchField);
-                return (errs.length == 0);
-            };
-            let container = document.createElement('div');
-            container.className = (options.warning ? " lexwarning" : "");
-            container.style.display = "flex";
-            container.style.position = "relative";
-            this.root.appendChild(container);
-            this.disabled = (options.disabled || options.warning) ?? (options.url ? true : false);
-            let wValue = null;
-            if (!this.disabled) {
-                wValue = document.createElement('input');
-                wValue.className = "lextext " + (options.inputClass ?? "");
-                wValue.type = options.type || "";
-                wValue.value = value || "";
-                wValue.style.textAlign = (options.float ?? "");
-                wValue.setAttribute("placeholder", options.placeholder ?? "");
-                if (options.required) {
-                    wValue.setAttribute("required", options.required);
-                }
-                if (options.pattern) {
-                    wValue.setAttribute("pattern", exports.LX.buildTextPattern(options.pattern));
-                }
-                const trigger = options.trigger ?? "default";
-                if (trigger == "default") {
-                    wValue.addEventListener("keyup", (e) => {
-                        if (e.key == "Enter") {
-                            this._triggerEvent = e;
-                            wValue.blur();
-                        }
-                    });
-                    wValue.addEventListener("focusout", (e) => {
-                        this._triggerEvent = this._triggerEvent ?? e;
-                        this.set(e.target.value, false, this._triggerEvent);
-                    });
-                }
-                else if (trigger == "input") {
-                    wValue.addEventListener("input", (e) => {
-                        this.set(e.target.value, false, e);
-                    });
-                }
-                wValue.addEventListener("mousedown", function (e) {
-                    e.stopImmediatePropagation();
-                    e.stopPropagation();
-                });
-                if (options.icon) {
-                    wValue.style.paddingLeft = "1.75rem";
-                    const icon = exports.LX.makeIcon(options.icon, { iconClass: "absolute z-1 ml-2", svgClass: "sm" });
-                    container.appendChild(icon);
-                }
-            }
-            else if (options.url) {
-                wValue = document.createElement('a');
-                wValue.href = options.url;
-                wValue.target = "_blank";
-                wValue.innerHTML = value ?? "";
-                wValue.style.textAlign = options.float ?? "";
-                wValue.className = "lextext ellipsis-overflow";
-            }
-            else {
-                wValue = document.createElement('input');
-                wValue.disabled = true;
-                wValue.value = value;
-                wValue.style.textAlign = options.float ?? "";
-                wValue.className = "lextext ellipsis-overflow " + (options.inputClass ?? "");
-            }
-            if (options.fit) {
-                wValue.classList.add("size-content");
-            }
-            Object.assign(wValue.style, options.style ?? {});
-            container.appendChild(wValue);
-            exports.LX.doAsync(this.onResize.bind(this));
-        }
-    }
-    exports.LX.TextInput = TextInput;
-
-    // Title.ts @jxarco
-    /**
-     * @class Title
-     * @description Title Component
-     */
-    class Title extends BaseComponent {
-        constructor(name, options = {}) {
-            console.assert(name.length !== 0, "Can't create Title Component without text!");
-            // Note: Titles are not registered in Panel.components by now
-            super(exports.ComponentType.TITLE, null, null, options);
-            this.root.className = `lextitle ${this.root.className}`;
-            if (options.icon) {
-                let icon = exports.LX.makeIcon(options.icon, { iconClass: "mr-2" });
-                icon.querySelector("svg").style.color = options.iconColor || "";
-                this.root.appendChild(icon);
-            }
-            let text = document.createElement("span");
-            text.innerText = name;
-            this.root.appendChild(text);
-            Object.assign(this.root.style, options.style ?? {});
-            if (options.link != undefined) {
-                let linkDom = document.createElement('a');
-                linkDom.innerText = name;
-                linkDom.href = options.link;
-                linkDom.target = options.target ?? "";
-                linkDom.className = "lextitle link";
-                Object.assign(linkDom.style, options.style ?? {});
-                this.root.replaceWith(linkDom);
-            }
-        }
-    }
-    exports.LX.Title = Title;
+    exports.LX.Button = Button;
 
     // ComboButtons.ts @jxarco
     /**
@@ -1212,36 +981,41 @@
         constructor(name, options = {}) {
             options.hideName = true;
             super(exports.ComponentType.CARD, name, null, options);
-            let container = document.createElement('div');
-            container.className = "lexcard";
-            container.style.width = "100%";
-            this.root.appendChild(container);
-            if (options.img) {
-                let img = document.createElement('img');
-                img.src = options.img;
-                container.appendChild(img);
-                if (options.link != undefined) {
-                    img.style.cursor = "pointer";
-                    img.addEventListener('click', function () {
-                        const hLink = container.querySelector('a');
-                        if (hLink) {
-                            hLink.click();
-                        }
-                    });
+            this.root.classList.add("place-content-center");
+            const container = exports.LX.makeContainer(["100%", "auto"], "lexcard max-w-sm flex flex-col gap-4 bg-primary border rounded-xl py-6", "", this.root);
+            if (options.header) {
+                const hasAction = (options.header.action !== undefined);
+                let header = exports.LX.makeContainer(["100%", "auto"], `flex ${hasAction ? "flex-row gap-4" : "flex-col gap-1"} px-6`, "", container);
+                if (hasAction) {
+                    const actionBtn = new Button(null, options.header.action.name, options.header.action.callback);
+                    header.appendChild(actionBtn.root);
+                    const titleDescBox = exports.LX.makeContainer(["75%", "auto"], `flex flex-col gap-1`, "");
+                    header.prepend(titleDescBox);
+                    header = titleDescBox;
+                }
+                if (options.header.title) {
+                    exports.LX.makeElement("div", "text-md leading-none font-semibold", options.header.title, header);
+                }
+                if (options.header.description) {
+                    exports.LX.makeElement("div", "text-sm fg-tertiary", options.header.description, header);
                 }
             }
-            let cardNameDom = document.createElement('span');
-            cardNameDom.innerText = name;
-            container.appendChild(cardNameDom);
-            if (options.link != undefined) {
-                let cardLinkDom = document.createElement('a');
-                cardLinkDom.innerText = name;
-                cardLinkDom.href = options.link;
-                cardLinkDom.target = options.target ?? "";
-                cardNameDom.innerText = "";
-                cardNameDom.appendChild(cardLinkDom);
+            if (options.content) {
+                const content = exports.LX.makeContainer(["100%", "auto"], "flex flex-col gap-2 px-6", "", container);
+                const elements = [].concat(options.content);
+                for (let e of elements) {
+                    content.appendChild(e.root ? e.root : e);
+                }
+            }
+            if (options.footer) {
+                const footer = exports.LX.makeContainer(["100%", "auto"], "flex flex-col gap-1 px-6", "", container);
+                const elements = [].concat(options.footer);
+                for (let e of elements) {
+                    footer.appendChild(e.root ? e.root : e);
+                }
             }
             if (options.callback) {
+                container.classList.add("selectable");
                 container.style.cursor = "pointer";
                 container.addEventListener("click", (e) => {
                     this._trigger(new IEvent(name, null, e), options.callback);
@@ -1298,7 +1072,7 @@
                 entryData.placeholder = entryData.placeholder ?? (entryData.label ?? `Enter ${entry}`);
                 entryData.ignoreValidation = true;
                 if (!(options.skipLabels ?? false)) {
-                    const label = new TextInput(null, entryData.label ?? entry, null, { disabled: true, inputClass: "formlabel nobg" });
+                    const label = new TextInput(null, entryData.label ?? entry, null, { disabled: true, inputClass: "formlabel bg-none" });
                     container.appendChild(label.root);
                 }
                 entryData.textComponent = new TextInput(null, entryData.constructor == Object ? entryData.value : entryData, (value, event) => {
@@ -2785,6 +2559,7 @@
             let arrayValue = value.replace(/\s/g, '').split(',');
             let defaultValue = exports.LX.deepCopy(arrayValue);
             super(exports.ComponentType.TAGS, name, defaultValue, options);
+            this.options.skipDuplicates = options.skipDuplicates ?? true;
             this.onGetValue = () => {
                 return exports.LX.deepCopy(value);
             };
@@ -2824,16 +2599,16 @@
                 tagInput.placeholder = "Add tag...";
                 tagsContainer.appendChild(tagInput);
                 tagInput.onkeydown = e => {
-                    const val = tagInput.value.replace(/\s/g, '');
                     if (e.key == ' ' || e.key == 'Enter') {
+                        const val = tagInput.value.replace(/\s/g, '');
                         e.preventDefault();
-                        if (!val.length || value.indexOf(val) > -1)
+                        if (!val.length || (options.skipDuplicates && value.indexOf(val) > -1))
                             return;
                         value.push(val);
                         this.set(value, false, e);
+                        tagsContainer.querySelector("input")?.focus(); // generateTags creates a new tagInput instance
                     }
                 };
-                tagInput.focus();
             };
             this.generateTags(arrayValue);
             exports.LX.doAsync(this.onResize.bind(this));
@@ -4726,6 +4501,157 @@
     }
     exports.LX.CalendarRange = CalendarRange;
 
+    // Pagination.ts @jxarco
+    /**
+     * @class Pagination
+     */
+    class Pagination {
+        static ITEMS_PER_PAGE_VALUES = [8, 12, 24, 48, 96];
+        root;
+        pagesRoot;
+        page = 1;
+        pages = 1;
+        _alwaysShowEdges = true;
+        _useEllipsis = true;
+        _maxButtons = 3;
+        _itemsPerPage = 12;
+        _itemsPerPageValues = Pagination.ITEMS_PER_PAGE_VALUES;
+        onChange = () => { };
+        onItemsPerPageChange = () => { };
+        constructor(options = {}) {
+            this.pages = options.pages ?? 1;
+            this.page = exports.LX.clamp(options.page ?? 1, 1, this.pages);
+            this._alwaysShowEdges = options.alwaysShowEdges ?? this._alwaysShowEdges;
+            this._useEllipsis = options.useEllipsis ?? this._useEllipsis;
+            this._maxButtons = options.maxButtons ?? this._maxButtons;
+            this._itemsPerPage = options.itemsPerPage ?? this._itemsPerPage;
+            if (this._itemsPerPageValues.indexOf(this._itemsPerPage) === -1) {
+                this._itemsPerPageValues.push(this._itemsPerPage);
+                this._itemsPerPageValues = this._itemsPerPageValues.sort((a, b) => {
+                    if (a < b)
+                        return -1;
+                    if (a > b)
+                        return 1;
+                    return 0;
+                });
+            }
+            if (typeof options.onChange === 'function') {
+                this.onChange = options.onChange;
+            }
+            if (typeof options.onItemsPerPageChange === 'function') {
+                this.onItemsPerPageChange = options.onItemsPerPageChange;
+            }
+            this.root = exports.LX.makeContainer(["auto", "auto"], "flex flex-row gap-2 " + (options.className ?? ""));
+            if (options.allowChangeItemsPerPage ?? false) {
+                const itemsPerPageSelectContainer = exports.LX.makeContainer(["auto", "auto"], "flex flex-row items-center", "", this.root);
+                const itemsPerPageSelect = new Select(null, Pagination.ITEMS_PER_PAGE_VALUES, this._itemsPerPage, (v) => {
+                    this._itemsPerPage = v;
+                    this.onItemsPerPageChange?.(this._itemsPerPage);
+                }, { overflowContainer: null });
+                itemsPerPageSelectContainer.appendChild(itemsPerPageSelect.root);
+            }
+            this.pagesRoot = exports.LX.makeContainer(["auto", "auto"], "flex flex-row overflow-scroll", "", this.root);
+            this.refresh();
+        }
+        setPage(n) {
+            const newPage = exports.LX.clamp(n, 1, this.pages);
+            if (newPage === this.page) {
+                return;
+            }
+            this.page = newPage;
+            this.refresh();
+            this._emitChange();
+        }
+        setPages(n) {
+            this.pages = Math.max(1, n);
+            if (this.page > this.pages) {
+                this.page = this.pages;
+            }
+            this.refresh();
+        }
+        next() {
+            this.setPage(this.page + 1);
+        }
+        prev() {
+            this.setPage(this.page - 1);
+        }
+        refresh() {
+            this.pagesRoot.innerHTML = "";
+            // Previous page button
+            this._makeButton(exports.LX.makeIcon("ChevronLeft").innerHTML, this.page === 1, () => this.prev(), `bg-none ${this.page === 1 ? "" : "hover:bg-tertiary"}`);
+            const pagesContainer = exports.LX.makeContainer(["auto", "auto"], "flex flex-row items-center", "", this.pagesRoot);
+            const maxButtons = this._maxButtons + 2; // + next and prev
+            if (this.pages <= maxButtons) {
+                for (let i = 1; i <= this.pages; i++) {
+                    this._makePageButton(pagesContainer, i);
+                }
+            }
+            else {
+                const page = this.page;
+                const total = this.pages;
+                // Always show first and last pages and the middle cluster depends on current page!
+                const showFirst = 1;
+                const showLast = total;
+                const edgesOffset = this._alwaysShowEdges ? 1 : 0;
+                const clusterSize = maxButtons - 2; // reserve spots for first and last
+                const half = Math.floor(clusterSize / 2);
+                let start = Math.max(1 + edgesOffset, page - half);
+                let end = Math.min(total - edgesOffset, page + half);
+                // Adjust cluster if too close to edges
+                if (start <= 2) {
+                    start = 1 + edgesOffset;
+                    end = start + clusterSize - 1;
+                }
+                if (end >= total - 1) {
+                    end = total - edgesOffset;
+                    start = end - clusterSize + 1;
+                }
+                // First page
+                if (this._alwaysShowEdges) {
+                    this._makePageButton(pagesContainer, showFirst);
+                }
+                // Ellipsis after first if needed
+                if (this._useEllipsis && start > 2) {
+                    exports.LX.makeElement('span', "h-6 px-2 text-lg font-semibold whitespace-nowrap", "...", pagesContainer);
+                }
+                // Page button cluster
+                for (let i = start; i <= end; i++) {
+                    this._makePageButton(pagesContainer, i);
+                }
+                // Ellipsis before last if needed
+                if (this._useEllipsis && end < total - 1) {
+                    exports.LX.makeElement('span', "h-6 px-2 text-lg font-semibold whitespace-nowrap", "...", pagesContainer);
+                }
+                // Last page
+                if (this._alwaysShowEdges) {
+                    this._makePageButton(pagesContainer, showLast);
+                }
+            }
+            // Next page button
+            this._makeButton(exports.LX.makeIcon("ChevronRight").innerHTML, this.page === this.pages, () => this.next(), `bg-none ${this.page === this.pages ? "" : "hover:bg-tertiary"}`);
+        }
+        _emitChange() {
+            // Event callback
+            this.onChange?.(this.page);
+            // DOM event for DOM workflows?
+            this.root.dispatchEvent(new CustomEvent('change', {
+                detail: { page: this.page }
+            }));
+        }
+        _makeButton(label, disabled, onclick, buttonClass, parent) {
+            const btn = new Button(null, label, onclick, { disabled, buttonClass });
+            btn.root.querySelector("button").style.paddingInline = "0.5rem";
+            parent = parent ?? this.pagesRoot;
+            parent.appendChild(btn.root);
+            return btn.root;
+        }
+        _makePageButton(container, i) {
+            const buttonClass = i === this.page ? "bg-secondary border" : "bg-none";
+            return this._makeButton(String(i), false, () => this.setPage(i), buttonClass, container);
+        }
+    }
+    exports.LX.Pagination = Pagination;
+
     // Rate.ts @jxarco
     /**
      * @class Table
@@ -4741,9 +4667,15 @@
         _toggleColumns;
         _sortColumns;
         _resetCustomFiltersBtn = null;
+        _hiddenColumns = [];
+        _paginator;
+        _showSelectedNumber;
         _centered;
         get centered() { return this._centered; }
         set centered(v) { this._setCentered(v); }
+        _rowsPerPage = -1;
+        get rowsPerPage() { return this._rowsPerPage; }
+        set rowsPerPage(v) { this._setRowsPerPage(v); }
         constructor(name, data, options = {}) {
             if (!data) {
                 throw ("Data is needed to create a table!");
@@ -4760,18 +4692,36 @@
             if (this._centered === true) {
                 container.classList.add("centered");
             }
+            this.data = data;
             this.filter = options.filter ?? false;
             this.customFilters = options.customFilters;
             this.activeCustomFilters = {};
             this._toggleColumns = options.toggleColumns ?? false;
             this._sortColumns = options.sortColumns ?? true;
+            this._showSelectedNumber = options.showSelectedNumber ?? true;
             this._currentFilter = options.filterValue;
+            this._hiddenColumns = options.hiddenColumns ?? [];
             data.head = data.head ?? [];
             data.body = data.body ?? [];
             data.checkMap = {};
             data.colVisibilityMap = {};
-            data.head.forEach((col, index) => { data.colVisibilityMap[index] = true; });
-            this.data = data;
+            data.head.forEach((colName, index) => {
+                const idx = this._hiddenColumns.indexOf(colName);
+                const visible = (!this._toggleColumns) || (idx === -1);
+                data.colVisibilityMap[index] = visible;
+            });
+            if (options.pagination ?? false) {
+                this._rowsPerPage = options.rowsPerPage ?? 12;
+                this._paginator = new Pagination({
+                    pages: this._getNumPages(),
+                    itemsPerPage: this._rowsPerPage,
+                    allowChangeItemsPerPage: options.allowChangeItemsPerPage ?? true,
+                    onChange: this._onChangePage.bind(this),
+                    onItemsPerPageChange: (v) => {
+                        this.rowsPerPage = v;
+                    }
+                });
+            }
             const getDate = (text) => {
                 // Match DD/MM/YYYY or DD-MM-YYYY
                 const m = text.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{2}|\d{4})$/);
@@ -4824,6 +4774,7 @@
                 data.body = data.body.sort(compareFn.bind(this, idx, sign));
                 this.refresh();
             };
+            const that = this;
             // Append header
             if (this.filter || this.customFilters || this._toggleColumns) {
                 const headerContainer = exports.LX.makeContainer(["100%", "auto"], "flex flex-row mb-2");
@@ -5015,6 +4966,8 @@
                                 data.checkMap[rowId] = this.checked;
                                 el.querySelector("input[type='checkbox']").checked = this.checked;
                             }
+                            const sRows = that.getSelectedRows();
+                            exports.LX.emitSignal("@rows_selected_changed", sRows.length);
                         });
                         this.rowOffsetCount++;
                         hrow.appendChild(th);
@@ -5024,7 +4977,7 @@
                         th.innerHTML = `<span>${headData}</span>`;
                         th.querySelector("span").appendChild(exports.LX.makeIcon("MenuArrows", { svgClass: "sm" }));
                         const idx = data.head.indexOf(headData);
-                        if (this._centered?.indexOf && this._centered.indexOf(idx) > -1) {
+                        if (this._centered?.indexOf && ((this._centered.indexOf(idx) > -1) || (this._centered.indexOf(headData) > -1))) {
                             th.classList.add("centered");
                         }
                         const menuOptions = [];
@@ -5101,8 +5054,9 @@
                         if (movePending) {
                             // Modify inner data first
                             // Origin row should go to the target row, and the rest should be moved up/down
-                            const fromIdx = rIdx - 1;
-                            const targetIdx = movePending[1] - 1;
+                            const pageOffset = this._paginator ? (this._paginator.page - 1) * this.rowsPerPage : 0;
+                            const fromIdx = rIdx - 1 + pageOffset;
+                            const targetIdx = movePending[1] - 1 + pageOffset;
                             exports.LX.emitSignal("@on_table_sort", { instance: this, fromIdx, targetIdx });
                             const b = data.body[fromIdx];
                             let targetOffset = 0;
@@ -5123,7 +5077,7 @@
                             }
                             data.body[targetIdx] = b;
                             const parent = movePending[0].parentNode;
-                            exports.LX.insertChildAtIndex(parent, movePending[0], targetIdx + targetOffset);
+                            exports.LX.insertChildAtIndex(parent, movePending[0], targetIdx + targetOffset - pageOffset);
                             movePending = null;
                         }
                         rIdx = null;
@@ -5141,6 +5095,8 @@
                         fromRow.dY += e.movementY;
                         fromRow.style.transform = `translateY(${fromRow.dY}px)`;
                     };
+                    const filtered = [];
+                    // Filter rows
                     for (let r = 0; r < data.body.length; ++r) {
                         const bodyData = data.body[r];
                         if (this.filter) {
@@ -5207,8 +5163,19 @@
                                 continue;
                             }
                         }
+                        filtered.push(bodyData);
+                    }
+                    if (this._paginator) {
+                        this._paginator.setPages(this._getNumPages(filtered.length));
+                    }
+                    const start = this._paginator ? (this._paginator.page - 1) * this.rowsPerPage : 0;
+                    const end = this._paginator ? Math.min(start + this.rowsPerPage, filtered.length) : filtered.length;
+                    // Render filtered rows
+                    for (let r = start; r < end; ++r) {
+                        const bodyData = filtered[r];
+                        const idx = this.data.body.indexOf(bodyData);
                         const row = document.createElement('tr');
-                        const rowId = exports.LX.getSupportedDOMName(bodyData.join('-')).substr(0, 32);
+                        const rowId = this._makeRowId(bodyData);
                         row.setAttribute("rowId", rowId);
                         if (options.sortable ?? false) {
                             const td = document.createElement('td');
@@ -5266,14 +5233,17 @@
                                         headInput.checked = data.checkMap[":root"] = true;
                                     }
                                 }
+                                const sRows = that.getSelectedRows();
+                                exports.LX.emitSignal("@rows_selected_changed", sRows.length);
                             });
                             row.appendChild(td);
                         }
-                        for (const rowData of bodyData) {
+                        for (let colIdx = 0; colIdx < bodyData.length; ++colIdx) {
+                            const rowData = bodyData[colIdx];
                             const td = document.createElement('td');
                             td.innerHTML = `${rowData}`;
-                            const idx = bodyData.indexOf(rowData);
-                            if (this._centered?.indexOf && this._centered.indexOf(idx) > -1) {
+                            const headData = data.head[colIdx];
+                            if (this._centered?.indexOf && ((this._centered.indexOf(colIdx) > -1) || (this._centered.indexOf(headData) > -1))) {
                                 td.classList.add("centered");
                             }
                             row.appendChild(td);
@@ -5288,10 +5258,9 @@
                                 let button = null;
                                 if (action == "delete") {
                                     button = exports.LX.makeIcon("Trash3", { title: "Delete Row" });
-                                    button.addEventListener('click', function () {
-                                        // Don't need to refresh table..
-                                        data.body.splice(r, 1);
-                                        row.remove();
+                                    button.addEventListener('click', () => {
+                                        data.body.splice(idx, 1);
+                                        this.refresh();
                                     });
                                 }
                                 else if (action == "menu") {
@@ -5300,7 +5269,7 @@
                                         if (!options.onMenuAction) {
                                             return;
                                         }
-                                        const menuOptions = options.onMenuAction(r, data);
+                                        const menuOptions = options.onMenuAction(idx, data);
                                         console.assert(menuOptions.length, "Add items to the Menu Action Dropdown!");
                                         exports.LX.addDropdownMenu(e.target, menuOptions, { side: "bottom", align: "end" });
                                     });
@@ -5311,7 +5280,7 @@
                                     button = exports.LX.makeIcon(action.icon, { title: action.title });
                                     if (action.callback) {
                                         button.addEventListener('click', (e) => {
-                                            const mustRefresh = action.callback(bodyData, table, e);
+                                            const mustRefresh = action.callback(idx, bodyData, table, e);
                                             if (mustRefresh) {
                                                 this.refresh();
                                             }
@@ -5324,6 +5293,10 @@
                             row.appendChild(td);
                         }
                         body.appendChild(row);
+                    }
+                    if (options.selectable) {
+                        const sRows = this.getSelectedRows();
+                        exports.LX.emitSignal("@rows_selected_changed", sRows.length);
                     }
                     if (body.childNodes.length == 0) {
                         const row = document.createElement('tr');
@@ -5345,18 +5318,53 @@
                     }
                 }
             };
+            const showSelected = this._showSelectedNumber && options.selectable;
+            // Make footer
+            if (showSelected || this._paginator) {
+                const footerContainer = exports.LX.makeContainer(["100%", "auto"], "flex flex-row px-3 my-1 align-center", "", container);
+                // Show num selected rows
+                if (showSelected) {
+                    const selectedRowsLabelContainer = exports.LX.makeContainer(["100%", "auto"], "flex justify-start items-center fg-secondary", "0 row(s) selected.", footerContainer);
+                    exports.LX.addSignal("@rows_selected_changed", (target, n) => {
+                        if (!this._showSelectedNumber)
+                            return;
+                        selectedRowsLabelContainer.innerHTML = n === 0 ? "" : `${n ?? 0} row(s) selected.`;
+                    });
+                }
+                // Pagination
+                if (this._paginator) {
+                    const paginationContainer = exports.LX.makeContainer(["100%", "auto"], "flex justify-end", "", footerContainer);
+                    paginationContainer.appendChild(this._paginator.root);
+                }
+            }
             this.refresh();
             exports.LX.doAsync(this.onResize.bind(this));
         }
         getSelectedRows() {
             const selectedRows = [];
             for (const row of this.data.body) {
-                const rowId = exports.LX.getSupportedDOMName(row.join('-')).substr(0, 32);
+                const rowId = this._makeRowId(row);
                 if (this.data.checkMap[rowId] === true) {
                     selectedRows.push(row);
                 }
             }
             return selectedRows;
+        }
+        _makeRowId(row) {
+            return exports.LX.getSupportedDOMName(row.join('-')).substr(0, 32);
+        }
+        _onChangePage(page) {
+            this.refresh();
+        }
+        _getNumPages(total) {
+            if (this.rowsPerPage === -1)
+                return 1;
+            total = total ?? this.data.body?.length;
+            return Math.ceil((total ?? 0) / this.rowsPerPage);
+        }
+        _setRowsPerPage(n) {
+            this._rowsPerPage = n;
+            this.refresh();
         }
         _setCentered(v) {
             if (v.constructor == Boolean) {
@@ -5941,6 +5949,9 @@
                 item.addEventListener("dragenter", (e) => {
                     e.target.classList.add("draggingover");
                 });
+                item.addEventListener("dragend", (e) => {
+                    e.target.classList.remove("draggingover");
+                });
                 item.addEventListener("dragleave", (e) => {
                     e.target.classList.remove("draggingover");
                 });
@@ -5948,6 +5959,11 @@
                     e.preventDefault(); // Prevent default action (open as link for some elements)
                     let dragged = window.__tree_node_dragged;
                     if (!dragged) {
+                        // Test if we are moving from AssetView extension
+                        dragged = window.__av_item_dragged;
+                        if (dragged) {
+                            dragged._nodeTarget = node;
+                        }
                         return;
                     }
                     let target = node;
@@ -7049,7 +7065,7 @@
          */
         addLabel(value, options = {}) {
             options.disabled = true;
-            options.inputClass = (options.inputClass ?? "") + " nobg";
+            options.inputClass = (options.inputClass ?? "") + " bg-none";
             const component = this.addText(null, value, null, options);
             component.type = exports.ComponentType.LABEL;
             return component;
@@ -7574,6 +7590,252 @@
         }
     }
     exports.LX.Panel = Panel;
+
+    // Menubar.ts @jxarco
+    /**
+     * @class Menubar
+     */
+    class Menubar {
+        root;
+        siblingArea;
+        buttonContainer;
+        items = [];
+        buttons = {};
+        icons = {};
+        shorts = {};
+        focused = false;
+        _currentDropdown;
+        constructor(items, options = {}) {
+            this.root = document.createElement("div");
+            this.root.className = "lexmenubar";
+            if (options.float) {
+                this.root.style.justifyContent = options.float;
+            }
+            this.items = items ?? [];
+            this.createEntries();
+        }
+        _resetMenubar(focus) {
+            this.root.querySelectorAll(".lexmenuentry").forEach((e) => {
+                e.classList.remove('selected');
+                delete e.dataset["built"];
+            });
+            if (this._currentDropdown) {
+                this._currentDropdown.destroy();
+                this._currentDropdown = null;
+            }
+            // Next time we need to click again
+            this.focused = focus ?? false;
+        }
+        /**
+         * @method createEntries
+         */
+        createEntries() {
+            for (let item of this.items) {
+                let key = item.name;
+                let pKey = exports.LX.getSupportedDOMName(key);
+                // Item already created
+                if (this.root.querySelector("#" + pKey)) {
+                    continue;
+                }
+                let entry = document.createElement('div');
+                entry.className = "lexmenuentry";
+                entry.id = pKey;
+                entry.innerHTML = "<span>" + key + "</span>";
+                entry.tabIndex = 1;
+                this.root.appendChild(entry);
+                const _showEntry = () => {
+                    this._resetMenubar(true);
+                    entry.classList.add("selected");
+                    entry.dataset["built"] = "true";
+                    this._currentDropdown = exports.LX.addDropdownMenu(entry, item.submenu ?? [], { side: "bottom", align: "start", onBlur: () => {
+                            this._resetMenubar();
+                        } });
+                };
+                entry.addEventListener("mousedown", (e) => {
+                    e.preventDefault();
+                });
+                entry.addEventListener("mouseup", (e) => {
+                    e.preventDefault();
+                    const f = item['callback'];
+                    if (f) {
+                        f.call(this, key, entry, e);
+                        return;
+                    }
+                    _showEntry();
+                    this.focused = true;
+                    return false;
+                });
+                entry.addEventListener("mouseover", (e) => {
+                    if (this.focused && !(entry.dataset["built"] ?? false)) {
+                        _showEntry();
+                    }
+                });
+            }
+        }
+        /**
+         * @method getButton
+         * @param {String} name
+         */
+        getButton(name) {
+            return this.buttons[name];
+        }
+        /**
+         * @method getSubitems
+         * @param {Object} item: parent item
+         * @param {Array} tokens: split path strings
+        */
+        getSubitem(item, tokens) {
+            for (const s of item) {
+                if (s?.name != tokens[0]) {
+                    continue;
+                }
+                if (tokens.length == 1) {
+                    return s;
+                }
+                else if (s.submenu) {
+                    tokens.shift();
+                    return this.getSubitem(s.submenu, tokens);
+                }
+            }
+        }
+        /**
+         * @method getItem
+         * @param {String} path
+        */
+        getItem(path) {
+            // Process path
+            const tokens = path.split('/');
+            return this.getSubitem(this.items, tokens);
+        }
+        /**
+         * @method setButtonIcon
+         * @param {String} name
+         * @param {String} icon
+         * @param {Function} callback
+         * @param {Object} options
+         */
+        setButtonIcon(name, icon, callback, options = {}) {
+            if (!name) {
+                throw ("Set Button Name!");
+            }
+            let button = this.buttons[name];
+            // If the button already exists, delete it
+            // since only one button of this type can exist
+            if (button) {
+                delete this.buttons[name];
+                exports.LX.deleteElement(button.root);
+            }
+            // Otherwise, create it
+            button = new Button(name, undefined, callback, {
+                title: name,
+                buttonClass: "lexmenubutton main bg-none",
+                disabled: options.disabled,
+                icon,
+                svgClass: "xl",
+                hideName: true,
+                swap: options.swap
+            });
+            if (options.float == "right") {
+                button.root.right = true;
+            }
+            if (this.root.lastChild && this.root.lastChild.right) {
+                this.root.lastChild.before(button.root);
+            }
+            else if (options.float == "left") {
+                this.root.prepend(button.root);
+            }
+            else {
+                this.root.appendChild(button.root);
+            }
+            this.buttons[name] = button;
+        }
+        /**
+         * @method setButtonImage
+         * @param {String} name
+         * @param {String} src
+         * @param {Function} callback
+         * @param {Object} options
+         */
+        setButtonImage(name, src, callback, options = {}) {
+            if (!name) {
+                throw ("Set Button Name!");
+            }
+            let button = this.buttons[name];
+            if (button) {
+                button.querySelector('img').src = src;
+                return;
+            }
+            // Otherwise, create it
+            button = document.createElement('div');
+            const disabled = options.disabled ?? false;
+            button.className = "lexmenubutton main" + (disabled ? " disabled" : "");
+            button.title = name;
+            button.innerHTML = "<a><image src='" + src + "' class='lexicon' style='height:32px;'></a>";
+            if (options.float == "right") {
+                button.right = true;
+            }
+            if (this.root.lastChild && this.root.lastChild.right) {
+                this.root.lastChild.before(button);
+            }
+            else if (options.float == "left") {
+                this.root.prepend(button);
+            }
+            else {
+                this.root.appendChild(button);
+            }
+            const _b = button.querySelector('a');
+            _b.addEventListener("mousedown", (e) => {
+                e.preventDefault();
+            });
+            _b.addEventListener("mouseup", (e) => {
+                if (callback && !disabled) {
+                    callback.call(this, _b, e);
+                }
+            });
+            this.buttons[name] = button;
+        }
+        /**
+         * @method addButton
+         * @param {Array} buttons
+         * @param {Object} options
+         * float: center (Default), right
+         */
+        addButtons(buttons, options = {}) {
+            if (!buttons) {
+                throw ("No buttons to add!");
+            }
+            if (!this.buttonContainer) {
+                this.buttonContainer = document.createElement("div");
+                this.buttonContainer.className = "lexmenubuttons";
+                this.buttonContainer.classList.add(options.float ?? "center");
+                if (options.float == "right") {
+                    this.buttonContainer.right = true;
+                }
+                if (this.root.lastChild && this.root.lastChild.right) {
+                    this.root.lastChild.before(this.buttonContainer);
+                }
+                else {
+                    this.root.appendChild(this.buttonContainer);
+                }
+            }
+            for (const data of buttons) {
+                const title = data.title;
+                const button = new Button(title, data.label, data.callback, {
+                    title,
+                    buttonClass: "bg-none",
+                    disabled: data.disabled,
+                    icon: data.icon,
+                    hideName: true,
+                    swap: data.swap,
+                    iconPosition: "start"
+                });
+                this.buttonContainer.appendChild(button.root);
+                if (title) {
+                    this.buttons[title] = button;
+                }
+            }
+        }
+    }
 
     // Tabs.ts @jxarco
     /**
@@ -8947,6 +9209,17 @@
         return JSON.parse(JSON.stringify(obj));
     }
     exports.LX.deepCopy = deepCopy;
+    function concatTypedArray(arrays, ArrayType) {
+        let size = arrays.reduce((acc, arr) => acc + arr.length, 0);
+        let result = new ArrayType(size); // generate just one array
+        let offset = 0;
+        for (let i = 0; i < arrays.length; ++i) {
+            result.set(arrays[i], offset); // copy values
+            offset += arrays[i].length;
+        }
+        return result;
+    }
+    exports.LX.concatTypedArray = concatTypedArray;
     /**
      * @method setTheme
      * @description Set dark or light theme
@@ -9227,6 +9500,24 @@
     }
     exports.LX.guidGenerator = guidGenerator;
     /**
+     * @method escapeRegExp
+     * @description Helper to escape regexp chars
+     */
+    function escapeRegExp(str) {
+        return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }
+    exports.LX.escapeRegExp = escapeRegExp;
+    /**
+     * @method wildcardToRegExp
+     * @description Helper to get regexs from string using wildcard chars
+     */
+    function wildcardToRegExp(pattern) {
+        const escaped = pattern.replace(/([.+^${}()|[\]\\])/g, '\\$1');
+        const converted = escaped.replace(/\*/g, '.*').replace(/\?/g, '.');
+        return new RegExp('^' + converted + '$', 'i');
+    }
+    exports.LX.wildcardToRegExp = wildcardToRegExp;
+    /**
      * @method buildTextPattern
      * @description Create a validation pattern using specific options
      * @param {Object} options
@@ -9406,7 +9697,8 @@
         const collapsed = (options.collapsed ?? true);
         const actionIcon = exports.LX.makeIcon("Right");
         actionIcon.classList.add("collapser");
-        actionIcon.dataset["collapsed"] = `${collapsed}`;
+        if (collapsed)
+            actionIcon.dataset["collapsed"] = `${collapsed}`;
         actionIcon.style.marginLeft = "auto";
         actionIcon.style.marginRight = "0.2rem";
         actionIcon.addEventListener("click", function (e) {
@@ -9414,7 +9706,7 @@
             e.stopPropagation();
             if (this.dataset["collapsed"]) {
                 delete this.dataset["collapsed"];
-                content.style.display = "block";
+                content.style.display = options.display ?? "block";
             }
             else {
                 this.dataset["collapsed"] = "true";
@@ -9450,15 +9742,16 @@
         snippet.className = "lexcodesnippet " + (options.className ?? "");
         snippet.style.width = size ? size[0] : "auto";
         snippet.style.height = size ? size[1] : "auto";
-        const area = new Area({ noAppend: true });
-        let editor = new exports.LX.CodeEditor(area, {
+        const area = new Area({ xskipAppend: true });
+        new exports.LX.CodeEditor(area, {
             skipInfo: true,
             disableEdition: true,
             allowAddScripts: false,
             name: options.tabName,
-            callback: () => {
+            callback: (instance) => {
+                instance.setText(code, options.language ?? "Plain Text");
                 if (options.linesAdded) {
-                    const code = editor.root.querySelector(".code");
+                    const code = instance.root.querySelector(".code");
                     for (let ls of options.linesAdded) {
                         const l = ls;
                         if (l.constructor == Number) {
@@ -9473,7 +9766,7 @@
                     }
                 }
                 if (options.linesRemoved) {
-                    const code = editor.root.querySelector(".code");
+                    const code = instance.root.querySelector(".code");
                     for (let ls of options.linesRemoved) {
                         const l = ls;
                         if (l.constructor == Number) {
@@ -9487,27 +9780,26 @@
                         }
                     }
                 }
+                if (options.windowMode) {
+                    const windowActionButtons = document.createElement("div");
+                    windowActionButtons.className = "lexwindowbuttons";
+                    const aButton = document.createElement("span");
+                    aButton.style.background = "#ee4f50";
+                    const bButton = document.createElement("span");
+                    bButton.style.background = "#f5b720";
+                    const cButton = document.createElement("span");
+                    cButton.style.background = "#53ca29";
+                    windowActionButtons.appendChild(aButton);
+                    windowActionButtons.appendChild(bButton);
+                    windowActionButtons.appendChild(cButton);
+                    const tabs = instance.root.querySelector(".lexareatabs");
+                    tabs.prepend(windowActionButtons);
+                }
+                if (!(options.lineNumbers ?? true)) {
+                    instance.root.classList.add("no-gutter");
+                }
             }
         });
-        editor.setText(code, options.language ?? "Plain Text");
-        if (options.windowMode) {
-            const windowActionButtons = document.createElement("div");
-            windowActionButtons.className = "lexwindowbuttons";
-            const aButton = document.createElement("span");
-            aButton.style.background = "#ee4f50";
-            const bButton = document.createElement("span");
-            bButton.style.background = "#f5b720";
-            const cButton = document.createElement("span");
-            cButton.style.background = "#53ca29";
-            windowActionButtons.appendChild(aButton);
-            windowActionButtons.appendChild(bButton);
-            windowActionButtons.appendChild(cButton);
-            const tabs = editor.root.querySelector(".lexareatabs");
-            tabs.prepend(windowActionButtons);
-        }
-        if (!(options.lineNumbers ?? true)) {
-            editor.root.classList.add("no-gutter");
-        }
         snippet.appendChild(area.root);
         return snippet;
     }
@@ -10635,6 +10927,28 @@
         return { ...RAW_ICONS, ...aliasIcons };
     })();
 
+    // Spinner.ts @jxarco
+    /**
+     * @class Spinner
+     */
+    class Spinner {
+        root;
+        constructor(options = {}) {
+            const icon = options.icon ?? "LoaderCircle";
+            const size = options.size ?? "md";
+            const iconClass = `flex ${options.iconClass ?? ""}`.trim();
+            const svgClass = `animate-spin ${size} ${options.svgClass ?? ""}`.trim();
+            this.root = exports.LX.makeIcon(icon, { iconClass, svgClass });
+        }
+        html() {
+            return this.root.innerHTML;
+        }
+        destroy() {
+            this.root.remove();
+        }
+    }
+    exports.LX.Spinner = Spinner;
+
     // Sidebar.ts @jxarco
     /**
      * @class Sidebar
@@ -10695,7 +11009,7 @@
         constructor(options = {}) {
             const mobile = navigator && /Android|iPhone/i.test(navigator.userAgent);
             this.root = document.createElement("div");
-            this.root.className = "lexsidebar " + (options.className ?? "");
+            this.root.className = "lexsidebar flex flex-col " + (options.className ?? "");
             this.callback = options.callback ?? null;
             this._displaySelected = options.displaySelected ?? false;
             this.side = options.side ?? "left";
@@ -10728,7 +11042,7 @@
             if (!(options.skipHeader ?? false)) {
                 this.header = options.header ?? this._generateDefaultHeader(options);
                 console.assert(this.header.constructor === HTMLDivElement, "Use an HTMLDivElement to build your custom header");
-                this.header.className = "lexsidebarheader";
+                this.header.className = "lexsidebarheader flex-auto";
                 this.root.appendChild(this.header);
                 if (this.collapsable) {
                     const icon = exports.LX.makeIcon(this.side == "left" ? "PanelLeft" : "PanelRight", { title: "Toggle Sidebar", iconClass: "toggler" });
@@ -10767,23 +11081,16 @@
             // Content
             {
                 this.content = document.createElement('div');
-                this.content.className = "lexsidebarcontent";
+                this.content.className = "lexsidebarcontent flex-auto-fill";
                 this.root.appendChild(this.content);
             }
             // Footer
             if (!(options.skipFooter ?? false)) {
                 this.footer = options.footer ?? this._generateDefaultFooter(options);
                 console.assert(this.footer.constructor === HTMLDivElement, "Use an HTMLDivElement to build your custom footer");
-                this.footer.className = "lexsidebarfooter";
+                this.footer.className = "lexsidebarfooter flex-auto";
                 this.root.appendChild(this.footer);
             }
-            const resizeObserver = new ResizeObserver(entries => {
-                const contentOffset = (this.header?.offsetHeight ?? 0) +
-                    (this.filter?.offsetHeight ?? 0) +
-                    (this.footer?.offsetHeight ?? 0);
-                this.content.style.height = `calc(100% - ${contentOffset}px)`;
-            });
-            resizeObserver.observe(this.root);
         }
         _generateDefaultHeader(options = {}) {
             const header = document.createElement('div');
@@ -11561,7 +11868,7 @@
             const menuItem = document.createElement('div');
             menuItem.className = "lexdropdownmenuitem" + ((item.name || item.options) ? "" : " label") + (item.disabled ?? false ? " disabled" : "") + (` ${item.className ?? ""}`);
             menuItem.dataset["id"] = pKey;
-            menuItem.innerHTML = `<span>${key}</span>`;
+            menuItem.innerHTML = `<span class="ellipsis-overflow">${key}</span>`;
             menuItem.tabIndex = "1";
             parentDom.appendChild(menuItem);
             if (item.constructor === String) // Label case
@@ -11597,7 +11904,7 @@
                 menuItem.setAttribute("data-radioname", this._radioGroup.name);
             }
             else if (item.icon) {
-                const icon = exports.LX.makeIcon(item.icon, { svgClass: disabled ? "fg-tertiary" : item.svgClass ?? item.className });
+                const icon = item.icon.constructor === String ? exports.LX.makeIcon(item.icon, { svgClass: disabled ? "fg-tertiary" : item.svgClass ?? item.className }) : item.icon;
                 menuItem.prepend(icon);
             }
             else if (item.checked == undefined && applyIconPadding) // no checkbox, no icon, apply padding if there's checkbox or icon in other items
@@ -12227,7 +12534,7 @@
             }
             root.style.left = position[0] ?? "50%";
             root.style.top = position[1] ?? "50%";
-            panel.root.style.height = title ? "calc( 100% - " + (titleDiv.offsetHeight + 30) + "px )" : "calc( 100% - 51px )";
+            panel.root.style.height = title ? "calc( 100% - " + (titleDiv.offsetHeight + 30) + "px )" : "calc(100%)";
         }
         destroy() {
             this.root.remove();
@@ -12990,6 +13297,7 @@
     exports.NumberInput = NumberInput;
     exports.OTPInput = OTPInput;
     exports.Pad = Pad;
+    exports.Pagination = Pagination;
     exports.Panel = Panel;
     exports.PocketDialog = PocketDialog;
     exports.Popover = Popover;
@@ -13002,6 +13310,7 @@
     exports.Sidebar = Sidebar;
     exports.SizeInput = SizeInput;
     exports.Skeleton = Skeleton;
+    exports.Spinner = Spinner;
     exports.TabSections = TabSections;
     exports.Table = Table;
     exports.Tabs = Tabs;

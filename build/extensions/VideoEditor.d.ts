@@ -54,6 +54,15 @@ export declare class TimeBar {
  * @class VideoEditor
  */
 export declare class VideoEditor {
+    static CROP_HANDLE_L: number;
+    static CROP_HANDLE_R: number;
+    static CROP_HANDLE_T: number;
+    static CROP_HANDLE_B: number;
+    static CROP_HANDLE_TL: number;
+    static CROP_HANDLE_BL: number;
+    static CROP_HANDLE_TR: number;
+    static CROP_HANDLE_BR: number;
+    options: any;
     playing: boolean;
     videoReady: boolean;
     controls: boolean;
@@ -67,15 +76,14 @@ export declare class VideoEditor {
     video: HTMLVideoElement;
     loop: boolean;
     isDragging: boolean;
-    isResizing: boolean;
+    isResizing: any;
     crop: boolean;
     dragOffsetX: number;
     dragOffsetY: number;
     currentTimeString: string;
     timebar: TimeBar;
     mainArea: typeof Area;
-    cropArea: HTMLElement;
-    brCrop: HTMLElement;
+    cropArea: any;
     controlsArea: typeof Area;
     controlsPanelLeft: typeof Panel;
     controlsPanelRight: typeof Panel;
@@ -90,9 +98,13 @@ export declare class VideoEditor {
     onResize: any;
     onChangeSpeed: any;
     _updateTime: boolean;
+    _onCropMouseUp: (e: MouseEvent) => void;
+    _onCropMouseMove: (e: MouseEvent) => void;
+    resize: () => void;
     constructor(area: typeof Area, options?: any);
-    resizeCropArea(e: any): void;
-    dragCropArea(e: any): void;
+    setCropAreaHandles(flags: number): void;
+    resizeCropArea(sx: number, sy: number, isNormalized?: boolean): void;
+    moveCropArea(x: number, y: number, isNormalized?: boolean): void;
     loadVideo(options?: any): Promise<void>;
     _update(): void;
     timeToString(t: number): string;
@@ -105,7 +117,7 @@ export declare class VideoEditor {
         start: number;
         end: number;
     };
-    getCroppedArea(): DOMRect;
+    getCroppedArea(): any;
     showCropArea(): void;
     hideCropArea(): void;
     showControls(): void;

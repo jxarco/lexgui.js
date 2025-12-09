@@ -1,5 +1,5 @@
 // This is a generated file. Do not edit.
-export { AssetView, AssetViewEvent } from './AssetView.js';
+export { AssetView } from './AssetView.js';
 export { Knob } from './Audio.js';
 export { CodeEditor } from './CodeEditor.js';
 export { DocMaker } from './DocMaker.js';

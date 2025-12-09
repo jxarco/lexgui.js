@@ -328,6 +328,7 @@ class VideoEditor {
     static CROP_HANDLE_BL = VideoEditor.CROP_HANDLE_L | VideoEditor.CROP_HANDLE_B;
     static CROP_HANDLE_TR = VideoEditor.CROP_HANDLE_R | VideoEditor.CROP_HANDLE_T;
     static CROP_HANDLE_BR = VideoEditor.CROP_HANDLE_R | VideoEditor.CROP_HANDLE_B;
+    options = {};
     playing = false;
     videoReady = false;
     controls = true;
@@ -367,6 +368,7 @@ class VideoEditor {
     _onCropMouseMove;
     resize;
     constructor(area, options = {}) {
+        this.options = options ?? {};
         this.speed = options.speed ?? this.speed;
         this.mainArea = area;
         let videoArea = null;
@@ -478,14 +480,14 @@ class VideoEditor {
         this.timebar.onChangeStart = this._setStartTime.bind(this);
         this.timebar.onChangeEnd = this._setEndTime.bind(this);
         this.resize = () => {
-            if (this.onResize) {
-                this.onResize([videoArea.root.clientWidth, videoArea.root.clientHeight]);
-            }
             bottomArea.setSize([this.controlsArea.root.clientWidth, 40]);
             let availableWidth = this.controlsArea.root.clientWidth - controlsLeft.root.clientWidth - controlsRight.root.clientWidth;
             this.timebar.resize([availableWidth, timeBarArea.root.clientHeight]);
             this.moveCropArea(this.cropArea.normCoords.x, this.cropArea.normCoords.y, true);
             this.resizeCropArea(this.cropArea.normCoords.w, this.cropArea.normCoords.h, true);
+            if (this.onResize) {
+                this.onResize([videoArea.root.clientWidth, videoArea.root.clientHeight]);
+            }
         };
         area.onresize = this.resize.bind(this);
         window.addEventListener('resize', area.onresize);
@@ -592,16 +594,19 @@ class VideoEditor {
         this.onChangeStart = null;
         this.onChangeEnd = null;
     }
-    setCropAreaHandles(flags /*Integer*/) {
-        const resizers = this.cropArea.getElementsByClassName("resize-handle");
+    setCropAreaHandles(flags) {
         // remove existing resizer handles
+        const resizers = this.cropArea.getElementsByClassName("resize-handle");
         for (let i = resizers.length - 1; i > -1; --i) {
-            resizers.remove();
+            resizers[i].remove();
         }
-        const buildResizer = (className, movement /*integer*/) => {
+        const buildResizer = (className, movement) => {
             const handle = document.createElement("div");
             handle.className = " resize-handle " + className;
             handle.movement = movement;
+            if (this.options.handleStyle) {
+                Object.assign(handle.style, this.options.handleStyle);
+            }
             this.cropArea.append(handle);
             handle.addEventListener("mousedown", (e) => {
                 e.stopPropagation();

@@ -137,8 +137,8 @@ export declare abstract class Timeline {
      */
     addNewTrack(options?: any, skipCallback?: boolean): number;
     /**
-     * Finds tracks (wholy and partially) inside the range minY maxY.
-     * (Full) Canvas local coordinates.
+     * Finds tracks ( wholy and partially ) inside the range minY maxY.
+     * ( Full ) Canvas local coordinates.
      * @param {Number} minY pixels
      * @param {Number} maxY pixels
      * @returns array of trackDatas
@@ -149,7 +149,7 @@ export declare abstract class Timeline {
      * @param {*} animation
      * @param {Boolean} needsToProcess
      * @param {Object} processOptions
-     * [KeyFrameTimeline] - each track should contain an attribute "dim" to indicate the value dimension (e.g. vector3 -> dim=3). Otherwise dimensions will be infered from track's values and times. Default is 1
+     * [ KeyFrameTimeline ] - each track should contain an attribute "dim" to indicate the value dimension ( e.g. vector3 -> dim=3). Otherwise dimensions will be infered from track's values and times. Default is 1
      */
     setAnimationClip(animation: any, needsToProcess?: boolean): any;
     drawTimeInfo(w: number, h?: number): void;
@@ -180,8 +180,8 @@ export declare abstract class Timeline {
     /**
      * @method setScroll
      * not delta from last state, but full scroll amount.
-     * @param {Number} scrollY either pixels or [0,1]
-     * @param {Boolean} normalized if true, scrollY is in range[0,1] being 1 fully scrolled. Otherwised scrollY represents pixels
+     * @param {Number} scrollY either pixels or [0,1 ]
+     * @param {Boolean} normalized if true, scrollY is in range[0,1 ] being 1 fully scrolled. Otherwised scrollY represents pixels
      * @returns
      */
     setScroll(scrollY: number, normalized?: boolean): void;
@@ -217,7 +217,7 @@ export declare abstract class Timeline {
      */
     setLoopMode(loopState: boolean, skipCallback?: boolean): void;
     /**
-     * @returns the tree elements (tracks and grouops) shown in the timeline.
+     * @returns the tree elements ( tracks and grouops ) shown in the timeline.
      *  Each item has { treeData: { trackData: track } }, where track is the actual track information of the animationClip.
      *  If not a track, trackData will be undefined
      */
@@ -273,7 +273,7 @@ export declare abstract class Timeline {
      */
     setTrackLock(trackIdx: number, isLocked?: boolean, skipCallback?: boolean, updateTrackTree?: boolean): void;
     /**
-     * @param {Int} trackIdx index of track in the animation (not local index)
+     * @param {Int} trackIdx index of track in the animation ( not local index )
      * @param {Boolean} combineWithPrevious whether to create a new entry or unify changes into a single undo entry
      */
     saveState(trackIdx: number, combineWithPrevious?: boolean): void;
@@ -308,7 +308,7 @@ export declare abstract class Timeline {
     generateSelectedItemsTreeData(): any;
     /**
      *
-     * @param {Object} options set some values for the track instance (groups and trackIdx not included)
+     * @param {Object} options set some values for the track instance ( groups and trackIdx not included )
      * @returns
      */
     instantiateTrack(options?: any, clone?: boolean): {
@@ -419,7 +419,7 @@ export declare class KeyFramesTimeline extends Timeline {
     updateTrack(trackIdx: number, newTrack: any): boolean;
     /**
      * removes equivalent sequential keys either because of equal times or values
-     * (0,0,0,0,1,1,1,0,0,0,0,0,0,0) --> (0,0,1,1,0,0)
+     * ( 0,0,0,0,1,1,1,0,0,0,0,0,0,0 ) --> ( 0, 0,1,1,0, 0 )
      * @param {Int} trackIdx index of track in the animation
      * @param {Boolean} onlyEqualTime if true, removes only keyframes with equal times. Otherwise, values are ALSO compared through the class threshold
      * @param {Boolean} skipCallback if false, triggers "onOptimizeTracks" after optimizing
@@ -469,7 +469,7 @@ export declare class KeyFramesTimeline extends Timeline {
      *
      * @param {Int} trackIdx
      * @param {Array} newValues array of values for each keyframe. It should be a flat array of size track.dim*numKeyframes. Check ADDKEY_VALUESINARRAYS flag
-     * @param {Array of numbers} newTimes must be ordered ascendently
+     * @param {Array of numbers } newTimes must be ordered ascendently
      * @param {Number} timeOffset
      * @param {Int} flags
      *      KeyFramesTimeline.ADDKEY_VALUESINARRAYS: if set, newValues is an array of arrays, one for each entry [ [1,2,3], [5,6,7] ]. Times is still a flat array of values [ 0, 0.2 ]
@@ -484,10 +484,10 @@ export declare class KeyFramesTimeline extends Timeline {
      * @param {Object} track
      * @param {Number} time
      * @param {Number} mode on of the possible values
-     *  - -1 = nearest frame with t[f] <= time
+     *  - -1 = nearest frame with t[ f ] <= time
      *  - 0 = nearest frame
-     *  - 1 = nearest frame with t[f] >= time
-     * @returns a zero/positive value if successful. On failure returnes -1 meaning either there are no frames ( 0 ), no frame-time is lower (-1) or no frame-time is higher (1)
+     *  - 1 = nearest frame with t[ f ] >= time
+     * @returns a zero/positive value if successful. On failure returnes -1 meaning either there are no frames ( 0 ), no frame-time is lower ( -1 ) or no frame-time is higher (1 )
      */
     getNearestKeyFrame(track: any, time: number, mode?: number): number;
     /**
@@ -499,7 +499,7 @@ export declare class KeyFramesTimeline extends Timeline {
      */
     getCurrentKeyFrame(track: any, time: number, threshold?: number): number;
     /**
-     * Returns the interval of frames between minTime and maxTime (both included)
+     * Returns the interval of frames between minTime and maxTime (both included )
      * @param {Object} track
      * @param {Number} minTime
      * @param {Number} maxTime
@@ -512,7 +512,7 @@ export declare class KeyFramesTimeline extends Timeline {
     isKeyFrameSelected(track: any, index: number): any;
     /**
      * @param {Int} trackIdx track index of animation clip
-     * @param {Int} frameIdx frame (index) to select inside the track
+     * @param {Int} frameIdx frame ( index ) to select inside the track
      * @param {Boolean} skipCallback
      * @returns
      */
@@ -562,7 +562,7 @@ export declare class ClipsTimeline extends Timeline {
     instantiateAnimationClip(animation: any, clone?: boolean): any;
     /**
      *
-     * @param {Object} options set some values for the track instance (groups and trackIdx not included)
+     * @param {Object} options set some values for the track instance ( groups and trackIdx not included )
      * @returns
     */
     instantiateTrack(options?: any, clone?: boolean): any;
@@ -604,17 +604,17 @@ export declare class ClipsTimeline extends Timeline {
      */
     optimizeTracks(): void;
     /**
-     *
-     * @param {Object} clip  clip to be added
-     * @param {Int} trackIdx (optional) track where to put the clip. -1 will find the first free slot. ***WARNING*** Must call getClipsInRange, before calling this function with a valid trackdIdx
-     * @param {Number} offsetTime (optional) offset time of current time
-     * @param {Number} searchStartTrackIdx (optional) if trackIdx is set to -1, this idx will be used as the starting point to find a valid track
-     * @returns  a zero/positive value if successful. Otherwise, -1
-     */
+    *
+    * @param {Object} clip  clip to be added
+    * @param {Int} trackIdx ( optional ) track where to put the clip. -1 will find the first free slot. ***WARNING*** Must call getClipsInRange, before calling this function with a valid trackdIdx
+    * @param {Number} offsetTime ( optional ) offset time of current time
+    * @param {Number} searchStartTrackIdx ( optional ) if trackIdx is set to -1, this idx will be used as the starting point to find a valid track
+    * @returns  a zero/positive value if successful. Otherwise, -1
+    */
     addClip(clip: any, trackIdx?: number, offsetTime?: number, searchStartTrackIdx?: number): any;
     /**
      *  Add an array of clips to the timeline in the first suitable tracks. It tries to put clips in the same track if possible. All clips will be in adjacent tracks to each other
-     * @param {Array of objects} clips
+     * @param {Object[] } clips
      * @param {Number} offsetTime
      * @param {Int} searchStartTrackIdx
      * @returns
@@ -628,10 +628,10 @@ export declare class ClipsTimeline extends Timeline {
     deleteClip(trackIdx: number, clipIdx: number, skipCallback?: boolean): void;
     /**
      * User defined. Used when copying and pasting
-     * @param {Array of clips} clipsToClone array of original clips. Do not modify clips in this array
-     * @param {Number} timeOffset Value of time that should be added (or subtracted) from the timing attributes
+     * @param {Array of clips } clipsToClone array of original clips. Do not modify clips in this array
+     * @param {Number} timeOffset Value of time that should be added ( or subtracted ) from the timing attributes
      * @param {Int} reason Flag to signal the reason of the clone
-     * @returns {Array of clips}
+     * @returns {Array of clips }
      */
     cloneClips(clipsToClone: any[], timeOffset: number, reason?: number): any;
     /**
