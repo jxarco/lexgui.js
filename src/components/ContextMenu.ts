@@ -161,8 +161,7 @@ export class ContextMenu
         }
 
         // Add callback
-        entry.addEventListener( 'click', e =>
-        {
+        entry.addEventListener( 'click', e => {
             e.stopPropagation();
             e.stopImmediatePropagation();
 
@@ -199,8 +198,7 @@ export class ContextMenu
 
         if ( LX.OPEN_CONTEXTMENU_ENTRY == 'mouseover' )
         {
-            entry.addEventListener( 'mouseover', e =>
-            {
+            entry.addEventListener( 'mouseover', e => {
                 if ( entry.dataset['built'] == 'true' ) return;
                 entry.dataset['built'] = 'true';
                 this._createSubmenu( o, k, entry, ++d );
@@ -208,8 +206,7 @@ export class ContextMenu
             } );
         }
 
-        entry.addEventListener( 'mouseleave', () =>
-        {
+        entry.addEventListener( 'mouseleave', () => {
             d = -1; // Reset depth
             c.querySelectorAll( '.lexcontextmenu' ).forEach( ( m: HTMLElement ) => m.remove() );
         } );
@@ -237,13 +234,11 @@ export class ContextMenu
 
         let idx = 0;
 
-        const insert = ( token: string | undefined, list: any ) =>
-        {
+        const insert = ( token: string | undefined, list: any ) => {
             if ( token == undefined ) return;
 
             let found = null;
-            list.forEach( ( o: any ) =>
-            {
+            list.forEach( ( o: any ) => {
                 const keys = Object.keys( o );
                 const key = keys.find( t => t == token );
                 if ( key ) found = o[key];
@@ -276,8 +271,7 @@ export class ContextMenu
 
         // Set parents
 
-        const setParent = ( _item: any ) =>
-        {
+        const setParent = ( _item: any ) => {
             let key = Object.keys( _item )[0];
             let children = _item[key];
 

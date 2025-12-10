@@ -20,13 +20,11 @@ export class TextInput extends BaseComponent
     {
         super( ComponentType.TEXT, name, String( value ), options );
 
-        this.onGetValue = () =>
-        {
+        this.onGetValue = () => {
             return value;
         };
 
-        this.onSetValue = ( newValue, skipCallback, event ) =>
-        {
+        this.onSetValue = ( newValue, skipCallback, event ) => {
             let skipTrigger = this._lastValueTriggered == newValue;
 
             if ( !options.ignoreValidation )
@@ -51,14 +49,12 @@ export class TextInput extends BaseComponent
             }
         };
 
-        this.onResize = ( rect ) =>
-        {
+        this.onResize = ( rect ) => {
             const realNameWidth = this.root.domName?.style.width ?? '0px';
             container.style.width = options.inputWidth ?? `calc( 100% - ${realNameWidth})`;
         };
 
-        this.valid = ( v, matchField ) =>
-        {
+        this.valid = ( v, matchField ) => {
             v = v ?? this.value();
             if ( !options.pattern ) return true;
             const errs = LX.validateValueAtPattern( v, options.pattern, matchField );
@@ -98,8 +94,7 @@ export class TextInput extends BaseComponent
 
             if ( trigger == 'default' )
             {
-                wValue.addEventListener( 'keyup', ( e: KeyboardEvent ) =>
-                {
+                wValue.addEventListener( 'keyup', ( e: KeyboardEvent ) => {
                     if ( e.key == 'Enter' )
                     {
                         this._triggerEvent = e;
@@ -107,16 +102,14 @@ export class TextInput extends BaseComponent
                     }
                 } );
 
-                wValue.addEventListener( 'focusout', ( e: FocusEvent ) =>
-                {
+                wValue.addEventListener( 'focusout', ( e: FocusEvent ) => {
                     this._triggerEvent = this._triggerEvent ?? e;
                     this.set( ( e.target as any ).value, false, this._triggerEvent );
                 } );
             }
             else if ( trigger == 'input' )
             {
-                wValue.addEventListener( 'input', ( e: InputEvent ) =>
-                {
+                wValue.addEventListener( 'input', ( e: InputEvent ) => {
                     this.set( ( e.target as any ).value, false, e );
                 } );
             }

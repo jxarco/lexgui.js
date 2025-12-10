@@ -17,13 +17,11 @@ export class NumberInput extends BaseComponent
     {
         super( ComponentType.NUMBER, name, value, options );
 
-        this.onGetValue = () =>
-        {
+        this.onGetValue = () => {
             return value;
         };
 
-        this.onSetValue = ( newValue, skipCallback, event ) =>
-        {
+        this.onSetValue = ( newValue, skipCallback, event ) => {
             if ( isNaN( newValue ) )
             {
                 return;
@@ -45,14 +43,12 @@ export class NumberInput extends BaseComponent
             }
         };
 
-        this.onResize = ( rect ) =>
-        {
+        this.onResize = ( rect ) => {
             const realNameWidth = this.root.domName?.style.width ?? '0px';
             container.style.width = options.inputWidth ?? `calc( 100% - ${realNameWidth})`;
         };
 
-        this.setLimits = ( newMin, newMax, newStep ) =>
-        {};
+        this.setLimits = ( newMin, newMax, newStep ) => {};
 
         var container = document.createElement( 'div' );
         container.className = 'lexnumber';
@@ -109,8 +105,7 @@ export class NumberInput extends BaseComponent
             slider.value = value;
             slider.disabled = this.disabled;
 
-            slider.addEventListener( 'input', ( e: InputEvent ) =>
-            {
+            slider.addEventListener( 'input', ( e: InputEvent ) => {
                 this.set( slider.valueAsNumber, false, e );
             }, false );
 
@@ -133,8 +128,7 @@ export class NumberInput extends BaseComponent
             sliderBox.appendChild( slider );
 
             // Method to change min, max, step parameters
-            this.setLimits = ( newMin, newMax, newStep ) =>
-            {
+            this.setLimits = ( newMin, newMax, newStep ) => {
                 vecinput.min = slider.min = newMin ?? vecinput.min;
                 vecinput.max = slider.max = newMax ?? vecinput.max;
                 vecinput.step = newStep ?? vecinput.step;
@@ -149,8 +143,7 @@ export class NumberInput extends BaseComponent
             value = LX.round( value, options.precision );
         }, false );
 
-        vecinput.addEventListener( 'wheel', ( e: WheelEvent ) =>
-        {
+        vecinput.addEventListener( 'wheel', ( e: WheelEvent ) => {
             e.preventDefault();
             if ( vecinput !== document.activeElement )
             {
@@ -163,8 +156,7 @@ export class NumberInput extends BaseComponent
             this.set( value, false, e );
         }, { passive: false } );
 
-        vecinput.addEventListener( 'change', ( e: InputEvent ) =>
-        {
+        vecinput.addEventListener( 'change', ( e: InputEvent ) => {
             this.set( vecinput.valueAsNumber, false, e );
         }, { passive: false } );
 
@@ -172,8 +164,7 @@ export class NumberInput extends BaseComponent
 
         var that = this;
 
-        let innerMouseDown = ( e: MouseEvent ) =>
-        {
+        let innerMouseDown = ( e: MouseEvent ) => {
             if ( ( document.activeElement == vecinput ) || ( e.button != LX.MOUSE_LEFT_CLICK ) )
             {
                 return;
@@ -198,8 +189,7 @@ export class NumberInput extends BaseComponent
             }
         };
 
-        let innerMouseMove = ( e: MouseEvent ) =>
-        {
+        let innerMouseMove = ( e: MouseEvent ) => {
             let dt = -e.movementY;
 
             if ( dt != 0 )
@@ -215,8 +205,7 @@ export class NumberInput extends BaseComponent
             e.preventDefault();
         };
 
-        let innerMouseUp = ( e: MouseEvent ) =>
-        {
+        let innerMouseUp = ( e: MouseEvent ) => {
             var doc = that.root.ownerDocument;
             doc.removeEventListener( 'mousemove', innerMouseMove );
             doc.removeEventListener( 'mouseup', innerMouseUp );

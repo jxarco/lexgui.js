@@ -70,8 +70,7 @@ export class DocMaker
         let highlight = '';
         let content = '';
 
-        const getHTML = ( h: string, c: string ) =>
-        {
+        const getHTML = ( h: string, c: string ) => {
             return `<span class="${h}">${c}</span>`;
         };
 
@@ -430,8 +429,7 @@ export class DocMaker
         b.appendChild( LX.makeIcon( 'Check' ) );
         b.classList.add( 'copied' );
 
-        setTimeout( () =>
-        {
+        setTimeout( () => {
             b.innerHTML = '';
             b.appendChild( LX.makeIcon( 'Copy' ) );
             b.classList.remove( 'copied' );

@@ -48,8 +48,7 @@ export class Tour
             this.tourContainer.style.display = 'none';
             document.body.appendChild( this.tourContainer );
 
-            window.addEventListener( 'resize', () =>
-            {
+            window.addEventListener( 'resize', () => {
                 for ( const tour of Tour.ACTIVE_TOURS )
                 {
                     tour._showStep( 0 );
@@ -238,8 +237,7 @@ export class Tour
             const closeIcon = LX.makeIcon( 'X' );
             closer.appendChild( closeIcon );
 
-            LX.listen( closeIcon, 'click', () =>
-            {
+            LX.listen( closeIcon, 'click', () => {
                 this.stop();
             } );
         }
@@ -281,23 +279,20 @@ export class Tour
 
         if ( previousStep )
         {
-            footerPanel.addButton( null, 'Previous', () =>
-            {
+            footerPanel.addButton( null, 'Previous', () => {
                 this._showStep( -1 );
             }, { buttonClass: 'contrast' } );
         }
 
         if ( nextStep )
         {
-            footerPanel.addButton( null, 'Next', () =>
-            {
+            footerPanel.addButton( null, 'Next', () => {
                 this._showStep( 1 );
             }, { buttonClass: 'accent' } );
         }
         else
         {
-            footerPanel.addButton( null, 'Finish', () =>
-            {
+            footerPanel.addButton( null, 'Finish', () => {
                 this.stop();
             } );
         }

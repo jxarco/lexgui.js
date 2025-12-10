@@ -15,13 +15,11 @@ export class TextArea extends BaseComponent
     {
         super( ComponentType.TEXTAREA, name, value, options );
 
-        this.onGetValue = () =>
-        {
+        this.onGetValue = () => {
             return value;
         };
 
-        this.onSetValue = ( newValue, skipCallback, event ) =>
-        {
+        this.onSetValue = ( newValue, skipCallback, event ) => {
             wValue.value = value = newValue;
 
             if ( !skipCallback )
@@ -30,8 +28,7 @@ export class TextArea extends BaseComponent
             }
         };
 
-        this.onResize = ( rect ) =>
-        {
+        this.onResize = ( rect ) => {
             const realNameWidth = this.root.domName?.style.width ?? '0px';
             container.style.width = options.inputWidth ?? `calc( 100% - ${realNameWidth})`;
         };
@@ -82,15 +79,13 @@ export class TextArea extends BaseComponent
                 }
             } );
 
-            wValue.addEventListener( 'focusout', ( e: any ) =>
-            {
+            wValue.addEventListener( 'focusout', ( e: any ) => {
                 this.set( e.target?.value, false, e );
             } );
         }
         else if ( trigger == 'input' )
         {
-            wValue.addEventListener( 'input', ( e: any ) =>
-            {
+            wValue.addEventListener( 'input', ( e: any ) => {
                 this.set( e.target?.value, false, e );
             } );
         }
@@ -101,8 +96,7 @@ export class TextArea extends BaseComponent
             container.appendChild( icon );
         }
 
-        LX.doAsync( () =>
-        {
+        LX.doAsync( () => {
             container.style.height = options.height ?? '';
             this.onResize();
         }, 10 );

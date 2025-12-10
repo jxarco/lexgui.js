@@ -79,8 +79,7 @@ export class TimeBar
         this._draw();
 
         this.updateTheme();
-        LX.addSignal( '@on_new_color_scheme', () =>
-        {
+        LX.addSignal( '@on_new_color_scheme', () => {
             // Retrieve again the color using LX.getThemeColor, which checks the applied theme
             this.updateTheme();
         } );
@@ -569,8 +568,7 @@ export class VideoEditor
         topArea.root.classList.add( 'lexbar' );
         bottomArea.root.classList.add( 'lexbar' );
         this.controlsCurrentPanel = new LX.Panel( { className: 'lexcontrolspanel lextime' } );
-        this.controlsCurrentPanel.refresh = () =>
-        {
+        this.controlsCurrentPanel.refresh = () => {
             this.controlsCurrentPanel.clear();
             this.controlsCurrentPanel.addLabel( this.currentTimeString, { float: 'center' } );
         };
@@ -584,12 +582,10 @@ export class VideoEditor
 
         // Create controls panel (play/pause button and start time)
         this.controlsPanelLeft = new LX.Panel( { className: 'lexcontrolspanel' } );
-        this.controlsPanelLeft.refresh = () =>
-        {
+        this.controlsPanelLeft.refresh = () => {
             this.controlsPanelLeft.clear();
             this.controlsPanelLeft.sameLine();
-            let playbtn = this.controlsPanelLeft.addButton( 'Play', '', ( v: boolean ) =>
-            {
+            let playbtn = this.controlsPanelLeft.addButton( 'Play', '', ( v: boolean ) => {
                 this.playing = v;
                 if ( this.playing )
                 {
@@ -607,11 +603,9 @@ export class VideoEditor
                 className: 'justify-center' } );
             playbtn.setState( this.playing, true );
 
-            this.controlsPanelLeft.addButton( '', '', ( v: any, e: MouseEvent ) =>
-            {
+            this.controlsPanelLeft.addButton( '', '', ( v: any, e: MouseEvent ) => {
                 const panel = new LX.Panel();
-                panel.addRange( 'Speed', this.speed, ( v: number ) =>
-                {
+                panel.addRange( 'Speed', this.speed, ( v: number ) => {
                     this.speed = v;
                     this.video.playbackRate = v;
                     if ( this.onChangeSpeed )
@@ -623,8 +617,7 @@ export class VideoEditor
                 new LX.Popover( e.target, [ panel ], { align: 'start', side: 'top', sideOffset: 12 } );
             }, { width: '40px', title: 'speed', icon: 'Timer@solid', className: 'justify-center' } );
 
-            this.controlsPanelLeft.addButton( '', 'Loop', ( v: boolean ) =>
-            {
+            this.controlsPanelLeft.addButton( '', 'Loop', ( v: boolean ) => {
                 this.loop = v;
             }, { width: '40px', title: 'loop', icon: ( 'Repeat@solid' ), className: `justify-center`, selectable: true,
                 selected: this.loop } );
@@ -643,8 +636,7 @@ export class VideoEditor
 
         // Create right controls panel (ens time)
         this.controlsPanelRight = new LX.Panel( { className: 'lexcontrolspanel' } );
-        this.controlsPanelRight.refresh = () =>
-        {
+        this.controlsPanelRight.refresh = () => {
             this.controlsPanelRight.clear();
             this.controlsPanelRight.addLabel( this.endTimeString, { width: 100 } );
         };
@@ -656,8 +648,7 @@ export class VideoEditor
         this.timebar.onChangeStart = this._setStartTime.bind( this );
         this.timebar.onChangeEnd = this._setEndTime.bind( this );
 
-        this.resize = () =>
-        {
+        this.resize = () => {
             bottomArea.setSize( [ this.controlsArea.root.clientWidth, 40 ] );
             let availableWidth = this.controlsArea.root.clientWidth - controlsLeft.root.clientWidth
                 - controlsRight.root.clientWidth;
@@ -673,8 +664,7 @@ export class VideoEditor
         area.onresize = this.resize.bind( this );
         window.addEventListener( 'resize', area.onresize );
 
-        this.onKeyUp = ( e: KeyboardEvent ) =>
-        {
+        this.onKeyUp = ( e: KeyboardEvent ) => {
             if ( this.controls && e.key == ' ' )
             {
                 e.preventDefault();
@@ -703,15 +693,13 @@ export class VideoEditor
         const parent = controlsArea.parentElement ? controlsArea.parentElement : controlsArea.root.parentElement;
 
         // Add canvas event listeneres
-        parent.addEventListener( 'mousedown', ( e: MouseEvent ) =>
-        {
+        parent.addEventListener( 'mousedown', ( e: MouseEvent ) => {
             // if( this.controls) {
             //     this.timebar.onMouseDown(e);
             // }
         } );
 
-        this._onCropMouseUp = ( event: MouseEvent ) =>
-        {
+        this._onCropMouseUp = ( event: MouseEvent ) => {
             // if(this.controls) {
             //     this.timebar.onMouseUp(event);
             // }
@@ -728,8 +716,7 @@ export class VideoEditor
             document.removeEventListener( 'mousemove', this._onCropMouseMove ); // self destroy. Added during mouseDown on cropArea and handles
         };
 
-        this._onCropMouseMove = ( event: MouseEvent ) =>
-        {
+        this._onCropMouseMove = ( event: MouseEvent ) => {
             // if(this.controls) {
             //     this.timebar.onMouseMove(event);
             // }
@@ -799,8 +786,7 @@ export class VideoEditor
             }
         };
 
-        this.cropArea.addEventListener( 'mousedown', ( e: MouseEvent ) =>
-        {
+        this.cropArea.addEventListener( 'mousedown', ( e: MouseEvent ) => {
             if ( e.target === this.cropArea )
             {
                 const rect = this.cropArea.getBoundingClientRect();
@@ -827,8 +813,7 @@ export class VideoEditor
             resizers[i].remove();
         }
 
-        const buildResizer = ( className: string, movement: number ) =>
-        {
+        const buildResizer = ( className: string, movement: number ) => {
             const handle: any = document.createElement( 'div' );
             handle.className = ' resize-handle ' + className;
             handle.movement = movement;
@@ -837,8 +822,7 @@ export class VideoEditor
                 Object.assign( handle.style, this.options.handleStyle );
             }
             this.cropArea.append( handle );
-            handle.addEventListener( 'mousedown', ( e: MouseEvent ) =>
-            {
+            handle.addEventListener( 'mousedown', ( e: MouseEvent ) => {
                 e.stopPropagation();
                 e.preventDefault();
                 this.isResizing = handle;
@@ -967,8 +951,7 @@ export class VideoEditor
         this.video.currentTime = 0.01; // BUG: some videos will not play unless this line is present
 
         // Duration can change if the video is dynamic (stream). This function is to ensure to load all buffer data
-        const forceLoadChunks = () =>
-        {
+        const forceLoadChunks = () => {
             const state = this.videoReady;
             if ( this.video.readyState > 3 )
             {
@@ -982,8 +965,7 @@ export class VideoEditor
 
         this.video.addEventListener( 'canplaythrough', forceLoadChunks, { passive: true } );
 
-        this.video.ondurationchange = ( v ) =>
-        {
+        this.video.ondurationchange = ( v ) => {
             if ( this.video.duration != this.endTime )
             {
                 this.video.currentTime = this.startTime;

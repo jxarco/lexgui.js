@@ -75,8 +75,7 @@ export class Card extends BaseComponent
         {
             container.classList.add( 'selectable' );
             container.style.cursor = 'pointer';
-            container.addEventListener( 'click', ( e: MouseEvent ) =>
-            {
+            container.addEventListener( 'click', ( e: MouseEvent ) => {
                 this._trigger( new IEvent( name, null, e ), options.callback );
             } );
         }

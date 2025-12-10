@@ -67,8 +67,7 @@ export class NodeTree
         if ( this.options.onlyFolders )
         {
             let hasFolders = false;
-            node.children.forEach( ( c: any ) =>
-            {
+            node.children.forEach( ( c: any ) => {
                 hasFolders = hasFolders || ( c.type == 'folder' );
             } );
             isParent = !!hasFolders;
@@ -121,8 +120,7 @@ export class NodeTree
         list.appendChild( item );
 
         // Callbacks
-        item.addEventListener( 'click', ( e: MouseEvent ) =>
-        {
+        item.addEventListener( 'click', ( e: MouseEvent ) => {
             if ( handled )
             {
                 handled = false;
@@ -131,8 +129,7 @@ export class NodeTree
 
             if ( !e.shiftKey )
             {
-                list.querySelectorAll( 'li' ).forEach( ( e: HTMLElement ) =>
-                {
+                list.querySelectorAll( 'li' ).forEach( ( e: HTMLElement ) => {
                     e.classList.remove( 'selected' );
                 } );
                 this.selected.length = 0;
@@ -187,8 +184,7 @@ export class NodeTree
             }
         } );
 
-        item.addEventListener( 'contextmenu', ( e: any ) =>
-        {
+        item.addEventListener( 'contextmenu', ( e: any ) => {
             e.preventDefault();
 
             if ( !that.onevent )
@@ -199,8 +195,7 @@ export class NodeTree
             const event: any = new TreeEvent( TreeEvent.NODE_CONTEXTMENU, node, this.selected, e );
             event.multiple = this.selected.length > 1;
 
-            LX.addContextMenu( event.multiple ? 'Selected Nodes' : event.node.id, event.event, ( m: ContextMenu ) =>
-            {
+            LX.addContextMenu( event.multiple ? 'Selected Nodes' : event.node.id, event.event, ( m: ContextMenu ) => {
                 event.panel = m;
             } );
 
@@ -213,10 +208,8 @@ export class NodeTree
                     event.panel.add( '' );
                 }
 
-                event.panel.add( 'Select Children', () =>
-                {
-                    const selectChildren = ( n: any ) =>
-                    {
+                event.panel.add( 'Select Children', () => {
+                    const selectChildren = ( n: any ) => {
                         if ( n.closed )
                         {
                             return;
@@ -245,8 +238,7 @@ export class NodeTree
                     selectChildren( node );
                 } );
 
-                event.panel.add( 'Delete', { callback: () =>
-                {
+                event.panel.add( 'Delete', { callback: () => {
                     const ok = that.deleteNode( node );
 
                     if ( ok && that.onevent )
@@ -260,8 +252,7 @@ export class NodeTree
             }
         } );
 
-        item.addEventListener( 'keydown', ( e: KeyboardEvent ) =>
-        {
+        item.addEventListener( 'keydown', ( e: KeyboardEvent ) => {
             if ( node.rename )
             {
                 return;
@@ -356,31 +347,25 @@ export class NodeTree
             // Drag nodes
             if ( parent )
             { // Root doesn't move!
-                item.addEventListener( 'dragstart', ( e: DragEvent ) =>
-                {
+                item.addEventListener( 'dragstart', ( e: DragEvent ) => {
                     ( window as any ).__tree_node_dragged = node;
                 } );
             }
 
             /* Events fired on other node items */
-            item.addEventListener( 'dragover', ( e: DragEvent ) =>
-            {
+            item.addEventListener( 'dragover', ( e: DragEvent ) => {
                 e.preventDefault(); // allow drop
             }, false );
-            item.addEventListener( 'dragenter', ( e: any ) =>
-            {
+            item.addEventListener( 'dragenter', ( e: any ) => {
                 e.target.classList.add( 'draggingover' );
             } );
-            item.addEventListener( 'dragend', ( e: any ) =>
-            {
+            item.addEventListener( 'dragend', ( e: any ) => {
                 e.target.classList.remove( 'draggingover' );
             } );
-            item.addEventListener( 'dragleave', ( e: any ) =>
-            {
+            item.addEventListener( 'dragleave', ( e: any ) => {
                 e.target.classList.remove( 'draggingover' );
             } );
-            item.addEventListener( 'drop', ( e: DragEvent ) =>
-            {
+            item.addEventListener( 'drop', ( e: DragEvent ) => {
                 e.preventDefault(); // Prevent default action (open as link for some elements)
                 let dragged = ( window as any ).__tree_node_dragged;
                 if ( !dragged )
@@ -483,8 +468,7 @@ export class NodeTree
             for ( let i = 0; i < node.actions.length; ++i )
             {
                 const action = node.actions[i];
-                const actionBtn = new Button( null, '', ( swapValue: boolean, event: any ) =>
-                {
+                const actionBtn = new Button( null, '', ( swapValue: boolean, event: any ) => {
                     event.stopPropagation();
                     if ( action.callback )
                     {
@@ -506,8 +490,7 @@ export class NodeTree
 
         if ( !( node.skipVisibility ?? false ) )
         {
-            const visibilityBtn = new Button( null, '', ( swapValue: boolean, e: any ) =>
-            {
+            const visibilityBtn = new Button( null, '', ( swapValue: boolean, e: any ) => {
                 e.stopPropagation();
                 node.visible = node.visible === undefined ? false : !node.visible;
                 // Trigger visibility event
@@ -696,8 +679,7 @@ export class Tree extends BaseComponent
             nodeFilterInput.className = 'lexnodetreefilter';
             nodeFilterInput.setAttribute( 'placeholder', 'Filter..' );
             nodeFilterInput.style.width = '100%';
-            nodeFilterInput.addEventListener( 'input', () =>
-            {
+            nodeFilterInput.addEventListener( 'input', () => {
                 this.innerTree.refresh();
             } );
 

@@ -21,8 +21,7 @@ export class Vector extends BaseComponent
 
         super( ComponentType.VECTOR, name, LX.deepCopy( value ), options );
 
-        this.onGetValue = () =>
-        {
+        this.onGetValue = () => {
             let inputs = this.root.querySelectorAll( "input[type='number']" );
             let value = [];
             for ( var v of inputs )
@@ -32,8 +31,7 @@ export class Vector extends BaseComponent
             return value;
         };
 
-        this.onSetValue = ( newValue, skipCallback, event ) =>
-        {
+        this.onSetValue = ( newValue, skipCallback, event ) => {
             if ( vectorInputs.length != newValue.length )
             {
                 console.error( 'Input length does not match vector length.' );
@@ -54,14 +52,12 @@ export class Vector extends BaseComponent
             }
         };
 
-        this.onResize = ( rect ) =>
-        {
+        this.onResize = ( rect ) => {
             const realNameWidth = this.root.domName?.style.width ?? '0px';
             container.style.width = `calc( 100% - ${realNameWidth})`;
         };
 
-        this.setLimits = ( newMin, newMax, newStep ) =>
-        {};
+        this.setLimits = ( newMin, newMax, newStep ) => {};
 
         const vectorInputs: any[] = [];
 
@@ -133,8 +129,7 @@ export class Vector extends BaseComponent
                 }
             }, { passive: false } );
 
-            vecinput.addEventListener( 'change', ( e: any ) =>
-            {
+            vecinput.addEventListener( 'change', ( e: any ) => {
                 if ( isNaN( e.target.value ) )
                 {
                     return;
@@ -243,8 +238,7 @@ export class Vector extends BaseComponent
         // Method to change min, max, step parameters
         if ( options.min !== undefined || options.max !== undefined )
         {
-            this.setLimits = ( newMin, newMax, newStep ) =>
-            {
+            this.setLimits = ( newMin, newMax, newStep ) => {
                 for ( let v of vectorInputs )
                 {
                     v.min = newMin ?? v.min;
@@ -256,8 +250,7 @@ export class Vector extends BaseComponent
             };
         }
 
-        const lockerButton: any = new Button( null, '', ( swapValue: boolean ) =>
-        {
+        const lockerButton: any = new Button( null, '', ( swapValue: boolean ) => {
             lockerButton.locked = swapValue;
         }, { title: 'Lock', icon: 'LockOpen', swap: 'Lock', buttonClass: 'no-h bg-none p-0' } );
         container.appendChild( lockerButton.root );

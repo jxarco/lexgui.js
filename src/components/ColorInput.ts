@@ -35,14 +35,12 @@ export class ColorInput extends BaseComponent
 
         super( ComponentType.COLOR, name, value, options );
 
-        this.onGetValue = () =>
-        {
+        this.onGetValue = () => {
             const currentColor = new Color( value );
             return options.useRGB ? currentColor.rgb : value;
         };
 
-        this.onSetValue = ( newValue, skipCallback, event ) =>
-        {
+        this.onSetValue = ( newValue, skipCallback, event ) => {
             const newColor = new Color( newValue );
 
             colorSampleRGB.style.color = value = newColor.hex.substr( 0, 7 );
@@ -75,8 +73,7 @@ export class ColorInput extends BaseComponent
             }
         };
 
-        this.onResize = ( rect ) =>
-        {
+        this.onResize = ( rect ) => {
             const realNameWidth = this.root.domName?.style.width ?? '0px';
             container.style.width = `calc( 100% - ${realNameWidth})`;
         };
@@ -88,8 +85,7 @@ export class ColorInput extends BaseComponent
         this.picker = new ColorPicker( value, {
             colorModel: options.useRGB ? 'RGB' : 'Hex',
             useAlpha,
-            onChange: ( color: Color ) =>
-            {
+            onChange: ( color: Color ) => {
                 this.set( color.hex );
             }
         } );
@@ -97,8 +93,7 @@ export class ColorInput extends BaseComponent
         let sampleContainer = LX.makeContainer( [ '18px', '18px' ], 'flex flex-row bg-contrast rounded overflow-hidden',
             '', container );
         sampleContainer.tabIndex = '1';
-        sampleContainer.addEventListener( 'click', ( e: MouseEvent ) =>
-        {
+        sampleContainer.addEventListener( 'click', ( e: MouseEvent ) => {
             if ( ( options.disabled ?? false ) )
             {
                 return;
@@ -126,8 +121,7 @@ export class ColorInput extends BaseComponent
             colorSampleRGB.style.width = '18px';
         }
 
-        const textComponent = new TextInput( null, value, ( v: string ) =>
-        {
+        const textComponent = new TextInput( null, value, ( v: string ) => {
             this._skipTextUpdate = true;
             this.set( v );
             delete this._skipTextUpdate;

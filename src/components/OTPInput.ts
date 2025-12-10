@@ -24,13 +24,11 @@ export class OTPInput extends BaseComponent
 
         super( ComponentType.OTP, name, value, options );
 
-        this.onGetValue = () =>
-        {
+        this.onGetValue = () => {
             return +value;
         };
 
-        this.onSetValue = ( newValue, skipCallback, event ) =>
-        {
+        this.onSetValue = ( newValue, skipCallback, event ) => {
             value = newValue;
 
             _refreshInput( value );
@@ -41,8 +39,7 @@ export class OTPInput extends BaseComponent
             }
         };
 
-        this.onResize = ( rect ) =>
-        {
+        this.onResize = ( rect ) => {
             const realNameWidth = this.root.domName?.style.width ?? '0px';
             container.style.width = `calc( 100% - ${realNameWidth})`;
         };
@@ -55,8 +52,7 @@ export class OTPInput extends BaseComponent
 
         const groups = pattern.split( '-' );
 
-        const _refreshInput = ( valueString: string ) =>
-        {
+        const _refreshInput = ( valueString: string ) => {
             container.innerHTML = '';
 
             let itemsCount = 0;
@@ -92,8 +88,7 @@ export class OTPInput extends BaseComponent
                         slotDom.className += ' rounded-r border-right';
                     }
 
-                    slotDom.addEventListener( 'click', () =>
-                    {
+                    slotDom.addEventListener( 'click', () => {
                         if ( this.disabled ) return;
                         container.querySelectorAll( '.lexotpslot' ).forEach( s => s.classList.remove( 'active' ) );
                         const activeDom: any = container.querySelectorAll( '.lexotpslot' )[activeSlot];
@@ -101,18 +96,15 @@ export class OTPInput extends BaseComponent
                         activeDom.focus();
                     } );
 
-                    slotDom.addEventListener( 'blur', () =>
-                    {
+                    slotDom.addEventListener( 'blur', () => {
                         if ( this.disabled ) return;
-                        LX.doAsync( () =>
-                        {
+                        LX.doAsync( () => {
                             if ( container.contains( document.activeElement ) ) return;
                             container.querySelectorAll( '.lexotpslot' ).forEach( s => s.classList.remove( 'active' ) );
                         }, 10 );
                     } );
 
-                    slotDom.addEventListener( 'keyup', ( e: KeyboardEvent ) =>
-                    {
+                    slotDom.addEventListener( 'keyup', ( e: KeyboardEvent ) => {
                         if ( this.disabled ) return;
                         if ( !/[^0-9]+/g.test( e.key ) )
                         {

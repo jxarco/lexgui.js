@@ -118,8 +118,7 @@ export class Calendar
                 const prevMonthIcon = LX.makeIcon( 'Left', { title: 'Previous Month',
                     iconClass: 'border p-1 rounded hover:bg-secondary', svgClass: 'sm' } );
                 header.appendChild( prevMonthIcon );
-                prevMonthIcon.addEventListener( 'click', () =>
-                {
+                prevMonthIcon.addEventListener( 'click', () => {
                     this._previousMonth();
                 } );
             }
@@ -132,8 +131,7 @@ export class Calendar
                 const nextMonthIcon = LX.makeIcon( 'Right', { title: 'Next Month',
                     iconClass: 'border p-1 rounded hover:bg-secondary', svgClass: 'sm' } );
                 header.appendChild( nextMonthIcon );
-                nextMonthIcon.addEventListener( 'click', () =>
-                {
+                nextMonthIcon.addEventListener( 'click', () => {
                     this._nextMonth();
                 } );
             }
@@ -222,8 +220,7 @@ export class Calendar
 
                         if ( selectable )
                         {
-                            th.addEventListener( 'click', () =>
-                            {
+                            th.addEventListener( 'click', () => {
                                 this.day = dayData.day;
                                 this.currentDate = this._getCurrentDate();
                                 if ( this.onChange )
@@ -235,8 +232,7 @@ export class Calendar
                         // This event should only be applied in non current month days
                         else if ( this.range === undefined && !dayData.currentMonth )
                         {
-                            th.addEventListener( 'click', () =>
-                            {
+                            th.addEventListener( 'click', () => {
                                 if ( dayData?.prevMonth )
                                 {
                                     this._previousMonth();

@@ -29,8 +29,7 @@ export class RangeInput extends BaseComponent
             options.fill = false; // Range inputs do not fill by default
         }
 
-        this.onGetValue = () =>
-        {
+        this.onGetValue = () => {
             let finalValue = value;
             if ( isRangeValue )
             {
@@ -43,8 +42,7 @@ export class RangeInput extends BaseComponent
             return finalValue;
         };
 
-        this.onSetValue = ( newValue, skipCallback, event ) =>
-        {
+        this.onSetValue = ( newValue, skipCallback, event ) => {
             let newTpContent = '';
 
             const diff = options.max - options.min;
@@ -107,8 +105,7 @@ export class RangeInput extends BaseComponent
             }
         };
 
-        this.onResize = ( rect ) =>
-        {
+        this.onResize = ( rect ) => {
             const realNameWidth = this.root.domName?.style.width ?? '0px';
             container.style.width = options.inputWidth ?? `calc( 100% - ${realNameWidth})`;
             if ( isRangeValue )
@@ -157,8 +154,7 @@ export class RangeInput extends BaseComponent
         slider.value = value;
         container.appendChild( slider );
 
-        slider.addEventListener( 'input', ( e: any ) =>
-        {
+        slider.addEventListener( 'input', ( e: any ) => {
             this.set(
                 isRangeValue ? [ Math.min( e.target.valueAsNumber, ogValue[1] ), ogValue[1] ] : e.target.valueAsNumber,
                 false,
@@ -187,16 +183,14 @@ export class RangeInput extends BaseComponent
         }
 
         // Method to change min, max, step parameters
-        this.setLimits = ( newMin, newMax, newStep ) =>
-        {
+        this.setLimits = ( newMin, newMax, newStep ) => {
             slider.min = newMin ?? slider.min;
             slider.max = newMax ?? slider.max;
             slider.step = newStep ?? slider.step;
             BaseComponent._dispatchEvent( slider, 'input', true );
         };
 
-        LX.doAsync( () =>
-        {
+        LX.doAsync( () => {
             this.onResize();
 
             let offsetX = 0;
@@ -213,8 +207,7 @@ export class RangeInput extends BaseComponent
                 offsetX = container.offsetWidth * remapped - ( container.offsetWidth * 0.5 );
             }
             LX.asTooltip( container, `${value}${isRangeValue ? `- ${ogValue[1]}` : ``}`, { offsetX,
-                callback: ( tpDom: HTMLElement ) =>
-                {
+                callback: ( tpDom: HTMLElement ) => {
                     this._labelTooltip = tpDom;
                 } } );
         } );
@@ -235,8 +228,7 @@ export class RangeInput extends BaseComponent
             maxSlider.value = maxRangeValue = LX.clamp( maxRangeValue, +maxSlider.min, +maxSlider.max );
             container.appendChild( maxSlider );
 
-            maxSlider.addEventListener( 'input', ( e: any ) =>
-            {
+            maxSlider.addEventListener( 'input', ( e: any ) => {
                 ogValue[1] = Math.max( value, +e.target.valueAsNumber );
                 this.set( [ value, ogValue[1] ], false, e );
             }, { passive: false } );

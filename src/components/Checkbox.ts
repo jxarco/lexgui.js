@@ -20,13 +20,11 @@ export class Checkbox extends BaseComponent
 
         super( ComponentType.CHECKBOX, name, value, options );
 
-        this.onGetValue = () =>
-        {
+        this.onGetValue = () => {
             return value;
         };
 
-        this.onSetValue = ( newValue, skipCallback, event ) =>
-        {
+        this.onSetValue = ( newValue, skipCallback, event ) => {
             if ( newValue == value )
             {
                 return;
@@ -43,8 +41,7 @@ export class Checkbox extends BaseComponent
             }
         };
 
-        this.onResize = ( rect ) =>
-        {
+        this.onResize = ( rect ) => {
             const realNameWidth = this.root.domName?.style.width ?? '0px';
             container.style.width = options.inputWidth ?? `calc( 100% - ${realNameWidth})`;
         };
@@ -65,8 +62,7 @@ export class Checkbox extends BaseComponent
         valueName.innerHTML = options.label ?? 'On';
         container.appendChild( valueName );
 
-        checkbox.addEventListener( 'change', e =>
-        {
+        checkbox.addEventListener( 'change', e => {
             this.set( checkbox.checked, false, e );
         } );
 

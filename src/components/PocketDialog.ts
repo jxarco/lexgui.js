@@ -26,8 +26,7 @@ export class PocketDialog extends Dialog
 
         let that = this;
         // Update margins on branch title closes/opens
-        LX.addSignal( '@on_branch_closed', this.panel, ( closed: boolean ) =>
-        {
+        LX.addSignal( '@on_branch_closed', this.panel, ( closed: boolean ) => {
             if ( this.dockPosition == PocketDialog.BOTTOM )
             {
                 this.root.style.top = `calc(100% - ${this.root.offsetHeight + dragMargin}px)`;
@@ -52,8 +51,7 @@ export class PocketDialog extends Dialog
 
         const innerTitle = this.title as any;
         innerTitle.tabIndex = -1;
-        innerTitle.addEventListener( 'click', ( e: MouseEvent ) =>
-        {
+        innerTitle.addEventListener( 'click', ( e: MouseEvent ) => {
             if ( innerTitle.eventCatched )
             {
                 innerTitle.eventCatched = false;

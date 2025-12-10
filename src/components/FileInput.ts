@@ -20,8 +20,7 @@ export class FileInput extends BaseComponent
         let type = options.type ?? 'text';
         let read = options.read ?? true;
 
-        this.onResize = ( rect ) =>
-        {
+        this.onResize = ( rect ) => {
             const realNameWidth = this.root.domName?.style.width ?? '0px';
             input.style.width = `calc( 100% - ${realNameWidth})`;
         };
@@ -56,8 +55,7 @@ export class FileInput extends BaseComponent
                 else if ( type === 'bin' ) reader.readAsBinaryString( files[0] );
                 else if ( type === 'url' ) reader.readAsDataURL( files[0] );
 
-                reader.onload = e =>
-                {
+                reader.onload = e => {
                     callback.call( this, e.target?.result, files[0] );
                 };
             }
@@ -76,25 +74,20 @@ export class FileInput extends BaseComponent
         {
             let settingsDialog: any = null;
 
-            const settingButton = new Button( null, '', () =>
-            {
+            const settingButton = new Button( null, '', () => {
                 if ( settingsDialog )
                 {
                     return;
                 }
 
-                settingsDialog = new LX.Dialog( 'Load Settings', ( p: Panel ) =>
-                {
-                    p.addSelect( 'Type', [ 'text', 'buffer', 'bin', 'url' ], type, ( v: any ) =>
-                    {
+                settingsDialog = new LX.Dialog( 'Load Settings', ( p: Panel ) => {
+                    p.addSelect( 'Type', [ 'text', 'buffer', 'bin', 'url' ], type, ( v: any ) => {
                         type = v;
                     } );
-                    p.addButton( null, 'Reload', () =>
-                    {
+                    p.addButton( null, 'Reload', () => {
                         input.dispatchEvent( new Event( 'change' ) );
                     } );
-                }, { onclose: ( root: HTMLElement ) =>
-                {
+                }, { onclose: ( root: HTMLElement ) => {
                     root.remove();
                     settingsDialog = null;
                 } } );

@@ -63,8 +63,7 @@ export class Popover
 
         this._parent.appendChild( this.root );
 
-        this.root.addEventListener( 'keydown', ( e: KeyboardEvent ) =>
-        {
+        this.root.addEventListener( 'keydown', ( e: KeyboardEvent ) => {
             if ( e.key == 'Escape' )
             {
                 e.preventDefault();
@@ -76,8 +75,7 @@ export class Popover
         if ( content )
         {
             content = [].concat( content );
-            content.forEach( ( e: any ) =>
-            {
+            content.forEach( ( e: any ) => {
                 const domNode = e.root ?? e;
                 this.root.appendChild( domNode );
                 if ( e.onPopover )
@@ -89,16 +87,14 @@ export class Popover
 
         Popover.activeElement = this;
 
-        LX.doAsync( () =>
-        {
+        LX.doAsync( () => {
             this._adjustPosition();
 
             if ( this._trigger )
             {
                 this.root.focus();
 
-                this._onClick = ( e: Event ) =>
-                {
+                this._onClick = ( e: Event ) => {
                     if ( e.target && ( this.root.contains( e.target ) || e.target == this._trigger ) )
                     {
                         return;
@@ -235,13 +231,11 @@ class PopConfirm
         footerButtons.appendChild( footerPanel.root );
 
         footerPanel.sameLine( 2, 'justify-end' );
-        footerPanel.addButton( null, cancelText, () =>
-        {
+        footerPanel.addButton( null, cancelText, () => {
             if ( onCancel ) onCancel();
             this._popover?.destroy();
         }, { xbuttonClass: 'contrast' } );
-        footerPanel.addButton( null, okText, () =>
-        {
+        footerPanel.addButton( null, okText, () => {
             if ( onConfirm ) onConfirm();
             this._popover?.destroy();
         }, { buttonClass: 'accent' } );

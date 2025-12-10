@@ -19,19 +19,16 @@ export class Select extends BaseComponent
     {
         super( ComponentType.SELECT, name, value, options );
 
-        this.onGetValue = () =>
-        {
+        this.onGetValue = () => {
             return value;
         };
 
-        this.onSetValue = ( newValue, skipCallback, event ) =>
-        {
+        this.onSetValue = ( newValue, skipCallback, event ) => {
             value = newValue;
 
             let item: any = null;
             const listOptionsNodes = listOptions.childNodes;
-            listOptionsNodes.forEach( ( e: any ) =>
-            {
+            listOptionsNodes.forEach( ( e: any ) => {
                 e.classList.remove( 'selected' );
                 if ( e.getAttribute( 'value' ) == newValue )
                 {
@@ -74,8 +71,7 @@ export class Select extends BaseComponent
             }
         };
 
-        this.onResize = ( rect ) =>
-        {
+        this.onResize = ( rect ) => {
             const realNameWidth = this.root.domName?.style.width ?? '0px';
             container.style.width = options.inputWidth ?? `calc( 100% - ${realNameWidth})`;
         };
@@ -94,8 +90,7 @@ export class Select extends BaseComponent
             options.overflowContainerX = options.overflowContainerY = options.overflowContainer;
         }
 
-        const _placeOptions = ( parent: any, forceLastPlacement?: boolean ) =>
-        {
+        const _placeOptions = ( parent: any, forceLastPlacement?: boolean ) => {
             const selectRoot = selectedOption.root;
             const rect = selectRoot.getBoundingClientRect();
             const nestedDialog = parent.parentElement.closest( 'dialog' )
@@ -177,8 +172,7 @@ export class Select extends BaseComponent
             }
         };
 
-        let selectedOption = new Button( null, value, ( value: any, event: any ) =>
-        {
+        let selectedOption = new Button( null, value, ( value: any, event: any ) => {
             if ( list.unfocus_event )
             {
                 delete list.unfocus_event;
@@ -209,8 +203,7 @@ export class Select extends BaseComponent
 
         container.appendChild( selectedOption.root );
 
-        selectedOption.refresh = ( v?: string ) =>
-        {
+        selectedOption.refresh = ( v?: string ) => {
             const buttonSpan = selectedOption.root.querySelector( 'span' );
             if ( buttonSpan.innerText == '' )
             {
@@ -264,8 +257,7 @@ export class Select extends BaseComponent
             filterOptions.className = 'lexfilter';
             filterOptions.inputClass = 'outline';
 
-            filter = new TextInput( null, options.filterValue ?? '', ( v: string ) =>
-            {
+            filter = new TextInput( null, options.filterValue ?? '', ( v: string ) => {
                 const filteredOptions = this._filterOptions( values, v );
                 list.refresh( filteredOptions );
                 _placeOptions( listDialog, true );
@@ -293,8 +285,7 @@ export class Select extends BaseComponent
         list.appendChild( listOptions );
 
         // Add select options list
-        list.refresh = ( currentOptions: any ) =>
-        {
+        list.refresh = ( currentOptions: any ) => {
             // Empty list
             listOptions.innerHTML = '';
 
@@ -322,8 +313,7 @@ export class Select extends BaseComponent
                 option.className = 'option';
                 li.appendChild( option );
 
-                const onSelect = ( e: any ) =>
-                {
+                const onSelect = ( e: any ) => {
                     this.set( e.currentTarget?.getAttribute( 'value' ), false, e );
                     listDialog.close();
                 };

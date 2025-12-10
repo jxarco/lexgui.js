@@ -24,15 +24,13 @@ export class Button extends BaseComponent
         this.callback = callback;
         this.selectable = options.selectable ?? this.selectable;
 
-        this.onGetValue = () =>
-        {
+        this.onGetValue = () => {
             const isSelected = LX.hasClass( wValue, 'selected' );
             const swapInput = wValue.querySelector( 'input' );
             return swapInput ? swapInput.checked : ( this.selectable ? isSelected : value );
         };
 
-        this.onSetValue = ( newValue, skipCallback, event ) =>
-        {
+        this.onSetValue = ( newValue, skipCallback, event ) => {
             if ( ( options.swap ?? false ) )
             {
                 this.setState( newValue, skipCallback );
@@ -60,8 +58,7 @@ export class Button extends BaseComponent
             }
         };
 
-        this.onResize = ( rect: any ) =>
-        {
+        this.onResize = ( rect: any ) => {
             const realNameWidth = this.root.domName?.style.width ?? '0px';
             wValue.style.width = `calc( 100% - ${realNameWidth})`;
         };
@@ -79,8 +76,7 @@ export class Button extends BaseComponent
             {
                 if ( options.parent )
                 {
-                    options.parent.querySelectorAll( '.lexbutton.selected' ).forEach( ( b: HTMLElement ) =>
-                    {
+                    options.parent.querySelectorAll( '.lexbutton.selected' ).forEach( ( b: HTMLElement ) => {
                         if ( b == wValue ) return;
                         b.classList.remove( 'selected' );
                     } );
@@ -165,8 +161,7 @@ export class Button extends BaseComponent
                 else if ( options.fileInputType === 'buffer' ) reader.readAsArrayBuffer( files[0] );
                 else if ( options.fileInputType === 'bin' ) reader.readAsBinaryString( files[0] );
                 else if ( options.fileInputType === 'url' ) reader.readAsDataURL( files[0] );
-                reader.onload = e =>
-                {
+                reader.onload = e => {
                     callback.call( this, e.target?.result, files[0] );
                 };
             } );
@@ -204,15 +199,13 @@ export class Button extends BaseComponent
             };
         }
 
-        trigger.addEventListener( 'click', ( e: MouseEvent ) =>
-        {
+        trigger.addEventListener( 'click', ( e: MouseEvent ) => {
             let isSelected;
             if ( this.selectable )
             {
                 if ( options.parent )
                 {
-                    options.parent.querySelectorAll( '.lexbutton.selected' ).forEach( ( b: HTMLElement ) =>
-                    {
+                    options.parent.querySelectorAll( '.lexbutton.selected' ).forEach( ( b: HTMLElement ) => {
                         if ( b == wValue ) return;
                         b.classList.remove( 'selected' );
                     } );
@@ -230,8 +223,7 @@ export class Button extends BaseComponent
                 const swapInput = wValue.querySelector( 'input' );
 
                 new LX.PopConfirm( wValue, {
-                    onConfirm: () =>
-                    {
+                    onConfirm: () => {
                         if ( options.swap )
                         {
                             swapInput.checked = true;

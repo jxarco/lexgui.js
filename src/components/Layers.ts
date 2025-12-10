@@ -17,13 +17,11 @@ export class Layers extends BaseComponent
     {
         super( ComponentType.LAYERS, name, value, options );
 
-        this.onGetValue = () =>
-        {
+        this.onGetValue = () => {
             return value;
         };
 
-        this.onSetValue = ( newValue, skipCallback, event ) =>
-        {
+        this.onSetValue = ( newValue, skipCallback, event ) => {
             value = newValue;
             this.setLayers( value );
             if ( !skipCallback )
@@ -32,8 +30,7 @@ export class Layers extends BaseComponent
             }
         };
 
-        this.onResize = ( rect ) =>
-        {
+        this.onResize = ( rect ) => {
             const realNameWidth = this.root.domName?.style.width ?? '0px';
             container.style.width = `calc( 100% - ${realNameWidth})`;
         };
@@ -44,8 +41,7 @@ export class Layers extends BaseComponent
 
         const maxBits = options.maxBits ?? 16;
 
-        this.setLayers = ( val ) =>
-        {
+        this.setLayers = ( val ) => {
             container.innerHTML = '';
 
             let binary = val.toString( 2 );
@@ -75,8 +71,7 @@ export class Layers extends BaseComponent
                 layer.title = 'Bit ' + bit + ', value ' + ( 1 << bit );
                 container.appendChild( layer );
 
-                layer.addEventListener( 'click', ( e: any ) =>
-                {
+                layer.addEventListener( 'click', ( e: any ) => {
                     e.stopPropagation();
                     e.stopImmediatePropagation();
                     e.target.classList.toggle( 'selected' );

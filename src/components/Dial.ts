@@ -20,13 +20,11 @@ export class Dial extends BaseComponent
 
         super( ComponentType.DIAL, name, defaultValues, options );
 
-        this.onGetValue = () =>
-        {
+        this.onGetValue = () => {
             return JSON.parse( JSON.stringify( dialInstance.element.value ) );
         };
 
-        this.onSetValue = ( newValue, skipCallback, event ) =>
-        {
+        this.onSetValue = ( newValue, skipCallback, event ) => {
             dialInstance.element.value = JSON.parse( JSON.stringify( newValue ) );
             dialInstance.redraw();
             if ( !skipCallback )
@@ -35,8 +33,7 @@ export class Dial extends BaseComponent
             }
         };
 
-        this.onResize = ( rect ) =>
-        {
+        this.onResize = ( rect ) => {
             const realNameWidth = this.root.domName?.style.width ?? '0px';
             container.style.width = `calc( 100% - ${realNameWidth})`;
             LX.flushCss( container );
@@ -51,8 +48,7 @@ export class Dial extends BaseComponent
         container.className = 'lexcurve';
         this.root.appendChild( container );
 
-        options.callback = ( v: any, e: MouseEvent ) =>
-        {
+        options.callback = ( v: any, e: MouseEvent ) => {
             this._trigger( new IEvent( name, v, e ), callback );
         };
 

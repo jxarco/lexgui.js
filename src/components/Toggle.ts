@@ -20,13 +20,11 @@ export class Toggle extends BaseComponent
 
         super( ComponentType.TOGGLE, name, value, options );
 
-        this.onGetValue = () =>
-        {
+        this.onGetValue = () => {
             return toggle.checked;
         };
 
-        this.onSetValue = ( newValue, skipCallback, event ) =>
-        {
+        this.onSetValue = ( newValue, skipCallback, event ) => {
             if ( newValue == value )
             {
                 return;
@@ -43,8 +41,7 @@ export class Toggle extends BaseComponent
             }
         };
 
-        this.onResize = ( rect ) =>
-        {
+        this.onResize = ( rect ) => {
             const realNameWidth = this.root.domName?.style.width ?? '0px';
             container.style.width = options.inputWidth ?? `calc( 100% - ${realNameWidth})`;
         };
@@ -66,8 +63,7 @@ export class Toggle extends BaseComponent
         valueName.innerHTML = options.label ?? 'On';
         container.appendChild( valueName );
 
-        toggle.addEventListener( 'change', ( e: InputEvent ) =>
-        {
+        toggle.addEventListener( 'change', ( e: InputEvent ) => {
             this.set( toggle.checked, false, e );
         } );
 

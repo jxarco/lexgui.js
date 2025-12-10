@@ -25,13 +25,11 @@ export class Form extends BaseComponent
 
         super( ComponentType.FORM, name, null, options );
 
-        this.onGetValue = () =>
-        {
+        this.onGetValue = () => {
             return container.formData;
         };
 
-        this.onSetValue = ( newValue, skipCallback, event ) =>
-        {
+        this.onSetValue = ( newValue, skipCallback, event ) => {
             container.formData = newValue;
             const entries = container.querySelectorAll( '.lexcomponent' );
             for ( let i = 0; i < entries.length; ++i )
@@ -77,8 +75,7 @@ export class Form extends BaseComponent
             }
 
             entryData.textComponent = new TextInput( null,
-                entryData.constructor == Object ? entryData.value : entryData, ( value: string, event: any ) =>
-            {
+                entryData.constructor == Object ? entryData.value : entryData, ( value: string, event: any ) => {
                 container.formData[entry] = value;
                 if ( entryData.submit && event.constructor === KeyboardEvent )
                 {
@@ -95,8 +92,7 @@ export class Form extends BaseComponent
         if ( options.secondaryActionName || options.secondaryActionCallback )
         {
             const secondaryButton = new Button( null, options.secondaryActionName ?? 'Cancel',
-                ( value: any, event: MouseEvent ) =>
-                {
+                ( value: any, event: MouseEvent ) => {
                     if ( options.secondaryActionCallback )
                     {
                         options.secondaryActionCallback( container.formData, event );
@@ -107,8 +103,7 @@ export class Form extends BaseComponent
         }
 
         const primaryButton = new Button( null, options.primaryActionName ?? 'Submit',
-            ( value: any, event: MouseEvent ) =>
-            {
+            ( value: any, event: MouseEvent ) => {
                 const errors = [];
 
                 for ( let entry in data )

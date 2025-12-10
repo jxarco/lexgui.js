@@ -346,8 +346,7 @@ export class Panel
             this.signals.push( { [component.options.signal]: component } );
         }
 
-        const _insertComponent = ( el: HTMLElement ) =>
-        {
+        const _insertComponent = ( el: HTMLElement ) => {
             if ( options.container )
             {
                 options.container.appendChild( el );
@@ -375,8 +374,7 @@ export class Panel
             }
         };
 
-        const _storeComponent = ( el: HTMLElement ) =>
-        {
+        const _storeComponent = ( el: HTMLElement ) => {
             if ( !this.queuedContainer )
             {
                 this._inlineComponents.push( el );
@@ -430,8 +428,7 @@ export class Panel
         element.appendChild( searchIcon );
         element.appendChild( input );
 
-        input.addEventListener( 'input', e =>
-        {
+        input.addEventListener( 'input', e => {
             if ( options.callback )
             {
                 options.callback( input.value, e );

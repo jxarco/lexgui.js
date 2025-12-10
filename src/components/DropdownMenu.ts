@@ -77,14 +77,12 @@ export class DropdownMenu
 
         DropdownMenu.currentMenu = this;
 
-        LX.doAsync( () =>
-        {
+        LX.doAsync( () => {
             this._adjustPosition();
 
             this.root.focus();
 
-            this._onClick = ( e: any ) =>
-            {
+            this._onClick = ( e: any ) => {
                 // Check if the click is inside a menu or on the trigger
                 if ( e.target && ( e.target.closest( '.lexdropdownmenu' ) != undefined || e.target == this._trigger ) )
                 {
@@ -108,8 +106,7 @@ export class DropdownMenu
         document.body.removeEventListener( 'mousedown', this._onClick, true );
         document.body.removeEventListener( 'focusin', this._onClick, true );
 
-        this._parent.querySelectorAll( '.lexdropdownmenu' ).forEach( ( m: any ) =>
-        {
+        this._parent.querySelectorAll( '.lexdropdownmenu' ).forEach( ( m: any ) => {
             m.remove();
         } );
 
@@ -141,8 +138,7 @@ export class DropdownMenu
             newParent.currentParent = parentDom;
             parentDom = newParent;
 
-            LX.doAsync( () =>
-            {
+            LX.doAsync( () => {
                 const position = [ parentRect.x + parentRect.width, parentRect.y ];
 
                 if ( this._parent instanceof HTMLDialogElement )
@@ -165,8 +161,7 @@ export class DropdownMenu
             }, 10 );
         }
 
-        let applyIconPadding = items.filter( ( i: any ) =>
-        {
+        let applyIconPadding = items.filter( ( i: any ) => {
             return ( i?.icon != undefined ) || ( i?.checked != undefined );
         } ).length > 0;
 
@@ -218,8 +213,7 @@ export class DropdownMenu
             const kbd = LX.makeKbd( item.kbd );
             menuItem.appendChild( kbd );
 
-            document.addEventListener( 'keydown', e =>
-            {
+            document.addEventListener( 'keydown', e => {
                 if ( !this._trigger.ddm ) return;
                 e.preventDefault();
                 // Check if it's a letter or other key
@@ -263,8 +257,7 @@ export class DropdownMenu
 
         if ( item.checked != undefined )
         {
-            const checkbox = new Checkbox( pKey + '_entryChecked', item.checked, ( v: boolean ) =>
-            {
+            const checkbox = new Checkbox( pKey + '_entryChecked', item.checked, ( v: boolean ) => {
                 const f = item['callback'];
                 item.checked = v;
                 if ( f )
@@ -276,8 +269,7 @@ export class DropdownMenu
             input.classList.add( 'ml-auto' );
             menuItem.appendChild( input );
 
-            menuItem.addEventListener( 'click', ( e: any ) =>
-            {
+            menuItem.addEventListener( 'click', ( e: any ) => {
                 if ( e.target.type == 'checkbox' ) return;
                 input.checked = !input.checked;
                 checkbox.set( input.checked );
@@ -285,8 +277,7 @@ export class DropdownMenu
         }
         else
         {
-            menuItem.addEventListener( 'click', ( e: MouseEvent ) =>
-            {
+            menuItem.addEventListener( 'click', ( e: MouseEvent ) => {
                 const radioName = menuItem.getAttribute( 'data-radioname' );
                 if ( radioName )
                 {
@@ -307,8 +298,7 @@ export class DropdownMenu
             } );
         }
 
-        menuItem.addEventListener( 'mouseover', ( e: MouseEvent ) =>
-        {
+        menuItem.addEventListener( 'mouseover', ( e: MouseEvent ) => {
             let path = menuItem.dataset['id'];
             if ( !path ) return;
             let p = parentDom;
@@ -319,8 +309,7 @@ export class DropdownMenu
                 p = p.currentParent?.parentElement;
             }
 
-            this._parent.querySelectorAll( '.lexdropdownmenu' ).forEach( ( m: any ) =>
-            {
+            this._parent.querySelectorAll( '.lexdropdownmenu' ).forEach( ( m: any ) => {
                 if ( !path.includes( m.dataset['id'] ) )
                 {
                     m.currentParent.built = false;

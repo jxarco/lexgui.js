@@ -649,8 +649,7 @@ export class CodeEditor
         {
             options.files = [ ...options.filesAsync ];
 
-            const instance: any = ( async () =>
-            {
+            const instance: any = ( async () => {
                 await this._init( area, options );
                 // Constructors return `this` implicitly, but this is an IIFE, so
                 // return `this` explicitly (else we'd return an empty object).
@@ -708,8 +707,7 @@ export class CodeEditor
                 filter: false,
                 rename: false,
                 skipDefaultIcon: true,
-                onevent: ( event: typeof LX.TreeEvent ) =>
-                {
+                onevent: ( event: typeof LX.TreeEvent ) => {
                     switch ( event.type )
                     {
                         // case LX.TreeEvent.NODE_SELECTED:
@@ -751,8 +749,7 @@ export class CodeEditor
 
         if ( !this.skipTabs )
         {
-            this.tabs = this.area.addTabs( { onclose: ( name: string ) =>
-            {
+            this.tabs = this.area.addTabs( { onclose: ( name: string ) => {
                 delete this.openedTabs[name];
                 if ( Object.keys( this.openedTabs ).length < 2 )
                 {
@@ -765,8 +762,7 @@ export class CodeEditor
 
             if ( !this.disableEdition )
             {
-                this.tabs.root.parentElement.addEventListener( 'dblclick', ( e: MouseEvent ) =>
-                {
+                this.tabs.root.parentElement.addEventListener( 'dblclick', ( e: MouseEvent ) => {
                     if ( options.allowAddScripts ?? true )
                     {
                         e.preventDefault();
@@ -786,8 +782,7 @@ export class CodeEditor
                 LX.makeIcon( 'FolderOpen' ).innerHTML, this.area, {
                 bottom: '8px'
             } );
-            loadFileButton.addEventListener( 'click', ( e: MouseEvent ) =>
-            {
+            loadFileButton.addEventListener( 'click', ( e: MouseEvent ) => {
                 const dropdownOptions = [];
 
                 for ( const [ key, value ] of [ ...Object.entries( this.loadedTabs ).slice( 1 ),
@@ -799,8 +794,7 @@ export class CodeEditor
                         name: key,
                         icon: classes[0],
                         svgClass: classes.slice( 0 ).join( ' ' ),
-                        callback: ( entryName: string ) =>
-                        {
+                        callback: ( entryName: string ) => {
                             this.loadCode( entryName );
                         }
                     } );
@@ -812,8 +806,7 @@ export class CodeEditor
 
         this.codeArea.root.classList.add( 'lexcodearea' );
 
-        const codeResizeObserver = new ResizeObserver( entries =>
-        {
+        const codeResizeObserver = new ResizeObserver( entries => {
             if ( !this.code )
             {
                 return;
@@ -826,8 +819,7 @@ export class CodeEditor
         // Full editor
         area.root.classList.add( 'codebasearea' );
 
-        const observer = new MutationObserver( ( e ) =>
-        {
+        const observer = new MutationObserver( ( e ) => {
             if ( e[0].attributeName == 'style' )
             {
                 this.resize();
@@ -893,8 +885,7 @@ export class CodeEditor
 
             if ( !this.disableEdition )
             {
-                this.codeScroller.addEventListener( 'scroll', ( e: any ) =>
-                {
+                this.codeScroller.addEventListener( 'scroll', ( e: any ) => {
                     if ( this._discardScroll )
                     {
                         this._discardScroll = false;
@@ -943,8 +934,7 @@ export class CodeEditor
                     }
                 } );
 
-                this.codeScroller.addEventListener( 'wheel', ( e: WheelEvent ) =>
-                {
+                this.codeScroller.addEventListener( 'wheel', ( e: WheelEvent ) => {
                     if ( e.ctrlKey )
                     {
                         e.preventDefault();
@@ -953,8 +943,7 @@ export class CodeEditor
                     }
                 } );
 
-                this.codeScroller.addEventListener( 'wheel', ( e: WheelEvent ) =>
-                {
+                this.codeScroller.addEventListener( 'wheel', ( e: WheelEvent ) => {
                     if ( !e.ctrlKey )
                     {
                         const dX = ( e.deltaY > 0.0 ? 10.0 : -10.0 ) * ( e.shiftKey ? 1.0 : 0.0 );
@@ -1008,8 +997,7 @@ export class CodeEditor
                     tooltip: true } );
 
                 const searchInput = box.querySelector( 'input' );
-                searchInput?.addEventListener( 'keyup', e =>
-                {
+                searchInput?.addEventListener( 'keyup', e => {
                     if ( e.key == 'Escape' ) this.hideSearchBox();
                     else if ( e.key == 'Enter' ) this.search( ( e.target as any ).value, !!e.shiftKey );
                 } );
@@ -1027,8 +1015,7 @@ export class CodeEditor
                 box.appendChild( searchPanel.root );
 
                 searchPanel.sameLine( 2 );
-                searchPanel.addText( null, '', ( value: string ) =>
-                {
+                searchPanel.addText( null, '', ( value: string ) => {
                     input.value = ':' + value.replaceAll( ':', '' );
                     this.goToLine( input.value.slice( 1 ) );
                 }, { placeholder: 'Go to line', trigger: 'input' } );
@@ -1036,8 +1023,7 @@ export class CodeEditor
                     tooltip: true } );
 
                 let input: any = box.querySelector( 'input' );
-                input.addEventListener( 'keyup', ( e: KeyboardEvent ) =>
-                {
+                input.addEventListener( 'keyup', ( e: KeyboardEvent ) => {
                     if ( e.key == 'Escape' ) this.hideSearchLineBox();
                 } );
 
@@ -1120,8 +1106,7 @@ export class CodeEditor
 
         // Action keys
         {
-            this.action( 'Escape', false, ( ln, cursor, e ) =>
-            {
+            this.action( 'Escape', false, ( ln, cursor, e ) => {
                 if ( this.hideAutoCompleteBox() )
                 {
                     return;
@@ -1135,8 +1120,7 @@ export class CodeEditor
                 this._removeSecondaryCursors();
             } );
 
-            this.action( 'Backspace', false, ( ln, cursor, e ) =>
-            {
+            this.action( 'Backspace', false, ( ln, cursor, e ) => {
                 this._addUndoStep( cursor );
 
                 if ( cursor.selection )
@@ -1194,8 +1178,7 @@ export class CodeEditor
                 this.resizeIfNecessary( cursor, true );
             } );
 
-            this.action( 'Delete', false, ( ln, cursor, e ) =>
-            {
+            this.action( 'Delete', false, ( ln, cursor, e ) => {
                 this._addUndoStep( cursor );
 
                 if ( cursor.selection )
@@ -1222,8 +1205,7 @@ export class CodeEditor
                 this.resizeIfNecessary( cursor, true );
             } );
 
-            this.action( 'Tab', true, ( ln, cursor, e ) =>
-            {
+            this.action( 'Tab', true, ( ln, cursor, e ) => {
                 if ( this._skipTabs )
                 {
                     this._skipTabs--;
@@ -1250,13 +1232,11 @@ export class CodeEditor
                         this._addSpaces( cursor, indentSpaces );
                     }
                 }
-            }, ( cursor: Cursor, e: KeyboardEvent ) =>
-            {
+            }, ( cursor: Cursor, e: KeyboardEvent ) => {
                 return e.shiftKey || ( cursor.selection && !cursor.selection.sameLine() );
             } );
 
-            this.action( 'Home', false, ( ln, cursor, e ) =>
-            {
+            this.action( 'Home', false, ( ln, cursor, e ) => {
                 let idx = firstNonspaceIndex( this.code.lines[ln] );
 
                 // We already are in the first non space index...
@@ -1307,8 +1287,7 @@ export class CodeEditor
                 }
             } );
 
-            this.action( 'End', false, ( ln, cursor, e ) =>
-            {
+            this.action( 'End', false, ( ln, cursor, e ) => {
                 if ( ( e.shiftKey || e._shiftKey ) && !e.cancelShift )
                 {
                     var string = this.code.lines[ln].substring( cursor.position );
@@ -1347,8 +1326,7 @@ export class CodeEditor
                 this.mergeCursors( ln );
             } );
 
-            this.action( 'Enter', true, ( ln, cursor, e ) =>
-            {
+            this.action( 'Enter', true, ( ln, cursor, e ) => {
                 // Add word
                 if ( this.isAutoCompleteActive )
                 {
@@ -1391,8 +1369,7 @@ export class CodeEditor
                 this.processLines();
             } );
 
-            this.action( 'ArrowUp', false, ( ln, cursor, e ) =>
-            {
+            this.action( 'ArrowUp', false, ( ln, cursor, e ) => {
                 // Move cursor..
                 if ( !this.isAutoCompleteActive )
                 {
@@ -1429,8 +1406,7 @@ export class CodeEditor
                 }
             } );
 
-            this.action( 'ArrowDown', false, ( ln, cursor, e ) =>
-            {
+            this.action( 'ArrowDown', false, ( ln, cursor, e ) => {
                 // Move cursor..
                 if ( !this.isAutoCompleteActive )
                 {
@@ -1468,8 +1444,7 @@ export class CodeEditor
                 }
             } );
 
-            this.action( 'ArrowLeft', false, ( ln, cursor, e ) =>
-            {
+            this.action( 'ArrowLeft', false, ( ln, cursor, e ) => {
                 // Nothing to do..
                 if ( cursor.line == 0 && cursor.position == 0 )
                 {
@@ -1565,8 +1540,7 @@ export class CodeEditor
                 }
             } );
 
-            this.action( 'ArrowRight', false, ( ln, cursor, e ) =>
-            {
+            this.action( 'ArrowRight', false, ( ln, cursor, e ) => {
                 // Nothing to do..
                 if ( cursor.line == this.code.lines.length - 1
                     && cursor.position == this.code.lines[cursor.line].length )
@@ -1669,8 +1643,7 @@ export class CodeEditor
 
         // Default code tab
 
-        const onLoadAll = async () =>
-        {
+        const onLoadAll = async () => {
             // Create inspector panel when the initial state is complete
             // and we have at least 1 tab opened
             this.statusPanel = this._createStatusPanel( options );
@@ -1702,8 +1675,7 @@ export class CodeEditor
             LX.emitSignal( '@font-size', this.fontSize );
 
             // Get final sizes for editor elements based on Tabs and status bar offsets
-            LX.doAsync( () =>
-            {
+            LX.doAsync( () => {
                 this._verticalTopOffset = this.tabs?.root.getBoundingClientRect().height ?? 0;
                 this._verticalBottomOffset = this.statusPanel?.root.getBoundingClientRect().height ?? 0;
                 this._fullVerticalOffset = this._verticalTopOffset + this._verticalBottomOffset;
@@ -1745,8 +1717,7 @@ export class CodeEditor
                 const finalFileName = url.constructor === Array ? url[1] : undefined;
 
                 await this.loadFile( finalUrl, { filename: finalFileName, async: loadAsync,
-                    callback: ( name: string, text: string ) =>
-                    {
+                    callback: ( name: string, text: string ) => {
                         filesLoaded++;
                         if ( filesLoaded == numFiles )
                         {
@@ -1900,8 +1871,7 @@ export class CodeEditor
             this.processLine( lidx );
         }
 
-        this.resize( CodeEditor.RESIZE_SCROLLBAR_H_V, undefined, () =>
-        {
+        this.resize( CodeEditor.RESIZE_SCROLLBAR_H_V, undefined, () => {
             var viewportSizeX = ( this.codeScroller.clientWidth + this.getScrollLeft() ) - CodeEditor.LINE_GUTTER_WIDTH; // Gutter offset
             if ( ( cursor.position * this.charWidth ) >= viewportSizeX )
             {
@@ -1922,8 +1892,7 @@ export class CodeEditor
 
     async loadFile( file: File, options: any = {} )
     {
-        const _innerAddTab = ( text: string, name: string, title?: string ) =>
-        {
+        const _innerAddTab = ( text: string, name: string, title?: string ) => {
             // Remove Carriage Return in some cases and sub tabs using spaces
             text = text.replaceAll( '\r', '' ).replaceAll( /\t|\\t/g, ' '.repeat( this.tabSpaces ) );
 
@@ -1976,8 +1945,7 @@ export class CodeEditor
             }
             else
             {
-                LX.request( { url: filename, success: ( text: string ) =>
-                {
+                LX.request( { url: filename, success: ( text: string ) => {
                     _innerAddTab( text, name, options.filename ?? filename );
                 } } );
             }
@@ -1987,8 +1955,7 @@ export class CodeEditor
         {
             const fr = new FileReader();
             fr.readAsText( file );
-            fr.onload = e =>
-            {
+            fr.onload = e => {
                 const text = ( e.currentTarget as any ).result;
                 _innerAddTab( text, file.name );
             };
@@ -2237,15 +2204,12 @@ export class CodeEditor
             fit: true,
             signal: '@cursor-data'
         } );
-        rightStatusPanel.addButton( null, 'Spaces: ' + this.tabSpaces, ( value: any, event: any ) =>
-        {
-            LX.addContextMenu( 'Spaces', event, ( m: typeof ContextMenu ) =>
-            {
+        rightStatusPanel.addButton( null, 'Spaces: ' + this.tabSpaces, ( value: any, event: any ) => {
+            LX.addContextMenu( 'Spaces', event, ( m: typeof ContextMenu ) => {
                 const options = [ 2, 4, 8 ];
                 for ( const n of options )
                 {
-                    m.add( n, ( v: any ) =>
-                    {
+                    m.add( n, ( v: any ) => {
                         this.tabSpaces = v;
                         this.processLines();
                         this._updateDataInfoPanel( '@tab-spaces', 'Spaces: ' + this.tabSpaces );
@@ -2253,14 +2217,11 @@ export class CodeEditor
                 }
             } );
         }, { id: 'EditorIndentationStatusComponent', nameWidth: '15%', signal: '@tab-spaces' } );
-        rightStatusPanel.addButton( '<b>{ }</b>', this.highlight, ( value: any, event: any ) =>
-        {
-            LX.addContextMenu( 'Language', event, ( m: typeof ContextMenu ) =>
-            {
+        rightStatusPanel.addButton( '<b>{ }</b>', this.highlight, ( value: any, event: any ) => {
+            LX.addContextMenu( 'Language', event, ( m: typeof ContextMenu ) => {
                 for ( const lang of Object.keys( CodeEditor.languages ) )
                 {
-                    m.add( lang, ( v: any ) =>
-                    {
+                    m.add( lang, ( v: any ) => {
                         this._changeLanguage( v, undefined, true );
                         this.processLines();
                     } );
@@ -2278,8 +2239,7 @@ export class CodeEditor
             'Editor Language': options.statusShowEditorLanguage ?? true
         };
 
-        const _setVisibility = ( itemName: string ) =>
-        {
+        const _setVisibility = ( itemName: string ) => {
             const b = panel.root.querySelector( `#${itemName.replaceAll( ' ', '' )}StatusComponent` );
             console.assert( b, `${itemName} has no status button!` );
             b.classList.toggle( 'hidden', !itemVisibilityMap[itemName] );
@@ -2290,8 +2250,7 @@ export class CodeEditor
             _setVisibility( itemName );
         }
 
-        panel.root.addEventListener( 'contextmenu', ( e: any ) =>
-        {
+        panel.root.addEventListener( 'contextmenu', ( e: any ) => {
             if ( e.target
                 && ( e.target.classList.contains( 'lexpanel' )
                     || e.target.classList.contains( 'lexinlinecomponents' ) ) )
@@ -2299,13 +2258,11 @@ export class CodeEditor
                 return;
             }
 
-            const menuOptions = Object.keys( itemVisibilityMap ).map( ( itemName, idx ) =>
-            {
+            const menuOptions = Object.keys( itemVisibilityMap ).map( ( itemName, idx ) => {
                 const item: any = {
                     name: itemName,
                     icon: 'Check',
-                    callback: () =>
-                    {
+                    callback: () => {
                         itemVisibilityMap[itemName] = !itemVisibilityMap[itemName];
                         _setVisibility( itemName );
                     }
@@ -2473,20 +2430,17 @@ export class CodeEditor
         }
 
         new LX.DropdownMenu( event.target, [
-            { name: 'Close', kbd: 'MWB', disabled: !this.allowClosingTabs, callback: () =>
-            {
+            { name: 'Close', kbd: 'MWB', disabled: !this.allowClosingTabs, callback: () => {
                 this.closeTab( name );
             } },
-            { name: 'Close Others', disabled: !this.allowClosingTabs, callback: () =>
-            {
+            { name: 'Close Others', disabled: !this.allowClosingTabs, callback: () => {
                 for ( const [ key, data ] of Object.entries( this.tabs.tabs ) )
                 {
                     if ( key === '+' || key === name ) continue;
                     this.closeTab( key );
                 }
             } },
-            { name: 'Close All', disabled: !this.allowClosingTabs, callback: () =>
-            {
+            { name: 'Close All', disabled: !this.allowClosingTabs, callback: () => {
                 for ( const [ key, data ] of Object.entries( this.tabs.tabs ) )
                 {
                     if ( key === '+' ) continue;
@@ -2494,8 +2448,7 @@ export class CodeEditor
                 }
             } },
             null,
-            { name: 'Copy Path', icon: 'Copy', callback: () =>
-            {
+            { name: 'Copy Path', icon: 'Copy', callback: () => {
                 navigator.clipboard.writeText( this.openedTabs[name].path ?? '' );
             } }
         ], { side: 'bottom', align: 'start', event } );
@@ -2504,8 +2457,7 @@ export class CodeEditor
     addTab( name: string, selected: boolean, title?: string, options: any = {} )
     {
         // If already loaded, set new name...
-        const repeats = Object.keys( this.loadedTabs ).slice( 1 ).reduce( ( v, key ) =>
-        {
+        const repeats = Object.keys( this.loadedTabs ).slice( 1 ).reduce( ( v, key ) => {
             const noRepeatName = key.replace( /[_\d+]/g, '' );
             return v + ( noRepeatName == name ? 1 : 0 );
         }, 0 );
@@ -2547,8 +2499,7 @@ export class CodeEditor
             e.preventDefault();
             this.parentElement?.classList.remove( 'dragging' );
         } );
-        code.addEventListener( 'drop', e =>
-        {
+        code.addEventListener( 'drop', e => {
             e.preventDefault();
             code.parentElement?.classList.remove( 'dragging' );
             if ( e.dataTransfer?.files )
@@ -2782,8 +2733,7 @@ export class CodeEditor
         input.type = 'file';
         document.body.appendChild( input );
         input.click();
-        input.addEventListener( 'change', e =>
-        {
+        input.addEventListener( 'change', e => {
             const target = e.target as HTMLInputElement;
             if ( target.files && target.files[0] )
             {
@@ -2888,21 +2838,17 @@ export class CodeEditor
                 return;
             }
 
-            LX.addContextMenu( null, e, ( m: typeof ContextMenu ) =>
-            {
-                m.add( 'Copy', () =>
-                {
+            LX.addContextMenu( null, e, ( m: typeof ContextMenu ) => {
+                m.add( 'Copy', () => {
                     this._copyContent( cursor );
                 } );
 
                 if ( !this.disableEdition )
                 {
-                    m.add( 'Cut', () =>
-                    {
+                    m.add( 'Cut', () => {
                         this._cutContent( cursor );
                     } );
-                    m.add( 'Paste', () =>
-                    {
+                    m.add( 'Paste', () => {
                         this._pasteContent( cursor );
                     } );
                 }
@@ -3702,8 +3648,7 @@ export class CodeEditor
             this._addUndoStep( cursor, true );
 
             const selectedLines = this.code.lines.slice( cursor.selection.fromY, cursor.selection.toY + 1 );
-            const minIdx = Math.min( ...selectedLines.map( ( v: string ) =>
-            {
+            const minIdx = Math.min( ...selectedLines.map( ( v: string ) => {
                 var idx = firstNonspaceIndex( v );
                 return idx < 0 ? 1e10 : idx;
             } ) );
@@ -4208,8 +4153,7 @@ export class CodeEditor
             {
                 this._buildingBlockComment = [ lineNumber - 1, 0 ];
 
-                this.mustProcessPreviousLine = ( tokens ) =>
-                {
+                this.mustProcessPreviousLine = ( tokens ) => {
                     const idx = tokens.indexOf( blockCommentsTokens[0] );
                     return ( idx === -1 );
                 };
@@ -4238,8 +4182,7 @@ export class CodeEditor
             {
                 this._buildingBlockComment = [ section[0].x, section[1].x ];
 
-                this.mustProcessNextLine = ( tokens ) =>
-                {
+                this.mustProcessNextLine = ( tokens ) => {
                     const idx = tokens.indexOf( blockCommentsTokens[1] );
                     return ( idx === -1 );
                 };
@@ -4416,8 +4359,7 @@ export class CodeEditor
         const text = lineString.trim();
         const previousLineScope = this.code.lineScopes[lineNumber - 1];
 
-        const _pushSymbol = ( s: any ) =>
-        {
+        const _pushSymbol = ( s: any ) => {
             const signature = `${s.name}_${s.kind}_${s.scope}_${s.line}`;
             if ( symbolsMap.has( signature ) )
             {
@@ -4816,8 +4758,7 @@ export class CodeEditor
             || ( !inBlockComment
                 && ( lang.tags ?? false ? ( this._enclosedByTokens( token, tokenIndex, '<', '>' ) ) : true ) ) )
         {
-            const _checkIfStringEnded = ( t: string ) =>
-            {
+            const _checkIfStringEnded = ( t: string ) => {
                 if ( this._stringInterpolation )
                 {
                     if ( token == '$' && next == '{' )
@@ -5237,8 +5178,7 @@ export class CodeEditor
 
         if ( this.cursorBlinkRate > 0 )
         {
-            this.blinker = setInterval( () =>
-            {
+            this.blinker = setInterval( () => {
                 LX.toggleClass( this.cursorsDOM, 'show' );
             }, this.cursorBlinkRate );
         }
@@ -5801,8 +5741,7 @@ export class CodeEditor
     setScrollLeft( value: number )
     {
         if ( !this.codeScroller ) return;
-        LX.doAsync( () =>
-        {
+        LX.doAsync( () => {
             this.codeScroller.scrollLeft = value;
             this.setScrollBarValue( 'horizontal', 0 );
         }, 10 );
@@ -5811,8 +5750,7 @@ export class CodeEditor
     setScrollTop( value: number )
     {
         if ( !this.codeScroller ) return;
-        LX.doAsync( () =>
-        {
+        LX.doAsync( () => {
             this.codeScroller.scrollTop = value;
             this.setScrollBarValue( 'vertical' );
         }, 10 );
@@ -5820,8 +5758,7 @@ export class CodeEditor
 
     resize( flag: number = CodeEditor.RESIZE_SCROLLBAR_H_V, pMaxLength?: number, onResize?: any )
     {
-        setTimeout( () =>
-        {
+        setTimeout( () => {
             let scrollWidth, scrollHeight;
 
             if ( flag & CodeEditor.RESIZE_SCROLLBAR_H )
@@ -5856,8 +5793,7 @@ export class CodeEditor
         );
         if ( force || ( maxLineLength >= numViewportChars && maxLineLength != this._lastMaxLineLength ) )
         {
-            this.resize( CodeEditor.RESIZE_SCROLLBAR_H, maxLineLength, () =>
-            {
+            this.resize( CodeEditor.RESIZE_SCROLLBAR_H, maxLineLength, () => {
                 if ( cursor.position > numViewportChars )
                 {
                     this.setScrollLeft( cursor.position * this.charWidth );
@@ -5993,8 +5929,7 @@ export class CodeEditor
         const col = cursor.line;
         const words = this.code.lines[col];
 
-        const isChar = ( char: string ) =>
-        {
+        const isChar = ( char: string ) => {
             const exceptions = [ '_', '#', '!' ];
             const code = char.charCodeAt( 0 );
             return ( exceptions.indexOf( char ) > -1 ) || ( code > 47 && code < 58 ) || ( code > 64 && code < 91 )
@@ -6229,8 +6164,7 @@ export class CodeEditor
             }
 
             pre.appendChild( LX.makeIcon( iconName, { iconClass: 'mr-1', svgClass: 'sm ' + iconClass } ) );
-            pre.addEventListener( 'click', () =>
-            {
+            pre.addEventListener( 'click', () => {
                 this.autoCompleteWord( currSuggestion );
             } );
 
@@ -6452,8 +6386,7 @@ export class CodeEditor
             delete this._lastResult;
         }
 
-        const getIndex = ( l: number ) =>
-        {
+        const getIndex = ( l: number ) => {
             var string = this.code.lines[l];
 
             if ( reverse )
@@ -6614,8 +6547,7 @@ export class CodeEditor
             this._currentOcurrences[currentKey] = true;
         }
 
-        this.search( text, false, ( col: number, ln: number ) =>
-        {
+        this.search( text, false, ( col: number, ln: number ) => {
             const key = [ col, ln ].join( '_' );
 
             if ( this._currentOcurrences[key] )
@@ -6742,8 +6674,7 @@ export class CodeEditor
 
     async _requestFileAsync( url: string, dataType?: string, nocache: boolean = false )
     {
-        return new Promise( ( resolve, reject ) =>
-        {
+        return new Promise( ( resolve, reject ) => {
             dataType = dataType ?? 'arraybuffer';
             const mimeType = dataType === 'arraybuffer' ? 'application/octet-stream' : undefined;
             var xhr: any = new XMLHttpRequest();

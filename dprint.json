@@ -9,6 +9,7 @@
         "quoteStyle": "preferSingle",
         "useBraces": "whenNotSingleLine",
         "bracePosition": "nextLine",
+        "arrowFunction.bracePosition": "sameLineUnlessHanging",
         "trailingCommas": "never",
         "preferHanging": true,
         "preferSingleLine": false,

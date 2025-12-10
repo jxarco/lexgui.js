@@ -17,21 +17,18 @@ export class RadioGroup extends BaseComponent
 
         let currentIndex: number | null = null;
 
-        this.onGetValue = () =>
-        {
+        this.onGetValue = () => {
             const items = container.querySelectorAll( 'button' );
             return currentIndex ? [ currentIndex, items[currentIndex] ] : undefined;
         };
 
-        this.onSetValue = ( newValue, skipCallback, event ) =>
-        {
+        this.onSetValue = ( newValue, skipCallback, event ) => {
             newValue = newValue[0] ?? newValue; // Allow getting index of { index, value } tupple
 
             console.assert( newValue.constructor == Number, 'RadioGroup _value_ must be an Array index!' );
 
             const items = container.querySelectorAll( 'button' );
-            items.forEach( ( b: any ) =>
-            {
+            items.forEach( ( b: any ) => {
                 b.checked = false;
                 b.classList.remove( 'checked' );
             } );
@@ -65,8 +62,7 @@ export class RadioGroup extends BaseComponent
             optionButton.disabled = options.disabled ?? false;
             optionItem.appendChild( optionButton );
 
-            optionButton.addEventListener( 'click', ( e ) =>
-            {
+            optionButton.addEventListener( 'click', ( e ) => {
                 this.set( i, false, e );
             } );
 

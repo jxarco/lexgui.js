@@ -95,10 +95,8 @@ export class GraphEditor
 
     static NODE_TYPES: Record<string, GraphNode> = {};
 
-    static onCustomNodeRegistered: ( s: string, n: GraphNode ) => void = () =>
-    {};
-    static onNodeTypeReplaced: ( s: string, n: GraphNode, p: GraphNode ) => void = () =>
-    {};
+    static onCustomNodeRegistered: ( s: string, n: GraphNode ) => void = () => {};
+    static onNodeTypeReplaced: ( s: string, n: GraphNode, p: GraphNode ) => void = () => {};
 
     root: HTMLElement;
     area: typeof Area;
@@ -149,8 +147,7 @@ export class GraphEditor
     {
         GraphEditor.__instances.push( this );
 
-        this._sidebar = area.addSidebar( ( m: typeof Sidebar ) =>
-        {
+        this._sidebar = area.addSidebar( ( m: typeof Sidebar ) => {
         }, {
             displaySelected: true,
             headerIcon: 'EllipsisVertical',
@@ -177,15 +174,13 @@ export class GraphEditor
         this._sidebarActive = options.sidebar ?? this._sidebarActive;
 
         // Set sidebar state depending on options..
-        LX.doAsync( () =>
-        {
+        LX.doAsync( () => {
             this._sidebar.toggleCollapsed( !this._sidebarActive );
         }, 50 );
 
         // Bind resize
 
-        area.onresize = ( bb: any ) =>
-        {
+        area.onresize = ( bb: any ) => {
         };
 
         area.addOverlayButtons( [
@@ -220,8 +215,7 @@ export class GraphEditor
                 {
                     name: 'Import',
                     icon: 'Upload',
-                    callback: () =>
-                    {
+                    callback: () => {
                         this.loadGraph( '../../data/graph_sample.json' );
                     }
                 },
@@ -269,51 +263,41 @@ export class GraphEditor
         // Move to root..
         this.root.appendChild( this.propertiesDialog.root );
 
-        this.addCastType( 'float', 'vec2', ( v: number ) =>
-        {
+        this.addCastType( 'float', 'vec2', ( v: number ) => {
             return [ v, v ];
         } );
-        this.addCastType( 'float', 'vec3', ( v: number ) =>
-        {
+        this.addCastType( 'float', 'vec3', ( v: number ) => {
             return [ v, v, v ];
         } );
-        this.addCastType( 'float', 'vec4', ( v: number ) =>
-        {
+        this.addCastType( 'float', 'vec4', ( v: number ) => {
             return [ v, v, v, v ];
         } );
-        this.addCastType( 'float', 'bool', ( v: number ) =>
-        {
+        this.addCastType( 'float', 'bool', ( v: number ) => {
             return !!v;
         } );
 
-        this.addCastType( 'vec4', 'vec3', ( v: number[] ) =>
-        {
+        this.addCastType( 'vec4', 'vec3', ( v: number[] ) => {
             v.slice( 0, 3 );
             return v;
         } );
-        this.addCastType( 'vec4', 'vec2', ( v: number[] ) =>
-        {
+        this.addCastType( 'vec4', 'vec2', ( v: number[] ) => {
             v.slice( 0, 2 );
             return v;
         } );
-        this.addCastType( 'vec3', 'vec2', ( v: number[] ) =>
-        {
+        this.addCastType( 'vec3', 'vec2', ( v: number[] ) => {
             v.slice( 0, 2 );
             return v;
         } );
 
-        this.addCastType( 'vec3', 'vec4', ( v: number[] ) =>
-        {
+        this.addCastType( 'vec3', 'vec4', ( v: number[] ) => {
             v.push( 1 );
             return v;
         } );
-        this.addCastType( 'vec2', 'vec3', ( v: number[] ) =>
-        {
+        this.addCastType( 'vec2', 'vec3', ( v: number[] ) => {
             v.push( 1 );
             return v;
         } );
-        this.addCastType( 'vec2', 'vec4', ( v: number[] ) =>
-        {
+        this.addCastType( 'vec2', 'vec4', ( v: number[] ) => {
             v.push( 0, 1 );
             return v;
         } );
@@ -507,8 +491,7 @@ export class GraphEditor
 
     loadGraph( url: string, callback?: ( g: Graph ) => void )
     {
-        const onComplete = ( json: any ) =>
-        {
+        const onComplete = ( json: any ) => {
             let graph: Graph | GraphFunction = ( json.type == 'Graph' )
                 ? this.addGraph( json )
                 : this.addGraphFunction( json );
@@ -548,8 +531,7 @@ export class GraphEditor
 
         this.setGraph( graph );
 
-        this._sidebar.add( graph.name, { icon: 'CircleNodes', className: graph.id, callback: () =>
-        {
+        this._sidebar.add( graph.name, { icon: 'CircleNodes', className: graph.id, callback: () => {
             this.setGraph( graph );
         } } );
         this._sidebar.update();
@@ -607,8 +589,7 @@ export class GraphEditor
         NodeFunction.gid = func.id;
         GraphEditor.registerCustomNode( 'function/' + func.name, NodeFunction );
 
-        this._sidebar.add( func.name, { icon: 'Function', className: func.id, callback: () =>
-        {
+        this._sidebar.add( func.name, { icon: 'Function', className: func.id, callback: () => {
             this.setGraph( func );
         } } );
         this._sidebar.update();
@@ -734,8 +715,7 @@ export class GraphEditor
             nodeContainer.style.backgroundColor = 'rgba(' + color + ', ' + this._nodeBackgroundOpacity + ')';
         }
 
-        nodeContainer.addEventListener( 'mousedown', ( e: MouseEvent ) =>
-        {
+        nodeContainer.addEventListener( 'mousedown', ( e: MouseEvent ) => {
             // Only for left click..
             if ( e.button != LX.MOUSE_LEFT_CLICK )
             {
@@ -760,16 +740,13 @@ export class GraphEditor
             }
         } );
 
-        nodeContainer.addEventListener( 'contextmenu', e =>
-        {
+        nodeContainer.addEventListener( 'contextmenu', e => {
             e.preventDefault();
             e.stopPropagation();
             e.stopImmediatePropagation();
 
-            LX.addContextMenu( null, e, ( m: typeof ContextMenu ) =>
-            {
-                m.add( 'Copy', () =>
-                {
+            LX.addContextMenu( null, e, ( m: typeof ContextMenu ) => {
+                m.add( 'Copy', () => {
                     this._clipboardData = {
                         id: node.id,
                         gid: this.currentGraph?.id
@@ -783,15 +760,13 @@ export class GraphEditor
 
                 m.add( '' );
 
-                m.add( 'Delete', () =>
-                {
+                m.add( 'Delete', () => {
                     this._deleteNode( nodeContainer.dataset['id'] as string );
                 } );
             } );
         } );
 
-        nodeContainer.addEventListener( 'dblclick', e =>
-        {
+        nodeContainer.addEventListener( 'dblclick', e => {
             // Only for left click..
             if ( e.button != LX.MOUSE_LEFT_CLICK )
             {
@@ -961,8 +936,7 @@ export class GraphEditor
 
         node.size = new vec2( nodeContainer.offsetWidth, nodeContainer.offsetHeight );
 
-        node.resizeObserver = new ResizeObserver( entries =>
-        {
+        node.resizeObserver = new ResizeObserver( entries => {
             for ( const entry of entries )
             {
                 const bb = entry.contentRect;
@@ -1075,10 +1049,8 @@ export class GraphEditor
 
         // Manage links
 
-        nodeIO?.querySelectorAll( '.lexgraphnodeio' ).forEach( ( el: any ) =>
-        {
-            el.addEventListener( 'mousedown', ( e: MouseEvent ) =>
-            {
+        nodeIO?.querySelectorAll( '.lexgraphnodeio' ).forEach( ( el: any ) => {
+            el.addEventListener( 'mousedown', ( e: MouseEvent ) => {
                 // Only for left click..
                 if ( e.button != LX.MOUSE_LEFT_CLICK )
                 {
@@ -1098,8 +1070,7 @@ export class GraphEditor
                 e.stopImmediatePropagation();
             } );
 
-            el.addEventListener( 'mouseup', ( e: MouseEvent ) =>
-            {
+            el.addEventListener( 'mouseup', ( e: MouseEvent ) => {
                 e.stopPropagation();
                 e.stopImmediatePropagation();
 
@@ -1123,8 +1094,7 @@ export class GraphEditor
                 }
             } );
 
-            el.addEventListener( 'click', ( e: MouseEvent ) =>
-            {
+            el.addEventListener( 'click', ( e: MouseEvent ) => {
                 if ( !el.links )
                 {
                     return;
@@ -1275,8 +1245,7 @@ export class GraphEditor
         // Allow change name if input
         if ( node.constructor.category == 'inputs' )
         {
-            panel.addText( 'Name', node.title, ( v: string ) =>
-            {
+            panel.addText( 'Name', node.title, ( v: string ) => {
                 node.title = v;
                 const header: any = dom.querySelector( '.lexgraphnodeheader' );
                 header.innerText = v;
@@ -1289,44 +1258,37 @@ export class GraphEditor
             {
                 case 'float':
                 case 'int':
-                    panel.addNumber( p.name, p.value, ( v: number ) =>
-                    {
+                    panel.addNumber( p.name, p.value, ( v: number ) => {
                         p.value = v;
                     } );
                     break;
                 case 'string':
-                    panel.addText( p.name, p.value, ( v: string ) =>
-                    {
+                    panel.addText( p.name, p.value, ( v: string ) => {
                         p.value = v;
                     } );
                     break;
                 case 'vec2':
-                    panel.addVector2( p.name, p.value, ( v: number[] ) =>
-                    {
+                    panel.addVector2( p.name, p.value, ( v: number[] ) => {
                         p.value = v;
                     } );
                     break;
                 case 'vec3':
-                    panel.addVector3( p.name, p.value, ( v: number[] ) =>
-                    {
+                    panel.addVector3( p.name, p.value, ( v: number[] ) => {
                         p.value = v;
                     } );
                     break;
                 case 'vec4':
-                    panel.addVector4( p.name, p.value, ( v: number[] ) =>
-                    {
+                    panel.addVector4( p.name, p.value, ( v: number[] ) => {
                         p.value = v;
                     } );
                     break;
                 case 'select':
-                    panel.addSelect( p.name, p.options, p.value, ( v: any ) =>
-                    {
+                    panel.addSelect( p.name, p.options, p.value, ( v: any ) => {
                         p.value = v;
                     } );
                     break;
                 case 'array':
-                    panel.addArray( p.name, p.value, ( v: any[] ) =>
-                    {
+                    panel.addArray( p.name, p.value, ( v: any[] ) => {
                         p.value = v;
                         if ( node.type == 'function/Input' )
                         {
@@ -1556,8 +1518,7 @@ export class GraphEditor
         { // Only one "link to output" to delete
             let targetIndex: number = -1;
 
-            const targets = io.links.filter( ( v: any, i: number ) =>
-            {
+            const targets = io.links.filter( ( v: any, i: number ) => {
                 targetIndex = i;
                 return v !== undefined;
             } )[0];
@@ -1922,8 +1883,7 @@ export class GraphEditor
     {
         if ( !this.currentGraph ) return;
 
-        LX.addContextMenu( null, e, ( m: typeof ContextMenu ) =>
-        {
+        LX.addContextMenu( null, e, ( m: typeof ContextMenu ) => {
             var eventPosition: any = null;
 
             if ( e )
@@ -1937,8 +1897,7 @@ export class GraphEditor
 
             if ( this._clipboardData )
             {
-                m.add( 'Paste', () =>
-                {
+                m.add( 'Paste', () => {
                     const nodeId = this._clipboardData.id;
                     const graphId = this._clipboardData.gid;
 
@@ -1956,8 +1915,7 @@ export class GraphEditor
                     continue;
                 }
 
-                m.add( type, () =>
-                {
+                m.add( type, () => {
                     const newNode = GraphEditor.addNode( type );
 
                     const dom: any = this._createNodeDOM( newNode );
@@ -2785,14 +2743,12 @@ export class GraphEditor
 
         // Dbl click to rename
 
-        groupTitle.addEventListener( 'mousedown', e =>
-        {
+        groupTitle.addEventListener( 'mousedown', e => {
             e.stopPropagation();
             e.stopImmediatePropagation();
         } );
 
-        groupTitle.addEventListener( 'focusout', e =>
-        {
+        groupTitle.addEventListener( 'focusout', e => {
             groupTitle.disabled = true;
             if ( !groupTitle.value.length )
             {
@@ -2800,8 +2756,7 @@ export class GraphEditor
             }
         } );
 
-        groupTitle.addEventListener( 'keyup', e =>
-        {
+        groupTitle.addEventListener( 'keyup', e => {
             if ( e.key == 'Enter' )
             {
                 groupTitle.blur();
@@ -2813,8 +2768,7 @@ export class GraphEditor
             }
         } );
 
-        groupDOM.addEventListener( 'dblclick', e =>
-        {
+        groupDOM.addEventListener( 'dblclick', e => {
             // Only for left click..
             if ( e.button != LX.MOUSE_LEFT_CLICK )
             {
@@ -2824,16 +2778,13 @@ export class GraphEditor
             groupTitle.focus();
         } );
 
-        groupDOM.addEventListener( 'contextmenu', e =>
-        {
+        groupDOM.addEventListener( 'contextmenu', e => {
             e.preventDefault();
             e.stopPropagation();
             e.stopImmediatePropagation();
 
-            LX.addContextMenu( null, e, ( m: typeof ContextMenu ) =>
-            {
-                m.add( 'Delete', () =>
-                {
+            LX.addContextMenu( null, e, ( m: typeof ContextMenu ) => {
+                m.add( 'Delete', () => {
                     this._deleteGroup( group_id );
                 } );
             } );
@@ -2955,10 +2906,8 @@ export class GraphEditor
     {
         if ( !this.currentGraph ) return;
 
-        const dialog = new LX.Dialog( this.currentGraph.constructor.name, ( p: typeof Panel ) =>
-        {
-            p.addText( 'Name', this.currentGraph?.name, ( v: string ) =>
-            {
+        const dialog = new LX.Dialog( this.currentGraph.constructor.name, ( p: typeof Panel ) => {
+            p.addText( 'Name', this.currentGraph?.name, ( v: string ) => {
                 this._updateGraphName( v );
                 dialog.close();
             } );
@@ -3102,8 +3051,7 @@ class Graph
         // Reser variables each step?
         this.variables = {};
 
-        const addNode = ( id: string ) =>
-        {
+        const addNode = ( id: string ) => {
             if ( visitedNodes[id] )
             {
                 return;

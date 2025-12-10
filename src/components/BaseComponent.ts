@@ -88,8 +88,7 @@ export class BaseComponent
         const root: any = document.createElement( 'div' );
         root.className = 'lexcomponent';
 
-        this.onResize = () =>
-        {};
+        this.onResize = () => {};
 
         if ( options.id )
         {
@@ -273,14 +272,11 @@ export class BaseComponent
             return;
         }
 
-        LX.addContextMenu( this.typeName(), e, ( c: ContextMenu ) =>
-        {
-            c.add( 'Copy', () =>
-            {
+        LX.addContextMenu( this.typeName(), e, ( c: ContextMenu ) => {
+            c.add( 'Copy', () => {
                 this.copy();
             } );
-            c.add( 'Paste', { disabled: !this._canPaste(), callback: () =>
-            {
+            c.add( 'Paste', { disabled: !this._canPaste(), callback: () => {
                 this.paste();
             } } );
         } );

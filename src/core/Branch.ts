@@ -76,8 +76,7 @@ export class Branch
             title.classList.add( 'closed' );
             root.classList.add( 'closed' );
             this.grabber.setAttribute( 'hidden', true );
-            LX.doAsync( () =>
-            {
+            LX.doAsync( () => {
                 this.content.setAttribute( 'hidden', true );
             }, 10 );
         }
@@ -104,8 +103,7 @@ export class Branch
                 return;
             }
 
-            LX.addContextMenu( 'Dock', e, ( m: ContextMenu ) =>
-            {
+            LX.addContextMenu( 'Dock', e, ( m: ContextMenu ) => {
                 e.preventDefault();
                 m.add( 'Floating', that._onMakeFloating.bind( that ) );
             }, { icon: 'WindowRestore' } );
@@ -117,8 +115,7 @@ export class Branch
 
     _onMakeFloating()
     {
-        const dialog = new LX.Dialog( this.name, ( p: Panel ) =>
-        {
+        const dialog = new LX.Dialog( this.name, ( p: Panel ) => {
             // Add components
             for ( let w of this.components )
             {
@@ -151,8 +148,7 @@ export class Branch
         grabber.innerHTML = '&#9662;';
         element.appendChild( grabber );
 
-        LX.doAsync( () =>
-        {
+        LX.doAsync( () => {
             grabber.style.marginLeft = ( ( parseFloat( LX.DEFAULT_NAME_WIDTH ) / 100.0 ) * this.content.offsetWidth )
                 + 'px';
         }, 10 );

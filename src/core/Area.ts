@@ -70,8 +70,7 @@ export class AreaOverlayButtons
             container.className += ` ${floatClass}`;
         }
 
-        const _addButton = ( b: any, group?: any, last?: boolean ) =>
-        {
+        const _addButton = ( b: any, group?: any, last?: boolean ) => {
             const _options: any = {
                 width: 'auto',
                 selectable: b.selectable,
@@ -173,8 +172,7 @@ export class AreaOverlayButtons
             if ( float )
             {
                 var height = 0;
-                overlayPanel.root.childNodes.forEach( ( c: HTMLElement ) =>
-                {
+                overlayPanel.root.childNodes.forEach( ( c: HTMLElement ) => {
                     height += c.offsetHeight;
                 } );
 
@@ -457,8 +455,7 @@ export class Area
             return;
         }
 
-        const _splitArea = ( area: Area, layout: any ) =>
-        {
+        const _splitArea = ( area: Area, layout: any ) => {
             if ( layout.className )
             {
                 area.root.className += ` ${layout.className}`;
@@ -616,8 +613,7 @@ export class Area
         */
         if ( !fixedSize && ( !rect.width || !rect.height ) )
         {
-            const observer = new ResizeObserver( entries =>
-            {
+            const observer = new ResizeObserver( entries => {
                 console.assert( entries.length == 1, 'AreaResizeObserver: more than one entry' );
 
                 const rect = entries[0].contentRect;
@@ -674,8 +670,7 @@ export class Area
 
             // Observe the parent area until the DOM is ready
             // and the size is set correctly.
-            LX.doAsync( () =>
-            {
+            LX.doAsync( () => {
                 observer.observe( this.root );
             }, 100 );
         }
@@ -683,8 +678,7 @@ export class Area
         if ( auto && type == 'vertical' )
         {
             // Listen resize event on first area
-            this._autoVerticalResizeObserver = new ResizeObserver( entries =>
-            {
+            this._autoVerticalResizeObserver = new ResizeObserver( entries => {
                 for ( const entry of entries )
                 {
                     const size = LX.getComputedSize( entry.target );
@@ -701,25 +695,20 @@ export class Area
             this.splitExtended = false;
 
             // Keep state of the animation when ends...
-            area2.root.addEventListener( 'animationend', ( e: any ) =>
-            {
+            area2.root.addEventListener( 'animationend', ( e: any ) => {
                 const opacity = getComputedStyle( area2.root ).opacity;
                 area2.root.classList.remove( e.animationName + '-' + type );
                 area2.root.style.opacity = opacity;
                 LX.flushCss( area2.root );
             } );
 
-            this.splitBar.addEventListener( 'contextmenu', ( e: any ) =>
-            {
+            this.splitBar.addEventListener( 'contextmenu', ( e: any ) => {
                 e.preventDefault();
-                LX.addContextMenu( null, e, ( c: ContextMenu ) =>
-                {
-                    c.add( 'Extend', { disabled: this.splitExtended, callback: () =>
-                    {
+                LX.addContextMenu( null, e, ( c: ContextMenu ) => {
+                    c.add( 'Extend', { disabled: this.splitExtended, callback: () => {
                         this.extend();
                     } } );
-                    c.add( 'Reduce', { disabled: !this.splitExtended, callback: () =>
-                    {
+                    c.add( 'Reduce', { disabled: !this.splitExtended, callback: () => {
                         this.reduce();
                     } } );
                 } );
@@ -842,8 +831,7 @@ export class Area
             this.onresize( this.root.getBoundingClientRect() );
         }
 
-        LX.doAsync( () =>
-        {
+        LX.doAsync( () => {
             this.size = [ this.root.clientWidth, this.root.clientHeight ];
             this.propagateEvent( 'onresize' );
         }, 150 );
@@ -879,8 +867,7 @@ export class Area
             this._moveSplit( -Infinity, true, 8 );
         }
 
-        LX.doAsync( () =>
-        {
+        LX.doAsync( () => {
             this.propagateEvent( 'onresize' );
         }, 100 );
     }
@@ -907,8 +894,7 @@ export class Area
 
         this._moveSplit( this.offset );
 
-        LX.doAsync( () =>
-        {
+        LX.doAsync( () => {
             this.propagateEvent( 'onresize' );
         }, 100 );
     }
@@ -1185,8 +1171,7 @@ export class Area
             a1Root.style.transition = a2Root.style.transition = transition;
         }
 
-        LX.doAsync( () =>
-        {
+        LX.doAsync( () => {
             this._update();
             this.propagateEvent( 'onresize' );
         }, 10 );

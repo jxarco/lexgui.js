@@ -15,13 +15,11 @@ export class Progress extends BaseComponent
     {
         super( ComponentType.PROGRESS, name, value, options );
 
-        this.onGetValue = () =>
-        {
+        this.onGetValue = () => {
             return progress.value;
         };
 
-        this.onSetValue = ( newValue, skipCallback, event ) =>
-        {
+        this.onSetValue = ( newValue, skipCallback, event ) => {
             newValue = LX.clamp( newValue, progress.min, progress.max );
             this.root.querySelector( 'meter' ).value = newValue;
             _updateColor();
@@ -36,8 +34,7 @@ export class Progress extends BaseComponent
             }
         };
 
-        this.onResize = ( rect ) =>
-        {
+        this.onResize = ( rect ) => {
             const realNameWidth = this.root.domName?.style.width ?? '0px';
             container.style.width = `calc( 100% - ${realNameWidth})`;
         };
@@ -60,8 +57,7 @@ export class Progress extends BaseComponent
         progress.value = value;
         container.appendChild( progress );
 
-        const _updateColor = () =>
-        {
+        const _updateColor = () => {
             let backgroundColor = LX.getThemeColor( 'global-selected' );
 
             if ( progress.low != undefined && progress.value < progress.low )
@@ -95,8 +91,7 @@ export class Progress extends BaseComponent
         {
             progress.classList.add( 'editable' );
 
-            let innerMouseDown = ( e: MouseEvent ) =>
-            {
+            let innerMouseDown = ( e: MouseEvent ) => {
                 var doc = this.root.ownerDocument;
                 doc.addEventListener( 'mousemove', innerMouseMove );
                 doc.addEventListener( 'mouseup', innerMouseUp );
@@ -110,8 +105,7 @@ export class Progress extends BaseComponent
                 this.set( newValue, false, e );
             };
 
-            let innerMouseMove = ( e: MouseEvent ) =>
-            {
+            let innerMouseMove = ( e: MouseEvent ) => {
                 let dt = e.movementX;
 
                 if ( dt != 0 )
@@ -127,8 +121,7 @@ export class Progress extends BaseComponent
                 e.preventDefault();
             };
 
-            let innerMouseUp = ( e: MouseEvent ) =>
-            {
+            let innerMouseUp = ( e: MouseEvent ) => {
                 var doc = this.root.ownerDocument;
                 doc.removeEventListener( 'mousemove', innerMouseMove );
                 doc.removeEventListener( 'mouseup', innerMouseUp );

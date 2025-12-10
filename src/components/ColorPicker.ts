@@ -68,8 +68,7 @@ export class ColorPicker
 
         let pickerRect: any = null;
 
-        let innerMouseDown = ( e: MouseEvent ) =>
-        {
+        let innerMouseDown = ( e: MouseEvent ) => {
             var doc = this.root.ownerDocument;
             doc.addEventListener( 'mousemove', innerMouseMove );
             doc.addEventListener( 'mouseup', innerMouseUp );
@@ -87,8 +86,7 @@ export class ColorPicker
             pickerRect = this.colorPickerBackground.getBoundingClientRect();
         };
 
-        let innerMouseMove = ( e: MouseEvent ) =>
-        {
+        let innerMouseMove = ( e: MouseEvent ) => {
             const dX = e.movementX;
             const dY = e.movementY;
             const mouseX = e.x - pickerRect.x;
@@ -116,8 +114,7 @@ export class ColorPicker
             e.preventDefault();
         };
 
-        let innerMouseUp = ( e: MouseEvent ) =>
-        {
+        let innerMouseUp = ( e: MouseEvent ) => {
             var doc = this.root.ownerDocument;
             doc.removeEventListener( 'mousemove', innerMouseMove );
             doc.removeEventListener( 'mouseup', innerMouseUp );
@@ -132,8 +129,7 @@ export class ColorPicker
         const EyeDropper = ( window as any ).EyeDropper;
         if ( EyeDropper )
         {
-            hueAlphaContainer.appendChild( new Button( null, 'eyedrop', async () =>
-            {
+            hueAlphaContainer.appendChild( new Button( null, 'eyedrop', async () => {
                 const eyeDropper = new EyeDropper();
                 try
                 {
@@ -159,8 +155,7 @@ export class ColorPicker
         this.hueMarker.style.backgroundColor = `rgb(${hueColor.css.r}, ${hueColor.css.g}, ${hueColor.css.b})`;
         this.colorPickerTracker.appendChild( this.hueMarker );
 
-        const _fromHueX = ( hueX: number ) =>
-        {
+        const _fromHueX = ( hueX: number ) => {
             this.hueMarker.style.left = hueX + 'px';
             this.currentColor.hsv.h = LX.remapRange( hueX, 0, this.colorPickerTracker.offsetWidth - this.markerSize, 0,
                 360 );
@@ -174,8 +169,7 @@ export class ColorPicker
 
         let hueTrackerRect: any = null;
 
-        let innerMouseDownHue = ( e: MouseEvent ) =>
-        {
+        let innerMouseDownHue = ( e: MouseEvent ) => {
             const doc = this.root.ownerDocument;
             doc.addEventListener( 'mousemove', innerMouseMoveHue );
             doc.addEventListener( 'mouseup', innerMouseUpHue );
@@ -190,8 +184,7 @@ export class ColorPicker
             hueTrackerRect = this.colorPickerTracker.getBoundingClientRect();
         };
 
-        let innerMouseMoveHue = ( e: MouseEvent ) =>
-        {
+        let innerMouseMoveHue = ( e: MouseEvent ) => {
             const dX = e.movementX;
             const mouseX = e.x - hueTrackerRect.x;
 
@@ -207,8 +200,7 @@ export class ColorPicker
             e.preventDefault();
         };
 
-        let innerMouseUpHue = ( e: MouseEvent ) =>
-        {
+        let innerMouseUpHue = ( e: MouseEvent ) => {
             var doc = this.root.ownerDocument;
             doc.removeEventListener( 'mousemove', innerMouseMoveHue );
             doc.removeEventListener( 'mouseup', innerMouseUpHue );
@@ -232,8 +224,7 @@ export class ColorPicker
                 `rgb(${this.currentColor.css.r}, ${this.currentColor.css.g}, ${this.currentColor.css.b},${this.currentColor.css.a})`;
             this.alphaTracker.appendChild( this.alphaMarker );
 
-            const _fromAlphaX = ( alphaX: number ) =>
-            {
+            const _fromAlphaX = ( alphaX: number ) => {
                 this.alphaMarker.style.left = alphaX + 'px';
                 this.currentColor.hsv.a = LX.remapRange( alphaX, 0, this.alphaTracker.offsetWidth - this.markerSize, 0,
                     1 );
@@ -245,8 +236,7 @@ export class ColorPicker
 
             let alphaTrackerRect: any = null;
 
-            let innerMouseDownAlpha = ( e: MouseEvent ) =>
-            {
+            let innerMouseDownAlpha = ( e: MouseEvent ) => {
                 const doc = this.root.ownerDocument;
                 doc.addEventListener( 'mousemove', innerMouseMoveAlpha );
                 doc.addEventListener( 'mouseup', innerMouseUpAlpha );
@@ -259,8 +249,7 @@ export class ColorPicker
                 alphaTrackerRect = this.alphaTracker.getBoundingClientRect();
             };
 
-            let innerMouseMoveAlpha = ( e: MouseEvent ) =>
-            {
+            let innerMouseMoveAlpha = ( e: MouseEvent ) => {
                 const dX = e.movementX;
                 const mouseX = e.x - alphaTrackerRect.x;
 
@@ -276,8 +265,7 @@ export class ColorPicker
                 e.preventDefault();
             };
 
-            let innerMouseUpAlpha = ( e: MouseEvent ) =>
-            {
+            let innerMouseUpAlpha = ( e: MouseEvent ) => {
                 var doc = this.root.ownerDocument;
                 doc.removeEventListener( 'mousemove', innerMouseMoveAlpha );
                 doc.removeEventListener( 'mouseup', innerMouseUpAlpha );
@@ -290,8 +278,7 @@ export class ColorPicker
         // Info display
         const colorLabel = LX.makeContainer( [ '100%', 'auto' ], 'flex flex-row gap-1', '', this.root );
 
-        colorLabel.appendChild( new Select( null, [ 'CSS', 'Hex', 'HSV', 'RGB' ], this.colorModel, ( v: any ) =>
-        {
+        colorLabel.appendChild( new Select( null, [ 'CSS', 'Hex', 'HSV', 'RGB' ], this.colorModel, ( v: any ) => {
             this.colorModel = v;
             this._updateColorValue( null, true );
         } ).root );
@@ -301,13 +288,11 @@ export class ColorPicker
 
         // Copy button
         {
-            const copyButtonComponent = new Button( null, 'copy', async () =>
-            {
+            const copyButtonComponent = new Button( null, 'copy', async () => {
                 navigator.clipboard.writeText( this.labelComponent.value() );
                 copyButtonComponent.root.querySelector( "input[type='checkbox']" ).style.pointerEvents = 'none';
 
-                LX.doAsync( () =>
-                {
+                LX.doAsync( () => {
                     if ( copyButtonComponent.swap ) copyButtonComponent.swap( true );
                     copyButtonComponent.root.querySelector( "input[type='checkbox']" ).style.pointerEvents = 'auto';
                 }, 3000 );
@@ -378,8 +363,7 @@ export class ColorPicker
                 `rgb(${this.currentColor.css.r}, ${this.currentColor.css.g}, ${this.currentColor.css.b})`;
         }
 
-        const toFixed = ( s: number, n: number = 2 ) =>
-        {
+        const toFixed = ( s: number, n: number = 2 ) => {
             return s.toFixed( n ).replace( /([0-9]+(\.[0-9]+[1-9])?)(\.?0+$)/, '$1' );
         };
 

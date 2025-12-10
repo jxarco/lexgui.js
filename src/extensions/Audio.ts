@@ -31,19 +31,16 @@ export class Knob extends BaseComponent
 
         super( ComponentType.KNOB, name, value, options );
 
-        this.onGetValue = () =>
-        {
+        this.onGetValue = () => {
             return innerKnobCircle.value;
         };
 
-        this.onSetValue = ( newValue: any, skipCallback?: boolean, event?: any ) =>
-        {
+        this.onSetValue = ( newValue: any, skipCallback?: boolean, event?: any ) => {
             innerSetValue( newValue );
             LX.BaseComponent._dispatchEvent( innerKnobCircle, 'change', skipCallback );
         };
 
-        this.onResize = () =>
-        {
+        this.onResize = () => {
             const realNameWidth = this.root.domName?.style.width ?? '0px';
             container.style.width = `calc( 100% - ${realNameWidth})`;
         };
@@ -99,8 +96,7 @@ export class Knob extends BaseComponent
             LX.addClass( container, 'disabled' );
         }
 
-        innerKnobCircle.addEventListener( 'change', ( e: InputEvent ) =>
-        {
+        innerKnobCircle.addEventListener( 'change', ( e: InputEvent ) => {
             const knob: any = e.target;
 
             const skipCallback = e.detail;

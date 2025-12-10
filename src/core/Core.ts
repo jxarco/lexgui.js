@@ -99,13 +99,11 @@ LX.init = async function( options: any = {} )
         notifSection.appendChild( this.notifications );
         document.body.appendChild( notifSection );
 
-        this.notifications.addEventListener( 'mouseenter', () =>
-        {
+        this.notifications.addEventListener( 'mouseenter', () => {
             this.notifications.classList.add( 'list' );
         } );
 
-        this.notifications.addEventListener( 'mouseleave', () =>
-        {
+        this.notifications.addEventListener( 'mouseleave', () => {
             this.notifications.classList.remove( 'list' );
         } );
     }
@@ -126,8 +124,7 @@ LX.init = async function( options: any = {} )
     this.DEFAULT_SPLITBAR_SIZE = 4;
     this.OPEN_CONTEXTMENU_ENTRY = 'click';
 
-    this.componentResizeObserver = new ResizeObserver( entries =>
-    {
+    this.componentResizeObserver = new ResizeObserver( entries => {
         for ( const entry of entries )
         {
             const c = ( entry.target as any )?.jsInstance;
@@ -331,8 +328,7 @@ LX._createCommandbar = function( root: any )
         _resetBar( true );
     } );
 
-    root.addEventListener( 'keydown', ( e: KeyboardEvent ) =>
-    {
+    root.addEventListener( 'keydown', ( e: KeyboardEvent ) => {
         if ( e.key == ' ' && e.ctrlKey )
         {
             e.stopImmediatePropagation();
@@ -359,8 +355,7 @@ LX._createCommandbar = function( root: any )
 
     const header = LX.makeContainer( [ '100%', 'auto' ], 'flex flex-row' );
 
-    const filter = new TextInput( null, '', ( v: string ) =>
-    {
+    const filter = new TextInput( null, '', ( v: string ) => {
         commandbar._addElements( v.toLowerCase() );
     }, { width: '100%', icon: 'Search', trigger: 'input', placeholder: 'Search...' } );
     header.appendChild( filter.root );
@@ -377,8 +372,7 @@ LX._createCommandbar = function( root: any )
     // These tabs will serve as buttons by now
     // Filter stuff depending of the type of search
     {
-        const _onSelectTab = ( e: any, tabName: string ) =>
-        {
+        const _onSelectTab = ( e: any, tabName: string ) => {
             cbFilter = tabName;
         };
 
@@ -391,8 +385,7 @@ LX._createCommandbar = function( root: any )
 
     let refPrevious: any = null;
 
-    const _resetBar = ( resetInput?: boolean ) =>
-    {
+    const _resetBar = ( resetInput?: boolean ) => {
         itemContainer.innerHTML = '';
         allItems.length = 0;
         hoverElId = null;
@@ -402,8 +395,7 @@ LX._createCommandbar = function( root: any )
         }
     };
 
-    const _addElement = ( t: any, c: any, p: any, i: any ) =>
-    {
+    const _addElement = ( t: any, c: any, p: any, i: any ) => {
         if ( !t.length )
         {
             return;
@@ -425,8 +417,7 @@ LX._createCommandbar = function( root: any )
         searchItem.callback = c;
         searchItem.item = i;
 
-        searchItem.addEventListener( 'click', ( e: MouseEvent ) =>
-        {
+        searchItem.addEventListener( 'click', ( e: MouseEvent ) => {
             if ( i.checked != undefined )
             {
                 i.checked = !i.checked;
@@ -454,8 +445,7 @@ LX._createCommandbar = function( root: any )
         refPrevious = searchItem;
     };
 
-    const _propagateAdd = ( item: any, filter: string, path: string, skipPropagation?: boolean ) =>
-    {
+    const _propagateAdd = ( item: any, filter: string, path: string, skipPropagation?: boolean ) => {
         if ( !item || ( item.constructor != Object ) )
         {
             return;
@@ -485,8 +475,7 @@ LX._createCommandbar = function( root: any )
         }
     };
 
-    commandbar._addElements = ( filter: string ) =>
-    {
+    commandbar._addElements = ( filter: string ) => {
         _resetBar();
 
         for ( let m of LX.menubars )
@@ -533,8 +522,7 @@ LX._createCommandbar = function( root: any )
 
                 if ( key.toLowerCase().includes( filter ) )
                 {
-                    _addElement( value, () =>
-                    {
+                    _addElement( value, () => {
                         for ( let i of instances )
                         {
                             i._changeLanguage( l );
@@ -593,13 +581,11 @@ LX.REGISTER_COMPONENT = function( customComponentName: string, options: any = {}
         component.customName = customComponentName;
         component.customIdx = customIdx;
 
-        component.onGetValue = () =>
-        {
+        component.onGetValue = () => {
             return instance;
         };
 
-        component.onSetValue = ( newValue, skipCallback, event ) =>
-        {
+        component.onSetValue = ( newValue, skipCallback, event ) => {
             instance = newValue;
             _refreshComponent();
             element.querySelector( '.lexcustomitems' ).toggleAttribute( 'hidden', false );
@@ -609,8 +595,7 @@ LX.REGISTER_COMPONENT = function( customComponentName: string, options: any = {}
             }
         };
 
-        component.onResize = () =>
-        {
+        component.onResize = () => {
             const realNameWidth = component.root.domName?.style.width ?? '0px';
             container.style.width = `calc( 100% - ${realNameWidth})`;
         };
@@ -622,8 +607,7 @@ LX.REGISTER_COMPONENT = function( customComponentName: string, options: any = {}
 
         // Add instance button
 
-        const _refreshComponent = () =>
-        {
+        const _refreshComponent = () => {
             if ( container ) container.remove();
             if ( customComponentsDom ) customComponentsDom.remove();
 
@@ -636,8 +620,7 @@ LX.REGISTER_COMPONENT = function( customComponentName: string, options: any = {}
             const menuIcon = LX.makeIcon( 'Menu' );
 
             let buttonName = customComponentName + ( !instance ? ' [empty]' : '' );
-            let buttonEl = this.addButton( null, buttonName, ( value: any, event: MouseEvent ) =>
-            {
+            let buttonEl = this.addButton( null, buttonName, ( value: any, event: MouseEvent ) => {
                 if ( instance )
                 {
                     element.querySelector( '.lexcustomitems' ).toggleAttribute( 'hidden' );
@@ -645,10 +628,8 @@ LX.REGISTER_COMPONENT = function( customComponentName: string, options: any = {}
                 }
                 else
                 {
-                    LX.addContextMenu( null, event, ( c: ContextMenu ) =>
-                    {
-                        c.add( 'New ' + customComponentName, () =>
-                        {
+                    LX.addContextMenu( null, event, ( c: ContextMenu ) => {
+                        c.add( 'New ' + customComponentName, () => {
                             instance = {};
                             _refreshComponent();
                             element.querySelector( '.lexcustomitems' ).toggleAttribute( 'hidden', false );
@@ -667,14 +648,11 @@ LX.REGISTER_COMPONENT = function( customComponentName: string, options: any = {}
 
             if ( instance )
             {
-                menuIcon.addEventListener( 'click', ( e: MouseEvent ) =>
-                {
+                menuIcon.addEventListener( 'click', ( e: MouseEvent ) => {
                     e.stopImmediatePropagation();
                     e.stopPropagation();
-                    LX.addContextMenu( null, e, ( c: ContextMenu ) =>
-                    {
-                        c.add( 'Clear', () =>
-                        {
+                    LX.addContextMenu( null, e, ( c: ContextMenu ) => {
+                        c.add( 'Clear', () => {
                             instance = null;
                             _refreshComponent();
                         } );
@@ -693,8 +671,7 @@ LX.REGISTER_COMPONENT = function( customComponentName: string, options: any = {}
             {
                 this.queue( customComponentsDom );
 
-                const on_instance_changed = ( key: string, value: any, event: any ) =>
-                {
+                const on_instance_changed = ( key: string, value: any, event: any ) => {
                     const setter = options[`_set_${key}`];
                     if ( setter )
                     {

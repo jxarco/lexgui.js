@@ -15,8 +15,7 @@ export class SizeInput extends BaseComponent
     {
         super( ComponentType.SIZE, name, value, options );
 
-        this.onGetValue = () =>
-        {
+        this.onGetValue = () => {
             const value = [];
             for ( let i = 0; i < this.root.dimensions.length; ++i )
             {
@@ -25,8 +24,7 @@ export class SizeInput extends BaseComponent
             return value;
         };
 
-        this.onSetValue = ( newValue, skipCallback, event ) =>
-        {
+        this.onSetValue = ( newValue, skipCallback, event ) => {
             for ( let i = 0; i < this.root.dimensions.length; ++i )
             {
                 this.root.dimensions[i].set( newValue[i], skipCallback );
@@ -39,8 +37,7 @@ export class SizeInput extends BaseComponent
         for ( let i = 0; i < value.length; ++i )
         {
             const p = new LX.Panel();
-            this.root.dimensions[i] = p.addNumber( null, value[i], ( v: number ) =>
-            {
+            this.root.dimensions[i] = p.addNumber( null, value[i], ( v: number ) => {
                 const value = this.value();
 
                 if ( this.root.locked )
@@ -77,8 +74,7 @@ export class SizeInput extends BaseComponent
         // Lock aspect ratio
         if ( this.root.aspectRatio )
         {
-            const lockerButton = new Button( null, '', ( swapValue: boolean ) =>
-            {
+            const lockerButton = new Button( null, '', ( swapValue: boolean ) => {
                 this.root.locked = swapValue;
                 if ( swapValue )
                 {

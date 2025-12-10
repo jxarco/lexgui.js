@@ -23,13 +23,11 @@ export class ArrayInput extends BaseComponent
 
         super( ComponentType.ARRAY, name, null, options );
 
-        this.onGetValue = () =>
-        {
+        this.onGetValue = () => {
             return values;
         };
 
-        this.onSetValue = ( newValue, skipCallback, event ) =>
-        {
+        this.onSetValue = ( newValue, skipCallback, event ) => {
             values = newValue;
             this._updateItems();
             if ( !skipCallback )
@@ -48,8 +46,7 @@ export class ArrayInput extends BaseComponent
 
         let buttonName = `Array (size ${values.length})`;
 
-        const toggleButton = new Button( null, buttonName, () =>
-        {
+        const toggleButton = new Button( null, buttonName, () => {
             this.root.dataset['opened'] = this.root.dataset['opened'] == 'true' ? false : true;
             this.root.querySelector( '.lexarrayitems' ).toggleAttribute( 'hidden' );
         }, { buttonClass: 'array' } );
@@ -63,8 +60,7 @@ export class ArrayInput extends BaseComponent
         arrayItems.toggleAttribute( 'hidden', true );
         this.root.appendChild( arrayItems );
 
-        this._updateItems = () =>
-        {
+        this._updateItems = () => {
             // Update num items
             let buttonSpan = this.root.querySelector( '.lexbutton.array span' );
             for ( let node of buttonSpan.childNodes )
@@ -114,8 +110,7 @@ export class ArrayInput extends BaseComponent
 
                 arrayItems.appendChild( component.root );
 
-                const removeComponent = new Button( null, '', ( v: any, event: MouseEvent ) =>
-                {
+                const removeComponent = new Button( null, '', ( v: any, event: MouseEvent ) => {
                     values.splice( values.indexOf( value ), 1 );
                     this._updateItems();
                     this._trigger( new IEvent( name, values, event ), callback );
@@ -125,8 +120,7 @@ export class ArrayInput extends BaseComponent
             }
 
             const addButton = new Button( null, LX.makeIcon( 'Plus', { svgClass: 'sm' } ).innerHTML + 'Add item',
-                ( v: any, event: MouseEvent ) =>
-                {
+                ( v: any, event: MouseEvent ) => {
                     values.push( options.innerValues ? options.innerValues[0] : '' );
                     this._updateItems();
                     this._trigger( new IEvent( name, values, event ), callback );

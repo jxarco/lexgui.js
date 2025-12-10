@@ -34,8 +34,7 @@ class CanvasDial
         element.smooth = ( options.smooth && typeof ( options.smooth ) == 'number' ? options.smooth : 0.3 ) || false;
         element.move_out = options.moveOutAction ?? LX.CURVE_MOVEOUT_DELETE;
 
-        LX.addSignal( '@on_new_color_scheme', ( el: HTMLElement, value: string ) =>
-        {
+        LX.addSignal( '@on_new_color_scheme', ( el: HTMLElement, value: string ) => {
             element.bgcolor = options.bgColor || LX.getThemeColor( 'global-background' );
             element.pointscolor = options.pointsColor || LX.getThemeColor( 'global-color-accent-light' );
             this.redraw();

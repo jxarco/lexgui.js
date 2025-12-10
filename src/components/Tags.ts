@@ -22,13 +22,11 @@ export class Tags extends BaseComponent
 
         this.options.skipDuplicates = options.skipDuplicates ?? true;
 
-        this.onGetValue = () =>
-        {
+        this.onGetValue = () => {
             return LX.deepCopy( value );
         };
 
-        this.onSetValue = ( newValue, skipCallback, event ) =>
-        {
+        this.onSetValue = ( newValue, skipCallback, event ) => {
             arrayValue = [].concat( newValue );
             this.generateTags( arrayValue );
             if ( !skipCallback )
@@ -37,8 +35,7 @@ export class Tags extends BaseComponent
             }
         };
 
-        this.onResize = ( rect ) =>
-        {
+        this.onResize = ( rect ) => {
             const realNameWidth = this.root.domName?.style.width ?? '0px';
             tagsContainer.style.width = `calc( 100% - ${realNameWidth})`;
         };
@@ -49,8 +46,7 @@ export class Tags extends BaseComponent
         tagsContainer.className = 'lextags';
         this.root.appendChild( tagsContainer );
 
-        this.generateTags = ( value ) =>
-        {
+        this.generateTags = ( value ) => {
             tagsContainer.innerHTML = '';
 
             for ( let i = 0; i < value.length; ++i )
@@ -63,8 +59,7 @@ export class Tags extends BaseComponent
                 const removeButton = LX.makeIcon( 'X', { svgClass: 'sm' } );
                 tag.appendChild( removeButton );
 
-                removeButton.addEventListener( 'click', ( e: MouseEvent ) =>
-                {
+                removeButton.addEventListener( 'click', ( e: MouseEvent ) => {
                     tag.remove();
                     value.splice( value.indexOf( tagName ), 1 );
                     this.set( value, false, e );
@@ -78,8 +73,7 @@ export class Tags extends BaseComponent
             tagInput.placeholder = 'Add tag...';
             tagsContainer.appendChild( tagInput );
 
-            tagInput.onkeydown = e =>
-            {
+            tagInput.onkeydown = e => {
                 if ( e.key == ' ' || e.key == 'Enter' )
                 {
                     const val = tagInput.value.replace( /\s/g, '' );

@@ -39,8 +39,7 @@ export class Menubar
 
     _resetMenubar( focus?: boolean )
     {
-        this.root.querySelectorAll( '.lexmenuentry' ).forEach( ( e: HTMLElement ) =>
-        {
+        this.root.querySelectorAll( '.lexmenuentry' ).forEach( ( e: HTMLElement ) => {
             e.classList.remove( 'selected' );
             delete e.dataset['built'];
         } );
@@ -80,25 +79,21 @@ export class Menubar
 
             this.root.appendChild( entry );
 
-            const _showEntry = () =>
-            {
+            const _showEntry = () => {
                 this._resetMenubar( true );
                 entry.classList.add( 'selected' );
                 entry.dataset['built'] = 'true';
                 this._currentDropdown = LX.addDropdownMenu( entry, item.submenu ?? [], { side: 'bottom', align: 'start',
-                    onBlur: () =>
-                    {
+                    onBlur: () => {
                         this._resetMenubar();
                     } } );
             };
 
-            entry.addEventListener( 'mousedown', ( e ) =>
-            {
+            entry.addEventListener( 'mousedown', ( e ) => {
                 e.preventDefault();
             } );
 
-            entry.addEventListener( 'mouseup', ( e ) =>
-            {
+            entry.addEventListener( 'mouseup', ( e ) => {
                 e.preventDefault();
 
                 const f = item['callback'];
@@ -115,8 +110,7 @@ export class Menubar
                 return false;
             } );
 
-            entry.addEventListener( 'mouseover', ( e ) =>
-            {
+            entry.addEventListener( 'mouseover', ( e ) => {
                 if ( this.focused && !( entry.dataset['built'] ?? false ) )
                 {
                     _showEntry();
@@ -277,13 +271,11 @@ export class Menubar
 
         const _b = button.querySelector( 'a' );
 
-        _b.addEventListener( 'mousedown', ( e: MouseEvent ) =>
-        {
+        _b.addEventListener( 'mousedown', ( e: MouseEvent ) => {
             e.preventDefault();
         } );
 
-        _b.addEventListener( 'mouseup', ( e: MouseEvent ) =>
-        {
+        _b.addEventListener( 'mouseup', ( e: MouseEvent ) => {
             if ( callback && !disabled )
             {
                 callback.call( this, _b, e );

@@ -16,13 +16,11 @@ export class Counter extends BaseComponent
     {
         super( ComponentType.COUNTER, name, value, options );
 
-        this.onGetValue = () =>
-        {
+        this.onGetValue = () => {
             return counterText.count;
         };
 
-        this.onSetValue = ( newValue, skipCallback, event ) =>
-        {
+        this.onSetValue = ( newValue, skipCallback, event ) => {
             newValue = LX.clamp( newValue, min, max );
             counterText.count = newValue;
             counterText.innerHTML = newValue;
@@ -40,8 +38,7 @@ export class Counter extends BaseComponent
         container.className = 'lexcounter';
         this.root.appendChild( container );
 
-        const substrButton = new Button( null, '', ( value: any, e: MouseEvent ) =>
-        {
+        const substrButton = new Button( null, '', ( value: any, e: MouseEvent ) => {
             let mult = step ?? 1;
             if ( e.shiftKey ) mult *= 10;
             this.set( counterText.count - mult, false, e );
@@ -67,8 +64,7 @@ export class Counter extends BaseComponent
             containerBox.appendChild( counterLabel );
         }
 
-        const addButton = new Button( null, '', ( value: any, e: MouseEvent ) =>
-        {
+        const addButton = new Button( null, '', ( value: any, e: MouseEvent ) => {
             let mult = step ?? 1;
             if ( e.shiftKey ) mult *= 10;
             this.set( counterText.count + mult, false, e );

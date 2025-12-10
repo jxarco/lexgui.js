@@ -338,8 +338,7 @@ LX.LucideIconAlias = {
 
 // Generate Alias icons
 
-export default LX.ICONS = ( () =>
-{
+export default LX.ICONS = ( () => {
     const aliasIcons: Record<string, any> = {};
 
     for ( let i in RAW_ICONS )

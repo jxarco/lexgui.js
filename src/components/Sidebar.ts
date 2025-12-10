@@ -88,13 +88,11 @@ export class Sidebar
         this.collapsed = options.collapsed ?? mobile;
         this.filterString = '';
 
-        LX.doAsync( () =>
-        {
+        LX.doAsync( () => {
             this.root.parentElement.ogWidth = this.root.parentElement.style.width;
             this.root.parentElement.style.transition = this.collapsed ? '' : 'width 0.25s ease-out';
 
-            this.resizeObserver = new ResizeObserver( entries =>
-            {
+            this.resizeObserver = new ResizeObserver( entries => {
                 for ( const entry of entries )
                 {
                     this.siblingArea?.setSize( [ 'calc(100% - ' + ( entry.contentRect.width ) + 'px )', null ] );
@@ -113,8 +111,7 @@ export class Sidebar
 
                 this.resizeObserver.observe( this.root.parentElement );
 
-                LX.doAsync( () =>
-                {
+                LX.doAsync( () => {
                     this.resizeObserver?.unobserve( this.root.parentElement );
                     this.root.querySelectorAll( '.lexsidebarentrycontent' ).forEach( ( e: HTMLElement ) =>
                         e.dataset['disableTooltip'] = `${!this.collapsed}`
@@ -147,8 +144,7 @@ export class Sidebar
                     sheetSidebarOptions.collapsable = false;
                     area.addSidebar( this.callback, sheetSidebarOptions );
 
-                    icon.addEventListener( 'click', ( e: MouseEvent ) =>
-                    {
+                    icon.addEventListener( 'click', ( e: MouseEvent ) => {
                         e.preventDefault();
                         e.stopPropagation();
                         new LX.Sheet( '256px', [ area ], { side: this.side } );
@@ -156,8 +152,7 @@ export class Sidebar
                 }
                 else
                 {
-                    icon.addEventListener( 'click', ( e: MouseEvent ) =>
-                    {
+                    icon.addEventListener( 'click', ( e: MouseEvent ) => {
                         e.preventDefault();
                         e.stopPropagation();
                         this.toggleCollapsed();
@@ -169,8 +164,7 @@ export class Sidebar
         // Entry filter
         if ( ( options.filter ?? false ) )
         {
-            const filterTextInput = new TextInput( null, '', ( value: string, event: InputEvent ) =>
-            {
+            const filterTextInput = new TextInput( null, '', ( value: string, event: InputEvent ) => {
                 this.filterString = value;
                 this.update();
             }, { inputClass: 'outline', placeholder: 'Search...', icon: 'Search', className: 'lexsidebarfilter' } );
@@ -200,8 +194,7 @@ export class Sidebar
     {
         const header = document.createElement( 'div' );
 
-        header.addEventListener( 'click', e =>
-        {
+        header.addEventListener( 'click', e => {
             if ( this.collapsed )
             {
                 e.preventDefault();
@@ -259,8 +252,7 @@ export class Sidebar
     {
         const footer = document.createElement( 'div' );
 
-        footer.addEventListener( 'click', e =>
-        {
+        footer.addEventListener( 'click', e => {
             if ( options.onFooterPressed )
             {
                 options.onFooterPressed( e, footer );
@@ -342,8 +334,7 @@ export class Sidebar
 
         this.resizeObserver.observe( this.root.parentElement );
 
-        LX.doAsync( () =>
-        {
+        LX.doAsync( () => {
             this.root.classList.toggle( 'collapsed', this.collapsed );
             this.resizeObserver?.unobserve( this.root.parentElement );
             this.root.querySelectorAll( '.lexsidebarentrycontent' ).forEach( ( e: HTMLElement ) =>
@@ -402,16 +393,14 @@ export class Sidebar
 
         let idx = 0;
 
-        const _insertEntry = ( token: string, list: any[] ) =>
-        {
+        const _insertEntry = ( token: string, list: any[] ) => {
             if ( token == undefined )
             {
                 return;
             }
 
             let found = null;
-            list.forEach( ( o: any ) =>
-            {
+            list.forEach( ( o: any ) => {
                 const keys = Object.keys( o );
                 const key = keys.find( t => t == token );
                 if ( key ) found = o[key];
@@ -524,8 +513,7 @@ export class Sidebar
                     {
                         const groupActionIcon = LX.makeIcon( this.groups[item.group].icon, { svgClass: 'sm' } );
                         groupEntry.appendChild( groupActionIcon );
-                        groupActionIcon.addEventListener( 'click', ( e: MouseEvent ) =>
-                        {
+                        groupActionIcon.addEventListener( 'click', ( e: MouseEvent ) => {
                             if ( this.groups[item.group].callback )
                             {
                                 this.groups[item.group].callback( item.group, e );
@@ -575,8 +563,7 @@ export class Sidebar
             {
                 item.value = options.value ?? false;
                 const panel = new Panel();
-                item.checkbox = panel.addCheckbox( null, item.value, ( value: boolean, event: InputEvent ) =>
-                {
+                item.checkbox = panel.addCheckbox( null, item.value, ( value: boolean, event: InputEvent ) => {
                     event.preventDefault();
                     event.stopPropagation();
                     const f = options.callback;
@@ -620,8 +607,7 @@ export class Sidebar
                 ? options.collapsable
                 : ( options.collapsable || item[key].length );
 
-            entry.addEventListener( 'click', ( e: any ) =>
-            {
+            entry.addEventListener( 'click', ( e: any ) => {
                 if ( e.target && e.target.classList.contains( 'lexcheckbox' ) )
                 {
                     return;
@@ -664,8 +650,7 @@ export class Sidebar
                 const actionIcon = LX.makeIcon( options.action.icon ?? 'Ellipsis', { title: options.action.name } );
                 itemDom.appendChild( actionIcon );
 
-                actionIcon.addEventListener( 'click', ( e: MouseEvent ) =>
-                {
+                actionIcon.addEventListener( 'click', ( e: MouseEvent ) => {
                     e.preventDefault();
                     e.stopImmediatePropagation();
                     const f = options.action.callback;
@@ -727,8 +712,7 @@ export class Sidebar
                     } );
                     subentry.appendChild( actionIcon );
 
-                    actionIcon.addEventListener( 'click', ( e: MouseEvent ) =>
-                    {
+                    actionIcon.addEventListener( 'click', ( e: MouseEvent ) => {
                         e.preventDefault();
                         e.stopImmediatePropagation();
                         const f = suboptions.action.callback;
@@ -748,8 +732,7 @@ export class Sidebar
 
                 subentryContainer.appendChild( subentry );
 
-                subentry.addEventListener( 'click', ( e: MouseEvent ) =>
-                {
+                subentry.addEventListener( 'click', ( e: MouseEvent ) => {
                     const f = suboptions.callback;
                     if ( f ) f.call( this, subkey, subentry, e );
 

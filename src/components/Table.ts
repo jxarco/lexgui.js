@@ -58,8 +58,7 @@ export class Table extends BaseComponent
 
         super( ComponentType.TABLE, name, null, options );
 
-        this.onResize = ( rect ) =>
-        {
+        this.onResize = ( rect ) => {
             const realNameWidth = this.root.domName?.style.width ?? '0px';
             container.style.width = `calc( 100% - ${realNameWidth})`;
         };
@@ -88,8 +87,7 @@ export class Table extends BaseComponent
         data.body = data.body ?? [];
         data.checkMap = {};
         data.colVisibilityMap = {};
-        data.head.forEach( ( colName: any, index: number ) =>
-        {
+        data.head.forEach( ( colName: any, index: number ) => {
             const idx = this._hiddenColumns.indexOf( colName );
             const visible = ( !this._toggleColumns ) || ( idx === -1 );
             data.colVisibilityMap[index] = visible;
@@ -104,15 +102,13 @@ export class Table extends BaseComponent
                 itemsPerPage: this._rowsPerPage,
                 allowChangeItemsPerPage: options.allowChangeItemsPerPage ?? true,
                 onChange: this._onChangePage.bind( this ),
-                onItemsPerPageChange: ( v: number ) =>
-                {
+                onItemsPerPageChange: ( v: number ) => {
                     this.rowsPerPage = v;
                 }
             } );
         }
 
-        const getDate = ( text: string ): Date | null =>
-        {
+        const getDate = ( text: string ): Date | null => {
             // Match DD/MM/YYYY or DD-MM-YYYY
             const m = text.match( /^(\d{1,2})[\/-](\d{1,2})[\/-](\d{2}|\d{4})$/ );
             if ( !m ) return null;
@@ -135,8 +131,7 @@ export class Table extends BaseComponent
             return d;
         };
 
-        const compareFn = ( idx: number, order: number, a: any, b: any ) =>
-        {
+        const compareFn = ( idx: number, order: number, a: any, b: any ) => {
             const va = a[idx];
             const vb = b[idx];
 
@@ -166,8 +161,7 @@ export class Table extends BaseComponent
             return 0;
         };
 
-        const sortFn = ( idx: number, sign: number ) =>
-        {
+        const sortFn = ( idx: number, sign: number ) => {
             data.body = data.body.sort( compareFn.bind( this, idx, sign ) );
             this.refresh();
         };
@@ -187,8 +181,7 @@ export class Table extends BaseComponent
                 filterOptions.trigger = 'input';
                 filterOptions.inputClass = 'outline';
 
-                let filter = new TextInput( null, this._currentFilter ?? '', ( v: string ) =>
-                {
+                let filter = new TextInput( null, this._currentFilter ?? '', ( v: string ) => {
                     this._currentFilter = v;
                     this.refresh();
                 }, filterOptions );
@@ -204,19 +197,16 @@ export class Table extends BaseComponent
 
                 for ( let f of this.customFilters )
                 {
-                    f.component = new Button( null, icon.innerHTML + f.name, ( v: any ) =>
-                    {
+                    f.component = new Button( null, icon.innerHTML + f.name, ( v: any ) => {
                         const spanName = f.component.root.querySelector( 'span' );
 
                         if ( f.options )
                         {
-                            const menuOptions = f.options.map( ( colName: string, idx: number ) =>
-                            {
+                            const menuOptions = f.options.map( ( colName: string, idx: number ) => {
                                 const item = {
                                     name: colName,
                                     checked: !!this.activeCustomFilters[colName],
-                                    callback: ( key: string, v: boolean, dom: HTMLElement ) =>
-                                    {
+                                    callback: ( key: string, v: boolean, dom: HTMLElement ) => {
                                         if ( v ) this.activeCustomFilters[key] = f.name;
                                         else
                                         {
@@ -248,12 +238,10 @@ export class Table extends BaseComponent
                             f.start = f.start ?? f.min;
                             f.end = f.end ?? f.max;
 
-                            panel.refresh = () =>
-                            {
+                            panel.refresh = () => {
                                 panel.clear();
                                 panel.sameLine( 2, 'justify-center' );
-                                panel.addNumber( null, f.start, ( v: number ) =>
-                                {
+                                panel.addNumber( null, f.start, ( v: number ) => {
                                     f.start = v;
                                     const inUse = f.start != f.min || f.end != f.max;
                                     spanName.innerHTML = icon.innerHTML + f.name + ( inUse
@@ -267,8 +255,7 @@ export class Table extends BaseComponent
                                     }
                                     this.refresh();
                                 }, { skipSlider: true, min: f.min, max: f.max, step: f.step, units: f.units } );
-                                panel.addNumber( null, f.end, ( v: number ) =>
-                                {
+                                panel.addNumber( null, f.end, ( v: number ) => {
                                     f.end = v;
                                     const inUse = f.start != f.min || f.end != f.max;
                                     spanName.innerHTML = icon.innerHTML + f.name
@@ -283,8 +270,7 @@ export class Table extends BaseComponent
                                     }
                                     this.refresh();
                                 }, { skipSlider: true, min: f.min, max: f.max, step: f.step, units: f.units } );
-                                panel.addButton( null, 'Reset', () =>
-                                {
+                                panel.addButton( null, 'Reset', () => {
                                     f.start = f.min;
                                     f.end = f.max;
                                     spanName.innerHTML = icon.innerHTML + f.name;
@@ -303,8 +289,7 @@ export class Table extends BaseComponent
                             LX.makeContainer( [ '100%', 'auto' ], 'px-3 p-2 pb-0 text-md font-medium', f.name,
                                 container );
 
-                            panel.refresh = () =>
-                            {
+                            panel.refresh = () => {
                                 panel.clear();
 
                                 // Generate default value once the filter is used
@@ -318,8 +303,7 @@ export class Table extends BaseComponent
                                 }
 
                                 const calendar = new CalendarRange( f.value ?? f.default, {
-                                    onChange: ( dateRange: any ) =>
-                                    {
+                                    onChange: ( dateRange: any ) => {
                                         f.value = dateRange;
                                         spanName.innerHTML = icon.innerHTML + f.name
                                             + ( separatorHtml
@@ -340,8 +324,7 @@ export class Table extends BaseComponent
                     headerContainer.appendChild( f.component.root );
                 }
 
-                this._resetCustomFiltersBtn = new Button( null, 'resetButton', () =>
-                {
+                this._resetCustomFiltersBtn = new Button( null, 'resetButton', () => {
                     this.activeCustomFilters = {};
                     this._resetCustomFiltersBtn?.root.classList.add( 'hidden' );
                     for ( let f of this.customFilters ?? [] )
@@ -367,21 +350,17 @@ export class Table extends BaseComponent
             {
                 const icon = LX.makeIcon( 'Settings2' );
                 const toggleColumnsBtn = new Button( 'toggleColumnsBtn', icon.innerHTML + 'View',
-                    ( value: any, e: any ) =>
-                    {
-                        const menuOptions = data.head.map( ( colName: string, idx: number ) =>
-                        {
+                    ( value: any, e: any ) => {
+                        const menuOptions = data.head.map( ( colName: string, idx: number ) => {
                             const item: any = {
                                 name: colName,
                                 icon: 'Check',
-                                callback: () =>
-                                {
+                                callback: () => {
                                     data.colVisibilityMap[idx] = !data.colVisibilityMap[idx];
                                     const cells = table.querySelectorAll(
                                         `tr > *:nth-child(${idx + this.rowOffsetCount + 1})`
                                     );
-                                    cells.forEach( ( cell: any ) =>
-                                    {
+                                    cells.forEach( ( cell: any ) => {
                                         cell.style.display = ( cell.style.display === 'none' ) ? '' : 'none';
                                     } );
                                 }
@@ -402,8 +381,7 @@ export class Table extends BaseComponent
         LX.addClass( table, options.tableClass );
         container.appendChild( table );
 
-        this.refresh = () =>
-        {
+        this.refresh = () => {
             this._currentFilter = this._currentFilter ?? '';
 
             table.innerHTML = '';
@@ -483,8 +461,7 @@ export class Table extends BaseComponent
                             }
 
                             menuOptions.push( { name: action.name, icon: action.icon, className: action.className,
-                                callback: () =>
-                                {
+                                callback: () => {
                                     const colRows = this.data.body.map( ( row: any[] ) => [ row[idx] ] );
                                     const mustRefresh = action.callback( colRows, table );
                                     if ( mustRefresh )
@@ -518,22 +495,19 @@ export class Table extends BaseComponent
                         menuOptions.push( {
                             name: 'Hide',
                             icon: 'EyeOff',
-                            callback: () =>
-                            {
+                            callback: () => {
                                 data.colVisibilityMap[idx] = false;
                                 const cells = table.querySelectorAll(
                                     `tr > *:nth-child(${idx + this.rowOffsetCount + 1})`
                                 );
-                                cells.forEach( ( c: any ) =>
-                                {
+                                cells.forEach( ( c: any ) => {
                                     c.style.display = ( c.style.display === 'none' ) ? '' : 'none';
                                 } );
                             }
                         } );
                     }
 
-                    th.addEventListener( 'click', ( e: MouseEvent ) =>
-                    {
+                    th.addEventListener( 'click', ( e: MouseEvent ) => {
                         if ( menuOptions.length === 0 ) return;
                         LX.addDropdownMenu( e.target, menuOptions, { side: 'bottom', align: 'start' } );
                     } );
@@ -562,15 +536,13 @@ export class Table extends BaseComponent
                 let eventCatched: any = false;
                 let movePending: any = null;
 
-                document.addEventListener( 'mouseup', ( e ) =>
-                {
+                document.addEventListener( 'mouseup', ( e ) => {
                     if ( rIdx === null ) return;
                     document.removeEventListener( 'mousemove', onMove );
                     const fromRow: any = table.rows[rIdx];
                     fromRow.dY = 0;
                     fromRow.classList.remove( 'dragging' );
-                    Array.from( table.rows ).forEach( v =>
-                    {
+                    Array.from( table.rows ).forEach( v => {
                         v.style.transform = ``;
                         v.style.transition = `none`;
                     } );
@@ -616,17 +588,14 @@ export class Table extends BaseComponent
 
                     rIdx = null;
 
-                    LX.doAsync( () =>
-                    {
-                        Array.from( table.rows ).forEach( v =>
-                        {
+                    LX.doAsync( () => {
+                        Array.from( table.rows ).forEach( v => {
                             v.style.transition = `transform 0.2s ease-in`;
                         } );
                     } );
                 } );
 
-                let onMove = ( e: MouseEvent ) =>
-                {
+                let onMove = ( e: MouseEvent ) => {
                     if ( !rIdx ) return;
                     const fromRow: any = table.rows[rIdx];
                     fromRow.dY = fromRow.dY ?? 0;
@@ -765,8 +734,7 @@ export class Table extends BaseComponent
 
                         icon.draggable = true;
 
-                        icon.addEventListener( 'dragstart', ( e: DragEvent ) =>
-                        {
+                        icon.addEventListener( 'dragstart', ( e: DragEvent ) => {
                             e.preventDefault();
                             e.stopPropagation();
                             e.stopImmediatePropagation();
@@ -796,8 +764,7 @@ export class Table extends BaseComponent
                                     movePending = [ fromRow, undo ? ( this.rowIndex + 1 ) : ( this.rowIndex ) ];
                                     this.style.transform = undo ? `` : `translateY(${this.offsetHeight}px)`;
                                 }
-                                LX.doAsync( () =>
-                                {
+                                LX.doAsync( () => {
                                     eventCatched = false;
                                 } );
                             }
@@ -831,8 +798,7 @@ export class Table extends BaseComponent
                                 const rowInputs = Array.from(
                                     table.querySelectorAll( "tbody input[type='checkbox']" )
                                 );
-                                const uncheckedRowInputs = rowInputs.filter( ( i: any ) =>
-                                {
+                                const uncheckedRowInputs = rowInputs.filter( ( i: any ) => {
                                     return !i.checked;
                                 } );
                                 if ( !uncheckedRowInputs.length )
@@ -880,8 +846,7 @@ export class Table extends BaseComponent
                             if ( action == 'delete' )
                             {
                                 button = LX.makeIcon( 'Trash3', { title: 'Delete Row' } );
-                                button.addEventListener( 'click', () =>
-                                {
+                                button.addEventListener( 'click', () => {
                                     data.body.splice( idx, 1 );
                                     this.refresh();
                                 } );
@@ -910,8 +875,7 @@ export class Table extends BaseComponent
 
                                 if ( action.callback )
                                 {
-                                    button.addEventListener( 'click', ( e: MouseEvent ) =>
-                                    {
+                                    button.addEventListener( 'click', ( e: MouseEvent ) => {
                                         const mustRefresh = action.callback( idx, bodyData, table, e );
                                         if ( mustRefresh )
                                         {
@@ -955,8 +919,7 @@ export class Table extends BaseComponent
                 if ( !data.colVisibilityMap[idx] )
                 {
                     const cells = table.querySelectorAll( `tr > *:nth-child(${idx + this.rowOffsetCount + 1})` );
-                    cells.forEach( ( c: any ) =>
-                    {
+                    cells.forEach( ( c: any ) => {
                         c.style.display = ( c.style.display === 'none' ) ? '' : 'none';
                     } );
                 }
@@ -976,8 +939,7 @@ export class Table extends BaseComponent
             {
                 const selectedRowsLabelContainer = LX.makeContainer( [ '100%', 'auto' ],
                     'flex justify-start items-center fg-secondary', '0 row(s) selected.', footerContainer );
-                LX.addSignal( '@rows_selected_changed', ( target: HTMLElement, n: number ) =>
-                {
+                LX.addSignal( '@rows_selected_changed', ( target: HTMLElement, n: number ) => {
                     if ( !this._showSelectedNumber ) return;
                     selectedRowsLabelContainer.innerHTML = n === 0 ? '' : `${n ?? 0} row(s) selected.`;
                 } );

@@ -24,10 +24,8 @@ export class Pagination
     _itemsPerPage: number = 12;
     _itemsPerPageValues: number[] = Pagination.ITEMS_PER_PAGE_VALUES;
 
-    onChange: ( page: number ) => void = () =>
-    {};
-    onItemsPerPageChange: ( n: number ) => void = () =>
-    {};
+    onChange: ( page: number ) => void = () => {};
+    onItemsPerPageChange: ( n: number ) => void = () => {};
 
     constructor( options: any = {} )
     {
@@ -42,8 +40,7 @@ export class Pagination
         if ( this._itemsPerPageValues.indexOf( this._itemsPerPage ) === -1 )
         {
             this._itemsPerPageValues.push( this._itemsPerPage );
-            this._itemsPerPageValues = this._itemsPerPageValues.sort( ( a: number, b: number ) =>
-            {
+            this._itemsPerPageValues = this._itemsPerPageValues.sort( ( a: number, b: number ) => {
                 if ( a < b ) return -1;
                 if ( a > b ) return 1;
                 return 0;
@@ -67,8 +64,7 @@ export class Pagination
             const itemsPerPageSelectContainer = LX.makeContainer( [ 'auto', 'auto' ], 'flex flex-row items-center', '',
                 this.root );
             const itemsPerPageSelect = new Select( null, Pagination.ITEMS_PER_PAGE_VALUES, this._itemsPerPage,
-                ( v: number ) =>
-                {
+                ( v: number ) => {
                     this._itemsPerPage = v;
                     this.onItemsPerPageChange?.( this._itemsPerPage );
                 }, { overflowContainer: null } );

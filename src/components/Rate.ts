@@ -22,13 +22,11 @@ export class Rate extends BaseComponent
 
         super( ComponentType.RATE, name, value, options );
 
-        this.onGetValue = () =>
-        {
+        this.onGetValue = () => {
             return value;
         };
 
-        this.onSetValue = ( newValue, skipCallback, event ) =>
-        {
+        this.onSetValue = ( newValue, skipCallback, event ) => {
             value = newValue;
 
             _updateStars( value );
@@ -39,8 +37,7 @@ export class Rate extends BaseComponent
             }
         };
 
-        this.onResize = ( rect ) =>
-        {
+        this.onResize = ( rect ) => {
             const realNameWidth = this.root.domName?.style.width ?? '0px';
             container.style.width = `calc( 100% - ${realNameWidth})`;
         };
@@ -55,8 +52,7 @@ export class Rate extends BaseComponent
         const halfStarsContainer = LX.makeContainer( [ 'fit-content', 'auto' ],
             'absolute top-0 flex flex-row gap-1 pointer-events-none', '', container );
 
-        starsContainer.addEventListener( 'mousemove', ( e: MouseEvent ) =>
-        {
+        starsContainer.addEventListener( 'mousemove', ( e: MouseEvent ) => {
             const star: any = e.target;
             const idx = star.dataset['idx'];
 
@@ -68,8 +64,7 @@ export class Rate extends BaseComponent
             }
         }, false );
 
-        starsContainer.addEventListener( 'mouseleave', ( e: MouseEvent ) =>
-        {
+        starsContainer.addEventListener( 'mouseleave', ( e: MouseEvent ) => {
             _updateStars( value );
         }, false );
 
@@ -81,8 +76,7 @@ export class Rate extends BaseComponent
             starIcon.dataset['idx'] = i + 1;
             starsContainer.appendChild( starIcon );
 
-            starIcon.addEventListener( 'click', ( e: MouseEvent ) =>
-            {
+            starIcon.addEventListener( 'click', ( e: MouseEvent ) => {
                 const star: any = e.target;
                 const rect = star.getBoundingClientRect();
                 const half = allowHalf && e.offsetX < ( rect.width * 0.5 );
@@ -96,8 +90,7 @@ export class Rate extends BaseComponent
             halfStarsContainer.appendChild( halfStarIcon );
         }
 
-        const _updateStars = ( v: number ) =>
-        {
+        const _updateStars = ( v: number ) => {
             for ( let i = 0; i < 5; ++i )
             {
                 const filled = v > ( i + 0.5 );

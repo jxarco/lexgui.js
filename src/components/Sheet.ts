@@ -24,8 +24,7 @@ export class Sheet
         this.root.className = 'lexsheet fixed z-1000 bg-primary';
         document.body.appendChild( this.root );
 
-        this.root.addEventListener( 'keydown', ( e: KeyboardEvent ) =>
-        {
+        this.root.addEventListener( 'keydown', ( e: KeyboardEvent ) => {
             if ( e.key == 'Escape' )
             {
                 e.preventDefault();
@@ -37,8 +36,7 @@ export class Sheet
         if ( content )
         {
             content = [].concat( content );
-            content.forEach( ( e: any ) =>
-            {
+            content.forEach( ( e: any ) => {
                 const domNode = e.root ?? e;
                 this.root.appendChild( domNode );
                 if ( e.onSheet )
@@ -48,8 +46,7 @@ export class Sheet
             } );
         }
 
-        LX.doAsync( () =>
-        {
+        LX.doAsync( () => {
             LX.modal.toggle( false );
 
             switch ( this.side )
@@ -84,8 +81,7 @@ export class Sheet
 
             this.root.focus();
 
-            this._onClick = ( e: any ) =>
-            {
+            this._onClick = ( e: any ) => {
                 if ( e.target && ( this.root.contains( e.target ) ) )
                 {
                     return;

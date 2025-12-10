@@ -503,8 +503,7 @@ function rgbToHex( rgb: any, scale = 255 )
 
     return (
         '#'
-        + rgbArray.map( c =>
-        {
+        + rgbArray.map( c => {
             c = Math.floor( c * scale );
             const hex = c.toString( 16 );
             return hex.length === 1 ? ( '0' + hex ) : hex;
@@ -792,8 +791,7 @@ function makeDraggable( domEl: any, options: any = {} )
     let targetClass = options.targetClass;
     let dragMargin = options.dragMargin ?? 3;
 
-    let _computePosition = ( e: any, top?: number, left?: number ) =>
-    {
+    let _computePosition = ( e: any, top?: number, left?: number ) => {
         const nullRect = { x: 0, y: 0, width: 0, height: 0 };
         const parentRect = domEl.parentElement ? domEl.parentElement.getBoundingClientRect() : nullRect;
         const isFixed = domEl.style.position == 'fixed';
@@ -818,8 +816,7 @@ function makeDraggable( domEl: any, options: any = {} )
     let id = LX.guidGenerator();
     domEl['draggable-id'] = id;
 
-    const defaultMoveFunc = ( e: any ) =>
-    {
+    const defaultMoveFunc = ( e: any ) => {
         if ( !currentTarget )
         {
             return;
@@ -828,8 +825,7 @@ function makeDraggable( domEl: any, options: any = {} )
         _computePosition( e );
     };
 
-    const customMoveFunc = ( e: Event ) =>
-    {
+    const customMoveFunc = ( e: Event ) => {
         if ( !currentTarget )
         {
             return;
@@ -899,8 +895,7 @@ function makeDraggable( domEl: any, options: any = {} )
         }
     }, false );
 
-    document.addEventListener( 'mouseup', ( e ) =>
-    {
+    document.addEventListener( 'mouseup', ( e ) => {
         if ( currentTarget )
         {
             currentTarget = null;
@@ -988,8 +983,7 @@ function makeCodeSnippet( code: string, size: any[], options: any = {} )
         disableEdition: true,
         allowAddScripts: false,
         name: options.tabName,
-        callback: ( instance: typeof LX.CodeEditor ) =>
-        {
+        callback: ( instance: typeof LX.CodeEditor ) => {
             instance.setText( code, options.language ?? 'Plain Text' );
 
             if ( options.linesAdded )
@@ -1147,8 +1141,7 @@ function makeBreadcrumb( items: any[], options: any = {} )
         if ( item.items !== undefined )
         {
             const bDropdownTrigger = LX.makeContainer( [ 'auto', 'auto' ], `${lastElement ? '' : 'fg-secondary'}` );
-            LX.listen( bDropdownTrigger, 'click', ( e: any ) =>
-            {
+            LX.listen( bDropdownTrigger, 'click', ( e: any ) => {
                 LX.addDropdownMenu( e.target, item.items, { side: 'bottom', align: 'start' } );
             } );
             bDropdownTrigger.append( itemTitle );
@@ -1192,8 +1185,7 @@ function makeIcon( iconName: string, options: any = {} )
 {
     let svg: any = null;
 
-    const _createIconFromSVG = ( svg: any ) =>
-    {
+    const _createIconFromSVG = ( svg: any ) => {
         if ( options.svgClass && options.svgClass.length )
         {
             options.svgClass.split( ' ' ).forEach( ( c: string ) => svg.classList.add( c ) );
@@ -1239,14 +1231,12 @@ function makeIcon( iconName: string, options: any = {} )
             if ( data[5] )
             {
                 const classes = data[5].svgClass;
-                classes?.split( ' ' ).forEach( ( c: string ) =>
-                {
+                classes?.split( ' ' ).forEach( ( c: string ) => {
                     svg.classList.add( c );
                 } );
 
                 const attrs = data[5].svgAttributes;
-                attrs?.split( ' ' ).forEach( ( attr: string ) =>
-                {
+                attrs?.split( ' ' ).forEach( ( attr: string ) => {
                     const t = attr.split( '=' );
                     svg.setAttribute( t[0], t[1] );
                 } );
@@ -1260,14 +1250,12 @@ function makeIcon( iconName: string, options: any = {} )
             if ( data[5] )
             {
                 const classes = data[5].pathClass;
-                classes?.split( ' ' ).forEach( ( c: string ) =>
-                {
+                classes?.split( ' ' ).forEach( ( c: string ) => {
                     path.classList.add( c );
                 } );
 
                 const attrs = data[5].pathAttributes;
-                attrs?.split( ' ' ).forEach( ( attr: string ) =>
-                {
+                attrs?.split( ' ' ).forEach( ( attr: string ) => {
                     const t = attr.split( '=' );
                     path.setAttribute( t[0], t[1] );
                 } );
@@ -1393,8 +1381,7 @@ function message( text: string, title: string, options: any = {} )
 
     options.modal = true;
 
-    return new LX.Dialog( title, ( p: Panel ) =>
-    {
+    return new LX.Dialog( title, ( p: Panel ) => {
         p.addTextArea( null, text, null, { disabled: true, fitHeight: true } );
     }, options );
 }
@@ -1423,13 +1410,11 @@ function popup( text: string, title: string, options: any = {} )
     options.class = 'lexpopup';
 
     const time = options.timeout || 3000;
-    const dialog = new LX.Dialog( title, ( p: Panel ) =>
-    {
+    const dialog = new LX.Dialog( title, ( p: Panel ) => {
         p.addTextArea( null, text, null, { disabled: true, fitHeight: true } );
     }, options );
 
-    setTimeout( () =>
-    {
+    setTimeout( () => {
         dialog.close();
     }, Math.max( time, 150 ) );
 
@@ -1458,8 +1443,7 @@ function prompt( text: string, title: string, callback: ( value: any ) => void, 
 
     let value = '';
 
-    const dialog = new LX.Dialog( title, ( p: Panel ) =>
-    {
+    const dialog = new LX.Dialog( title, ( p: Panel ) => {
         p.addTextArea( null, text, null, { disabled: true, fitHeight: true } );
 
         if ( options.input ?? true )
@@ -1469,14 +1453,12 @@ function prompt( text: string, title: string, callback: ( value: any ) => void, 
 
         p.sameLine( 2 );
 
-        p.addButton( null, 'Cancel', () =>
-        {
+        p.addButton( null, 'Cancel', () => {
             if ( options.on_cancel ) options.on_cancel();
             dialog.close();
         } );
 
-        p.addButton( null, options.accept || 'Continue', () =>
-        {
+        p.addButton( null, options.accept || 'Continue', () => {
             if ( options.required && value === '' )
             {
                 text += text.includes( 'You must fill the input text.' ) ? '' : '\nYou must fill the input text.';
@@ -1569,8 +1551,7 @@ function toast( title: string, description: string, options: any = {} )
     toast.classList.add( positionVertical );
     toast.classList.add( positionHorizontal );
 
-    LX.doAsync( () =>
-    {
+    LX.doAsync( () => {
         if ( nots.offsetWidth > nots.iWidth )
         {
             nots.iWidth = Math.min( nots.offsetWidth, 480 );
@@ -1612,8 +1593,7 @@ function toast( title: string, description: string, options: any = {} )
     toast.close = function()
     {
         this.dataset['open'] = 'false';
-        LX.doAsync( () =>
-        {
+        LX.doAsync( () => {
             this.remove();
             if ( !LX.notifications.childElementCount )
             {
@@ -1626,8 +1606,7 @@ function toast( title: string, description: string, options: any = {} )
     if ( options.closable ?? true )
     {
         const closeIcon = LX.makeIcon( 'X', { iconClass: 'closer' } );
-        closeIcon.addEventListener( 'click', () =>
-        {
+        closeIcon.addEventListener( 'click', () => {
             toast.close();
         } );
         toast.appendChild( closeIcon );
@@ -1637,8 +1616,7 @@ function toast( title: string, description: string, options: any = {} )
 
     if ( timeout != -1 )
     {
-        LX.doAsync( () =>
-        {
+        LX.doAsync( () => {
             toast.close();
         }, timeout );
     }
@@ -1673,8 +1651,7 @@ function badge( text: string, className: string, options: any = {} )
         const arrowIcon = LX.makeIcon( 'ArrowUpRight', { svgClass: 'xs fg-contrast' } );
         arrowIcon.querySelector( 'svg' ).style.marginLeft = '-0.25rem';
         container.innerHTML += arrowIcon.innerHTML;
-        container.addEventListener( 'click', e =>
-        {
+        container.addEventListener( 'click', e => {
             e.preventDefault();
             e.stopPropagation();
             options.callback();
@@ -1790,8 +1767,7 @@ function asTooltip( trigger: any, content: any, options: any = {} )
         // Append new tooltip
         tooltipParent.appendChild( tooltipDom );
 
-        LX.doAsync( () =>
-        {
+        LX.doAsync( () => {
             const position = [ 0, 0 ];
             const offsetX = parseFloat( trigger.dataset['tooltipOffsetX'] ?? _offsetX );
             const offsetY = parseFloat( trigger.dataset['tooltipOffsetY'] ?? _offsetY );
@@ -2162,8 +2138,7 @@ Object.assign( LX, {
 
     loadScriptSync( url: string )
     {
-        return new Promise( ( resolve, reject ) =>
-        {
+        return new Promise( ( resolve, reject ) => {
             const script = document.createElement( 'script' );
             script.src = url;
             script.async = false;
@@ -2189,11 +2164,9 @@ Object.assign( LX, {
 
         if ( url.includes( 'http' ) )
         {
-            LX.request( { url: url, dataType: 'blob', success: ( f: File ) =>
-            {
+            LX.request( { url: url, dataType: 'blob', success: ( f: File ) => {
                 fr.readAsDataURL( f );
-                fr.onload = ( e: any ) =>
-                {
+                fr.onload = ( e: any ) => {
                     _download( e.currentTarget.result );
                 };
             } } );

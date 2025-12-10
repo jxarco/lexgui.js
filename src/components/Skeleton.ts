@@ -30,8 +30,7 @@ export class Skeleton
     {
         this.root.dataset['closed'] = true;
 
-        LX.doAsync( () =>
-        {
+        LX.doAsync( () => {
             this.root.remove();
             this.root = null;
         }, 200 );

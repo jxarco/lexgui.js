@@ -49,8 +49,7 @@ export class CalendarRange
         this.from = range[0];
         this.to = range[1];
 
-        const onChange = ( date: any ) =>
-        {
+        const onChange = ( date: any ) => {
             const newDateString = `${date.day}/${date.month}/${date.year}`;
 
             if ( !this._selectingRange )
@@ -78,8 +77,7 @@ export class CalendarRange
         this.fromCalendar = new Calendar( this.from, {
             skipNextMonth: true,
             onChange,
-            onPreviousMonth: () =>
-            {
+            onPreviousMonth: () => {
                 this.toCalendar._previousMonth();
             },
             range
@@ -88,8 +86,7 @@ export class CalendarRange
         this.toCalendar = new Calendar( this.to, {
             skipPrevMonth: true,
             onChange,
-            onNextMonth: () =>
-            {
+            onNextMonth: () => {
                 this.fromCalendar._nextMonth();
             },
             range

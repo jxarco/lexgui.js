@@ -20,21 +20,18 @@ export class Map2D extends BaseComponent
     {
         super( ComponentType.MAP2D, name, null, options );
 
-        this.onGetValue = () =>
-        {
+        this.onGetValue = () => {
             return this.map2d.weightsObj;
         };
 
-        this.onSetValue = ( newValue, skipCallback, event ) =>
-        {
+        this.onSetValue = ( newValue, skipCallback, event ) => {
             // if( !skipCallback )
             // {
             //     this._trigger( new IEvent( name, curveInstance.element.value, event ), callback );
             // }
         };
 
-        this.onResize = ( rect ) =>
-        {
+        this.onResize = ( rect ) => {
             const realNameWidth = this.root.domName?.style.width ?? '0px';
             container.style.width = `calc( 100% - ${realNameWidth})`;
         };
@@ -46,8 +43,7 @@ export class Map2D extends BaseComponent
         this.map2d = new CanvasMap2D( points, callback, options );
 
         const calendarIcon = LX.makeIcon( 'SquareMousePointer' );
-        const calendarButton = new Button( null, 'Open Map', () =>
-        {
+        const calendarButton = new Button( null, 'Open Map', () => {
             this._popover = new Popover( calendarButton.root, [ this.map2d ] );
         }, { buttonClass: `flex flex-row px-3 fg-secondary justify-between` } );
 

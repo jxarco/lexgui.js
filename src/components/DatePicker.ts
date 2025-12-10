@@ -31,13 +31,11 @@ export class DatePicker extends BaseComponent
             dateValue = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
         }
 
-        this.onGetValue = () =>
-        {
+        this.onGetValue = () => {
             return dateValue;
         };
 
-        this.onSetValue = ( newValue, skipCallback, event ) =>
-        {
+        this.onSetValue = ( newValue, skipCallback, event ) => {
             if ( !dateAsRange )
             {
                 ( this.calendar as Calendar ).fromDateString( newValue );
@@ -53,8 +51,7 @@ export class DatePicker extends BaseComponent
             }
         };
 
-        this.onResize = ( rect ) =>
-        {
+        this.onResize = ( rect ) => {
             const realNameWidth = this.root.domName?.style.width ?? '0px';
             container.style.width = `calc( 100% - ${realNameWidth})`;
         };
@@ -65,8 +62,7 @@ export class DatePicker extends BaseComponent
         if ( !dateAsRange )
         {
             this.calendar = new Calendar( dateValue as string, {
-                onChange: ( date: any ) =>
-                {
+                onChange: ( date: any ) => {
                     const newDateString = `${date.day}/${date.month}/${date.year}`;
                     this.set( newDateString );
                 },
@@ -76,16 +72,14 @@ export class DatePicker extends BaseComponent
         else
         {
             this.calendar = new CalendarRange( dateValue as string[], {
-                onChange: ( dateRange: any ) =>
-                {
+                onChange: ( dateRange: any ) => {
                     this.set( dateRange );
                 },
                 ...options
             } );
         }
 
-        const refresh = ( currentDate?: any ) =>
-        {
+        const refresh = ( currentDate?: any ) => {
             const emptyDate = !!currentDate;
 
             container.innerHTML = '';
@@ -96,8 +90,7 @@ export class DatePicker extends BaseComponent
             const d0 = dateAsRange ? dts[0] : currentDate;
 
             const calendarIcon = LX.makeIcon( 'Calendar' );
-            const calendarButton = new Button( null, d0, () =>
-            {
+            const calendarButton = new Button( null, d0, () => {
                 this._popover = new Popover( calendarButton.root, [ this.calendar ] );
             }, { buttonClass: `flex flex-row px-3 ${emptyDate ? '' : 'fg-tertiary'} justify-between` } );
             calendarButton.root.querySelector( 'button' ).appendChild( calendarIcon );
@@ -111,8 +104,7 @@ export class DatePicker extends BaseComponent
 
                 const d1 = dts[1];
                 const calendarIcon = LX.makeIcon( 'Calendar' );
-                const calendarButton = new Button( null, d1, () =>
-                {
+                const calendarButton = new Button( null, d1, () => {
                     this._popover = new Popover( calendarButton.root, [ this.calendar ] );
                 }, { buttonClass: `flex flex-row px-3 ${emptyDate ? '' : 'fg-tertiary'} justify-between` } );
                 calendarButton.root.querySelector( 'button' ).appendChild( calendarIcon );

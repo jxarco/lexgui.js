@@ -16,13 +16,11 @@ export class Pad extends BaseComponent
     {
         super( ComponentType.PAD, name, null, options );
 
-        this.onGetValue = () =>
-        {
+        this.onGetValue = () => {
             return thumb.value.xy;
         };
 
-        this.onSetValue = ( newValue, skipCallback, event ) =>
-        {
+        this.onSetValue = ( newValue, skipCallback, event ) => {
             thumb.value.set( newValue[0], newValue[1] );
             _updateValue( thumb.value );
             if ( !skipCallback )
@@ -31,8 +29,7 @@ export class Pad extends BaseComponent
             }
         };
 
-        this.onResize = ( rect ) =>
-        {
+        this.onResize = ( rect ) => {
             const realNameWidth = this.root.domName?.style.width ?? '0px';
             container.style.width = `calc( 100% - ${realNameWidth})`;
         };
@@ -55,8 +52,7 @@ export class Pad extends BaseComponent
         thumb.max = options.max ?? 1;
         pad.appendChild( thumb );
 
-        let _updateValue = ( v: vec2 ) =>
-        {
+        let _updateValue = ( v: vec2 ) => {
             const [ w, h ] = [ pad.offsetWidth, pad.offsetHeight ];
             const value0to1 = new vec2( LX.remapRange( v.x, thumb.min, thumb.max, 0.0, 1.0 ),
                 LX.remapRange( v.y, thumb.min, thumb.max, 0.0, 1.0 ) );
@@ -122,8 +118,7 @@ export class Pad extends BaseComponent
             }
         }
 
-        LX.doAsync( () =>
-        {
+        LX.doAsync( () => {
             this.onResize();
             _updateValue( thumb.value );
         } );

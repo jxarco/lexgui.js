@@ -219,13 +219,11 @@ export abstract class Timeline
 
         this.canvas.tabIndex = 1;
         // Process keys events
-        this.canvasArea.root.addEventListener( 'keydown', ( e: KeyboardEvent ) =>
-        {
+        this.canvasArea.root.addEventListener( 'keydown', ( e: KeyboardEvent ) => {
             this.processKeys( e );
         } ); // so this.processKeys can be overwritten by the user
 
-        this.canvasArea.onresize = ( bounding: { width: number; height: number; } ) =>
-        {
+        this.canvasArea.onresize = ( bounding: { width: number; height: number; } ) => {
             if ( !( bounding.width && bounding.height ) )
             {
                 return;
@@ -309,14 +307,12 @@ export abstract class Timeline
 
         header.queue( buttonContainer );
 
-        const playbtn = header.addButton( 'playBtn', '', ( value: any, event: Event ) =>
-        {
+        const playbtn = header.addButton( 'playBtn', '', ( value: any, event: Event ) => {
             this.changeState();
         }, { buttonClass: 'accept', title: 'Play', hideName: true, icon: 'Play@solid', swap: 'Pause@solid' } );
         playbtn.setState( this.playing, true );
 
-        header.addButton( 'stopBtn', '', ( value: any, event: Event ) =>
-        {
+        header.addButton( 'stopBtn', '', ( value: any, event: Event ) => {
             this.setState( false, true ); // skip callback of set state
             if ( this.onStateStop )
             {
@@ -324,8 +320,7 @@ export abstract class Timeline
             }
         }, { buttonClass: 'accept', title: 'Stop', hideName: true, icon: 'Stop@solid' } );
 
-        header.addButton( 'loopBtn', '', ( value: any, event: Event ) =>
-        {
+        header.addButton( 'loopBtn', '', ( value: any, event: Event ) => {
             this.setLoopMode( !this.loop );
         }, { selectable: true, selected: this.loop, title: 'Loop', hideName: true, icon: 'RefreshCw' } );
 
@@ -344,8 +339,7 @@ export abstract class Timeline
             this.onCreateBeforeTopBar( header );
         }
 
-        header.addNumber( 'Current Time', this.currentTime, ( value: number, event: Event ) =>
-        {
+        header.addNumber( 'Current Time', this.currentTime, ( value: number, event: Event ) => {
             this.setTime( value );
         }, {
             units: 's',
@@ -357,8 +351,7 @@ export abstract class Timeline
             nameWidth: 'auto'
         } );
 
-        header.addNumber( 'Duration', +this.duration.toFixed( 3 ), ( value: number, event: Event ) =>
-        {
+        header.addNumber( 'Duration', +this.duration.toFixed( 3 ), ( value: number, event: Event ) => {
             this.setDuration( value, false, false );
         }, {
             units: 's',
@@ -385,8 +378,7 @@ export abstract class Timeline
 
         if ( this.onShowOptimizeMenu )
         {
-            header.addButton( null, '', ( value: any, event: Event ) =>
-            {
+            header.addButton( null, '', ( value: any, event: Event ) => {
                 if ( this.onShowOptimizeMenu )
                 {
                     this.onShowOptimizeMenu( event );
@@ -396,23 +388,20 @@ export abstract class Timeline
 
         if ( this.onShowConfiguration )
         {
-            header.addButton( null, '', ( value: any, event: Event ) =>
-            {
+            header.addButton( null, '', ( value: any, event: Event ) => {
                 if ( this.configurationDialog )
                 {
                     this.configurationDialog.close();
                     this.configurationDialog = null;
                     return;
                 }
-                this.configurationDialog = new Dialog( 'Configuration', ( p: typeof Panel ) =>
-                {
+                this.configurationDialog = new Dialog( 'Configuration', ( p: typeof Panel ) => {
                     if ( this.onShowConfiguration )
                     {
                         this.onShowConfiguration( p );
                     }
                 }, {
-                    onBeforeClose: () =>
-                    {
+                    onBeforeClose: () => {
                         this.configurationDialog.panel.clear(); // clear signals
                         this.configurationDialog = null;
                     }
@@ -442,8 +431,7 @@ export abstract class Timeline
 
         if ( !this.disableNewTracks )
         {
-            panel.addButton( 'addTrackBtn', '', ( value: any, event: Event ) =>
-            {
+            panel.addButton( 'addTrackBtn', '', ( value: any, event: Event ) => {
                 if ( this.onAddNewTrackButton )
                 {
                     this.onAddNewTrackButton();
@@ -469,8 +457,7 @@ export abstract class Timeline
         }
 
         this.trackTreesComponent = p.addTree( null, treeTracks, { filter: false, rename: false, draggable: false,
-            onevent: ( e: typeof TreeEvent ) =>
-            {
+            onevent: ( e: typeof TreeEvent ) => {
                 switch ( e.type )
                 {
                     case LX.TreeEvent.NODE_SELECTED:
@@ -517,8 +504,7 @@ export abstract class Timeline
 
         this.trackTreesPanel = p;
         panel.attach( p.root );
-        p.root.addEventListener( 'scroll', ( e: any ) =>
-        {
+        p.root.addEventListener( 'scroll', ( e: any ) => {
             if ( e.currentTarget.scrollHeight > e.currentTarget.clientHeight )
             {
                 this.currentScroll = e.currentTarget.scrollTop
@@ -1449,8 +1435,7 @@ export abstract class Timeline
         const selected = this.trackTreesComponent.innerTree.selected;
         selected.length = 0;
 
-        const addToSelection = ( nodes: any[] ) =>
-        {
+        const addToSelection = ( nodes: any[] ) => {
             for ( let i = 0; i < nodes.length; ++i )
             {
                 if ( nodes[i].trackData && nodes[i].trackData.isSelected )
@@ -1674,8 +1659,7 @@ export abstract class Timeline
                     'name': 'Lock edition',
                     'icon': ( track.locked ? 'TimelineLock' : 'TimelineLockOpen' ),
                     'swap': ( track.locked ? 'TimelineLockOpen' : 'TimelineLock' ),
-                    'callback': ( node: any, swapValue: boolean, event: Event ) =>
-                    {
+                    'callback': ( node: any, swapValue: boolean, event: Event ) => {
                         this.setTrackLock( node.trackData.trackIdx, !node.trackData.locked, false, false ); // do not update left panel
                     }
                 } ] } );
@@ -1794,21 +1778,17 @@ export class KeyFramesTimeline extends Timeline
 
         if ( options.onShowOptimizeMenu && typeof options.onShowOptimizeMenu == 'boolean' )
         {
-            this.onShowOptimizeMenu = ( e: any ): void =>
-            {
+            this.onShowOptimizeMenu = ( e: any ): void => {
                 if ( this.selectedItems.length == 0 )
                 {
                     return;
                 }
 
-                LX.addContextMenu( 'Optimize', e, ( m: any ) =>
-                {
-                    this.selectedItems.forEach( item =>
-                    {
+                LX.addContextMenu( 'Optimize', e, ( m: any ) => {
+                    this.selectedItems.forEach( item => {
                         if ( item.isTrack )
                         {
-                            m.add( ( item.groupId ? item.groupId : '' ) + '@' + item.id, () =>
-                            {
+                            m.add( ( item.groupId ? item.groupId : '' ) + '@' + item.id, () => {
                                 this.optimizeTrack( item.trackIdx, false );
                             } );
                         }
@@ -1818,8 +1798,7 @@ export class KeyFramesTimeline extends Timeline
                             for ( let i = 0; i < tracks.length; ++i )
                             {
                                 const t = tracks[i];
-                                m.add( ( t.groupId ? t.groupId : '' ) + '@' + t.id, () =>
-                                {
+                                m.add( ( t.groupId ? t.groupId : '' ) + '@' + t.id, () => {
                                     this.optimizeTrack( t.trackIdx, false );
                                 } );
                             }
@@ -1829,8 +1808,7 @@ export class KeyFramesTimeline extends Timeline
             };
         }
 
-        this.onShowContextMenu = ( e: any ) =>
-        {
+        this.onShowContextMenu = ( e: any ) => {
             e.preventDefault();
             e.stopPropagation();
 
@@ -1840,8 +1818,7 @@ export class KeyFramesTimeline extends Timeline
                 actions.push(
                     {
                         title: 'Copy',
-                        callback: () =>
-                        {
+                        callback: () => {
                             this.copySelectedContent();
                         }
                     }
@@ -1849,8 +1826,7 @@ export class KeyFramesTimeline extends Timeline
                 actions.push(
                     {
                         title: 'Delete',
-                        callback: () =>
-                        {
+                        callback: () => {
                             this.deleteSelectedContent();
                         }
                     }
@@ -1861,8 +1837,7 @@ export class KeyFramesTimeline extends Timeline
                     actions.push(
                         {
                             title: 'Paste Value',
-                            callback: () =>
-                            {
+                            callback: () => {
                                 this.pasteContentValue();
                             }
                         }
@@ -1874,8 +1849,7 @@ export class KeyFramesTimeline extends Timeline
                 actions.push(
                     {
                         title: 'Add Here',
-                        callback: () =>
-                        {
+                        callback: () => {
                             if ( !e.track ) return;
                             const values: any = new Float32Array( e.track.dim );
                             values.fill( 0 );
@@ -1886,8 +1860,7 @@ export class KeyFramesTimeline extends Timeline
                 actions.push(
                     {
                         title: 'Add',
-                        callback: () =>
-                        {
+                        callback: () => {
                             if ( !e.track ) return;
                             const values: any = new Float32Array( e.track.dim );
                             values.fill( 0 );
@@ -1902,8 +1875,7 @@ export class KeyFramesTimeline extends Timeline
                 actions.push(
                     {
                         title: 'Paste Here',
-                        callback: () =>
-                        {
+                        callback: () => {
                             this.pasteContent( this.xToTime( e.localX ) );
                         }
                     }
@@ -1911,16 +1883,14 @@ export class KeyFramesTimeline extends Timeline
                 actions.push(
                     {
                         title: 'Paste',
-                        callback: () =>
-                        {
+                        callback: () => {
                             this.pasteContent( this.currentTime );
                         }
                     }
                 );
             }
 
-            LX.addContextMenu( 'Options', e, ( m: any ) =>
-            {
+            LX.addContextMenu( 'Options', e, ( m: any ) => {
                 for ( let i = 0; i < actions.length; i++ )
                 {
                     m.add( actions[i].title, actions[i].callback );
@@ -1955,8 +1925,7 @@ export class KeyFramesTimeline extends Timeline
                         'name': 'Lock edition',
                         'icon': ( track.locked ? 'TimelineLock' : 'TimelineLockOpen' ),
                         'swap': ( track.locked ? 'TimelineLockOpen' : 'TimelineLock' ),
-                        'callback': ( node: any, swapValue: boolean, event: Event ) =>
-                        {
+                        'callback': ( node: any, swapValue: boolean, event: Event ) => {
                             this.setTrackLock( node.trackData.trackIdx, !node.trackData.locked, false, false ); // do not update left panel
                         }
                     } ] } );
@@ -2113,8 +2082,7 @@ export class KeyFramesTimeline extends Timeline
             if ( animation.tracksPerGroup )
             {
                 // ungroup all tracks (just in case )
-                animationClip.tracks.forEach( ( v: any, i: number ) =>
-                {
+                animationClip.tracks.forEach( ( v: any, i: number ) => {
                     v.groupId = null;
                     v.groupTrackIdx = -1;
                 } );
@@ -2222,8 +2190,7 @@ export class KeyFramesTimeline extends Timeline
         if ( tracksPerGroup[groupId] )
         {
             // if group exists, ungroup tracks.
-            tracksPerGroup[groupId].forEach( ( t: any ) =>
-            {
+            tracksPerGroup[groupId].forEach( ( t: any ) => {
                 t.groupId = null;
                 t.groupTrackIdx = -1;
             } );
@@ -2923,8 +2890,7 @@ export class KeyFramesTimeline extends Timeline
             return;
         }
 
-        let cmpFunction = ( v: number, p: number, n: number, t: number ) =>
-        {
+        let cmpFunction = ( v: number, p: number, n: number, t: number ) => {
             return Math.abs( v - p ) >= t || Math.abs( v - n ) >= t;
         };
         let lastSavedIndex = 0;
@@ -3264,8 +3230,7 @@ export class KeyFramesTimeline extends Timeline
                 const clipboardItem = this.animationClip.tracks[trackIdx];
 
                 // ensure all tracks are visible
-                const idx = this.selectedItems.findIndex( ( item ) =>
-                {
+                const idx = this.selectedItems.findIndex( ( item ) => {
                     if ( item.isTrack ) return ( item === clipboardItem );
                     return item === clipboardItem.groupId;
                 } );
@@ -3859,8 +3824,7 @@ export class ClipsTimeline extends Timeline
 
         this.setAnimationClip( this.animationClip );
 
-        this.onDblClick = ( e: any ) =>
-        {
+        this.onDblClick = ( e: any ) => {
             const track = e.track;
             const localX = e.localX;
 
@@ -3871,8 +3835,7 @@ export class ClipsTimeline extends Timeline
             }
         };
 
-        this.onShowContextMenu = ( e: any ) =>
-        {
+        this.onShowContextMenu = ( e: any ) => {
             e.preventDefault();
             e.stopPropagation();
 
@@ -3882,8 +3845,7 @@ export class ClipsTimeline extends Timeline
                 actions.push(
                     {
                         title: 'Copy',
-                        callback: () =>
-                        {
+                        callback: () => {
                             this.copySelectedContent();
                         }
                     }
@@ -3891,8 +3853,7 @@ export class ClipsTimeline extends Timeline
                 actions.push(
                     {
                         title: 'Delete',
-                        callback: () =>
-                        {
+                        callback: () => {
                             this.deleteSelectedContent();
                         }
                     }
@@ -3905,8 +3866,7 @@ export class ClipsTimeline extends Timeline
                     actions.push(
                         {
                             title: 'Paste',
-                            callback: () =>
-                            {
+                            callback: () => {
                                 this.pasteContent();
                             }
                         }
@@ -3914,8 +3874,7 @@ export class ClipsTimeline extends Timeline
                     actions.push(
                         {
                             title: 'Paste Here',
-                            callback: () =>
-                            {
+                            callback: () => {
                                 this.pasteContent( this.xToTime( e.localX ) );
                             }
                         }
@@ -3923,8 +3882,7 @@ export class ClipsTimeline extends Timeline
                 }
             }
 
-            LX.addContextMenu( 'Options', e, ( m: any ) =>
-            {
+            LX.addContextMenu( 'Options', e, ( m: any ) => {
                 for ( let i = 0; i < actions.length; i++ )
                 {
                     m.add( actions[i].title, actions[i].callback );
@@ -4789,8 +4747,7 @@ export class ClipsTimeline extends Timeline
         { // find first free track slot
             for ( let i = searchStartTrackIdx; i < this.animationClip.tracks.length; i++ )
             {
-                let clipInCurrentSlot = this.animationClip.tracks[i].clips.find( ( t: any ) =>
-                {
+                let clipInCurrentSlot = this.animationClip.tracks[i].clips.find( ( t: any ) => {
                     return LX.compareThresholdRange( newStart, clip.start + clip.duration, t.start,
                         t.start + t.duration );
                 } );
@@ -4884,8 +4841,7 @@ export class ClipsTimeline extends Timeline
                 currTrackIdx = baseTrackIdx;
 
                 while ( currTrackIdx >= tracks.length ) this.addNewTrack( null, false );
-                let clipsInCurrentSlot = tracks[baseTrackIdx].clips.find( ( t: any ) =>
-                {
+                let clipsInCurrentSlot = tracks[baseTrackIdx].clips.find( ( t: any ) => {
                     return LX.compareThresholdRange( clipStart, clipEnd, t.start, t.start + t.duration );
                 } );
 
@@ -4902,8 +4858,7 @@ export class ClipsTimeline extends Timeline
             else
             {
                 // check if it fits in current track
-                let clipsInCurrentSlot = tracks[currTrackIdx].clips.find( ( t: any ) =>
-                {
+                let clipsInCurrentSlot = tracks[currTrackIdx].clips.find( ( t: any ) => {
                     return LX.compareThresholdRange( clipStart, clipEnd, t.start, t.start + t.duration );
                 } );
 
@@ -4920,8 +4875,7 @@ export class ClipsTimeline extends Timeline
                 {
                     ++currTrackIdx;
                     if ( currTrackIdx >= tracks.length ) this.addNewTrack( null, false );
-                    clipsInCurrentSlot = tracks[currTrackIdx].clips.find( ( t: any ) =>
-                    {
+                    clipsInCurrentSlot = tracks[currTrackIdx].clips.find( ( t: any ) => {
                         return LX.compareThresholdRange( clipStart, clipEnd, t.start, t.start + t.duration );
                     } );
                 }

@@ -18,8 +18,7 @@ export class Dialog
     size: any[] = [];
     branchData: any;
 
-    close: () => void = () =>
-    {};
+    close: () => void = () => {};
 
     _oncreate: any;
 
@@ -45,8 +44,7 @@ export class Dialog
         root.dataset['modal'] = modal;
         LX.root.appendChild( root );
 
-        LX.doAsync( () =>
-        {
+        LX.doAsync( () => {
             modal ? root.showModal() : root.show();
         }, 10 );
 
@@ -64,8 +62,7 @@ export class Dialog
 
         if ( options.closable ?? true )
         {
-            this.close = () =>
-            {
+            this.close = () => {
                 if ( options.onBeforeClose )
                 {
                     options.onBeforeClose( this );
@@ -75,8 +72,7 @@ export class Dialog
                 {
                     root.close();
 
-                    LX.doAsync( () =>
-                    {
+                    LX.doAsync( () => {
                         that.panel.clear();
                         root.remove();
                     }, 150 );
@@ -91,8 +87,7 @@ export class Dialog
             closeButton.addEventListener( 'click', this.close );
 
             const dockButton = LX.makeIcon( 'Minus', { title: 'Dock', iconClass: 'ml-auto mr-2' } );
-            dockButton.addEventListener( 'click', () =>
-            {
+            dockButton.addEventListener( 'click', () => {
                 const data = this.branchData;
                 const panel = data.panel;
                 const panelChildCount = panel.root.childElementCount;

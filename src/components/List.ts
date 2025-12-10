@@ -17,13 +17,11 @@ export class List extends BaseComponent
     {
         super( ComponentType.LIST, name, value, options );
 
-        this.onGetValue = () =>
-        {
+        this.onGetValue = () => {
             return value;
         };
 
-        this.onSetValue = ( newValue, skipCallback, event ) =>
-        {
+        this.onSetValue = ( newValue, skipCallback, event ) => {
             listContainer.querySelectorAll( '.lexlistitem' ).forEach( e => e.classList.remove( 'selected' ) );
 
             let idx = null;
@@ -52,14 +50,12 @@ export class List extends BaseComponent
             }
         };
 
-        this.onResize = ( rect ) =>
-        {
+        this.onResize = ( rect ) => {
             const realNameWidth = this.root.domName?.style.width ?? '0px';
             listContainer.style.width = `calc( 100% - ${realNameWidth})`;
         };
 
-        this._updateValues = ( newValues ) =>
-        {
+        this._updateValues = ( newValues ) => {
             values = newValues;
             listContainer.innerHTML = '';
 
@@ -84,8 +80,7 @@ export class List extends BaseComponent
 
                 listElement.innerHTML += `<span>${itemValue}</span>`;
 
-                listElement.addEventListener( 'click', e =>
-                {
+                listElement.addEventListener( 'click', e => {
                     listContainer.querySelectorAll( '.lexlistitem' ).forEach( e => e.classList.remove( 'selected' ) );
                     listElement.classList.toggle( 'selected' );
                     value = itemValue;

@@ -140,8 +140,7 @@ export class Tabs
             this.thumb = mEl;
             this.root.appendChild( mEl );
 
-            const resizeObserver = new ResizeObserver( ( entries ) =>
-            {
+            const resizeObserver = new ResizeObserver( ( entries ) => {
                 const tabEl = this.thumb.item;
                 if ( !tabEl ) return;
                 var transition = this.thumb.style.transition;
@@ -167,8 +166,7 @@ export class Tabs
             }
 
             // Listen resize event on parent area
-            const resizeObserver = new ResizeObserver( ( entries ) =>
-            {
+            const resizeObserver = new ResizeObserver( ( entries ) => {
                 for ( const entry of entries )
                 {
                     const bb = entry.contentRect;
@@ -251,8 +249,7 @@ export class Tabs
             this.selected = name;
         }
 
-        tabEl.addEventListener( 'click', ( e: MouseEvent ) =>
-        {
+        tabEl.addEventListener( 'click', ( e: MouseEvent ) => {
             e.preventDefault();
             e.stopPropagation();
 
@@ -300,8 +297,7 @@ export class Tabs
             delete tabEl._forceSelect;
         } );
 
-        tabEl.addEventListener( 'contextmenu', ( e: any ) =>
-        {
+        tabEl.addEventListener( 'contextmenu', ( e: any ) => {
             e.preventDefault();
             e.stopPropagation();
 
@@ -313,16 +309,14 @@ export class Tabs
 
         if ( options.allowDelete ?? false )
         {
-            tabEl.addEventListener( 'mousedown', ( e: MouseEvent ) =>
-            {
+            tabEl.addEventListener( 'mousedown', ( e: MouseEvent ) => {
                 if ( e.button == LX.MOUSE_MIDDLE_CLICK )
                 {
                     e.preventDefault();
                 }
             } );
 
-            tabEl.addEventListener( 'mouseup', ( e: MouseEvent ) =>
-            {
+            tabEl.addEventListener( 'mouseup', ( e: MouseEvent ) => {
                 e.preventDefault();
                 e.stopPropagation();
                 if ( e.button == LX.MOUSE_MIDDLE_CLICK )
@@ -333,8 +327,7 @@ export class Tabs
         }
 
         tabEl.setAttribute( 'draggable', true );
-        tabEl.addEventListener( 'dragstart', ( e: any ) =>
-        {
+        tabEl.addEventListener( 'dragstart', ( e: any ) => {
             const sourceAsFit = !!this.thumb;
             if ( tabEl.parentElement.childNodes.length == ( sourceAsFit ? 2 : 1 ) )
             {
@@ -353,8 +346,7 @@ export class Tabs
         this.tabDOMs[name] = tabEl;
         this.tabs[name] = content;
 
-        setTimeout( () =>
-        {
+        setTimeout( () => {
             if ( options.onCreate )
             {
                 options.onCreate.call( this, this.area.root.getBoundingClientRect() );
