@@ -39,6 +39,8 @@
         "url": "https://github.com/jxarco/lexgui.js/issues"
     },
     "scripts": {
+        "format": "dprint fmt",
+        "format:check": "dprint check",
         "colors": "node generate-colors.js",
         "clean:css": "rimraf build/lexgui.css && rimraf build/lexgui.min.css",
         "clean": "rimraf build",
@@ -51,6 +53,7 @@
         "@rollup/plugin-alias": "^6.0.0",
         "@rollup/plugin-terser": "^0.4.4",
         "cssnano": "^7.1.2",
+        "dprint": "^0.50.2",
         "postcss": "^8.5.6",
         "rimraf": "^5.0.10",
         "rollup": "^4.53.2",

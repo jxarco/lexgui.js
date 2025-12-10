@@ -5,6 +5,9 @@
 AssetView:
 - Added CreateFolder implementation to the MoveItem dialog button.
 
+Use `dprint` to auto-format code.
+Improved Icons page using Pagination Component.
+
 ## 8.0.0 (master)
 
 From 8.0 (changed versioning to set `8` as the major version), the full library is written in TypeScript to facilitate integrations in newer frameworks (Builds are still available as a JS module with its extensions).
