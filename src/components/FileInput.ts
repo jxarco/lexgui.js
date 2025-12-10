@@ -55,7 +55,7 @@ export class FileInput extends BaseComponent
                 else if ( type === 'bin' ) reader.readAsBinaryString( files[0] );
                 else if ( type === 'url' ) reader.readAsDataURL( files[0] );
 
-                reader.onload = e => {
+                reader.onload = ( e ) => {
                     callback.call( this, e.target?.result, files[0] );
                 };
             }

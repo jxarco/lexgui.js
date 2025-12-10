@@ -360,7 +360,7 @@ export class CanvasMap2D
 
     findPoint( name: string )
     {
-        return this.points.find( p => p.name == name );
+        return this.points.find( ( p ) => p.name == name );
     }
 
     clear()

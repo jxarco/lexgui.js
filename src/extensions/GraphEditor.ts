@@ -657,7 +657,7 @@ export class GraphEditor
 
     unSelectAll( keepPropDialog: boolean = false )
     {
-        this._domNodes.querySelectorAll( '.lexgraphnode' ).forEach( v => v.classList.remove( 'selected' ) );
+        this._domNodes.querySelectorAll( '.lexgraphnode' ).forEach( ( v ) => v.classList.remove( 'selected' ) );
 
         this.selectedNodes.length = 0;
 
@@ -740,7 +740,7 @@ export class GraphEditor
             }
         } );
 
-        nodeContainer.addEventListener( 'contextmenu', e => {
+        nodeContainer.addEventListener( 'contextmenu', ( e ) => {
             e.preventDefault();
             e.stopPropagation();
             e.stopImmediatePropagation();
@@ -766,7 +766,7 @@ export class GraphEditor
             } );
         } );
 
-        nodeContainer.addEventListener( 'dblclick', e => {
+        nodeContainer.addEventListener( 'dblclick', ( e ) => {
             // Only for left click..
             if ( e.button != LX.MOUSE_LEFT_CLICK )
             {
@@ -936,7 +936,7 @@ export class GraphEditor
 
         node.size = new vec2( nodeContainer.offsetWidth, nodeContainer.offsetHeight );
 
-        node.resizeObserver = new ResizeObserver( entries => {
+        node.resizeObserver = new ResizeObserver( ( entries ) => {
             for ( const entry of entries )
             {
                 const bb = entry.contentRect;
@@ -1123,7 +1123,7 @@ export class GraphEditor
 
         if ( exclude )
         {
-            elements = elements.filter( v => v != exclude );
+            elements = elements.filter( ( v ) => v != exclude );
         }
 
         return elements;
@@ -1366,7 +1366,7 @@ export class GraphEditor
 
         // Delete from the graph data
 
-        const idx = this.currentGraph.nodes.findIndex( v => v.id === nodeId );
+        const idx = this.currentGraph.nodes.findIndex( ( v ) => v.id === nodeId );
         console.assert( idx >= 0 );
         this.currentGraph.nodes.splice( idx, 1 );
 
@@ -1448,7 +1448,7 @@ export class GraphEditor
 
         // Delete from the graph data
 
-        const idx = this.currentGraph.groups.findIndex( v => v.id === groupId );
+        const idx = this.currentGraph.groups.findIndex( ( v ) => v.id === groupId );
         console.assert( idx >= 0 );
         this.currentGraph.groups.splice( idx, 1 );
     }
@@ -2743,12 +2743,12 @@ export class GraphEditor
 
         // Dbl click to rename
 
-        groupTitle.addEventListener( 'mousedown', e => {
+        groupTitle.addEventListener( 'mousedown', ( e ) => {
             e.stopPropagation();
             e.stopImmediatePropagation();
         } );
 
-        groupTitle.addEventListener( 'focusout', e => {
+        groupTitle.addEventListener( 'focusout', ( e ) => {
             groupTitle.disabled = true;
             if ( !groupTitle.value.length )
             {
@@ -2756,7 +2756,7 @@ export class GraphEditor
             }
         } );
 
-        groupTitle.addEventListener( 'keyup', e => {
+        groupTitle.addEventListener( 'keyup', ( e ) => {
             if ( e.key == 'Enter' )
             {
                 groupTitle.blur();
@@ -2768,7 +2768,7 @@ export class GraphEditor
             }
         } );
 
-        groupDOM.addEventListener( 'dblclick', e => {
+        groupDOM.addEventListener( 'dblclick', ( e ) => {
             // Only for left click..
             if ( e.button != LX.MOUSE_LEFT_CLICK )
             {
@@ -2778,7 +2778,7 @@ export class GraphEditor
             groupTitle.focus();
         } );
 
-        groupDOM.addEventListener( 'contextmenu', e => {
+        groupDOM.addEventListener( 'contextmenu', ( e ) => {
             e.preventDefault();
             e.stopPropagation();
             e.stopImmediatePropagation();

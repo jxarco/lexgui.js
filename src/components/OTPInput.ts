@@ -90,7 +90,7 @@ export class OTPInput extends BaseComponent
 
                     slotDom.addEventListener( 'click', () => {
                         if ( this.disabled ) return;
-                        container.querySelectorAll( '.lexotpslot' ).forEach( s => s.classList.remove( 'active' ) );
+                        container.querySelectorAll( '.lexotpslot' ).forEach( ( s ) => s.classList.remove( 'active' ) );
                         const activeDom: any = container.querySelectorAll( '.lexotpslot' )[activeSlot];
                         activeDom.classList.add( 'active' );
                         activeDom.focus();
@@ -100,7 +100,9 @@ export class OTPInput extends BaseComponent
                         if ( this.disabled ) return;
                         LX.doAsync( () => {
                             if ( container.contains( document.activeElement ) ) return;
-                            container.querySelectorAll( '.lexotpslot' ).forEach( s => s.classList.remove( 'active' ) );
+                            container.querySelectorAll( '.lexotpslot' ).forEach( ( s ) =>
+                                s.classList.remove( 'active' )
+                            );
                         }, 10 );
                     } );
 

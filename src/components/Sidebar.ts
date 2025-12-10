@@ -92,7 +92,7 @@ export class Sidebar
             this.root.parentElement.ogWidth = this.root.parentElement.style.width;
             this.root.parentElement.style.transition = this.collapsed ? '' : 'width 0.25s ease-out';
 
-            this.resizeObserver = new ResizeObserver( entries => {
+            this.resizeObserver = new ResizeObserver( ( entries ) => {
                 for ( const entry of entries )
                 {
                     this.siblingArea?.setSize( [ 'calc(100% - ' + ( entry.contentRect.width ) + 'px )', null ] );
@@ -194,7 +194,7 @@ export class Sidebar
     {
         const header = document.createElement( 'div' );
 
-        header.addEventListener( 'click', e => {
+        header.addEventListener( 'click', ( e ) => {
             if ( this.collapsed )
             {
                 e.preventDefault();
@@ -252,7 +252,7 @@ export class Sidebar
     {
         const footer = document.createElement( 'div' );
 
-        footer.addEventListener( 'click', e => {
+        footer.addEventListener( 'click', ( e ) => {
             if ( options.onFooterPressed )
             {
                 options.onFooterPressed( e, footer );
@@ -402,7 +402,7 @@ export class Sidebar
             let found = null;
             list.forEach( ( o: any ) => {
                 const keys = Object.keys( o );
-                const key = keys.find( t => t == token );
+                const key = keys.find( ( t ) => t == token );
                 if ( key ) found = o[key];
             } );
 
@@ -439,7 +439,7 @@ export class Sidebar
     {
         let pKey = LX.getSupportedDOMName( name );
 
-        const entry = this.items.find( v => v.name === pKey );
+        const entry = this.items.find( ( v ) => v.name === pKey );
 
         if ( !entry )
         {

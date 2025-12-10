@@ -70,7 +70,7 @@ export class ComboButtons extends BaseComponent
                 buttonEl.setAttribute( 'disabled', 'true' );
             }
 
-            buttonEl.addEventListener( 'click', e => {
+            buttonEl.addEventListener( 'click', ( e ) => {
                 currentValue = [];
 
                 if ( shouldSelect )
@@ -81,12 +81,12 @@ export class ComboButtons extends BaseComponent
                     }
                     else
                     {
-                        container.querySelectorAll( 'button' ).forEach( s => s.classList.remove( 'selected' ) );
+                        container.querySelectorAll( 'button' ).forEach( ( s ) => s.classList.remove( 'selected' ) );
                         buttonEl.classList.add( 'selected' );
                     }
                 }
 
-                container.querySelectorAll( 'button' ).forEach( s => {
+                container.querySelectorAll( 'button' ).forEach( ( s ) => {
                     if ( s.classList.contains( 'selected' ) )
                     {
                         currentValue.push( s.dataset['value'] );
@@ -130,9 +130,9 @@ export class ComboButtons extends BaseComponent
         this.onSetValue = ( newValue, skipCallback, event ) => {
             if ( shouldSelect && ( event == undefined ) )
             {
-                container.querySelectorAll( 'button' ).forEach( s => s.classList.remove( 'selected' ) );
+                container.querySelectorAll( 'button' ).forEach( ( s ) => s.classList.remove( 'selected' ) );
 
-                container.querySelectorAll( 'button' ).forEach( s => {
+                container.querySelectorAll( 'button' ).forEach( ( s ) => {
                     if ( currentValue && currentValue.indexOf( s.dataset['value'] ) > -1 )
                     {
                         s.classList.add( 'selected' );
@@ -143,7 +143,7 @@ export class ComboButtons extends BaseComponent
             if ( !skipCallback && newValue.constructor != Array )
             {
                 const enabled = event;
-                const fn = values.filter( v => v.value == newValue )[0]?.callback;
+                const fn = values.filter( ( v ) => v.value == newValue )[0]?.callback;
                 this._trigger( new IEvent( name, shouldToggle ? [ newValue, enabled ] : newValue, null ), fn );
             }
         };

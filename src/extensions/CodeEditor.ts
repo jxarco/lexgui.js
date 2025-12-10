@@ -806,7 +806,7 @@ export class CodeEditor
 
         this.codeArea.root.classList.add( 'lexcodearea' );
 
-        const codeResizeObserver = new ResizeObserver( entries => {
+        const codeResizeObserver = new ResizeObserver( ( entries ) => {
             if ( !this.code )
             {
                 return;
@@ -997,7 +997,7 @@ export class CodeEditor
                     tooltip: true } );
 
                 const searchInput = box.querySelector( 'input' );
-                searchInput?.addEventListener( 'keyup', e => {
+                searchInput?.addEventListener( 'keyup', ( e ) => {
                     if ( e.key == 'Escape' ) this.hideSearchBox();
                     else if ( e.key == 'Enter' ) this.search( ( e.target as any ).value, !!e.shiftKey );
                 } );
@@ -1955,7 +1955,7 @@ export class CodeEditor
         {
             const fr = new FileReader();
             fr.readAsText( file );
-            fr.onload = e => {
+            fr.onload = ( e ) => {
                 const text = ( e.currentTarget as any ).result;
                 _innerAddTab( text, file.name );
             };
@@ -2499,7 +2499,7 @@ export class CodeEditor
             e.preventDefault();
             this.parentElement?.classList.remove( 'dragging' );
         } );
-        code.addEventListener( 'drop', e => {
+        code.addEventListener( 'drop', ( e ) => {
             e.preventDefault();
             code.parentElement?.classList.remove( 'dragging' );
             if ( e.dataTransfer?.files )
@@ -2733,7 +2733,7 @@ export class CodeEditor
         input.type = 'file';
         document.body.appendChild( input );
         input.click();
-        input.addEventListener( 'change', e => {
+        input.addEventListener( 'change', ( e ) => {
             const target = e.target as HTMLInputElement;
             if ( target.files && target.files[0] )
             {
@@ -4067,7 +4067,7 @@ export class CodeEditor
                 }
             }
 
-            contextTokens = contextTokens.reverse().filter( v => v.length && v != ' ' );
+            contextTokens = contextTokens.reverse().filter( ( v ) => v.length && v != ' ' );
 
             // Keywords that can open a *named* scope
             // TODO: Do this per language
@@ -4127,7 +4127,7 @@ export class CodeEditor
     _getLineSignatureFromTokens( tokens: string[] )
     {
         const structuralChars = new Set( [ '{', '}' ] );
-        const sign = tokens.filter( t => structuralChars.has( t ) );
+        const sign = tokens.filter( ( t ) => structuralChars.has( t ) );
         return sign.join( '_' );
     }
 
@@ -4148,7 +4148,7 @@ export class CodeEditor
 
         if ( lineOpensBlock )
         {
-            const r = tokens.filter( t => t.substr( 0, blockCommentsTokens[0].length ) == blockCommentsTokens[0] );
+            const r = tokens.filter( ( t ) => t.substr( 0, blockCommentsTokens[0].length ) == blockCommentsTokens[0] );
             if ( !r.length )
             {
                 this._buildingBlockComment = [ lineNumber - 1, 0 ];
@@ -4177,7 +4177,7 @@ export class CodeEditor
         }
         else if ( lineClosesBlock )
         {
-            const r = tokens.filter( t => t.substr( 0, blockCommentsTokens[1].length ) == blockCommentsTokens[1] );
+            const r = tokens.filter( ( t ) => t.substr( 0, blockCommentsTokens[1].length ) == blockCommentsTokens[1] );
             if ( !r.length )
             {
                 this._buildingBlockComment = [ section[0].x, section[1].x ];
@@ -4450,7 +4450,7 @@ export class CodeEditor
             return symbols;
         }
 
-        const nonWhiteSpaceTokens = tokens.filter( t => t.trim().length );
+        const nonWhiteSpaceTokens = tokens.filter( ( t ) => t.trim().length );
 
         for ( let i = 0; i < nonWhiteSpaceTokens.length; i++ )
         {

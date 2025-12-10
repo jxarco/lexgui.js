@@ -944,7 +944,7 @@ export class VideoEditor
 
         while ( this.video.duration === Infinity || isNaN( this.video.duration ) || !this.timebar )
         {
-            await new Promise( r => setTimeout( r, 1000 ) );
+            await new Promise( ( r ) => setTimeout( r, 1000 ) );
             this.video.currentTime = 10000000 * Math.random();
         }
 

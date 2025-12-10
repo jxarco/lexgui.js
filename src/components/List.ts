@@ -22,7 +22,7 @@ export class List extends BaseComponent
         };
 
         this.onSetValue = ( newValue, skipCallback, event ) => {
-            listContainer.querySelectorAll( '.lexlistitem' ).forEach( e => e.classList.remove( 'selected' ) );
+            listContainer.querySelectorAll( '.lexlistitem' ).forEach( ( e ) => e.classList.remove( 'selected' ) );
 
             let idx = null;
             for ( let i = 0; i < values.length; ++i )
@@ -80,8 +80,10 @@ export class List extends BaseComponent
 
                 listElement.innerHTML += `<span>${itemValue}</span>`;
 
-                listElement.addEventListener( 'click', e => {
-                    listContainer.querySelectorAll( '.lexlistitem' ).forEach( e => e.classList.remove( 'selected' ) );
+                listElement.addEventListener( 'click', ( e ) => {
+                    listContainer.querySelectorAll( '.lexlistitem' ).forEach( ( e ) =>
+                        e.classList.remove( 'selected' )
+                    );
                     listElement.classList.toggle( 'selected' );
                     value = itemValue;
                     this._trigger( new IEvent( name, itemValue, e ), callback );

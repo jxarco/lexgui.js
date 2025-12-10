@@ -47,7 +47,7 @@ export class TabSections extends BaseComponent
         this.root.appendChild( container );
 
         // Check at least 1 is selected
-        if ( tabs.findIndex( e => e.selected === true ) < 0 )
+        if ( tabs.findIndex( ( e ) => e.selected === true ) < 0 )
         {
             tabs[0].selected = true;
         }
@@ -69,14 +69,14 @@ export class TabSections extends BaseComponent
             infoContainer.toggleAttribute( 'hidden', !( tab.selected ?? false ) );
             container.appendChild( infoContainer );
 
-            tabEl.addEventListener( 'click', e => {
+            tabEl.addEventListener( 'click', ( e ) => {
                 // Change selected tab
-                tabContainer.querySelectorAll( '.lextab' ).forEach( e => {
+                tabContainer.querySelectorAll( '.lextab' ).forEach( ( e ) => {
                     e.classList.remove( 'selected' );
                 } );
                 tabEl.classList.add( 'selected' );
                 // Hide all tabs content
-                container.querySelectorAll( '.components' ).forEach( e => {
+                container.querySelectorAll( '.components' ).forEach( ( e ) => {
                     e.toggleAttribute( 'hidden', true );
                 } );
                 // Show tab content

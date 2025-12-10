@@ -613,7 +613,7 @@ export class Area
         */
         if ( !fixedSize && ( !rect.width || !rect.height ) )
         {
-            const observer = new ResizeObserver( entries => {
+            const observer = new ResizeObserver( ( entries ) => {
                 console.assert( entries.length == 1, 'AreaResizeObserver: more than one entry' );
 
                 const rect = entries[0].contentRect;
@@ -678,7 +678,7 @@ export class Area
         if ( auto && type == 'vertical' )
         {
             // Listen resize event on first area
-            this._autoVerticalResizeObserver = new ResizeObserver( entries => {
+            this._autoVerticalResizeObserver = new ResizeObserver( ( entries ) => {
                 for ( const entry of entries )
                 {
                     const size = LX.getComputedSize( entry.target );

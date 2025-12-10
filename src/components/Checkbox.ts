@@ -62,7 +62,7 @@ export class Checkbox extends BaseComponent
         valueName.innerHTML = options.label ?? 'On';
         container.appendChild( valueName );
 
-        checkbox.addEventListener( 'change', e => {
+        checkbox.addEventListener( 'change', ( e ) => {
             this.set( checkbox.checked, false, e );
         } );
 

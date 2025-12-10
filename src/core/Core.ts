@@ -124,7 +124,7 @@ LX.init = async function( options: any = {} )
     this.DEFAULT_SPLITBAR_SIZE = 4;
     this.OPEN_CONTEXTMENU_ENTRY = 'click';
 
-    this.componentResizeObserver = new ResizeObserver( entries => {
+    this.componentResizeObserver = new ResizeObserver( ( entries ) => {
         for ( const entry of entries )
         {
             const c = ( entry.target as any )?.jsInstance;

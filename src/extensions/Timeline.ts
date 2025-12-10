@@ -1785,7 +1785,7 @@ export class KeyFramesTimeline extends Timeline
                 }
 
                 LX.addContextMenu( 'Optimize', e, ( m: any ) => {
-                    this.selectedItems.forEach( item => {
+                    this.selectedItems.forEach( ( item ) => {
                         if ( item.isTrack )
                         {
                             m.add( ( item.groupId ? item.groupId : '' ) + '@' + item.id, () => {

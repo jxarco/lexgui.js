@@ -17,7 +17,7 @@ export class ContextMenu
     constructor( event: any, title: string, options: any = {} )
     {
         // Remove all context menus
-        document.body.querySelectorAll( '.lexcontextmenu' ).forEach( e => e.remove() );
+        document.body.querySelectorAll( '.lexcontextmenu' ).forEach( ( e ) => e.remove() );
 
         this.root = document.createElement( 'div' );
         this.root.className = 'lexcontextmenu';
@@ -161,7 +161,7 @@ export class ContextMenu
         }
 
         // Add callback
-        entry.addEventListener( 'click', e => {
+        entry.addEventListener( 'click', ( e ) => {
             e.stopPropagation();
             e.stopImmediatePropagation();
 
@@ -198,7 +198,7 @@ export class ContextMenu
 
         if ( LX.OPEN_CONTEXTMENU_ENTRY == 'mouseover' )
         {
-            entry.addEventListener( 'mouseover', e => {
+            entry.addEventListener( 'mouseover', ( e ) => {
                 if ( entry.dataset['built'] == 'true' ) return;
                 entry.dataset['built'] = 'true';
                 this._createSubmenu( o, k, entry, ++d );
@@ -240,7 +240,7 @@ export class ContextMenu
             let found = null;
             list.forEach( ( o: any ) => {
                 const keys = Object.keys( o );
-                const key = keys.find( t => t == token );
+                const key = keys.find( ( t ) => t == token );
                 if ( key ) found = o[key];
             } );
 

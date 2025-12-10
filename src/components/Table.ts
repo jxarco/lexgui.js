@@ -212,7 +212,7 @@ export class Table extends BaseComponent
                                         {
                                             delete this.activeCustomFilters[key];
                                         }
-                                        const activeFilters = Object.keys( this.activeCustomFilters ).filter( k =>
+                                        const activeFilters = Object.keys( this.activeCustomFilters ).filter( ( k ) =>
                                             this.activeCustomFilters[k] == f.name
                                         );
                                         const filterBadgesHtml = activeFilters.reduce( ( acc, key ) =>
@@ -542,7 +542,7 @@ export class Table extends BaseComponent
                     const fromRow: any = table.rows[rIdx];
                     fromRow.dY = 0;
                     fromRow.classList.remove( 'dragging' );
-                    Array.from( table.rows ).forEach( v => {
+                    Array.from( table.rows ).forEach( ( v ) => {
                         v.style.transform = ``;
                         v.style.transition = `none`;
                     } );
@@ -589,7 +589,7 @@ export class Table extends BaseComponent
                     rIdx = null;
 
                     LX.doAsync( () => {
-                        Array.from( table.rows ).forEach( v => {
+                        Array.from( table.rows ).forEach( ( v ) => {
                             v.style.transition = `transform 0.2s ease-in`;
                         } );
                     } );

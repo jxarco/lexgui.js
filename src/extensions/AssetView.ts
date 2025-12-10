@@ -446,7 +446,9 @@ export class AssetView
             {
                 if ( !e.shiftKey )
                 {
-                    that.content.querySelectorAll( '.lexassetitem' ).forEach( i => i.classList.remove( 'selected' ) );
+                    that.content.querySelectorAll( '.lexassetitem' ).forEach( ( i ) =>
+                        i.classList.remove( 'selected' )
+                    );
                 }
 
                 this.classList.add( 'selected' );
@@ -805,7 +807,7 @@ export class AssetView
 
                             if ( node.type !== 'folder' )
                             {
-                                this.content.querySelectorAll( '.lexassetitem' ).forEach( i =>
+                                this.content.querySelectorAll( '.lexassetitem' ).forEach( ( i ) =>
                                     i.classList.remove( 'selected' )
                                 );
                                 const dom = node.domEl;
@@ -976,7 +978,7 @@ export class AssetView
 
         this.content.addEventListener( 'click', function()
         {
-            this.querySelectorAll( '.lexassetitem' ).forEach( i => i.classList.remove( 'selected' ) );
+            this.querySelectorAll( '.lexassetitem' ).forEach( ( i ) => i.classList.remove( 'selected' ) );
         } );
 
         this.content.addEventListener( 'contextmenu', function( e )
@@ -1059,7 +1061,7 @@ export class AssetView
                 LX.request( { url: item.path, dataType: 'blob', success: ( f: File ) => {
                     item.metadata.bytesize = f.size;
                     fr.readAsDataURL( f );
-                    fr.onload = e => {
+                    fr.onload = ( e ) => {
                         const target = e.currentTarget as any;
                         item.src = target.result; // This is a base64 string...
                         item.metadata.path = item.path;
@@ -1169,11 +1171,11 @@ export class AssetView
         {
             const file = e.dataTransfer.files[i];
 
-            const result = this.currentData.find( e => e.id === file.name );
+            const result = this.currentData.find( ( e ) => e.id === file.name );
             if ( result ) continue;
 
             fr.readAsDataURL( file );
-            fr.onload = e => {
+            fr.onload = ( e ) => {
                 let ext = file.name.substring( file.name.lastIndexOf( '.' ) + 1 ).toLowerCase();
                 let type = null;
 
@@ -1482,7 +1484,7 @@ export class AssetView
             }
 
             bcContainer.innerHTML = '';
-            bcContainer.appendChild( LX.makeBreadcrumb( path.reverse().map( p => {
+            bcContainer.appendChild( LX.makeBreadcrumb( path.reverse().map( ( p ) => {
                 return { title: p };
             } ), {
                 maxItems: 4,

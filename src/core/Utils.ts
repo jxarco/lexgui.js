@@ -104,7 +104,7 @@ LX.toCamelCase = toCamelCase;
  */
 function toTitleCase( str: string )
 {
-    return str.replace( /-/g, ' ' ).toLowerCase().replace( /\b\w/g, char => char.toUpperCase() );
+    return str.replace( /-/g, ' ' ).toLowerCase().replace( /\b\w/g, ( char ) => char.toUpperCase() );
 }
 
 LX.toTitleCase = toTitleCase;
@@ -115,7 +115,7 @@ LX.toTitleCase = toTitleCase;
  */
 function toKebabCase( str: string )
 {
-    return str.replace( /[A-Z]/g, m => '-' + m.toLowerCase() );
+    return str.replace( /[A-Z]/g, ( m ) => '-' + m.toLowerCase() );
 }
 
 LX.toKebabCase = toKebabCase;
@@ -461,7 +461,7 @@ function hexToRgb( hex: string )
     // Expand shorthand form (#RGB or #RGBA)
     if ( hex.length === 3 || hex.length === 4 )
     {
-        hex = hex.split( '' ).map( c => c + c ).join( '' );
+        hex = hex.split( '' ).map( ( c ) => c + c ).join( '' );
     }
 
     const bigint = parseInt( hex, 16 );
@@ -503,7 +503,7 @@ function rgbToHex( rgb: any, scale = 255 )
 
     return (
         '#'
-        + rgbArray.map( c => {
+        + rgbArray.map( ( c ) => {
             c = Math.floor( c * scale );
             const hex = c.toString( 16 );
             return hex.length === 1 ? ( '0' + hex ) : hex;
@@ -1112,7 +1112,7 @@ function makeBreadcrumb( items: any[], options: any = {} )
     if ( eraseNum > 0 )
     {
         const erased = items.splice( 1, eraseNum + 1 );
-        const ellipsisItem = { title: '...', ellipsis: erased.map( v => v.title ).join( '/' ) };
+        const ellipsisItem = { title: '...', ellipsis: erased.map( ( v ) => v.title ).join( '/' ) };
         items.splice( 1, 0, ellipsisItem );
     }
 
@@ -1651,7 +1651,7 @@ function badge( text: string, className: string, options: any = {} )
         const arrowIcon = LX.makeIcon( 'ArrowUpRight', { svgClass: 'xs fg-contrast' } );
         arrowIcon.querySelector( 'svg' ).style.marginLeft = '-0.25rem';
         container.innerHTML += arrowIcon.innerHTML;
-        container.addEventListener( 'click', e => {
+        container.addEventListener( 'click', ( e ) => {
             e.preventDefault();
             e.stopPropagation();
             options.callback();
@@ -1882,7 +1882,7 @@ LX.getParentArea = getParentArea;
 function hasClass( el: any, list: string | string[] )
 {
     list = ( [] as string[] ).concat( list );
-    var r = list.filter( v => el.classList.contains( v ) );
+    var r = list.filter( ( v ) => el.classList.contains( v ) );
     return !!r.length;
 }
 

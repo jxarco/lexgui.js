@@ -10,6 +10,7 @@
         "useBraces": "whenNotSingleLine",
         "bracePosition": "nextLine",
         "arrowFunction.bracePosition": "sameLineUnlessHanging",
+        "arrowFunction.useParentheses": "force",
         "trailingCommas": "never",
         "preferHanging": true,
         "preferSingleLine": false,

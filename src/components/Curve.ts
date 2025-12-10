@@ -52,7 +52,7 @@ export class Curve extends BaseComponent
         container.appendChild( curveInstance.element );
         this.curveInstance = curveInstance;
 
-        const observer = new ResizeObserver( entries => {
+        const observer = new ResizeObserver( ( entries ) => {
             for ( const entry of entries )
             {
                 curveInstance.canvas.width = entry.contentRect.width;

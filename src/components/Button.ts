@@ -161,7 +161,7 @@ export class Button extends BaseComponent
                 else if ( options.fileInputType === 'buffer' ) reader.readAsArrayBuffer( files[0] );
                 else if ( options.fileInputType === 'bin' ) reader.readAsBinaryString( files[0] );
                 else if ( options.fileInputType === 'url' ) reader.readAsDataURL( files[0] );
-                reader.onload = e => {
+                reader.onload = ( e ) => {
                     callback.call( this, e.target?.result, files[0] );
                 };
             } );

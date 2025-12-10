@@ -73,7 +73,7 @@ export class Tags extends BaseComponent
             tagInput.placeholder = 'Add tag...';
             tagsContainer.appendChild( tagInput );
 
-            tagInput.onkeydown = e => {
+            tagInput.onkeydown = ( e ) => {
                 if ( e.key == ' ' || e.key == 'Enter' )
                 {
                     const val = tagInput.value.replace( /\s/g, '' );

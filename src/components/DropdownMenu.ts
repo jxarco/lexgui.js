@@ -213,7 +213,7 @@ export class DropdownMenu
             const kbd = LX.makeKbd( item.kbd );
             menuItem.appendChild( kbd );
 
-            document.addEventListener( 'keydown', e => {
+            document.addEventListener( 'keydown', ( e ) => {
                 if ( !this._trigger.ddm ) return;
                 e.preventDefault();
                 // Check if it's a letter or other key

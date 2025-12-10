@@ -428,7 +428,7 @@ export class Panel
         element.appendChild( searchIcon );
         element.appendChild( input );
 
-        input.addEventListener( 'input', e => {
+        input.addEventListener( 'input', ( e ) => {
             if ( options.callback )
             {
                 options.callback( input.value, e );
@@ -494,7 +494,7 @@ export class Panel
     {
         if ( name )
         {
-            return this.branches.find( b => b.name == name );
+            return this.branches.find( ( b ) => b.name == name );
         }
 
         return this._currentBranch;
