@@ -1,0 +1,53 @@
+<script type="module">
+    import { LX } from 'lexgui';
+
+    const content = document.getElementById('content');
+    const componentName = "Counter";
+
+    docMaker.header(componentName + ".", "h1", componentName.toLowerCase());
+    docMaker.paragraph(`Input inside a button to add and substract values.`, false, "fg-tertiary");
+
+    {
+        window.__addInteractiveCodeExample( content, componentName, panel => {
+            panel.addCounter("Number of GPUs", 8, (value, event) => {
+                console.log(value);
+            });
+        });
+    }
+
+    docMaker.header("Usage", "h2");
+    docMaker.paragraph( `Call ${docMaker.iCode("Panel.addCounter(name, value, callback, options)")} to add a ${ componentName } Component to your panel or
+    create it anywhere using ${docMaker.iCode(`new LX.${ componentName.replace( /\s/g, '' ) }`)} to append its root to any container.` );
+
+    docMaker.header("API Reference", "h2");
+
+    {
+        const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
+        const panel = area.addPanel();
+        content.appendChild( area.root );
+
+        panel.addTable( null, {
+            head: [ "Parameter", "Type", "Description", "Default" ],
+            body: [
+                ["name", "String", "Component name", "—"],
+                ["value", "String|Array", "Color value in hex (&quot;#fff&quot;) or Array[r, g, b]", `"#000000"`],
+                ["callback", "Function", "Function called when the color changes", "—"],
+                ["options", "Object", "Basic options for a component", "—"]
+            ].map( v => {
+                return [ docMaker.iCode( v[ 0 ], "table" ), docMaker.iCode( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? docMaker.iCode( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+        docMaker.lineBreak( panel.root );
+        panel.addTable( null, {
+            head: [ "Option", "Type", "Description", "Default" ],
+            body: [
+                ["disabled", "Boolean", "Make the component disabled", "false"],
+                ["step", "Number|String", "Step value", `1`],
+                ["min", "Number", "Min input value", "0"],
+                ["max", "Number", "Max input value", "100"],
+            ].map( v => {
+                return [ docMaker.iCode( v[ 0 ], "table" ), docMaker.iCode( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? docMaker.iCode( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+    }
+</script>

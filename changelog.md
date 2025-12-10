@@ -7,8 +7,9 @@ AssetView:
 
 New Component: Alert Dialog.
 Use `dprint` to auto-format code.
-Style improvements for Sheet, Number slider, and Range Components.
+Style improvements for Sheet, Number slider, Counter, and Range Components.
 Improved Icons page using Pagination Component.
+Added Counter Component docs.
 
 ## 8.0.0 (master)
 

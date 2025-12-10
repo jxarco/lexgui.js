@@ -1382,6 +1382,7 @@ a svg, svg path {
     color: var(--global-text-primary);
     line-height: 2;
     overflow: hidden;
+    transition: background-color 0.1s linear;
 }
 
 .lexinlinecomponents .lexcomponentname.float-center {
@@ -1473,18 +1474,21 @@ a svg, svg path {
     border-bottom: 1px solid #c1c1c1;
 }
 
-.lexcomponent input:not(.lexcheckbox, .lextoggle, .lexrangeslider) {
+.lexcomponent input {
     font-family: var(--global-font);
-    padding: var(--spacing-sm);
-    color: var(--global-text-primary);
-    --background-color: var(--global-color-secondary);
-    background-color: var(--background-color);
-    outline: none;
-    border-radius: 6px;
+    border-radius: 0.5rem;
     border: 1px solid var(--global-color-transparent);
     transition-property: color, background-color, border-color;
     transition-timing-function: ease-out;
     transition-duration: .15s;
+    outline: none;
+}
+
+.lexcomponent input:not(.lexcheckbox, .lextoggle, .lexrangeslider, .lexcounter) {
+    padding: var(--spacing-sm);
+    color: var(--global-text-primary);
+    --background-color: var(--global-color-secondary);
+    background-color: var(--background-color);
 }
 
 .lexcomponent input:not(.lexcheckbox, .lextoggle, .lexrangeslider, .outline):hover {
@@ -1791,11 +1795,15 @@ a svg, svg path {
     border-color: var(--border-color);
 }
 
-.lexbutton:hover:not(.outline, .bg-none) {
+.lexbutton.bg-none {
+    border-radius: unset;
+}
+
+.lexbutton:hover:not(.outline, .bg-none, :disabled) {
     background-color: color-mix(in srgb, var(--button-color), #000 9%) !important;
 }
 
-:root[data-theme="light"] .lexbutton:hover:not(.outline, .bg-none) {
+:root[data-theme="light"] .lexbutton:hover:not(.outline, .bg-none, :disabled) {
     background-color: color-mix(in srgb, var(--button-color), #fff 9%) !important;
 }
 
@@ -1810,12 +1818,19 @@ a svg, svg path {
 .lexbutton:active:not(.lexbutton.combo) {
     background-color: color-mix(in srgb, var(--button-color), #fff 4%);
 }
+
 :root[data-theme="light"] .lexbutton:active:not(.lexbutton.combo) {
     background-color: color-mix(in srgb, var(--button-color), #000 4%);
 }
 
-.lexbutton:disabled, .lexbutton:disabled a {
+.lexbutton:disabled, .lexbutton:disabled a, .lexbutton:disabled svg {
     color: var(--global-text-quaternary);
+}
+
+.lexbutton:disabled {
+    color: var(--global-text-quaternary);
+    background-color: color-mix(in srgb, var(--button-color), #000 4%) !important;
+    cursor: default;
 }
 
 .lexbutton.selected {
@@ -4038,34 +4053,6 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 .lextags .lextag a:hover {
     color: light-dark(var(--global-text-tertiary), var(--global-text-secondary));
     cursor: pointer;
-}
-
-/* Counter Component */
-
-.lexcounter {
-    display: flex;
-    place-content: center;
-}
-
-.lexcounterbox {
-    display: grid;
-    text-align: -webkit-center;
-    text-align: center;
-    margin-left: 16px;
-    margin-right: 16px;
-}
-
-.lexcounterbox .lexcountervalue {
-    width: 100%;
-    font-size: var(--global-font-size-xxl);
-    font-weight: 700;
-}
-
-.lexcounterbox .lexcounterlabel {
-    width: 100%;
-    margin-top: -18px;
-    font-size: var(--global-font-size-sm);
-    color: var(--global-text-secondary);
 }
 
 /* Table Component */

@@ -1194,7 +1194,6 @@ export class Panel
      * disabled: Make the component disabled [false]
      * min, max: Min and Max values
      * step: Step for adding/substracting
-     * label: Text to show below the counter
      */
 
     addCounter( name: string, value: number, callback: any, options: any = {} )

@@ -707,7 +707,7 @@
 
         panel.branch("Preferences", { icon: "Settings" });
         panel.addButton(null, "Show Notifications" + LX.badge("+99", "accent sm"));
-        panel.addCounter("Calories Counter ", 350, (v) => { console.log(v + " calories!") }, { label: "CALORIES/DAY", max: 500 });
+        panel.addCounter("Calories Counter / day ", 350, (v) => { console.log(v + " calories!") }, { max: 500 });
         panel.addButton("Colored Tiny Button", "Click here!", () => { }, { buttonClass: "primary xs" });
         panel.addButton("Small Outlined Button", "Click here!", () => { }, { buttonClass: "accent sm outline" });
         panel.addButton("A Classic Button", "Click here!", () => { }, { buttonClass: "md" });
