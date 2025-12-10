@@ -47,7 +47,6 @@
     }, { float: 'lt' });
 
     const dialogClosable = new LX.Dialog("Closable Dialog", p => {
-        p.branch("Canvas");
         p.addColor("Background", "#b7a9b1");
         p.addText("Text", "Dialog Lexgui.js @jxarco", null, { placeholder: "e.g. ColorPicker", icon: "Type" });
         p.addColor("Font Color", { r: 1, g: 0.1, b: 0.6 }, (value, event) => {
@@ -62,8 +61,7 @@
         p.addSelect("Best Tool", ["@Engines", "Godot", "Unity", "Unreal Engine", "@Apps", "Visual Studio", "Visual Studio Code"], "Unity", (value, event) => {
             console.log(value);
         }, {filter: true, emptyMsg: "No engines found.", placeholder: "Search engines..."});
-        p.merge();
-    }, { size: ["350px", null], closable: true });
+    }, { size: ["350px", null], position: ["100px", "500px"], closable: true });
 
     const draggablePocketDialog = new LX.PocketDialog("Draggable PocketDialog", p => {
         p.branch("Canvas");
@@ -83,6 +81,8 @@
         }, { min: 0, max: 1024 });
         p.merge();
     }, { size: ["350px", null], draggable: true });
+
+    const alertDialog = new LX.AlertDialog( "Are you absolutely sure?", "This action cannot be undone. This will permanently delete your account and remove your data from our servers." );
 
     // add canvas to left upper part
     let canvas = document.createElement('canvas');

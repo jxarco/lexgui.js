@@ -1,0 +1,51 @@
+<script type="module">
+
+    const content = document.getElementById('content');
+    const componentName = "AlertDialog";
+
+    docMaker.header(componentName + ".", "h1", componentName.toLowerCase());
+    docMaker.paragraph( `A modal dialog that interrupts the user with important content and expects a response.`, false, "fg-tertiary");
+
+    {
+        window.__addInteractiveCodeExample( content, componentName, panel => {
+            const area = new LX.Area( { className: "flex flex-col p-12 gap-1", skipAppend: true, height: "auto" } );
+            panel.attach( area );
+
+            const p = area.addPanel({ className: "flex justify-center" });
+            p.addButton( null, "Show Dialog", (value, event) => {
+                
+                const alertDialog = new LX.AlertDialog( "Are you absolutely sure?", "This action cannot be undone. This will permanently delete your account and remove your data from our servers." );
+                
+            }, { width: "fit-content", buttonClass: "border bg-primary" });
+        });
+    }
+
+    docMaker.header("Usage", "h2");
+
+    docMaker.paragraph( `When creating an ${ componentName }, its panel is automatically created and filled with a title, message, together with a Cancel and Continue Buttons, where each of them
+    can be configured using ${docMaker.iCode("options")} parameter.` );
+
+    docMaker.header("API Reference", "h2");
+
+    docMaker.paragraph( `The possible ${docMaker.iCode("options (Object)")} when creating an ${ componentName } are the following:` );
+
+    {
+        const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
+        const panel = area.addPanel();
+        content.appendChild( area.root );
+        panel.addTable( null, {
+            head: [ "Option", "Type", "Description", "Default" ],
+            body: [
+                ["id", "String", "DOM Id of the root element", "—"],
+                ["className", "String", "DOM Class added to the root element", "—"],
+                ["cancelText", "String", "Text to display in Cancel Button", `"Cancel"`],
+                ["continueText", "String", "Text to display in Continue Button", `"Continue"`],
+                ["position", "Array", "[x, y] representing left-top values relative to the main LX root area", "—"],
+                ["size", "Array", "[width, height] in css", "—"]
+            ].map( v => {
+                return [ docMaker.iCode( v[ 0 ], "table" ), docMaker.iCode( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? docMaker.iCode( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+    }
+
+</script>

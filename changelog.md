@@ -5,6 +5,7 @@
 AssetView:
 - Added CreateFolder implementation to the MoveItem dialog button.
 
+New Component: Alert Dialog.
 Use `dprint` to auto-format code.
 Improved Icons page using Pagination Component.
 

@@ -22,7 +22,7 @@ export class Dialog
 
     _oncreate: any;
 
-    constructor( title: string, callback: any, options: any = {} )
+    constructor( title?: string, callback?: any, options: any = {} )
     {
         if ( !callback )
         {

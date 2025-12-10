@@ -48,6 +48,7 @@ export * from './components/Toggle';
 export * from './components/Vector';
 
 // Composite Components
+export * from './components/AlertDialog';
 export * from './components/ContextMenu';
 export * from './components/Dialog';
 export * from './components/DropdownMenu';

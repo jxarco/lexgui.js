@@ -780,7 +780,7 @@ a svg, svg path {
     box-shadow: 0 2px 6px #101010bb;
     border-radius: 12px;
     z-index: 101;
-    background-color: var(--global-background-secondary);
+    background-color: var(--global-background);
 }
 
 .lexdialog:has(.lexselect) {
@@ -1277,7 +1277,7 @@ a svg, svg path {
 
 .lexpanel {
     margin: 0;
-    padding: var(--spacing-xs);
+    padding: var(--spacing-sm);
     overflow: hidden;
     overflow-y: scroll;
 }
