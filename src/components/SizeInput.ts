@@ -15,76 +15,78 @@ export class SizeInput extends BaseComponent
     {
         super( ComponentType.SIZE, name, value, options );
 
-        this.onGetValue = () => {
+        this.onGetValue = () =>
+        {
             const value = [];
-            for( let i = 0; i < this.root.dimensions.length; ++i )
+            for ( let i = 0; i < this.root.dimensions.length; ++i )
             {
-                value.push( this.root.dimensions[ i ].value() );
+                value.push( this.root.dimensions[i].value() );
             }
             return value;
         };
 
-        this.onSetValue = ( newValue, skipCallback, event ) => {
-            for( let i = 0; i < this.root.dimensions.length; ++i )
+        this.onSetValue = ( newValue, skipCallback, event ) =>
+        {
+            for ( let i = 0; i < this.root.dimensions.length; ++i )
             {
-                this.root.dimensions[ i ].set( newValue[ i ], skipCallback );
+                this.root.dimensions[i].set( newValue[i], skipCallback );
             }
         };
 
-        this.root.aspectRatio = ( value.length == 2 ? value[ 0 ] / value[ 1 ] : null );
+        this.root.aspectRatio = value.length == 2 ? value[0] / value[1] : null;
         this.root.dimensions = [];
 
-        for( let i = 0; i < value.length; ++i )
+        for ( let i = 0; i < value.length; ++i )
         {
             const p = new LX.Panel();
-            this.root.dimensions[ i ] = p.addNumber( null, value[ i ], ( v: number ) => {
-
+            this.root.dimensions[i] = p.addNumber( null, value[i], ( v: number ) =>
+            {
                 const value = this.value();
 
-                if( this.root.locked )
+                if ( this.root.locked )
                 {
-                    const ar = ( i == 0 ? 1.0 / this.root.aspectRatio : this.root.aspectRatio );
+                    const ar = i == 0 ? 1.0 / this.root.aspectRatio : this.root.aspectRatio;
                     const index = ( 1 + i ) % 2;
-                    value[ index ] = v * ar;
-                    this.root.dimensions[ index ].set( value[ index ], true );
+                    value[index] = v * ar;
+                    this.root.dimensions[index].set( value[index], true );
                 }
 
-                if( callback )
+                if ( callback )
                 {
                     callback( value );
                 }
+            }, { min: 0, disabled: options.disabled, precision: options.precision, className: 'flex-fill' } );
 
-            }, { min: 0, disabled: options.disabled, precision: options.precision, className: "flex-fill" } );
+            this.root.appendChild( this.root.dimensions[i].root );
 
-            this.root.appendChild( this.root.dimensions[ i ].root );
-
-            if( ( i + 1 ) != value.length )
+            if ( ( i + 1 ) != value.length )
             {
-                const xIcon = LX.makeIcon( "X", { svgClass: "fg-accent font-bold" } );
+                const xIcon = LX.makeIcon( 'X', { svgClass: 'fg-accent font-bold' } );
                 this.root.appendChild( xIcon );
             }
         }
 
-        if( options.units )
+        if ( options.units )
         {
             let unitSpan = document.createElement( 'span' );
-            unitSpan.className = "select-none fg-tertiary font-medium";
+            unitSpan.className = 'select-none fg-tertiary font-medium';
             unitSpan.innerText = options.units;
             this.root.appendChild( unitSpan );
         }
 
         // Lock aspect ratio
-        if( this.root.aspectRatio )
+        if ( this.root.aspectRatio )
         {
-            const lockerButton = new Button( null, "", ( swapValue: boolean ) => {
+            const lockerButton = new Button( null, '', ( swapValue: boolean ) =>
+            {
                 this.root.locked = swapValue;
-                if( swapValue )
+                if ( swapValue )
                 {
                     // Recompute ratio
                     const value = this.value();
-                    this.root.aspectRatio = value[ 0 ] / value[ 1 ];
+                    this.root.aspectRatio = value[0] / value[1];
                 }
-            }, { title: "Lock Aspect Ratio", icon: "LockOpen", swap: "Lock", buttonClass: "bg-none p-0" } );
+            }, { title: 'Lock Aspect Ratio', icon: 'LockOpen', swap: 'Lock', buttonClass: 'bg-none p-0' } );
             this.root.appendChild( lockerButton.root );
         }
     }

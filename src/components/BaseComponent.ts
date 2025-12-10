@@ -5,47 +5,47 @@ import { ContextMenu } from './ContextMenu';
 
 export enum ComponentType
 {
-    NONE         = 0,
-    TEXT         = 1,
-    TEXTAREA     = 2,
-    BUTTON       = 3,
-    SELECT       = 4,
-    CHECKBOX     = 5,
-    TOGGLE       = 6,
-    RADIO        = 7,
-    BUTTONS      = 8,
-    COLOR        = 9,
-    RANGE        = 10,
-    NUMBER       = 11,
-    TITLE        = 12,
-    VECTOR       = 13,
-    TREE         = 14,
-    PROGRESS     = 15,
-    FILE         = 16,
-    LAYERS       = 17,
-    ARRAY        = 18,
-    LIST         = 19,
-    TAGS         = 20,
-    CURVE        = 21,
-    CARD         = 22,
-    IMAGE        = 23,
-    CONTENT      = 24,
-    CUSTOM       = 25,
-    SEPARATOR    = 26,
-    KNOB         = 27,
-    SIZE         = 28,
-    OTP          = 29,
-    PAD          = 30,
-    FORM         = 31,
-    DIAL         = 32,
-    COUNTER      = 33,
-    TABLE        = 34,
-    TABS         = 35,
-    DATE         = 36,
-    MAP2D        = 37,
-    LABEL        = 39,
-    BLANK        = 40,
-    RATE         = 41,
+    NONE = 0,
+    TEXT = 1,
+    TEXTAREA = 2,
+    BUTTON = 3,
+    SELECT = 4,
+    CHECKBOX = 5,
+    TOGGLE = 6,
+    RADIO = 7,
+    BUTTONS = 8,
+    COLOR = 9,
+    RANGE = 10,
+    NUMBER = 11,
+    TITLE = 12,
+    VECTOR = 13,
+    TREE = 14,
+    PROGRESS = 15,
+    FILE = 16,
+    LAYERS = 17,
+    ARRAY = 18,
+    LIST = 19,
+    TAGS = 20,
+    CURVE = 21,
+    CARD = 22,
+    IMAGE = 23,
+    CONTENT = 24,
+    CUSTOM = 25,
+    SEPARATOR = 26,
+    KNOB = 27,
+    SIZE = 28,
+    OTP = 29,
+    PAD = 30,
+    FORM = 31,
+    DIAL = 32,
+    COUNTER = 33,
+    TABLE = 34,
+    TABS = 35,
+    DATE = 36,
+    MAP2D = 37,
+    LABEL = 39,
+    BLANK = 40,
+    RATE = 41
 }
 
 LX.ComponentType = ComponentType;
@@ -54,8 +54,8 @@ LX.ComponentType = ComponentType;
  * @class BaseComponent
  */
 
-export class BaseComponent {
-
+export class BaseComponent
+{
     type: ComponentType;
     name: string | null | undefined;
     customName?: string;
@@ -86,40 +86,41 @@ export class BaseComponent {
         this._initialValue = value;
 
         const root: any = document.createElement( 'div' );
-        root.className = "lexcomponent";
+        root.className = 'lexcomponent';
 
-        this.onResize = () => {};
+        this.onResize = () =>
+        {};
 
-        if( options.id )
+        if ( options.id )
         {
             root.id = options.id;
         }
 
-        if( options.title )
+        if ( options.title )
         {
             root.title = options.title;
         }
 
-        if( options.className )
+        if ( options.className )
         {
-            root.className += " " + options.className;
+            root.className += ' ' + options.className;
         }
 
-        if( type != ComponentType.TITLE )
+        if ( type != ComponentType.TITLE )
         {
-            if( options.width )
+            if ( options.width )
             {
                 root.style.width = root.style.minWidth = options.width;
             }
-            if( options.maxWidth )
+            if ( options.maxWidth )
             {
                 root.style.maxWidth = options.maxWidth;
             }
-            if( options.minWidth )
+            if ( options.minWidth )
             {
                 root.style.minWidth = options.minWidth;
             }
-            if( options.height )
+            if ( options.height )
             {
                 root.style.height = root.style.minHeight = options.height;
             }
@@ -127,16 +128,16 @@ export class BaseComponent {
             LX.componentResizeObserver.observe( root );
         }
 
-        if( name != undefined )
+        if ( name != undefined )
         {
-            if( !( options.hideName ?? false ) )
+            if ( !( options.hideName ?? false ) )
             {
                 let domName = document.createElement( 'div' );
-                domName.className = "lexcomponentname";
+                domName.className = 'lexcomponentname';
 
-                if( options.justifyName )
+                if ( options.justifyName )
                 {
-                    domName.classList.add( "float-" + options.justifyName );
+                    domName.classList.add( 'float-' + options.justifyName );
                 }
 
                 domName.innerHTML = name;
@@ -150,17 +151,19 @@ export class BaseComponent {
                 const that = this;
 
                 // Copy-paste info
-                domName.addEventListener('contextmenu', function( e ) {
+                domName.addEventListener( 'contextmenu', function( e )
+                {
                     e.preventDefault();
                     that.oncontextmenu( e );
-                });
+                } );
 
-                if( !( options.skipReset ?? false )  && ( value != null ) )
+                if ( !( options.skipReset ?? false ) && ( value != null ) )
                 {
-                    this._addResetProperty( domName, function( el: any, event: any ) {
+                    this._addResetProperty( domName, function( el: any, event: any )
+                    {
                         that.set( that._initialValue, false, event );
-                        el.style.display = "none"; // Og value, don't show it
-                    });
+                        el.style.display = 'none'; // Og value, don't show it
+                    } );
                 }
             }
         }
@@ -169,7 +172,7 @@ export class BaseComponent {
             options.hideName = true;
         }
 
-        if( options.signal )
+        if ( options.signal )
         {
             LX.addSignal( options.signal, this );
         }
@@ -187,22 +190,23 @@ export class BaseComponent {
 
     _addResetProperty( container: any, callback: any )
     {
-        const domEl = LX.makeIcon( "Undo2", { iconClass: "ml-0 mr-1 px-1", title: "Reset" } )
-        domEl.style.display = "none";
-        domEl.addEventListener( "click", callback.bind( domEl, domEl ) );
+        const domEl = LX.makeIcon( 'Undo2', { iconClass: 'ml-0 mr-1 px-1', title: 'Reset' } );
+        domEl.style.display = 'none';
+        domEl.addEventListener( 'click', callback.bind( domEl, domEl ) );
         container.appendChild( domEl );
         return domEl;
     }
 
     _canPaste()
     {
-        const clipboard = ( navigator.clipboard as any );
-        let pasteAllowed: boolean = this.type === ComponentType.CUSTOM ?
-            ( clipboard.customIdx !== undefined && this.customIdx == clipboard.customIdx ) : clipboard.type === this.type;
+        const clipboard = navigator.clipboard as any;
+        let pasteAllowed: boolean = this.type === ComponentType.CUSTOM
+            ? ( clipboard.customIdx !== undefined && this.customIdx == clipboard.customIdx )
+            : clipboard.type === this.type;
 
         pasteAllowed = pasteAllowed && ( this.disabled !== true );
 
-        if( this.onAllowPaste )
+        if ( this.onAllowPaste )
         {
             pasteAllowed = this.onAllowPaste( pasteAllowed );
         }
@@ -212,7 +216,7 @@ export class BaseComponent {
 
     _trigger( event: any, callback: any, scope: any = this )
     {
-        if( !callback )
+        if ( !callback )
         {
             return;
         }
@@ -222,7 +226,7 @@ export class BaseComponent {
 
     value()
     {
-        if( this.onGetValue )
+        if ( this.onGetValue )
         {
             return this.onGetValue();
         }
@@ -232,111 +236,153 @@ export class BaseComponent {
 
     set( value: any, skipCallback?: boolean, event?: any )
     {
-        if( this.onSetValue )
+        if ( this.onSetValue )
         {
-            let resetButton = this.root.querySelector( ".lexcomponentname .lexicon" );
-            if( resetButton )
+            let resetButton = this.root.querySelector( '.lexcomponentname .lexicon' );
+            if ( resetButton )
             {
-                resetButton.style.display = ( value != this.value() ? "block" : "none" );
+                resetButton.style.display = value != this.value() ? 'block' : 'none';
 
-                const equalInitial = value.constructor === Array ? (function arraysEqual( a, b ) {
-                    if( a === b ) return true;
-                    if( a == null || b == null ) return false;
-                    if( a.length !== b.length ) return false;
-                    for( var i = 0; i < a.length; ++i )
+                const equalInitial = value.constructor === Array
+                    ? ( function arraysEqual( a, b )
                     {
-                        if( a[ i ] !== b[ i ] ) return false;
-                    }
-                    return true;
-                })( value, this._initialValue ) : ( value == this._initialValue );
+                        if ( a === b ) return true;
+                        if ( a == null || b == null ) return false;
+                        if ( a.length !== b.length ) return false;
+                        for ( var i = 0; i < a.length; ++i )
+                        {
+                            if ( a[i] !== b[i] ) return false;
+                        }
+                        return true;
+                    } )( value, this._initialValue )
+                    : ( value == this._initialValue );
 
-                resetButton.style.display = ( !equalInitial ? "block" : "none" );
+                resetButton.style.display = !equalInitial ? 'block' : 'none';
             }
 
             return this.onSetValue( value, skipCallback ?? false, event );
         }
 
-        console.warn( `Can't set value of ${ this.typeName() }`);
+        console.warn( `Can't set value of ${this.typeName()}` );
     }
 
     oncontextmenu( e: any )
     {
-        if( BaseComponent.NO_CONTEXT_TYPES.includes( this.type ) )
+        if ( BaseComponent.NO_CONTEXT_TYPES.includes( this.type ) )
         {
             return;
         }
 
-        LX.addContextMenu( this.typeName(), e, ( c: ContextMenu ) => {
-            c.add("Copy", () => { this.copy() });
-            c.add("Paste", { disabled: !this._canPaste(), callback: () => { this.paste() } } );
-        });
+        LX.addContextMenu( this.typeName(), e, ( c: ContextMenu ) =>
+        {
+            c.add( 'Copy', () =>
+            {
+                this.copy();
+            } );
+            c.add( 'Paste', { disabled: !this._canPaste(), callback: () =>
+            {
+                this.paste();
+            } } );
+        } );
     }
 
     copy()
     {
-        const clipboard = ( navigator.clipboard as any );
+        const clipboard = navigator.clipboard as any;
         clipboard.type = this.type;
         clipboard.customIdx = this.customIdx;
         clipboard.data = this.value();
-        clipboard.writeText(clipboard.data );
+        clipboard.writeText( clipboard.data );
     }
 
     paste()
     {
-        if( !this._canPaste() )
+        if ( !this._canPaste() )
         {
             return;
         }
 
-        const clipboard = ( navigator.clipboard as any );
+        const clipboard = navigator.clipboard as any;
         this.set( clipboard.data );
     }
 
     typeName()
     {
-        switch( this.type )
+        switch ( this.type )
         {
-            case ComponentType.TEXT: return "Text";
-            case ComponentType.TEXTAREA: return "TextArea";
-            case ComponentType.BUTTON: return "Button";
-            case ComponentType.SELECT: return "Select";
-            case ComponentType.CHECKBOX: return "Checkbox";
-            case ComponentType.TOGGLE: return "Toggle";
-            case ComponentType.RADIO: return "Radio";
-            case ComponentType.COLOR: return "Color";
-            case ComponentType.RANGE: return "Range";
-            case ComponentType.NUMBER: return "Number";
-            case ComponentType.VECTOR: return "Vector";
-            case ComponentType.TREE: return "Tree";
-            case ComponentType.PROGRESS: return "Progress";
-            case ComponentType.FILE: return "File";
-            case ComponentType.LAYERS: return "Layers";
-            case ComponentType.ARRAY: return "Array";
-            case ComponentType.LIST: return "List";
-            case ComponentType.TAGS: return "Tags";
-            case ComponentType.CURVE: return "Curve";
-            case ComponentType.KNOB: return "Knob";
-            case ComponentType.SIZE: return "Size";
-            case ComponentType.PAD: return "Pad";
-            case ComponentType.FORM: return "Form";
-            case ComponentType.DIAL: return "Dial";
-            case ComponentType.COUNTER: return "Counter";
-            case ComponentType.TABLE: return "Table";
-            case ComponentType.TABS: return "Tabs";
-            case ComponentType.DATE: return "Date";
-            case ComponentType.MAP2D: return "Map2D";
-            case ComponentType.RATE: return "Rate";
-            case ComponentType.LABEL: return "Label";
-            case ComponentType.BLANK: return "Blank";
-            case ComponentType.CUSTOM: return this.customName;
+            case ComponentType.TEXT:
+                return 'Text';
+            case ComponentType.TEXTAREA:
+                return 'TextArea';
+            case ComponentType.BUTTON:
+                return 'Button';
+            case ComponentType.SELECT:
+                return 'Select';
+            case ComponentType.CHECKBOX:
+                return 'Checkbox';
+            case ComponentType.TOGGLE:
+                return 'Toggle';
+            case ComponentType.RADIO:
+                return 'Radio';
+            case ComponentType.COLOR:
+                return 'Color';
+            case ComponentType.RANGE:
+                return 'Range';
+            case ComponentType.NUMBER:
+                return 'Number';
+            case ComponentType.VECTOR:
+                return 'Vector';
+            case ComponentType.TREE:
+                return 'Tree';
+            case ComponentType.PROGRESS:
+                return 'Progress';
+            case ComponentType.FILE:
+                return 'File';
+            case ComponentType.LAYERS:
+                return 'Layers';
+            case ComponentType.ARRAY:
+                return 'Array';
+            case ComponentType.LIST:
+                return 'List';
+            case ComponentType.TAGS:
+                return 'Tags';
+            case ComponentType.CURVE:
+                return 'Curve';
+            case ComponentType.KNOB:
+                return 'Knob';
+            case ComponentType.SIZE:
+                return 'Size';
+            case ComponentType.PAD:
+                return 'Pad';
+            case ComponentType.FORM:
+                return 'Form';
+            case ComponentType.DIAL:
+                return 'Dial';
+            case ComponentType.COUNTER:
+                return 'Counter';
+            case ComponentType.TABLE:
+                return 'Table';
+            case ComponentType.TABS:
+                return 'Tabs';
+            case ComponentType.DATE:
+                return 'Date';
+            case ComponentType.MAP2D:
+                return 'Map2D';
+            case ComponentType.RATE:
+                return 'Rate';
+            case ComponentType.LABEL:
+                return 'Label';
+            case ComponentType.BLANK:
+                return 'Blank';
+            case ComponentType.CUSTOM:
+                return this.customName;
         }
 
-        console.error( `Unknown Component type: ${ this.type }` );
+        console.error( `Unknown Component type: ${this.type}` );
     }
 
     refresh( value?: any )
     {
-
     }
 }
 

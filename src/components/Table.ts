@@ -3,10 +3,10 @@
 import { LX } from './../core/Namespace';
 import { BaseComponent, ComponentType } from './BaseComponent';
 import { Button } from './Button';
-import { TextInput } from './TextInput';
-import { Popover } from './Popover';
 import { CalendarRange } from './CalendarRange';
 import { Pagination } from './Pagination';
+import { Popover } from './Popover';
+import { TextInput } from './TextInput';
 
 /**
  * @class Table
@@ -30,35 +30,48 @@ export class Table extends BaseComponent
     _showSelectedNumber: boolean;
 
     private _centered: any;
-    get centered(): any { return this._centered; }
-    set centered( v: any ) { this._setCentered( v ); }
+    get centered(): any
+    {
+        return this._centered;
+    }
+    set centered( v: any )
+    {
+        this._setCentered( v );
+    }
 
     private _rowsPerPage: number = -1;
-    get rowsPerPage(): any { return this._rowsPerPage; }
-    set rowsPerPage( v: any ) { this._setRowsPerPage( v ); }
+    get rowsPerPage(): any
+    {
+        return this._rowsPerPage;
+    }
+    set rowsPerPage( v: any )
+    {
+        this._setRowsPerPage( v );
+    }
 
     constructor( name: string, data: any, options: any = {} )
     {
-        if( !data )
+        if ( !data )
         {
-            throw( "Data is needed to create a table!" );
+            throw ( 'Data is needed to create a table!' );
         }
 
         super( ComponentType.TABLE, name, null, options );
 
-        this.onResize = ( rect ) => {
-            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
-            container.style.width = `calc( 100% - ${ realNameWidth })`;
+        this.onResize = ( rect ) =>
+        {
+            const realNameWidth = this.root.domName?.style.width ?? '0px';
+            container.style.width = `calc( 100% - ${realNameWidth})`;
         };
 
-        const container = document.createElement('div');
-        container.className = "lextable";
+        const container = document.createElement( 'div' );
+        container.className = 'lextable';
         this.root.appendChild( container );
 
         this._centered = options.centered ?? false;
-        if( this._centered === true )
+        if ( this._centered === true )
         {
-            container.classList.add( "centered" );
+            container.classList.add( 'centered' );
         }
 
         this.data = data;
@@ -73,16 +86,16 @@ export class Table extends BaseComponent
 
         data.head = data.head ?? [];
         data.body = data.body ?? [];
-        data.checkMap = { };
-        data.colVisibilityMap = { };
+        data.checkMap = {};
+        data.colVisibilityMap = {};
         data.head.forEach( ( colName: any, index: number ) =>
         {
             const idx = this._hiddenColumns.indexOf( colName );
             const visible = ( !this._toggleColumns ) || ( idx === -1 );
-            data.colVisibilityMap[ index ] = visible;
-        })
+            data.colVisibilityMap[index] = visible;
+        } );
 
-        if( options.pagination ?? false )
+        if ( options.pagination ?? false )
         {
             this._rowsPerPage = options.rowsPerPage ?? 12;
 
@@ -101,20 +114,20 @@ export class Table extends BaseComponent
         const getDate = ( text: string ): Date | null =>
         {
             // Match DD/MM/YYYY or DD-MM-YYYY
-            const m = text.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{2}|\d{4})$/);
-            if( !m ) return null;
+            const m = text.match( /^(\d{1,2})[\/-](\d{1,2})[\/-](\d{2}|\d{4})$/ );
+            if ( !m ) return null;
 
-            let day = Number( m[ 1 ] );
-            let month = Number( m[ 2 ] ) - 1; // JS months: 0-11
-            let year = Number( m[ 3 ] );
+            let day = Number( m[1] );
+            let month = Number( m[2] ) - 1; // JS months: 0-11
+            let year = Number( m[3] );
 
             // Convert YY → 20YY
-            if( year < 100 ) year += 2000;
+            if ( year < 100 ) year += 2000;
 
             const d = new Date( year, month, day );
 
             // Validate (to avoid things like 32/13/2025 becoming valid)
-            if( d.getFullYear() !== year || d.getMonth() !== month || d.getDate() !== day )
+            if ( d.getFullYear() !== year || d.getMonth() !== month || d.getDate() !== day )
             {
                 return null;
             }
@@ -124,57 +137,58 @@ export class Table extends BaseComponent
 
         const compareFn = ( idx: number, order: number, a: any, b: any ) =>
         {
-            const va = a[ idx ];
-            const vb = b[ idx ];
+            const va = a[idx];
+            const vb = b[idx];
 
             // Date sort
             const da = getDate( va );
             const db = getDate( vb );
-            if( da && db )
+            if ( da && db )
             {
-                if( da.getTime() < db.getTime() ) return -order;
-                if( da.getTime() > db.getTime() ) return order;
+                if ( da.getTime() < db.getTime() ) return -order;
+                if ( da.getTime() > db.getTime() ) return order;
                 return 0;
             }
 
             // Number sort
             const na = Number( va );
             const nb = Number( vb );
-            if( !isNaN( na ) && !isNaN( nb ) )
+            if ( !isNaN( na ) && !isNaN( nb ) )
             {
-                if( na < nb ) return -order;
-                if( na > nb ) return order;
+                if ( na < nb ) return -order;
+                if ( na > nb ) return order;
                 return 0;
             }
 
             // String sort
-            if( va < vb ) return -order;
-            else if( va > vb ) return order;
+            if ( va < vb ) return -order;
+            else if ( va > vb ) return order;
             return 0;
-        }
+        };
 
         const sortFn = ( idx: number, sign: number ) =>
         {
             data.body = data.body.sort( compareFn.bind( this, idx, sign ) );
             this.refresh();
-        }
+        };
 
         const that = this;
 
         // Append header
-        if( this.filter || this.customFilters || this._toggleColumns )
+        if ( this.filter || this.customFilters || this._toggleColumns )
         {
-            const headerContainer = LX.makeContainer( [ "100%", "auto" ], "flex flex-row mb-2" );
+            const headerContainer = LX.makeContainer( [ '100%', 'auto' ], 'flex flex-row mb-2' );
 
-            if( this.filter )
+            if ( this.filter )
             {
                 const filterOptions = LX.deepCopy( options );
-                filterOptions.placeholder = `Filter ${ this.filter }...`;
+                filterOptions.placeholder = `Filter ${this.filter}...`;
                 filterOptions.skipComponent = true;
-                filterOptions.trigger = "input";
-                filterOptions.inputClass = "outline";
+                filterOptions.trigger = 'input';
+                filterOptions.inputClass = 'outline';
 
-                let filter = new TextInput(null, this._currentFilter ?? "", ( v: string ) => {
+                let filter = new TextInput( null, this._currentFilter ?? '', ( v: string ) =>
+                {
                     this._currentFilter = v;
                     this.refresh();
                 }, filterOptions );
@@ -182,159 +196,203 @@ export class Table extends BaseComponent
                 headerContainer.appendChild( filter.root );
             }
 
-            if( this.customFilters !== null )
+            if ( this.customFilters !== null )
             {
-                const icon = LX.makeIcon( "CirclePlus", { svgClass: "sm" } );
-                const separatorHtml = `<div class="lexcontainer border-right self-center mx-1" style="width: 1px; height: 70%;"></div>`;
+                const icon = LX.makeIcon( 'CirclePlus', { svgClass: 'sm' } );
+                const separatorHtml =
+                    `<div class="lexcontainer border-right self-center mx-1" style="width: 1px; height: 70%;"></div>`;
 
-                for( let f of this.customFilters )
+                for ( let f of this.customFilters )
                 {
-                    f.component = new Button(null, icon.innerHTML + f.name, ( v: any ) => {
+                    f.component = new Button( null, icon.innerHTML + f.name, ( v: any ) =>
+                    {
+                        const spanName = f.component.root.querySelector( 'span' );
 
-                        const spanName = f.component.root.querySelector( "span" );
-
-                        if( f.options )
+                        if ( f.options )
                         {
-                            const menuOptions = f.options.map( ( colName: string, idx: number ) => {
+                            const menuOptions = f.options.map( ( colName: string, idx: number ) =>
+                            {
                                 const item = {
                                     name: colName,
-                                    checked:  !!this.activeCustomFilters[ colName ],
-                                    callback: ( key: string, v: boolean, dom: HTMLElement) => {
-                                        if( v ) { this.activeCustomFilters[ key ] = f.name; }
-                                        else {
-                                            delete this.activeCustomFilters[ key ];
+                                    checked: !!this.activeCustomFilters[colName],
+                                    callback: ( key: string, v: boolean, dom: HTMLElement ) =>
+                                    {
+                                        if ( v ) this.activeCustomFilters[key] = f.name;
+                                        else
+                                        {
+                                            delete this.activeCustomFilters[key];
                                         }
-                                        const activeFilters = Object.keys( this.activeCustomFilters ).filter(  k => this.activeCustomFilters[ k ] == f.name );
-                                        const filterBadgesHtml = activeFilters.reduce( ( acc, key ) => acc += LX.badge( key, "bg-tertiary fg-secondary text-sm border-0" ), "" );
-                                        spanName.innerHTML = icon.innerHTML + f.name + ( activeFilters.length ? separatorHtml : "" ) + filterBadgesHtml;
+                                        const activeFilters = Object.keys( this.activeCustomFilters ).filter( k =>
+                                            this.activeCustomFilters[k] == f.name
+                                        );
+                                        const filterBadgesHtml = activeFilters.reduce( ( acc, key ) =>
+                                            acc += LX.badge( key, 'bg-tertiary fg-secondary text-sm border-0' ), '' );
+                                        spanName.innerHTML = icon.innerHTML + f.name
+                                            + ( activeFilters.length ? separatorHtml : '' ) + filterBadgesHtml;
                                         this.refresh();
                                     }
-                                }
+                                };
                                 return item;
                             } );
-                            LX.addDropdownMenu( f.component.root, menuOptions, { side: "bottom", align: "start" });
+                            LX.addDropdownMenu( f.component.root, menuOptions, { side: 'bottom', align: 'start' } );
                         }
-                        else if( f.type == "range" )
+                        else if ( f.type == 'range' )
                         {
-                            console.assert( f.min != undefined && f.max != undefined, "Range filter needs min and max values!" );
-                            const container = LX.makeContainer( ["240px", "auto"], "text-md" );
+                            console.assert( f.min != undefined && f.max != undefined,
+                                'Range filter needs min and max values!' );
+                            const container = LX.makeContainer( [ '240px', 'auto' ], 'text-md' );
                             const panel: any = new LX.Panel();
-                            LX.makeContainer( ["100%", "auto"], "px-3 p-2 pb-0 text-md font-medium", f.name, container );
+                            LX.makeContainer( [ '100%', 'auto' ], 'px-3 p-2 pb-0 text-md font-medium', f.name,
+                                container );
 
                             f.start = f.start ?? f.min;
                             f.end = f.end ?? f.max;
 
-                            panel.refresh = () => {
+                            panel.refresh = () =>
+                            {
                                 panel.clear();
-                                panel.sameLine( 2, "justify-center" );
-                                panel.addNumber( null, f.start, ( v: number ) => {
+                                panel.sameLine( 2, 'justify-center' );
+                                panel.addNumber( null, f.start, ( v: number ) =>
+                                {
                                     f.start = v;
-                                    const inUse = ( f.start != f.min || f.end != f.max );
-                                    spanName.innerHTML = icon.innerHTML + f.name + ( inUse ? separatorHtml + LX.badge( `${ f.start } - ${ f.end } ${ f.units ?? "" }`, "bg-tertiary fg-secondary text-sm border-0" ) : "" );
-                                    if( inUse ) this._resetCustomFiltersBtn?.root.classList.remove( "hidden" );
+                                    const inUse = f.start != f.min || f.end != f.max;
+                                    spanName.innerHTML = icon.innerHTML + f.name + ( inUse
+                                        ? separatorHtml
+                                            + LX.badge( `${f.start} - ${f.end} ${f.units ?? ''}`,
+                                                'bg-tertiary fg-secondary text-sm border-0' )
+                                        : '' );
+                                    if ( inUse )
+                                    {
+                                        this._resetCustomFiltersBtn?.root.classList.remove( 'hidden' );
+                                    }
                                     this.refresh();
                                 }, { skipSlider: true, min: f.min, max: f.max, step: f.step, units: f.units } );
-                                panel.addNumber( null, f.end, ( v: number ) => {
+                                panel.addNumber( null, f.end, ( v: number ) =>
+                                {
                                     f.end = v;
-                                    const inUse = ( f.start != f.min || f.end != f.max );
-                                    spanName.innerHTML = icon.innerHTML + f.name + ( inUse ? separatorHtml + LX.badge( `${ f.start } - ${ f.end } ${ f.units ?? "" }`, "bg-tertiary fg-secondary text-sm border-0" ) : "" );
-                                    if( inUse ) this._resetCustomFiltersBtn?.root.classList.remove( "hidden" );
+                                    const inUse = f.start != f.min || f.end != f.max;
+                                    spanName.innerHTML = icon.innerHTML + f.name
+                                        + ( inUse
+                                            ? separatorHtml
+                                                + LX.badge( `${f.start} - ${f.end} ${f.units ?? ''}`,
+                                                    'bg-tertiary fg-secondary text-sm border-0' )
+                                            : '' );
+                                    if ( inUse )
+                                    {
+                                        this._resetCustomFiltersBtn?.root.classList.remove( 'hidden' );
+                                    }
                                     this.refresh();
                                 }, { skipSlider: true, min: f.min, max: f.max, step: f.step, units: f.units } );
-                                panel.addButton( null, "Reset", () => {
+                                panel.addButton( null, 'Reset', () =>
+                                {
                                     f.start = f.min;
                                     f.end = f.max;
                                     spanName.innerHTML = icon.innerHTML + f.name;
                                     panel.refresh();
                                     this.refresh();
-                                }, { buttonClass: "contrast" } );
-                            }
+                                }, { buttonClass: 'contrast' } );
+                            };
                             panel.refresh();
                             container.appendChild( panel.root );
-                            new Popover( f.component.root, [ container ], { side: "bottom" } );
+                            new Popover( f.component.root, [ container ], { side: 'bottom' } );
                         }
-                        else if( f.type == "date" )
+                        else if ( f.type == 'date' )
                         {
-                            const container = LX.makeContainer( ["auto", "auto"], "text-md" );
+                            const container = LX.makeContainer( [ 'auto', 'auto' ], 'text-md' );
                             const panel: any = new LX.Panel();
-                            LX.makeContainer( ["100%", "auto"], "px-3 p-2 pb-0 text-md font-medium", f.name, container );
+                            LX.makeContainer( [ '100%', 'auto' ], 'px-3 p-2 pb-0 text-md font-medium', f.name,
+                                container );
 
-                            panel.refresh = () => {
+                            panel.refresh = () =>
+                            {
                                 panel.clear();
 
                                 // Generate default value once the filter is used
-                                if( !f.default )
+                                if ( !f.default )
                                 {
                                     const date = new Date();
-                                    const todayStringDate = `${ date.getDate() }/${ date.getMonth() + 1 }/${ date.getFullYear() }`;
+                                    const todayStringDate = `${date.getDate()}/${
+                                        date.getMonth() + 1
+                                    }/${date.getFullYear()}`;
                                     f.default = [ todayStringDate, todayStringDate ];
                                 }
 
                                 const calendar = new CalendarRange( f.value ?? f.default, {
-                                    onChange: ( dateRange: any ) => {
+                                    onChange: ( dateRange: any ) =>
+                                    {
                                         f.value = dateRange;
-                                        spanName.innerHTML = icon.innerHTML + f.name + ( separatorHtml + LX.badge( `${ calendar.getFullDate() }`, "bg-tertiary fg-secondary text-sm border-0" ) );
-                                        this._resetCustomFiltersBtn?.root.classList.remove( "hidden" );
+                                        spanName.innerHTML = icon.innerHTML + f.name
+                                            + ( separatorHtml
+                                                + LX.badge( `${calendar.getFullDate()}`,
+                                                    'bg-tertiary fg-secondary text-sm border-0' ) );
+                                        this._resetCustomFiltersBtn?.root.classList.remove( 'hidden' );
                                         this.refresh();
                                     }
-                                });
+                                } );
 
                                 panel.attach( calendar );
-                            }
+                            };
                             panel.refresh();
                             container.appendChild( panel.root );
-                            new Popover( f.component.root, [ container ], { side: "bottom" } );
+                            new Popover( f.component.root, [ container ], { side: 'bottom' } );
                         }
-
-                    }, { buttonClass: "px-2 primary dashed" } );
+                    }, { buttonClass: 'px-2 primary dashed' } );
                     headerContainer.appendChild( f.component.root );
                 }
 
-                this._resetCustomFiltersBtn = new Button(null, "resetButton", () => {
+                this._resetCustomFiltersBtn = new Button( null, 'resetButton', () =>
+                {
                     this.activeCustomFilters = {};
-                    this._resetCustomFiltersBtn?.root.classList.add( "hidden" );
-                    for( let f of this.customFilters ?? [] )
+                    this._resetCustomFiltersBtn?.root.classList.add( 'hidden' );
+                    for ( let f of this.customFilters ?? [] )
                     {
-                        f.component.root.querySelector( "span" ).innerHTML = ( icon.innerHTML + f.name );
-                        if( f.type == "range" )
+                        f.component.root.querySelector( 'span' ).innerHTML = icon.innerHTML + f.name;
+                        if ( f.type == 'range' )
                         {
                             f.start = f.min;
                             f.end = f.max;
                         }
-                        else if( f.type == "date" )
+                        else if ( f.type == 'date' )
                         {
                             delete f.value;
                         }
                     }
                     this.refresh();
-                }, { title: "Reset filters", tooltip: true, icon: "X" } );
+                }, { title: 'Reset filters', tooltip: true, icon: 'X' } );
                 headerContainer.appendChild( this._resetCustomFiltersBtn?.root );
-                this._resetCustomFiltersBtn?.root.classList.add( "hidden" );
+                this._resetCustomFiltersBtn?.root.classList.add( 'hidden' );
             }
 
-            if( this._toggleColumns )
+            if ( this._toggleColumns )
             {
-                const icon = LX.makeIcon( "Settings2" );
-                const toggleColumnsBtn = new Button( "toggleColumnsBtn", icon.innerHTML + "View", ( value: any, e: any ) => {
-                    const menuOptions = data.head.map( ( colName: string, idx: number ) => {
-                        const item: any = {
-                            name: colName,
-                            icon: "Check",
-                            callback: () => {
-                                data.colVisibilityMap[ idx ] = !data.colVisibilityMap[ idx ];
-                                const cells = table.querySelectorAll( `tr > *:nth-child(${idx + this.rowOffsetCount + 1})` );
-                                cells.forEach( ( cell: any ) => {
-                                    cell.style.display = ( cell.style.display === "none" ) ? "" : "none";
-                                } );
-                            }
-                        }
-                        if( !data.colVisibilityMap[ idx ] ) delete item.icon;
-                        return item;
-                    } );
-                    LX.addDropdownMenu( e.target, menuOptions, { side: "bottom", align: "end" });
-                }, { hideName: true } );
+                const icon = LX.makeIcon( 'Settings2' );
+                const toggleColumnsBtn = new Button( 'toggleColumnsBtn', icon.innerHTML + 'View',
+                    ( value: any, e: any ) =>
+                    {
+                        const menuOptions = data.head.map( ( colName: string, idx: number ) =>
+                        {
+                            const item: any = {
+                                name: colName,
+                                icon: 'Check',
+                                callback: () =>
+                                {
+                                    data.colVisibilityMap[idx] = !data.colVisibilityMap[idx];
+                                    const cells = table.querySelectorAll(
+                                        `tr > *:nth-child(${idx + this.rowOffsetCount + 1})`
+                                    );
+                                    cells.forEach( ( cell: any ) =>
+                                    {
+                                        cell.style.display = ( cell.style.display === 'none' ) ? '' : 'none';
+                                    } );
+                                }
+                            };
+                            if ( !data.colVisibilityMap[idx] ) delete item.icon;
+                            return item;
+                        } );
+                        LX.addDropdownMenu( e.target, menuOptions, { side: 'bottom', align: 'end' } );
+                    }, { hideName: true } );
                 headerContainer.appendChild( toggleColumnsBtn.root );
-                toggleColumnsBtn.root.style.marginLeft = "auto";
+                toggleColumnsBtn.root.style.marginLeft = 'auto';
             }
 
             container.appendChild( headerContainer );
@@ -344,140 +402,150 @@ export class Table extends BaseComponent
         LX.addClass( table, options.tableClass );
         container.appendChild( table );
 
-        this.refresh = () => {
+        this.refresh = () =>
+        {
+            this._currentFilter = this._currentFilter ?? '';
 
-            this._currentFilter = this._currentFilter ?? "";
-
-            table.innerHTML = "";
+            table.innerHTML = '';
 
             this.rowOffsetCount = 0;
 
             // Head
             {
                 const head = document.createElement( 'thead' );
-                head.className = "lextablehead";
+                head.className = 'lextablehead';
                 table.appendChild( head );
 
                 const hrow = document.createElement( 'tr' );
 
-                if( options.sortable ?? false )
+                if ( options.sortable ?? false )
                 {
                     const th = document.createElement( 'th' );
-                    th.style.width = "0px";
+                    th.style.width = '0px';
                     hrow.appendChild( th );
                     this.rowOffsetCount++;
                 }
 
-                if( options.selectable ?? false )
+                if ( options.selectable ?? false )
                 {
                     const th = document.createElement( 'th' );
-                    th.style.width = "0px";
+                    th.style.width = '0px';
                     const input = document.createElement( 'input' );
-                    input.type = "checkbox";
-                    input.className = "lexcheckbox accent";
-                    input.checked = data.checkMap[ ":root" ] ?? false;
+                    input.type = 'checkbox';
+                    input.className = 'lexcheckbox accent';
+                    input.checked = data.checkMap[':root'] ?? false;
                     th.appendChild( input );
 
-                    input.addEventListener( 'change', function() {
+                    input.addEventListener( 'change', function()
+                    {
+                        data.checkMap[':root'] = this.checked;
 
-                        data.checkMap[ ":root" ] = this.checked;
-
-                        const body: any = table.querySelector( "tbody" );
-                        for( const el of body.childNodes )
+                        const body: any = table.querySelector( 'tbody' );
+                        for ( const el of body.childNodes )
                         {
-                            const rowId = el.getAttribute( "rowId" );
-                            if( !rowId ) continue;
-                            data.checkMap[ rowId ] = this.checked;
+                            const rowId = el.getAttribute( 'rowId' );
+                            if ( !rowId ) continue;
+                            data.checkMap[rowId] = this.checked;
                             el.querySelector( "input[type='checkbox']" ).checked = this.checked;
                         }
 
                         const sRows = that.getSelectedRows();
-                        LX.emitSignal( "@rows_selected_changed", sRows.length );
-                    });
+                        LX.emitSignal( '@rows_selected_changed', sRows.length );
+                    } );
 
                     this.rowOffsetCount++;
                     hrow.appendChild( th );
                 }
 
-                for( const headData of data.head )
+                for ( const headData of data.head )
                 {
                     const th: any = document.createElement( 'th' );
-                    th.innerHTML = `<span>${ headData }</span>`;
-                    th.querySelector( "span" ).appendChild( LX.makeIcon( "MenuArrows", { svgClass: "sm" } ) );
+                    th.innerHTML = `<span>${headData}</span>`;
+                    th.querySelector( 'span' ).appendChild( LX.makeIcon( 'MenuArrows', { svgClass: 'sm' } ) );
 
                     const idx = data.head.indexOf( headData );
-                    if( this._centered?.indexOf && ( ( this._centered.indexOf( idx ) > -1 ) || ( this._centered.indexOf( headData ) > -1 ) ) )
+                    if ( this._centered?.indexOf
+                        && ( ( this._centered.indexOf( idx ) > -1 ) || ( this._centered.indexOf( headData ) > -1 ) ) )
                     {
-                        th.classList.add( "centered" );
+                        th.classList.add( 'centered' );
                     }
 
                     const menuOptions: any[] = [];
 
-                    if( options.columnActions )
+                    if ( options.columnActions )
                     {
-                        for( let action of options.columnActions )
+                        for ( let action of options.columnActions )
                         {
-                            if( !action.name )
+                            if ( !action.name )
                             {
-                                console.warn( "Invalid column action (missing name):", action );
+                                console.warn( 'Invalid column action (missing name):', action );
                                 continue;
                             }
 
-                            menuOptions.push( { name: action.name, icon: action.icon, className: action.className, callback: () => {
-                                const colRows = this.data.body.map( ( row: any[] ) => [ row[ idx ] ] );
-                                const mustRefresh = action.callback( colRows, table );
-                                if( mustRefresh )
+                            menuOptions.push( { name: action.name, icon: action.icon, className: action.className,
+                                callback: () =>
                                 {
-                                    this.refresh();
-                                }
-                            } } );
+                                    const colRows = this.data.body.map( ( row: any[] ) => [ row[idx] ] );
+                                    const mustRefresh = action.callback( colRows, table );
+                                    if ( mustRefresh )
+                                    {
+                                        this.refresh();
+                                    }
+                                } } );
                         }
                     }
 
-                    if( this._sortColumns )
+                    if ( this._sortColumns )
                     {
-                        if(  menuOptions.length > 0 )
+                        if ( menuOptions.length > 0 )
                         {
                             menuOptions.push( null );
                         }
 
                         menuOptions.push(
-                            { name: "Asc", icon: "ArrowUpZA", callback: sortFn.bind( this, idx, 1 ) },
-                            { name: "Desc", icon: "ArrowDownZA", callback: sortFn.bind( this, idx, -1 ) }
+                            { name: 'Asc', icon: 'ArrowUpZA', callback: sortFn.bind( this, idx, 1 ) },
+                            { name: 'Desc', icon: 'ArrowDownZA', callback: sortFn.bind( this, idx, -1 ) }
                         );
                     }
 
-                    if( this._toggleColumns )
+                    if ( this._toggleColumns )
                     {
-                        if(  menuOptions.length > 0 )
+                        if ( menuOptions.length > 0 )
                         {
                             menuOptions.push( null );
                         }
 
                         menuOptions.push( {
-                            name: "Hide", icon: "EyeOff", callback: () => {
-                                data.colVisibilityMap[ idx ] = false;
-                                const cells = table.querySelectorAll( `tr > *:nth-child(${idx + this.rowOffsetCount + 1})` );
-                                cells.forEach( ( c: any ) => {
-                                    c.style.display = ( c.style.display === "none" ) ? "" : "none";
+                            name: 'Hide',
+                            icon: 'EyeOff',
+                            callback: () =>
+                            {
+                                data.colVisibilityMap[idx] = false;
+                                const cells = table.querySelectorAll(
+                                    `tr > *:nth-child(${idx + this.rowOffsetCount + 1})`
+                                );
+                                cells.forEach( ( c: any ) =>
+                                {
+                                    c.style.display = ( c.style.display === 'none' ) ? '' : 'none';
                                 } );
                             }
                         } );
                     }
 
-                    th.addEventListener( 'click', ( e: MouseEvent ) => {
-                        if( menuOptions.length === 0 ) return;
-                        LX.addDropdownMenu( e.target, menuOptions, { side: "bottom", align: "start" });
-                    });
+                    th.addEventListener( 'click', ( e: MouseEvent ) =>
+                    {
+                        if ( menuOptions.length === 0 ) return;
+                        LX.addDropdownMenu( e.target, menuOptions, { side: 'bottom', align: 'start' } );
+                    } );
 
                     hrow.appendChild( th );
                 }
 
                 // Add empty header column
-                if( options.rowActions )
+                if ( options.rowActions )
                 {
                     const th = document.createElement( 'th' );
-                    th.className = "sm";
+                    th.className = 'sm';
                     hrow.appendChild( th );
                 }
 
@@ -487,174 +555,181 @@ export class Table extends BaseComponent
             // Body
             {
                 const body = document.createElement( 'tbody' );
-                body.className = "lextablebody";
+                body.className = 'lextablebody';
                 table.appendChild( body );
 
                 let rIdx: any = null;
                 let eventCatched: any = false;
                 let movePending: any = null;
 
-                document.addEventListener( 'mouseup', (e) => {
-                    if( rIdx === null ) return;
-                    document.removeEventListener( "mousemove", onMove );
-                    const fromRow: any = table.rows[ rIdx ];
+                document.addEventListener( 'mouseup', ( e ) =>
+                {
+                    if ( rIdx === null ) return;
+                    document.removeEventListener( 'mousemove', onMove );
+                    const fromRow: any = table.rows[rIdx];
                     fromRow.dY = 0;
-                    fromRow.classList.remove( "dragging" );
-                    Array.from( table.rows ).forEach( v => {
+                    fromRow.classList.remove( 'dragging' );
+                    Array.from( table.rows ).forEach( v =>
+                    {
                         v.style.transform = ``;
                         v.style.transition = `none`;
                     } );
                     LX.flushCss( fromRow );
 
-                    if( movePending )
+                    if ( movePending )
                     {
                         // Modify inner data first
                         // Origin row should go to the target row, and the rest should be moved up/down
                         const pageOffset = this._paginator ? ( this._paginator.page - 1 ) * this.rowsPerPage : 0;
                         const fromIdx = rIdx - 1 + pageOffset;
-                        const targetIdx = movePending[ 1 ] - 1 + pageOffset;
+                        const targetIdx = movePending[1] - 1 + pageOffset;
 
-                        LX.emitSignal( "@on_table_sort", { instance: this, fromIdx, targetIdx } );
+                        LX.emitSignal( '@on_table_sort', { instance: this, fromIdx, targetIdx } );
 
-                        const b = data.body[ fromIdx ];
+                        const b = data.body[fromIdx];
                         let targetOffset = 0;
 
-                        if( fromIdx == targetIdx ) return;
-                        if( fromIdx > targetIdx ) // Move up
-                        {
-                            for( let i = fromIdx; i > targetIdx; --i )
+                        if ( fromIdx == targetIdx ) return;
+                        if ( fromIdx > targetIdx )
+                        { // Move up
+                            for ( let i = fromIdx; i > targetIdx; --i )
                             {
-                                data.body[ i ] = data.body[ i - 1 ];
+                                data.body[i] = data.body[i - 1];
                             }
                         }
-                        else // Move down
+                        // Move down
+                        else
                         {
                             targetOffset = 1;
-                            for( let i = fromIdx; i < targetIdx; ++i )
+                            for ( let i = fromIdx; i < targetIdx; ++i )
                             {
-                                data.body[ i ] = data.body[ i + 1 ];
+                                data.body[i] = data.body[i + 1];
                             }
                         }
 
-                        data.body[ targetIdx ] = b;
+                        data.body[targetIdx] = b;
 
-                        const parent = movePending[ 0 ].parentNode;
-                        LX.insertChildAtIndex( parent, movePending[ 0 ], targetIdx + targetOffset - pageOffset );
+                        const parent = movePending[0].parentNode;
+                        LX.insertChildAtIndex( parent, movePending[0], targetIdx + targetOffset - pageOffset );
                         movePending = null;
                     }
 
                     rIdx = null;
 
-                    LX.doAsync( () => {
-                        Array.from( table.rows ).forEach( v => {
+                    LX.doAsync( () =>
+                    {
+                        Array.from( table.rows ).forEach( v =>
+                        {
                             v.style.transition = `transform 0.2s ease-in`;
                         } );
-                    } )
+                    } );
                 } );
 
-                let onMove = ( e: MouseEvent ) => {
-                    if( !rIdx ) return;
-                    const fromRow: any = table.rows[ rIdx ];
+                let onMove = ( e: MouseEvent ) =>
+                {
+                    if ( !rIdx ) return;
+                    const fromRow: any = table.rows[rIdx];
                     fromRow.dY = fromRow.dY ?? 0;
                     fromRow.dY += e.movementY;
-                    fromRow.style.transform = `translateY(${ fromRow.dY }px)`;
+                    fromRow.style.transform = `translateY(${fromRow.dY}px)`;
                 };
 
                 const filtered = [];
 
                 // Filter rows
-                for( let r = 0; r < data.body.length; ++r )
+                for ( let r = 0; r < data.body.length; ++r )
                 {
-                    const bodyData = data.body[ r ];
+                    const bodyData = data.body[r];
 
-                    if( this.filter )
+                    if ( this.filter )
                     {
                         const filterColIndex = data.head.indexOf( this.filter );
-                        if( filterColIndex > -1 )
+                        if ( filterColIndex > -1 )
                         {
-                            const validRowValue = LX.stripHTML( bodyData[ filterColIndex ] ).toLowerCase();
-                            if( !validRowValue.includes( this._currentFilter.toLowerCase() ) )
+                            const validRowValue = LX.stripHTML( bodyData[filterColIndex] ).toLowerCase();
+                            if ( !validRowValue.includes( this._currentFilter.toLowerCase() ) )
                             {
                                 continue;
                             }
                         }
                     }
 
-                    if( Object.keys( this.activeCustomFilters ).length )
+                    if ( Object.keys( this.activeCustomFilters ).length )
                     {
                         let acfMap: Record<string, boolean> = {};
 
-                        this._resetCustomFiltersBtn?.root.classList.remove( "hidden" );
+                        this._resetCustomFiltersBtn?.root.classList.remove( 'hidden' );
 
-                        for( let acfValue in this.activeCustomFilters )
+                        for ( let acfValue in this.activeCustomFilters )
                         {
-                            const acfName = this.activeCustomFilters[ acfValue ];
-                            acfMap[ acfName ] = acfMap[ acfName ] ?? false;
+                            const acfName = this.activeCustomFilters[acfValue];
+                            acfMap[acfName] = acfMap[acfName] ?? false;
 
                             const filterColIndex = data.head.indexOf( acfName );
-                            if( filterColIndex > -1 )
+                            if ( filterColIndex > -1 )
                             {
-                                const cellValue = bodyData[ filterColIndex ];
+                                const cellValue = bodyData[filterColIndex];
                                 const strippedValue = LX.stripTags( cellValue ) ?? cellValue;
-                                acfMap[ acfName ] = acfMap[ acfName ] || ( strippedValue === acfValue );
+                                acfMap[acfName] = acfMap[acfName] || ( strippedValue === acfValue );
                             }
                         }
 
                         const show = Object.values( acfMap ).reduce<boolean>( ( acc, e ) => acc && e, true );
-                        if( !show )
+                        if ( !show )
                         {
                             continue;
                         }
                     }
 
                     // Check range/date filters
-                    if( this.customFilters )
+                    if ( this.customFilters )
                     {
                         let acfMap: Record<string, boolean> = {};
 
-                        for( let f of this.customFilters )
+                        for ( let f of this.customFilters )
                         {
                             const acfName = f.name;
 
-                            if( f.type == "range" )
+                            if ( f.type == 'range' )
                             {
-                                acfMap[ acfName ] = acfMap[ acfName ] ?? false;
+                                acfMap[acfName] = acfMap[acfName] ?? false;
 
                                 const filterColIndex = data.head.indexOf( acfName );
-                                if( filterColIndex > -1 )
+                                if ( filterColIndex > -1 )
                                 {
-                                    const validRowValue = parseFloat( bodyData[ filterColIndex ] );
+                                    const validRowValue = parseFloat( bodyData[filterColIndex] );
                                     const min = f.start ?? f.min;
                                     const max = f.end ?? f.max;
-                                    acfMap[ acfName ] = acfMap[ acfName ] || ( ( validRowValue >= min ) && ( validRowValue <= max ) );
+                                    acfMap[acfName] = acfMap[acfName]
+                                        || ( ( validRowValue >= min ) && ( validRowValue <= max ) );
                                 }
                             }
-                            else if( f.type == "date" )
+                            else if ( f.type == 'date' )
                             {
-                                acfMap[ acfName ] = acfMap[ acfName ] ?? false;
+                                acfMap[acfName] = acfMap[acfName] ?? false;
 
                                 const filterColIndex = data.head.indexOf( acfName );
-                                if( filterColIndex > -1 )
+                                if ( filterColIndex > -1 )
                                 {
-                                    if( !f.value )
+                                    if ( !f.value )
                                     {
-                                        acfMap[ acfName ] = true;
+                                        acfMap[acfName] = true;
                                         continue;
                                     }
 
                                     f.value = f.value ?? f.default;
 
-                                    const dateString = bodyData[ filterColIndex ];
+                                    const dateString = bodyData[filterColIndex];
                                     const date = LX.dateFromDateString( dateString );
-                                    const minDate = LX.dateFromDateString( f.value[ 0 ] );
-                                    const maxDate = LX.dateFromDateString( f.value[ 1 ] );
-                                    acfMap[ acfName ] = acfMap[ acfName ] || ( ( date >= minDate ) && ( date <= maxDate ) );
+                                    const minDate = LX.dateFromDateString( f.value[0] );
+                                    const maxDate = LX.dateFromDateString( f.value[1] );
+                                    acfMap[acfName] = acfMap[acfName] || ( ( date >= minDate ) && ( date <= maxDate ) );
                                 }
                             }
                         }
 
                         const show = Object.values( acfMap ).reduce<boolean>( ( acc, e ) => acc && e, true );
-                        if( !show )
+                        if ( !show )
                         {
                             continue;
                         }
@@ -663,7 +738,7 @@ export class Table extends BaseComponent
                     filtered.push( bodyData );
                 }
 
-                if( this._paginator )
+                if ( this._paginator )
                 {
                     this._paginator.setPages( this._getNumPages( filtered.length ) );
                 }
@@ -672,160 +747,177 @@ export class Table extends BaseComponent
                 const end = this._paginator ? Math.min( start + this.rowsPerPage, filtered.length ) : filtered.length;
 
                 // Render filtered rows
-                for( let r = start; r < end; ++r )
+                for ( let r = start; r < end; ++r )
                 {
-                    const bodyData = filtered[ r ];
+                    const bodyData = filtered[r];
 
                     const idx = this.data.body.indexOf( bodyData );
                     const row = document.createElement( 'tr' );
                     const rowId = this._makeRowId( bodyData );
-                    row.setAttribute( "rowId", rowId );
+                    row.setAttribute( 'rowId', rowId );
 
-                    if( options.sortable ?? false )
+                    if ( options.sortable ?? false )
                     {
                         const td = document.createElement( 'td' );
-                        td.style.width = "0px";
-                        const icon = LX.makeIcon( "GripVertical" );
+                        td.style.width = '0px';
+                        const icon = LX.makeIcon( 'GripVertical' );
                         td.appendChild( icon );
 
                         icon.draggable = true;
 
-                        icon.addEventListener("dragstart", ( e: DragEvent ) => {
+                        icon.addEventListener( 'dragstart', ( e: DragEvent ) =>
+                        {
                             e.preventDefault();
                             e.stopPropagation();
                             e.stopImmediatePropagation();
 
                             rIdx = row.rowIndex;
-                            row.classList.add( "dragging" );
+                            row.classList.add( 'dragging' );
 
-                            document.addEventListener( "mousemove", onMove );
+                            document.addEventListener( 'mousemove', onMove );
                         }, false );
 
-                        row.addEventListener("mouseenter", function( e: MouseEvent ) {
+                        row.addEventListener( 'mouseenter', function( e: MouseEvent )
+                        {
                             e.preventDefault();
 
-                            if( rIdx != null && ( this.rowIndex != rIdx ) && ( eventCatched != this.rowIndex ) )
+                            if ( rIdx != null && ( this.rowIndex != rIdx ) && ( eventCatched != this.rowIndex ) )
                             {
                                 eventCatched = this.rowIndex;
-                                const fromRow = table.rows[ rIdx ];
-                                const undo = ( this.style.transform != `` );
-                                if (this.rowIndex > rIdx) {
-                                    movePending = [ fromRow, undo ? (this.rowIndex-1) : this.rowIndex ];
+                                const fromRow = table.rows[rIdx];
+                                const undo = this.style.transform != ``;
+                                if ( this.rowIndex > rIdx )
+                                {
+                                    movePending = [ fromRow, undo ? ( this.rowIndex - 1 ) : this.rowIndex ];
                                     this.style.transform = undo ? `` : `translateY(-${this.offsetHeight}px)`;
-                                } else {
-                                    movePending = [ fromRow, undo ? (this.rowIndex+1) : (this.rowIndex) ];
+                                }
+                                else
+                                {
+                                    movePending = [ fromRow, undo ? ( this.rowIndex + 1 ) : ( this.rowIndex ) ];
                                     this.style.transform = undo ? `` : `translateY(${this.offsetHeight}px)`;
                                 }
-                                LX.doAsync( () => {
+                                LX.doAsync( () =>
+                                {
                                     eventCatched = false;
-                                } )
+                                } );
                             }
-                        });
+                        } );
 
                         row.appendChild( td );
                     }
 
-                    if( options.selectable ?? false )
+                    if ( options.selectable ?? false )
                     {
                         const td = document.createElement( 'td' );
                         const input = document.createElement( 'input' );
-                        input.type = "checkbox";
-                        input.className = "lexcheckbox accent";
-                        input.checked = data.checkMap[ rowId ];
+                        input.type = 'checkbox';
+                        input.className = 'lexcheckbox accent';
+                        input.checked = data.checkMap[rowId];
                         td.appendChild( input );
 
-                        input.addEventListener( 'change', function() {
-                            data.checkMap[ rowId ] = this.checked;
+                        input.addEventListener( 'change', function()
+                        {
+                            data.checkMap[rowId] = this.checked;
 
                             const headInput: any = table.querySelector( "thead input[type='checkbox']" );
-                            console.assert( headInput, "Header checkbox not found!" );
+                            console.assert( headInput, 'Header checkbox not found!' );
 
-                            if( !this.checked )
+                            if ( !this.checked )
                             {
-                                headInput.checked = data.checkMap[ ":root" ] = false;
+                                headInput.checked = data.checkMap[':root'] = false;
                             }
                             else
                             {
-                                const rowInputs = Array.from( table.querySelectorAll( "tbody input[type='checkbox']" ) );
-                                const uncheckedRowInputs = rowInputs.filter( ( i: any ) => { return !i.checked; } );
-                                if( !uncheckedRowInputs.length )
+                                const rowInputs = Array.from(
+                                    table.querySelectorAll( "tbody input[type='checkbox']" )
+                                );
+                                const uncheckedRowInputs = rowInputs.filter( ( i: any ) =>
                                 {
-                                    headInput.checked = data.checkMap[ ":root" ] = true;
+                                    return !i.checked;
+                                } );
+                                if ( !uncheckedRowInputs.length )
+                                {
+                                    headInput.checked = data.checkMap[':root'] = true;
                                 }
                             }
 
                             const sRows = that.getSelectedRows();
-                            LX.emitSignal( "@rows_selected_changed", sRows.length );
-                        });
+                            LX.emitSignal( '@rows_selected_changed', sRows.length );
+                        } );
 
                         row.appendChild( td );
                     }
 
-                    for( let colIdx = 0; colIdx < bodyData.length; ++colIdx )
+                    for ( let colIdx = 0; colIdx < bodyData.length; ++colIdx )
                     {
-                        const rowData = bodyData[ colIdx ];
+                        const rowData = bodyData[colIdx];
                         const td = document.createElement( 'td' );
-                        td.innerHTML = `${ rowData }`;
-                        const headData = data.head[ colIdx ];
-                        if( this._centered?.indexOf && ( ( this._centered.indexOf( colIdx ) > -1 ) || ( this._centered.indexOf( headData ) > -1 ) ) )
+                        td.innerHTML = `${rowData}`;
+                        const headData = data.head[colIdx];
+                        if ( this._centered?.indexOf
+                            && ( ( this._centered.indexOf( colIdx ) > -1 )
+                                || ( this._centered.indexOf( headData ) > -1 ) ) )
                         {
-                            td.classList.add( "centered" );
+                            td.classList.add( 'centered' );
                         }
 
                         row.appendChild( td );
                     }
 
-                    if( options.rowActions )
+                    if ( options.rowActions )
                     {
                         const td = document.createElement( 'td' );
-                        td.style.width = "0px";
+                        td.style.width = '0px';
 
                         const buttons = document.createElement( 'div' );
-                        buttons.className = "lextablebuttons";
+                        buttons.className = 'lextablebuttons';
                         td.appendChild( buttons );
 
-                        for( const action of options.rowActions )
+                        for ( const action of options.rowActions )
                         {
                             let button = null;
 
-                            if( action == "delete" )
+                            if ( action == 'delete' )
                             {
-                                button = LX.makeIcon( "Trash3", { title: "Delete Row" } );
+                                button = LX.makeIcon( 'Trash3', { title: 'Delete Row' } );
                                 button.addEventListener( 'click', () =>
                                 {
                                     data.body.splice( idx, 1 );
                                     this.refresh();
-                                });
+                                } );
                             }
-                            else if( action == "menu" )
+                            else if ( action == 'menu' )
                             {
-                                button = LX.makeIcon( "EllipsisVertical", { title: "Menu" } );
-                                button.addEventListener( 'click', function( e: MouseEvent ) {
-                                    if( !options.onMenuAction )
+                                button = LX.makeIcon( 'EllipsisVertical', { title: 'Menu' } );
+                                button.addEventListener( 'click', function( e: MouseEvent )
+                                {
+                                    if ( !options.onMenuAction )
                                     {
                                         return;
                                     }
 
                                     const menuOptions = options.onMenuAction( idx, data );
-                                    console.assert( menuOptions.length, "Add items to the Menu Action Dropdown!" );
+                                    console.assert( menuOptions.length, 'Add items to the Menu Action Dropdown!' );
 
-                                    LX.addDropdownMenu( e.target, menuOptions, { side: "bottom", align: "end" });
-                                });
+                                    LX.addDropdownMenu( e.target, menuOptions, { side: 'bottom', align: 'end' } );
+                                } );
                             }
-                            else // custom actions
+                            // custom actions
+                            else
                             {
                                 console.assert( action.constructor == Object );
                                 button = LX.makeIcon( action.icon, { title: action.title } );
 
-                                if( action.callback )
+                                if ( action.callback )
                                 {
-                                    button.addEventListener( 'click', ( e: MouseEvent ) => {
+                                    button.addEventListener( 'click', ( e: MouseEvent ) =>
+                                    {
                                         const mustRefresh = action.callback( idx, bodyData, table, e );
-                                        if( mustRefresh )
+                                        if ( mustRefresh )
                                         {
                                             this.refresh();
                                         }
-                                    });
+                                    } );
                                 }
                             }
 
@@ -839,59 +931,63 @@ export class Table extends BaseComponent
                     body.appendChild( row );
                 }
 
-                if( options.selectable )
+                if ( options.selectable )
                 {
                     const sRows = this.getSelectedRows();
-                    LX.emitSignal( "@rows_selected_changed", sRows.length );
+                    LX.emitSignal( '@rows_selected_changed', sRows.length );
                 }
 
-                if( body.childNodes.length == 0 )
+                if ( body.childNodes.length == 0 )
                 {
                     const row = document.createElement( 'tr' );
                     const td = document.createElement( 'td' );
-                    td.setAttribute( "colspan", data.head.length + this.rowOffsetCount + 1 ); // +1 for rowActions
-                    td.className = "empty-row";
-                    td.innerHTML = "No results.";
+                    td.setAttribute( 'colspan', data.head.length + this.rowOffsetCount + 1 ); // +1 for rowActions
+                    td.className = 'empty-row';
+                    td.innerHTML = 'No results.';
                     row.appendChild( td );
                     body.appendChild( row );
                 }
             }
 
-            for( const v in data.colVisibilityMap )
+            for ( const v in data.colVisibilityMap )
             {
                 const idx = parseInt( v );
-                if( !data.colVisibilityMap[ idx ] )
+                if ( !data.colVisibilityMap[idx] )
                 {
                     const cells = table.querySelectorAll( `tr > *:nth-child(${idx + this.rowOffsetCount + 1})` );
-                    cells.forEach( ( c: any ) => {
-                        c.style.display = ( c.style.display === "none" ) ? "" : "none";
+                    cells.forEach( ( c: any ) =>
+                    {
+                        c.style.display = ( c.style.display === 'none' ) ? '' : 'none';
                     } );
                 }
             }
-        }
+        };
 
         const showSelected = this._showSelectedNumber && options.selectable;
 
         // Make footer
-        if( showSelected || this._paginator )
+        if ( showSelected || this._paginator )
         {
-            const footerContainer = LX.makeContainer( [ "100%", "auto" ], "flex flex-row px-3 my-1 align-center", "", container );
+            const footerContainer = LX.makeContainer( [ '100%', 'auto' ], 'flex flex-row px-3 my-1 align-center', '',
+                container );
 
             // Show num selected rows
-            if( showSelected )
+            if ( showSelected )
             {
-                const selectedRowsLabelContainer = LX.makeContainer( [ "100%", "auto" ], "flex justify-start items-center fg-secondary", "0 row(s) selected.", footerContainer );
-                LX.addSignal( "@rows_selected_changed", ( target: HTMLElement, n: number ) =>
+                const selectedRowsLabelContainer = LX.makeContainer( [ '100%', 'auto' ],
+                    'flex justify-start items-center fg-secondary', '0 row(s) selected.', footerContainer );
+                LX.addSignal( '@rows_selected_changed', ( target: HTMLElement, n: number ) =>
                 {
-                    if( !this._showSelectedNumber ) return;
-                    selectedRowsLabelContainer.innerHTML = n === 0 ? "" : `${ n ?? 0 } row(s) selected.`;
-                });
+                    if ( !this._showSelectedNumber ) return;
+                    selectedRowsLabelContainer.innerHTML = n === 0 ? '' : `${n ?? 0} row(s) selected.`;
+                } );
             }
 
             // Pagination
-            if( this._paginator )
+            if ( this._paginator )
             {
-                const paginationContainer = LX.makeContainer( [ "100%", "auto" ], "flex justify-end", "", footerContainer );
+                const paginationContainer = LX.makeContainer( [ '100%', 'auto' ], 'flex justify-end', '',
+                    footerContainer );
                 paginationContainer.appendChild( this._paginator.root );
             }
         }
@@ -905,10 +1001,10 @@ export class Table extends BaseComponent
     {
         const selectedRows = [];
 
-        for( const row of this.data.body )
+        for ( const row of this.data.body )
         {
             const rowId = this._makeRowId( row );
-            if( this.data.checkMap[ rowId ] === true )
+            if ( this.data.checkMap[rowId] === true )
             {
                 selectedRows.push( row );
             }
@@ -929,7 +1025,7 @@ export class Table extends BaseComponent
 
     _getNumPages( total?: number )
     {
-        if( this.rowsPerPage === -1 ) return 1;
+        if ( this.rowsPerPage === -1 ) return 1;
         total = total ?? this.data.body?.length;
         return Math.ceil( ( total ?? 0 ) / this.rowsPerPage );
     }
@@ -942,10 +1038,10 @@ export class Table extends BaseComponent
 
     _setCentered( v: any )
     {
-        if( v.constructor == Boolean )
+        if ( v.constructor == Boolean )
         {
-            const container = this.root.querySelector( ".lextable" );
-            container.classList.toggle( "centered", v );
+            const container = this.root.querySelector( '.lextable' );
+            container.classList.toggle( 'centered', v );
         }
         else
         {

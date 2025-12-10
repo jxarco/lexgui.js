@@ -2,35 +2,36 @@
 
 import { LX } from './../core/Namespace';
 
-export class Skeleton {
-
+export class Skeleton
+{
     root: any;
 
-    constructor( elements: any[] ) {
+    constructor( elements: any[] )
+    {
+        this.root = LX.makeContainer( [ 'auto', 'auto' ], 'flex flex-row lexskeleton' );
 
-        this.root = LX.makeContainer( [ "auto", "auto" ], "flex flex-row lexskeleton" );
-
-        if( elements.constructor === String )
+        if ( elements.constructor === String )
         {
             this.root.innerHTML = elements;
         }
         else
         {
             // Force array
-            elements = [].concat( ( elements as any ) );
+            elements = [].concat( elements as any );
 
-            for( let e of elements )
+            for ( let e of elements )
             {
                 this.root.appendChild( e );
             }
         }
     }
 
-    destroy() {
+    destroy()
+    {
+        this.root.dataset['closed'] = true;
 
-        this.root.dataset[ "closed" ] = true;
-
-        LX.doAsync( () => {
+        LX.doAsync( () =>
+        {
             this.root.remove();
             this.root = null;
         }, 200 );

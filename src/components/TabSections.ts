@@ -19,14 +19,14 @@ export class TabSections extends BaseComponent
 
         super( ComponentType.TABS, name, null, options );
 
-        if( tabs.constructor != Array )
+        if ( tabs.constructor != Array )
         {
-            throw( "Param @tabs must be an Array!" );
+            throw ( 'Param @tabs must be an Array!' );
         }
 
-        if( !tabs.length )
+        if ( !tabs.length )
         {
-            throw( "Tab list cannot be empty!" );
+            throw ( 'Tab list cannot be empty!' );
         }
 
         const vertical = options.vertical ?? true;
@@ -35,57 +35,66 @@ export class TabSections extends BaseComponent
         this.tabDOMs = {};
 
         let container = document.createElement( 'div' );
-        container.className = "lextabscontainer";
-        if( !vertical )
+        container.className = 'lextabscontainer';
+        if ( !vertical )
         {
-            container.className += " horizontal";
+            container.className += ' horizontal';
         }
 
-        let tabContainer = document.createElement( "div" );
-        tabContainer.className = "tabs";
+        let tabContainer = document.createElement( 'div' );
+        tabContainer.className = 'tabs';
         container.appendChild( tabContainer );
         this.root.appendChild( container );
 
         // Check at least 1 is selected
-        if( tabs.findIndex( e => e.selected === true ) < 0 )
+        if ( tabs.findIndex( e => e.selected === true ) < 0 )
         {
-            tabs[ 0 ].selected = true;
+            tabs[0].selected = true;
         }
 
-        for( let tab of tabs )
+        for ( let tab of tabs )
         {
             console.assert( tab.name );
-            let tabEl = document.createElement( "div" );
-            tabEl.className = "lextab " + ( ( tab.selected ?? false ) ? "selected" : "" );
-            tabEl.innerHTML = ( showNames ? tab.name : "" );
-            tabEl.appendChild( LX.makeIcon( tab.icon ?? "Hash", { title: tab.name, iconClass: tab.iconClass, svgClass: tab.svgClass } ) );
-            this.tabDOMs[ tab.name ] = tabEl;
+            let tabEl = document.createElement( 'div' );
+            tabEl.className = 'lextab ' + ( ( tab.selected ?? false ) ? 'selected' : '' );
+            tabEl.innerHTML = showNames ? tab.name : '';
+            tabEl.appendChild(
+                LX.makeIcon( tab.icon ?? 'Hash', { title: tab.name, iconClass: tab.iconClass, svgClass: tab.svgClass } )
+            );
+            this.tabDOMs[tab.name] = tabEl;
 
-            let infoContainer = document.createElement( "div" );
+            let infoContainer = document.createElement( 'div' );
             infoContainer.id = tab.name.replace( /\s/g, '' );
-            infoContainer.className = "components";
-            infoContainer.toggleAttribute( "hidden", !( tab.selected ?? false ) );
+            infoContainer.className = 'components';
+            infoContainer.toggleAttribute( 'hidden', !( tab.selected ?? false ) );
             container.appendChild( infoContainer );
 
-            tabEl.addEventListener( "click", e => {
+            tabEl.addEventListener( 'click', e =>
+            {
                 // Change selected tab
-                tabContainer.querySelectorAll( ".lextab" ).forEach( e => { e.classList.remove( "selected" ); } );
-                tabEl.classList.add( "selected" );
+                tabContainer.querySelectorAll( '.lextab' ).forEach( e =>
+                {
+                    e.classList.remove( 'selected' );
+                } );
+                tabEl.classList.add( 'selected' );
                 // Hide all tabs content
-                container.querySelectorAll(".components").forEach( e => { e.toggleAttribute( "hidden", true ); } );
+                container.querySelectorAll( '.components' ).forEach( e =>
+                {
+                    e.toggleAttribute( 'hidden', true );
+                } );
                 // Show tab content
                 const el = container.querySelector( '#' + infoContainer.id );
-                el?.toggleAttribute( "hidden" );
+                el?.toggleAttribute( 'hidden' );
 
-                if( tab.onSelect )
+                if ( tab.onSelect )
                 {
                     tab.onSelect( this, infoContainer );
                 }
-            });
+            } );
 
             tabContainer.appendChild( tabEl );
 
-            if( tab.onCreate )
+            if ( tab.onCreate )
             {
                 // Push to tab space
                 const creationPanel = new LX.Panel();
@@ -100,9 +109,9 @@ export class TabSections extends BaseComponent
 
     select( name: string )
     {
-        const tabEl = this.tabDOMs[ name ];
+        const tabEl = this.tabDOMs[name];
 
-        if( !tabEl )
+        if ( !tabEl )
         {
             return;
         }

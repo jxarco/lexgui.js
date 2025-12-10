@@ -9,8 +9,8 @@ import { Dialog } from './Dialog';
 
 export class PocketDialog extends Dialog
 {
-    static TOP      = 0;
-    static BOTTOM   = 1;
+    static TOP = 0;
+    static BOTTOM = 1;
 
     dockPosition: number = PocketDialog.TOP;
     minimized: boolean = false;
@@ -26,106 +26,110 @@ export class PocketDialog extends Dialog
 
         let that = this;
         // Update margins on branch title closes/opens
-        LX.addSignal("@on_branch_closed", this.panel, ( closed: boolean ) => {
-            if( this.dockPosition == PocketDialog.BOTTOM )
+        LX.addSignal( '@on_branch_closed', this.panel, ( closed: boolean ) =>
+        {
+            if ( this.dockPosition == PocketDialog.BOTTOM )
             {
-                this.root.style.top = `calc(100% - ${ this.root.offsetHeight + dragMargin }px)`;
+                this.root.style.top = `calc(100% - ${this.root.offsetHeight + dragMargin}px)`;
             }
-        });
+        } );
 
         // Custom
-        this.root.classList.add( "pocket" );
+        this.root.classList.add( 'pocket' );
 
-        this.root.style.translate = "none";
-        this.root.style.top = "0";
-        this.root.style.left = "unset";
+        this.root.style.translate = 'none';
+        this.root.style.top = '0';
+        this.root.style.left = 'unset';
 
-        if( !options.position )
+        if ( !options.position )
         {
-            this.root.style.right = dragMargin + "px";
-            this.root.style.top = dragMargin + "px";
+            this.root.style.right = dragMargin + 'px';
+            this.root.style.top = dragMargin + 'px';
         }
 
-        this.panel.root.style.width = "100%";
-        this.panel.root.style.height = "100%";
+        this.panel.root.style.width = '100%';
+        this.panel.root.style.height = '100%';
 
-        const innerTitle = ( this.title as any );
+        const innerTitle = this.title as any;
         innerTitle.tabIndex = -1;
-        innerTitle.addEventListener( "click", ( e: MouseEvent ) => {
-            if( innerTitle.eventCatched )
+        innerTitle.addEventListener( 'click', ( e: MouseEvent ) =>
+        {
+            if ( innerTitle.eventCatched )
             {
                 innerTitle.eventCatched = false;
                 return;
             }
 
             // Sized dialogs have to keep their size
-            if( this.size )
+            if ( this.size )
             {
-                if( !this.minimized ) this.root.style.height = "auto";
-                else this.root.style.height = this.size[ 1 ];
+                if ( !this.minimized ) this.root.style.height = 'auto';
+                else this.root.style.height = this.size[1];
             }
 
-            this.root.classList.toggle( "minimized" );
+            this.root.classList.toggle( 'minimized' );
             this.minimized = !this.minimized;
 
-            if( this.dockPosition == PocketDialog.BOTTOM )
+            if ( this.dockPosition == PocketDialog.BOTTOM )
             {
-                that.root.style.top = this.root.classList.contains( "minimized" ) ?
-                    `calc(100% - ${ that.title.offsetHeight + 6 }px)` : `calc(100% - ${ that.root.offsetHeight + dragMargin }px)`;
+                that.root.style.top = this.root.classList.contains( 'minimized' )
+                    ? `calc(100% - ${that.title.offsetHeight + 6}px)`
+                    : `calc(100% - ${that.root.offsetHeight + dragMargin}px)`;
             }
-        });
+        } );
 
-        if( !options.draggable )
+        if ( !options.draggable )
         {
             const float = options.float;
 
-            if( float )
+            if ( float )
             {
-                for( let i = 0; i < float.length; i++ )
+                for ( let i = 0; i < float.length; i++ )
                 {
-                    const t = float[ i ];
-                    switch( t )
+                    const t = float[i];
+                    switch ( t )
                     {
-                    case 'b':
-                        this.root.style.top = `calc(100% - ${ this.root.offsetHeight + dragMargin }px)`;
-                        break;
-                    case 'l':
-                        this.root.style.right = "unset";
-                        this.root.style.left = options.position ? options.position[ 1 ] : ( `${ dragMargin }px` );
-                        break;
+                        case 'b':
+                            this.root.style.top = `calc(100% - ${this.root.offsetHeight + dragMargin}px)`;
+                            break;
+                        case 'l':
+                            this.root.style.right = 'unset';
+                            this.root.style.left = options.position ? options.position[1] : ( `${dragMargin}px` );
+                            break;
                     }
                 }
             }
 
-            this.root.classList.add( "dockable" );
+            this.root.classList.add( 'dockable' );
 
-            innerTitle.addEventListener( "keydown", function( e: KeyboardEvent ) {
-                if( !e.ctrlKey )
+            innerTitle.addEventListener( 'keydown', function( e: KeyboardEvent )
+            {
+                if ( !e.ctrlKey )
                 {
                     return;
                 }
 
-                that.root.style.right = "unset";
+                that.root.style.right = 'unset';
 
-                if( e.key == 'ArrowLeft' )
+                if ( e.key == 'ArrowLeft' )
                 {
                     that.root.style.left = '0px';
                 }
-                else if( e.key == 'ArrowRight' )
+                else if ( e.key == 'ArrowRight' )
                 {
-                    that.root.style.left = `calc(100% - ${ that.root.offsetWidth + dragMargin }px)`;
+                    that.root.style.left = `calc(100% - ${that.root.offsetWidth + dragMargin}px)`;
                 }
-                else if( e.key == 'ArrowUp' )
+                else if ( e.key == 'ArrowUp' )
                 {
-                    that.root.style.top = "0px";
+                    that.root.style.top = '0px';
                     that.dockPosition = PocketDialog.TOP;
                 }
-                else if( e.key == 'ArrowDown' )
+                else if ( e.key == 'ArrowDown' )
                 {
-                    that.root.style.top = `calc(100% - ${ that.root.offsetHeight + dragMargin }px)`;
+                    that.root.style.top = `calc(100% - ${that.root.offsetHeight + dragMargin}px)`;
                     that.dockPosition = PocketDialog.BOTTOM;
                 }
-            });
+            } );
         }
     }
 }

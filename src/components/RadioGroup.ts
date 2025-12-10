@@ -1,8 +1,8 @@
 // RadioGroup.ts @jxarco
 
+import { IEvent } from './../core/Event';
 import { LX } from './../core/Namespace';
 import { BaseComponent, ComponentType } from './BaseComponent';
-import { IEvent } from './../core/Event';
 
 /**
  * @class RadioGroup
@@ -17,50 +17,56 @@ export class RadioGroup extends BaseComponent
 
         let currentIndex: number | null = null;
 
-        this.onGetValue = () => {
+        this.onGetValue = () =>
+        {
             const items = container.querySelectorAll( 'button' );
-            return currentIndex ? [ currentIndex, items[ currentIndex ] ] : undefined;
+            return currentIndex ? [ currentIndex, items[currentIndex] ] : undefined;
         };
 
-        this.onSetValue = ( newValue, skipCallback, event ) => {
+        this.onSetValue = ( newValue, skipCallback, event ) =>
+        {
+            newValue = newValue[0] ?? newValue; // Allow getting index of { index, value } tupple
 
-            newValue = newValue[ 0 ] ?? newValue; // Allow getting index of { index, value } tupple
-
-            console.assert( newValue.constructor == Number, "RadioGroup _value_ must be an Array index!" );
+            console.assert( newValue.constructor == Number, 'RadioGroup _value_ must be an Array index!' );
 
             const items = container.querySelectorAll( 'button' );
-            items.forEach( ( b: any ) => { b.checked = false; b.classList.remove( "checked" ) } );
-
-            const optionItem: any = items[ newValue ];
-            optionItem.checked = !optionItem.checked;
-            optionItem.classList.toggle( "checked" );
-
-            if( !skipCallback )
+            items.forEach( ( b: any ) =>
             {
-                this._trigger( new IEvent( null, [ newValue, values[ newValue ] ], event ), callback );
+                b.checked = false;
+                b.classList.remove( 'checked' );
+            } );
+
+            const optionItem: any = items[newValue];
+            optionItem.checked = !optionItem.checked;
+            optionItem.classList.toggle( 'checked' );
+
+            if ( !skipCallback )
+            {
+                this._trigger( new IEvent( null, [ newValue, values[newValue] ], event ), callback );
             }
         };
 
         var container = document.createElement( 'div' );
-        container.className = "lexradiogroup " + ( options.className ?? "" );
+        container.className = 'lexradiogroup ' + ( options.className ?? '' );
         this.root.appendChild( container );
 
         let labelSpan = document.createElement( 'span' );
         labelSpan.innerHTML = label;
         container.appendChild( labelSpan );
 
-        for( let i = 0; i < values.length; ++i )
+        for ( let i = 0; i < values.length; ++i )
         {
             const optionItem = document.createElement( 'div' );
-            optionItem.className = "lexradiogroupitem";
+            optionItem.className = 'lexradiogroupitem';
             container.appendChild( optionItem );
 
             const optionButton = document.createElement( 'button' );
-            optionButton.className = "flex p-0 rounded-lg cursor-pointer";
+            optionButton.className = 'flex p-0 rounded-lg cursor-pointer';
             optionButton.disabled = options.disabled ?? false;
             optionItem.appendChild( optionButton );
 
-            optionButton.addEventListener( "click", ( e ) => {
+            optionButton.addEventListener( 'click', ( e ) =>
+            {
                 this.set( i, false, e );
             } );
 
@@ -68,13 +74,13 @@ export class RadioGroup extends BaseComponent
             optionButton.appendChild( checkedSpan );
 
             const optionLabel = document.createElement( 'span' );
-            optionLabel.innerHTML = values[ i ];
+            optionLabel.innerHTML = values[i];
             optionItem.appendChild( optionLabel );
         }
 
-        if( options.selected )
+        if ( options.selected )
         {
-            console.assert( options.selected.constructor == Number, "RadioGroup _selected_ must be an Array index!" );
+            console.assert( options.selected.constructor == Number, 'RadioGroup _selected_ must be an Array index!' );
             currentIndex = options.selected;
             this.set( currentIndex, true );
         }

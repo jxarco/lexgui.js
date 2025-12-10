@@ -1,8 +1,8 @@
 // Button.ts @jxarco
 
+import { IEvent } from './../core/Event';
 import { LX } from './../core/Namespace';
 import { BaseComponent, ComponentType } from './BaseComponent';
-import { IEvent } from './../core/Event';
 
 /**
  * @class Button
@@ -24,15 +24,16 @@ export class Button extends BaseComponent
         this.callback = callback;
         this.selectable = options.selectable ?? this.selectable;
 
-        this.onGetValue = () => {
-            const isSelected = LX.hasClass( wValue, "selected" );
-            const swapInput = wValue.querySelector( "input" );
+        this.onGetValue = () =>
+        {
+            const isSelected = LX.hasClass( wValue, 'selected' );
+            const swapInput = wValue.querySelector( 'input' );
             return swapInput ? swapInput.checked : ( this.selectable ? isSelected : value );
         };
 
-        this.onSetValue = ( newValue, skipCallback, event ) => {
-
-            if( ( options.swap ?? false ) )
+        this.onSetValue = ( newValue, skipCallback, event ) =>
+        {
+            if ( ( options.swap ?? false ) )
             {
                 this.setState( newValue, skipCallback );
                 return;
@@ -40,14 +41,14 @@ export class Button extends BaseComponent
 
             // No-swap buttons
 
-            wValue.innerHTML = "";
+            wValue.innerHTML = '';
 
-            if( options.icon )
+            if ( options.icon )
             {
                 const icon = LX.makeIcon( options.icon );
                 wValue.prepend( icon );
             }
-            else if( options.img )
+            else if ( options.img )
             {
                 let img = document.createElement( 'img' );
                 img.src = options.img;
@@ -55,163 +56,183 @@ export class Button extends BaseComponent
             }
             else
             {
-                wValue.innerHTML = `<span>${ ( newValue ?? "" ) }</span>`;
+                wValue.innerHTML = `<span>${( newValue ?? '' )}</span>`;
             }
         };
 
-        this.onResize = ( rect: any ) => {
-            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
-            wValue.style.width = `calc( 100% - ${ realNameWidth })`;
+        this.onResize = ( rect: any ) =>
+        {
+            const realNameWidth = this.root.domName?.style.width ?? '0px';
+            wValue.style.width = `calc( 100% - ${realNameWidth})`;
         };
 
         // In case of swap, set if a change has to be performed
-        this.setState = function( v, skipCallback ) {
-            const swapInput = wValue.querySelector( "input" );
+        this.setState = function( v, skipCallback )
+        {
+            const swapInput = wValue.querySelector( 'input' );
 
-            if( swapInput )
+            if ( swapInput )
             {
                 swapInput.checked = v;
             }
-            else if( this.selectable )
+            else if ( this.selectable )
             {
-                if( options.parent )
+                if ( options.parent )
                 {
-                    options.parent.querySelectorAll(".lexbutton.selected").forEach( ( b: HTMLElement ) => { if( b == wValue ) return; b.classList.remove( "selected" ) } );
+                    options.parent.querySelectorAll( '.lexbutton.selected' ).forEach( ( b: HTMLElement ) =>
+                    {
+                        if ( b == wValue ) return;
+                        b.classList.remove( 'selected' );
+                    } );
                 }
 
-                wValue.classList.toggle( "selected", v );
+                wValue.classList.toggle( 'selected', v );
             }
 
-            if( !skipCallback )
+            if ( !skipCallback )
             {
-                this._trigger( new IEvent( name, swapInput ? swapInput.checked : ( this.selectable ? v : value ), null ), callback );
+                this._trigger(
+                    new IEvent( name, swapInput ? swapInput.checked : ( this.selectable ? v : value ), null ),
+                    callback
+                );
             }
         };
 
         var wValue: any = document.createElement( 'button' );
-        wValue.title = options.tooltip ? "" : ( options.title ?? "" );
-        wValue.className = "lexbutton px-3 " + ( options.buttonClass ?? "" );
+        wValue.title = options.tooltip ? '' : ( options.title ?? '' );
+        wValue.className = 'lexbutton px-3 ' + ( options.buttonClass ?? '' );
         this.root.appendChild( wValue );
 
-        if( options.selected )
+        if ( options.selected )
         {
-            wValue.classList.add( "selected" );
+            wValue.classList.add( 'selected' );
         }
 
-        if( options.img )
+        if ( options.img )
         {
             let img = document.createElement( 'img' );
             img.src = options.img;
             wValue.prepend( img );
         }
-        else if( options.icon )
+        else if ( options.icon )
         {
             const icon = LX.makeIcon( options.icon, { iconClass: options.iconClass, svgClass: options.svgClass } );
-            const iconPosition = options.iconPosition ?? "cover";
+            const iconPosition = options.iconPosition ?? 'cover';
 
             // Default
-            if( iconPosition == "cover" || ( options.swap !== undefined ) )
+            if ( iconPosition == 'cover' || ( options.swap !== undefined ) )
             {
                 wValue.prepend( icon );
             }
             else
             {
-                wValue.innerHTML = `<span>${ ( value || "" ) }</span>`;
+                wValue.innerHTML = `<span>${( value || '' )}</span>`;
 
-                if( iconPosition == "start" )
+                if ( iconPosition == 'start' )
                 {
-                    wValue.querySelector( "span" ).prepend( icon );
+                    wValue.querySelector( 'span' ).prepend( icon );
                 }
-                else // "end"
+                // "end"
+                else
                 {
-                    wValue.querySelector( "span" ).appendChild( icon );
+                    wValue.querySelector( 'span' ).appendChild( icon );
                 }
             }
 
-            wValue.classList.add( "justify-center" );
+            wValue.classList.add( 'justify-center' );
         }
         else
         {
-            wValue.innerHTML = `<span>${ ( value || "" ) }</span>`;
+            wValue.innerHTML = `<span>${( value || '' )}</span>`;
         }
 
-        if( options.fileInput )
+        if ( options.fileInput )
         {
-            const fileInput = document.createElement( "input" );
-            fileInput.type = "file";
-            fileInput.className = "file-input";
-            fileInput.style.display = "none";
+            const fileInput = document.createElement( 'input' );
+            fileInput.type = 'file';
+            fileInput.className = 'file-input';
+            fileInput.style.display = 'none';
             wValue.appendChild( fileInput );
 
-            fileInput.addEventListener( 'change', function( e: any ) {
-                if( !e.target ) return;
+            fileInput.addEventListener( 'change', function( e: any )
+            {
+                if ( !e.target ) return;
                 const files = e.target.files;
-                if( !files.length ) return;
+                if ( !files.length ) return;
 
                 const reader = new FileReader();
-                if( options.fileInputType === 'text' ) reader.readAsText( files[ 0 ] );
-                else if( options.fileInputType === 'buffer' ) reader.readAsArrayBuffer( files[ 0 ] );
-                else if( options.fileInputType === 'bin' ) reader.readAsBinaryString( files[ 0 ] );
-                else if( options.fileInputType === 'url' ) reader.readAsDataURL( files[ 0 ] );
-                reader.onload = e => { callback.call( this, e.target?.result, files[ 0 ] ); } ;
-            });
+                if ( options.fileInputType === 'text' ) reader.readAsText( files[0] );
+                else if ( options.fileInputType === 'buffer' ) reader.readAsArrayBuffer( files[0] );
+                else if ( options.fileInputType === 'bin' ) reader.readAsBinaryString( files[0] );
+                else if ( options.fileInputType === 'url' ) reader.readAsDataURL( files[0] );
+                reader.onload = e =>
+                {
+                    callback.call( this, e.target?.result, files[0] );
+                };
+            } );
         }
 
-        if( options.disabled )
+        if ( options.disabled )
         {
             this.disabled = true;
-            wValue.setAttribute( "disabled", true );
+            wValue.setAttribute( 'disabled', true );
         }
 
         let trigger = wValue;
 
-        if( options.swap )
+        if ( options.swap )
         {
-            wValue.classList.add( "swap" );
-            wValue.querySelector( "a" ).classList.add( "swap-off" );
+            wValue.classList.add( 'swap' );
+            wValue.querySelector( 'a' ).classList.add( 'swap-off' );
 
-            const input = document.createElement( "input" );
-            input.className = "p-0 border-0";
-            input.type = "checkbox";
+            const input = document.createElement( 'input' );
+            input.className = 'p-0 border-0';
+            input.type = 'checkbox';
             wValue.prepend( input );
 
-            const swapIcon = LX.makeIcon( options.swap, { iconClass: "swap-on" } );
+            const swapIcon = LX.makeIcon( options.swap, { iconClass: 'swap-on' } );
             wValue.appendChild( swapIcon );
 
-            this.swap = function( skipCallback?: boolean ) {
-                const swapInput = wValue.querySelector( "input" );
+            this.swap = function( skipCallback?: boolean )
+            {
+                const swapInput = wValue.querySelector( 'input' );
                 swapInput.checked = !swapInput.checked;
-                if( !skipCallback )
+                if ( !skipCallback )
                 {
                     trigger.click();
                 }
             };
         }
 
-        trigger.addEventListener( "click", ( e: MouseEvent ) => {
+        trigger.addEventListener( 'click', ( e: MouseEvent ) =>
+        {
             let isSelected;
-            if( this.selectable )
+            if ( this.selectable )
             {
-                if( options.parent )
+                if ( options.parent )
                 {
-                    options.parent.querySelectorAll(".lexbutton.selected").forEach( ( b: HTMLElement ) => { if( b == wValue ) return; b.classList.remove( "selected" ) } );
+                    options.parent.querySelectorAll( '.lexbutton.selected' ).forEach( ( b: HTMLElement ) =>
+                    {
+                        if ( b == wValue ) return;
+                        b.classList.remove( 'selected' );
+                    } );
                 }
 
-                isSelected = wValue.classList.toggle('selected');
+                isSelected = wValue.classList.toggle( 'selected' );
             }
 
-            if( options.fileInput )
+            if ( options.fileInput )
             {
-                wValue.querySelector( ".file-input" ).click();
+                wValue.querySelector( '.file-input' ).click();
             }
-            else if( options.mustConfirm )
+            else if ( options.mustConfirm )
             {
-                const swapInput = wValue.querySelector( "input" );
+                const swapInput = wValue.querySelector( 'input' );
 
                 new LX.PopConfirm( wValue, {
                     onConfirm: () =>
                     {
-                        if( options.swap )
+                        if ( options.swap )
                         {
                             swapInput.checked = true;
                         }
@@ -226,19 +247,20 @@ export class Button extends BaseComponent
                     content: options.confirmContent
                 } );
 
-                if( options.swap )
+                if ( options.swap )
                 {
                     swapInput.checked = false;
                 }
             }
             else
             {
-                const swapInput = wValue.querySelector( "input" );
-                this._trigger( new IEvent( name, swapInput?.checked ?? ( this.selectable ? isSelected : value ), e ), callback );
+                const swapInput = wValue.querySelector( 'input' );
+                this._trigger( new IEvent( name, swapInput?.checked ?? ( this.selectable ? isSelected : value ), e ),
+                    callback );
             }
-        });
+        } );
 
-        if( options.tooltip )
+        if ( options.tooltip )
         {
             LX.asTooltip( wValue, options.title ?? name );
         }
@@ -254,13 +276,13 @@ export class Button extends BaseComponent
 
     setSwapIcon( iconName: string )
     {
-        const oldIcon = this.root.querySelector( ".swap-on" );
-        if( !oldIcon )
+        const oldIcon = this.root.querySelector( '.swap-on' );
+        if ( !oldIcon )
         {
             return;
         }
 
-        const swapIcon = LX.makeIcon( iconName, { iconClass: "swap-on" } );
+        const swapIcon = LX.makeIcon( iconName, { iconClass: 'swap-on' } );
         oldIcon.replaceWith( swapIcon );
     }
 }

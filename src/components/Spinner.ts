@@ -12,10 +12,10 @@ export class Spinner
 
     constructor( options: any = {} )
     {
-        const icon = options.icon ?? "LoaderCircle";
-        const size = options.size ?? "md";
-        const iconClass = `flex ${ options.iconClass ?? "" }`.trim();
-        const svgClass = `animate-spin ${ size } ${ options.svgClass ?? "" }`.trim();
+        const icon = options.icon ?? 'LoaderCircle';
+        const size = options.size ?? 'md';
+        const iconClass = `flex ${options.iconClass ?? ''}`.trim();
+        const svgClass = `animate-spin ${size} ${options.svgClass ?? ''}`.trim();
 
         this.root = LX.makeIcon( icon, { iconClass, svgClass } );
     }
@@ -29,6 +29,6 @@ export class Spinner
     {
         this.root.remove();
     }
-};
+}
 
 LX.Spinner = Spinner;

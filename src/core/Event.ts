@@ -4,11 +4,11 @@ import { LX } from './Namespace';
 import { Panel } from './Panel';
 
 /*
-*   Events and Signals
-*/
+ *   Events and Signals
+ */
 
-export class IEvent {
-
+export class IEvent
+{
     name: any;
     value: any;
     domEvent: any;
@@ -19,28 +19,28 @@ export class IEvent {
         this.value = value;
         this.domEvent = domEvent;
     }
-};
+}
 
 LX.IEvent = IEvent;
 
 export class TreeEvent
 {
-    static NONE                 = 0;
-    static NODE_SELECTED        = 1;
-    static NODE_DELETED         = 2;
-    static NODE_DBLCLICKED      = 3;
-    static NODE_CONTEXTMENU     = 4;
-    static NODE_DRAGGED         = 5;
-    static NODE_RENAMED         = 6;
-    static NODE_VISIBILITY      = 7;
-    static NODE_CARETCHANGED    = 8;
+    static NONE = 0;
+    static NODE_SELECTED = 1;
+    static NODE_DELETED = 2;
+    static NODE_DBLCLICKED = 3;
+    static NODE_CONTEXTMENU = 4;
+    static NODE_DRAGGED = 5;
+    static NODE_RENAMED = 6;
+    static NODE_VISIBILITY = 7;
+    static NODE_CARETCHANGED = 8;
 
     type: number = TreeEvent.NONE;
     node: any;
     value: any;
     event: any;
-    multiple : boolean = false; // Multiple selection
-    panel: Panel|null = null;
+    multiple: boolean = false; // Multiple selection
+    panel: Panel | null = null;
 
     constructor( type: number, node: any, value: any, event: any )
     {
@@ -52,19 +52,28 @@ export class TreeEvent
 
     string()
     {
-        switch( this.type )
+        switch ( this.type )
         {
-            case TreeEvent.NONE: return "tree_event_none";
-            case TreeEvent.NODE_SELECTED: return "tree_event_selected";
-            case TreeEvent.NODE_DELETED: return "tree_event_deleted";
-            case TreeEvent.NODE_DBLCLICKED:  return "tree_event_dblclick";
-            case TreeEvent.NODE_CONTEXTMENU:  return "tree_event_contextmenu";
-            case TreeEvent.NODE_DRAGGED: return "tree_event_dragged";
-            case TreeEvent.NODE_RENAMED: return "tree_event_renamed";
-            case TreeEvent.NODE_VISIBILITY: return "tree_event_visibility";
-            case TreeEvent.NODE_CARETCHANGED: return "tree_event_caretchanged";
+            case TreeEvent.NONE:
+                return 'tree_event_none';
+            case TreeEvent.NODE_SELECTED:
+                return 'tree_event_selected';
+            case TreeEvent.NODE_DELETED:
+                return 'tree_event_deleted';
+            case TreeEvent.NODE_DBLCLICKED:
+                return 'tree_event_dblclick';
+            case TreeEvent.NODE_CONTEXTMENU:
+                return 'tree_event_contextmenu';
+            case TreeEvent.NODE_DRAGGED:
+                return 'tree_event_dragged';
+            case TreeEvent.NODE_RENAMED:
+                return 'tree_event_renamed';
+            case TreeEvent.NODE_VISIBILITY:
+                return 'tree_event_visibility';
+            case TreeEvent.NODE_CARETCHANGED:
+                return 'tree_event_caretchanged';
         }
     }
-};
+}
 
 LX.TreeEvent = TreeEvent;

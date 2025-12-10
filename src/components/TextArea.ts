@@ -1,8 +1,8 @@
 // TextArea.ts @jxarco
 
+import { IEvent } from './../core/Event';
 import { LX } from './../core/Namespace';
 import { BaseComponent, ComponentType } from './BaseComponent';
-import { IEvent } from './../core/Event';
 
 /**
  * @class TextArea
@@ -15,89 +15,95 @@ export class TextArea extends BaseComponent
     {
         super( ComponentType.TEXTAREA, name, value, options );
 
-        this.onGetValue = () => {
+        this.onGetValue = () =>
+        {
             return value;
         };
 
-        this.onSetValue = ( newValue, skipCallback, event ) => {
-
+        this.onSetValue = ( newValue, skipCallback, event ) =>
+        {
             wValue.value = value = newValue;
 
-            if( !skipCallback )
+            if ( !skipCallback )
             {
                 this._trigger( new IEvent( name, newValue, event ), callback );
             }
         };
 
-        this.onResize = ( rect ) => {
-            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
-            container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth })`;
+        this.onResize = ( rect ) =>
+        {
+            const realNameWidth = this.root.domName?.style.width ?? '0px';
+            container.style.width = options.inputWidth ?? `calc( 100% - ${realNameWidth})`;
         };
 
-        let container = document.createElement( "div" );
-        container.className = "lextextarea";
-        container.style.display = "flex";
+        let container = document.createElement( 'div' );
+        container.className = 'lextextarea';
+        container.style.display = 'flex';
         this.root.appendChild( container );
 
-        let wValue = document.createElement( "textarea" );
-        wValue.value = value ?? "";
-        wValue.className = ( options.inputClass ?? "" );
-        wValue.style.textAlign = options.float ?? "";
+        let wValue = document.createElement( 'textarea' );
+        wValue.value = value ?? '';
+        wValue.className = options.inputClass ?? '';
+        wValue.style.textAlign = options.float ?? '';
         Object.assign( wValue.style, options.style ?? {} );
 
-        if( options.fitHeight ?? false )
+        if ( options.fitHeight ?? false )
         {
-            wValue.classList.add( "size-content" );
+            wValue.classList.add( 'size-content' );
         }
 
-        if( !( options.resize ?? true ) )
+        if ( !( options.resize ?? true ) )
         {
-            wValue.classList.add( "resize-none" );
+            wValue.classList.add( 'resize-none' );
         }
 
         container.appendChild( wValue );
 
-        if( options.disabled ?? false )
+        if ( options.disabled ?? false )
         {
             this.disabled = true;
-            wValue.setAttribute( "disabled", "true" );
+            wValue.setAttribute( 'disabled', 'true' );
         }
 
-        if( options.placeholder )
+        if ( options.placeholder )
         {
-            wValue.setAttribute( "placeholder", options.placeholder );
+            wValue.setAttribute( 'placeholder', options.placeholder );
         }
 
-        const trigger = options.trigger ?? "default";
+        const trigger = options.trigger ?? 'default';
 
-        if( trigger == "default" )
+        if ( trigger == 'default' )
         {
-            wValue.addEventListener("keyup", function(e) {
-                if( e.key == "Enter" )
+            wValue.addEventListener( 'keyup', function( e )
+            {
+                if ( e.key == 'Enter' )
                 {
                     wValue.blur();
                 }
-            });
+            } );
 
-            wValue.addEventListener("focusout", ( e: any ) => {
+            wValue.addEventListener( 'focusout', ( e: any ) =>
+            {
                 this.set( e.target?.value, false, e );
-            });
+            } );
         }
-        else if( trigger == "input" )
+        else if ( trigger == 'input' )
         {
-            wValue.addEventListener("input", ( e: any ) => {
+            wValue.addEventListener( 'input', ( e: any ) =>
+            {
                 this.set( e.target?.value, false, e );
-            });
+            } );
         }
 
-        if( options.icon )
+        if ( options.icon )
         {
-            const icon = LX.makeIcon( options.icon, { iconClass: "absolute z-1 ml-2", svgClass: "sm" } );
+            const icon = LX.makeIcon( options.icon, { iconClass: 'absolute z-1 ml-2', svgClass: 'sm' } );
             container.appendChild( icon );
         }
 
-        LX.doAsync( () => {
-            container.style.height = options.height ?? "";
+        LX.doAsync( () =>
+        {
+            container.style.height = options.height ?? '';
             this.onResize();
         }, 10 );
     }

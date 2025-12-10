@@ -3,27 +3,27 @@
 /**
  * Main namespace
  * @namespace LX
-*/
+ */
 
-const g = ( globalThis as any );
+const g = globalThis as any;
 
 // Update global namespace if not present (Loading module)
 // Extension scripts rely on LX being globally available
 let LX: any = g.LX;
 
-if( !LX )
+if ( !LX )
 {
     LX = {
-        version: "8.0",
+        version: '8.0',
         ready: false,
-        extensions: [],                 // Store extensions used
-        extraCommandbarEntries: [],     // User specific entries for command bar
-        signals: {},                    // Events and triggers
-        activeDraggable: null,          // Watch for the current active draggable
+        extensions: [], // Store extensions used
+        extraCommandbarEntries: [], // User specific entries for command bar
+        signals: {}, // Events and triggers
+        activeDraggable: null, // Watch for the current active draggable
 
-        spacingMode: "default",
-        layoutMode: "app",
-        
+        spacingMode: 'default',
+        layoutMode: 'app',
+
         MOUSE_LEFT_CLICK: 0,
         MOUSE_MIDDLE_CLICK: 1,
         MOUSE_RIGHT_CLICK: 2,
@@ -33,7 +33,7 @@ if( !LX )
 
         CURVE_MOVEOUT_CLAMP: 0,
         CURVE_MOVEOUT_DELETE: 1,
-        
+
         DRAGGABLE_Z_INDEX: 101
     };
 

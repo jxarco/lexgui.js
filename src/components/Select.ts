@@ -1,10 +1,10 @@
 // Select.ts @jxarco
 
+import { IEvent } from './../core/Event';
 import { LX } from './../core/Namespace';
 import { BaseComponent, ComponentType } from './BaseComponent';
 import { Button } from './Button';
 import { TextInput } from './TextInput';
-import { IEvent } from './../core/Event';
 
 /**
  * @class Select
@@ -19,98 +19,105 @@ export class Select extends BaseComponent
     {
         super( ComponentType.SELECT, name, value, options );
 
-        this.onGetValue = () => {
+        this.onGetValue = () =>
+        {
             return value;
         };
 
-        this.onSetValue = ( newValue, skipCallback, event ) => {
+        this.onSetValue = ( newValue, skipCallback, event ) =>
+        {
             value = newValue;
 
             let item: any = null;
             const listOptionsNodes = listOptions.childNodes;
-            listOptionsNodes.forEach( ( e: any ) => {
-                e.classList.remove( "selected" );
-                if( e.getAttribute( "value" ) == newValue )
+            listOptionsNodes.forEach( ( e: any ) =>
+            {
+                e.classList.remove( 'selected' );
+                if ( e.getAttribute( 'value' ) == newValue )
                 {
                     item = e;
                 }
             } );
 
-            console.assert( item, `Item ${ newValue } does not exist in the Select.` );
-            item.classList.add( "selected" );
+            console.assert( item, `Item ${newValue} does not exist in the Select.` );
+            item.classList.add( 'selected' );
             selectedOption.refresh( value );
 
             // Reset filter
-            if( filter )
+            if ( filter )
             {
-                filter.root.querySelector( "input" ).value = "";
-                const filteredOptions = this._filterOptions( values, "" );
+                filter.root.querySelector( 'input' ).value = '';
+                const filteredOptions = this._filterOptions( values, '' );
                 list.refresh( filteredOptions );
             }
 
             // Update suboptions menu
-            const suboptions = this.root.querySelector( ".lexcustomcontainer" );
-            const suboptionsFunc = options[ `on_${ value }` ];
-            suboptions.toggleAttribute( "hidden", !suboptionsFunc );
+            const suboptions = this.root.querySelector( '.lexcustomcontainer' );
+            const suboptionsFunc = options[`on_${value}`];
+            suboptions.toggleAttribute( 'hidden', !suboptionsFunc );
 
-            if( suboptionsFunc )
+            if ( suboptionsFunc )
             {
-                suboptions.innerHTML = "";
+                suboptions.innerHTML = '';
                 const suboptionsPanel = new LX.Panel();
                 suboptionsPanel.queue( suboptions );
-                suboptionsFunc.call(this, suboptionsPanel);
+                suboptionsFunc.call( this, suboptionsPanel );
                 suboptionsPanel.clearQueue();
             }
 
-            this.root.dataset["opened"] = ( !!suboptionsFunc );
-            list.style.height = ""; // set auto height by default
+            this.root.dataset['opened'] = !!suboptionsFunc;
+            list.style.height = ''; // set auto height by default
 
-            if( !skipCallback )
+            if ( !skipCallback )
             {
                 this._trigger( new IEvent( name, value, event ), callback );
             }
         };
 
-        this.onResize = ( rect ) => {
-            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
-            container.style.width = options.inputWidth ?? `calc( 100% - ${ realNameWidth })`;
+        this.onResize = ( rect ) =>
+        {
+            const realNameWidth = this.root.domName?.style.width ?? '0px';
+            container.style.width = options.inputWidth ?? `calc( 100% - ${realNameWidth})`;
         };
 
-        let container = document.createElement( "div" );
-        container.className = "lexselect";
+        let container = document.createElement( 'div' );
+        container.className = 'lexselect';
         this.root.appendChild( container );
 
         let wValue: any = document.createElement( 'div' );
-        wValue.className = "lexselect lexoption";
+        wValue.className = 'lexselect lexoption';
         wValue.name = name;
         wValue.iValue = value;
 
-        if( options.overflowContainer !== undefined )
+        if ( options.overflowContainer !== undefined )
         {
             options.overflowContainerX = options.overflowContainerY = options.overflowContainer;
         }
 
-        const _placeOptions = ( parent: any, forceLastPlacement?: boolean ) => {
-
+        const _placeOptions = ( parent: any, forceLastPlacement?: boolean ) =>
+        {
             const selectRoot = selectedOption.root;
             const rect = selectRoot.getBoundingClientRect();
-            const nestedDialog = parent.parentElement.closest( "dialog" ) ?? parent.parentElement.closest( ".lexcolorpicker" );
+            const nestedDialog = parent.parentElement.closest( 'dialog' )
+                ?? parent.parentElement.closest( '.lexcolorpicker' );
 
             // Manage vertical aspect
             {
-                const overflowContainer = options.overflowContainerY !== undefined ? options.overflowContainerY : LX.getParentArea( parent );
+                const overflowContainer = options.overflowContainerY !== undefined
+                    ? options.overflowContainerY
+                    : LX.getParentArea( parent );
                 const listHeight = parent.offsetHeight;
                 let topPosition = rect.y;
 
                 let maxY = window.innerHeight;
 
-                if( overflowContainer )
+                if ( overflowContainer )
                 {
                     const parentRect = overflowContainer.getBoundingClientRect();
                     maxY = parentRect.y + parentRect.height;
                 }
 
-                if( nestedDialog )
+                if ( nestedDialog )
                 {
                     const rect = nestedDialog.getBoundingClientRect();
                     topPosition -= rect.y;
@@ -118,19 +125,19 @@ export class Select extends BaseComponent
                 }
 
                 parent.style.top = ( topPosition + selectRoot.offsetHeight ) + 'px';
-                list.style.height = ""; // set auto height by default
+                list.style.height = ''; // set auto height by default
 
-                const failAbove = forceLastPlacement ? this._lastPlacement[ 0 ] : ( topPosition - listHeight ) < 0;
-                const failBelow = forceLastPlacement ? this._lastPlacement[ 1 ] : ( topPosition + listHeight ) > maxY;
-                if( failBelow && !failAbove )
+                const failAbove = forceLastPlacement ? this._lastPlacement[0] : ( topPosition - listHeight ) < 0;
+                const failBelow = forceLastPlacement ? this._lastPlacement[1] : ( topPosition + listHeight ) > maxY;
+                if ( failBelow && !failAbove )
                 {
                     parent.style.top = ( topPosition - listHeight ) + 'px';
-                    parent.classList.add( "place-above" );
+                    parent.classList.add( 'place-above' );
                 }
                 // If does not fit in any direction, put it below but limit height..
-                else if( failBelow && failAbove )
+                else if ( failBelow && failAbove )
                 {
-                    list.style.height = `${ maxY - topPosition - 32 }px`; // 32px margin
+                    list.style.height = `${maxY - topPosition - 32}px`; // 32px margin
                 }
 
                 this._lastPlacement = [ failAbove, failBelow ];
@@ -138,47 +145,50 @@ export class Select extends BaseComponent
 
             // Manage horizontal aspect
             {
-                const overflowContainer = options.overflowContainerX !== undefined ? options.overflowContainerX : LX.getParentArea( parent );
+                const overflowContainer = options.overflowContainerX !== undefined
+                    ? options.overflowContainerX
+                    : LX.getParentArea( parent );
                 const listWidth = parent.offsetWidth;
                 let leftPosition = rect.x;
 
                 parent.style.minWidth = ( rect.width ) + 'px';
 
-                if( nestedDialog )
+                if ( nestedDialog )
                 {
                     const rect = nestedDialog.getBoundingClientRect();
                     leftPosition -= rect.x;
                 }
 
-                parent.style.left = ( leftPosition ) + 'px';
+                parent.style.left = leftPosition + 'px';
 
                 let maxX = window.innerWidth;
 
-                if( overflowContainer )
+                if ( overflowContainer )
                 {
                     const parentRect = overflowContainer.getBoundingClientRect();
                     maxX = parentRect.x + parentRect.width;
                 }
 
                 const showLeft = ( leftPosition + listWidth ) > maxX;
-                if( showLeft )
+                if ( showLeft )
                 {
                     parent.style.left = ( leftPosition - ( listWidth - rect.width ) ) + 'px';
                 }
             }
         };
 
-        let selectedOption = new Button( null, value, ( value: any, event: any ) => {
-            if( list.unfocus_event )
+        let selectedOption = new Button( null, value, ( value: any, event: any ) =>
+        {
+            if ( list.unfocus_event )
             {
                 delete list.unfocus_event;
                 return;
             }
 
-            listDialog.classList.remove( "place-above" );
-            const opened = listDialog.hasAttribute( "open" );
+            listDialog.classList.remove( 'place-above' );
+            const opened = listDialog.hasAttribute( 'open' );
 
-            if( !opened )
+            if ( !opened )
             {
                 listDialog.show();
                 _placeOptions( listDialog );
@@ -188,21 +198,21 @@ export class Select extends BaseComponent
                 listDialog.close();
             }
 
-            if( filter )
+            if ( filter )
             {
-                filter.root.querySelector( "input" ).focus();
+                filter.root.querySelector( 'input' ).focus();
             }
+        }, { buttonClass: 'array', skipInlineCount: true, disabled: options.disabled } );
 
-        }, { buttonClass: "array", skipInlineCount: true, disabled: options.disabled } );
-
-        selectedOption.root.style.width = "100%";
-        selectedOption.root.querySelector( "span" ).appendChild( LX.makeIcon( "Down", { svgClass: "sm" } ) );
+        selectedOption.root.style.width = '100%';
+        selectedOption.root.querySelector( 'span' ).appendChild( LX.makeIcon( 'Down', { svgClass: 'sm' } ) );
 
         container.appendChild( selectedOption.root );
 
-        selectedOption.refresh = ( v?: string ) => {
-            const buttonSpan = selectedOption.root.querySelector("span");
-            if( buttonSpan.innerText == "" )
+        selectedOption.refresh = ( v?: string ) =>
+        {
+            const buttonSpan = selectedOption.root.querySelector( 'span' );
+            if ( buttonSpan.innerText == '' )
             {
                 buttonSpan.innerText = v;
             }
@@ -210,22 +220,23 @@ export class Select extends BaseComponent
             {
                 buttonSpan.innerHTML = buttonSpan.innerHTML.replaceAll( buttonSpan.innerText, v );
             }
-        }
+        };
 
         // Add select options container
 
         const listDialog = document.createElement( 'dialog' );
-        listDialog.className = "lexselectoptions";
+        listDialog.className = 'lexselectoptions';
 
         let list: any = document.createElement( 'ul' );
         list.tabIndex = -1;
-        list.className = "lexoptions";
-        listDialog.appendChild( list )
+        list.className = 'lexoptions';
+        listDialog.appendChild( list );
 
-        list.addEventListener( 'focusout', function( e: any ) {
+        list.addEventListener( 'focusout', function( e: any )
+        {
             e.stopPropagation();
             e.stopImmediatePropagation();
-            if( e.relatedTarget === selectedOption.root.querySelector( 'button' ) )
+            if ( e.relatedTarget === selectedOption.root.querySelector( 'button' ) )
             {
                 list.unfocus_event = true;
                 setTimeout( () => delete list.unfocus_event, 200 );
@@ -239,148 +250,152 @@ export class Select extends BaseComponent
                 return;
             }
             listDialog.close();
-        });
+        } );
 
         // Add filter options
         let filter: any = null;
-        if( options.filter ?? false )
+        if ( options.filter ?? false )
         {
             const filterOptions = LX.deepCopy( options );
-            filterOptions.placeholder = filterOptions.placeholder ?? "Search...";
+            filterOptions.placeholder = filterOptions.placeholder ?? 'Search...';
             filterOptions.skipComponent = filterOptions.skipComponent ?? true;
-            filterOptions.trigger = "input";
-            filterOptions.icon = "Search";
-            filterOptions.className = "lexfilter";
-            filterOptions.inputClass = "outline";
+            filterOptions.trigger = 'input';
+            filterOptions.icon = 'Search';
+            filterOptions.className = 'lexfilter';
+            filterOptions.inputClass = 'outline';
 
-            filter = new TextInput(null, options.filterValue ?? "", ( v: string ) => {
+            filter = new TextInput( null, options.filterValue ?? '', ( v: string ) =>
+            {
                 const filteredOptions = this._filterOptions( values, v );
                 list.refresh( filteredOptions );
                 _placeOptions( listDialog, true );
             }, filterOptions );
-            filter.root.querySelector( ".lextext" ).style.border = "1px solid transparent";
+            filter.root.querySelector( '.lextext' ).style.border = '1px solid transparent';
 
-            const input = filter.root.querySelector( "input" );
+            const input = filter.root.querySelector( 'input' );
 
-            input.addEventListener('focusout', function( e: any ) {
-                if (e.relatedTarget && e.relatedTarget.tagName == "UL" && e.relatedTarget.classList.contains("lexoptions"))
+            input.addEventListener( 'focusout', function( e: any )
+            {
+                if ( e.relatedTarget && e.relatedTarget.tagName == 'UL'
+                    && e.relatedTarget.classList.contains( 'lexoptions' ) )
                 {
                     return;
                 }
                 listDialog.close();
-            });
+            } );
 
             list.appendChild( filter.root );
         }
 
         // Create option list to empty it easily..
-        const listOptions = document.createElement('span');
-        listOptions.className = "lexselectinnerlist";
+        const listOptions = document.createElement( 'span' );
+        listOptions.className = 'lexselectinnerlist';
         list.appendChild( listOptions );
 
         // Add select options list
-        list.refresh = ( currentOptions: any ) => {
-
+        list.refresh = ( currentOptions: any ) =>
+        {
             // Empty list
-            listOptions.innerHTML = "";
+            listOptions.innerHTML = '';
 
-            if( !currentOptions.length )
+            if ( !currentOptions.length )
             {
-                let iValue = options.emptyMsg ?? "No options found.";
+                let iValue = options.emptyMsg ?? 'No options found.';
 
-                let option = document.createElement( "div" );
-                option.className = "option";
-                option.innerHTML = ( LX.makeIcon( "Inbox", { svgClass: "mr-2" } ).innerHTML + iValue );
+                let option = document.createElement( 'div' );
+                option.className = 'option';
+                option.innerHTML = LX.makeIcon( 'Inbox', { svgClass: 'mr-2' } ).innerHTML + iValue;
 
-                let li = document.createElement( "li" );
-                li.className = "lexselectitem empty";
+                let li = document.createElement( 'li' );
+                li.className = 'lexselectitem empty';
                 li.appendChild( option );
 
                 listOptions.appendChild( li );
                 return;
             }
 
-            for( let i = 0; i < currentOptions.length; i++ )
+            for ( let i = 0; i < currentOptions.length; i++ )
             {
-                let iValue = currentOptions[ i ];
-                let li = document.createElement( "li" );
-                let option: any = document.createElement( "div" );
-                option.className = "option";
+                let iValue = currentOptions[i];
+                let li = document.createElement( 'li' );
+                let option: any = document.createElement( 'div' );
+                option.className = 'option';
                 li.appendChild( option );
 
-                const onSelect = ( e: any ) => {
-                    this.set( e.currentTarget?.getAttribute( "value" ), false, e );
+                const onSelect = ( e: any ) =>
+                {
+                    this.set( e.currentTarget?.getAttribute( 'value' ), false, e );
                     listDialog.close();
                 };
 
-                li.addEventListener( "click", onSelect );
+                li.addEventListener( 'click', onSelect );
 
                 // Add string option
-                if( iValue.constructor != Object )
+                if ( iValue.constructor != Object )
                 {
-                    const asLabel = ( iValue[ 0 ] === '@' );
+                    const asLabel = iValue[0] === '@';
 
-                    if( !asLabel )
+                    if ( !asLabel )
                     {
-                        option.innerHTML = `<span>${ iValue }</span>`;
-                        option.appendChild( LX.makeIcon( "Check" ) )
+                        option.innerHTML = `<span>${iValue}</span>`;
+                        option.appendChild( LX.makeIcon( 'Check' ) );
                         option.value = iValue;
-                        li.setAttribute( "value", iValue );
+                        li.setAttribute( 'value', iValue );
 
-                        if( iValue == value )
+                        if ( iValue == value )
                         {
-                            li.classList.add( "selected" );
+                            li.classList.add( 'selected' );
                             wValue.innerHTML = iValue;
                         }
                     }
                     else
                     {
-                        option.innerHTML = "<span>" + iValue.substr( 1 ) + "</span>";
-                        li.removeEventListener( "click", onSelect );
+                        option.innerHTML = '<span>' + iValue.substr( 1 ) + '</span>';
+                        li.removeEventListener( 'click', onSelect );
                     }
 
-                    li.classList.add( asLabel ? "lexselectlabel" : "lexselectitem" );
+                    li.classList.add( asLabel ? 'lexselectlabel' : 'lexselectitem' );
                 }
                 else
                 {
                     // Add image option
-                    let img = document.createElement( "img" );
+                    let img = document.createElement( 'img' );
                     img.src = iValue.src;
-                    li.setAttribute( "value", iValue.value );
-                    li.className = "lexlistitem";
+                    li.setAttribute( 'value', iValue.value );
+                    li.className = 'lexlistitem';
                     option.innerText = iValue.value;
-                    option.className += " media";
+                    option.className += ' media';
                     option.prepend( img );
 
-                    option.setAttribute( "value", iValue.value );
-                    option.setAttribute( "data-index", i );
-                    option.setAttribute( "data-src", iValue.src );
-                    option.setAttribute( "title", iValue.value );
+                    option.setAttribute( 'value', iValue.value );
+                    option.setAttribute( 'data-index', i );
+                    option.setAttribute( 'data-src', iValue.src );
+                    option.setAttribute( 'title', iValue.value );
 
-                    if( value == iValue.value )
+                    if ( value == iValue.value )
                     {
-                        li.classList.add( "selected" );
+                        li.classList.add( 'selected' );
                     }
                 }
 
                 listOptions.appendChild( li );
             }
-        }
+        };
 
         list.refresh( values );
 
         container.appendChild( listDialog );
 
         // Element suboptions
-        let suboptions = document.createElement( "div" );
-        suboptions.className = "lexcustomcontainer w-full";
+        let suboptions = document.createElement( 'div' );
+        suboptions.className = 'lexcustomcontainer w-full';
 
-        const suboptionsFunc = options[ `on_${ value }` ];
-        suboptions.toggleAttribute( "hidden", !suboptionsFunc );
+        const suboptionsFunc = options[`on_${value}`];
+        suboptions.toggleAttribute( 'hidden', !suboptionsFunc );
 
-        if( suboptionsFunc )
+        if ( suboptionsFunc )
         {
-            suboptions.innerHTML = "";
+            suboptions.innerHTML = '';
             const suboptionsPanel = new LX.Panel();
             suboptionsPanel.queue( suboptions );
             suboptionsFunc.call( this, suboptionsPanel );
@@ -388,27 +403,27 @@ export class Select extends BaseComponent
         }
 
         this.root.appendChild( suboptions );
-        this.root.dataset["opened"] = ( !!suboptionsFunc );
+        this.root.dataset['opened'] = !!suboptionsFunc;
 
         LX.doAsync( this.onResize.bind( this ) );
     }
 
-    _filterOptions( options: any, value: string ) {
-
+    _filterOptions( options: any, value: string )
+    {
         // Push to right container
         const emptyFilter = !value.length;
         let filteredOptions = [];
 
         // Add components
-        for( let i = 0; i < options.length; i++ )
+        for ( let i = 0; i < options.length; i++ )
         {
-            let o = options[ i ];
-            if( !emptyFilter )
+            let o = options[i];
+            if ( !emptyFilter )
             {
                 let toCompare = ( typeof o == 'string' ) ? o : o.value;
                 const filterWord = value.toLowerCase();
                 const name = toCompare.toLowerCase();
-                if( !name.includes( filterWord ) ) continue;
+                if ( !name.includes( filterWord ) ) continue;
             }
 
             filteredOptions.push( o );

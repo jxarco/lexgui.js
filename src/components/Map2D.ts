@@ -2,8 +2,8 @@
 
 import { LX } from './../core/Namespace';
 import { BaseComponent, ComponentType } from './BaseComponent';
-import { CanvasMap2D } from './CanvasMap2D';
 import { Button } from './Button';
+import { CanvasMap2D } from './CanvasMap2D';
 import { Popover } from './Popover';
 
 /**
@@ -20,34 +20,38 @@ export class Map2D extends BaseComponent
     {
         super( ComponentType.MAP2D, name, null, options );
 
-        this.onGetValue = () => {
+        this.onGetValue = () =>
+        {
             return this.map2d.weightsObj;
         };
 
-        this.onSetValue = ( newValue, skipCallback, event ) => {
+        this.onSetValue = ( newValue, skipCallback, event ) =>
+        {
             // if( !skipCallback )
             // {
             //     this._trigger( new IEvent( name, curveInstance.element.value, event ), callback );
             // }
         };
 
-        this.onResize = ( rect ) => {
-            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
-            container.style.width = `calc( 100% - ${ realNameWidth })`;
+        this.onResize = ( rect ) =>
+        {
+            const realNameWidth = this.root.domName?.style.width ?? '0px';
+            container.style.width = `calc( 100% - ${realNameWidth})`;
         };
 
-        var container = document.createElement( "div" );
-        container.className = "lexmap2d";
+        var container = document.createElement( 'div' );
+        container.className = 'lexmap2d';
         this.root.appendChild( container );
 
         this.map2d = new CanvasMap2D( points, callback, options );
 
-        const calendarIcon = LX.makeIcon( "SquareMousePointer" );
-        const calendarButton = new Button( null, "Open Map", () => {
+        const calendarIcon = LX.makeIcon( 'SquareMousePointer' );
+        const calendarButton = new Button( null, 'Open Map', () =>
+        {
             this._popover = new Popover( calendarButton.root, [ this.map2d ] );
         }, { buttonClass: `flex flex-row px-3 fg-secondary justify-between` } );
 
-        calendarButton.root.querySelector( "button" ).appendChild( calendarIcon );
+        calendarButton.root.querySelector( 'button' ).appendChild( calendarIcon );
         container.appendChild( calendarButton.root );
 
         LX.doAsync( this.onResize.bind( this ) );

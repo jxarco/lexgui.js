@@ -2,9 +2,9 @@
 
 import { LX } from '../core/Namespace';
 
-if( !LX )
+if ( !LX )
 {
-    throw( "Missing LX namespace!" );
+    throw ( 'Missing LX namespace!' );
 }
 
 LX.extensions.push( 'ImUI' );
@@ -29,20 +29,19 @@ export class ImUI
     usePointerCursor: boolean = false;
     eventClick: MouseEvent | undefined = undefined;
 
-
     constructor( canvas: HTMLCanvasElement, options: any = {} )
     {
         console.assert( canvas !== undefined );
-        
+
         // To capture key events
         canvas.tabIndex = -1;
-        
-        canvas.addEventListener( 'keydown', this._processKey.bind(this), true);
-        canvas.addEventListener( 'mousedown', this._processMouse.bind(this) );
-        canvas.addEventListener( 'mouseup', this._processMouse.bind(this) );
-        canvas.addEventListener( 'mousemove', this._processMouse.bind(this) );
-        canvas.addEventListener( 'click', this._processMouse.bind(this) );
-        
+
+        canvas.addEventListener( 'keydown', this._processKey.bind( this ), true );
+        canvas.addEventListener( 'mousedown', this._processMouse.bind( this ) );
+        canvas.addEventListener( 'mouseup', this._processMouse.bind( this ) );
+        canvas.addEventListener( 'mousemove', this._processMouse.bind( this ) );
+        canvas.addEventListener( 'click', this._processMouse.bind( this ) );
+
         // this.font = new FontFace("Ubuntu", "url(../data/Ubuntu-Bold.ttf)");
         // this.font.load().then(
         //     ( font ) => {
@@ -66,18 +65,16 @@ export class ImUI
 
     _processMouse( e: MouseEvent )
     {
-        if( e.type == 'mousedown' )
+        if ( e.type == 'mousedown' )
         {
             this.mouseDown = true;
         }
-        
-        else if( e.type == 'mouseup' )
+        else if ( e.type == 'mouseup' )
         {
-            this._processClick(e);
+            this._processClick( e );
             this.mouseDown = false;
         }
-
-        else if( e.type == 'mousemove' )
+        else if ( e.type == 'mousemove' )
         {
             this.mousePosition.set( e.clientX, e.clientY );
         }
@@ -97,12 +94,12 @@ export class ImUI
 
     Button( text: string, x: number, y: number, callback: any )
     {
-        const ctx = this.canvas.getContext("2d");
+        const ctx = this.canvas.getContext( '2d' );
 
         // Element properties
 
         let fontSize = 16;
-        ctx.font = fontSize + "px Arial";
+        ctx.font = fontSize + 'px Arial';
 
         let padding = new LX.vec2( 12, 8 );
         let position = new LX.vec2( x, y );
@@ -112,28 +109,29 @@ export class ImUI
 
         // Get mouse state
 
-        const hovered = this.mousePosition.x >= position.x && this.mousePosition.x <= (position.x + size.x + padding.x * 2.0)
-        && this.mousePosition.y >= position.y && this.mousePosition.y <= (position.y + size.y + padding.y * 2.0);
+        const hovered = this.mousePosition.x >= position.x
+            && this.mousePosition.x <= ( position.x + size.x + padding.x * 2.0 )
+            && this.mousePosition.y >= position.y && this.mousePosition.y <= ( position.y + size.y + padding.y * 2.0 );
 
         const active = hovered && this.mouseDown;
 
         // Draw button
 
         ctx.beginPath();
-        ctx.fillStyle = active ? "#666" : (hovered ? "#444" : "#222");
-        ctx.roundRect( position.x, position.y, size.x + padding.x * 2.0, size.y + padding.y * 2.0, [8, 8, 8, 8] );
+        ctx.fillStyle = active ? '#666' : ( hovered ? '#444' : '#222' );
+        ctx.roundRect( position.x, position.y, size.x + padding.x * 2.0, size.y + padding.y * 2.0, [ 8, 8, 8, 8 ] );
         ctx.fill();
 
         // Draw text
 
-        ctx.fillStyle = hovered ? "#fff" : "#ddd";
+        ctx.fillStyle = hovered ? '#fff' : '#ddd';
         ctx.fillText( text, position.x + padding.x, position.y + metrics.actualBoundingBoxAscent + padding.y );
 
         this.usePointerCursor = this.usePointerCursor || hovered;
 
-        if( this.eventClick )
+        if ( this.eventClick )
         {
-            if(callback) callback();
+            if ( callback ) callback();
             return true;
         }
 
@@ -150,23 +148,23 @@ export class ImUI
 
     Slider( text: string, x: number, y: number, value: number = 0, callback: any )
     {
-        const ctx = this.canvas.getContext("2d");
+        const ctx = this.canvas.getContext( '2d' );
 
         // Store slider value
-        
-        if( !this.components[ text ] )
+
+        if ( !this.components[text] )
         {
-            this.components[ text ] = { value: value };
+            this.components[text] = { value: value };
         }
         else
         {
-            value = this.components[ text ].value;
+            value = this.components[text].value;
         }
 
         // Element properties
 
         let fontSize = 16;
-        ctx.font = fontSize + "px Arial";
+        ctx.font = fontSize + 'px Arial';
 
         let padding = new LX.vec2( 12, 8 );
         let position = new LX.vec2( x, y );
@@ -177,16 +175,16 @@ export class ImUI
 
         // Get mouse state
 
-        const hovered = this.mousePosition.x >= position.x && this.mousePosition.x <= (position.x + fullSize.x)
-            && this.mousePosition.y >= position.y && this.mousePosition.y <= (position.y + fullSize.y);
+        const hovered = this.mousePosition.x >= position.x && this.mousePosition.x <= ( position.x + fullSize.x )
+            && this.mousePosition.y >= position.y && this.mousePosition.y <= ( position.y + fullSize.y );
 
         const active = hovered && this.mouseDown;
 
         // Draw box
 
         ctx.beginPath();
-        ctx.fillStyle = hovered ? "#444" : "#222";
-        ctx.roundRect( position.x, position.y, fullSize.x, fullSize.y, [8, 8, 8, 8] );
+        ctx.fillStyle = hovered ? '#444' : '#222';
+        ctx.roundRect( position.x, position.y, fullSize.x, fullSize.y, [ 8, 8, 8, 8 ] );
         ctx.fill();
 
         // Draw value
@@ -194,20 +192,20 @@ export class ImUI
         const min = position.x;
         const max = position.x + fullSize.x;
 
-        if( active )
+        if ( active )
         {
-            value = LX.clamp((this.mousePosition.x - min) / (max - min), 0.0, 1.0);
-            this.components[ text ].value = value;
+            value = LX.clamp( ( this.mousePosition.x - min ) / ( max - min ), 0.0, 1.0 );
+            this.components[text].value = value;
         }
-        
+
         let valueSize = new LX.vec2( fullSize.x * value, size.y );
 
         ctx.beginPath();
-        ctx.fillStyle = hovered ? "#6074e7" : "#3e57e4";
-        if( valueSize.x > ( fullSize.x - 8 ) ) // 8: radius
-        {
-            ctx.roundRect( position.x, position.y, valueSize.x, valueSize.y + padding.y * 2.0, [8, 8, 8, 8] );
-            ctx.fill();    
+        ctx.fillStyle = hovered ? '#6074e7' : '#3e57e4';
+        if ( valueSize.x > ( fullSize.x - 8 ) )
+        { // 8: radius
+            ctx.roundRect( position.x, position.y, valueSize.x, valueSize.y + padding.y * 2.0, [ 8, 8, 8, 8 ] );
+            ctx.fill();
         }
         else
         {
@@ -216,14 +214,14 @@ export class ImUI
 
         // Draw text
 
-        ctx.fillStyle = hovered ? "#fff" : "#ddd";
+        ctx.fillStyle = hovered ? '#fff' : '#ddd';
         ctx.fillText( text, position.x + padding.x, position.y + metrics.actualBoundingBoxAscent + padding.y );
 
         this.usePointerCursor = this.usePointerCursor || hovered;
 
-        if( active )
+        if ( active )
         {
-            if(callback) callback( value );
+            if ( callback ) callback( value );
         }
     }
 
@@ -237,23 +235,23 @@ export class ImUI
 
     Checkbox( text: string, x: number, y: number, value: boolean = false, callback: any )
     {
-        const ctx = this.canvas.getContext("2d");
+        const ctx = this.canvas.getContext( '2d' );
 
         // Store slider value
-        
-        if( !this.components[ text ] )
+
+        if ( !this.components[text] )
         {
-            this.components[ text ] = { value: value };
+            this.components[text] = { value: value };
         }
         else
         {
-            value = this.components[ text ].value;
+            value = this.components[text].value;
         }
 
         // Element properties
 
         let fontSize = 16;
-        ctx.font = fontSize + "px Arial";
+        ctx.font = fontSize + 'px Arial';
 
         let padding = new LX.vec2( 12, 8 );
         let position = new LX.vec2( x, y );
@@ -262,43 +260,44 @@ export class ImUI
         let size = new LX.vec2( metrics.width, metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent );
 
         let boxMargin = 12;
-        let fullSize = new LX.vec2(boxMargin * 2.0, 0);
+        let fullSize = new LX.vec2( boxMargin * 2.0, 0 );
         fullSize.add( size, fullSize );
 
         // Get mouse state
 
         const boxStartX = position.x + size.x + padding.x + boxMargin;
         const boxStartY = position.y + padding.y;
-        const hovered = this.mousePosition.x >= boxStartX && this.mousePosition.x <= (boxStartX + size.y)
-        && this.mousePosition.y >= boxStartY && this.mousePosition.y <= (boxStartY + size.y);
+        const hovered = this.mousePosition.x >= boxStartX && this.mousePosition.x <= ( boxStartX + size.y )
+            && this.mousePosition.y >= boxStartY && this.mousePosition.y <= ( boxStartY + size.y );
 
         const active = hovered && this.mouseDown;
         const pressed = hovered && this.eventClick;
 
         // Draw button
 
-        ctx.fillStyle = active ? "#666" : (hovered ? "#444" : "#222");
+        ctx.fillStyle = active ? '#666' : ( hovered ? '#444' : '#222' );
         ctx.fillRect( position.x, position.y, fullSize.x + padding.x * 2.0, fullSize.y + padding.y * 2.0 );
 
         // Draw checkbox
 
-        if( pressed )
+        if ( pressed )
         {
             value = !value;
-            this.components[ text ].value = value;
-            if( callback )
+            this.components[text].value = value;
+            if ( callback )
             {
                 callback( value );
             }
         }
 
-        ctx.fillStyle = value ? (active ? "#ddd" : (hovered ? "#6074e7" : "#3e57e4")) : 
-                            (active ? "#bbb" : (hovered ? "#777" : "#888"));
+        ctx.fillStyle = value
+            ? ( active ? '#ddd' : ( hovered ? '#6074e7' : '#3e57e4' ) )
+            : ( active ? '#bbb' : ( hovered ? '#777' : '#888' ) );
         ctx.fillRect( position.x + size.x + padding.x + boxMargin, position.y + padding.y, size.y, size.y );
 
         // Draw text
 
-        ctx.fillStyle = hovered ? "#fff" : "#ddd";
+        ctx.fillStyle = hovered ? '#fff' : '#ddd';
         ctx.fillText( text, position.x + padding.x, position.y + metrics.actualBoundingBoxAscent + padding.y );
 
         this.usePointerCursor = this.usePointerCursor || hovered;
@@ -309,12 +308,12 @@ export class ImUI
      * @description Clears the information stored during the last frame
      */
 
-    endFrame() {
-
+    endFrame()
+    {
         delete this.eventClick;
 
         // Pointer cursor on hover
-        document.body.style.cursor = this.usePointerCursor ? "pointer" : "default";
+        document.body.style.cursor = this.usePointerCursor ? 'pointer' : 'default';
 
         // Clear info
         this.usePointerCursor = false;

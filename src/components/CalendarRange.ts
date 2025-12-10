@@ -3,8 +3,8 @@
 import { LX } from './../core/Namespace';
 import { Calendar } from './Calendar';
 
-export class CalendarRange {
-
+export class CalendarRange
+{
     /**
      * @constructor CalendarRange
      * @param {Array} range ["DD/MM/YYYY", "DD/MM/YYYY"]
@@ -23,37 +23,37 @@ export class CalendarRange {
 
     constructor( range: string[], options: any = {} )
     {
-        this.root = LX.makeContainer( ["auto", "auto"], "flex flex-row" );
+        this.root = LX.makeContainer( [ 'auto', 'auto' ], 'flex flex-row' );
 
-        console.assert( range && range.constructor === Array, "Range cannot be empty and has to be an Array!" );
+        console.assert( range && range.constructor === Array, 'Range cannot be empty and has to be an Array!' );
 
         let mustSetMonth = null;
         let dateReversed = false;
 
         // Fix any issues with date range picking
         {
-            const t0 = LX.dateFromDateString( range[ 0 ] );
-            const t1 = LX.dateFromDateString( range[ 1 ] );
+            const t0 = LX.dateFromDateString( range[0] );
+            const t1 = LX.dateFromDateString( range[1] );
 
-            if( t0 > t1 )
+            if ( t0 > t1 )
             {
-                const tmp = range[ 0 ];
-                range[ 0 ] = range[ 1 ];
-                range[ 1 ] = tmp;
+                const tmp = range[0];
+                range[0] = range[1];
+                range[1] = tmp;
                 dateReversed = true;
             }
 
-            mustSetMonth = (dateReversed ? t1.getMonth() : t0.getMonth() ) + 2; // +1 to convert range, +1 to use next month
+            mustSetMonth = ( dateReversed ? t1.getMonth() : t0.getMonth() ) + 2; // +1 to convert range, +1 to use next month
         }
 
-        this.from = range[ 0 ];
-        this.to = range[ 1 ];
+        this.from = range[0];
+        this.to = range[1];
 
-        const onChange = ( date: any ) => {
+        const onChange = ( date: any ) =>
+        {
+            const newDateString = `${date.day}/${date.month}/${date.year}`;
 
-            const newDateString = `${ date.day }/${ date.month }/${ date.year }`;
-
-            if( !this._selectingRange )
+            if ( !this._selectingRange )
             {
                 this.from = this.to = newDateString;
                 this._selectingRange = true;
@@ -69,32 +69,33 @@ export class CalendarRange {
             this.fromCalendar.setRange( newRange );
             this.toCalendar.setRange( newRange );
 
-            if( options.onChange )
+            if ( options.onChange )
             {
                 options.onChange( newRange );
             }
-
         };
 
         this.fromCalendar = new Calendar( this.from, {
             skipNextMonth: true,
             onChange,
-            onPreviousMonth: () => {
+            onPreviousMonth: () =>
+            {
                 this.toCalendar._previousMonth();
             },
             range
-        });
+        } );
 
         this.toCalendar = new Calendar( this.to, {
             skipPrevMonth: true,
             onChange,
-            onNextMonth: () => {
+            onNextMonth: () =>
+            {
                 this.fromCalendar._nextMonth();
             },
             range
-        });
+        } );
 
-        console.assert( mustSetMonth && "New Month must be valid" );
+        console.assert( mustSetMonth && 'New Month must be valid' );
         this.toCalendar.setMonth( mustSetMonth );
 
         this.root.appendChild( this.fromCalendar.root );
@@ -109,7 +110,9 @@ export class CalendarRange {
         const d1 = LX.dateFromDateString( this.to );
         const d1Month = this.toCalendar.getMonthName( d1.getMonth() );
 
-        return `${ this.fromCalendar.getFullDate( d0Month, d0.getDate(), d0.getFullYear() ) } to ${ this.toCalendar.getFullDate( d1Month, d1.getDate(), d1.getFullYear() ) }`;
+        return `${this.fromCalendar.getFullDate( d0Month, d0.getDate(), d0.getFullYear() )} to ${
+            this.toCalendar.getFullDate( d1Month, d1.getDate(), d1.getFullYear() )
+        }`;
     }
 }
 

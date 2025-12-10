@@ -1,8 +1,9 @@
 {
     "$schema": "https://plugins.dprint.dev/dprint/dprint-plugin-typescript/latest/schema.json",
-    "lineWidth": 100,
+    "lineWidth": 120,
     "indentWidth": 4,
     "useTabs": false,
+    "newLineKind": "system",
     "typescript": {
         "semiColons": "always",
         "quoteStyle": "preferSingle",

@@ -1,8 +1,8 @@
 // Curve.ts @jxarco
 
+import { IEvent } from './../core/Event';
 import { LX } from './../core/Namespace';
 import { BaseComponent, ComponentType } from './BaseComponent';
-import { IEvent } from './../core/Event';
 import { CanvasCurve } from './CanvasCurve';
 
 /**
@@ -20,29 +20,33 @@ export class Curve extends BaseComponent
 
         super( ComponentType.CURVE, name, defaultValues, options );
 
-        this.onGetValue = () => {
-            return JSON.parse(JSON.stringify( curveInstance.element.value ));
+        this.onGetValue = () =>
+        {
+            return JSON.parse( JSON.stringify( curveInstance.element.value ) );
         };
 
-        this.onSetValue = ( newValue, skipCallback, event ) => {
+        this.onSetValue = ( newValue, skipCallback, event ) =>
+        {
             curveInstance.element.value = JSON.parse( JSON.stringify( newValue ) );
             curveInstance.redraw();
-            if( !skipCallback )
+            if ( !skipCallback )
             {
                 this._trigger( new IEvent( name, curveInstance.element.value, event ), callback );
             }
         };
 
-        this.onResize = ( rect ) => {
-            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
-            container.style.width = `calc( 100% - ${ realNameWidth })`;
+        this.onResize = ( rect ) =>
+        {
+            const realNameWidth = this.root.domName?.style.width ?? '0px';
+            container.style.width = `calc( 100% - ${realNameWidth})`;
         };
 
-        var container = document.createElement( "div" );
-        container.className = "lexcurve";
+        var container = document.createElement( 'div' );
+        container.className = 'lexcurve';
         this.root.appendChild( container );
 
-        options.callback = ( v: any[], e: MouseEvent ) => {
+        options.callback = ( v: any[], e: MouseEvent ) =>
+        {
             this._trigger( new IEvent( name, v, e ), callback );
         };
 
@@ -52,13 +56,14 @@ export class Curve extends BaseComponent
         container.appendChild( curveInstance.element );
         this.curveInstance = curveInstance;
 
-        const observer = new ResizeObserver( entries => {
+        const observer = new ResizeObserver( entries =>
+        {
             for ( const entry of entries )
             {
                 curveInstance.canvas.width = entry.contentRect.width;
                 curveInstance.redraw();
             }
-        });
+        } );
 
         observer.observe( container );
 

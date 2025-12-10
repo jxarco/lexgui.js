@@ -1,8 +1,8 @@
 // Layers.ts @jxarco
 
+import { IEvent } from './../core/Event';
 import { LX } from './../core/Namespace';
 import { BaseComponent, ComponentType } from './BaseComponent';
-import { IEvent } from './../core/Event';
 
 /**
  * @class Layers
@@ -17,65 +17,69 @@ export class Layers extends BaseComponent
     {
         super( ComponentType.LAYERS, name, value, options );
 
-        this.onGetValue = () => {
+        this.onGetValue = () =>
+        {
             return value;
         };
 
-        this.onSetValue = ( newValue, skipCallback, event ) => {
+        this.onSetValue = ( newValue, skipCallback, event ) =>
+        {
             value = newValue;
             this.setLayers( value );
-            if( !skipCallback )
+            if ( !skipCallback )
             {
-                this._trigger( new IEvent(name, value, event), callback );
+                this._trigger( new IEvent( name, value, event ), callback );
             }
         };
 
-        this.onResize = ( rect ) => {
-            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
-            container.style.width = `calc( 100% - ${ realNameWidth })`;
+        this.onResize = ( rect ) =>
+        {
+            const realNameWidth = this.root.domName?.style.width ?? '0px';
+            container.style.width = `calc( 100% - ${realNameWidth})`;
         };
 
-        const container = document.createElement( "div" );
-        container.className = "lexlayers";
+        const container = document.createElement( 'div' );
+        container.className = 'lexlayers';
         this.root.appendChild( container );
 
         const maxBits = options.maxBits ?? 16;
 
-        this.setLayers = ( val ) =>  {
-
-            container.innerHTML = "";
+        this.setLayers = ( val ) =>
+        {
+            container.innerHTML = '';
 
             let binary = val.toString( 2 );
             let nbits = binary.length;
 
             // fill zeros
-            for( let i = 0; i < ( maxBits - nbits ); ++i )
+            for ( let i = 0; i < ( maxBits - nbits ); ++i )
             {
                 binary = '0' + binary;
             }
 
-            for( let bit = 0; bit < maxBits; ++bit )
+            for ( let bit = 0; bit < maxBits; ++bit )
             {
-                let layer: any = document.createElement( "div" );
-                layer.className = "lexlayer";
+                let layer: any = document.createElement( 'div' );
+                layer.className = 'lexlayer';
 
-                if( val != undefined )
+                if ( val != undefined )
                 {
-                    const valueBit = binary[ maxBits - bit - 1 ];
-                    if( valueBit != undefined && valueBit == '1' )
+                    const valueBit = binary[maxBits - bit - 1];
+                    if ( valueBit != undefined && valueBit == '1' )
                     {
-                        layer.classList.add( "selected" );
+                        layer.classList.add( 'selected' );
                     }
                 }
 
                 layer.innerText = bit + 1;
-                layer.title = "Bit " + bit + ", value " + ( 1 << bit );
+                layer.title = 'Bit ' + bit + ', value ' + ( 1 << bit );
                 container.appendChild( layer );
 
-                layer.addEventListener( "click", ( e: any ) => {
+                layer.addEventListener( 'click', ( e: any ) =>
+                {
                     e.stopPropagation();
                     e.stopImmediatePropagation();
-                    e.target.classList.toggle( "selected" );
+                    e.target.classList.toggle( 'selected' );
                     const newValue = val ^ ( 1 << bit );
                     this.set( newValue, false, e );
                 } );

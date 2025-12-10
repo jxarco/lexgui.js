@@ -2,9 +2,9 @@
 
 import { LX } from '../core/Namespace';
 
-if( !LX )
+if ( !LX )
 {
-    throw( "Missing LX namespace!" );
+    throw ( 'Missing LX namespace!' );
 }
 
 LX.extensions.push( 'Audio' );
@@ -23,7 +23,7 @@ export class Knob extends BaseComponent
 {
     constructor( name: string, value: number, min: number, max: number, callback: any, options: any = {} )
     {
-        if( value.constructor == Number )
+        if ( value.constructor == Number )
         {
             value = LX.clamp( value, min, max );
             value = options.precision ? LX.round( value, options.precision ) : value;
@@ -31,51 +31,54 @@ export class Knob extends BaseComponent
 
         super( ComponentType.KNOB, name, value, options );
 
-        this.onGetValue = () => {
+        this.onGetValue = () =>
+        {
             return innerKnobCircle.value;
         };
 
-        this.onSetValue = ( newValue: any, skipCallback?: boolean, event?: any ) => {
-            innerSetValue( newValue );
-            LX.BaseComponent._dispatchEvent( innerKnobCircle, "change", skipCallback );
-        };
-
-        this.onResize = () => {
-            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
-            container.style.width = `calc( 100% - ${ realNameWidth })`;
-        };
-
-        const snapEnabled = ( options.snap && options.snap.constructor == Number );
-        const ticks: number[] = [];
-        if( snapEnabled )
+        this.onSetValue = ( newValue: any, skipCallback?: boolean, event?: any ) =>
         {
-            const range = (max - min) / options.snap;
-            for( let i = 0; i < ( options.snap + 1 ); ++i )
+            innerSetValue( newValue );
+            LX.BaseComponent._dispatchEvent( innerKnobCircle, 'change', skipCallback );
+        };
+
+        this.onResize = () =>
+        {
+            const realNameWidth = this.root.domName?.style.width ?? '0px';
+            container.style.width = `calc( 100% - ${realNameWidth})`;
+        };
+
+        const snapEnabled = options.snap && options.snap.constructor == Number;
+        const ticks: number[] = [];
+        if ( snapEnabled )
+        {
+            const range = ( max - min ) / options.snap;
+            for ( let i = 0; i < ( options.snap + 1 ); ++i )
             {
-                ticks.push( min + (i  * range) );
+                ticks.push( min + ( i * range ) );
             }
         }
 
         var container: any = document.createElement( 'div' );
-        container.className = "lexknob";
+        container.className = 'lexknob';
         LX.addClass( container, options.size );
-        LX.addClass( container, snapEnabled ? "show-ticks" : null );
+        LX.addClass( container, snapEnabled ? 'show-ticks' : null );
 
         let knobCircle = document.createElement( 'div' );
-        knobCircle.className = "knobcircle";
-        if( snapEnabled )
+        knobCircle.className = 'knobcircle';
+        if ( snapEnabled )
         {
-            knobCircle.style.setProperty( "--knob-snap-mark", ( 270 / options.snap ) + "deg" );
+            knobCircle.style.setProperty( '--knob-snap-mark', ( 270 / options.snap ) + 'deg' );
         }
 
         let innerKnobCircle: any = document.createElement( 'div' );
-        innerKnobCircle.className = "innerknobcircle";
+        innerKnobCircle.className = 'innerknobcircle';
         innerKnobCircle.min = min;
         innerKnobCircle.max = max;
         knobCircle.appendChild( innerKnobCircle );
 
         let knobMarker: any = document.createElement( 'div' );
-        knobMarker.className = "knobmarker";
+        knobMarker.className = 'knobmarker';
         innerKnobCircle.appendChild( knobMarker );
         innerKnobCircle.value = innerKnobCircle.iValue = value;
 
@@ -86,25 +89,27 @@ export class Knob extends BaseComponent
             const angle = LX.remapRange( v, innerKnobCircle.min, innerKnobCircle.max, -135.0, 135.0 );
             innerKnobCircle.style.rotate = angle + 'deg';
             innerKnobCircle.value = v;
-        }
+        };
 
         const angle = LX.remapRange( value, min, max, -135.0, 135.0 );
         innerKnobCircle.style.rotate = angle + 'deg';
 
-        if( options.disabled )
+        if ( options.disabled )
         {
-            LX.addClass( container, "disabled" );
+            LX.addClass( container, 'disabled' );
         }
 
-        innerKnobCircle.addEventListener( "change", ( e: InputEvent ) => {
-
+        innerKnobCircle.addEventListener( 'change', ( e: InputEvent ) =>
+        {
             const knob: any = e.target;
 
             const skipCallback = e.detail;
 
-            if( mustSnap )
+            if ( mustSnap )
             {
-                knob.value = ticks.reduce( ( prev, curr ) => Math.abs( curr - knob.value ) < Math.abs( prev - knob.value ) ? curr : prev );
+                knob.value = ticks.reduce( ( prev, curr ) =>
+                    Math.abs( curr - knob.value ) < Math.abs( prev - knob.value ) ? curr : prev
+                );
             }
 
             let val = knob.value = LX.clamp( knob.value, knob.min, knob.max );
@@ -113,39 +118,38 @@ export class Knob extends BaseComponent
             innerSetValue( val );
 
             // Reset button (default value)
-            if( !skipCallback )
+            if ( !skipCallback )
             {
-                let btn = this.root.querySelector( ".lexcomponentname .lexicon" );
-                if( btn ) btn.style.display = val != innerKnobCircle.iValue ? "block": "none";
+                let btn = this.root.querySelector( '.lexcomponentname .lexicon' );
+                if ( btn ) btn.style.display = val != innerKnobCircle.iValue ? 'block' : 'none';
 
-                if( !( snapEnabled && !mustSnap ) )
+                if ( !( snapEnabled && !mustSnap ) )
                 {
                     this._trigger( new IEvent( name, val, e ), callback );
                     mustSnap = false;
                 }
             }
-
-        }, { passive: false });
+        }, { passive: false } );
 
         // Add drag input
 
-        innerKnobCircle.addEventListener( "mousedown", innerMouseDown );
+        innerKnobCircle.addEventListener( 'mousedown', innerMouseDown );
 
         var that = this;
 
         function innerMouseDown( e: MouseEvent )
         {
-            if( document.activeElement == innerKnobCircle || options.disabled )
+            if ( document.activeElement == innerKnobCircle || options.disabled )
             {
                 return;
             }
 
             var doc = that.root.ownerDocument;
-            doc.addEventListener( "mousemove", innerMouseMove );
-            doc.addEventListener( "mouseup", innerMouseUp );
-            document.body.classList.add( "noevents" );
+            doc.addEventListener( 'mousemove', innerMouseMove );
+            doc.addEventListener( 'mouseup', innerMouseUp );
+            document.body.classList.add( 'noevents' );
 
-            if( !document.pointerLockElement )
+            if ( !document.pointerLockElement )
             {
                 container.requestPointerLock();
             }
@@ -161,9 +165,9 @@ export class Knob extends BaseComponent
             if ( dt != 0 )
             {
                 let mult = options.step ?? 1;
-                if(e.shiftKey) mult *= 10;
-                else if(e.altKey) mult *= 0.1;
-                let new_value = (innerKnobCircle.value - mult * dt);
+                if ( e.shiftKey ) mult *= 10;
+                else if ( e.altKey ) mult *= 0.1;
+                let new_value = innerKnobCircle.value - mult * dt;
                 innerKnobCircle.value = new_value;
                 LX.BaseComponent._dispatchEvent( innerKnobCircle, 'change' );
             }
@@ -180,13 +184,13 @@ export class Knob extends BaseComponent
             document.body.classList.remove( 'noevents' );
 
             // Snap if necessary
-            if( snapEnabled )
+            if ( snapEnabled )
             {
                 mustSnap = true;
                 LX.BaseComponent._dispatchEvent( innerKnobCircle, 'change' );
             }
 
-            if( document.pointerLockElement )
+            if ( document.pointerLockElement )
             {
                 document.exitPointerLock();
             }
@@ -219,4 +223,4 @@ panelProto.addKnob = function( name: string, value: number, min: number, max: nu
 {
     const component = new Knob( name, value, min, max, callback, options );
     return this._attachComponent( component );
-}
+};

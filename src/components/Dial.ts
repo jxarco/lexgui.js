@@ -1,8 +1,8 @@
 // Dial.ts @jxarco
 
+import { IEvent } from './../core/Event';
 import { LX } from './../core/Namespace';
 import { BaseComponent, ComponentType } from './BaseComponent';
-import { IEvent } from './../core/Event';
 import { CanvasDial } from './CanvasDial';
 
 /**
@@ -20,35 +20,39 @@ export class Dial extends BaseComponent
 
         super( ComponentType.DIAL, name, defaultValues, options );
 
-        this.onGetValue = () => {
+        this.onGetValue = () =>
+        {
             return JSON.parse( JSON.stringify( dialInstance.element.value ) );
         };
 
-        this.onSetValue = ( newValue, skipCallback, event ) => {
+        this.onSetValue = ( newValue, skipCallback, event ) =>
+        {
             dialInstance.element.value = JSON.parse( JSON.stringify( newValue ) );
             dialInstance.redraw();
-            if( !skipCallback )
+            if ( !skipCallback )
             {
                 this._trigger( new IEvent( name, dialInstance.element.value, event ), callback );
             }
         };
 
-        this.onResize = ( rect ) => {
-            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
-            container.style.width = `calc( 100% - ${ realNameWidth })`;
+        this.onResize = ( rect ) =>
+        {
+            const realNameWidth = this.root.domName?.style.width ?? '0px';
+            container.style.width = `calc( 100% - ${realNameWidth})`;
             LX.flushCss( container );
-            dialInstance.element.style.height = dialInstance.element.offsetWidth + "px";
+            dialInstance.element.style.height = dialInstance.element.offsetWidth + 'px';
             dialInstance.canvas.width = dialInstance.element.offsetWidth;
-            container.style.width = dialInstance.element.offsetWidth + "px";
+            container.style.width = dialInstance.element.offsetWidth + 'px';
             dialInstance.canvas.height = dialInstance.canvas.width;
             dialInstance.redraw();
         };
 
-        var container = document.createElement( "div" );
-        container.className = "lexcurve";
+        var container = document.createElement( 'div' );
+        container.className = 'lexcurve';
         this.root.appendChild( container );
 
-        options.callback = ( v: any, e: MouseEvent ) => {
+        options.callback = ( v: any, e: MouseEvent ) =>
+        {
             this._trigger( new IEvent( name, v, e ), callback );
         };
 

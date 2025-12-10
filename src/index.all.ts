@@ -1,5 +1,5 @@
 // Core
-export * from "./index.css";
+export * from './index.css';
 
 // Extensions
-export * from "./extensions/index";
+export * from './extensions/index';

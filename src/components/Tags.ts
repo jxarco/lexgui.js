@@ -1,8 +1,8 @@
 // Tags.ts @jxarco
 
+import { IEvent } from './../core/Event';
 import { LX } from './../core/Namespace';
 import { BaseComponent, ComponentType } from './BaseComponent';
-import { IEvent } from './../core/Event';
 
 /**
  * @class Tags
@@ -22,45 +22,49 @@ export class Tags extends BaseComponent
 
         this.options.skipDuplicates = options.skipDuplicates ?? true;
 
-        this.onGetValue = () => {
+        this.onGetValue = () =>
+        {
             return LX.deepCopy( value );
         };
 
-        this.onSetValue = ( newValue, skipCallback, event ) => {
+        this.onSetValue = ( newValue, skipCallback, event ) =>
+        {
             arrayValue = [].concat( newValue );
             this.generateTags( arrayValue );
-            if( !skipCallback )
+            if ( !skipCallback )
             {
                 this._trigger( new IEvent( name, arrayValue, event ), callback );
             }
         };
 
-        this.onResize = ( rect ) => {
-            const realNameWidth = ( this.root.domName?.style.width ?? "0px" );
-            tagsContainer.style.width = `calc( 100% - ${ realNameWidth })`;
+        this.onResize = ( rect ) =>
+        {
+            const realNameWidth = this.root.domName?.style.width ?? '0px';
+            tagsContainer.style.width = `calc( 100% - ${realNameWidth})`;
         };
 
         // Show tags
 
-        const tagsContainer = document.createElement('div');
-        tagsContainer.className = "lextags";
+        const tagsContainer = document.createElement( 'div' );
+        tagsContainer.className = 'lextags';
         this.root.appendChild( tagsContainer );
 
-        this.generateTags = ( value ) => {
+        this.generateTags = ( value ) =>
+        {
+            tagsContainer.innerHTML = '';
 
-            tagsContainer.innerHTML = "";
-
-            for( let i = 0; i < value.length; ++i )
+            for ( let i = 0; i < value.length; ++i )
             {
-                const tagName = value[ i ];
-                const tag = document.createElement('span');
-                tag.className = "lextag";
+                const tagName = value[i];
+                const tag = document.createElement( 'span' );
+                tag.className = 'lextag';
                 tag.innerHTML = tagName;
 
-                const removeButton = LX.makeIcon( "X", { svgClass: "sm" } );
+                const removeButton = LX.makeIcon( 'X', { svgClass: 'sm' } );
                 tag.appendChild( removeButton );
 
-                removeButton.addEventListener( 'click', ( e: MouseEvent ) => {
+                removeButton.addEventListener( 'click', ( e: MouseEvent ) =>
+                {
                     tag.remove();
                     value.splice( value.indexOf( tagName ), 1 );
                     this.set( value, false, e );
@@ -70,23 +74,26 @@ export class Tags extends BaseComponent
             }
 
             let tagInput = document.createElement( 'input' );
-            tagInput.value = "";
-            tagInput.placeholder = "Add tag...";
+            tagInput.value = '';
+            tagInput.placeholder = 'Add tag...';
             tagsContainer.appendChild( tagInput );
 
-            tagInput.onkeydown = e => {
-                if( e.key == ' ' || e.key == 'Enter' )
+            tagInput.onkeydown = e =>
+            {
+                if ( e.key == ' ' || e.key == 'Enter' )
                 {
                     const val = tagInput.value.replace( /\s/g, '' );
                     e.preventDefault();
-                    if (!val.length || (options.skipDuplicates && value.indexOf(val) > -1 ) )
+                    if ( !val.length || ( options.skipDuplicates && value.indexOf( val ) > -1 ) )
+                    {
                         return;
+                    }
                     value.push( val );
                     this.set( value, false, e );
-                    tagsContainer.querySelector("input")?.focus(); // generateTags creates a new tagInput instance
+                    tagsContainer.querySelector( 'input' )?.focus(); // generateTags creates a new tagInput instance
                 }
             };
-        }
+        };
 
         this.generateTags( arrayValue );
 
