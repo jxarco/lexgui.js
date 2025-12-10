@@ -41,27 +41,30 @@ export class Counter extends BaseComponent
         container.className = 'flex flex-row border bg-primary rounded-lg shadow';
         this.root.appendChild( container );
 
-        const input = LX.makeElement( "input", "lexcounter w-12 bg-primary px-2 fg-primary", "", container );
-        input.type = "number";
+        const input = LX.makeElement( 'input', 'lexcounter w-12 bg-primary px-2 fg-primary', '', container );
+        input.type = 'number';
         input.value = value;
 
-        if( options.disabled )
+        if ( options.disabled )
         {
-            input.setAttribute( "disabled", "true" );
+            input.setAttribute( 'disabled', 'true' );
         }
 
         const substrButton = new Button( null, '', ( value: any, e: MouseEvent ) => {
             let mult = step ?? 1;
             if ( e.shiftKey ) mult *= 10;
             this.set( this.count - mult, false, e );
-        }, { disabled: options.disabled, className: `p-0 ${ options.disabled ? "" : "hover:bg-secondary" } border-left border-right`, buttonClass: "bg-none", icon: 'Minus' } );
+        }, { disabled: options.disabled,
+            className: `p-0 ${options.disabled ? '' : 'hover:bg-secondary'} border-left border-right`,
+            buttonClass: 'bg-none', icon: 'Minus' } );
         container.appendChild( substrButton.root );
 
         const addButton = new Button( null, '', ( value: any, e: MouseEvent ) => {
             let mult = step ?? 1;
             if ( e.shiftKey ) mult *= 10;
             this.set( this.count + mult, false, e );
-        }, { disabled: options.disabled, className: `p-0 ${ options.disabled ? "" : "hover:bg-secondary" } rounded-r-lg`, buttonClass: "bg-none", icon: 'Plus' } );
+        }, { disabled: options.disabled, className: `p-0 ${options.disabled ? '' : 'hover:bg-secondary'} rounded-r-lg`,
+            buttonClass: 'bg-none', icon: 'Plus' } );
         container.appendChild( addButton.root );
     }
 }
