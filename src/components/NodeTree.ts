@@ -644,9 +644,7 @@ export class Tree extends BaseComponent
 
         if ( name )
         {
-            let title = document.createElement( 'span' );
-            title.innerHTML = name;
-            container.appendChild( title );
+            let title = LX.makeElement( 'span', 'block p-1 fg-secondary select-none text-base font-medium whitespace-nowrap', name, container );
         }
 
         let toolsDiv = document.createElement( 'div' );

@@ -229,11 +229,11 @@ export class Sidebar
             info.className = 'infodefault';
             header.appendChild( info );
 
-            const infoText = document.createElement( 'span' );
+            const infoText = LX.makeElement( 'span', 'truncate text-sm font-semibold' );
             infoText.innerHTML = options.headerTitle ?? '';
             info.appendChild( infoText );
 
-            const infoSubtext = document.createElement( 'span' );
+            const infoSubtext = LX.makeElement( 'span', 'truncate text-xs' );
             infoSubtext.innerHTML = options.headerSubtitle ?? '';
             info.appendChild( infoSubtext );
         }
@@ -281,11 +281,11 @@ export class Sidebar
             info.className = 'infodefault';
             footer.appendChild( info );
 
-            const infoText = document.createElement( 'span' );
+            const infoText = LX.makeElement( 'span', 'truncate text-sm font-semibold' );
             infoText.innerHTML = options.footerTitle ?? '';
             info.appendChild( infoText );
 
-            const infoSubtext = document.createElement( 'span' );
+            const infoSubtext = LX.makeElement( 'span', 'truncate text-xs' );
             infoSubtext.innerHTML = options.footerSubtitle ?? '';
             info.appendChild( infoSubtext );
         }

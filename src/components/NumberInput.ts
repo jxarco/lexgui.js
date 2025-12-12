@@ -82,8 +82,8 @@ export class NumberInput extends BaseComponent
 
         if ( options.units )
         {
-            let unitBox = LX.makeContainer( [ 'auto', 'auto' ], 'px-2 bg-secondary content-center', options.units,
-                valueBox, { 'word-break': 'keep-all' } );
+            let unitBox = LX.makeContainer( [ 'auto', 'auto' ], 'px-2 bg-primary content-center break-keep', options.units,
+                valueBox );
             vecinput.unitBox = unitBox;
         }
 

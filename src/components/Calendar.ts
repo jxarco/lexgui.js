@@ -33,7 +33,7 @@ export class Calendar
 
     constructor( dateString?: string, options: any = {} )
     {
-        this.root = LX.makeContainer( [ '256px', 'auto' ], 'p-1 text-base' );
+        this.root = LX.makeContainer( [ '256px', 'auto' ], 'p-1 flex flex-col gap-2 text-sm' );
 
         this.onChange = options.onChange;
         this.onPreviousMonth = options.onPreviousMonth;
@@ -116,7 +116,7 @@ export class Calendar
             if ( !this.skipPrevMonth )
             {
                 const prevMonthIcon = LX.makeIcon( 'Left', { title: 'Previous Month',
-                    iconClass: 'border p-1 rounded hover:bg-secondary', svgClass: 'sm' } );
+                    iconClass: 'border-color p-1 rounded hover:bg-secondary', svgClass: 'sm' } );
                 header.appendChild( prevMonthIcon );
                 prevMonthIcon.addEventListener( 'click', () => {
                     this._previousMonth();
@@ -129,7 +129,7 @@ export class Calendar
             if ( !this.skipNextMonth )
             {
                 const nextMonthIcon = LX.makeIcon( 'Right', { title: 'Next Month',
-                    iconClass: 'border p-1 rounded hover:bg-secondary', svgClass: 'sm' } );
+                    iconClass: 'border-color p-1 rounded hover:bg-secondary', svgClass: 'sm' } );
                 header.appendChild( nextMonthIcon );
                 nextMonthIcon.addEventListener( 'click', () => {
                     this._nextMonth();
@@ -153,7 +153,7 @@ export class Calendar
                 for ( const headData of [ 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su' ] )
                 {
                     const th = document.createElement( 'th' );
-                    th.className = 'fg-tertiary text-sm font-normal select-none';
+                    th.className = 'fg-tertiary text-xs font-normal select-none';
                     th.innerHTML = `<span>${headData}</span>`;
                     hrow.appendChild( th );
                 }
@@ -177,7 +177,7 @@ export class Calendar
                     for ( const dayData of weekDays )
                     {
                         const th = document.createElement( 'th' );
-                        th.className = 'leading-loose font-normal rounded select-none cursor-pointer';
+                        th.className = 'leading-8 text-xs font-normal rounded select-none cursor-pointer';
 
                         const dayDate = new Date( `${this.month}/${dayData.day}/${this.year}` );
                         const date = new Date();

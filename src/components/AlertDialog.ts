@@ -26,7 +26,7 @@ export class AlertDialog extends Dialog
 
             p.sameLine( 2, 'justify-end' );
             p.addButton( null, options.cancelText ?? 'Cancel', () => this.destroy(), {
-                buttonClass: 'border bg-primary'
+                buttonClass: 'border-color bg-primary'
             } );
             p.addButton( null, options.continueText ?? 'Continue', () => {
                 this.destroy();

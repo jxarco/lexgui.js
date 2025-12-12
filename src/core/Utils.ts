@@ -1542,6 +1542,7 @@ function toast( title: string, description: string, options: any = {} )
             break;
         case 'center':
             nots.style.placeSelf = 'center';
+            nots.style.justifySelf = 'anchor-center';
             break;
         case 'right':
             nots.style.right = '1rem';

@@ -98,7 +98,7 @@ if( mobile )
     `, area );
 
     const headerButtons = LX.makeContainer( [ "auto", "auto" ], "flex flex-row mt-2", ``, header );
-    const getStartedButton = new LX.Button( null, `Get Started <span class="text-lg">${ LX.version }</span>`, () => window.open( "./docs/", "_blank" ), { buttonClass: "contrast" } );
+    const getStartedButton = new LX.Button( null, `Get Started <span class="text-base">${ LX.version }</span>`, () => window.open( "./docs/", "_blank" ), { buttonClass: "contrast" } );
     const componentsButton = new LX.Button( null, "View Components", () => window.open( "./docs/?p=components", "_blank" ), { buttonClass: "tertiary" } );
     headerButtons.appendChild( getStartedButton.root );
     headerButtons.appendChild( componentsButton.root );
@@ -419,11 +419,11 @@ if( mobile )
     if( !mobile )
     {
         const mailContainer = LX.makeContainer( [ null, "800px" ], "flex flex-col bg-primary border-color rounded-lg overflow-hidden" );
-        tabs.add( "Mail", mailContainer, { xselected: true, badge: { content: "5", className: "sm fg-white bg-error", asChild: true } } );
+        tabs.add( "Mail", mailContainer, { xselected: true, badge: { content: "5", className: "xs fg-white bg-error", asChild: true } } );
 
         const mailArea = new LX.Area();
         mailContainer.appendChild( mailArea.root );
-        const badgeClass = "ml-auto bg-none font-medium";
+        const badgeClass = "xs ml-auto bg-none font-medium";
 
         const sidebar = mailArea.addSidebar( m => {
             m.add( "Inbox", { selected: true, icon: "Inbox", content: LX.badge("128", badgeClass, { asElement: true }) } );
@@ -489,20 +489,20 @@ if( mobile )
 
                             // Name + Date
                             {
-                                const msgName = LX.makeContainer( [ "auto", "auto" ], "flex font-semibold text-base gap-2", "", msgNameDate );
+                                const msgName = LX.makeContainer( [ "auto", "auto" ], "flex font-semibold text-sm gap-2", "", msgNameDate );
                                 msgName.innerHTML = mail.name;
                                 msgName.innerHTML += ( mail.read ? "" : `<span class="rounded-full place-self-center bg-accent" style="width: 8px; height: 8px"></span>` );
-                                const msgDate = LX.makeContainer( [ "auto", "auto" ], "fg-tertiary text-sm ml-auto place-self-center", mail.date, msgNameDate );
+                                const msgDate = LX.makeContainer( [ "auto", "auto" ], "fg-tertiary text-xs ml-auto place-self-center", mail.date, msgNameDate );
                             }
 
-                            const msgSubject = LX.makeContainer( [ "100%", "auto" ], "font-semibold text-sm", mail.subject, msgInfo );
+                            const msgSubject = LX.makeContainer( [ "100%", "auto" ], "font-semibold text-xs", mail.subject, msgInfo );
                         }
 
-                        const msgText = LX.makeContainer( [ "100%", "auto" ], "text-sm line-clamp-2 fg-tertiary", mail.content, msgContent );
+                        const msgText = LX.makeContainer( [ "100%", "auto" ], "text-xs line-clamp-2 fg-tertiary", mail.content, msgContent );
                         const msgTags = LX.makeContainer( [ "100%", "auto" ], "flex flex-row gap-0.5 font-semibold", "", msgContent );
                         for( const tag of mail.tags )
                         {
-                            msgTags.appendChild( LX.badge( tag, "sm", { asElement: true } ) );
+                            msgTags.appendChild( LX.badge( tag, "xs", { asElement: true } ) );
                         }
 
                         LX.listen( msgContent, "click", function() {
@@ -569,13 +569,13 @@ if( mobile )
                     const avatarIcon = LX.makeContainer( [ "auto", "auto" ], "font-medium place-self-center", mailNames[ 0 ][ 0 ] + mailNames[ 1 ][ 0 ], avatarContainer );
 
                     const senderData = LX.makeContainer( [ "auto", "auto" ], "flex flex-col gap-0.5", `
-                    <div class="text-base font-semibold">${ mail.name }</div>
-                    <div class="text-sm">${ mail.subject }</div>
-                    <div class="text-sm">Reply-To: ${ mail.email }</div>
+                    <div class="text-sm font-semibold">${ mail.name }</div>
+                    <div class="text-xs">${ mail.subject }</div>
+                    <div class="text-xs">Reply-To: ${ mail.email }</div>
                     `, mailPreviewInfo );
 
-                    const exactDate = LX.makeContainer( [ "auto", "auto" ], "flex flex-row text-sm fg-tertiary ml-auto", mail.exactDate, mailPreviewInfo );
-                    const mailPreviewContent = LX.makeContainer( [ "100%", "515px" ], "flex flex-row border-b-color text-base whitespace-pre-wrap p-4", mail.content, previewDataContent );
+                    const exactDate = LX.makeContainer( [ "auto", "auto" ], "flex flex-row text-xs fg-tertiary ml-auto", mail.exactDate, mailPreviewInfo );
+                    const mailPreviewContent = LX.makeContainer( [ "100%", "515px" ], "flex flex-row border-b-color text-sm whitespace-pre-wrap p-4", mail.content, previewDataContent );
                     const previewFooter = LX.makeContainer( [ "100%", "auto" ], "flex flex-col p-2", "", previewDataContent );
 
                     const msgReplyTextArea = new LX.TextArea(null, "", null,
@@ -607,7 +607,7 @@ if( mobile )
 
         const header = LX.makeContainer( [ null, "auto" ], "col p-4", `
             <h2>Welcome back!</h2>
-            <p class="fg-tertiary">Here's a list of your tasks for this month!</p>
+            <p class="fg-tertiary text-sm">Here's a list of your tasks for this month!</p>
         `, tasksContainer );
 
         const tableComponent = new LX.Table(null, {

@@ -6,7 +6,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <title>Colors - LexGUI</title>
-    <link rel="stylesheet" href="../build/lexgui.css">
+    <link rel="stylesheet" href="../css/output.css">
     <link rel="icon" href="../images/favicon.png">
 
     <script type="importmap">
@@ -151,7 +151,7 @@
             <div class="h-32 bg-${ name } rounded-lg border-color">
                 ${ LX.makeIcon( "Clipboard", { svgClass: "copySvg ml-auto mr-2 mt-2 opacity-0" } ).innerHTML }
             </div>
-            <div class="hex place-self-center font-code text-base" data-copy="${value.hex}">${ name }</div>
+            <div class="hex place-self-center font-code text-xs" data-copy="${value.hex}">${ name }</div>
         `;
         block.querySelector(".copySvg").style.transition = "opacity 0.15s linear, color 0.15s linear";
         block.colorData = value;
@@ -173,7 +173,7 @@
             setTimeout( () => block.querySelector(".copySvg").classList.remove( "fg-success" ), 1500 );
 
             updateExampleString();
-            LX.toast( `${ LX.makeIcon( "CircleCheck" ).innerHTML } Copied ${ val } to clipboard.`, null, { position: "top-center", timeout: 3000 } );
+            LX.toast( `${ LX.makeIcon( "CircleCheck" ).innerHTML } Copied ${ val } to clipboard.`, null, { position: "top-center", timeout: -1 } );
         });
 
         return block;

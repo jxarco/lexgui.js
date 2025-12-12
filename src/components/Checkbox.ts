@@ -52,13 +52,13 @@ export class Checkbox extends BaseComponent
 
         let checkbox = document.createElement( 'input' );
         checkbox.type = 'checkbox';
-        checkbox.className = 'lexcheckbox ' + ( options.className ?? 'primary' );
+        checkbox.className = 'lexcheckbox rounded-xl ' + ( options.className ?? 'primary' );
         checkbox.checked = value;
         checkbox.disabled = options.disabled ?? false;
         container.appendChild( checkbox );
 
         let valueName = document.createElement( 'span' );
-        valueName.className = 'checkboxtext';
+        valueName.className = 'text-sm';
         valueName.innerHTML = options.label ?? 'On';
         container.appendChild( valueName );
 

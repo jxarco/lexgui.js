@@ -216,7 +216,7 @@ export class Table extends BaseComponent
                                             this.activeCustomFilters[k] == f.name
                                         );
                                         const filterBadgesHtml = activeFilters.reduce( ( acc, key ) =>
-                                            acc += LX.badge( key, 'bg-tertiary fg-secondary text-sm border-0' ), '' );
+                                            acc += LX.badge( key, 'xs bg-tertiary fg-secondary border-0' ), '' );
                                         spanName.innerHTML = icon.innerHTML + f.name
                                             + ( activeFilters.length ? separatorHtml : '' ) + filterBadgesHtml;
                                         this.refresh();
@@ -231,7 +231,7 @@ export class Table extends BaseComponent
                             console.assert( f.min != undefined && f.max != undefined,
                                 'Range filter needs min and max values!' );
                             const container = LX.makeContainer( [ '240px', 'auto' ], 'text-base' );
-                            const panel: any = new LX.Panel();
+                            const panel: any = new LX.Panel({className: 'flex flex-col gap-2'});
                             LX.makeContainer( [ '100%', 'auto' ], 'px-3 p-2 pb-0 text-base font-medium', f.name,
                                 container );
 
@@ -247,7 +247,7 @@ export class Table extends BaseComponent
                                     spanName.innerHTML = icon.innerHTML + f.name + ( inUse
                                         ? separatorHtml
                                             + LX.badge( `${f.start} - ${f.end} ${f.units ?? ''}`,
-                                                'bg-tertiary fg-secondary text-sm border-0' )
+                                                'xs bg-tertiary fg-secondary border-0' )
                                         : '' );
                                     if ( inUse )
                                     {
@@ -262,7 +262,7 @@ export class Table extends BaseComponent
                                         + ( inUse
                                             ? separatorHtml
                                                 + LX.badge( `${f.start} - ${f.end} ${f.units ?? ''}`,
-                                                    'bg-tertiary fg-secondary text-sm border-0' )
+                                                    'xs bg-tertiary fg-secondary border-0' )
                                             : '' );
                                     if ( inUse )
                                     {
@@ -308,7 +308,7 @@ export class Table extends BaseComponent
                                         spanName.innerHTML = icon.innerHTML + f.name
                                             + ( separatorHtml
                                                 + LX.badge( `${calendar.getFullDate()}`,
-                                                    'bg-tertiary fg-secondary text-sm border-0' ) );
+                                                    'xs bg-tertiary fg-secondary border-0' ) );
                                         this._resetCustomFiltersBtn?.root.classList.remove( 'hidden' );
                                         this.refresh();
                                     }
@@ -320,7 +320,7 @@ export class Table extends BaseComponent
                             container.appendChild( panel.root );
                             new Popover( f.component.root, [ container ], { side: 'bottom' } );
                         }
-                    }, { buttonClass: 'px-2 primary dashed' } );
+                    }, { buttonClass: 'p-4 primary dashed' } );
                     headerContainer.appendChild( f.component.root );
                 }
 

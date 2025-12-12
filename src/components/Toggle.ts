@@ -47,7 +47,7 @@ export class Toggle extends BaseComponent
         };
 
         var container = document.createElement( 'div' );
-        container.className = 'lextogglecont';
+        container.className = 'flex gap-2 items-center';
         this.root.appendChild( container );
 
         let toggle: any = document.createElement( 'input' );
@@ -59,7 +59,7 @@ export class Toggle extends BaseComponent
         container.appendChild( toggle );
 
         let valueName = document.createElement( 'span' );
-        valueName.className = 'toggletext';
+        valueName.className = 'font-medium w-full overflow-hidden truncate';
         valueName.innerHTML = options.label ?? 'On';
         container.appendChild( valueName );
 
