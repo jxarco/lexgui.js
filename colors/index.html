@@ -73,7 +73,7 @@
     {
         menubar = area.addMenubar( menubarButtons );
 
-        const commandButton = new LX.Button(null, `Search command...<span class="ml-auto">${ LX.makeKbd( ["Ctrl", "Space"], false, "bg-tertiary border px-1 rounded" ).innerHTML }</span>`, () => { LX.setCommandbarState( true ) }, {
+        const commandButton = new LX.Button(null, `Search command...<span class="ml-auto">${ LX.makeKbd( ["Ctrl", "Space"], false, "bg-tertiary border-color px-1 rounded" ).innerHTML }</span>`, () => { LX.setCommandbarState( true ) }, {
             width: "256px", className: "right", buttonClass: "p-4 fg-tertiary bg-primary" }
         );
         menubar.root.appendChild( commandButton.root );
@@ -118,7 +118,7 @@
     let lastCopied = null;
 
     const header = LX.makeContainer([null, "auto"], "flex flex-col gap-4 pt-8 pb-4 items-center", `
-    <a class="text-md">Get started with LexGUI.js <span class="text-sm fg-secondary">${LX.version}</span></a>
+    <a class="text-base">Get started with LexGUI.js <span class="text-sm fg-secondary">${LX.version}</span></a>
     <p class="fg-primary font-medium tracking-tight leading-none text-center text-balance text-5xl xs:text-4xl">Use Tailwind Colors</p>
     <p class="fg-primary font-light text-xl  xs:text-lg text-center text-balance leading-normal max-w-3xl">The complete Tailwind color palette in HEX, RGB, HSL, CSS variables, and classes. Ready to copy and paste into your project.</p>`, area);
 
@@ -136,22 +136,22 @@
     }
 
     const headerButtons = LX.makeContainer( [ "100%", "auto" ], "flex flex-row mt-2 gap-2 justify-center", ``, header );
-    LX.makeContainer( [ "auto", "auto" ], "text-md content-center", `Format`, headerButtons );
+    LX.makeContainer( [ "auto", "auto" ], "text-base content-center", `Format`, headerButtons );
     const formatSelect = new LX.Select( null, ["hex", "rgb", "hsl", "oklch", "className", "var"], copyFormat, (v) => {
         copyFormat = v;
         updateExampleString();
     }, { skipReset: true } );
     headerButtons.appendChild( formatSelect.root );
-    const exampleString = LX.makeContainer( [ "auto", "auto" ], "text-md content-center fg-tertiary font-medium", `#fed7aa`, headerButtons );
+    const exampleString = LX.makeContainer( [ "auto", "auto" ], "text-base content-center fg-tertiary font-medium", `#fed7aa`, headerButtons );
 
     function createColorBlock(name, value) {
         const block = document.createElement('div');
         block.className = "w-full flex flex-col gap-2 fg-tertiary hover:fg-primary cursor-pointer";
         block.innerHTML = `
-            <div class="h-32 bg-${ name } rounded-lg border">
+            <div class="h-32 bg-${ name } rounded-lg border-color">
                 ${ LX.makeIcon( "Clipboard", { svgClass: "copySvg ml-auto mr-2 mt-2 opacity-0" } ).innerHTML }
             </div>
-            <div class="hex self-center font-code text-md" data-copy="${value.hex}">${ name }</div>
+            <div class="hex place-self-center font-code text-base" data-copy="${value.hex}">${ name }</div>
         `;
         block.querySelector(".copySvg").style.transition = "opacity 0.15s linear, color 0.15s linear";
         block.colorData = value;
@@ -179,7 +179,7 @@
         return block;
     }
 
-    const container = LX.makeElement( "div", `xs:w-full lg:w-2/3 self-center ${ mobile ? "p-4" : "p-8" } flex flex-col gap-4`, "", area );
+    const container = LX.makeElement( "div", `xs:w-full lg:w-2/3 place-self-center ${ mobile ? "p-4" : "p-8" } flex flex-col gap-4`, "", area );
 
     LX.requestJSON( "../registry/colors.json", ( colors ) => 
     {
@@ -194,7 +194,7 @@
             }
 
             // e.g. slate[ {scale, hex}, ... ]
-            const colorClass = LX.makeContainer( ["100%", "auto"], "font-semibold text-md p-2", LX.toTitleCase( key ), container );
+            const colorClass = LX.makeContainer( ["100%", "auto"], "font-semibold text-base p-2", LX.toTitleCase( key ), container );
             const group = LX.makeContainer( ["100%", "auto"], `${ mobile ? "grid" : "flex flex-row" } gap-2`, "", container );
             if( mobile )
             {
@@ -210,7 +210,7 @@
     // Footer
     {
         const footer = new LX.Footer({
-            className: "border-top",
+            className: "border-t-color",
             parent: LX.root,
             columns: [
                 {

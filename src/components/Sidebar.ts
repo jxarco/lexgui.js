@@ -126,7 +126,7 @@ export class Sidebar
             this.header = options.header ?? this._generateDefaultHeader( options );
             console.assert( this.header.constructor === HTMLDivElement,
                 'Use an HTMLDivElement to build your custom header' );
-            this.header.className = 'lexsidebarheader flex-auto';
+            this.header.className = 'lexsidebarheader';
             this.root.appendChild( this.header );
 
             if ( this.collapsable )
@@ -175,7 +175,7 @@ export class Sidebar
         // Content
         {
             this.content = document.createElement( 'div' );
-            this.content.className = 'lexsidebarcontent flex-auto-fill';
+            this.content.className = 'lexsidebarcontent flex-auto';
             this.root.appendChild( this.content );
         }
 
@@ -185,7 +185,7 @@ export class Sidebar
             this.footer = options.footer ?? this._generateDefaultFooter( options );
             console.assert( this.footer.constructor === HTMLDivElement,
                 'Use an HTMLDivElement to build your custom footer' );
-            this.footer.className = 'lexsidebarfooter flex-auto';
+            this.footer.className = 'lexsidebarfooter';
             this.root.appendChild( this.footer );
         }
     }

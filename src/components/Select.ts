@@ -199,7 +199,8 @@ export class Select extends BaseComponent
         }, { buttonClass: 'array', skipInlineCount: true, disabled: options.disabled } );
 
         selectedOption.root.style.width = '100%';
-        selectedOption.root.querySelector( 'span' ).appendChild( LX.makeIcon( 'Down', { svgClass: 'sm' } ) );
+        const valueSpan = selectedOption.root.querySelector( 'span' );
+        valueSpan.appendChild( LX.makeIcon( 'Down', { svgClass: 'sm' } ) );
 
         container.appendChild( selectedOption.root );
 
@@ -327,7 +328,7 @@ export class Select extends BaseComponent
 
                     if ( !asLabel )
                     {
-                        option.innerHTML = `<span>${iValue}</span>`;
+                        option.innerHTML = `<span class="flex flex-row justify-between">${iValue}</span>`;
                         option.appendChild( LX.makeIcon( 'Check' ) );
                         option.value = iValue;
                         li.setAttribute( 'value', iValue );

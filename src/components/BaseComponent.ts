@@ -132,7 +132,7 @@ export class BaseComponent
             if ( !( options.hideName ?? false ) )
             {
                 let domName = document.createElement( 'div' );
-                domName.className = 'lexcomponentname';
+                domName.className = 'lexcomponentname text-sm';
 
                 if ( options.justifyName )
                 {

@@ -74,8 +74,7 @@ export class NodeTree
         }
 
         let item: any = document.createElement( 'li' );
-        item.className = 'lextreeitem ' + 'datalevel' + level + ( isParent ? ' parent' : '' )
-            + ( isSelected ? ' selected' : '' );
+        item.className = `lextreeitem inline-flex outline-none text-sm items-center cursor-pointer truncate rounded-lg select-none datalevel${ level } ${ isParent ? 'parent' : '' } ${ isSelected ? ' selected' : '' }`
         item.id = LX.getSupportedDOMName( node.id );
         item.tabIndex = '0';
         item.treeData = node;
@@ -302,7 +301,7 @@ export class NodeTree
 
         const nameInput = document.createElement( 'input' );
         nameInput.toggleAttribute( 'hidden', !node.rename );
-        nameInput.className = 'bg-none';
+        nameInput.className = 'fg-primary bg-none text-sm border-none outline-none';
         nameInput.value = node.id;
         item.appendChild( nameInput );
 

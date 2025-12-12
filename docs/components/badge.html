@@ -16,13 +16,13 @@
             panelA.attach( LX.badge("Badge", "border-none", { asElement: true }) );
             panelA.attach( LX.badge("Contrast", "contrast", { asElement: true }) );
             panelA.attach( LX.badge("Destructive", "error fg-primary", { asElement: true }) );
-            panelA.attach( LX.badge("Outline", "primary border", { asElement: true }) );
+            panelA.attach( LX.badge("Outline", "primary border-color", { asElement: true }) );
 
             const panelB = area.addPanel( { className: "flex flex-row gap-1 place-content-center" } );
             panelB.attach( LX.badge( LX.makeIcon( "BadgeCheck", { svgClass: "sm" } ).innerHTML + "Verified", "accent", { asElement: true }) );
             panelB.attach( LX.badge("8", "contrast", { asElement: true, chip: true }) );
             panelB.attach( LX.badge("99", "error fg-primary", { asElement: true, chip: true }) );
-            panelB.attach( LX.badge("20+", "primary border", { asElement: true, chip: true }) );
+            panelB.attach( LX.badge("20+", "primary border-color", { asElement: true, chip: true }) );
 
             const panelC = area.addPanel( { className: "flex flex-row gap-1 place-content-center" } );
             const chipParent = LX.makeContainer( ["auto", "auto"], "py-1 px-8 bg-tertiary rounded-lg", "Parent Chip", panelC );

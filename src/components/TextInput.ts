@@ -147,7 +147,7 @@ export class TextInput extends BaseComponent
 
         if ( options.fit )
         {
-            wValue.classList.add( 'size-content' );
+            wValue.classList.add( 'field-sizing-content' );
         }
 
         Object.assign( wValue.style, options.style ?? {} );

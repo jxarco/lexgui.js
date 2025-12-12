@@ -1500,7 +1500,7 @@ export class AssetView
                 'flex flex-auto-fill flex-col overflow-scroll py-2 gap-1', `` );
 
             {
-                const headerPanel = area.addPanel( { className: 'p-2 border-bottom flex flex-auto', height: 'auto' } );
+                const headerPanel = area.addPanel( { className: 'p-2 border-b-color flex flex-auto', height: 'auto' } );
                 headerPanel.sameLine( 2, 'w-full' );
                 headerPanel.addButton( null, 'BackButton', () => {
                     if ( targetFolder && targetFolder.parent ) _openFolder( targetFolder.parent, content );
@@ -1518,7 +1518,7 @@ export class AssetView
             _openFolder( defaultFolder ?? this.data, content );
 
             {
-                const footerPanel = area.addPanel( { className: 'p-2 border-top flex flex-auto justify-between',
+                const footerPanel = area.addPanel( { className: 'p-2 border-t-color flex flex-auto justify-between',
                     height: 'auto' } );
                 footerPanel.addButton( null, 'NewFolderButton', () => {
                     this._requestCreateFolder( targetFolder );

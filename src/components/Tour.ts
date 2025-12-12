@@ -242,13 +242,13 @@ export class Tour
             } );
         }
 
-        const content = LX.makeContainer( [ '100%', 'auto' ], 'p-2 text-md', step.content, popoverContainer, {
+        const content = LX.makeContainer( [ '100%', 'auto' ], 'p-2 text-base', step.content, popoverContainer, {
             maxWidth: '400px'
         } );
-        const footer = LX.makeContainer( [ '100%', 'auto' ], 'flex flex-row text-md', '', popoverContainer );
+        const footer = LX.makeContainer( [ '100%', 'auto' ], 'flex flex-row text-base', '', popoverContainer );
 
         {
-            const footerSteps = LX.makeContainer( [ '50%', 'auto' ], 'p-2 gap-1 self-center flex flex-row text-md', '',
+            const footerSteps = LX.makeContainer( [ '50%', 'auto' ], 'p-2 gap-1 place-self-center flex flex-row text-base', '',
                 footer );
             for ( let i = 0; i < this.steps.length; i++ )
             {
@@ -262,7 +262,7 @@ export class Tour
             }
         }
 
-        const footerButtons = LX.makeContainer( [ '50%', 'auto' ], 'text-md', '', footer );
+        const footerButtons = LX.makeContainer( [ '50%', 'auto' ], 'text-base', '', footer );
         const footerPanel = new Panel();
 
         let numButtons = 1;

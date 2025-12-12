@@ -1085,7 +1085,7 @@ function makeKbd( keys: string[], useSpecialKeys: boolean = true, extraClass: st
 
     for ( const k of keys )
     {
-        LX.makeContainer( [ 'auto', 'auto' ], 'self-center text-xs fg-secondary select-none ' + extraClass,
+        LX.makeContainer( [ 'auto', 'auto' ], 'place-self-center text-xs fg-secondary select-none ' + extraClass,
             useSpecialKeys ? specialKeys[k] ?? k : k, kbd );
     }
 

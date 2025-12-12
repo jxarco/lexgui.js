@@ -33,7 +33,7 @@ export class Calendar
 
     constructor( dateString?: string, options: any = {} )
     {
-        this.root = LX.makeContainer( [ '256px', 'auto' ], 'p-1 text-md' );
+        this.root = LX.makeContainer( [ '256px', 'auto' ], 'p-1 text-base' );
 
         this.onChange = options.onChange;
         this.onPreviousMonth = options.onPreviousMonth;

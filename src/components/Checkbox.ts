@@ -47,7 +47,7 @@ export class Checkbox extends BaseComponent
         };
 
         var container = document.createElement( 'div' );
-        container.className = 'lexcheckboxcont';
+        container.className = 'lexcheckboxcont items-center';
         this.root.appendChild( container );
 
         let checkbox = document.createElement( 'input' );

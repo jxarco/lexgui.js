@@ -15,7 +15,7 @@
 
     {
         const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
-        const button = LX.makeContainer( ["auto", "auto"], "self-center bg-contrast fg-contrast p-2 rounded-lg cursor-pointer", "Click here", area );
+        const button = LX.makeContainer( ["auto", "auto"], "place-self-center bg-contrast fg-contrast p-2 rounded-lg cursor-pointer", "Click here", area );
         LX.listen( button, "click", ( event ) => {
             event.preventDefault();
             LX.addContextMenu( "Nodes", event, ( m ) => {
@@ -53,7 +53,7 @@
 
     {
         const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
-        const button = LX.makeContainer( ["auto", "auto"], "self-center bg-contrast fg-contrast p-2 rounded-lg cursor-pointer", "Click here", area );
+        const button = LX.makeContainer( ["auto", "auto"], "place-self-center bg-contrast fg-contrast p-2 rounded-lg cursor-pointer", "Click here", area );
         LX.listen( button, "click", ( event ) => {
             event.preventDefault();
             LX.addDropdownMenu( button, [
@@ -83,7 +83,7 @@
 
     {
         const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
-        const button = LX.makeContainer( ["auto", "auto"], "self-center bg-contrast fg-contrast p-2 rounded-lg cursor-pointer", "Click here", area );
+        const button = LX.makeContainer( ["auto", "auto"], "place-self-center bg-contrast fg-contrast p-2 rounded-lg cursor-pointer", "Click here", area );
         LX.listen( button, "click", ( event ) => {
             event.preventDefault();
             LX.addDropdownMenu( button, [

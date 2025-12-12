@@ -778,7 +778,7 @@ export class CodeEditor
             this.codeArea = new LX.Area( { skipAppend: true } );
             this.area.attach( this.codeArea );
             const loadFileButton = LX.makeElement( 'button',
-                'grid absolute self-center z-100 p-3 rounded-full bg-secondary hover:bg-tertiary cursor-pointer border',
+                'grid absolute place-self-center z-100 p-3 rounded-full bg-secondary hover:bg-tertiary cursor-pointer border',
                 LX.makeIcon( 'FolderOpen' ).innerHTML, this.area, {
                 bottom: '8px'
             } );

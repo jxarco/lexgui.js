@@ -336,7 +336,7 @@ export class DocMaker
     {
         console.assert( text !== undefined );
 
-        const note = LX.makeContainer( [], 'border rounded-lg overflow-hidden text-md fg-secondary my-6', '',
+        const note = LX.makeContainer( [], 'border-color rounded-lg overflow-hidden text-base fg-secondary my-6', '',
             this.root );
 
         let header = document.createElement( 'div' );

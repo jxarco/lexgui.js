@@ -173,26 +173,38 @@ LX.init = async function( options: any = {} )
     }
 
     return this.mainArea;
-}, /**
+};
+
+/**
  * @method setSpacingMode
  * @param {String} mode: "default" | "compact"
- */ LX.setSpacingMode = function( mode: string )
+ */
+
+LX.setSpacingMode = function( mode: string )
 {
     this.spacingMode = mode;
     document.documentElement.setAttribute( 'data-spacing', this.spacingMode );
-}, /**
+};
+
+/**
  * @method setLayoutMode
  * @param {String} mode: "app" | "document"
- */ LX.setLayoutMode = function( mode: string )
+ */
+
+LX.setLayoutMode = function( mode: string )
 {
     this.layoutMode = mode;
     document.documentElement.setAttribute( 'data-layout', this.layoutMode );
-}, /**
+};
+
+/**
  * @method addSignal
  * @param {String} name
  * @param {Object} obj
  * @param {Function} callback
- */ LX.addSignal = function( name: string, obj: any, callback: ( value: any ) => void )
+ */
+
+LX.addSignal = function( name: string, obj: any, callback: ( value: any ) => void )
 {
     obj[name] = callback;
 
@@ -207,12 +219,16 @@ LX.init = async function( options: any = {} )
     }
 
     LX.signals[name].push( obj );
-}, /**
+};
+
+/**
  * @method emitSignal
  * @param {String} name
  * @param {*} value
  * @param {Object} options
- */ LX.emitSignal = function( name: string, value: any, options: Record<string, any> = {} )
+ */
+
+LX.emitSignal = function( name: string, value: any, options: Record<string, any> = {} )
 {
     const data = LX.signals[name];
 
@@ -259,7 +275,7 @@ LX.init = async function( options: any = {} )
 LX._createCommandbar = function( root: any )
 {
     let commandbar: any = document.createElement( 'dialog' );
-    commandbar.className = 'commandbar';
+    commandbar.className = 'commandbar absolute border-color rounded-lg m-0';
     commandbar.tabIndex = -1;
     root.appendChild( commandbar );
 

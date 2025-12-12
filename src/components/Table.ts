@@ -193,7 +193,7 @@ export class Table extends BaseComponent
             {
                 const icon = LX.makeIcon( 'CirclePlus', { svgClass: 'sm' } );
                 const separatorHtml =
-                    `<div class="lexcontainer border-right self-center mx-1" style="width: 1px; height: 70%;"></div>`;
+                    `<div class="lexcontainer border-r-color place-self-center mx-1" style="width: 1px; height: 70%;"></div>`;
 
                 for ( let f of this.customFilters )
                 {
@@ -230,9 +230,9 @@ export class Table extends BaseComponent
                         {
                             console.assert( f.min != undefined && f.max != undefined,
                                 'Range filter needs min and max values!' );
-                            const container = LX.makeContainer( [ '240px', 'auto' ], 'text-md' );
+                            const container = LX.makeContainer( [ '240px', 'auto' ], 'text-base' );
                             const panel: any = new LX.Panel();
-                            LX.makeContainer( [ '100%', 'auto' ], 'px-3 p-2 pb-0 text-md font-medium', f.name,
+                            LX.makeContainer( [ '100%', 'auto' ], 'px-3 p-2 pb-0 text-base font-medium', f.name,
                                 container );
 
                             f.start = f.start ?? f.min;
@@ -284,9 +284,9 @@ export class Table extends BaseComponent
                         }
                         else if ( f.type == 'date' )
                         {
-                            const container = LX.makeContainer( [ 'auto', 'auto' ], 'text-md' );
+                            const container = LX.makeContainer( [ 'auto', 'auto' ], 'text-base' );
                             const panel: any = new LX.Panel();
-                            LX.makeContainer( [ '100%', 'auto' ], 'px-3 p-2 pb-0 text-md font-medium', f.name,
+                            LX.makeContainer( [ '100%', 'auto' ], 'px-3 p-2 pb-0 text-base font-medium', f.name,
                                 container );
 
                             panel.refresh = () => {

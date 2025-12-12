@@ -130,7 +130,7 @@
         {
             const area = new LX.Area({ className: "flex flex-col gap-3 docs", skipAppend: true, height: "auto" });
             content.appendChild( area.root );
-            const container = LX.makeContainer( ["100%", "auto"], "flex flex-col bg-background border rounded-xxl overflow-hidden", "", area );
+            const container = LX.makeContainer( ["100%", "auto"], "flex flex-col bg-background border-color rounded-xxl overflow-hidden", "", area );
             const panel = window.__panel = new LX.Panel({ className: panelClass ?? "p-6" });
             container.appendChild( panel.root );
             onPanel( panel );
@@ -152,7 +152,7 @@
             code = lines.map( line => line.substr( 12 ) ).join( '\n' );
             const heightByLines = Math.min( 5 + lines.length * 1.25, 32 );
 
-            const codeArea = new LX.Area({ className: "overflow-hidden border-top py-8", skipAppend: true, height: `${ heightByLines }rem` });
+            const codeArea = new LX.Area({ className: "overflow-hidden border-t-color py-8", skipAppend: true, height: `${ heightByLines }rem` });
             container.appendChild( codeArea.root );
             const codeEditor = new CodeEditor( codeArea, {
                 name: `${componentName.toLowerCase().replace( /\s/g, '_' )}.js`,

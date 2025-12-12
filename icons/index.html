@@ -76,7 +76,7 @@
     {
         menubar = area.addMenubar( menubarButtons );
 
-        const commandButton = new LX.Button(null, `Search command...<span class="ml-auto">${ LX.makeKbd( ["Ctrl", "Space"], false, "bg-tertiary border px-1 rounded" ).innerHTML }</span>`, () => { LX.setCommandbarState( true ) }, {
+        const commandButton = new LX.Button(null, `Search command...<span class="ml-auto">${ LX.makeKbd( ["Ctrl", "Space"], false, "bg-tertiary border-color px-1 rounded" ).innerHTML }</span>`, () => { LX.setCommandbarState( true ) }, {
             width: "256px", className: "right", buttonClass: "p-4 fg-tertiary bg-primary" }
         );
         menubar.root.appendChild( commandButton.root );
@@ -118,14 +118,14 @@
     }
 
     const header = LX.makeContainer([null, "auto"], "flex flex-col gap-4 pt-8 pb-4 items-center", `
-    <a class="text-md">Get started with LexGUI.js <span class="text-sm fg-secondary">${LX.version}</span></a>
+    <a class="text-base">Get started with LexGUI.js <span class="text-sm fg-secondary">${LX.version}</span></a>
     <p class="fg-primary font-medium tracking-tight leading-none text-center text-balance text-5xl xs:text-4xl">Lucide Icons and More</p>
     <p class="fg-primary font-light text-xl xs:text-lg text-center text-balance leading-normal max-w-3xl">Built on Lucide icons, extended with additional packs, and fully customizable with your own SVGs.</p>`, area);
 
     {
         const params = new URLSearchParams( document.location.search );
         const content = document.getElementById('content');
-        const container = LX.makeElement( "div", `xs:w-full lg:w-2/3 self-center ${ mobile ? "p-4" : "p-8" } flex flex-col gap-4`, "", area );
+        const container = LX.makeElement( "div", `xs:w-full lg:w-2/3 place-self-center ${ mobile ? "p-4" : "p-8" } flex flex-col gap-4`, "", area );
 
         let showMoreButton = null;
         let forceSolid = false;
@@ -141,7 +141,7 @@
 
         const toolsContainer = LX.makeContainer( ["100%", "auto"], `flex ${ mobile ? "flex-col" : "flex-row" } mt-4 mb-4 gap-2`, "", container );
 
-        const filterContainer = LX.makeContainer( ["auto", "auto"], "flex flex-auto-fill", "", toolsContainer );
+        const filterContainer = LX.makeContainer( ["auto", "auto"], "flex flex-auto", "", toolsContainer );
         const filter = new LX.TextInput( null, "", (v) => {
             nameFilter = v;
             refreshIcons();
@@ -149,7 +149,7 @@
         filterContainer.appendChild( filter.root );
 
         const iconsPerPage = 256;
-        const paginationContainer = LX.makeContainer( ["auto", "auto"], "flex flex-row flex-auto", "", toolsContainer );
+        const paginationContainer = LX.makeContainer( ["auto", "auto"], "flex flex-row", "", toolsContainer );
         const paginator = new LX.Pagination({
             page: 1,
             itemsPerPage: iconsPerPage,
@@ -159,7 +159,7 @@
         });
         paginationContainer.appendChild( paginator.root );
 
-        const variantContainer = LX.makeContainer( ["auto", "auto"], "flex flex-row flex-auto justify-end", "", toolsContainer );
+        const variantContainer = LX.makeContainer( ["auto", "auto"], "flex flex-row justify-end", "", toolsContainer );
         const variantToggle = new LX.Toggle( null, forceSolid, (v) => {
             forceSolid = v;
             refreshIcons();
@@ -193,7 +193,7 @@
             for( let i = start; i < end; ++i )
             {
                 const iconName = filteredIcons[ i ];
-                const iconDiv = LX.makeContainer( ["56px", "56px"], "relative icon flex border rounded-lg content-center items-center justify-center cursor-pointer bg-primary hover:bg-tertiary", "", allIconsContainer );
+                const iconDiv = LX.makeContainer( ["56px", "56px"], "relative icon flex border-color rounded-lg content-center items-center justify-center cursor-pointer bg-primary hover:bg-tertiary", "", allIconsContainer );
                 if( !mobile )
                 {
                     LX.asTooltip( iconDiv, iconName, { side: "bottom" } );
@@ -237,7 +237,7 @@
     // Footer
     {
         const footer = new LX.Footer({
-            className: "border-top",
+            className: "border-t-color",
             parent: LX.root,
             columns: [
                 {

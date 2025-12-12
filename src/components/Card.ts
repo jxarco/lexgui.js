@@ -21,7 +21,7 @@ export class Card extends BaseComponent
         this.root.classList.add( 'place-content-center' );
 
         const container = LX.makeContainer( [ '100%', 'auto' ],
-            'lexcard max-w-sm flex flex-col gap-4 bg-primary border rounded-xl py-6', '', this.root );
+            'lexcard max-w-sm flex flex-col gap-4 bg-primary border-color rounded-xl py-6', '', this.root );
 
         if ( options.header )
         {
@@ -41,7 +41,7 @@ export class Card extends BaseComponent
 
             if ( options.header.title )
             {
-                LX.makeElement( 'div', 'text-md leading-none font-semibold', options.header.title, header );
+                LX.makeElement( 'div', 'text-base leading-none font-semibold', options.header.title, header );
             }
 
             if ( options.header.description )

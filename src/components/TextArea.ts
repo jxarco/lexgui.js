@@ -46,7 +46,7 @@ export class TextArea extends BaseComponent
 
         if ( options.fitHeight ?? false )
         {
-            wValue.classList.add( 'size-content' );
+            wValue.classList.add( 'field-sizing-content' );
         }
 
         if ( !( options.resize ?? true ) )

@@ -221,12 +221,12 @@ class PopConfirm
 
         {
             const headerDiv = LX.makeContainer( [ '100%', 'auto' ], 'flex flex-row', '', popoverContainer );
-            const titleDiv = LX.makeContainer( [ '100%', 'auto' ], 'p-1 font-medium text-md', title, headerDiv );
+            const titleDiv = LX.makeContainer( [ '100%', 'auto' ], 'p-1 font-medium text-base', title, headerDiv );
         }
 
-        LX.makeContainer( [ '100%', 'auto' ], 'p-1 text-md', content, popoverContainer, { maxWidth: '400px' } );
-        const footer = LX.makeContainer( [ '100%', 'auto' ], 'flex flex-row text-md', '', popoverContainer );
-        const footerButtons = LX.makeContainer( [ '100%', 'auto' ], 'text-md', '', footer );
+        LX.makeContainer( [ '100%', 'auto' ], 'p-1 text-base', content, popoverContainer, { maxWidth: '400px' } );
+        const footer = LX.makeContainer( [ '100%', 'auto' ], 'flex flex-row text-base', '', popoverContainer );
+        const footerButtons = LX.makeContainer( [ '100%', 'auto' ], 'text-base', '', footer );
         const footerPanel = new LX.Panel();
         footerButtons.appendChild( footerPanel.root );
 
