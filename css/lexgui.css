@@ -6186,13 +6186,13 @@ ul.lexassetscontent {
 .text-center { text-align: center }
 .text-end { text-align: end }
 
-.leading-none { line-height: 1 }
-.leading-tight { line-height: 1.25 }
-.leading-snug { line-height: 1.375 }
-.leading-normal { line-height: 1.5 }
-.leading-relaxed { line-height: 1.625 }
-.leading-loose { line-height: 2 }
-.leading-inherit { line-height: inherit }
+.leading-none { line-height: 1 !important }
+.leading-tight { line-height: 1.25 !important }
+.leading-snug { line-height: 1.375 !important }
+.leading-normal { line-height: 1.5 !important }
+.leading-relaxed { line-height: 1.625 !important }
+.leading-loose { line-height: 2 !important }
+.leading-inherit { line-height: inherit !important }
 
 .leading-3 { line-height: 0.75rem }
 .leading-4 { line-height: 1rem }

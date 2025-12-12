@@ -1,0 +1,237 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Icons - LexGUI</title>
+    <link rel="stylesheet" href="../build/lexgui.css">
+    <link rel="icon" href="../images/favicon.png">
+
+    <script type="importmap">
+        {
+          "imports": {
+            "lexgui": "../build/lexgui.module.js",
+            "lexgui/extensions/": "../build/extensions/"
+          }
+        }
+    </script>
+
+</head>
+
+<body>
+
+</body>
+
+<script type="module">
+
+    import { LX } from 'lexgui';
+    import { DocMaker } from 'lexgui/extensions/DocMaker.js';
+
+    window.LX = LX;
+
+    const area = await LX.init({ layoutMode: "document", rootClass: "wrapper" });
+    const starterTheme = LX.getTheme();
+    const localHost = window.location.protocol !== "https:";
+    const docMaker = new DocMaker();
+
+    // Menubar
+    {
+        const menubar = area.addMenubar([
+            { name: "Docs", callback: () => { window.open("../docs/") } },
+            { name: "Examples", callback: () => { window.open("../examples/") } },
+            { name: "Components", callback: () => { window.open("../docs/?p=components") } },
+            { name: "Colors", callback: () => { window.open("../colors/", "_self") } },
+            { name: "Icons", callback: () => {} },
+        ]);
+
+    menubar.setButtonImage("lexgui.js", `../images/icon_${ starterTheme }.png`, () => {  window.location.href = window.location.origin + ( localHost ? "" : window.location.pathname ) }, { float: "left"} );
+
+        LX.addSignal("@on_new_color_scheme", (el, value) => {
+            menubar.setButtonImage("lexgui.js", `../images/icon_${value}.png`);
+        });
+
+        const commandButton = new LX.Button(null, `Search command...<span class="ml-auto">${LX.makeKbd(["Ctrl", "Space"], false, "bg-tertiary border px-1 rounded").innerHTML}</span>`, () => { LX.setCommandbarState(true) }, {
+            width: "256px", className: "right", buttonClass: "p-4 fg-tertiary bg-primary"
+        }
+        );
+        menubar.root.appendChild(commandButton.root);
+
+        menubar.addButtons([
+            {
+                title: "Github",
+                icon: "Github@solid",
+                callback: (event) => window.open("https://github.com/jxarco/lexgui.js/", "_blank")
+            },
+            {
+                title: "Switch Theme",
+                icon: starterTheme == "dark" ? "Moon" : "Sun",
+                swap: starterTheme == "dark" ? "Sun" : "Moon",
+                callback: (value, event) => { LX.switchTheme() }
+            },
+            {
+                title: "Switch Spacing",
+                icon: "AlignVerticalSpaceAround",
+                callback: (value, event) => { LX.switchSpacing() }
+            }
+        ], { float: "right" });
+    }
+
+    let copyFormat = "hex";
+    let lastCopied = null;
+
+    const header = LX.makeContainer([null, "auto"], "flex flex-col gap-3 py-8 items-center", `
+    <a class="text-md">Get started with LexGUI.js <span class="text-sm fg-secondary">${LX.version}</span></a>
+    <p class="fg-primary font-semibold tracking-tight" style="font-size:2.75rem">Lucide Icons and More</p>
+    <p class="fg-primary font-light text-xl text-center text-balance leading-normal" style="max-width:48rem">Built on Lucide icons, extended with additional packs, and fully customizable with your own SVGs.</p>`, area);
+
+    {
+        const params = new URLSearchParams( document.location.search );
+        const content = document.getElementById('content');
+        const iconsArea = new LX.Area( { className: "self-center p-8", skipAppend: true, width: "80%", height: "auto" } );
+
+        let showMoreButton = null;
+        let forceSolid = false;
+        let nameFilter = params.get( "filter" ) ?? "";
+
+        function copySVG( svg, event )
+        {
+            navigator.clipboard.writeText( svg.dataset[ "name" ] + ( forceSolid ? "@solid" : "" ) );
+            const msg = `${ svg.dataset[ "name" ] } icon copied to clipboard!`;
+            console.log( msg );
+            LX.toast( msg, null, { position: "top-center", timeout: 3000 } );
+        }
+
+        const toolsContainer = LX.makeContainer( ["100%", "auto"], "flex flex-row mt-8 mb-4 gap-2", "", iconsArea );
+
+        const filterContainer = LX.makeContainer( ["auto", "auto"], "flex flex-auto-fill", "", toolsContainer );
+        const filter = new LX.TextInput( null, "", (v) => {
+            nameFilter = v;
+            refreshIcons();
+        }, { width: "100%", icon: "Search", placeholder: "Filter icons", trigger: "input" } );
+        filterContainer.appendChild( filter.root );
+
+        const iconsPerPage = 256;
+        const paginationContainer = LX.makeContainer( ["auto", "auto"], "flex flex-row flex-auto", "", toolsContainer );
+        const paginator = new LX.Pagination({
+            page: 1,
+            itemsPerPage: iconsPerPage,
+            onChange: (page) => {
+                refreshIcons();
+            }
+        });
+        paginationContainer.appendChild( paginator.root );
+
+        const variantContainer = LX.makeContainer( ["auto", "auto"], "flex flex-row flex-auto justify-end", "", toolsContainer );
+        const variantToggle = new LX.Toggle( null, forceSolid, (v) => {
+            forceSolid = v;
+            refreshIcons();
+        }, { label: "Solid Variant" } );
+        variantContainer.appendChild( variantToggle.root );
+
+        const allIcons = {
+            ...LX.ICONS,
+            ...lucide.icons
+        }
+
+        // Sort icons by name
+        const allIconsSorted = Object.keys( allIcons ).sort();
+        const allIconsContainer = LX.makeContainer( ["100%", "auto"], "grid mb-8 gap-2", "", iconsArea );
+        allIconsContainer.style.gridTemplateColumns = "repeat(auto-fill, minmax(56px, 1fr))";
+
+        const refreshIcons = () => {
+
+            allIconsContainer.innerHTML = "";
+
+            const filteredIcons = allIconsSorted.filter( i => {
+                return !i.includes( '@' ) && i.toLowerCase().includes( nameFilter );
+            } );
+            const total = filteredIcons.length;
+            const numPages = iconsPerPage === 1 ? 1 : Math.ceil( total / iconsPerPage );
+            paginator.setPages( numPages );
+
+            const start = ( paginator.page - 1 ) * iconsPerPage;
+            const end = Math.min( start + iconsPerPage, total );
+
+            for( let i = start; i < end; ++i )
+            {
+                const iconName = filteredIcons[ i ];
+                const iconDiv = LX.makeContainer( ["56px", "56px"], "relative icon flex border rounded-lg content-center items-center justify-center cursor-pointer bg-primary hover:bg-tertiary", "", allIconsContainer );
+                LX.asTooltip( iconDiv, iconName, { side: "bottom" } );
+
+                const variant = forceSolid ? "solid" : "regular";
+                const icon = LX.makeIcon( iconName, { iconClass: "flex justify-center items-center", svgClass: "absolute xxl pointer-events-none hover:fg-primary", variant });
+                const checkIcon = LX.makeIcon( "Check", { iconClass: "opacity-0 flex justify-center items-center", svgClass: "absolute xxl pointer-events-none fg-success" });
+                icon.style.transition = "opacity 0.2s ease-out";
+                checkIcon.style.transition = "opacity 0.2s ease-out";
+                LX.removeClass( icon, "lexicon" );
+                LX.removeClass( checkIcon, "lexicon" );
+                iconDiv.appendChild( icon );
+                iconDiv.appendChild( checkIcon );
+                const svg = icon.querySelector( "svg" );
+                const checkSvg = icon.querySelector( "svg" );
+
+                LX.listen( iconDiv, "click", () => {
+
+                    LX.addClass( icon, "opacity-0" );
+                    LX.removeClass( checkIcon, "opacity-0" );
+
+                    copySVG( svg, event );
+
+                    setTimeout( () => {
+                        LX.addClass( checkIcon, "opacity-0" );
+                        LX.removeClass( icon, "opacity-0" );
+                    }, 2000 );
+                } );
+            }
+        }
+
+        refreshIcons();
+
+        docMaker.setDomTarget( iconsArea.root );
+
+        docMaker.note( `If neither Lucide or LexGUI don't have the icon you are looking for, get the SVG string of your icon from anywhere (it must contain one path) and use ${ docMaker.iCode( "LX.registerIcon(name, svgString, variant, aliases)" ) }
+    to allow using it inside LexGUI. `, false, "Tip" );
+
+        area.attach( iconsArea );
+    }
+
+    // Footer
+    {
+        const footer = new LX.Footer({
+            className: "border-top",
+            parent: LX.root,
+            columns: [
+                {
+                    title: "LexGUI",
+                    items: [
+                        { title: "Source code on Github", link: "https://github.com/jxarco/lexgui.js/" }
+                    ]
+                },
+                {
+                    title: "Projects",
+                    items: [
+                        { title: "Animics", link: "https://animics.gti.upf.edu/" },
+                        { title: "Performs", link: "https://performs.gti.upf.edu/" }
+                    ]
+                },
+                {
+                    title: "References",
+                    items: [
+                        { title: "shadcn/ui", link: "https://ui.shadcn.com/" },
+                        { title: "Radix UI", link: "https://www.radix-ui.com/" },
+                    ]
+                }
+            ],
+            credits: `2019-${new Date().getUTCFullYear()} Alex Rodríguez and contributors. Website source code on GitHub.`,
+            socials: [
+                { title: "Github", link: "https://github.com/jxarco/lexgui.js/", icon: "Github" },
+                { title: "Discord", link: "https://discord.gg/vwqVrMZBXv", icon: "Discord" }
+            ]
+        });
+    }
+
+</script>
+
+</html>

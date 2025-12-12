@@ -5,9 +5,9 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <title>Colors - LexGUI.js </title>
+    <title>Colors - LexGUI</title>
     <link rel="stylesheet" href="../build/lexgui.css">
-    <link rel="icon" href="images/favicon.png">
+    <link rel="icon" href="../images/favicon.png">
 
     <script type="importmap">
         {
@@ -38,9 +38,10 @@
     {
         const menubar = area.addMenubar([
             { name: "Docs", callback: () => { window.open("../docs/") } },
-            { name: "Components", callback: () => { window.open("../docs/?p=components") } },
             { name: "Examples", callback: () => { window.open("../examples/") } },
-            { name: "Colors", callback: () => { window.location.href = "" } }
+            { name: "Components", callback: () => { window.open("../docs/?p=components") } },
+            { name: "Colors", callback: () => {} },
+            { name: "Icons", callback: () => { window.open("../icons/", "_self") } },
         ]);
 
     menubar.setButtonImage("lexgui.js", `../images/icon_${ starterTheme }.png`, () => {  window.location.href = window.location.origin + ( localHost ? "" : window.location.pathname ) }, { float: "left"} );
@@ -81,7 +82,7 @@
     const header = LX.makeContainer([null, "auto"], "flex flex-col gap-3 py-8 items-center", `
     <a class="text-md">Get started with LexGUI.js <span class="text-sm fg-secondary">${LX.version}</span></a>
     <p class="fg-primary font-semibold tracking-tight" style="font-size:2.75rem">Use Tailwind Colors</p>
-    <p class="fg-primary font-light text-xxl text-center text-balance" style="max-width:48rem">The complete Tailwind color palette in HEX, RGB, HSL, CSS variables, and classes. Ready to copy and paste into your project.</p>`, area);
+    <p class="fg-primary font-light text-xl text-center text-balance leading-normal" style="max-width:48rem">The complete Tailwind color palette in HEX, RGB, HSL, CSS variables, and classes. Ready to copy and paste into your project.</p>`, area);
 
     const updateExampleString = () =>
     {
@@ -140,7 +141,7 @@
         return block;
     }
 
-    const container = LX.makeContainer( ["80%", "auto"], "self-center p-12 flex flex-col gap-4", "", area );
+    const container = LX.makeContainer( ["80%", "auto"], "self-center p-8 flex flex-col gap-4", "", area );
 
     LX.requestJSON( "../registry/colors.json", ( colors ) => 
     {
