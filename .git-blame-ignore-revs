@@ -1,0 +1,11 @@
+# Ignore revisions that involve changes to formatting
+# Auto-format source code
+97b33a64e6b8dc69027f80ca6587160127b13675
+# Change arrowFunction.bracePosition format config
+bdfce41f92f73861defbb51ccd2422a804b90089
+# Change arrowFunction.useParentheses format config
+aa055414fd06a77901cd032cf39d84289ac71064
+# Manual extensions format code
+be4756c018cc34ee44733d400b9b8b0eb112d84c
+# TL: Remove white spaces, wip code formatting
+f98ff60f1e409157e2ca70a497c145220f0be503
