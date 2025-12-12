@@ -35,61 +35,97 @@
     const starterTheme = LX.getTheme();
     const localHost = window.location.protocol !== "https:";
     const docMaker = new DocMaker();
+    const mobile = navigator && /Android|iPhone/i.test( navigator.userAgent );
+    const menubarButtons = [
+        { name: "Docs", callback: () => { window.open("../docs/") } },
+        { name: "Examples", callback: () => { window.open("../examples/") } },
+        { name: "Components", callback: () => { window.open("../docs/?p=components") } },
+        { name: "Colors", callback: () => { window.open("../colors/", "_self") } },
+        { name: "Icons", callback: () => {} },
+    ];
 
-    // Menubar
+    let menubar = null, sheetArea = null;
+
+    if( mobile )
     {
-        const menubar = area.addMenubar([
-            { name: "Docs", callback: () => { window.open("../docs/") } },
-            { name: "Examples", callback: () => { window.open("../examples/") } },
-            { name: "Components", callback: () => { window.open("../docs/?p=components") } },
-            { name: "Colors", callback: () => { window.open("../colors/", "_self") } },
-            { name: "Icons", callback: () => {} },
-        ]);
+        menubar = area.addMenubar();
+
+        sheetArea = new LX.Area({ skipAppend: true });
+        sheetArea.addSidebar( ( m ) => {
+
+            m.group( "Menu" );
+
+            for( let b of menubarButtons )
+            {
+                m.add( b.name, { callback: b.callback } );
+            }
+
+        }, {
+            headerTitle: `lexgui.js`,
+            headerSubtitle: `v${ LX.version }`,
+            headerImage: "../images/favicon.png",
+            footerTitle: "jxarco",
+                footerSubtitle: "alexroco.30@gmail.com",
+                footerImage: "https://avatars.githubusercontent.com/u/25059187?s=400&u=ad8907b748c13e4e1a7cdd3882826acb6a2928b5&v=4",
+            collapsed: false,
+            collapsable: false,
+            displaySelected: false
+        } );
+    }
+    else
+    {
+        menubar = area.addMenubar( menubarButtons );
+
+        const commandButton = new LX.Button(null, `Search command...<span class="ml-auto">${ LX.makeKbd( ["Ctrl", "Space"], false, "bg-tertiary border px-1 rounded" ).innerHTML }</span>`, () => { LX.setCommandbarState( true ) }, {
+            width: "256px", className: "right", buttonClass: "p-4 fg-tertiary bg-primary" }
+        );
+        menubar.root.appendChild( commandButton.root );
+    }
 
     menubar.setButtonImage("lexgui.js", `../images/icon_${ starterTheme }.png`, () => {  window.location.href = window.location.origin + ( localHost ? "" : window.location.pathname ) }, { float: "left"} );
 
-        LX.addSignal("@on_new_color_scheme", (el, value) => {
-            menubar.setButtonImage("lexgui.js", `../images/icon_${value}.png`);
-        });
+    LX.addSignal("@on_new_color_scheme", (el, value) => {
+        menubar.setButtonImage("lexgui.js", `../images/icon_${value}.png`);
+    });
 
-        const commandButton = new LX.Button(null, `Search command...<span class="ml-auto">${LX.makeKbd(["Ctrl", "Space"], false, "bg-tertiary border px-1 rounded").innerHTML}</span>`, () => { LX.setCommandbarState(true) }, {
-            width: "256px", className: "right", buttonClass: "p-4 fg-tertiary bg-primary"
+    menubar.addButtons([
+        {
+            title: "Github",
+            icon: "Github@solid",
+            callback: (event) => window.open("https://github.com/jxarco/lexgui.js/", "_blank")
+        },
+        {
+            title: "Switch Theme",
+            icon: starterTheme == "dark" ? "Moon" : "Sun",
+            swap: starterTheme == "dark" ? "Sun" : "Moon",
+            callback: (value, event) => { LX.switchTheme() }
+        },
+        {
+            title: "Switch Spacing",
+            icon: "AlignVerticalSpaceAround",
+            callback: (value, event) => { LX.switchSpacing() }
         }
-        );
-        menubar.root.appendChild(commandButton.root);
+    ], { float: "right" });
 
-        menubar.addButtons([
-            {
-                title: "Github",
-                icon: "Github@solid",
-                callback: (event) => window.open("https://github.com/jxarco/lexgui.js/", "_blank")
-            },
-            {
-                title: "Switch Theme",
-                icon: starterTheme == "dark" ? "Moon" : "Sun",
-                swap: starterTheme == "dark" ? "Sun" : "Moon",
-                callback: (value, event) => { LX.switchTheme() }
-            },
-            {
-                title: "Switch Spacing",
-                icon: "AlignVerticalSpaceAround",
-                callback: (value, event) => { LX.switchSpacing() }
-            }
-        ], { float: "right" });
+    if( mobile )
+    {
+        menubar.root.querySelector( ".lexmenubuttons" ).style.marginLeft = "auto";
+
+        const commandButton = new LX.Button(null, LX.makeIcon( "Menu" ).innerHTML, () => {
+            window.__currentSheet = new LX.Sheet("256px", [ sheetArea ] );
+        }, { buttonClass: "p-4 bg-none fg-tertiary" } );
+        menubar.root.prepend( commandButton.root );
     }
 
-    let copyFormat = "hex";
-    let lastCopied = null;
-
-    const header = LX.makeContainer([null, "auto"], "flex flex-col gap-3 py-8 items-center", `
+    const header = LX.makeContainer([null, "auto"], "flex flex-col gap-4 pt-8 pb-4 items-center", `
     <a class="text-md">Get started with LexGUI.js <span class="text-sm fg-secondary">${LX.version}</span></a>
-    <p class="fg-primary font-semibold tracking-tight" style="font-size:2.75rem">Lucide Icons and More</p>
-    <p class="fg-primary font-light text-xl text-center text-balance leading-normal" style="max-width:48rem">Built on Lucide icons, extended with additional packs, and fully customizable with your own SVGs.</p>`, area);
+    <p class="fg-primary font-medium tracking-tight leading-none text-center text-balance text-5xl xs:text-4xl">Lucide Icons and More</p>
+    <p class="fg-primary font-light text-xl xs:text-lg text-center text-balance leading-normal max-w-3xl">Built on Lucide icons, extended with additional packs, and fully customizable with your own SVGs.</p>`, area);
 
     {
         const params = new URLSearchParams( document.location.search );
         const content = document.getElementById('content');
-        const iconsArea = new LX.Area( { className: "self-center p-8", skipAppend: true, width: "80%", height: "auto" } );
+        const container = LX.makeElement( "div", `xs:w-full lg:w-2/3 self-center ${ mobile ? "p-4" : "p-8" } flex flex-col gap-4`, "", area );
 
         let showMoreButton = null;
         let forceSolid = false;
@@ -103,7 +139,7 @@
             LX.toast( msg, null, { position: "top-center", timeout: 3000 } );
         }
 
-        const toolsContainer = LX.makeContainer( ["100%", "auto"], "flex flex-row mt-8 mb-4 gap-2", "", iconsArea );
+        const toolsContainer = LX.makeContainer( ["100%", "auto"], `flex ${ mobile ? "flex-col" : "flex-row" } mt-4 mb-4 gap-2`, "", container );
 
         const filterContainer = LX.makeContainer( ["auto", "auto"], "flex flex-auto-fill", "", toolsContainer );
         const filter = new LX.TextInput( null, "", (v) => {
@@ -137,7 +173,7 @@
 
         // Sort icons by name
         const allIconsSorted = Object.keys( allIcons ).sort();
-        const allIconsContainer = LX.makeContainer( ["100%", "auto"], "grid mb-8 gap-2", "", iconsArea );
+        const allIconsContainer = LX.makeContainer( ["100%", "auto"], "grid mb-8 gap-2", "", container );
         allIconsContainer.style.gridTemplateColumns = "repeat(auto-fill, minmax(56px, 1fr))";
 
         const refreshIcons = () => {
@@ -158,7 +194,10 @@
             {
                 const iconName = filteredIcons[ i ];
                 const iconDiv = LX.makeContainer( ["56px", "56px"], "relative icon flex border rounded-lg content-center items-center justify-center cursor-pointer bg-primary hover:bg-tertiary", "", allIconsContainer );
-                LX.asTooltip( iconDiv, iconName, { side: "bottom" } );
+                if( !mobile )
+                {
+                    LX.asTooltip( iconDiv, iconName, { side: "bottom" } );
+                }
 
                 const variant = forceSolid ? "solid" : "regular";
                 const icon = LX.makeIcon( iconName, { iconClass: "flex justify-center items-center", svgClass: "absolute xxl pointer-events-none hover:fg-primary", variant });
@@ -189,12 +228,10 @@
 
         refreshIcons();
 
-        docMaker.setDomTarget( iconsArea.root );
+        docMaker.setDomTarget( container );
 
         docMaker.note( `If neither Lucide or LexGUI don't have the icon you are looking for, get the SVG string of your icon from anywhere (it must contain one path) and use ${ docMaker.iCode( "LX.registerIcon(name, svgString, variant, aliases)" ) }
     to allow using it inside LexGUI. `, false, "Tip" );
-
-        area.attach( iconsArea );
     }
 
     // Footer

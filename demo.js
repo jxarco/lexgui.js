@@ -33,7 +33,7 @@ if( mobile )
     }, {
         headerTitle: `lexgui.js`,
         headerSubtitle: `v${ LX.version }`,
-        headerImage: "../images/favicon.png",
+        headerImage: "./images/favicon.png",
         footerTitle: "jxarco",
             footerSubtitle: "alexroco.30@gmail.com",
             footerImage: "https://avatars.githubusercontent.com/u/25059187?s=400&u=ad8907b748c13e4e1a7cdd3882826acb6a2928b5&v=4",
@@ -93,8 +93,8 @@ if( mobile )
     const header = LX.makeContainer( [ null, "auto" ], "flex flex-col gap-4 pt-8 pb-4 items-center", `
         <a href="docs?p=changelog" class="flex flex-row gap-1 items-center text-sm p-1 px-4 rounded-full fg-primary decoration-none hover:bg-secondary cursor-pointer"><span class="flex bg-accent w-2 h-2 rounded-full"></span>
             New Components: Spinner, Pagination and more${ LX.makeIcon( "ArrowRight", { svgClass: "sm" } ).innerHTML }</a>
-        <p class="fg-primary font-medium tracking-tight leading-none text-center text-balance" style="font-size:2.75rem">Build your Application Interface</p>
-        <p class="fg-primary font-light text-xl text-center text-balance leading-normal" style="max-width:48rem">A modern-style UI kit, inspired by shadcn, built for the web. Pure JavaScript, CSS, zero dependencies. Fully Open Source.</p>
+        <p class="fg-primary font-medium tracking-tight leading-none text-center text-balance text-5xl xs:text-4xl">Build your Application Interface</p>
+        <p class="fg-primary font-light text-xl xs:text-lg text-center text-balance leading-normal max-w-3xl">A modern-style UI kit, inspired by shadcn, built for the web. Pure JavaScript, CSS, zero dependencies. Fully Open Source.</p>
     `, area );
 
     const headerButtons = LX.makeContainer( [ "auto", "auto" ], "flex flex-row mt-2", ``, header );

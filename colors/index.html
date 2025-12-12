@@ -33,56 +33,94 @@
     const area = await LX.init({ layoutMode: "document", rootClass: "wrapper" });
     const starterTheme = LX.getTheme();
     const localHost = window.location.protocol !== "https:";
+    const mobile = navigator && /Android|iPhone/i.test( navigator.userAgent );
+    const menubarButtons = [
+        { name: "Docs", callback: () => { window.open("../docs/") } },
+        { name: "Examples", callback: () => { window.open("../examples/") } },
+        { name: "Components", callback: () => { window.open("../docs/?p=components") } },
+        { name: "Colors", callback: () => {} },
+        { name: "Icons", callback: () => { window.open("../icons/", "_self") } },
+    ];
+    let menubar = null, sheetArea = null;
 
-    // Menubar
+    if( mobile )
     {
-        const menubar = area.addMenubar([
-            { name: "Docs", callback: () => { window.open("../docs/") } },
-            { name: "Examples", callback: () => { window.open("../examples/") } },
-            { name: "Components", callback: () => { window.open("../docs/?p=components") } },
-            { name: "Colors", callback: () => {} },
-            { name: "Icons", callback: () => { window.open("../icons/", "_self") } },
-        ]);
+        menubar = area.addMenubar();
+
+        sheetArea = new LX.Area({ skipAppend: true });
+        sheetArea.addSidebar( ( m ) => {
+
+            m.group( "Menu" );
+
+            for( let b of menubarButtons )
+            {
+                m.add( b.name, { callback: b.callback } );
+            }
+
+        }, {
+            headerTitle: `lexgui.js`,
+            headerSubtitle: `v${ LX.version }`,
+            headerImage: "../images/favicon.png",
+            footerTitle: "jxarco",
+                footerSubtitle: "alexroco.30@gmail.com",
+                footerImage: "https://avatars.githubusercontent.com/u/25059187?s=400&u=ad8907b748c13e4e1a7cdd3882826acb6a2928b5&v=4",
+            collapsed: false,
+            collapsable: false,
+            displaySelected: false
+        } );
+    }
+    else
+    {
+        menubar = area.addMenubar( menubarButtons );
+
+        const commandButton = new LX.Button(null, `Search command...<span class="ml-auto">${ LX.makeKbd( ["Ctrl", "Space"], false, "bg-tertiary border px-1 rounded" ).innerHTML }</span>`, () => { LX.setCommandbarState( true ) }, {
+            width: "256px", className: "right", buttonClass: "p-4 fg-tertiary bg-primary" }
+        );
+        menubar.root.appendChild( commandButton.root );
+    }
 
     menubar.setButtonImage("lexgui.js", `../images/icon_${ starterTheme }.png`, () => {  window.location.href = window.location.origin + ( localHost ? "" : window.location.pathname ) }, { float: "left"} );
 
-        LX.addSignal("@on_new_color_scheme", (el, value) => {
-            menubar.setButtonImage("lexgui.js", `../images/icon_${value}.png`);
-        });
+    LX.addSignal("@on_new_color_scheme", (el, value) => {
+        menubar.setButtonImage("lexgui.js", `../images/icon_${value}.png`);
+    });
 
-        const commandButton = new LX.Button(null, `Search command...<span class="ml-auto">${LX.makeKbd(["Ctrl", "Space"], false, "bg-tertiary border px-1 rounded").innerHTML}</span>`, () => { LX.setCommandbarState(true) }, {
-            width: "256px", className: "right", buttonClass: "p-4 fg-tertiary bg-primary"
+    menubar.addButtons([
+        {
+            title: "Github",
+            icon: "Github@solid",
+            callback: (event) => window.open("https://github.com/jxarco/lexgui.js/", "_blank")
+        },
+        {
+            title: "Switch Theme",
+            icon: starterTheme == "dark" ? "Moon" : "Sun",
+            swap: starterTheme == "dark" ? "Sun" : "Moon",
+            callback: (value, event) => { LX.switchTheme() }
+        },
+        {
+            title: "Switch Spacing",
+            icon: "AlignVerticalSpaceAround",
+            callback: (value, event) => { LX.switchSpacing() }
         }
-        );
-        menubar.root.appendChild(commandButton.root);
+    ], { float: "right" });
 
-        menubar.addButtons([
-            {
-                title: "Github",
-                icon: "Github@solid",
-                callback: (event) => window.open("https://github.com/jxarco/lexgui.js/", "_blank")
-            },
-            {
-                title: "Switch Theme",
-                icon: starterTheme == "dark" ? "Moon" : "Sun",
-                swap: starterTheme == "dark" ? "Sun" : "Moon",
-                callback: (value, event) => { LX.switchTheme() }
-            },
-            {
-                title: "Switch Spacing",
-                icon: "AlignVerticalSpaceAround",
-                callback: (value, event) => { LX.switchSpacing() }
-            }
-        ], { float: "right" });
+    if( mobile )
+    {
+        menubar.root.querySelector( ".lexmenubuttons" ).style.marginLeft = "auto";
+
+        const commandButton = new LX.Button(null, LX.makeIcon( "Menu" ).innerHTML, () => {
+            window.__currentSheet = new LX.Sheet("256px", [ sheetArea ] );
+        }, { buttonClass: "p-4 bg-none fg-tertiary" } );
+        menubar.root.prepend( commandButton.root );
     }
 
     let copyFormat = "hex";
     let lastCopied = null;
 
-    const header = LX.makeContainer([null, "auto"], "flex flex-col gap-3 py-8 items-center", `
+    const header = LX.makeContainer([null, "auto"], "flex flex-col gap-4 pt-8 pb-4 items-center", `
     <a class="text-md">Get started with LexGUI.js <span class="text-sm fg-secondary">${LX.version}</span></a>
-    <p class="fg-primary font-semibold tracking-tight" style="font-size:2.75rem">Use Tailwind Colors</p>
-    <p class="fg-primary font-light text-xl text-center text-balance leading-normal" style="max-width:48rem">The complete Tailwind color palette in HEX, RGB, HSL, CSS variables, and classes. Ready to copy and paste into your project.</p>`, area);
+    <p class="fg-primary font-medium tracking-tight leading-none text-center text-balance text-5xl xs:text-4xl">Use Tailwind Colors</p>
+    <p class="fg-primary font-light text-xl  xs:text-lg text-center text-balance leading-normal max-w-3xl">The complete Tailwind color palette in HEX, RGB, HSL, CSS variables, and classes. Ready to copy and paste into your project.</p>`, area);
 
     const updateExampleString = () =>
     {
@@ -141,7 +179,7 @@
         return block;
     }
 
-    const container = LX.makeContainer( ["80%", "auto"], "self-center p-8 flex flex-col gap-4", "", area );
+    const container = LX.makeElement( "div", `xs:w-full lg:w-2/3 self-center ${ mobile ? "p-4" : "p-8" } flex flex-col gap-4`, "", area );
 
     LX.requestJSON( "../registry/colors.json", ( colors ) => 
     {
@@ -150,16 +188,22 @@
         {
             const value = colors[ key ];
 
-            if( Array.isArray( value ) )
+            if( !Array.isArray( value ) )
             {
-                // e.g. slate[ {scale, hex}, ... ]
-                const colorClass = LX.makeContainer( ["100%", "auto"], "font-semibold text-md p-2", LX.toTitleCase( key ), container );
-                const group = LX.makeContainer( ["100%", "auto"], "flex flex-row gap-2", "", container );
-
-                value.forEach(entry => {
-                    group.appendChild(createColorBlock(`${key}-${entry.scale}`, entry));
-                });
+                continue;
             }
+
+            // e.g. slate[ {scale, hex}, ... ]
+            const colorClass = LX.makeContainer( ["100%", "auto"], "font-semibold text-md p-2", LX.toTitleCase( key ), container );
+            const group = LX.makeContainer( ["100%", "auto"], `${ mobile ? "grid" : "flex flex-row" } gap-2`, "", container );
+            if( mobile )
+            {
+                group.style.gridTemplateColumns = "repeat(auto-fill, minmax(90px, 1fr))";
+            }
+
+            value.forEach(entry => {
+                group.appendChild(createColorBlock(`${key}-${entry.scale}`, entry));
+            });
         }
     });
 
