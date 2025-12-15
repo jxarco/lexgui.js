@@ -258,13 +258,13 @@
     // Clone events
     {
         assetView.on( "beforeClone", ( event, resolve ) => {
-            LX.prompt("Perform Clone Action?", "Server Message", () => {
-                resolve();
+            LX.prompt("Perform Clone Action?", "Server Message", (value) => {
+                resolve( value );
             })
         } );
 
-        assetView.on( "clone", ( event ) => {
-            console.log(event.items[ 0 ].id + " cloned");
+        assetView.on( "clone", ( event, arg1, arg2 ) => {
+            console.log(event.items[ 0 ].id + " cloned",  arg1, arg2);
         } );
     }
 

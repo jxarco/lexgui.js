@@ -46,7 +46,7 @@ interface AssetViewEvent
  * Signature for cancelable events.
  * `resolve()` MUST be called by the user to perform the UI action
  */
-export type AssetViewEventCallback = ( event: AssetViewEvent, resolve?: () => void ) => void | Promise<void>;
+export type AssetViewEventCallback = ( event: AssetViewEvent, resolve?: ( ...args: any[] ) => void ) => boolean | void | Promise<void>;
 
 /**
  * @class AssetView
@@ -1261,15 +1261,7 @@ export class AssetView
             } );
         }
 
-        this.currentFolder = folderItem;
-        this.currentData = this.currentFolder?.children ?? [];
-
-        if ( !sameFolder )
-        {
-            this._refreshContent();
-        }
-
-        this._updatePath();
+        let mustRefresh: boolean = !sameFolder;
 
         const onEnterFolder = this._callbacks['enterFolder'];
         if ( onEnterFolder !== undefined )
@@ -1279,8 +1271,22 @@ export class AssetView
                 to: folderItem,
                 userInitiated: true
             };
-            onEnterFolder( event );
+
+            const r: any = onEnterFolder( event ) as boolean;
+            mustRefresh = mustRefresh || ( r );
         }
+
+        // Update this after the event since the user might have added or modified the data
+        this.currentFolder = folderItem;
+        this.currentData = this.currentFolder?.children ?? [];
+
+        if ( mustRefresh )
+        {
+            this._processData( this.data );
+            this._refreshContent();
+        }
+
+        this._updatePath();
     }
 
     _removeItemFromParent( item: AssetViewItem )
@@ -1318,14 +1324,14 @@ export class AssetView
         const onBeforeDelete = this._callbacks['beforeDelete'];
         const onDelete = this._callbacks['delete'];
 
-        const resolve = () => {
+        const resolve = ( ...args: any[] ) => {
             this._deleteItem( item );
             const event: AssetViewEvent = {
                 type: 'delete',
                 items: [ item ],
                 userInitiated: true
             };
-            if ( onDelete ) onDelete( event );
+            if ( onDelete ) onDelete( event, ...args );
         };
 
         if ( onBeforeDelete )
@@ -1363,7 +1369,7 @@ export class AssetView
         const onBeforeMove = this._callbacks['beforeMove'];
         const onMove = this._callbacks['move'];
 
-        const resolve = () => {
+        const resolve = ( ...args: any[] ) => {
             this._moveItemToFolder( item, folder );
             const event: AssetViewEvent = {
                 type: 'move',
@@ -1372,7 +1378,7 @@ export class AssetView
                 to: folder,
                 userInitiated: true
             };
-            if ( onMove ) onMove( event );
+            if ( onMove ) onMove( event, ...args );
         };
 
         if ( onBeforeMove )
@@ -1557,7 +1563,7 @@ export class AssetView
         const onBeforeClone = this._callbacks['beforeClone'];
         const onClone = this._callbacks['clone'];
 
-        const resolve = () => {
+        const resolve = ( ...args: any[] ) => {
             const clonedItem = this._cloneItem( item );
             const event: AssetViewEvent = {
                 type: 'clone',
@@ -1565,7 +1571,7 @@ export class AssetView
                 result: [ clonedItem ],
                 userInitiated: true
             };
-            if ( onClone ) onClone( event );
+            if ( onClone ) onClone( event, ...args );
         };
 
         if ( onBeforeClone )
@@ -1667,15 +1673,16 @@ export class AssetView
         const onRename = this._callbacks['rename'];
         const oldName = item.id;
 
-        const resolve = () => {
+        const resolve = ( ...args: any[] ) => {
             this._renameItem( item, newName );
             const event: AssetViewEvent = {
                 type: 'rename',
+                items: [ item ],
                 oldName,
                 newName,
                 userInitiated: true
             };
-            if ( onRename ) onRename( event );
+            if ( onRename ) onRename( event, ...args );
         };
 
         if ( onBeforeRename )
@@ -1761,7 +1768,7 @@ export class AssetView
         const onBeforeCreateFolder = this._callbacks['beforeCreateFolder'];
         const onCreateFolder = this._callbacks['createFolder'];
 
-        const resolve = () => {
+        const resolve = ( ...args: any[] ) => {
             const newFolder = this._createFolder( folder );
             const event: AssetViewEvent = {
                 type: 'create-folder',
@@ -1769,13 +1776,14 @@ export class AssetView
                 to: folder,
                 userInitiated: true
             };
-            if ( onCreateFolder ) onCreateFolder( event );
+            if ( onCreateFolder ) onCreateFolder( event, ...args );
         };
 
         if ( onBeforeCreateFolder )
         {
             const event: AssetViewEvent = {
                 type: 'create-folder',
+                from: folder,
                 userInitiated: true
             };
 
