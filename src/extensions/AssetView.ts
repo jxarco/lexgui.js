@@ -37,6 +37,7 @@ interface AssetViewEvent
     result?: AssetViewItem[];
     from?: AssetViewItem;
     to?: AssetViewItem;
+    where?: AssetViewItem;
     oldName?: string;
     newName?: string;
     userInitiated: boolean; // clicked by user vs programmatically
@@ -1689,6 +1690,7 @@ export class AssetView
         {
             const event: AssetViewEvent = {
                 type: 'rename',
+                items: [ item ],
                 oldName,
                 newName,
                 userInitiated: true
@@ -1773,7 +1775,7 @@ export class AssetView
             const event: AssetViewEvent = {
                 type: 'create-folder',
                 result: [ newFolder ],
-                to: folder,
+                where: folder,
                 userInitiated: true
             };
             if ( onCreateFolder ) onCreateFolder( event, ...args );
@@ -1783,7 +1785,7 @@ export class AssetView
         {
             const event: AssetViewEvent = {
                 type: 'create-folder',
-                from: folder,
+                where: folder,
                 userInitiated: true
             };
 

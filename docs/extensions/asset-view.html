@@ -64,32 +64,72 @@
     docMaker.header("Usage", "h2");
 
     docMaker.paragraph( `Load your data using ${ docMaker.iCode( "LX.AssetView.load( data )" ) }.
-        Use ${ docMaker.iCode( "LX.on( eventName: string, callback: AssetViewEventCallback )" ) } to add event callbacks for the following UI action events: ` );
+        Use ${ docMaker.iCode( "LX.on( eventName: string, callback: AssetViewEventCallback )" ) } to add an AssetViewEventCallback for the following UI action events, where AssetViewEventCallback has the following
+        parameters: ${ docMaker.iCode("event") } (AssetViewEvent) and ${ docMaker.iCode("resolve") } (Function). Users must call resolve to perform the action for cancellable events. ` );
 
-    docMaker.codeBulletList( [
-        [ "select", "Asset has been selected" ],
-        [ "delete", "Asset has been deleted" ],
-        [ "rename", "Asset has been renamed" ],
-        [ "clone", "Asset has been cloned" ],
-        [ "dblClick", "Asset has been double clicked" ],
-        [ "check", "Asset has been checked" ],
-        [ "move", "Asset has been moved" ],
-        [ "enterFolder", "Folder has been entered" ],
-        [ "createFolder", "Folder has been created" ],
+    docMaker.note( `The ${ docMaker.iCode("event") } in the AssetViewEventCallback function contains common parameters as ${ docMaker.iCode("type") } and ${ docMaker.iCode("userInitiated") } and can contains more information
+    depending on the event.` );
+
+    docMaker.classMethod( "select", `Asset has been selected.`, [
+        [ "event", "{ type, userInitiated, items }" ]
     ] );
 
-    docMaker.paragraph( `and the cancellable events: ` );
-
-    docMaker.codeBulletList( [
-        [ "beforeDelete", "Called before deleting" ],
-        [ "beforeRename", "Called before renaming" ],
-        [ "beforeClone", "Called before cloning" ],
-        [ "beforeMove", "Called before moving" ],
-        [ "beforeCreateFolder", "Called before creating a folder" ]
+    docMaker.classMethod( "delete", `Asset has been deleted.`, [
+        [ "event", "{ type, userInitiated, items }" ]
     ] );
 
-    docMaker.note( `An AssetViewEventCallback has the following parameters: ${ docMaker.iCode("event") } (AssetViewEvent) and ${ docMaker.iCode("resolve") } (Function). Users must call
-    resolve to perform the action for cancellable events.` );
+    docMaker.classMethod( "rename", `Asset has been renamed.`, [
+        [ "event", "{ type, userInitiated, items, oldName, newName }" ]
+    ] );
+
+    docMaker.classMethod( "clone", `Asset has been cloned.`, [
+        [ "event", "{ type, userInitiated, items, result }" ]
+    ] );
+
+    docMaker.classMethod( "dblClick", `Asset has been double clicked.`, [
+        [ "event", "{ type, userInitiated, items }" ]
+    ] );
+
+    docMaker.classMethod( "check", `Asset has been checked.`, [
+        [ "event", "{ type, userInitiated, items }" ]
+    ] );
+
+    docMaker.classMethod( "move", `Asset has been moved.`, [
+        [ "event", "{ type, userInitiated, items, from, to }" ]
+    ] );
+
+    docMaker.classMethod( "enterFolder", `Folder has been entered.`, [
+        [ "event", "{ type, userInitiated, to }" ]
+    ] );
+
+    docMaker.classMethod( "createFolder", `Folder has been created.`, [
+        [ "event", "{ type, userInitiated, where, result }" ]
+    ] );
+
+    docMaker.classMethod( "beforeDelete", `Called before deleting assets.`, [
+        [ "event", "{ type, userInitiated, items }" ],
+        [ "resolve", "Function" ]
+    ] );
+
+    docMaker.classMethod( "beforeRename", `Called before renaming assets.`, [
+        [ "event", "{ type, userInitiated, items, oldName, newName }" ],
+        [ "resolve", "Function" ]
+    ] );
+
+    docMaker.classMethod( "beforeClone", `Called before cloning assets.`, [
+        [ "event", "{ type, userInitiated, items }" ],
+        [ "resolve", "Function" ]
+    ] );
+
+    docMaker.classMethod( "beforeMove", `Called before moving assets.`, [
+        [ "event", "{ type, userInitiated, items, from, to }" ],
+        [ "resolve", "Function" ]
+    ] );
+
+    docMaker.classMethod( "beforeCreateFolder", `Called before creating a folder.`, [
+        [ "event", "{ type, userInitiated, where }" ],
+        [ "resolve", "Function" ]
+    ] );
 
     docMaker.header("API Reference", "h2");
     docMaker.classCtor("class LX.AssetView", [ [ "options", "Object = {}" ] ]);
@@ -125,7 +165,7 @@
 
     docMaker.header( "Methods", "h3", "methods" );
 
-    docMaker.classMethod( ".clear", `Clear all AssetView panels`, [] );
+    docMaker.classMethod( ".clear", `Clear all AssetView panels.`, [] );
 
     docMaker.classMethod( ".load", `Loads and creates all the data elements.`, [
         ["data", "Object|Array"]

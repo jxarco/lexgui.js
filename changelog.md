@@ -4,7 +4,9 @@
 
 AssetView:
 - Added CreateFolder implementation to the MoveItem dialog button.
-- Add more event parameters, allow `enterFolder` event to modify data.
+- Added more event attributes, added also to docs.
+- `enterFolder` event can now modify data.
+- Passing user parameters through `resolve` call is now allowed.
 
 New Component: Alert Dialog.
 Use `dprint` to auto-format code.
