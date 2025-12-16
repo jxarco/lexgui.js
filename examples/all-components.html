@@ -5,7 +5,7 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
     <title>LexGUI demo</title>
-    <link rel="stylesheet" href="../build/lexgui.css">
+    <link rel="stylesheet" href="../css/output.css">
     <link rel="icon" href="../images/favicon.png">
 
     <script type="importmap">
@@ -129,23 +129,22 @@
             }
 
             buttonsLeftPanel.branch("Classic Buttons", { closed: closedDefault });
-            buttonsLeftPanel.addButton(null, "Classic", null);
             buttonsLeftPanel.addButton(null, "Primary", null, { buttonClass: "primary" });
             buttonsLeftPanel.addButton(null, "Secondary", null, { buttonClass: "secondary" });
+            buttonsLeftPanel.addButton(null, "Ghost", null, { buttonClass: "ghost" });
+            buttonsLeftPanel.addButton(null, "Link", null, { buttonClass: "link" });
             buttonsLeftPanel.addButton(null, "Accent", null, { buttonClass: "accent" });
-            buttonsLeftPanel.addButton(null, "Contrast", null, { buttonClass: "contrast" });
             buttonsLeftPanel.addButton(null, "Success", null, { buttonClass: "success" });
-            buttonsLeftPanel.addButton(null, "Error", null, { buttonClass: "error" });
             buttonsLeftPanel.addButton(null, "Warning", null, { buttonClass: "warning" });
+            buttonsLeftPanel.addButton(null, "Destructive", null, { buttonClass: "destructive" });
             buttonsLeftPanel.branch("Disabled Buttons", { closed: closedDefault });
-            buttonsLeftPanel.addButton(null, "Classic", null, { disabled: true });
             buttonsLeftPanel.addButton(null, "Primary", null, { disabled: true, buttonClass: "primary" });
             buttonsLeftPanel.addButton(null, "Secondary", null, { disabled: true, buttonClass: "secondary" });
             buttonsLeftPanel.addButton(null, "Accent", null, { disabled: true, buttonClass: "accent" });
             buttonsLeftPanel.addButton(null, "Contrast", null, { disabled: true, buttonClass: "contrast" });
             buttonsLeftPanel.addButton(null, "Success", null, { disabled: true, buttonClass: "success" });
-            buttonsLeftPanel.addButton(null, "Error", null, { disabled: true, buttonClass: "error" });
             buttonsLeftPanel.addButton(null, "Warning", null, { disabled: true, buttonClass: "warning" });
+            buttonsLeftPanel.addButton(null, "Destructive", null, { disabled: true, buttonClass: "destructive" });
             buttonsLeftPanel.branch("Advanced Buttons", { closed: closedDefault });
             buttonsLeftPanel.addButton("Icon Button", "Not used", null, { icon: "Skull" });
             buttonsLeftPanel.sameLine();
@@ -162,23 +161,20 @@
             buttonsLeftPanel.addButton(null, LX.makeIcon("CirclePlus").innerHTML + "Button with Inlined Icon", null);
             buttonsLeftPanel.addButton(null, "With a Badge" + LX.badge("+99", "accent xs"));
             buttonsRightPanel.branch("Outline Buttons", { closed: closedDefault });
-            buttonsRightPanel.addButton(null, "Classic Outline", null, { buttonClass: "outline" });
-            buttonsRightPanel.addButton(null, "Primary Outline", null, { buttonClass: "primary outline" });
             buttonsRightPanel.addButton(null, "Secondary Outline", null, { buttonClass: "secondary outline" });
+            buttonsRightPanel.addButton(null, "Link Outline", null, { buttonClass: "link outline" });
             buttonsRightPanel.addButton(null, "Accent Outline", null, { buttonClass: "accent outline" });
-            buttonsRightPanel.addButton(null, "Contrast Outline", null, { buttonClass: "contrast outline" });
             buttonsRightPanel.addButton(null, "Success Outline", null, { buttonClass: "success outline" });
-            buttonsRightPanel.addButton(null, "Error Outline", null, { buttonClass: "error outline" });
             buttonsRightPanel.addButton(null, "Warning Outline", null, { buttonClass: "warning outline" });
+            buttonsRightPanel.addButton(null, "Destructive Outline", null, { buttonClass: "destructive outline" });
             buttonsRightPanel.branch("Dashed Buttons", { closed: closedDefault });
-            buttonsRightPanel.addButton(null, "Classic Dashed", null, { buttonClass: "dashed" });
             buttonsRightPanel.addButton(null, "Primary Dashed", null, { buttonClass: "primary dashed" });
             buttonsRightPanel.addButton(null, "Secondary Dashed", null, { buttonClass: "secondary dashed" });
             buttonsRightPanel.addButton(null, "Accent Dashed", null, { buttonClass: "accent dashed" });
             buttonsRightPanel.addButton(null, "Contrast Dashed", null, { buttonClass: "contrast dashed" });
             buttonsRightPanel.addButton(null, "Success Dashed", null, { buttonClass: "success dashed" });
-            buttonsRightPanel.addButton(null, "Error Dashed", null, { buttonClass: "error dashed" });
             buttonsRightPanel.addButton(null, "Warning Dashed", null, { buttonClass: "warning dashed" });
+            buttonsRightPanel.addButton(null, "Destructive Dashed", null, { buttonClass: "destructive dashed" });
             buttonsRightPanel.branch("Combo Buttons", { closed: closedDefault });
             buttonsRightPanel.addComboButtons("Classic Combo", comboValues);
             buttonsRightPanel.addComboButtons("Toggle Combo", comboValues, { toggle: true });
@@ -206,14 +202,12 @@
         // Test Checkboxes
         {
             checkLeftPanel.branch("Checkboxes", { closed: closedDefault });
-            checkLeftPanel.addCheckbox(null, true, null, { className: "x", label: "Classic" });
             checkLeftPanel.addCheckbox(null, true, null, { className: "primary", label: "Primary" });
             checkLeftPanel.addCheckbox(null, true, null, { className: "secondary", label: "Secondary" });
             checkLeftPanel.addCheckbox(null, true, null, { className: "accent", label: "Accent" });
-            checkLeftPanel.addCheckbox(null, true, null, { className: "contrast", label: "Contrast" });
             checkLeftPanel.addCheckbox(null, true, null, { className: "success", label: "Success" });
-            checkLeftPanel.addCheckbox(null, true, null, { className: "error", label: "Error" });
             checkLeftPanel.addCheckbox(null, true, null, { className: "warning", label: "Warning" });
+            checkLeftPanel.addCheckbox(null, true, null, { className: "destructive", label: "Destructive" });
         }
 
         // Radiogroup
@@ -226,23 +220,19 @@
         // Test Toggles
         {
             checkRightPanel.branch("Classic Toggles", { closed: closedDefault });
-            checkRightPanel.addToggle(null, true, null, { label: "Classic" });
             checkRightPanel.addToggle(null, true, null, { className: "primary", label: "Primary" });
             checkRightPanel.addToggle(null, true, null, { className: "secondary", label: "Secondary" });
             checkRightPanel.addToggle(null, true, null, { className: "accent", label: "Accent" });
-            checkRightPanel.addToggle(null, true, null, { className: "contrast", label: "Contrast" });
             checkRightPanel.addToggle(null, true, null, { className: "success", label: "Success" });
-            checkRightPanel.addToggle(null, true, null, { className: "error", label: "Error" });
             checkRightPanel.addToggle(null, true, null, { className: "warning", label: "Warning" });
+            checkRightPanel.addToggle(null, true, null, { className: "destructive", label: "Destructive" });
             checkRightPanel.branch("Outline Toggles", { closed: closedDefault });
-            checkRightPanel.addToggle(null, true, null, { label: "Classic" });
             checkRightPanel.addToggle(null, true, null, { className: "primary outline", label: "Primary" });
             checkRightPanel.addToggle(null, true, null, { className: "secondary outline", label: "Secondary" });
             checkRightPanel.addToggle(null, true, null, { className: "accent outline", label: "Accent" });
-            checkRightPanel.addToggle(null, true, null, { className: "contrast outline", label: "Contrast" });
             checkRightPanel.addToggle(null, true, null, { className: "success outline", label: "Success" });
-            checkRightPanel.addToggle(null, true, null, { className: "error outline", label: "Error" });
             checkRightPanel.addToggle(null, true, null, { className: "warning outline", label: "Warning" });
+            checkRightPanel.addToggle(null, true, null, { className: "destructive outline", label: "Destructive" });
         }
 
         // Test Inputs

@@ -54,7 +54,7 @@ export class Button extends BaseComponent
             }
             else
             {
-                wValue.innerHTML = `<span>${( newValue ?? '' )}</span>`;
+                wValue.innerHTML = `${( newValue ?? '' )}`;
             }
         };
 
@@ -96,7 +96,10 @@ export class Button extends BaseComponent
 
         var wValue: any = document.createElement( 'button' );
         wValue.title = options.tooltip ? '' : ( options.title ?? '' );
-        wValue.className = 'lexbutton px-3 ' + ( options.buttonClass ?? '' );
+        wValue.className = `lexbutton inline-flex items-center justify-center whitespace-nowrap
+            transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none shrink-0
+            [&_svg]:shrink-0 outline-none group/button select-none cursor-pointer
+            ${ options.buttonClass ?? 'primary' }`;
         this.root.appendChild( wValue );
 
         if ( options.selected )
@@ -122,16 +125,16 @@ export class Button extends BaseComponent
             }
             else
             {
-                wValue.innerHTML = `<span>${( value || '' )}</span>`;
+                wValue.innerHTML = `${( value || '' )}`;
 
                 if ( iconPosition == 'start' )
                 {
-                    wValue.querySelector( 'span' ).prepend( icon );
+                    wValue.prepend( icon );
                 }
                 // "end"
                 else
                 {
-                    wValue.querySelector( 'span' ).appendChild( icon );
+                    wValue.appendChild( icon );
                 }
             }
 
@@ -139,7 +142,7 @@ export class Button extends BaseComponent
         }
         else
         {
-            wValue.innerHTML = `<span>${( value || '' )}</span>`;
+            wValue.innerHTML = `${( value || '' )}`;
         }
 
         if ( options.fileInput )

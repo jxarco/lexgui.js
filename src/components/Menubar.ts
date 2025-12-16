@@ -325,7 +325,7 @@ export class Menubar
             const title = data.title;
             const button = new Button( title, data.label, data.callback, {
                 title,
-                buttonClass: 'bg-none',
+                buttonClass: 'ghost',
                 disabled: data.disabled,
                 icon: data.icon,
                 hideName: true,

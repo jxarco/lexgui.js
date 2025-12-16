@@ -173,7 +173,7 @@
             setTimeout( () => block.querySelector(".copySvg").classList.remove( "fg-success" ), 1500 );
 
             updateExampleString();
-            LX.toast( `${ LX.makeIcon( "CircleCheck" ).innerHTML } Copied ${ val } to clipboard.`, null, { position: "top-center", timeout: -1 } );
+            LX.toast( `${ LX.makeIcon( "CircleCheck" ).innerHTML } Copied ${ val } to clipboard.`, null, { position: "top-center", timeout: 3000 } );
         });
 
         return block;

@@ -4,7 +4,8 @@
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <title>Documentation - LexGUI</title>
-    <link rel="stylesheet" href="../build/lexgui.css">
+    <link rel="stylesheet" href="../css/output.css">
+    <link rel="stylesheet" href="../css/docs.css">
     <link rel="icon" href="../images/favicon.png">
     <script type="importmap">
         {
@@ -130,7 +131,7 @@
         {
             const area = new LX.Area({ className: "flex flex-col gap-3 docs", skipAppend: true, height: "auto" });
             content.appendChild( area.root );
-            const container = LX.makeContainer( ["100%", "auto"], "flex flex-col bg-background border-color rounded-xxl overflow-hidden", "", area );
+            const container = LX.makeContainer( ["100%", "auto"], "flex flex-col bg-background border-color rounded-2xl overflow-hidden", "", area );
             const panel = window.__panel = new LX.Panel({ className: panelClass ?? "p-6" });
             container.appendChild( panel.root );
             onPanel( panel );
@@ -178,7 +179,7 @@
 
             const runButton = new LX.Button( null, "Run", (value, event) => {
                 runCode();
-            }, { buttonClass: "contrast" } );
+            } );
             area.attach( runButton.root );
         }
 
@@ -317,7 +318,7 @@
             "Pagination": "8.0",
             "Alert Dialog": "8.1"
         };
-        const badgeClass = "contrast sm";
+        const badgeClass = "primary xs";
 
         const sidebarCallback = m => {
 

@@ -5,29 +5,41 @@
     const componentName = "Button";
 
     docMaker.header(componentName + ".", "h1", componentName.toLowerCase());
-    docMaker.paragraph( `Represents a clickable element typically used to trigger an action.`, false, "fg-tertiary");
+    docMaker.paragraph( `Represents a clickable element typically used to trigger an action.`, false, "text-muted-foreground");
 
     {
         window.__addInteractiveCodeExample( content, componentName, panel => {
-            panel.addButton(null, "A Button Name", (value, event) => {
-                console.log(event);
-            });
 
-            panel.addButton(null, "A Must Confirm Button", (value, event) => {
-                console.log(event);
-            }, { mustConfirm: true });
+            const makeButtons = ( size ) => {
+                panel.sameLine( 6, "flex flex-wrap items-center gap-2" );
 
-            panel.addButton("A Button Label", "Print event", (value, event) => {
-                console.log(event);
-            });
+                for( const variant of [ "primary", "secondary", "outline", "ghost", "destructive", "link" ] )
+                {
+                    panel.addButton(null, variant[ 0 ].toUpperCase() + variant.substring( 1 ), (value, event) => {
+                        console.log(event);
+                    }, { buttonClass: `${ variant } ${ size }`, icon: "ArrowLeft", iconPosition: "start" } );
+                }
+            };
 
-            panel.sameLine( 3, "justify-center" );
+            makeButtons("xs");
+            makeButtons("sm");
+            makeButtons("md");
+            makeButtons("lg");
 
-            panel.addButton(null, "Icon Button (Cover)", null, { icon: "Box" } );
-            panel.addButton(null, "Icon Button (Start)", null, { icon: "Box", iconPosition: "start" } );
-            panel.addButton(null, "Icon Button (End)", null, { icon: "Box", iconPosition: "end" } );
-
-        });
+            panel.sameLine();
+            panel.addLabel("Icon Buttons");
+            panel.addButton(null, "Not used", null, { icon: "Skull", buttonClass: "primary" });
+            panel.addButton(null, "Not used", null, { icon: "Box", buttonClass: "outline" });
+            panel.addButton(null, "Not used", null, { icon: "Grid3x3", buttonClass: "ghost" });
+            panel.addLabel("Swap Buttons");
+            panel.addButton(null, "Not used", null, { icon: "Moon", swap: "Sun", buttonClass: "secondary" });
+            panel.addButton(null, "Not used", null, { icon: "Eye", swap: "EyeOff" });
+            panel.endLine("justify-start");
+            panel.sameLine(2);
+            panel.addButton(null, "Button with Inlined Icon Left", null, { icon: "CirclePlus", iconPosition: "start" });
+            panel.addButton(null, "Button with Inlined Icon Right", null, { icon: "CirclePlus", iconPosition: "end" });
+            panel.addButton(null, "With a Badge" + LX.badge("+99", "secondary xs"));
+        }, "flex flex-col gap-2 p-4");
     }
 
     docMaker.header("Usage", "h2");

@@ -1,6 +1,6 @@
 // Export css using postcss
-import './../css/lexguidocs.css';
 import './../css/output.css';
+import './../css/docs.css';
 
 // Core
 export * from './index';

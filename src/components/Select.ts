@@ -199,8 +199,7 @@ export class Select extends BaseComponent
         }, { buttonClass: 'array', skipInlineCount: true, disabled: options.disabled } );
 
         selectedOption.root.style.width = '100%';
-        const valueSpan = selectedOption.root.querySelector( 'span' );
-        valueSpan.appendChild( LX.makeIcon( 'Down', { svgClass: 'sm' } ) );
+        selectedOption.root.appendChild( LX.makeIcon( 'Down', { svgClass: 'sm' } ) );
 
         container.appendChild( selectedOption.root );
 
