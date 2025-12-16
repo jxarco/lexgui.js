@@ -3,6 +3,7 @@
 ## dev
 
 Fixed Table Component bug when there's a filter but no custom filters.
+Fixed AssetView `onEnterFolder` not allowing async callbacks.
 
 ## 8.1.0 (master)
 

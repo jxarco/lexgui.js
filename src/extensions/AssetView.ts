@@ -1243,7 +1243,7 @@ export class AssetView
         this._refreshContent();
     }
 
-    _enterFolder( folderItem: AssetViewItem | undefined, storeCurrent: boolean = true )
+    async _enterFolder( folderItem: AssetViewItem | undefined, storeCurrent: boolean = true )
     {
         if ( !folderItem )
         {
@@ -1274,7 +1274,7 @@ export class AssetView
                 userInitiated: true
             };
 
-            const r: any = onEnterFolder( event ) as boolean;
+            const r: any = await onEnterFolder( event ) as boolean;
             mustRefresh = mustRefresh || r;
         }
 

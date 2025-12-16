@@ -201,6 +201,19 @@
         }
     ];
 
+    const fakeServerRequest = function( payload, delay = 800 ) {
+        return new Promise(resolve => {
+            setTimeout(() => {
+                // 70% chance to allow the action
+                const ok = Math.random() > 0.3;
+                resolve({
+                    ok,
+                    reason: ok ? undefined : "Server rejected the operation"
+                });
+            }, delay);
+        });
+    }
+
     // Click events
     {
         assetView.on( "select", ( event, resolve ) => {
@@ -214,9 +227,42 @@
 
     // Folder events
     {
-        assetView.on( "enterFolder", ( event ) => {
+        assetView.on( "enterFolder", async ( event ) => {
             console.log(`Entered ${ event.to.id } folder` );
-        } );
+
+            // const r = await (() => { return new Promise(resolve => {
+            //     setTimeout(() => {
+            //         resolve({
+            //             ok: true
+            //         });
+            //     }, 2000);
+            // }) })();
+
+            // if( r?.ok )
+            // {
+            //     event.to.children = [
+            //         {
+            //             id: "brow_lowerer.png",
+            //             type: "clip",
+            //             src: "../data/brow_lowerer.png",
+            //             metadata: {
+            //                 lastModified: 1740181312813
+            //             }
+            //         },
+            //         {
+            //             id: "brow_lowerer.png",
+            //             type: "clip",
+            //             src: "../data/brow_lowerer.png",
+            //             metadata: {
+            //                 lastModified: 1740181312813
+            //             }
+            //         }
+            //     ]
+            // }
+
+            // return true;
+
+        });
 
         assetView.on( "beforeCreateFolder", ( event, resolve ) => {
             LX.prompt("Perform CreateFolder Action?", "Server Message", () => {
