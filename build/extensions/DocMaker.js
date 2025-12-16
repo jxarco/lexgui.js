@@ -3,13 +3,17 @@ import { LX } from '../core/Namespace.js';
 
 // DocMaker.ts @jxarco
 if (!LX) {
-    throw ("Missing LX namespace!");
+    throw ('Missing LX namespace!');
 }
 LX.extensions.push('DocMaker');
-const CPP_KEY_WORDS = ['int', 'float', 'double', 'bool', 'char', 'wchar_t', 'const', 'static_cast', 'dynamic_cast', 'new', 'delete', 'void', 'true', 'false', 'auto', 'struct', 'typedef', 'nullptr', 'NULL', 'unsigned', 'namespace', 'auto'];
+const CPP_KEY_WORDS = ['int', 'float', 'double', 'bool', 'char', 'wchar_t', 'const', 'static_cast', 'dynamic_cast',
+    'new', 'delete', 'void', 'true', 'false', 'auto', 'struct', 'typedef', 'nullptr', 'NULL', 'unsigned', 'namespace',
+    'auto'];
 const CLASS_WORDS = ['uint32_t', 'uint64_t', 'uint8_t'];
-const STATEMENT_WORDS = ['for', 'if', 'else', 'return', 'continue', 'break', 'case', 'switch', 'while', 'import', 'from', 'await'];
-const JS_KEY_WORDS = ['var', 'let', 'const', 'static', 'function', 'null', 'undefined', 'new', 'delete', 'true', 'false', 'NaN', 'this'];
+const STATEMENT_WORDS = ['for', 'if', 'else', 'return', 'continue', 'break', 'case', 'switch', 'while', 'import',
+    'from', 'await'];
+const JS_KEY_WORDS = ['var', 'let', 'const', 'static', 'function', 'null', 'undefined', 'new', 'delete', 'true',
+    'false', 'NaN', 'this'];
 const HTML_ATTRIBUTES = ['html', 'charset', 'rel', 'src', 'href', 'crossorigin', 'type', 'lang'];
 const HTML_TAGS = ['html', 'DOCTYPE', 'head', 'meta', 'title', 'link', 'script', 'body', 'style'];
 class DocMaker {
@@ -36,16 +40,16 @@ class DocMaker {
     paragraph(string, sup = false, className) {
         console.assert(string !== undefined);
         let paragraph = document.createElement(sup ? 'sup' : 'p');
-        paragraph.className = "leading-relaxed " + (className ?? "");
+        paragraph.className = 'leading-relaxed ' + (className ?? '');
         paragraph.innerHTML = string;
         this.root.appendChild(paragraph);
     }
-    code(text, language = "js") {
+    code(text, language = 'js') {
         console.assert(text !== undefined);
         text.replaceAll('<', '&lt;');
         text.replaceAll('>', '&gt;');
-        let highlight = "";
-        let content = "";
+        let highlight = '';
+        let content = '';
         const getHTML = (h, c) => {
             return `<span class="${h}">${c}</span>`;
         };
@@ -61,7 +65,7 @@ class DocMaker {
                 }
                 let html = null;
                 const tagIndex = str.indexOf('@');
-                const skipTag = (str[tagIndex - 1] == '|');
+                const skipTag = str[tagIndex - 1] == '|';
                 // Highlight is specified
                 if (text[i + 1] == '[') {
                     highlight = str.substr(1, 3);
@@ -88,50 +92,50 @@ class DocMaker {
                         content = preContent + content.substring(0, content.substring(1).indexOf('@') + 1);
                         text = text.substr(0, i) + '@' + content + '@' + text.substr(i + content.length + 3);
                     }
-                    if (language == "cpp" && CPP_KEY_WORDS.includes(content)) {
-                        highlight = "kwd";
+                    if (language == 'cpp' && CPP_KEY_WORDS.includes(content)) {
+                        highlight = 'kwd';
                     }
-                    else if (language == "js" && JS_KEY_WORDS.includes(content)) {
-                        highlight = "kwd";
+                    else if (language == 'js' && JS_KEY_WORDS.includes(content)) {
+                        highlight = 'kwd';
                     }
                     else if (CLASS_WORDS.includes(content)) {
-                        highlight = "cls";
+                        highlight = 'cls';
                     }
                     else if (STATEMENT_WORDS.includes(content)) {
-                        highlight = "lit";
+                        highlight = 'lit';
                     }
                     else if (HTML_TAGS.includes(content)) {
-                        highlight = "tag";
+                        highlight = 'tag';
                     }
                     else if (HTML_ATTRIBUTES.includes(content)) {
-                        highlight = "atn";
+                        highlight = 'atn';
                     }
-                    else if ((content[0] == '"' && content[content.length - 1] == '"') ||
-                        (content[0] == "'" && content[content.length - 1] == "'") ||
-                        (content[0] == "`" && content[content.length - 1] == "`")) {
-                        highlight = "str";
+                    else if ((content[0] == '"' && content[content.length - 1] == '"')
+                        || (content[0] == "'" && content[content.length - 1] == "'")
+                        || (content[0] == '`' && content[content.length - 1] == '`')) {
+                        highlight = 'str';
                     }
                     else if (!Number.isNaN(parseFloat(content))) {
-                        highlight = "dec";
+                        highlight = 'dec';
                     }
                     else {
-                        console.error("ERROR[Code Parsing]: Unknown highlight type: " + content);
+                        console.error('ERROR[Code Parsing]: Unknown highlight type: ' + content);
                         return;
                     }
                     html = getHTML(highlight, content);
                     text = text.replace(`@${content}@`, html);
                 }
-                i += (html.length - 1);
+                i += html.length - 1;
             }
         }
         let container = document.createElement('div');
-        container.className = "code-container";
+        container.className = 'code-container';
         let pre = document.createElement('pre');
         let code = document.createElement('code');
         code.innerHTML = text;
         let button = document.createElement('button');
-        button.title = "Copy code sample";
-        button.appendChild(LX.makeIcon("Copy"));
+        button.title = 'Copy code sample';
+        button.appendChild(LX.makeIcon('Copy'));
         button.addEventListener('click', this._copySnippet.bind(this, button));
         container.appendChild(button);
         pre.appendChild(code);
@@ -140,7 +144,7 @@ class DocMaker {
     }
     list(list, type, target) {
         const validTypes = ['bullet', 'numbered'];
-        console.assert(list && list.length > 0 && validTypes.includes(type), "Invalid list type or empty list" + type);
+        console.assert(list && list.length > 0 && validTypes.includes(type), 'Invalid list type or empty list' + type);
         const typeString = type == 'bullet' ? 'ul' : 'ol';
         let ul = document.createElement(typeString);
         target = target ?? this.root;
@@ -151,7 +155,7 @@ class DocMaker {
                 return;
             }
             let li = document.createElement('li');
-            li.className = "leading-loose";
+            li.className = 'leading-loose';
             li.innerHTML = el;
             ul.appendChild(li);
         }
@@ -175,14 +179,18 @@ class DocMaker {
     }
     codeListItem(item, target) {
         target = target ?? this._listQueued;
-        let split = (item.constructor === Array);
+        let split = item.constructor === Array;
         if (split && item[0].constructor === Array) {
             this.codeBulletList(item, target);
             return;
         }
         let li = document.createElement('li');
-        li.className = "leading-loose";
-        li.innerHTML = split ? (item.length == 2 ? this.iCode(item[0]) + ": " + item[1] : this.iCode(item[0] + " <span class='desc'>(" + item[1] + ")</span>") + ": " + item[2]) : this.iCode(item);
+        li.className = 'leading-loose';
+        li.innerHTML = split
+            ? (item.length == 2
+                ? this.iCode(item[0]) + ': ' + item[1]
+                : this.iCode(item[0] + " <span class='desc'>(" + item[1] + ')</span>') + ': ' + item[2])
+            : this.iCode(item);
         target?.appendChild(li);
     }
     codeBulletList(list, target) {
@@ -198,11 +206,11 @@ class DocMaker {
             this.root.appendChild(ul);
         }
     }
-    image(src, caption = "", parent) {
+    image(src, caption = '', parent) {
         let img = document.createElement('img');
         img.src = src;
         img.alt = caption;
-        img.className = "my-1";
+        img.className = 'my-1';
         parent = parent ?? this.root;
         parent.appendChild(img);
     }
@@ -210,9 +218,9 @@ class DocMaker {
         const mobile = navigator && /Android|iPhone/i.test(navigator.userAgent);
         if (!mobile) {
             let div = document.createElement('div');
-            div.style.width = width ?? "auto";
-            div.style.height = height ?? "256px";
-            div.className = "flex flex-row justify-center";
+            div.style.width = width ?? 'auto';
+            div.style.height = height ?? '256px';
+            div.className = 'flex flex-row justify-center';
             for (let i = 0; i < sources.length; ++i) {
                 this.image(sources[i], captions[i], div);
             }
@@ -224,7 +232,7 @@ class DocMaker {
             }
         }
     }
-    video(src, caption = "", controls = true, autoplay = false) {
+    video(src, caption = '', controls = true, autoplay = false) {
         let video = document.createElement('video');
         video.src = src;
         video.controls = controls;
@@ -238,44 +246,48 @@ class DocMaker {
     }
     note(text, warning = false, title, icon) {
         console.assert(text !== undefined);
-        const note = LX.makeContainer([], "border rounded-lg overflow-hidden text-md fg-secondary my-6", "", this.root);
+        const note = LX.makeContainer([], 'border rounded-lg overflow-hidden text-md fg-secondary my-6', '', this.root);
         let header = document.createElement('div');
-        header.className = "flex bg-tertiary font-semibold px-3 py-2 gap-2 fg-secondary";
-        header.appendChild(LX.makeIcon(icon ?? (warning ? "MessageSquareWarning" : "NotepadText")));
-        header.innerHTML += (title ?? (warning ? "Important" : "Note"));
+        header.className = 'flex bg-tertiary font-semibold px-3 py-2 gap-2 fg-secondary';
+        header.appendChild(LX.makeIcon(icon ?? (warning ? 'MessageSquareWarning' : 'NotepadText')));
+        header.innerHTML += title ?? (warning ? 'Important' : 'Note');
         note.appendChild(header);
         // Node body
-        LX.makeContainer([], "leading-6 p-3", text, note);
+        LX.makeContainer([], 'leading-6 p-3', text, note);
     }
-    classCtor(name, params, language = "js") {
-        let paramsHTML = "";
+    classCtor(name, params, language = 'js') {
+        let paramsHTML = '';
         for (var p of params) {
             const str1 = p[0]; // cpp: param          js: name
             const str2 = p[1]; // cpp: defaultValue   js: type
-            if (language == "cpp") {
-                paramsHTML += str1 + (str2 ? " = <span class='desc'>" + str2 + "</span>" : "") + (params.indexOf(p) != (params.length - 1) ? ', ' : '');
+            if (language == 'cpp') {
+                paramsHTML += str1 + (str2 ? " = <span class='desc'>" + str2 + '</span>' : '')
+                    + (params.indexOf(p) != (params.length - 1) ? ', ' : '');
             }
-            else if (language == "js") {
-                paramsHTML += str1 + ": <span class='desc'>" + str2 + "</span>" + (params.indexOf(p) != (params.length - 1) ? ', ' : '');
+            else if (language == 'js') {
+                paramsHTML += str1 + ": <span class='desc'>" + str2 + '</span>'
+                    + (params.indexOf(p) != (params.length - 1) ? ', ' : '');
             }
         }
         let pr = document.createElement('p');
-        pr.innerHTML = this.iCode("<span class='constructor'>" + name + "(" + paramsHTML + ")" + "</span>");
+        pr.innerHTML = this.iCode("<span class='constructor'>" + name + '(' + paramsHTML + ')' + '</span>');
         this.root.appendChild(pr);
     }
     classMethod(name, desc, params, ret) {
         this.startCodeBulletList();
-        let paramsHTML = "";
+        let paramsHTML = '';
         for (var p of params) {
             const name = p[0];
             const type = p[1];
-            paramsHTML += name + ": <span class='desc'>" + type + "</span>" + (params.indexOf(p) != (params.length - 1) ? ', ' : '');
+            paramsHTML += name + ": <span class='desc'>" + type + '</span>'
+                + (params.indexOf(p) != (params.length - 1) ? ', ' : '');
         }
         let li = document.createElement('li');
-        li.innerHTML = this.iCode("<span class='method'>" + name + " (" + paramsHTML + ")" + (ret ? (": " + ret) : "") + "</span>");
+        li.innerHTML = this.iCode("<span class='method'>" + name + ' (' + paramsHTML + ')' + (ret ? (': ' + ret) : '') + '</span>');
         this._listQueued?.appendChild(li);
         this.endCodeBulletList();
         this.paragraph(desc);
+        return li.parentElement;
     }
     iLink(text, href) {
         console.assert(text !== undefined && href !== undefined);
@@ -283,31 +295,31 @@ class DocMaker {
     }
     iPage(text, page) {
         console.assert(text !== undefined && page !== undefined);
-        const startPage = page.replace(".html", "");
+        const startPage = page.replace('.html', '');
         const g = globalThis;
         if (g.setPath && g.loadPage) {
             const tabName = g.setPath(startPage);
             return `<a onclick="loadPage('${page}', true, '${tabName}')">${text}</a>`;
         }
         else {
-            console.warn("[DocMaker] Create globalThis.setPath and globalThis.loadPage to use inline pages!");
+            console.warn('[DocMaker] Create globalThis.setPath and globalThis.loadPage to use inline pages!');
         }
     }
     iCode(text, codeClass) {
         console.assert(text !== undefined);
-        return `<code class="inline ${codeClass ?? ""}">${text}</code>`;
+        return `<code class="inline ${codeClass ?? ''}">${text}</code>`;
     }
     _copySnippet(b) {
-        b.innerHTML = "";
-        b.appendChild(LX.makeIcon("Check"));
+        b.innerHTML = '';
+        b.appendChild(LX.makeIcon('Check'));
         b.classList.add('copied');
         setTimeout(() => {
-            b.innerHTML = "";
-            b.appendChild(LX.makeIcon("Copy"));
+            b.innerHTML = '';
+            b.appendChild(LX.makeIcon('Copy'));
             b.classList.remove('copied');
         }, 2000);
         navigator.clipboard.writeText(b.dataset['snippet'] ?? b.parentElement.innerText);
-        console.log("Copied!");
+        console.log('Copied!');
     }
 }
 

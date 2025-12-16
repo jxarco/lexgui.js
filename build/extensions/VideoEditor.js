@@ -3,7 +3,7 @@ import { LX } from '../core/Namespace.js';
 
 // VideoEditor.ts @evallsg
 if (!LX) {
-    throw ("Missing LX namespace!");
+    throw ('Missing LX namespace!');
 }
 LX.extensions.push('VideoEditor');
 const vec2 = LX.vec2;
@@ -15,9 +15,9 @@ LX.Panel;
 class TimeBar {
     static TIMEBAR_PLAY = 1;
     static TIMEBAR_TRIM = 2;
-    static BACKGROUND_COLOR = LX.getThemeColor("global-branch-darker");
-    static COLOR = LX.getThemeColor("global-button-color");
-    static ACTIVE_COLOR = "#668ee4";
+    static BACKGROUND_COLOR = LX.getThemeColor('global-branch-darker');
+    static COLOR = LX.getThemeColor('global-button-color');
+    static ACTIVE_COLOR = '#668ee4';
     type = TimeBar.TIMEBAR_PLAY;
     duration = 1.0;
     canvas;
@@ -46,7 +46,7 @@ class TimeBar {
         this.canvas.width = area.size[0];
         this.canvas.height = area.size[1];
         area.attach(this.canvas);
-        this.ctx = this.canvas.getContext("2d");
+        this.ctx = this.canvas.getContext('2d');
         this.markerWidth = options.markerWidth ?? this.markerWidth;
         this.markerHeight = options.markerHeight ?? (this.canvas.height * 0.5);
         this.offset = options.offset || (this.markerWidth * 0.5 + 5);
@@ -59,7 +59,7 @@ class TimeBar {
         this.currentX = this.startX;
         this._draw();
         this.updateTheme();
-        LX.addSignal("@on_new_color_scheme", () => {
+        LX.addSignal('@on_new_color_scheme', () => {
             // Retrieve again the color using LX.getThemeColor, which checks the applied theme
             this.updateTheme();
         });
@@ -68,9 +68,9 @@ class TimeBar {
         this.canvas.onmouseup = (e) => this.onMouseUp(e);
     }
     updateTheme() {
-        TimeBar.BACKGROUND_COLOR = LX.getThemeColor("global-color-secondary");
-        TimeBar.COLOR = LX.getThemeColor("global-color-quaternary");
-        TimeBar.ACTIVE_COLOR = "#668ee4";
+        TimeBar.BACKGROUND_COLOR = LX.getThemeColor('global-color-secondary');
+        TimeBar.COLOR = LX.getThemeColor('global-color-quaternary');
+        TimeBar.ACTIVE_COLOR = '#668ee4';
     }
     setDuration(duration) {
         this.duration = duration;
@@ -132,7 +132,8 @@ class TimeBar {
         // Min-Max time markers
         this._drawTrimMarker('start', this.startX, { color: null, fillColor: TimeBar.ACTIVE_COLOR || '#5f88c9' });
         this._drawTrimMarker('end', this.endX, { color: null, fillColor: TimeBar.ACTIVE_COLOR || '#5f88c9' });
-        this._drawTimeMarker('current', this.currentX, { color: '#e5e5e5', fillColor: TimeBar.ACTIVE_COLOR || '#5f88c9', width: this.markerWidth });
+        this._drawTimeMarker('current', this.currentX, { color: '#e5e5e5',
+            fillColor: TimeBar.ACTIVE_COLOR || '#5f88c9', width: this.markerWidth });
         if (this.onDraw) {
             this.onDraw();
         }
@@ -146,7 +147,7 @@ class TimeBar {
             return;
         // Shadow
         if (this.hovering == name) {
-            ctx.shadowColor = "white";
+            ctx.shadowColor = 'white';
             ctx.shadowBlur = 2;
         }
         ctx.globalAlpha = 1;
@@ -155,7 +156,7 @@ class TimeBar {
         ctx.roundRect(x - w * 0.5, y, w, h, 2);
         ctx.fill();
         ctx.fillStyle = ctx.strokeStyle = options.fillColor || '#111'; // "#FFF";
-        ctx.strokeStyle = "white";
+        ctx.strokeStyle = 'white';
         ctx.beginPath();
         ctx.lineWidth = 2;
         ctx.moveTo(x, y + 4);
@@ -174,11 +175,11 @@ class TimeBar {
         ctx.fillStyle = ctx.strokeStyle = options.fillColor || '#111'; // "#FFF";
         // Shadow
         if (this.hovering == name) {
-            ctx.shadowColor = "white";
+            ctx.shadowColor = 'white';
             ctx.shadowBlur = 2;
         }
         // Current time line
-        ctx.fillStyle = ctx.strokeStyle = "white";
+        ctx.fillStyle = ctx.strokeStyle = 'white';
         ctx.beginPath();
         ctx.moveTo(x, y);
         ctx.lineTo(x, y + h * 0.5);
@@ -214,15 +215,15 @@ class TimeBar {
         // grab trim markers only from the bottom
         if (Math.abs(this.startX - x) < threshold && this.position.y < y) {
             this.dragging = 'start';
-            canvas.style.cursor = "grabbing";
+            canvas.style.cursor = 'grabbing';
         }
         else if (Math.abs(this.endX - x) < threshold && this.position.y < y) {
             this.dragging = 'end';
-            canvas.style.cursor = "grabbing";
+            canvas.style.cursor = 'grabbing';
         }
         else {
             this.dragging = 'current';
-            canvas.style.cursor = "grabbing";
+            canvas.style.cursor = 'grabbing';
             if (x < this.startX) {
                 this.currentX = this.startX;
             }
@@ -247,7 +248,7 @@ class TimeBar {
             return;
         }
         const canvas = this.canvas;
-        canvas.style.cursor = "default";
+        canvas.style.cursor = 'default';
     }
     onMouseMove(e) {
         if (this.onMouse) {
@@ -283,19 +284,19 @@ class TimeBar {
             const threshold = this.markerWidth * 0.5;
             if (Math.abs(this.startX - x) < threshold) {
                 this.hovering = 'start';
-                canvas.style.cursor = "grab";
+                canvas.style.cursor = 'grab';
             }
             else if (Math.abs(this.endX - x) < threshold) {
                 this.hovering = 'end';
-                canvas.style.cursor = "grab";
+                canvas.style.cursor = 'grab';
             }
             else if (Math.abs(this.currentX - x) < threshold) {
                 this.hovering = 'current';
-                canvas.style.cursor = "grab";
+                canvas.style.cursor = 'grab';
             }
             else {
                 delete this.hovering;
-                canvas.style.cursor = "default";
+                canvas.style.cursor = 'default';
             }
         }
         this._draw();
@@ -332,8 +333,8 @@ class VideoEditor {
     playing = false;
     videoReady = false;
     controls = true;
-    startTimeString = "0:0";
-    endTimeString = "0:0";
+    startTimeString = '0:0';
+    endTimeString = '0:0';
     speed = 1.0;
     currentTime = 0.0;
     startTime = 0.0;
@@ -346,7 +347,7 @@ class VideoEditor {
     crop = false;
     dragOffsetX = 0.0;
     dragOffsetY = 0.0;
-    currentTimeString = "";
+    currentTimeString = '';
     timebar;
     mainArea;
     cropArea; // HTMLElement with normCoord attribute;
@@ -378,12 +379,13 @@ class VideoEditor {
             controlsArea = options.controlsArea;
         }
         else {
-            [videoArea, controlsArea] = area.split({ type: 'vertical', sizes: ["85%", null], minimizable: false, resize: false });
+            [videoArea, controlsArea] = area.split({ type: 'vertical', sizes: ['85%', null], minimizable: false,
+                resize: false });
         }
         controlsArea.root.classList.add('lexconstrolsarea');
-        this.cropArea = document.createElement("div");
-        this.cropArea.id = "cropArea";
-        this.cropArea.className = "resize-area hidden";
+        this.cropArea = document.createElement('div');
+        this.cropArea.id = 'cropArea';
+        this.cropArea.className = 'resize-area hidden';
         this.cropArea.normCoords = { x: 0, y: 0, w: 1, h: 1 };
         const flags = 0x0f;
         this.setCropAreaHandles(flags);
@@ -398,40 +400,43 @@ class VideoEditor {
             this.loadVideo(options);
         }
         if (options.videoArea) {
-            options.videoArea.root.classList.add("lexvideoeditor");
+            options.videoArea.root.classList.add('lexvideoeditor');
             options.videoArea.attach(this.cropArea);
             videoArea.attach(options.videoArea);
         }
         else {
             videoArea.attach(video);
             videoArea.attach(this.cropArea);
-            videoArea.root.classList.add("lexvideoeditor");
+            videoArea.root.classList.add('lexvideoeditor');
         }
         this.controlsArea = controlsArea;
         // Create playing timeline area and attach panels
-        let [topArea, bottomArea] = controlsArea.split({ type: 'vertical', sizes: ["50%", null], minimizable: false, resize: false });
+        let [topArea, bottomArea] = controlsArea.split({ type: 'vertical', sizes: ['50%', null],
+            minimizable: false, resize: false });
         bottomArea.setSize([bottomArea.size[0], 40]);
-        let [leftArea, controlsRight] = bottomArea.split({ type: 'horizontal', sizes: ["92%", null], minimizable: false, resize: false });
-        let [controlsLeft, timeBarArea] = leftArea.split({ type: 'horizontal', sizes: ["10%", null], minimizable: false, resize: false });
+        let [leftArea, controlsRight] = bottomArea.split({ type: 'horizontal', sizes: ['92%', null],
+            minimizable: false, resize: false });
+        let [controlsLeft, timeBarArea] = leftArea.split({ type: 'horizontal', sizes: ['10%', null],
+            minimizable: false, resize: false });
         topArea.root.classList.add('lexbar');
         bottomArea.root.classList.add('lexbar');
         this.controlsCurrentPanel = new LX.Panel({ className: 'lexcontrolspanel lextime' });
         this.controlsCurrentPanel.refresh = () => {
             this.controlsCurrentPanel.clear();
-            this.controlsCurrentPanel.addLabel(this.currentTimeString, { float: "center" });
+            this.controlsCurrentPanel.addLabel(this.currentTimeString, { float: 'center' });
         };
         topArea.root.classList.add('lexflexarea');
         topArea.attach(this.controlsCurrentPanel);
         this.controlsCurrentPanel.refresh();
         const style = getComputedStyle(bottomArea.root);
-        let padding = Number(style.getPropertyValue('padding').replace("px", ""));
+        let padding = Number(style.getPropertyValue('padding').replace('px', ''));
         this.timebar = new TimeBar(timeBarArea, TimeBar.TIMEBAR_TRIM, { offset: padding });
         // Create controls panel (play/pause button and start time)
         this.controlsPanelLeft = new LX.Panel({ className: 'lexcontrolspanel' });
         this.controlsPanelLeft.refresh = () => {
             this.controlsPanelLeft.clear();
             this.controlsPanelLeft.sameLine();
-            let playbtn = this.controlsPanelLeft.addButton('Play', "", (v) => {
+            let playbtn = this.controlsPanelLeft.addButton('Play', '', (v) => {
                 this.playing = v;
                 if (this.playing) {
                     if (this.video.currentTime + 0.000001 >= this.endTime) {
@@ -442,23 +447,25 @@ class VideoEditor {
                 else {
                     this.video.pause();
                 }
-            }, { width: '40px', icon: 'Play@solid', swap: 'Pause@solid', hideName: true, className: "justify-center" });
+            }, { width: '40px', icon: 'Play@solid', swap: 'Pause@solid', hideName: true,
+                className: 'justify-center' });
             playbtn.setState(this.playing, true);
             this.controlsPanelLeft.addButton('', '', (v, e) => {
                 const panel = new LX.Panel();
-                panel.addRange("Speed", this.speed, (v) => {
+                panel.addRange('Speed', this.speed, (v) => {
                     this.speed = v;
                     this.video.playbackRate = v;
                     if (this.onChangeSpeed) {
                         this.onChangeSpeed(v);
                     }
                 }, { min: 0, max: 2.5, step: 0.01, hideName: true });
-                new LX.Popover(e.target, [panel], { align: "start", side: "top", sideOffset: 12 });
-            }, { width: '40px', title: 'speed', icon: "Timer@solid", className: "justify-center" });
+                new LX.Popover(e.target, [panel], { align: 'start', side: 'top', sideOffset: 12 });
+            }, { width: '40px', title: 'speed', icon: 'Timer@solid', className: 'justify-center' });
             this.controlsPanelLeft.addButton('', 'Loop', (v) => {
                 this.loop = v;
-            }, { width: '40px', title: 'loop', icon: ('Repeat@solid'), className: `justify-center`, selectable: true, selected: this.loop });
-            this.controlsPanelLeft.addLabel(this.startTimeString, { width: "100px" });
+            }, { width: '40px', title: 'loop', icon: ('Repeat@solid'), className: `justify-center`, selectable: true,
+                selected: this.loop });
+            this.controlsPanelLeft.addLabel(this.startTimeString, { width: '100px' });
             this.controlsPanelLeft.endLine();
             let availableWidth = leftArea.root.clientWidth - controlsLeft.root.clientWidth;
             this.timebar.resize([availableWidth, timeBarArea.root.clientHeight]);
@@ -481,7 +488,8 @@ class VideoEditor {
         this.timebar.onChangeEnd = this._setEndTime.bind(this);
         this.resize = () => {
             bottomArea.setSize([this.controlsArea.root.clientWidth, 40]);
-            let availableWidth = this.controlsArea.root.clientWidth - controlsLeft.root.clientWidth - controlsRight.root.clientWidth;
+            let availableWidth = this.controlsArea.root.clientWidth - controlsLeft.root.clientWidth
+                - controlsRight.root.clientWidth;
             this.timebar.resize([availableWidth, timeBarArea.root.clientHeight]);
             this.moveCropArea(this.cropArea.normCoords.x, this.cropArea.normCoords.y, true);
             this.resizeCropArea(this.cropArea.normCoords.w, this.cropArea.normCoords.h, true);
@@ -492,7 +500,7 @@ class VideoEditor {
         area.onresize = this.resize.bind(this);
         window.addEventListener('resize', area.onresize);
         this.onKeyUp = (e) => {
-            if (this.controls && e.key == " ") {
+            if (this.controls && e.key == ' ') {
                 e.preventDefault();
                 e.stopPropagation();
                 this.playing = !this.playing;
@@ -508,10 +516,10 @@ class VideoEditor {
                 this.controlsPanelLeft.refresh();
             }
         };
-        window.addEventListener("keyup", this.onKeyUp);
+        window.addEventListener('keyup', this.onKeyUp);
         const parent = controlsArea.parentElement ? controlsArea.parentElement : controlsArea.root.parentElement;
         // Add canvas event listeneres
-        parent.addEventListener("mousedown", (e) => {
+        parent.addEventListener('mousedown', (e) => {
             // if( this.controls) {
             //     this.timebar.onMouseDown(e);
             // }
@@ -527,8 +535,8 @@ class VideoEditor {
             }
             this.isDragging = false;
             this.isResizing = false;
-            document.removeEventListener("mouseup", this._onCropMouseUp); // self destroy. Added during mouseDown on cropArea and handles
-            document.removeEventListener("mousemove", this._onCropMouseMove); // self destroy. Added during mouseDown on cropArea and handles
+            document.removeEventListener('mouseup', this._onCropMouseUp); // self destroy. Added during mouseDown on cropArea and handles
+            document.removeEventListener('mousemove', this._onCropMouseMove); // self destroy. Added during mouseDown on cropArea and handles
         };
         this._onCropMouseMove = (event) => {
             // if(this.controls) {
@@ -581,14 +589,14 @@ class VideoEditor {
                 this.moveCropArea(event.clientX - this.dragOffsetX, event.clientY - this.dragOffsetY, false);
             }
         };
-        this.cropArea.addEventListener("mousedown", (e) => {
+        this.cropArea.addEventListener('mousedown', (e) => {
             if (e.target === this.cropArea) {
                 const rect = this.cropArea.getBoundingClientRect();
                 this.isDragging = true;
                 this.dragOffsetX = e.clientX - rect.left;
                 this.dragOffsetY = e.clientY - rect.top;
-                document.addEventListener("mouseup", this._onCropMouseUp);
-                document.addEventListener("mousemove", this._onCropMouseMove);
+                document.addEventListener('mouseup', this._onCropMouseUp);
+                document.addEventListener('mousemove', this._onCropMouseMove);
             }
         });
         this.onChangeStart = null;
@@ -596,49 +604,45 @@ class VideoEditor {
     }
     setCropAreaHandles(flags) {
         // remove existing resizer handles
-        const resizers = this.cropArea.getElementsByClassName("resize-handle");
+        const resizers = this.cropArea.getElementsByClassName('resize-handle');
         for (let i = resizers.length - 1; i > -1; --i) {
             resizers[i].remove();
         }
         const buildResizer = (className, movement) => {
-            const handle = document.createElement("div");
-            handle.className = " resize-handle " + className;
+            const handle = document.createElement('div');
+            handle.className = ' resize-handle ' + className;
             handle.movement = movement;
             if (this.options.handleStyle) {
                 Object.assign(handle.style, this.options.handleStyle);
             }
             this.cropArea.append(handle);
-            handle.addEventListener("mousedown", (e) => {
+            handle.addEventListener('mousedown', (e) => {
                 e.stopPropagation();
                 e.preventDefault();
                 this.isResizing = handle;
-                document.addEventListener("mouseup", this._onCropMouseUp);
-                document.addEventListener("mousemove", this._onCropMouseMove);
+                document.addEventListener('mouseup', this._onCropMouseUp);
+                document.addEventListener('mousemove', this._onCropMouseMove);
             });
         };
-        if (flags & VideoEditor.CROP_HANDLE_L) {
-            buildResizer("l", VideoEditor.CROP_HANDLE_L);
-        }
-        if (flags & VideoEditor.CROP_HANDLE_R) {
-            buildResizer("r", VideoEditor.CROP_HANDLE_R);
-        }
-        if (flags & VideoEditor.CROP_HANDLE_T) {
-            buildResizer("t", VideoEditor.CROP_HANDLE_T);
-        }
-        if (flags & VideoEditor.CROP_HANDLE_B) {
-            buildResizer("b", VideoEditor.CROP_HANDLE_B);
-        }
+        if (flags & VideoEditor.CROP_HANDLE_L)
+            buildResizer('l', VideoEditor.CROP_HANDLE_L);
+        if (flags & VideoEditor.CROP_HANDLE_R)
+            buildResizer('r', VideoEditor.CROP_HANDLE_R);
+        if (flags & VideoEditor.CROP_HANDLE_T)
+            buildResizer('t', VideoEditor.CROP_HANDLE_T);
+        if (flags & VideoEditor.CROP_HANDLE_B)
+            buildResizer('b', VideoEditor.CROP_HANDLE_B);
         if ((flags & VideoEditor.CROP_HANDLE_TL) == VideoEditor.CROP_HANDLE_TL) {
-            buildResizer("tl", VideoEditor.CROP_HANDLE_TL);
+            buildResizer('tl', VideoEditor.CROP_HANDLE_TL);
         }
         if ((flags & VideoEditor.CROP_HANDLE_BL) == VideoEditor.CROP_HANDLE_BL) {
-            buildResizer("bl", VideoEditor.CROP_HANDLE_BL);
+            buildResizer('bl', VideoEditor.CROP_HANDLE_BL);
         }
         if ((flags & VideoEditor.CROP_HANDLE_TR) == VideoEditor.CROP_HANDLE_TR) {
-            buildResizer("tr", VideoEditor.CROP_HANDLE_TR);
+            buildResizer('tr', VideoEditor.CROP_HANDLE_TR);
         }
         if ((flags & VideoEditor.CROP_HANDLE_BR) == VideoEditor.CROP_HANDLE_BR) {
-            buildResizer("br", VideoEditor.CROP_HANDLE_BR);
+            buildResizer('br', VideoEditor.CROP_HANDLE_BR);
         }
     }
     resizeCropArea(sx, sy, isNormalized = true) {
@@ -655,7 +659,7 @@ class VideoEditor {
         const heightPx = rectVideo.height * sy;
         const xPx = rectVideo.width * this.cropArea.normCoords.x + rectVideo.left;
         const yPx = rectVideo.height * this.cropArea.normCoords.y + rectVideo.top;
-        if (!this.cropArea.classList.contains("hidden")) {
+        if (!this.cropArea.classList.contains('hidden')) {
             const nodes = this.cropArea.parentElement.childNodes;
             for (let i = 0; i < nodes.length; i++) {
                 if (nodes[i] != this.cropArea) {
@@ -665,8 +669,8 @@ class VideoEditor {
                 }
             }
         }
-        this.cropArea.style.width = widthPx + "px";
-        this.cropArea.style.height = heightPx + "px";
+        this.cropArea.style.width = widthPx + 'px';
+        this.cropArea.style.height = heightPx + 'px';
     }
     // screen pixel (event.clientX) or video normalized (0 is top left of video, 1 bot right)
     moveCropArea(x, y, isNormalized = true) {
@@ -683,7 +687,7 @@ class VideoEditor {
         const yPx = rectVideo.height * y + rectVideo.top;
         const widthPx = rectVideo.width * this.cropArea.normCoords.w;
         const heightPx = rectVideo.height * this.cropArea.normCoords.h;
-        if (!this.cropArea.classList.contains("hidden")) {
+        if (!this.cropArea.classList.contains('hidden')) {
             const nodes = this.cropArea.parentElement.childNodes;
             for (let i = 0; i < nodes.length; i++) {
                 if (nodes[i] != this.cropArea) {
@@ -694,13 +698,13 @@ class VideoEditor {
             }
         }
         const rectParent = this.cropArea.parentElement.getBoundingClientRect();
-        this.cropArea.style.left = xPx - rectParent.left + "px";
-        this.cropArea.style.top = yPx - rectParent.top + "px";
+        this.cropArea.style.left = xPx - rectParent.left + 'px';
+        this.cropArea.style.top = yPx - rectParent.top + 'px';
     }
     async loadVideo(options = {}) {
         this.videoReady = false;
         while (this.video.duration === Infinity || isNaN(this.video.duration) || !this.timebar) {
-            await new Promise(r => setTimeout(r, 1000));
+            await new Promise((r) => setTimeout(r, 1000));
             this.video.currentTime = 10000000 * Math.random();
         }
         this.video.currentTime = 0.01; // BUG: some videos will not play unless this line is present
@@ -714,11 +718,11 @@ class VideoEditor {
                 this.video.currentTime = this.video.duration;
             }
         };
-        this.video.addEventListener("canplaythrough", forceLoadChunks, { passive: true });
+        this.video.addEventListener('canplaythrough', forceLoadChunks, { passive: true });
         this.video.ondurationchange = (v) => {
             if (this.video.duration != this.endTime) {
                 this.video.currentTime = this.startTime;
-                console.log("duration changed from", this.endTime, " to ", this.video.duration);
+                console.log('duration changed from', this.endTime, ' to ', this.video.duration);
                 this.endTime = this.video.duration;
                 this.timebar.setDuration(this.endTime);
                 this.timebar.setEndTime(this.endTime);
@@ -734,10 +738,10 @@ class VideoEditor {
         this.timebar.setEndTime(this.video.duration);
         this.timebar.setStartTime(this.startTime);
         this.timebar.setCurrentTime(this.startTime);
-        //this.timebar.setStartValue( this.timebar.startX);
-        //this.timebar.currentX = this._timeToX( this.video.currentTime);
-        //this.timebar.setCurrentValue( this.timebar.currentX);
-        //this.timebar.update( this.timebar.currentX );
+        // this.timebar.setStartValue( this.timebar.startX);
+        // this.timebar.currentX = this._timeToX( this.video.currentTime);
+        // this.timebar.setCurrentValue( this.timebar.currentX);
+        // this.timebar.update( this.timebar.currentX );
         // only have one update on flight
         if (!this.requestId) {
             this._update();
@@ -746,8 +750,8 @@ class VideoEditor {
         if (!this.controls) {
             this.hideControls();
         }
-        this.cropArea.style.height = this.video.clientHeight + "px";
-        this.cropArea.style.width = this.video.clientWidth + "px";
+        this.cropArea.style.height = this.video.clientHeight + 'px';
+        this.cropArea.style.width = this.video.clientWidth + 'px';
         this.moveCropArea(0, 0, true);
         this.resizeCropArea(1, 1, true);
         if (this.crop) {
@@ -756,7 +760,7 @@ class VideoEditor {
         else {
             this.hideCropArea();
         }
-        window.addEventListener("keyup", this.onKeyUp);
+        window.addEventListener('keyup', this.onKeyUp);
         if (this.onVideoLoaded) {
             this.onVideoLoaded(this.video);
         }
@@ -840,7 +844,7 @@ class VideoEditor {
         return this.cropArea.getBoundingClientRect();
     }
     showCropArea() {
-        this.cropArea.classList.remove("hidden");
+        this.cropArea.classList.remove('hidden');
         const nodes = this.cropArea.parentElement?.childNodes ?? [];
         const rect = this.cropArea.getBoundingClientRect();
         for (let i = 0; i < nodes.length; i++) {
@@ -853,13 +857,13 @@ class VideoEditor {
         }
     }
     hideCropArea() {
-        this.cropArea.classList.add("hidden");
+        this.cropArea.classList.add('hidden');
         const nodes = this.cropArea.parentElement?.childNodes ?? [];
         for (let i = 0; i < nodes.length; i++) {
             const node = nodes[i];
             if (node == this.cropArea)
                 continue;
-            node.style.webkitMask = "";
+            node.style.webkitMask = '';
             node.style.webkitMaskRepeat = 'no-repeat';
         }
     }
@@ -882,10 +886,10 @@ class VideoEditor {
         this.video.pause();
         this.playing = false;
         this.controlsPanelLeft.refresh();
-        this.video.src = "";
-        window.removeEventListener("keyup", this.onKeyUp);
-        document.removeEventListener("mouseup", this._onCropMouseUp);
-        document.removeEventListener("mousemove", this._onCropMouseMove);
+        this.video.src = '';
+        window.removeEventListener('keyup', this.onKeyUp);
+        document.removeEventListener('mouseup', this._onCropMouseUp);
+        document.removeEventListener('mousemove', this._onCropMouseMove);
     }
 }
 LX.VideoEditor = VideoEditor;

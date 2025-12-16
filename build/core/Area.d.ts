@@ -1,6 +1,6 @@
-import { Panel } from './Panel';
 import { Menubar } from '../components/Menubar';
 import { Tabs } from '../components/Tabs';
+import { Panel } from './Panel';
 export declare class AreaOverlayButtons {
     area: Area;
     options: any;
@@ -64,39 +64,39 @@ export declare class Area {
      */
     split(options?: any): any[];
     /**
-    * @method setLimitBox
-    * Set min max for width and height
-    */
+     * @method setLimitBox
+     * Set min max for width and height
+     */
     setLimitBox(minw?: number, minh?: number, maxw?: number, maxh?: number): void;
     /**
-    * @method resize
-    * Resize element
-    */
+     * @method resize
+     * Resize element
+     */
     setSize(size: any[]): void;
     /**
-    * @method extend
-    * Hide 2nd area split
-    */
+     * @method extend
+     * Hide 2nd area split
+     */
     extend(): void;
     /**
-    * @method reduce
-    * Show 2nd area split
-    */
+     * @method reduce
+     * Show 2nd area split
+     */
     reduce(): void;
     /**
-    * @method hide
-    * Hide element
-    */
+     * @method hide
+     * Hide element
+     */
     hide(): void;
     /**
-    * @method show
-    * Show element if it is hidden
-    */
+     * @method show
+     * Show element if it is hidden
+     */
     show(): void;
     /**
-    * @method toggle
-    * Toggle element if it is hidden
-    */
+     * @method toggle
+     * Toggle element if it is hidden
+     */
     toggle(force: boolean): void;
     /**
      * @method propagateEvent

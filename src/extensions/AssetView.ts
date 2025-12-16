@@ -47,7 +47,8 @@ interface AssetViewEvent
  * Signature for cancelable events.
  * `resolve()` MUST be called by the user to perform the UI action
  */
-export type AssetViewEventCallback = ( event: AssetViewEvent, resolve?: ( ...args: any[] ) => void ) => boolean | void | Promise<void>;
+export type AssetViewEventCallback = ( event: AssetViewEvent, resolve?: ( ...args: any[] ) => void ) => boolean | void
+    | Promise<void>;
 
 /**
  * @class AssetView
@@ -1274,7 +1275,7 @@ export class AssetView
             };
 
             const r: any = onEnterFolder( event ) as boolean;
-            mustRefresh = mustRefresh || ( r );
+            mustRefresh = mustRefresh || r;
         }
 
         // Update this after the event since the user might have added or modified the data

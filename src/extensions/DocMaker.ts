@@ -372,7 +372,7 @@ export class DocMaker
         this.root.appendChild( pr );
     }
 
-    classMethod( name: string, desc: string, params: any[], ret?: string ) : HTMLElement | null
+    classMethod( name: string, desc: string, params: any[], ret?: string ): HTMLElement | null
     {
         this.startCodeBulletList();
 

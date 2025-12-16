@@ -125,9 +125,8 @@ export declare abstract class Timeline {
      */
     updateHeader(): void;
     /**
-    * @method updateLeftPanel
-    *
-    */
+     * @method updateLeftPanel
+     */
     updateLeftPanel(): void;
     setTrackHeight(trackHeight: number): void;
     /**
@@ -200,14 +199,14 @@ export declare abstract class Timeline {
      * @method changeState
      * @param {Boolean} skipCallback defaults false
      * @description change play/pause state
-     **/
+     */
     changeState(skipCallback?: boolean): void;
     /**
      * @method setState
      * @param {Boolean} state
      * @param {Boolean} skipCallback defaults false
      * @description change play/pause state
-     **/
+     */
     setState(state: boolean, skipCallback?: boolean): void;
     /**
      * @method setLoopMode
@@ -257,15 +256,14 @@ export declare abstract class Timeline {
     _updateTrackTreeSelection(): void;
     deselectAllElements(): void;
     /**
-    * @method setTrackState
-    * @param {Int} trackIdx
-    * @param {Boolean} isEnbaled
-    * @param {Boolean} skipCallback onSetTrackState
-    * @param {Boolean} updateTrackTree updates eye icon of the track, if it is visible in the timeline
-    */
+     * @method setTrackState
+     * @param {Int} trackIdx
+     * @param {Boolean} isEnbaled
+     * @param {Boolean} skipCallback onSetTrackState
+     * @param {Boolean} updateTrackTree updates eye icon of the track, if it is visible in the timeline
+     */
     setTrackState(trackIdx: number, isEnbaled?: boolean, skipCallback?: boolean, updateTrackTree?: boolean): void;
     /**
-     *
      * @param {Int} trackIdx
      * @param {Boolean} isLocked
      * @param {Boolean} skipCallback onSetTrackLock
@@ -286,14 +284,14 @@ export declare abstract class Timeline {
     resize(size?: Nullable<[number, number]>): void;
     resizeCanvas(): void;
     /**
-    * @method hide
-    * Hide timeline area
-    */
+     * @method hide
+     * Hide timeline area
+     */
     hide(): void;
     /**
-    * @method show
-    * Show timeline area if it is hidden
-    */
+     * @method show
+     * Show timeline area if it is hidden
+     */
     show(): void;
     /**
         These functions might be overriden by child classes. Nonetheless, they must have the same attributes, at least.
@@ -307,7 +305,6 @@ export declare abstract class Timeline {
      */
     generateSelectedItemsTreeData(): any;
     /**
-     *
      * @param {Object} options set some values for the track instance ( groups and trackIdx not included )
      * @returns
      */
@@ -392,7 +389,6 @@ export declare class KeyFramesTimeline extends Timeline {
      */
     getTrack(trackId: string, groupId?: Nullable<string>): any;
     /**
-     *
      * @param {Number} size pixels, height of keyframe
      * @param {Number} sizeHovered optional, size in pixels when hovered
      */
@@ -406,7 +402,7 @@ export declare class KeyFramesTimeline extends Timeline {
      * @param {*} ctx
      * ...
      * @description helper function, you can call it from drawContent to render all the keyframes
-    */
+     */
     drawTrackWithKeyframes(ctx: CanvasRenderingContext2D, trackHeight: number, track: any): void;
     drawTrackWithCurves(ctx: CanvasRenderingContext2D, trackHeight: number, track: any): void;
     _getValidTrackName(uglyName: string): (string | null)[];
@@ -451,11 +447,10 @@ export declare class KeyFramesTimeline extends Timeline {
         edited: any;
     };
     /**
-    *
-    * @param {*} track
-    * @param {Number} srcIdx keyFrame index
-    * @param {Number} trgIdx keyFrame index
-    */
+     * @param {*} track
+     * @param {Number} srcIdx keyFrame index
+     * @param {Number} trgIdx keyFrame index
+     */
     swapKeyFrames(track: any, srcIdx: number, trgIdx: number): void;
     copySelectedContent(): void;
     copyKeyFrameValue(track: any, index: number): void;
@@ -561,10 +556,9 @@ export declare class ClipsTimeline extends Timeline {
      */
     instantiateAnimationClip(animation: any, clone?: boolean): any;
     /**
-     *
      * @param {Object} options set some values for the track instance ( groups and trackIdx not included )
      * @returns
-    */
+     */
     instantiateTrack(options?: any, clone?: boolean): any;
     instantiateClip(options?: any): {
         id: any;
@@ -604,13 +598,12 @@ export declare class ClipsTimeline extends Timeline {
      */
     optimizeTracks(): void;
     /**
-    *
-    * @param {Object} clip  clip to be added
-    * @param {Int} trackIdx ( optional ) track where to put the clip. -1 will find the first free slot. ***WARNING*** Must call getClipsInRange, before calling this function with a valid trackdIdx
-    * @param {Number} offsetTime ( optional ) offset time of current time
-    * @param {Number} searchStartTrackIdx ( optional ) if trackIdx is set to -1, this idx will be used as the starting point to find a valid track
-    * @returns  a zero/positive value if successful. Otherwise, -1
-    */
+     * @param {Object} clip  clip to be added
+     * @param {Int} trackIdx ( optional ) track where to put the clip. -1 will find the first free slot. ***WARNING*** Must call getClipsInRange, before calling this function with a valid trackdIdx
+     * @param {Number} offsetTime ( optional ) offset time of current time
+     * @param {Number} searchStartTrackIdx ( optional ) if trackIdx is set to -1, this idx will be used as the starting point to find a valid track
+     * @returns  a zero/positive value if successful. Otherwise, -1
+     */
     addClip(clip: any, trackIdx?: number, offsetTime?: number, searchStartTrackIdx?: number): any;
     /**
      *  Add an array of clips to the timeline in the first suitable tracks. It tries to put clips in the same track if possible. All clips will be in adjacent tracks to each other
@@ -624,7 +617,7 @@ export declare class ClipsTimeline extends Timeline {
     /** Delete clip from the timeline
      * @param {Number} trackIdx
      * @param {Number} clipIdx clip to be deleted
-    */
+     */
     deleteClip(trackIdx: number, clipIdx: number, skipCallback?: boolean): void;
     /**
      * User defined. Used when copying and pasting

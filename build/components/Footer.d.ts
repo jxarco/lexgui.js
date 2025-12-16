@@ -8,7 +8,7 @@ export declare class Footer {
      * credits: html string
      * socials: Array with data per item { title, link, icon }
      * className: Extra class to customize
-    */
+     */
     root: any;
     constructor(options?: any);
 }

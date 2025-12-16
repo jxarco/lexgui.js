@@ -2,7 +2,7 @@ import { LX } from '../core/Namespace';
 declare const Area: any;
 declare const Panel: any;
 declare const NodeTree: any;
-export type AssetViewAction = "select" | "dbl_click" | "check" | "clone" | "move" | "delete" | "rename" | "enter_folder" | "create-folder";
+export type AssetViewAction = 'select' | 'dbl_click' | 'check' | 'clone' | 'move' | 'delete' | 'rename' | 'enter_folder' | 'create-folder';
 export interface AssetViewItem {
     id: string;
     type: string;
@@ -20,6 +20,7 @@ interface AssetViewEvent {
     result?: AssetViewItem[];
     from?: AssetViewItem;
     to?: AssetViewItem;
+    where?: AssetViewItem;
     oldName?: string;
     newName?: string;
     userInitiated: boolean;
@@ -28,7 +29,7 @@ interface AssetViewEvent {
  * Signature for cancelable events.
  * `resolve()` MUST be called by the user to perform the UI action
  */
-export type AssetViewEventCallback = (event: AssetViewEvent, resolve?: () => void) => void | Promise<void>;
+export type AssetViewEventCallback = (event: AssetViewEvent, resolve?: (...args: any[]) => void) => boolean | void | Promise<void>;
 /**
  * @class AssetView
  * @description Asset container with Tree for file system
@@ -80,26 +81,27 @@ export declare class AssetView {
     _paginator: typeof LX.Pagination | undefined;
     _scriptCodeDialog: typeof LX.Dialog | undefined;
     _moveItemDialog: typeof LX.Dialog | undefined;
+    _movingItem: AssetViewItem | undefined;
     constructor(options?: any);
     /**
-    * @method on
-    * @description Stores an event callback for the desired action
-    */
+     * @method on
+     * @description Stores an event callback for the desired action
+     */
     on(eventName: string, callback: AssetViewEventCallback): void;
     /**
-    * @method load
-    * @description Loads and processes the input data
-    */
+     * @method load
+     * @description Loads and processes the input data
+     */
     load(data: any): void;
     /**
-    * @method addItem
-    * @description Creates an item DOM element
-    */
+     * @method addItem
+     * @description Creates an item DOM element
+     */
     addItem(item: AssetViewItem, childIndex: number | undefined, updateTree?: boolean): HTMLLIElement;
     /**
-    * @method clear
-    * @description Creates all AssetView container panels
-    */
+     * @method clear
+     * @description Creates all AssetView container panels
+     */
     clear(): void;
     _processData(data: any, parent?: AssetViewItem): void;
     _updatePath(): void;
@@ -118,15 +120,15 @@ export declare class AssetView {
     _deleteItem(item: AssetViewItem): void;
     _requestMoveItemToFolder(item: AssetViewItem, folder: AssetViewItem): void;
     _moveItemToFolder(item: AssetViewItem, folder: AssetViewItem): void;
-    _moveItem(item: AssetViewItem): void;
+    _moveItem(item: AssetViewItem, defaultFolder?: AssetViewItem | AssetViewItem[]): void;
     _requestCloneItem(item: AssetViewItem): false | undefined;
     _cloneItem(item: AssetViewItem): AssetViewItem;
     _getClonedName(originalName: string, siblings: any[]): string;
     _requestRenameItem(item: AssetViewItem, newName: string): void;
     _renameItem(item: AssetViewItem, newName: string): void;
     _renameItemPopover(item: AssetViewItem): void;
-    _requestCreateFolder(): void;
-    _createFolder(): AssetViewItem;
+    _requestCreateFolder(folder?: AssetViewItem): void;
+    _createFolder(folder?: AssetViewItem): AssetViewItem;
     _openScriptInEditor(script: any): void;
     _setAssetsPerPage(n: number): void;
     _lastModifiedToStringDate(lm: number): string;

@@ -3,11 +3,11 @@ import { LX } from '../core/Namespace.js';
 
 // Timeline.ts @evallsg, @japopra
 if (!LX) {
-    throw ("Missing LX namespace!");
+    throw ('Missing LX namespace!');
 }
 LX.extensions.push('Timeline');
-LX.registerIcon("TimelineLock", '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" d="M7 11V7a4 4 0 0 1 9 0v4 M5,11h13 a2 2 0 0 1 2 2 v7 a2 2 0 0 1 -2 2 h-13 a2 2 0 0 1 -2 -2 v-7 a2 2 0 0 1 2 -2 M12 16 v2"/></svg>');
-LX.registerIcon("TimelineLockOpen", '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" d="M14 11V7a4 4 0 0 1 9 0v2 M3,11h13 a2 2 0 0 1 2 2 v7 a2 2 0 0 1 -2 2 h-13 a2 2 0 0 1 -2 -2 v-7 a2 2 0 0 1 2 -2 M8 17 h3"/></svg>');
+LX.registerIcon('TimelineLock', '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" d="M7 11V7a4 4 0 0 1 9 0v4 M5,11h13 a2 2 0 0 1 2 2 v7 a2 2 0 0 1 -2 2 h-13 a2 2 0 0 1 -2 -2 v-7 a2 2 0 0 1 2 -2 M12 16 v2"/></svg>');
+LX.registerIcon('TimelineLockOpen', '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" d="M14 11V7a4 4 0 0 1 9 0v2 M3,11h13 a2 2 0 0 1 2 2 v7 a2 2 0 0 1 -2 2 h-13 a2 2 0 0 1 -2 -2 v-7 a2 2 0 0 1 2 -2 M8 17 h3"/></svg>');
 const Area = LX.Area;
 const Panel = LX.Panel;
 const Dialog = LX.Dialog;
@@ -63,8 +63,8 @@ class Timeline {
     grabbingScroll = false;
     movingKeys = false;
     timeBeforeMove = 0;
-    currentScroll = 0; //in percentage
-    currentScrollInPixels = 0; //in pixels
+    currentScroll = 0; // in percentage
+    currentScrollInPixels = 0; // in pixels
     trackHeight = 32;
     timeSeparators = [0.01, 0.1, 0.5, 1, 5];
     playing = false;
@@ -128,8 +128,8 @@ class Timeline {
         this.onShowOptimizeMenu = options.onShowOptimizeMenu;
         this.onShowConfiguration = options.onShowConfiguration;
         this.canvas = document.createElement('canvas');
-        this.canvas.style.width = "100%";
-        this.canvas.style.height = "100%";
+        this.canvas.style.width = '100%';
+        this.canvas.style.height = '100%';
         this.secondsPerPixel = 1 / this.pixelsPerSecond;
         this.animationClip = this.instantiateAnimationClip();
         this.loop = options.loop ?? true;
@@ -139,35 +139,37 @@ class Timeline {
         // main area -- root
         this.mainArea = new Area({ className: 'lextimeline' });
         this.root = this.mainArea.root;
-        this.mainArea.split({ type: "vertical", sizes: [this.header_offset, "auto"], resize: false });
+        this.mainArea.split({ type: 'vertical', sizes: [this.header_offset, 'auto'], resize: false });
         // header
         this.header = new Panel({ id: 'lextimelineheader' });
         this.mainArea.sections[0].attach(this.header);
         this.updateHeader();
         // content area
         const contentArea = this.mainArea.sections[1];
-        contentArea.root.id = "bottom-timeline-area";
-        contentArea.split({ type: "horizontal", sizes: ["15%", "85%"] });
+        contentArea.root.id = 'bottom-timeline-area';
+        contentArea.split({ type: 'horizontal', sizes: ['15%', '85%'] });
         let [left, right] = contentArea.sections;
         right.attach(this.canvas);
         this.canvasArea = right;
-        this.canvasArea.root.classList.add("lextimelinearea");
-        this.leftPanel = left.addPanel({ className: 'lextimelinepanel', width: "100%", height: "100%" });
+        this.canvasArea.root.classList.add('lextimelinearea');
+        this.leftPanel = left.addPanel({ className: 'lextimelinepanel', width: '100%', height: '100%' });
         this.updateLeftPanel();
         if (this.uniqueID.length) {
             this.root.id = this.uniqueID;
             this.canvas.id = this.uniqueID + '-canvas';
         }
         // Process mouse events
-        this.canvas.addEventListener("mousedown", this.processMouse.bind(this));
-        this.canvas.addEventListener("mouseup", this.processMouse.bind(this));
-        this.canvas.addEventListener("mousemove", this.processMouse.bind(this));
-        this.canvas.addEventListener("wheel", this.processMouse.bind(this));
-        this.canvas.addEventListener("dblclick", this.processMouse.bind(this));
-        this.canvas.addEventListener("contextmenu", this.processMouse.bind(this));
+        this.canvas.addEventListener('mousedown', this.processMouse.bind(this));
+        this.canvas.addEventListener('mouseup', this.processMouse.bind(this));
+        this.canvas.addEventListener('mousemove', this.processMouse.bind(this));
+        this.canvas.addEventListener('wheel', this.processMouse.bind(this));
+        this.canvas.addEventListener('dblclick', this.processMouse.bind(this));
+        this.canvas.addEventListener('contextmenu', this.processMouse.bind(this));
         this.canvas.tabIndex = 1;
         // Process keys events
-        this.canvasArea.root.addEventListener("keydown", (e) => { this.processKeys(e); }); // so this.processKeys can be overwritten by the user
+        this.canvasArea.root.addEventListener('keydown', (e) => {
+            this.processKeys(e);
+        }); // so this.processKeys can be overwritten by the user
         this.canvasArea.onresize = (bounding) => {
             if (!(bounding.width && bounding.height)) {
                 return;
@@ -179,23 +181,23 @@ class Timeline {
          * updates theme ( light - dark ) based on LX's current theme
          */
         function updateTheme() {
-            Timeline.BACKGROUND_COLOR = LX.getThemeColor("global-blur-background");
-            Timeline.TRACK_COLOR_PRIMARY = LX.getThemeColor("global-color-primary");
-            Timeline.TRACK_COLOR_SECONDARY = LX.getThemeColor("global-color-secondary");
-            Timeline.TRACK_COLOR_TERCIARY = LX.getThemeColor("global-color-terciary");
-            Timeline.TRACK_COLOR_QUATERNARY = LX.getThemeColor("global-color-quaternary");
-            Timeline.FONT = LX.getThemeColor("global-font");
-            Timeline.FONT_COLOR_PRIMARY = LX.getThemeColor("global-text-primary");
-            Timeline.FONT_COLOR_TERTIARY = LX.getThemeColor("global-text-tertiary");
-            Timeline.FONT_COLOR_QUATERNARY = LX.getThemeColor("global-text-quaternary");
-            Timeline.KEYFRAME_COLOR = LX.getThemeColor("lxTimeline-keyframe");
-            Timeline.KEYFRAME_COLOR_SELECTED = Timeline.KEYFRAME_COLOR_HOVERED = LX.getThemeColor("lxTimeline-keyframe-selected");
-            Timeline.KEYFRAME_COLOR_LOCK = LX.getThemeColor("lxTimeline-keyframe-locked");
-            Timeline.KEYFRAME_COLOR_EDITED = LX.getThemeColor("lxTimeline-keyframe-edited");
-            Timeline.KEYFRAME_COLOR_INACTIVE = LX.getThemeColor("lxTimeline-keyframe-inactive");
+            Timeline.BACKGROUND_COLOR = LX.getThemeColor('global-blur-background');
+            Timeline.TRACK_COLOR_PRIMARY = LX.getThemeColor('global-color-primary');
+            Timeline.TRACK_COLOR_SECONDARY = LX.getThemeColor('global-color-secondary');
+            Timeline.TRACK_COLOR_TERCIARY = LX.getThemeColor('global-color-terciary');
+            Timeline.TRACK_COLOR_QUATERNARY = LX.getThemeColor('global-color-quaternary');
+            Timeline.FONT = LX.getThemeColor('global-font');
+            Timeline.FONT_COLOR_PRIMARY = LX.getThemeColor('global-text-primary');
+            Timeline.FONT_COLOR_TERTIARY = LX.getThemeColor('global-text-tertiary');
+            Timeline.FONT_COLOR_QUATERNARY = LX.getThemeColor('global-text-quaternary');
+            Timeline.KEYFRAME_COLOR = LX.getThemeColor('lxTimeline-keyframe');
+            Timeline.KEYFRAME_COLOR_SELECTED = Timeline.KEYFRAME_COLOR_HOVERED = LX.getThemeColor('lxTimeline-keyframe-selected');
+            Timeline.KEYFRAME_COLOR_LOCK = LX.getThemeColor('lxTimeline-keyframe-locked');
+            Timeline.KEYFRAME_COLOR_EDITED = LX.getThemeColor('lxTimeline-keyframe-edited');
+            Timeline.KEYFRAME_COLOR_INACTIVE = LX.getThemeColor('lxTimeline-keyframe-inactive');
         }
         this.updateTheme = updateTheme.bind(this);
-        LX.addSignal("@on_new_color_scheme", this.updateTheme);
+        LX.addSignal('@on_new_color_scheme', this.updateTheme);
     }
     // makes it ready to be deleted
     clear() {
@@ -206,7 +208,7 @@ class Timeline {
             this.leftPanel.clear();
         }
         if (this.updateTheme) {
-            let signals = LX.signals["@on_new_color_scheme"] ?? [];
+            let signals = LX.signals['@on_new_color_scheme'] ?? [];
             for (let i = 0; i < signals.length; ++i) {
                 if (signals[i] == this.updateTheme) {
                     signals.splice(i, 1);
@@ -222,73 +224,78 @@ class Timeline {
         const header = this.header;
         header.sameLine();
         if (this.timelineTitle) {
-            header.addTitle(this.timelineTitle, { style: { background: "none", fontSize: "18px", fontStyle: "bold", alignItems: "center" } });
+            header.addTitle(this.timelineTitle, {
+                style: { background: 'none', fontSize: '18px', fontStyle: 'bold', alignItems: 'center' }
+            });
         }
-        const buttonContainer = LX.makeContainer(["auto", "100%"], "flex flex-row gap-1");
+        const buttonContainer = LX.makeContainer(['auto', '100%'], 'flex flex-row gap-1');
         header.queue(buttonContainer);
-        const playbtn = header.addButton("playBtn", '', (value, event) => {
+        const playbtn = header.addButton('playBtn', '', (value, event) => {
             this.changeState();
-        }, { buttonClass: "accept", title: "Play", hideName: true, icon: "Play@solid", swap: "Pause@solid" });
+        }, { buttonClass: 'accept', title: 'Play', hideName: true, icon: 'Play@solid', swap: 'Pause@solid' });
         playbtn.setState(this.playing, true);
-        header.addButton("stopBtn", '', (value, event) => {
+        header.addButton('stopBtn', '', (value, event) => {
             this.setState(false, true); // skip callback of set state
             if (this.onStateStop) {
                 this.onStateStop();
             }
-        }, { buttonClass: "accept", title: "Stop", hideName: true, icon: "Stop@solid" });
-        header.addButton("loopBtn", '', (value, event) => {
+        }, { buttonClass: 'accept', title: 'Stop', hideName: true, icon: 'Stop@solid' });
+        header.addButton('loopBtn', '', (value, event) => {
             this.setLoopMode(!this.loop);
-        }, { selectable: true, selected: this.loop, title: 'Loop', hideName: true, icon: "RefreshCw" });
+        }, { selectable: true, selected: this.loop, title: 'Loop', hideName: true, icon: 'RefreshCw' });
         if (this.onCreateControlsButtons) {
             this.onCreateControlsButtons(header);
         }
         header.clearQueue(buttonContainer);
-        header.addContent("header-buttons", buttonContainer);
+        header.addContent('header-buttons', buttonContainer);
         // time number inputs - duration, current time, etc
         if (this.onCreateBeforeTopBar) {
             this.onCreateBeforeTopBar(header);
         }
-        header.addNumber("Current Time", this.currentTime, (value, event) => {
+        header.addNumber('Current Time', this.currentTime, (value, event) => {
             this.setTime(value);
         }, {
-            units: "s",
-            step: 0.01, min: 0, precision: 3,
+            units: 's',
+            step: 0.01,
+            min: 0,
+            precision: 3,
             skipSlider: true,
             skipReset: true,
-            nameWidth: "auto"
+            nameWidth: 'auto'
         });
-        header.addNumber("Duration", +this.duration.toFixed(3), (value, event) => {
+        header.addNumber('Duration', +this.duration.toFixed(3), (value, event) => {
             this.setDuration(value, false, false);
         }, {
-            units: "s",
-            step: 0.01, min: 0,
+            units: 's',
+            step: 0.01,
+            min: 0,
             skipReset: true,
-            nameWidth: "auto"
+            nameWidth: 'auto'
         });
         if (this.onCreateAfterTopBar) {
             this.onCreateAfterTopBar(header);
         }
         // settings buttons - optimize, settings, etc
-        const buttonContainerEnd = LX.makeContainer(["auto", "100%"], "flex flex-row gap-1");
+        const buttonContainerEnd = LX.makeContainer(['auto', '100%'], 'flex flex-row gap-1');
         header.queue(buttonContainerEnd);
         if (this.onCreateSettingsButtons) {
             this.onCreateSettingsButtons(header);
         }
         if (this.onShowOptimizeMenu) {
-            header.addButton(null, "", (value, event) => {
+            header.addButton(null, '', (value, event) => {
                 if (this.onShowOptimizeMenu) {
                     this.onShowOptimizeMenu(event);
                 }
-            }, { tooltip: true, title: "Optimize", icon: "Filter" });
+            }, { tooltip: true, title: 'Optimize', icon: 'Filter' });
         }
         if (this.onShowConfiguration) {
-            header.addButton(null, "", (value, event) => {
+            header.addButton(null, '', (value, event) => {
                 if (this.configurationDialog) {
                     this.configurationDialog.close();
                     this.configurationDialog = null;
                     return;
                 }
-                this.configurationDialog = new Dialog("Configuration", (p) => {
+                this.configurationDialog = new Dialog('Configuration', (p) => {
                     if (this.onShowConfiguration) {
                         this.onShowConfiguration(p);
                     }
@@ -298,41 +305,43 @@ class Timeline {
                         this.configurationDialog = null;
                     }
                 });
-            }, { title: "Settings", icon: "Settings", tooltip: true });
+            }, { title: 'Settings', icon: 'Settings', tooltip: true });
         }
         header.clearQueue(buttonContainerEnd);
-        header.addContent("header-buttons-end", buttonContainerEnd);
-        header.endLine("justify-between");
+        header.addContent('header-buttons-end', buttonContainerEnd);
+        header.endLine('justify-between');
     }
     /**
-    * @method updateLeftPanel
-    *
-    */
+     * @method updateLeftPanel
+     */
     updateLeftPanel() {
         this.leftPanel.clear();
         const panel = this.leftPanel;
         panel.sameLine();
-        let titleComponent = panel.addTitle("Tracks", { style: { background: "none" }, className: "fg-secondary text-lg px-4" });
+        let titleComponent = panel.addTitle('Tracks', { style: { background: 'none' },
+            className: 'fg-secondary text-lg px-4' });
         let title = titleComponent.root;
         if (!this.disableNewTracks) {
-            panel.addButton("addTrackBtn", '', (value, event) => {
+            panel.addButton('addTrackBtn', '', (value, event) => {
                 if (this.onAddNewTrackButton) {
                     this.onAddNewTrackButton();
                 }
                 else {
                     this.addNewTrack();
                 }
-            }, { hideName: true, title: "Add Track", icon: "Plus" });
+            }, { hideName: true, title: 'Add Track', icon: 'Plus' });
         }
         panel.endLine();
         const styles = window.getComputedStyle(title);
-        const titleHeight = title.clientHeight + parseFloat(styles['marginTop']) + parseFloat(styles['marginBottom']);
-        let p = new LX.Panel({ height: "calc(100% - " + titleHeight + "px )" });
+        const titleHeight = title.clientHeight + parseFloat(styles['marginTop'])
+            + parseFloat(styles['marginBottom']);
+        let p = new LX.Panel({ height: 'calc(100% - ' + titleHeight + 'px )' });
         let treeTracks = [];
         if (this.animationClip && this.selectedItems.length) {
             treeTracks = this.generateSelectedItemsTreeData();
         }
-        this.trackTreesComponent = p.addTree(null, treeTracks, { filter: false, rename: false, draggable: false, onevent: (e) => {
+        this.trackTreesComponent = p.addTree(null, treeTracks, { filter: false, rename: false, draggable: false,
+            onevent: (e) => {
                 switch (e.type) {
                     case LX.TreeEvent.NODE_SELECTED:
                         if (!e.event.shiftKey) {
@@ -363,13 +372,14 @@ class Timeline {
             this._updateTrackTreeSelection(); // select visible tracks
         }
         // setting a name in the addTree function adds an undesired node
-        this.trackTreesComponent.name = "tracksTrees";
+        this.trackTreesComponent.name = 'tracksTrees';
         p.components[this.trackTreesComponent.name] = this.trackTreesComponent;
         this.trackTreesPanel = p;
         panel.attach(p.root);
-        p.root.addEventListener("scroll", (e) => {
+        p.root.addEventListener('scroll', (e) => {
             if (e.currentTarget.scrollHeight > e.currentTarget.clientHeight) {
-                this.currentScroll = e.currentTarget.scrollTop / (e.currentTarget.scrollHeight - e.currentTarget.clientHeight);
+                this.currentScroll = e.currentTarget.scrollTop
+                    / (e.currentTarget.scrollHeight - e.currentTarget.clientHeight);
                 this.currentScrollInPixels = e.currentTarget.scrollTop;
             }
             else {
@@ -379,7 +389,7 @@ class Timeline {
         });
         this.trackTreesPanel.root.scrollTop = this.currentScrollInPixels;
         this.setTrackHeight(this.trackHeight);
-        if (this.leftPanel.parent.root.classList.contains("hidden") || !this.root.parentElement) {
+        if (this.leftPanel.parent.root.classList.contains('hidden') || !this.root.parentElement) {
             return;
         }
         this.resizeCanvas();
@@ -393,9 +403,9 @@ class Timeline {
             return;
         }
         trackHeight -= gapSize;
-        const tracks = this.trackTreesComponent.root.querySelector("ul").children;
+        const tracks = this.trackTreesComponent.root.querySelector('ul').children;
         for (let i = 0; i < tracks.length; ++i) {
-            tracks[i].style.height = trackHeight + "px";
+            tracks[i].style.height = trackHeight + 'px';
         }
     }
     /**
@@ -467,9 +477,9 @@ class Timeline {
         return this.animationClip;
     }
     drawTimeInfo(w, h = this.topMargin) {
-        let ctx = this.canvas.getContext("2d");
-        ctx.font = "11px " + Timeline.FONT; //"11px Calibri";
-        ctx.textAlign = "center";
+        let ctx = this.canvas.getContext('2d');
+        ctx.font = '11px ' + Timeline.FONT; // "11px Calibri";
+        ctx.textAlign = 'center';
         // Draw time markers
         ctx.save();
         // background of timeinfo
@@ -478,15 +488,12 @@ class Timeline {
         ctx.strokeStyle = Timeline.FONT_COLOR_PRIMARY;
         // set tick and sub tick times
         let tickTime = 4;
-        if (this.pixelsPerSecond > 900) {
+        if (this.pixelsPerSecond > 900)
             tickTime = 1;
-        }
-        else if (this.pixelsPerSecond > 100) {
+        else if (this.pixelsPerSecond > 100)
             tickTime = 2;
-        }
-        else if (this.pixelsPerSecond > 50) {
+        else if (this.pixelsPerSecond > 50)
             tickTime = 3;
-        }
         let subtickTime = this.timeSeparators[tickTime - 1];
         tickTime = this.timeSeparators[tickTime];
         const startTime = this.visualTimeRange[0];
@@ -520,14 +527,14 @@ class Timeline {
     }
     drawTracksBackground(w, h) {
         let canvas = this.canvas;
-        let ctx = canvas.getContext("2d");
+        let ctx = canvas.getContext('2d');
         let duration = this.duration;
         ctx.globalAlpha = 1;
         // Content
         const topMargin = this.topMargin;
         const treeOffset = this.lastTrackTreesComponentOffset;
         const line_height = this.trackHeight;
-        //fill track lines
+        // fill track lines
         w = w || canvas.width;
         let max_tracks = Math.ceil((h - topMargin) / line_height) + 1;
         ctx.save();
@@ -537,13 +544,12 @@ class Timeline {
         for (let i = blackOrWhite; i <= max_tracks; i += 2) {
             ctx.fillRect(0, treeOffset - rectsOffset + i * line_height, w, line_height);
         }
-        //bg lines
+        // bg lines
         ctx.strokeStyle = Timeline.TRACK_COLOR_TERCIARY;
         ctx.beginPath();
         let pos = this.timeToX(0);
-        if (pos < 0) {
+        if (pos < 0)
             pos = 0;
-        }
         ctx.lineWidth = 1;
         ctx.moveTo(pos + 0.5, topMargin);
         ctx.lineTo(pos + 0.5, canvas.height);
@@ -556,19 +562,20 @@ class Timeline {
      * @method draw
      */
     draw() {
-        let ctx = this.canvas.getContext("2d");
-        ctx.textBaseline = "bottom";
-        ctx.font = "11px " + Timeline.FONT; //"11px Calibri";
+        let ctx = this.canvas.getContext('2d');
+        ctx.textBaseline = 'bottom';
+        ctx.font = '11px ' + Timeline.FONT; // "11px Calibri";
         ctx.globalAlpha = 1;
         const w = ctx.canvas.width;
         const h = ctx.canvas.height;
         const scrollableHeight = this.trackTreesComponent.root.scrollHeight;
         // tree has gaps of 0.25rem (4px ) inbetween entries but not in the beginning nor ending. Move half gap upwards.
-        const treeOffset = this.lastTrackTreesComponentOffset = this.trackTreesComponent.innerTree.domEl.offsetTop - this.canvas.offsetTop - 2;
-        //zoom
-        let startTime = this.visualOriginTime; //seconds
+        const treeOffset = this.lastTrackTreesComponentOffset = this.trackTreesComponent.innerTree.domEl.offsetTop
+            - this.canvas.offsetTop - 2;
+        // zoom
+        let startTime = this.visualOriginTime; // seconds
         startTime = Math.min(this.duration, Math.max(0, startTime));
-        let endTime = this.visualOriginTime + w * this.secondsPerPixel; //seconds
+        let endTime = this.visualOriginTime + w * this.secondsPerPixel; // seconds
         endTime = Math.max(startTime, Math.min(this.duration, endTime));
         this.visualTimeRange[0] = startTime;
         this.visualTimeRange[1] = endTime;
@@ -585,9 +592,9 @@ class Timeline {
             this.drawContent(ctx);
             ctx.translate(0, -treeOffset);
         }
-        //scrollbar
+        // scrollbar
         if ((h - this.topMargin) < scrollableHeight) {
-            ctx.fillStyle = "#222";
+            ctx.fillStyle = '#222';
             ctx.fillRect(w - 10, 0, 10, h);
             ctx.fillStyle = this.grabbingScroll ? Timeline.FONT_COLOR_TERTIARY : Timeline.FONT_COLOR_QUATERNARY;
             let scrollBarHeight = Math.max(10, (h - this.topMargin) * (h - this.topMargin) / this.trackTreesPanel.root.scrollHeight);
@@ -603,7 +610,7 @@ class Timeline {
             ctx.globalAlpha = 1;
             ctx.beginPath();
             ctx.moveTo(posx, posy * 0.6);
-            ctx.lineTo(posx, this.canvas.height); //line
+            ctx.lineTo(posx, this.canvas.height); // line
             ctx.stroke();
             ctx.closePath();
             ctx.shadowBlur = 8;
@@ -617,9 +624,9 @@ class Timeline {
             ctx.shadowOffsetY = 0;
         }
         // Current time seconds in text
-        ctx.font = "11px " + Timeline.FONT; //"11px Calibri";
-        ctx.textAlign = "center";
-        //ctx.textBaseline = "middle";
+        ctx.font = '11px ' + Timeline.FONT; // "11px Calibri";
+        ctx.textAlign = 'center';
+        // ctx.textBaseline = "middle";
         ctx.fillStyle = Timeline.TIME_MARKER_COLOR_TEXT;
         ctx.fillText((Math.floor(this.currentTime * 10) * 0.1).toFixed(1), posx, this.topMargin * 0.6);
         // Selections
@@ -650,7 +657,7 @@ class Timeline {
         let v = Math.max(0, t);
         this.duration = this.animationClip.duration = v;
         if (updateHeader) {
-            this.header.components["Duration"].set(+this.duration.toFixed(2), true); // skipcallback = true
+            this.header.components['Duration'].set(+this.duration.toFixed(2), true); // skipcallback = true
         }
         if (this.onSetDuration && !skipCallback) {
             this.onSetDuration(this.duration);
@@ -658,7 +665,7 @@ class Timeline {
     }
     setTime(time, skipCallback = false) {
         this.currentTime = Math.max(0, Math.min(time, this.duration));
-        this.header.components["Current Time"].set(+this.currentTime.toFixed(2), true); // skipcallback = true
+        this.header.components['Current Time'].set(+this.currentTime.toFixed(2), true); // skipcallback = true
         if (this.onSetTime && !skipCallback) {
             this.onSetTime(this.currentTime);
         }
@@ -731,22 +738,22 @@ class Timeline {
         let localX = e.offsetX;
         let localY = e.offsetY;
         let timeX = this.timeToX(this.currentTime);
-        let isHoveringTimeBar = localY < this.topMargin &&
-            localX > (timeX - 6) && localX < (timeX + 6);
+        let isHoveringTimeBar = localY < this.topMargin
+            && localX > (timeX - 6) && localX < (timeX + 6);
         const time = this.xToTime(x);
         if (isHoveringTimeBar) {
-            this.canvas.style.cursor = "col-resize";
+            this.canvas.style.cursor = 'col-resize';
         }
         else if (this.movingKeys) {
-            this.canvas.style.cursor = "grabbing";
+            this.canvas.style.cursor = 'grabbing';
         }
         else if (e.shiftKey) {
-            this.canvas.style.cursor = "crosshair";
+            this.canvas.style.cursor = 'crosshair';
         }
         else {
-            this.canvas.style.cursor = "default";
+            this.canvas.style.cursor = 'default';
         }
-        if (e.type == "wheel") {
+        if (e.type == 'wheel') {
             if (e.shiftKey) {
                 if (e.wheelDelta) {
                     let mouseTime = this.xToTime(localX);
@@ -762,14 +769,14 @@ class Timeline {
             }
             return;
         }
-        const is_inside = x >= 0 && x <= this.size[0] &&
-            y >= 0 && y <= this.size[1];
+        const is_inside = x >= 0 && x <= this.size[0]
+            && y >= 0 && y <= this.size[1];
         let track = this.getTracksInRange(localY, localY);
         track = track.length ? track[0] : null;
         e.track = track;
         e.localX = localX;
         e.localY = localY;
-        if (e.type == "mouseup") {
+        if (e.type == 'mouseup') {
             if (!this.active) {
                 this.grabbing = false;
                 this.grabbingTimeBar = false;
@@ -792,7 +799,7 @@ class Timeline {
             this.timeBeforeMove = 0;
             this.boxSelection = false; // after mouseup
         }
-        if (e.type == "mousedown") {
+        if (e.type == 'mousedown') {
             window.getSelection()?.empty(); // if canvas DOM is selected, dragging does not work properly. Deselect it
             // e.preventDefault();
             this.clickTime = LX.getTime();
@@ -807,13 +814,12 @@ class Timeline {
                 this.grabbingTimeBar = true;
                 this.setTime(time);
             }
-            else if ((h - this.topMargin) < this.trackTreesComponent.root.scrollHeight && x > w - 10) // grabbing scroll bar
-             {
+            else if ((h - this.topMargin) < this.trackTreesComponent.root.scrollHeight && x > w - 10) { // grabbing scroll bar
                 this.grabbing = true;
                 this.grabbingScroll = true;
             }
-            else // grabbing canvas
-             {
+            // grabbing canvas
+            else {
                 this.grabbing = true;
                 this.grabTime = time;
                 this.grabbingTimeBar = isHoveringTimeBar;
@@ -822,15 +828,14 @@ class Timeline {
                 }
             }
         }
-        else if (e.type == "mousemove") {
+        else if (e.type == 'mousemove') {
             if (e.shiftKey && this.active && this.boxSelection) {
                 this.boxSelectionEnd[0] = localX;
                 this.boxSelectionEnd[1] = localY;
                 return; // Handled
             }
-            else if (this.grabbing && e.button != 2 && !this.movingKeys) // e.buttons != 2 on mousemove needs to be plural
-             {
-                this.canvas.style.cursor = "grabbing";
+            else if (this.grabbing && e.button != 2 && !this.movingKeys) { // e.buttons != 2 on mousemove needs to be plural
+                this.canvas.style.cursor = 'grabbing';
                 if (this.grabbingTimeBar && this.active) {
                     this.setTime(time);
                 }
@@ -840,14 +845,15 @@ class Timeline {
                         this.trackTreesPanel.root.scrollTop = 0;
                     }
                     else {
-                        this.trackTreesPanel.root.scrollTop += this.trackTreesPanel.root.scrollHeight * e.deltay / (h - this.topMargin);
+                        this.trackTreesPanel.root.scrollTop += this.trackTreesPanel.root.scrollHeight * e.deltay
+                            / (h - this.topMargin);
                     }
                 }
                 else {
                     // Move timeline in X ( independent of current time )
                     var old = this.xToTime(this.lastMouse[0]);
                     var now = this.xToTime(e.offsetX);
-                    this.visualOriginTime += (old - now);
+                    this.visualOriginTime += old - now;
                     this.trackTreesPanel.root.scrollTop -= e.deltay; // will automatically call scroll event
                 }
             }
@@ -855,10 +861,10 @@ class Timeline {
                 this.onMouseMove(e, time);
             }
         }
-        else if (e.type == "dblclick" && this.onDblClick) {
+        else if (e.type == 'dblclick' && this.onDblClick) {
             this.onDblClick(e);
         }
-        else if (e.type == "contextmenu" && this.onShowContextMenu && this.active) {
+        else if (e.type == 'contextmenu' && this.onShowContextMenu && this.active) {
             this.onShowContextMenu(e);
         }
         this.lastMouse[0] = x;
@@ -884,23 +890,21 @@ class Timeline {
                 break;
             case 'c':
             case 'C':
-                if (e.ctrlKey) {
+                if (e.ctrlKey)
                     this.copySelectedContent();
-                }
                 break;
             case 'v':
             case 'V':
-                if (e.ctrlKey) {
+                if (e.ctrlKey)
                     this.pasteContent(this.currentTime);
-                }
                 break;
             case ' ':
                 e.preventDefault();
                 e.stopImmediatePropagation();
                 this.changeState();
                 break;
-            case "Shift":
-                this.canvas.style.cursor = "crosshair";
+            case 'Shift':
+                this.canvas.style.cursor = 'crosshair';
                 break;
         }
     }
@@ -908,7 +912,7 @@ class Timeline {
      * @method changeState
      * @param {Boolean} skipCallback defaults false
      * @description change play/pause state
-     **/
+     */
     changeState(skipCallback = false) {
         this.setState(!this.playing, skipCallback);
     }
@@ -917,7 +921,7 @@ class Timeline {
      * @param {Boolean} state
      * @param {Boolean} skipCallback defaults false
      * @description change play/pause state
-     **/
+     */
     setState(state, skipCallback = false) {
         this.playing = state;
         this.header.components.playBtn.setState(this.playing, true);
@@ -934,10 +938,10 @@ class Timeline {
     setLoopMode(loopState, skipCallback = false) {
         this.loop = loopState;
         if (this.loop) {
-            this.header.components.loopBtn.root.children[0].classList.add("selected");
+            this.header.components.loopBtn.root.children[0].classList.add('selected');
         }
         else {
-            this.header.components.loopBtn.root.children[0].classList.remove("selected");
+            this.header.components.loopBtn.root.children[0].classList.remove('selected');
         }
         if (this.onChangeLoopMode && !skipCallback) {
             this.onChangeLoopMode(this.loop);
@@ -1076,12 +1080,12 @@ class Timeline {
     deselectAllElements() {
     }
     /**
-    * @method setTrackState
-    * @param {Int} trackIdx
-    * @param {Boolean} isEnbaled
-    * @param {Boolean} skipCallback onSetTrackState
-    * @param {Boolean} updateTrackTree updates eye icon of the track, if it is visible in the timeline
-    */
+     * @method setTrackState
+     * @param {Int} trackIdx
+     * @param {Boolean} isEnbaled
+     * @param {Boolean} skipCallback onSetTrackState
+     * @param {Boolean} updateTrackTree updates eye icon of the track, if it is visible in the timeline
+     */
     setTrackState(trackIdx, isEnbaled = true, skipCallback = false, updateTrackTree = true) {
         const track = this.animationClip.tracks[trackIdx];
         const oldState = track.active;
@@ -1095,7 +1099,6 @@ class Timeline {
         }
     }
     /**
-     *
      * @param {Int} trackIdx
      * @param {Boolean} isLocked
      * @param {Boolean} skipCallback onSetTrackLock
@@ -1128,9 +1131,8 @@ class Timeline {
         else {
             this.historyUndo.push([undoStep]);
         }
-        if (this.historyUndo.length > this.historyMaxSteps) {
-            this.historyUndo.shift();
-        } // remove first ( oldest ) element
+        if (this.historyUndo.length > this.historyMaxSteps)
+            this.historyUndo.shift(); // remove first ( oldest ) element
         this.historyRedo = [];
     }
     #undoRedo(isUndo = true) {
@@ -1155,8 +1157,12 @@ class Timeline {
         toBeStored.push(combinedStateToStore);
         return true;
     }
-    undo() { return this.#undoRedo(true); }
-    redo() { return this.#undoRedo(false); }
+    undo() {
+        return this.#undoRedo(true);
+    }
+    redo() {
+        return this.#undoRedo(false);
+    }
     // historyApplyTrackStep( state, isUndo ) MUST BE IMPLEMENTED BY CHILD CLASS
     // historyGenerateTrackStep( trackIdx ) MUST BE IMPLEMENTED BY CHILD CLASS
     /**
@@ -1172,8 +1178,8 @@ class Timeline {
             this.size[0] = this.root.parentElement.clientWidth;
             this.size[1] = this.root.parentElement.clientHeight;
         }
-        //this.content_area.setSize([ size[ 0 ], size[ 1 ] - this.header_offset] );
-        this.mainArea.sections[1].root.style.height = "calc(100% - " + this.header_offset + "px )";
+        // this.content_area.setSize([ size[ 0 ], size[ 1 ] - this.header_offset] );
+        this.mainArea.sections[1].root.style.height = 'calc(100% - ' + this.header_offset + 'px )';
         this.size[0] - this.leftPanel.root.clientWidth - 8;
         this.mainArea.sections[1]._update(); // update area's this.size attribute
         this.resizeCanvas();
@@ -1183,16 +1189,16 @@ class Timeline {
         this.canvas.height = this.canvasArea.root.clientHeight;
     }
     /**
-    * @method hide
-    * Hide timeline area
-    */
+     * @method hide
+     * Hide timeline area
+     */
     hide() {
         this.mainArea.hide();
     }
     /**
-    * @method show
-    * Show timeline area if it is hidden
-    */
+     * @method show
+     * Show timeline area if it is hidden
+     */
     show() {
         this.mainArea.show();
         this.resize();
@@ -1213,7 +1219,8 @@ class Timeline {
         const treeTracks = [];
         for (let i = 0; i < this.selectedItems.length; i++) {
             const track = this.selectedItems[i];
-            treeTracks.push({ trackData: track, id: track.id, skipVisibility: this.skipVisibility, visible: track.active, children: [], actions: this.skipLock ? null : [{
+            treeTracks.push({ trackData: track, id: track.id, skipVisibility: this.skipVisibility,
+                visible: track.active, children: [], actions: this.skipLock ? null : [{
                         'name': 'Lock edition',
                         'icon': (track.locked ? 'TimelineLock' : 'TimelineLockOpen'),
                         'swap': (track.locked ? 'TimelineLockOpen' : 'TimelineLock'),
@@ -1225,14 +1232,13 @@ class Timeline {
         return treeTracks;
     }
     /**
-     *
      * @param {Object} options set some values for the track instance ( groups and trackIdx not included )
      * @returns
      */
     instantiateTrack(options = {}, clone = false) {
         return {
             isTrack: true,
-            id: options.id ?? (Math.floor(performance.now()) + "_" + Math.floor(Math.random() * 0xffff)), //must be unique, at least inside a group
+            id: options.id ?? (Math.floor(performance.now()) + '_' + Math.floor(Math.random() * 0xffff)), // must be unique, at least inside a group
             active: options.active ?? true,
             locked: options.locked ?? false,
             isSelected: false, // render and lexgui tree
@@ -1248,39 +1254,39 @@ class Timeline {
      */
     instantiateAnimationClip(options = {}, clone = false) {
         const animationClip = {
-            id: options.id ?? (options.name ?? "animationClip"),
+            id: options.id ?? (options.name ?? 'animationClip'),
             duration: options.duration ?? 0,
             tracks: [],
-            data: options.data ?? null, // user defined data
+            data: options.data ?? null // user defined data
         };
         return animationClip;
     }
 }
-Timeline.BACKGROUND_COLOR = LX.getThemeColor("global-blur-background");
-Timeline.TRACK_COLOR_PRIMARY = LX.getThemeColor("global-color-primary");
-Timeline.TRACK_COLOR_SECONDARY = LX.getThemeColor("global-color-secondary");
-Timeline.TRACK_COLOR_TERCIARY = LX.getThemeColor("global-color-terciary");
-Timeline.TRACK_COLOR_QUATERNARY = LX.getThemeColor("global-color-quaternary");
-Timeline.TRACK_SELECTED = LX.getThemeColor("global-color-accent");
-Timeline.TRACK_SELECTED_LIGHT = LX.getThemeColor("global-color-accent-light");
-Timeline.FONT = LX.getThemeColor("global-font");
-Timeline.FONT_COLOR_PRIMARY = LX.getThemeColor("global-text-primary");
-Timeline.FONT_COLOR_TERTIARY = LX.getThemeColor("global-text-tertiary");
-Timeline.FONT_COLOR_QUATERNARY = LX.getThemeColor("global-text-quaternary");
-Timeline.TIME_MARKER_COLOR = LX.getThemeColor("global-color-accent");
-Timeline.TIME_MARKER_COLOR_TEXT = "#ffffff";
-LX.setThemeColor("lxTimeline-keyframe", "light-dark(#2d69da,#2d69da )");
-LX.setThemeColor("lxTimeline-keyframe-selected", "light-dark(#f5c700,#fafa14)");
-LX.setThemeColor("lxTimeline-keyframe-hovered", "light-dark(#f5c700,#fafa14)");
-LX.setThemeColor("lxTimeline-keyframe-locked", "light-dark(#c62e2e,#ff7d7d )");
-LX.setThemeColor("lxTimeline-keyframe-edited", "light-dark(#00d000,#00d000 )");
-LX.setThemeColor("lxTimeline-keyframe-inactive", "light-dark(#706b6b,#706b6b)");
-Timeline.KEYFRAME_COLOR = LX.getThemeColor("lxTimeline-keyframe");
-Timeline.KEYFRAME_COLOR_SELECTED = Timeline.KEYFRAME_COLOR_HOVERED = LX.getThemeColor("lxTimeline-keyframe-selected");
-Timeline.KEYFRAME_COLOR_LOCK = LX.getThemeColor("lxTimeline-keyframe-locked");
-Timeline.KEYFRAME_COLOR_EDITED = LX.getThemeColor("lxTimeline-keyframe-edited");
-Timeline.KEYFRAME_COLOR_INACTIVE = LX.getThemeColor("lxTimeline-keyframe-inactive");
-Timeline.BOX_SELECTION_COLOR = "#AAA";
+Timeline.BACKGROUND_COLOR = LX.getThemeColor('global-blur-background');
+Timeline.TRACK_COLOR_PRIMARY = LX.getThemeColor('global-color-primary');
+Timeline.TRACK_COLOR_SECONDARY = LX.getThemeColor('global-color-secondary');
+Timeline.TRACK_COLOR_TERCIARY = LX.getThemeColor('global-color-terciary');
+Timeline.TRACK_COLOR_QUATERNARY = LX.getThemeColor('global-color-quaternary');
+Timeline.TRACK_SELECTED = LX.getThemeColor('global-color-accent');
+Timeline.TRACK_SELECTED_LIGHT = LX.getThemeColor('global-color-accent-light');
+Timeline.FONT = LX.getThemeColor('global-font');
+Timeline.FONT_COLOR_PRIMARY = LX.getThemeColor('global-text-primary');
+Timeline.FONT_COLOR_TERTIARY = LX.getThemeColor('global-text-tertiary');
+Timeline.FONT_COLOR_QUATERNARY = LX.getThemeColor('global-text-quaternary');
+Timeline.TIME_MARKER_COLOR = LX.getThemeColor('global-color-accent');
+Timeline.TIME_MARKER_COLOR_TEXT = '#ffffff';
+LX.setThemeColor('lxTimeline-keyframe', 'light-dark(#2d69da,#2d69da )');
+LX.setThemeColor('lxTimeline-keyframe-selected', 'light-dark(#f5c700,#fafa14)');
+LX.setThemeColor('lxTimeline-keyframe-hovered', 'light-dark(#f5c700,#fafa14)');
+LX.setThemeColor('lxTimeline-keyframe-locked', 'light-dark(#c62e2e,#ff7d7d )');
+LX.setThemeColor('lxTimeline-keyframe-edited', 'light-dark(#00d000,#00d000 )');
+LX.setThemeColor('lxTimeline-keyframe-inactive', 'light-dark(#706b6b,#706b6b)');
+Timeline.KEYFRAME_COLOR = LX.getThemeColor('lxTimeline-keyframe');
+Timeline.KEYFRAME_COLOR_SELECTED = Timeline.KEYFRAME_COLOR_HOVERED = LX.getThemeColor('lxTimeline-keyframe-selected');
+Timeline.KEYFRAME_COLOR_LOCK = LX.getThemeColor('lxTimeline-keyframe-locked');
+Timeline.KEYFRAME_COLOR_EDITED = LX.getThemeColor('lxTimeline-keyframe-edited');
+Timeline.KEYFRAME_COLOR_INACTIVE = LX.getThemeColor('lxTimeline-keyframe-inactive');
+Timeline.BOX_SELECTION_COLOR = '#AAA';
 LX.Timeline = Timeline;
 /**
  * @class KeyFramesTimeline
@@ -1313,15 +1319,15 @@ class KeyFramesTimeline extends Timeline {
         this.defaultCurvesRange = [0, 1]; // whn a track with dim == 1 has no curves attribute, defaultCurves will be used instead. If true, track is rendered using curves
         this.keyframeSize = this.trackHeight * 0.5; // height of keyframe
         this.keyframeSizeHovered = this.trackHeight * 0.5 + 5;
-        if (options.onShowOptimizeMenu && typeof options.onShowOptimizeMenu == "boolean") {
+        if (options.onShowOptimizeMenu && typeof options.onShowOptimizeMenu == 'boolean') {
             this.onShowOptimizeMenu = (e) => {
                 if (this.selectedItems.length == 0) {
                     return;
                 }
-                LX.addContextMenu("Optimize", e, (m) => {
-                    this.selectedItems.forEach(item => {
+                LX.addContextMenu('Optimize', e, (m) => {
+                    this.selectedItems.forEach((item) => {
                         if (item.isTrack) {
-                            m.add((item.groupId ? item.groupId : "") + "@" + item.id, () => {
+                            m.add((item.groupId ? item.groupId : '') + '@' + item.id, () => {
                                 this.optimizeTrack(item.trackIdx, false);
                             });
                         }
@@ -1329,7 +1335,7 @@ class KeyFramesTimeline extends Timeline {
                             const tracks = this.animationClip.tracksPerGroup[item];
                             for (let i = 0; i < tracks.length; ++i) {
                                 const t = tracks[i];
-                                m.add((t.groupId ? t.groupId : "") + "@" + t.id, () => {
+                                m.add((t.groupId ? t.groupId : '') + '@' + t.id, () => {
                                     this.optimizeTrack(t.trackIdx, false);
                                 });
                             }
@@ -1344,20 +1350,20 @@ class KeyFramesTimeline extends Timeline {
             let actions = [];
             if (this.lastKeyFramesSelected && this.lastKeyFramesSelected.length) {
                 actions.push({
-                    title: "Copy",
+                    title: 'Copy',
                     callback: () => {
                         this.copySelectedContent();
                     }
                 });
                 actions.push({
-                    title: "Delete",
+                    title: 'Delete',
                     callback: () => {
                         this.deleteSelectedContent();
                     }
                 });
                 if (this.lastKeyFramesSelected.length == 1 && this.clipboard && this.clipboard.value) {
                     actions.push({
-                        title: "Paste Value",
+                        title: 'Paste Value',
                         callback: () => {
                             this.pasteContentValue();
                         }
@@ -1366,7 +1372,7 @@ class KeyFramesTimeline extends Timeline {
             }
             else {
                 actions.push({
-                    title: "Add Here",
+                    title: 'Add Here',
                     callback: () => {
                         if (!e.track)
                             return;
@@ -1376,7 +1382,7 @@ class KeyFramesTimeline extends Timeline {
                     }
                 });
                 actions.push({
-                    title: "Add",
+                    title: 'Add',
                     callback: () => {
                         if (!e.track)
                             return;
@@ -1388,19 +1394,19 @@ class KeyFramesTimeline extends Timeline {
             }
             if (this.clipboard && this.clipboard.keyframes) {
                 actions.push({
-                    title: "Paste Here",
+                    title: 'Paste Here',
                     callback: () => {
                         this.pasteContent(this.xToTime(e.localX));
                     }
                 });
                 actions.push({
-                    title: "Paste",
+                    title: 'Paste',
                     callback: () => {
                         this.pasteContent(this.currentTime);
                     }
                 });
             }
-            LX.addContextMenu("Options", e, (m) => {
+            LX.addContextMenu('Options', e, (m) => {
                 for (let i = 0; i < actions.length; i++) {
                     m.add(actions[i].title, actions[i].callback);
                 }
@@ -1421,7 +1427,8 @@ class KeyFramesTimeline extends Timeline {
             const nodes = [];
             for (let j = 0; j < itemTracks.length; j++) {
                 const track = itemTracks[j];
-                nodes.push({ 'trackData': track, 'id': track.id, 'skipVisibility': this.skipVisibility, visible: track.active, 'children': [], actions: this.skipLock ? null : [{
+                nodes.push({ 'trackData': track, 'id': track.id, 'skipVisibility': this.skipVisibility,
+                    visible: track.active, 'children': [], actions: this.skipLock ? null : [{
                             'name': 'Lock edition',
                             'icon': (track.locked ? 'TimelineLock' : 'TimelineLockOpen'),
                             'swap': (track.locked ? 'TimelineLockOpen' : 'TimelineLock'),
@@ -1453,8 +1460,7 @@ class KeyFramesTimeline extends Timeline {
     instantiateTrack(options = {}, clone = false) {
         const track = super.instantiateTrack(options);
         track.dim = Math.max(1, options.dim ?? 1); // >= 1
-        track.groupId = null,
-            track.groupTrackIdx = -1, // track Idx inside group only if in group
+        track.groupId = null, track.groupTrackIdx = -1, // track Idx inside group only if in group
             track.values = new Float32Array(0);
         track.times = new Float32Array(0);
         track.selected = [];
@@ -1504,9 +1510,8 @@ class KeyFramesTimeline extends Timeline {
                 let values = track.values ?? [];
                 let valueDim = track.dim;
                 if (!valueDim || valueDim < 0) {
-                    if (times.length && values.length) {
+                    if (times.length && values.length)
                         valueDim = Math.round(values.length / times.length);
-                    }
                     else {
                         valueDim = 1;
                     }
@@ -1541,7 +1546,10 @@ class KeyFramesTimeline extends Timeline {
             // overwrite trackspergroup
             if (animation.tracksPerGroup) {
                 // ungroup all tracks (just in case )
-                animationClip.tracks.forEach((v, i) => { v.groupId = null; v.groupTrackIdx = -1; });
+                animationClip.tracks.forEach((v, i) => {
+                    v.groupId = null;
+                    v.groupTrackIdx = -1;
+                });
                 animationClip.tracksPerGroup = {};
                 let tpg = animation.tracksPerGroup;
                 for (let groupId in tpg) {
@@ -1590,8 +1598,7 @@ class KeyFramesTimeline extends Timeline {
         if (itemsToAdd) {
             for (let i = 0; i < itemsToAdd.length; ++i) {
                 const v = itemsToAdd[i];
-                if (isNaN(v)) // assuming it is a string
-                 {
+                if (isNaN(v)) { // assuming it is a string
                     if (tracksPerGroup[v]) {
                         this.selectedItems.push(v);
                     }
@@ -1642,7 +1649,7 @@ class KeyFramesTimeline extends Timeline {
         for (let i = 0; i < groupTracks.length; ++i) {
             const v = groupTracks[i];
             let track = null;
-            if (typeof v == "string") {
+            if (typeof v == 'string') {
                 // v is an id  ( string)
                 for (let t = 0; t < tracks.length; ++t) {
                     if (tracks[t].id == v) {
@@ -1692,7 +1699,6 @@ class KeyFramesTimeline extends Timeline {
         return null;
     }
     /**
-     *
      * @param {Number} size pixels, height of keyframe
      * @param {Number} sizeHovered optional, size in pixels when hovered
      */
@@ -1710,9 +1716,9 @@ class KeyFramesTimeline extends Timeline {
                 const thresholdPixels = this.keyframeSize * 0.5; // radius of circle ( curves ) or rotated square (keyframes )
                 const keyFrameIdx = this.getCurrentKeyFrame(track, this.xToTime(localX), this.secondsPerPixel * thresholdPixels);
                 if (keyFrameIdx > -1) {
-                    track.selected[keyFrameIdx] ?
-                        this.deselectKeyFrame(track.trackIdx, keyFrameIdx) :
-                        this.processSelectionKeyFrame(track.trackIdx, keyFrameIdx, true);
+                    track.selected[keyFrameIdx]
+                        ? this.deselectKeyFrame(track.trackIdx, keyFrameIdx)
+                        : this.processSelectionKeyFrame(track.trackIdx, keyFrameIdx, true);
                 }
             }
             // Box selection
@@ -1728,8 +1734,7 @@ class KeyFramesTimeline extends Timeline {
                 }
             }
         }
-        else if (!this.movingKeys && !discard) // if not moving timeline and not adding keyframes through e.shiftkey (just a click )
-         {
+        else if (!this.movingKeys && !discard) { // if not moving timeline and not adding keyframes through e.shiftkey (just a click )
             if (this.lastKeyFramesSelected.length) {
                 if (this.onDeselectKeyFrames) {
                     this.onDeselectKeyFrames(this.lastKeyFramesSelected);
@@ -1751,17 +1756,15 @@ class KeyFramesTimeline extends Timeline {
         let localX = e.localX;
         e.localY;
         e.track;
-        if ((e.ctrlKey || e.altKey) && this.lastKeyFramesSelected.length) // move keyframes
-         {
+        if ((e.ctrlKey || e.altKey) && this.lastKeyFramesSelected.length) { // move keyframes
             this.movingKeys = true;
-            this.canvas.style.cursor = "grab";
+            this.canvas.style.cursor = 'grab';
             this.canvas.classList.add('grabbing');
             // Set pre-move state
             this.moveKeyMinTime = Infinity;
             const tracks = this.animationClip.tracks;
             let lastTrackIdx = -1;
-            for (let selectedKey of this.lastKeyFramesSelected) // WARNING assumes lasKeyFramesSelected is sorted, so all keyframes of the same track are grouped
-             {
+            for (let selectedKey of this.lastKeyFramesSelected) { // WARNING assumes lasKeyFramesSelected is sorted, so all keyframes of the same track are grouped
                 let [trackIdx, keyIndex, keyTime] = selectedKey;
                 const track = tracks[trackIdx];
                 selectedKey[2] = track.times[keyIndex]; // update original time just in case
@@ -1787,8 +1790,7 @@ class KeyFramesTimeline extends Timeline {
         let localX = e.localX;
         e.localY;
         let track = e.track;
-        if (this.movingKeys) // move keyframes
-         {
+        if (this.movingKeys) { // move keyframes
             let newTime = this.xToTime(localX);
             let deltaTime = newTime - this.timeBeforeMove;
             if (deltaTime + this.moveKeyMinTime < 0) {
@@ -1808,7 +1810,7 @@ class KeyFramesTimeline extends Timeline {
                     if (track && track.locked) {
                         continue;
                     }
-                    this.canvas.style.cursor = "grabbing";
+                    this.canvas.style.cursor = 'grabbing';
                     const times = this.animationClip.tracks[track.trackIdx].times;
                     times[keyIndex] = Math.max(0, times[keyIndex] + deltaTime);
                     if (times[keyIndex] > this.duration) {
@@ -1866,8 +1868,7 @@ class KeyFramesTimeline extends Timeline {
                     }
                     lastTrackChanged = track.trackIdx;
                 }
-                if (this.onUpdateTrack && lastTrackChanged > -1) // do the last update, once the last track has been processed
-                 {
+                if (this.onUpdateTrack && lastTrackChanged > -1) { // do the last update, once the last track has been processed
                     this.onUpdateTrack([track.trackIdx]);
                 }
                 return;
@@ -1902,14 +1903,14 @@ class KeyFramesTimeline extends Timeline {
         let offset = scrollY;
         // compute track from which to start rendering ( avoid rendering unseen tracks )
         let startElIdx = 0;
-        if (offset < -this.lastTrackTreesComponentOffset) // offset 0 = ( 0 of canvas ) + track-Tree-Offset. This renders tracks under the time zone
-         {
+        if (offset < -this.lastTrackTreesComponentOffset) { // offset 0 = ( 0 of canvas ) + track-Tree-Offset. This renders tracks under the time zone
             startElIdx = Math.floor(-(offset + this.lastTrackTreesComponentOffset) / this.trackHeight); // how many tracks to skip
             offset += startElIdx * this.trackHeight;
         }
         ctx.translate(0, offset);
         // compute track to end rendering ( avoid rendering unseen tracks )
-        let endElIdx = startElIdx + Math.ceil((ctx.canvas.height - this.lastTrackTreesComponentOffset - offset) / this.trackHeight);
+        let endElIdx = startElIdx
+            + Math.ceil((ctx.canvas.height - this.lastTrackTreesComponentOffset - offset) / this.trackHeight);
         endElIdx = endElIdx > visibleElements.length ? visibleElements.length : endElIdx;
         for (let t = startElIdx; t < endElIdx; t++) {
             const track = visibleElements[t].treeData.trackData;
@@ -1925,13 +1926,12 @@ class KeyFramesTimeline extends Timeline {
         }
         ctx.restore();
     }
-    ;
     /**
      * @method drawTrackWithKeyframes
      * @param {*} ctx
      * ...
      * @description helper function, you can call it from drawContent to render all the keyframes
-    */
+     */
     drawTrackWithKeyframes(ctx, trackHeight, track) {
         if (track.isSelected) {
             ctx.globalAlpha = 0.2;
@@ -1990,23 +1990,27 @@ class KeyFramesTimeline extends Timeline {
         const values = track.values;
         const defaultPointSize = this.keyframeSize * 0.5; // radius
         const hoverPointSize = this.keyframeSizeHovered * 0.5; // radius
-        const valueRange = track.curvesRange; //[ min, max ]
+        const valueRange = track.curvesRange; // [ min, max ]
         const displayRange = trackHeight - defaultPointSize * 2;
         const startTime = this.visualTimeRange[0];
         const endTime = this.visualTimeRange[1] + 0.0000001;
-        //draw lines
+        // draw lines
         ctx.strokeStyle = KeyFramesTimeline.FONT_COLOR_PRIMARY;
         ctx.beginPath();
         if (keyframes.length > 1) {
             let startPosX = this.timeToX(keyframes[0]);
             let startValue = values[0];
-            startValue = LX.clamp((startValue - valueRange[0]) / (valueRange[1] - valueRange[0]), 0, 1) * (-displayRange) + (trackHeight - defaultPointSize); // normalize and offset
+            startValue =
+                LX.clamp((startValue - valueRange[0]) / (valueRange[1] - valueRange[0]), 0, 1) * (-displayRange)
+                    + (trackHeight - defaultPointSize); // normalize and offset
             ctx.moveTo(startPosX, startValue);
             for (let j = 1; j < keyframes.length; ++j) {
                 let time = keyframes[j];
                 let keyframePosX = this.timeToX(time);
                 let value = values[j];
-                value = LX.clamp((value - valueRange[0]) / (valueRange[1] - valueRange[0]), 0, 1) * (-displayRange) + (trackHeight - defaultPointSize); // normalize and offset
+                value =
+                    LX.clamp((value - valueRange[0]) / (valueRange[1] - valueRange[0]), 0, 1) * (-displayRange)
+                        + (trackHeight - defaultPointSize); // normalize and offset
                 if (time < startTime) {
                     ctx.moveTo(keyframePosX, value);
                     continue;
@@ -2016,41 +2020,49 @@ class KeyFramesTimeline extends Timeline {
                     let dt = keyframePosX - lastKeyframePosX;
                     if (dt > 0) {
                         let lastValue = values[j - 1];
-                        lastValue = LX.clamp((lastValue - valueRange[0]) / (valueRange[1] - valueRange[0]), 0, 1) * (-displayRange) + (trackHeight - defaultPointSize); // normalize and offset
+                        lastValue = LX.clamp((lastValue - valueRange[0]) / (valueRange[1] - valueRange[0]), 0, 1)
+                            * (-displayRange) + (trackHeight - defaultPointSize); // normalize and offset
                         let f = (this.timeToX(endTime) - lastKeyframePosX) / dt;
                         ctx.lineTo(lastKeyframePosX + dt * f, lastValue * (1 - f) + value * f);
                     }
-                    break; //end loop, but print line
+                    break; // end loop, but print line
                 }
-                //convert to timeline track range
+                // convert to timeline track range
                 ctx.lineTo(keyframePosX, value);
             }
             ctx.stroke();
         }
-        //draw points
+        // draw points
         ctx.fillStyle = Timeline.KEYFRAME_COLOR;
         for (let j = 0; j < keyframes.length; ++j) {
             let time = keyframes[j];
-            if (time < startTime || time > endTime)
+            if (time < startTime || time > endTime) {
                 continue;
+            }
             let size = defaultPointSize;
             let keyframePosX = this.timeToX(time);
-            if (!this.active || !track.active)
+            if (!this.active || !track.active) {
                 ctx.fillStyle = Timeline.KEYFRAME_COLOR_INACTIVE;
-            else if (track.locked)
+            }
+            else if (track.locked) {
                 ctx.fillStyle = Timeline.KEYFRAME_COLOR_LOCK;
+            }
             else if (track.hovered[j]) {
                 size = hoverPointSize;
                 ctx.fillStyle = Timeline.KEYFRAME_COLOR_HOVERED;
             }
-            else if (track.selected[j])
+            else if (track.selected[j]) {
                 ctx.fillStyle = Timeline.KEYFRAME_COLOR_SELECTED;
-            else if (track.edited[j])
+            }
+            else if (track.edited[j]) {
                 ctx.fillStyle = Timeline.KEYFRAME_COLOR_EDITED;
-            else
+            }
+            else {
                 ctx.fillStyle = Timeline.KEYFRAME_COLOR;
+            }
             let value = values[j];
-            value = LX.clamp((value - valueRange[0]) / (valueRange[1] - valueRange[0]), 0, 1) * (-displayRange) + (trackHeight - defaultPointSize); // normalize, clamp and offset
+            value = LX.clamp((value - valueRange[0]) / (valueRange[1] - valueRange[0]), 0, 1) * (-displayRange)
+                + (trackHeight - defaultPointSize); // normalize, clamp and offset
             ctx.beginPath();
             ctx.arc(keyframePosX, value, size, 0, Math.PI * 2);
             ctx.fill();
@@ -2062,12 +2074,12 @@ class KeyFramesTimeline extends Timeline {
         let trackId = null;
         let trackNameInfo;
         // Support other versions
-        if (uglyName.includes("[")) {
+        if (uglyName.includes('[')) {
             const nameIndex = uglyName.indexOf('[');
-            trackNameInfo = uglyName.substring(nameIndex + 1).split("].");
+            trackNameInfo = uglyName.substring(nameIndex + 1).split('].');
         }
         else {
-            trackNameInfo = uglyName.split(".");
+            trackNameInfo = uglyName.split('.');
         }
         if (trackNameInfo.length > 1) {
             groupId = trackNameInfo[0];
@@ -2085,8 +2097,9 @@ class KeyFramesTimeline extends Timeline {
      * @returns
      */
     updateTrack(trackIdx, newTrack) {
-        if (!this.animationClip)
+        if (!this.animationClip) {
             return false;
+        }
         const track = this.animationClip.tracks[trackIdx];
         track.values = newTrack.values;
         track.times = newTrack.times;
@@ -2109,7 +2122,9 @@ class KeyFramesTimeline extends Timeline {
         if (track.locked) {
             return;
         }
-        let cmpFunction = (v, p, n, t) => { return Math.abs(v - p) >= t || Math.abs(v - n) >= t; };
+        let cmpFunction = (v, p, n, t) => {
+            return Math.abs(v - p) >= t || Math.abs(v - n) >= t;
+        };
         let lastSavedIndex = 0;
         const lastIndex = times.length - 1;
         this.saveState(track.trackIdx);
@@ -2221,22 +2236,19 @@ class KeyFramesTimeline extends Timeline {
         track.times = state.t;
         track.values = state.v;
         track.edited = state.edited;
-        if (track.selected.length != track.times.length) {
+        if (track.selected.length != track.times.length)
             track.selected.length = track.times.length;
-        }
-        if (track.hovered.length != track.times.length) {
+        if (track.hovered.length != track.times.length)
             track.hovered.length = track.times.length;
-        }
         track.selected.fill(false);
         track.hovered.fill(false);
         return stateToReturn;
     }
     /**
-    *
-    * @param {*} track
-    * @param {Number} srcIdx keyFrame index
-    * @param {Number} trgIdx keyFrame index
-    */
+     * @param {*} track
+     * @param {Number} srcIdx keyFrame index
+     * @param {Number} trgIdx keyFrame index
+     */
     swapKeyFrames(track, srcIdx, trgIdx) {
         const times = track.times;
         const values = track.values;
@@ -2352,9 +2364,8 @@ class KeyFramesTimeline extends Timeline {
                 const clipboardItem = this.animationClip.tracks[trackIdx];
                 // ensure all tracks are visible
                 const idx = this.selectedItems.findIndex((item) => {
-                    if (item.isTrack) {
+                    if (item.isTrack)
                         return (item === clipboardItem);
-                    }
                     return item === clipboardItem.groupId;
                 });
                 if (idx == -1) {
@@ -2499,7 +2510,7 @@ class KeyFramesTimeline extends Timeline {
         return resultIndices;
     }
     deleteSelectedContent(skipCallback = false) {
-        //*********** WARNING: RELIES ON SORTED lastKeyFramesSelected ***********
+        // *********** WARNING: RELIES ON SORTED lastKeyFramesSelected ***********
         if (!this.lastKeyFramesSelected.length)
             return;
         const tracks = this.animationClip.tracks;
@@ -2560,8 +2571,9 @@ class KeyFramesTimeline extends Timeline {
         track.times = newTimes;
         track.values = newValues;
         // Update animation action interpolation info
-        if (this.onDeleteKeyFrames && !skipCallback)
+        if (this.onDeleteKeyFrames && !skipCallback) {
             this.onDeleteKeyFrames(trackIdx, indices);
+        }
         if ((newTimes[newTimes.length - 1]) > this.duration) {
             this.setDuration(newTimes[newTimes.length - 1]);
         }
@@ -2583,7 +2595,7 @@ class KeyFramesTimeline extends Timeline {
         if (!track || !track.times || !track.times.length) {
             return -1;
         }
-        //binary search
+        // binary search
         const times = track.times;
         let min = 0, max = times.length - 1;
         // edge cases
@@ -2596,12 +2608,10 @@ class KeyFramesTimeline extends Timeline {
         // time is between first and last frame
         let half = Math.floor((min + max) / 2);
         while (min < half && half < max) {
-            if (time < times[half]) {
+            if (time < times[half])
                 max = half;
-            }
-            else {
+            else
                 min = half;
-            }
             half = Math.floor((min + max) / 2);
         }
         if (mode == 0) {
@@ -2620,8 +2630,9 @@ class KeyFramesTimeline extends Timeline {
      * @returns returns a postive/zero value if there is a frame inside the threshold range. Otherwise, -1
      */
     getCurrentKeyFrame(track, time, threshold = 0.0) {
-        if (!track || !track.times.length)
+        if (!track || !track.times.length) {
             return -1;
+        }
         let frame = this.getNearestKeyFrame(track, time);
         if (frame > -1) {
             frame = Math.abs(track.times[frame] - time) > threshold ? -1 : frame;
@@ -2679,8 +2690,9 @@ class KeyFramesTimeline extends Timeline {
      */
     selectKeyFrame(trackIdx, frameIdx, skipCallback = false) {
         const track = this.animationClip.tracks[trackIdx];
-        if (track.locked || !track.active || track.selected[frameIdx])
+        if (track.locked || !track.active || track.selected[frameIdx]) {
             return null;
+        }
         // [ track idx, keyframe, keyframe time ]
         const selection = [track.trackIdx, frameIdx, track.times[frameIdx]];
         // sort lastkeyframeselected ascending order ( track and frame )
@@ -2700,8 +2712,9 @@ class KeyFramesTimeline extends Timeline {
     }
     deselectKeyFrame(trackIdx, frameIdx) {
         const track = this.animationClip.tracks[trackIdx];
-        if (track.locked || !track.active || !track.selected[frameIdx])
+        if (track.locked || !track.active || !track.selected[frameIdx]) {
             return false;
+        }
         track.selected[frameIdx] = false;
         for (let i = 0; i < this.lastKeyFramesSelected.length; ++i) {
             const sk = this.lastKeyFramesSelected[i];
@@ -2724,8 +2737,9 @@ class KeyFramesTimeline extends Timeline {
      */
     processSelectionKeyFrame(trackIdx, keyFrameIndex, multipleSelection = false) {
         const track = this.animationClip.tracks[trackIdx];
-        if (track.locked)
+        if (track.locked) {
             return;
+        }
         if (!multipleSelection) {
             this.deselectAllKeyFrames();
         }
@@ -2764,7 +2778,7 @@ class ClipsTimeline extends Timeline {
     static CLONEREASON_TRACKCLONE = 4;
     lastClipsSelected = [];
     lastTrackClipsMove = 0; // vertical movement of clips, onMouseMove onMousedown
-    dragClipMode = "";
+    dragClipMode = '';
     lastHovered = null;
     onSelectClip = null;
     onContentMoved = null;
@@ -2778,7 +2792,7 @@ class ClipsTimeline extends Timeline {
         super(name, options);
         this.lastClipsSelected = [];
         this.lastTrackClipsMove = 0; // vertical movement of clips, onMouseMove onMousedown
-        this.dragClipMode = "";
+        this.dragClipMode = '';
         this.setAnimationClip(this.animationClip);
         this.onDblClick = (e) => {
             const track = e.track;
@@ -2794,11 +2808,13 @@ class ClipsTimeline extends Timeline {
             let actions = [];
             if (this.lastClipsSelected.length) {
                 actions.push({
-                    title: "Copy",
-                    callback: () => { this.copySelectedContent(); }
+                    title: 'Copy',
+                    callback: () => {
+                        this.copySelectedContent();
+                    }
                 });
                 actions.push({
-                    title: "Delete",
+                    title: 'Delete',
                     callback: () => {
                         this.deleteSelectedContent();
                     }
@@ -2807,20 +2823,20 @@ class ClipsTimeline extends Timeline {
             else {
                 if (this.clipboard) {
                     actions.push({
-                        title: "Paste",
+                        title: 'Paste',
                         callback: () => {
                             this.pasteContent();
                         }
                     });
                     actions.push({
-                        title: "Paste Here",
+                        title: 'Paste Here',
                         callback: () => {
                             this.pasteContent(this.xToTime(e.localX));
                         }
                     });
                 }
             }
-            LX.addContextMenu("Options", e, (m) => {
+            LX.addContextMenu('Options', e, (m) => {
                 for (let i = 0; i < actions.length; i++) {
                     m.add(actions[i].title, actions[i].callback);
                 }
@@ -2844,10 +2860,9 @@ class ClipsTimeline extends Timeline {
         return animationClip;
     }
     /**
-     *
      * @param {Object} options set some values for the track instance ( groups and trackIdx not included )
      * @returns
-    */
+     */
     instantiateTrack(options = {}, clone = false) {
         const track = super.instantiateTrack(options);
         track.trackIdx = this.animationClip.tracks.length;
@@ -2855,7 +2870,9 @@ class ClipsTimeline extends Timeline {
         track.edited = [];
         track.hovered = [];
         if (options.clips) {
-            track.clips = clone ? this.cloneClips(options.clips, 0, ClipsTimeline.CLONEREASON_TRACKCLONE) : options.clips;
+            track.clips = clone
+                ? this.cloneClips(options.clips, 0, ClipsTimeline.CLONEREASON_TRACKCLONE)
+                : options.clips;
         }
         else {
             track.clips = [];
@@ -2888,15 +2905,15 @@ class ClipsTimeline extends Timeline {
     // provides an base example of a proper clip
     instantiateClip(options = {}) {
         return {
-            id: options.id ?? (options.name ?? "clip"),
+            id: options.id ?? (options.name ?? 'clip'),
             start: options.start ?? 0,
             duration: options.duration ?? 1,
             fadein: options.fadein ?? undefined,
             fadeout: options.fadeout ?? undefined,
-            clipColor: options.clipColor ?? LX.getThemeColor("global-color-accent"),
+            clipColor: options.clipColor ?? LX.getThemeColor('global-color-accent'),
             fadeColor: options.fadeColor ?? null,
             active: options.active ?? true,
-            trackIdx: -1, // filled by addClip
+            trackIdx: -1 // filled by addClip
         };
     }
     // use default updateleftpanel
@@ -2953,9 +2970,9 @@ class ClipsTimeline extends Timeline {
                 if (track) {
                     let clipIndex = this.getClipOnTime(track, this.xToTime(localX), this.secondsPerPixel * 5);
                     if (clipIndex > -1) {
-                        track.selected[clipIndex] ?
-                            this.deselectClip(track.trackIdx, clipIndex) :
-                            this.selectClip(track.trackIdx, clipIndex, false);
+                        track.selected[clipIndex]
+                            ? this.deselectClip(track.trackIdx, clipIndex)
+                            : this.selectClip(track.trackIdx, clipIndex, false);
                     }
                 }
             }
@@ -2965,16 +2982,18 @@ class ClipsTimeline extends Timeline {
                 for (let t of tracks) {
                     let clipsIndices = this.getClipsInRange(t, this.xToTime(this.boxSelectionStart[0]), this.xToTime(this.boxSelectionEnd[0]), 0.000001);
                     if (clipsIndices) {
-                        for (let index of clipsIndices)
+                        for (let index of clipsIndices) {
                             this.selectClip(t.trackIdx, index, false);
+                        }
                     }
                 }
             }
         }
         else {
             let boundingBox = this.canvas.getBoundingClientRect();
-            if (e.y < boundingBox.top || e.y > boundingBox.bottom)
+            if (e.y < boundingBox.top || e.y > boundingBox.bottom) {
                 return;
+            }
             // Check exact track clip
             if (!discard && track) {
                 if (e.button != 2) {
@@ -2993,12 +3012,11 @@ class ClipsTimeline extends Timeline {
         if (e.button > 0) {
             return;
         }
-        if (e.ctrlKey && track) // move clips
-         {
+        if (e.ctrlKey && track) { // move clips
             let x = e.offsetX;
             // clip selection is done on MouseUP
             const selectedClips = this.lastClipsSelected;
-            this.canvas.style.cursor = "grab";
+            this.canvas.style.cursor = 'grab';
             let curTrackIdx = -1;
             this.lastTrackClipsMove = Math.floor((e.localY - this.topMargin + this.trackTreesPanel.root.scrollTop) / this.trackHeight);
             for (let i = 0; i < selectedClips.length; i++) {
@@ -3006,13 +3024,13 @@ class ClipsTimeline extends Timeline {
                 const clip = this.animationClip.tracks[trackIndex].clips[clipIndex];
                 let endingX = this.timeToX(clip.start + clip.duration);
                 if (Math.abs(endingX - x) < 5) {
-                    this.dragClipMode = "duration";
-                    this.canvas.style.cursor = "column-resize";
+                    this.dragClipMode = 'duration';
+                    this.canvas.style.cursor = 'column-resize';
                 }
                 else {
-                    this.dragClipMode = "move";
+                    this.dragClipMode = 'move';
                 }
-                //*********** WARNING: RELIES ON SORTED lastClipsSelected ***********
+                // *********** WARNING: RELIES ON SORTED lastClipsSelected ***********
                 if (curTrackIdx != trackIndex) {
                     this.saveState(trackIndex, curTrackIdx != -1);
                     curTrackIdx = trackIndex;
@@ -3020,8 +3038,7 @@ class ClipsTimeline extends Timeline {
             }
             this.movingKeys = true;
         }
-        else if (!track || track && this.getClipOnTime(track, time, 0.001) == -1) // clicked on empty space
-         {
+        else if (!track || track && this.getClipOnTime(track, time, 0.001) == -1) { // clicked on empty space
             if (this.lastClipsSelected.length) {
                 this.deselectAllClips();
                 if (this.onSelectClip) {
@@ -3029,8 +3046,8 @@ class ClipsTimeline extends Timeline {
                 }
             }
         }
-        else if (track && (this.dragClipMode == "duration" || this.dragClipMode == "fadein" || this.dragClipMode == "fadeout")) // clicked while mouse was over fadeIn, fadeOut, duration
-         {
+        else if (track
+            && (this.dragClipMode == 'duration' || this.dragClipMode == 'fadein' || this.dragClipMode == 'fadeout')) { // clicked while mouse was over fadeIn, fadeOut, duration
             const clipIdx = this.getClipOnTime(track, this.xToTime(localX), 0.001);
             this.selectClip(track.trackIdx, clipIdx); // select current clip if any ( deselect others )
             if (this.lastClipsSelected.length) {
@@ -3048,30 +3065,29 @@ class ClipsTimeline extends Timeline {
             this.unHoverAll();
             let delta = time - this.grabTime;
             this.grabTime = time;
-            if (time < 0 && delta > 0) {
+            if (time < 0 && delta > 0)
                 delta = 0;
-            }
-            if (this.dragClipMode != "move" && this.lastClipsSelected.length == 1) // change fade and duration of clips
-             {
+            if (this.dragClipMode != 'move' && this.lastClipsSelected.length == 1) { // change fade and duration of clips
                 const track = this.animationClip.tracks[this.lastClipsSelected[0][0]];
                 let clip = track.clips[this.lastClipsSelected[0][1]];
-                if (this.dragClipMode == "fadein") {
+                if (this.dragClipMode == 'fadein') {
                     clip.fadein = Math.min(Math.max(clip.fadein + delta, clip.start), clip.fadeout ?? (clip.start + clip.duration));
                 }
-                else if (this.dragClipMode == "fadeout") {
+                else if (this.dragClipMode == 'fadeout') {
                     clip.fadeout = Math.max(Math.min(clip.fadeout + delta, clip.start + clip.duration), clip.fadein ?? clip.start);
                 }
-                else if (this.dragClipMode == "duration") {
+                else if (this.dragClipMode == 'duration') {
                     let duration = Math.max(0, clip.duration + delta);
-                    if (this.lastClipsSelected[0][1] < track.clips.length - 1) // max next clip's start
-                     {
+                    if (this.lastClipsSelected[0][1] < track.clips.length - 1) { // max next clip's start
                         duration = Math.min(track.clips[this.lastClipsSelected[0][1] + 1].start - clip.start - 0.0001, duration);
                     }
                     clip.duration = duration;
-                    if (clip.fadeout != undefined)
+                    if (clip.fadeout != undefined) {
                         clip.fadeout = Math.max(Math.min((clip.fadeout ?? (clip.start + clip.duration)) + delta, clip.start + clip.duration), clip.start);
-                    if (clip.fadein != undefined)
-                        clip.fadein = Math.max(Math.min((clip.fadein ?? (clip.start + clip.duration)), (clip.fadeout ?? (clip.start + clip.duration))), clip.start);
+                    }
+                    if (clip.fadein != undefined) {
+                        clip.fadein = Math.max(Math.min(clip.fadein ?? (clip.start + clip.duration), clip.fadeout ?? (clip.start + clip.duration)), clip.start);
+                    }
                     if (this.duration < clip.start + clip.duration)
                         this.setDuration(clip.start + clip.duration);
                 }
@@ -3079,9 +3095,8 @@ class ClipsTimeline extends Timeline {
                     this.onContentMoved(clip, 0);
                 }
             }
-            else if (this.dragClipMode == "move" && this.lastClipsSelected.length) // move clips
-             {
-                //*********** WARNING: RELIES ON SORTED lastClipsSelected ***********
+            else if (this.dragClipMode == 'move' && this.lastClipsSelected.length) { // move clips
+                // *********** WARNING: RELIES ON SORTED lastClipsSelected ***********
                 const treeOffset = this.lastTrackTreesComponentOffset;
                 let newTrackClipsMove = Math.floor((e.localY - treeOffset) / this.trackHeight);
                 // move clips vertically
@@ -3117,7 +3132,8 @@ class ClipsTimeline extends Timeline {
                             this.historySaveEnabler = false;
                             const selectedClips = this.lastClipsSelected;
                             this.lastClipsSelected = []; // avoid delete and addclips index reassignment loop ( not necessary because of order of operations in for )
-                            for (let i = selectedClips[selectedClips.length - 1][0] + deltaTracks - this.animationClip.tracks.length + 1; i > 0; --i) {
+                            for (let i = selectedClips[selectedClips.length - 1][0] + deltaTracks
+                                - this.animationClip.tracks.length + 1; i > 0; --i) {
                                 this.addNewTrack(null, i == 1);
                                 if (i == 1) {
                                     this.updateLeftPanel();
@@ -3138,9 +3154,8 @@ class ClipsTimeline extends Timeline {
                                     const undoState = this.historyUndo[this.historyUndo.length - 1];
                                     let state = 0;
                                     for (; state < undoState.length; ++state) {
-                                        if (newTrackIdx == undoState[state].trackIdx) {
+                                        if (newTrackIdx == undoState[state].trackIdx)
                                             break;
-                                        }
                                     }
                                     if (state == undoState.length) {
                                         this.historySaveEnabler = true;
@@ -3183,21 +3198,20 @@ class ClipsTimeline extends Timeline {
                     const trackClips = track.clips;
                     const clip = track.clips[clipIdx];
                     if (delta >= 0) {
-                        if (trackClips.length - 1 == clipIdx) {
-                            continue;
-                        } // all alowed
+                        if (trackClips.length - 1 == clipIdx)
+                            continue; // all alowed
                         if (!track.selected[clipIdx + 1]) { // if next is selected, force AllOrNothing and let next clip manage the leastDelta
-                            if (trackClips[clipIdx + 1].start >= (clip.start + clip.duration + delta)) {
-                                continue;
-                            } //has not reached next clip. Enough space. All allowed
+                            if (trackClips[clipIdx + 1].start >= (clip.start + clip.duration + delta))
+                                continue; // has not reached next clip. Enough space. All allowed
                             const nextClip = trackClips[clipIdx + 1];
                             leastDelta = Math.max(0, Math.min(leastDelta, nextClip.start - clip.start - clip.duration));
                         }
                     }
                     else if (delta < 0) {
-                        if (clipIdx > 0 && (trackClips[clipIdx - 1].start + trackClips[clipIdx - 1].duration) <= (clip.start + delta)) {
-                            continue;
-                        } // has not reached previous clip. Enough space
+                        if (clipIdx > 0
+                            && (trackClips[clipIdx - 1].start + trackClips[clipIdx - 1].duration)
+                                <= (clip.start + delta))
+                            continue; // has not reached previous clip. Enough space
                         if (clipIdx > 0) {
                             const prevClip = trackClips[clipIdx - 1];
                             leastDelta = Math.min(0, Math.max(leastDelta, prevClip.start + prevClip.duration - clip.start)); // delta is a negative value, that is why the leastDelta is the max
@@ -3210,7 +3224,8 @@ class ClipsTimeline extends Timeline {
                     if (!moveAccepted)
                         continue;
                     let clipsInRange = this.getClipsInRange(track, clip.start + delta, clip.start + clip.duration + delta, 0.01);
-                    if (clipsInRange && (clipsInRange[0] != clipIdx || clipsInRange[clipsInRange.length - 1] != clipIdx)) {
+                    if (clipsInRange
+                        && (clipsInRange[0] != clipIdx || clipsInRange[clipsInRange.length - 1] != clipIdx)) {
                         for (let c = 0; c < clipsInRange.length; ++c) {
                             if (!track.selected[clipsInRange[c]]) {
                                 moveAccepted = false;
@@ -3221,25 +3236,22 @@ class ClipsTimeline extends Timeline {
                 }
                 // if moveAccepted -> use full delta
                 // if !moveAccepted -> use leastDelta
-                if (moveAccepted) {
+                if (moveAccepted)
                     leastDelta = delta;
-                }
                 this.grabTime = time - delta + leastDelta;
-                //*********** WARNING: RELIES ON SORTED lastClipsSelected ***********
+                // *********** WARNING: RELIES ON SORTED lastClipsSelected ***********
                 // move all selected clips using the computed delta.
                 for (let i = 0; i < this.lastClipsSelected.length; ++i) {
-                    const lcs = this.lastClipsSelected[delta > 0 ? (this.lastClipsSelected.length - 1 - i) : i]; //delta > 0, move last-to-first; delta < 0, move first-to-last
+                    const lcs = this.lastClipsSelected[delta > 0 ? (this.lastClipsSelected.length - 1 - i) : i]; // delta > 0, move last-to-first; delta < 0, move first-to-last
                     const track = this.animationClip.tracks[lcs[0]];
                     const trackClips = track.clips;
                     let clipIdx = lcs[1];
                     const clip = track.clips[clipIdx];
                     clip.start += leastDelta;
-                    if (clip.fadein != undefined) {
+                    if (clip.fadein != undefined)
                         clip.fadein += leastDelta;
-                    }
-                    if (clip.fadeout != undefined) {
+                    if (clip.fadeout != undefined)
                         clip.fadeout += leastDelta;
-                    }
                     // prepare swap
                     const editedFlag = track.edited[clipIdx];
                     const selectedFlag = track.selected[clipIdx];
@@ -3286,8 +3298,7 @@ class ClipsTimeline extends Timeline {
             }
             return true;
         }
-        else if (e.track && e.buttons == 0) // mouse not dragging, just hovering
-         {
+        else if (e.track && e.buttons == 0) { // mouse not dragging, just hovering
             this.unHoverAll();
             let clips = this.getClipsInRange(e.track, time, time, 0.00001);
             if (!e.track.locked && clips) {
@@ -3297,23 +3308,20 @@ class ClipsTimeline extends Timeline {
                 if (!clip) {
                     return;
                 }
-                if (Math.abs(e.localX - this.timeToX(clip.start + clip.duration)) < 8) // duration
-                 {
-                    this.canvas.style.cursor = "col-resize";
-                    this.dragClipMode = "duration";
+                if (Math.abs(e.localX - this.timeToX(clip.start + clip.duration)) < 8) { // duration
+                    this.canvas.style.cursor = 'col-resize';
+                    this.dragClipMode = 'duration';
                 }
-                else if (clip.fadein != undefined && Math.abs(e.localX - this.timeToX(clip.fadein)) < 8) // fadein
-                 {
-                    this.canvas.style.cursor = "e-resize";
-                    this.dragClipMode = "fadein";
+                else if (clip.fadein != undefined && Math.abs(e.localX - this.timeToX(clip.fadein)) < 8) { // fadein
+                    this.canvas.style.cursor = 'e-resize';
+                    this.dragClipMode = 'fadein';
                 }
-                else if (clip.fadeout != undefined && Math.abs(e.localX - this.timeToX(clip.fadeout)) < 8) // fadeout
-                 {
-                    this.canvas.style.cursor = "e-resize";
-                    this.dragClipMode = "fadeout";
+                else if (clip.fadeout != undefined && Math.abs(e.localX - this.timeToX(clip.fadeout)) < 8) { // fadeout
+                    this.canvas.style.cursor = 'e-resize';
+                    this.dragClipMode = 'fadeout';
                 }
                 else {
-                    this.dragClipMode = "";
+                    this.dragClipMode = '';
                 }
             }
         }
@@ -3350,13 +3358,13 @@ class ClipsTimeline extends Timeline {
         const offset = (trackHeight * 0.4) * 0.5;
         trackHeight *= 0.6;
         let selectedClipArea = null;
-        ctx.font = Math.floor(trackHeight * 0.8) + "px" + Timeline.FONT;
-        ctx.textAlign = "left";
-        ctx.textBaseline = "middle";
+        ctx.font = Math.floor(trackHeight * 0.8) + 'px' + Timeline.FONT;
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
         for (var j = 0; j < clips.length; ++j) {
             selectedClipArea = null;
             const clip = clips[j];
-            //let selected = track.selected[ j ];
+            // let selected = track.selected[ j ];
             var x = Math.floor(this.timeToX(clip.start)) + 0.5;
             var x2 = Math.floor(this.timeToX(clip.start + clip.duration)) + 0.5;
             var w = x2 - x;
@@ -3365,21 +3373,24 @@ class ClipsTimeline extends Timeline {
             }
             // Overwrite clip color state depending on its state
             ctx.globalAlpha = 1;
-            ctx.fillStyle = clip.clipColor || (track.hovered[j] ? Timeline.KEYFRAME_COLOR_HOVERED : (track.selected[j] ? Timeline.TRACK_SELECTED : Timeline.KEYFRAME_COLOR));
+            ctx.fillStyle = clip.clipColor || (track.hovered[j]
+                ? Timeline.KEYFRAME_COLOR_HOVERED
+                : (track.selected[j] ? Timeline.TRACK_SELECTED : Timeline.KEYFRAME_COLOR));
             if (!this.active || !track.active || !clip.active) {
                 ctx.fillStyle = Timeline.KEYFRAME_COLOR_INACTIVE;
             }
             // Draw clip background
             drawRoundRect(ctx, x, y + offset, w, trackHeight, 5, true);
             if (this.active && track.active && clip.active) {
-                ctx.fillStyle = clip.fadeColor ?? "#0004";
+                ctx.fillStyle = clip.fadeColor ?? '#0004';
                 if (clip.fadein != undefined) {
                     const fadeinX = this.pixelsPerSecond * (clip.fadein - clip.start);
                     drawRoundRect(ctx, x, y + offset, fadeinX, trackHeight, { tl: 5, bl: 5, tr: 0, br: 0 }, true);
                 }
                 if (clip.fadeout != undefined) {
                     const fadeoutX = this.pixelsPerSecond * (clip.start + clip.duration - (clip.fadeout));
-                    drawRoundRect(ctx, x + w - fadeoutX, y + offset, fadeoutX, trackHeight, { tl: 0, bl: 0, tr: 5, br: 5 }, true);
+                    drawRoundRect(ctx, x + w - fadeoutX, y + offset, fadeoutX, trackHeight, { tl: 0, bl: 0, tr: 5,
+                        br: 5 }, true);
                 }
             }
             ctx.fillStyle = Timeline.TRACK_COLOR_PRIMARY;
@@ -3393,10 +3404,10 @@ class ClipsTimeline extends Timeline {
                 ctx.shadowBlur = 0;
                 ctx.shadowOffsetX = 0;
                 ctx.shadowOffsetY = 0;
-                ctx.font = "bold" + Math.floor(trackHeight) + "px " + Timeline.FONT;
+                ctx.font = 'bold' + Math.floor(trackHeight) + 'px ' + Timeline.FONT;
                 ctx.fillStyle = Timeline.FONT_COLOR_PRIMARY;
             }
-            let text = clip.id ?? ""; //clip.id.replaceAll("_", " ").replaceAll("-", " ");
+            let text = clip.id ?? ''; // clip.id.replaceAll("_", " ").replaceAll("-", " ");
             const textInfo = ctx.measureText(text);
             let textWidth = textInfo.width;
             if (textWidth > w && textWidth > 0) {
@@ -3405,12 +3416,12 @@ class ClipsTimeline extends Timeline {
                 textWidth = w;
             }
             ctx.fillText(text, x + (w - textWidth) * 0.5, y + offset + trackHeight * 0.5);
-            ctx.fillStyle = track.hovered[j] ? "white" : "#f5f5f5"; //track.hovered[ j ] ? "white" : Timeline.FONT_COLOR_QUATERNARY;
-            ctx.strokeStyle = "rgba(125,125,125,0.4)";
+            ctx.fillStyle = track.hovered[j] ? 'white' : '#f5f5f5'; // track.hovered[ j ] ? "white" : Timeline.FONT_COLOR_QUATERNARY;
+            ctx.strokeStyle = 'rgba(125,125,125,0.4)';
             // Draw resize bounding
             drawRoundRect(ctx, x + w - 8, y + offset, 8, trackHeight, { tl: 4, bl: 4, tr: 4, br: 4 }, true, true);
         }
-        ctx.font = "12px" + Timeline.FONT;
+        ctx.font = '12px' + Timeline.FONT;
     }
     /**
      * @method optimizeTrack
@@ -3423,34 +3434,30 @@ class ClipsTimeline extends Timeline {
     optimizeTracks() {
     }
     /**
-    *
-    * @param {Object} clip  clip to be added
-    * @param {Int} trackIdx ( optional ) track where to put the clip. -1 will find the first free slot. ***WARNING*** Must call getClipsInRange, before calling this function with a valid trackdIdx
-    * @param {Number} offsetTime ( optional ) offset time of current time
-    * @param {Number} searchStartTrackIdx ( optional ) if trackIdx is set to -1, this idx will be used as the starting point to find a valid track
-    * @returns  a zero/positive value if successful. Otherwise, -1
-    */
+     * @param {Object} clip  clip to be added
+     * @param {Int} trackIdx ( optional ) track where to put the clip. -1 will find the first free slot. ***WARNING*** Must call getClipsInRange, before calling this function with a valid trackdIdx
+     * @param {Number} offsetTime ( optional ) offset time of current time
+     * @param {Number} searchStartTrackIdx ( optional ) if trackIdx is set to -1, this idx will be used as the starting point to find a valid track
+     * @returns  a zero/positive value if successful. Otherwise, -1
+     */
     addClip(clip, trackIdx = -1, offsetTime = 0, searchStartTrackIdx = 0) {
-        if (!this.animationClip) {
+        if (!this.animationClip)
             return -1;
-        }
         this.deselectAllElements(); // TODO: consider adjusting values of hovered and selected instead of deselecting everything
         // Update clip information
         let newStart = clip.start + offsetTime;
         if (clip.fadein != undefined)
-            clip.fadein += (newStart - clip.start);
+            clip.fadein += newStart - clip.start;
         if (clip.fadeout != undefined)
-            clip.fadeout += (newStart - clip.start);
+            clip.fadeout += newStart - clip.start;
         clip.start = newStart;
         // sanity check
         clip.active = clip.active ?? true;
         // find appropriate track
-        if (trackIdx >= this.animationClip.tracks.length) // new track ad the end
-         {
+        if (trackIdx >= this.animationClip.tracks.length) { // new track ad the end
             trackIdx = this.addNewTrack();
         }
-        else if (trackIdx < 0) // find first free track slot
-         {
+        else if (trackIdx < 0) { // find first free track slot
             for (let i = searchStartTrackIdx; i < this.animationClip.tracks.length; i++) {
                 let clipInCurrentSlot = this.animationClip.tracks[i].clips.find((t) => {
                     return LX.compareThresholdRange(newStart, clip.start + clip.duration, t.start, t.start + t.duration);
@@ -3473,10 +3480,10 @@ class ClipsTimeline extends Timeline {
         if (newIdx < 0) {
             newIdx = track.clips.length;
         }
-        //Save track state before add the new clip
+        // Save track state before add the new clip
         this.saveState(trackIdx);
         // Add clip
-        track.clips.splice(newIdx, 0, clip); //insert clip into newIdx ( or push at the end )
+        track.clips.splice(newIdx, 0, clip); // insert clip into newIdx ( or push at the end )
         // Reset this clip's properties
         track.hovered.splice(newIdx, 0, false);
         track.selected.splice(newIdx, 0, false);
@@ -3513,10 +3520,11 @@ class ClipsTimeline extends Timeline {
             if (c == 0) { // last search failed, move one track down and check again
                 ++baseTrackIdx;
                 currTrackIdx = baseTrackIdx;
-                while (currTrackIdx >= tracks.length) {
+                while (currTrackIdx >= tracks.length)
                     this.addNewTrack(null, false);
-                }
-                let clipsInCurrentSlot = tracks[baseTrackIdx].clips.find((t) => { return LX.compareThresholdRange(clipStart, clipEnd, t.start, t.start + t.duration); });
+                let clipsInCurrentSlot = tracks[baseTrackIdx].clips.find((t) => {
+                    return LX.compareThresholdRange(clipStart, clipEnd, t.start, t.start + t.duration);
+                });
                 // reset search
                 if (clipsInCurrentSlot) {
                     c = -1;
@@ -3527,21 +3535,23 @@ class ClipsTimeline extends Timeline {
             }
             else {
                 // check if it fits in current track
-                let clipsInCurrentSlot = tracks[currTrackIdx].clips.find((t) => { return LX.compareThresholdRange(clipStart, clipEnd, t.start, t.start + t.duration); });
+                let clipsInCurrentSlot = tracks[currTrackIdx].clips.find((t) => {
+                    return LX.compareThresholdRange(clipStart, clipEnd, t.start, t.start + t.duration);
+                });
                 // check no previous added clips are in the way
                 for (let i = c - 1; i > -1; --i) {
-                    if (clipTrackIdxs[i] != currTrackIdx || clipsInCurrentSlot) {
+                    if (clipTrackIdxs[i] != currTrackIdx || clipsInCurrentSlot)
                         break;
-                    }
                     clipsInCurrentSlot = LX.compareThresholdRange(clipStart, clipEnd, clips[i].start + offsetTime, clips[i].start + offsetTime + clips[i].duration);
                 }
                 // check if it fits in the next track
                 if (clipsInCurrentSlot) {
                     ++currTrackIdx;
-                    if (currTrackIdx >= tracks.length) {
+                    if (currTrackIdx >= tracks.length)
                         this.addNewTrack(null, false);
-                    }
-                    clipsInCurrentSlot = tracks[currTrackIdx].clips.find((t) => { return LX.compareThresholdRange(clipStart, clipEnd, t.start, t.start + t.duration); });
+                    clipsInCurrentSlot = tracks[currTrackIdx].clips.find((t) => {
+                        return LX.compareThresholdRange(clipStart, clipEnd, t.start, t.start + t.duration);
+                    });
                 }
                 // reset search
                 if (clipsInCurrentSlot) {
@@ -3571,7 +3581,7 @@ class ClipsTimeline extends Timeline {
         return true;
     }
     deleteSelectedContent(skipCallback = false) {
-        //*********** WARNING: RELIES ON SORTED lastClipsSelected ***********
+        // *********** WARNING: RELIES ON SORTED lastClipsSelected ***********
         if (!this.lastClipsSelected.length) {
             return;
         }
@@ -3594,7 +3604,7 @@ class ClipsTimeline extends Timeline {
     /** Delete clip from the timeline
      * @param {Number} trackIdx
      * @param {Number} clipIdx clip to be deleted
-    */
+     */
     deleteClip(trackIdx, clipIdx, skipCallback = false) {
         this.saveState(trackIdx);
         const clip = this.#delete(trackIdx, clipIdx);
@@ -3620,12 +3630,10 @@ class ClipsTimeline extends Timeline {
             }
         }
         if (this.lastHovered && this.lastHovered[0] == trackIdx) {
-            if (this.lastHovered[1] == clipIdx) {
+            if (this.lastHovered[1] == clipIdx)
                 this.unHoverAll();
-            }
-            else if (this.lastHovered[1] > clipIdx) {
+            else if (this.lastHovered[1] > clipIdx)
                 this.lastHovered[1]--;
-            }
         }
         const clip = track[clipIdx];
         track.hovered.splice(clipIdx, 1);
@@ -3646,18 +3654,14 @@ class ClipsTimeline extends Timeline {
         for (let i = 0; i < clipsToReturn.length; ++i) {
             let clip = clipsToReturn[i];
             clip.start += timeOffset;
-            if (clip.fadein == null || clip.fadein == undefined) {
+            if (clip.fadein == null || clip.fadein == undefined)
                 clip.fadein = undefined;
-            }
-            else {
+            else
                 clip.fadein += timeOffset;
-            }
-            if (clip.fadeout == null || clip.fadeout == undefined) {
+            if (clip.fadeout == null || clip.fadeout == undefined)
                 clip.fadeout = undefined;
-            }
-            else {
+            else
                 clip.fadeout += timeOffset;
-            }
         }
         return clipsToReturn;
     }
@@ -3675,9 +3679,8 @@ class ClipsTimeline extends Timeline {
         for (let i = 0; i < lastClipsSelected.length; ++i) {
             let clip = tracks[lastClipsSelected[i][0]].clips[lastClipsSelected[i][1]];
             clipsToCopy.push(clip);
-            if (globalStart > clip.start) {
+            if (globalStart > clip.start)
                 globalStart = clip.start;
-            }
         }
         globalStart = Math.max(0, globalStart);
         this.clipboard = this.cloneClips(clipsToCopy, -globalStart, ClipsTimeline.CLONEREASON_COPY);
@@ -3718,9 +3721,8 @@ class ClipsTimeline extends Timeline {
                 break;
             }
         }
-        if (this.lastHovered && this.lastHovered[0] == trackIdx) {
+        if (this.lastHovered && this.lastHovered[0] == trackIdx)
             this.unHoverAll();
-        }
         return;
     }
     /**
@@ -3758,12 +3760,10 @@ class ClipsTimeline extends Timeline {
         };
         track.clips = state.clips;
         track.edited = state.edited;
-        if (track.selected.length < track.clips.length) {
+        if (track.selected.length < track.clips.length)
             track.selected.length = track.clips.length;
-        }
-        if (track.hovered.length < track.clips.length) {
+        if (track.hovered.length < track.clips.length)
             track.hovered.length = track.clips.length;
-        }
         track.selected.fill(false);
         track.hovered.fill(false);
         // sanity check. Also done in addClip
@@ -3788,7 +3788,6 @@ class ClipsTimeline extends Timeline {
         }
         return -1;
     }
-    ;
     deselectAllClips() {
         for (let [trackIdx, clipIdx] of this.lastClipsSelected) {
             this.animationClip.tracks[trackIdx].selected[clipIdx] = false;
@@ -3826,12 +3825,10 @@ class ClipsTimeline extends Timeline {
         let i = 0;
         for (; i < this.lastClipsSelected.length; ++i) {
             let t = this.lastClipsSelected[i];
-            if (t[0] < track.trackIdx) {
+            if (t[0] < track.trackIdx)
                 continue;
-            }
-            if (t[0] > track.trackIdx || t[1] > clipIndex) {
+            if (t[0] > track.trackIdx || t[1] > clipIndex)
                 break;
-            }
         }
         this.lastClipsSelected.splice(i, 0, [track.trackIdx, clipIndex, track.clips[clipIndex]]); //
         track.selected[clipIndex] = true;
@@ -3861,8 +3858,9 @@ class ClipsTimeline extends Timeline {
         return clipIndex;
     }
     getClipsInRange(track, minTime, maxTime, threshold = 0) {
-        if (!track || !track.clips.length)
+        if (!track || !track.clips.length) {
             return null;
+        }
         // Manage negative selection
         if (minTime > maxTime) {
             let aux = minTime;
@@ -3875,18 +3873,17 @@ class ClipsTimeline extends Timeline {
         minTime -= threshold;
         maxTime += threshold;
         const clips = track.clips;
-        if (maxTime < clips[0].start || minTime > (clips[clips.length - 1].start + clips[clips.length - 1].duration)) {
+        if (maxTime < clips[0].start
+            || minTime > (clips[clips.length - 1].start + clips[clips.length - 1].duration)) {
             return null;
         }
         let indices = [];
         for (let i = 0; i < clips.length; ++i) {
             const c = clips[i];
-            if (c.start + c.duration < minTime) {
+            if (c.start + c.duration < minTime)
                 continue;
-            }
-            if (c.start > maxTime) {
+            if (c.start > maxTime)
                 break;
-            }
             indices.push(i);
         }
         return indices.length ? indices : null;

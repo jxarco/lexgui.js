@@ -1,2 +1,2 @@
-export * from "./index.css";
-export * from "./extensions/index";
+export * from './index.css';
+export * from './extensions/index';

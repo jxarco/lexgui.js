@@ -2,6 +2,8 @@
 
 ## dev
 
+## 8.1.0 (master)
+
 AssetView:
 - Added CreateFolder implementation to the MoveItem dialog button.
 - Added more event attributes, added also to docs.
@@ -15,7 +17,7 @@ Improved Icons page using Pagination Component & moved to main page Menubar.
 Added Counter Component docs.
 Minor mobile version fixes.
 
-## 8.0.0 (master)
+## 8.0.0
 
 From 8.0 (changed versioning to set `8` as the major version), the full library is written in TypeScript to facilitate integrations in newer frameworks (Builds are still available as a JS module with its extensions).
 Replaced Skypack for jsDelivr CDN.

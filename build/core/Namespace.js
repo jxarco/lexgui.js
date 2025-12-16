@@ -3,21 +3,21 @@
 /**
  * Main namespace
  * @namespace LX
-*/
+ */
 const g = globalThis;
 // Update global namespace if not present (Loading module)
 // Extension scripts rely on LX being globally available
 let LX = g.LX;
 if (!LX) {
     LX = {
-        version: "8.0",
+        version: '8.1.0',
         ready: false,
         extensions: [], // Store extensions used
         extraCommandbarEntries: [], // User specific entries for command bar
         signals: {}, // Events and triggers
         activeDraggable: null, // Watch for the current active draggable
-        spacingMode: "default",
-        layoutMode: "app",
+        spacingMode: 'default',
+        layoutMode: 'app',
         MOUSE_LEFT_CLICK: 0,
         MOUSE_MIDDLE_CLICK: 1,
         MOUSE_RIGHT_CLICK: 2,

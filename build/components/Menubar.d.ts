@@ -26,12 +26,12 @@ export declare class Menubar {
      * @method getSubitems
      * @param {Object} item: parent item
      * @param {Array} tokens: split path strings
-    */
+     */
     getSubitem(item: any, tokens: any[]): any;
     /**
      * @method getItem
      * @param {String} path
-    */
+     */
     getItem(path: string): any;
     /**
      * @method setButtonIcon
