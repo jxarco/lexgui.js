@@ -75,7 +75,7 @@ export class Table extends BaseComponent
 
         this.data = data;
         this.filter = options.filter ?? false;
-        this.customFilters = options.customFilters;
+        this.customFilters = options.customFilters ?? null;
         this.activeCustomFilters = {};
         this._toggleColumns = options.toggleColumns ?? false;
         this._sortColumns = options.sortColumns ?? true;

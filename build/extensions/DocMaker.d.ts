@@ -19,7 +19,7 @@ export declare class DocMaker {
     video(src: string, caption?: string, controls?: boolean, autoplay?: boolean): void;
     note(text: string, warning?: boolean, title?: string, icon?: string): void;
     classCtor(name: string, params: any[], language?: string): void;
-    classMethod(name: string, desc: string, params: any[], ret?: string): void;
+    classMethod(name: string, desc: string, params: any[], ret?: string): HTMLElement | null;
     iLink(text: string, href: string): string;
     iPage(text: string, page: string): string | undefined;
     iCode(text: string, codeClass?: string): string;

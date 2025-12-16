@@ -238,7 +238,7 @@ export declare class Panel {
      * allowAddValues: Support adding values on click
      * smooth: Curve smoothness
      * moveOutAction: Clamp or delete points moved out of the curve (LX.CURVE_MOVEOUT_CLAMP, LX.CURVE_MOVEOUT_DELETE)
-    */
+     */
     addCurve(name: string, values: any[], callback: any, options?: any): any;
     /**
      * @method addDial
@@ -254,7 +254,7 @@ export declare class Panel {
      * allowAddValues: Support adding values on click
      * smooth: Curve smoothness
      * moveOutAction: Clamp or delete points moved out of the curve (LX.CURVE_MOVEOUT_CLAMP, LX.CURVE_MOVEOUT_DELETE)
-    */
+     */
     addDial(name: string, values: any[], callback: any, options?: any): any;
     /**
      * @method addLayers
@@ -486,7 +486,6 @@ export declare class Panel {
      * disabled: Make the component disabled [false]
      * min, max: Min and Max values
      * step: Step for adding/substracting
-     * label: Text to show below the counter
      */
     addCounter(name: string, value: number, callback: any, options?: any): any;
     /**

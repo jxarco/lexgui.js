@@ -372,7 +372,7 @@ export class DocMaker
         this.root.appendChild( pr );
     }
 
-    classMethod( name: string, desc: string, params: any[], ret?: string )
+    classMethod( name: string, desc: string, params: any[], ret?: string ): HTMLElement | null
     {
         this.startCodeBulletList();
 
@@ -393,6 +393,8 @@ export class DocMaker
         this.endCodeBulletList();
 
         this.paragraph( desc );
+
+        return li.parentElement;
     }
 
     iLink( text: string, href: string )

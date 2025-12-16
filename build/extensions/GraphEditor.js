@@ -3,7 +3,7 @@ import { LX } from '../core/Namespace.js';
 
 // GraphEditor.ts @jxarco
 if (!LX) {
-    throw ("Missing LX namespace!");
+    throw ('Missing LX namespace!');
 }
 LX.extensions.push('GraphEditor');
 const g = globalThis;
@@ -77,7 +77,7 @@ class GraphEditor {
     groups = {};
     supportedCastTypes = {};
     selectedNodes = [];
-    main = "";
+    main = '';
     mustStop = false;
     state = GraphEditor.STOPPED;
     isFocused = false;
@@ -113,16 +113,16 @@ class GraphEditor {
         this._sidebar = area.addSidebar((m) => {
         }, {
             displaySelected: true,
-            headerIcon: "EllipsisVertical",
-            headerTitle: "Create",
-            headerSubtitle: "Press to rename",
+            headerIcon: 'EllipsisVertical',
+            headerTitle: 'Create',
+            headerSubtitle: 'Press to rename',
             onHeaderPressed: () => this._showRenameGraphDialog(),
-            footerIcon: "Plus",
-            footerTitle: "Create",
-            footerSubtitle: "Graph or Function",
+            footerIcon: 'Plus',
+            footerTitle: 'Create',
+            footerSubtitle: 'Graph or Function',
             onFooterPressed: (e) => this._onSidebarCreate(e)
         });
-        this.area = new Area({ className: "lexgraph" });
+        this.area = new Area({ className: 'lexgraph' });
         area.root.classList.add('grapharea');
         this.root = this.area.root;
         this.root.tabIndex = -1;
@@ -140,44 +140,46 @@ class GraphEditor {
         area.addOverlayButtons([
             [
                 {
-                    name: "Start Graph",
-                    icon: "Play@solid",
+                    name: 'Start Graph',
+                    icon: 'Play@solid',
                     callback: () => this.start(),
                     selectable: true
                 },
                 {
-                    name: "Stop Graph",
-                    icon: "Stop@solid",
+                    name: 'Stop Graph',
+                    icon: 'Stop@solid',
                     callback: () => this.stop(),
                     selectable: true
                 }
             ],
             [
                 {
-                    name: "Enable Snapping",
-                    icon: "Frame",
+                    name: 'Enable Snapping',
+                    icon: 'Frame',
                     callback: () => this._toggleSnapping(),
                     selectable: true
                 },
                 {
                     name: 1,
                     options: [1, 2, 3],
-                    callback: (value) => this._setSnappingValue(value),
+                    callback: (value) => this._setSnappingValue(value)
                 }
             ],
             [
                 {
-                    name: "Import",
-                    icon: "Upload",
-                    callback: () => { this.loadGraph("../../data/graph_sample.json"); }
+                    name: 'Import',
+                    icon: 'Upload',
+                    callback: () => {
+                        this.loadGraph('../../data/graph_sample.json');
+                    }
                 },
                 {
-                    name: "Export",
-                    icon: "ArrowRightFromLine",
+                    name: 'Export',
+                    icon: 'ArrowRightFromLine',
                     callback: () => this.currentGraph?.export()
                 }
             ]
-        ], { float: "htc" });
+        ], { float: 'htc' });
         this.root.addEventListener('keydown', this._processKeyDown.bind(this), true);
         this.root.addEventListener('keyup', this._processKeyUp.bind(this), true);
         this.root.addEventListener('mousedown', this._processMouse.bind(this));
@@ -189,33 +191,59 @@ class GraphEditor {
         this.root.addEventListener('contextmenu', this._processMouse.bind(this));
         this.root.addEventListener('focus', this._processFocus.bind(this, true));
         this.root.addEventListener('focusout', this._processFocus.bind(this, false));
-        this.propertiesDialog = new PocketDialog("Properties", null, {
-            size: ["350px", null],
-            position: ["8px", "8px"],
-            float: "left",
+        this.propertiesDialog = new PocketDialog('Properties', null, {
+            size: ['350px', null],
+            position: ['8px', '8px'],
+            float: 'left',
             class: 'lexgraphpropdialog'
         });
         // Avoid closing the dialog on click..
-        this.propertiesDialog.root.addEventListener("mousedown", function (e) {
+        this.propertiesDialog.root.addEventListener('mousedown', function (e) {
             e.stopImmediatePropagation();
             e.stopPropagation();
         });
-        this.propertiesDialog.root.addEventListener("mouseup", function (e) {
+        this.propertiesDialog.root.addEventListener('mouseup', function (e) {
             e.stopImmediatePropagation();
             e.stopPropagation();
         });
         // Move to root..
         this.root.appendChild(this.propertiesDialog.root);
-        this.addCastType('float', 'vec2', (v) => { return [v, v]; });
-        this.addCastType('float', 'vec3', (v) => { return [v, v, v]; });
-        this.addCastType('float', 'vec4', (v) => { return [v, v, v, v]; });
-        this.addCastType('float', 'bool', (v) => { return !!v; });
-        this.addCastType('vec4', 'vec3', (v) => { v.slice(0, 3); return v; });
-        this.addCastType('vec4', 'vec2', (v) => { v.slice(0, 2); return v; });
-        this.addCastType('vec3', 'vec2', (v) => { v.slice(0, 2); return v; });
-        this.addCastType('vec3', 'vec4', (v) => { v.push(1); return v; });
-        this.addCastType('vec2', 'vec3', (v) => { v.push(1); return v; });
-        this.addCastType('vec2', 'vec4', (v) => { v.push(0, 1); return v; });
+        this.addCastType('float', 'vec2', (v) => {
+            return [v, v];
+        });
+        this.addCastType('float', 'vec3', (v) => {
+            return [v, v, v];
+        });
+        this.addCastType('float', 'vec4', (v) => {
+            return [v, v, v, v];
+        });
+        this.addCastType('float', 'bool', (v) => {
+            return !!v;
+        });
+        this.addCastType('vec4', 'vec3', (v) => {
+            v.slice(0, 3);
+            return v;
+        });
+        this.addCastType('vec4', 'vec2', (v) => {
+            v.slice(0, 2);
+            return v;
+        });
+        this.addCastType('vec3', 'vec2', (v) => {
+            v.slice(0, 2);
+            return v;
+        });
+        this.addCastType('vec3', 'vec4', (v) => {
+            v.push(1);
+            return v;
+        });
+        this.addCastType('vec2', 'vec3', (v) => {
+            v.push(1);
+            return v;
+        });
+        this.addCastType('vec2', 'vec4', (v) => {
+            v.push(0, 1);
+            return v;
+        });
         this._nodeBackgroundOpacity = options.disableNodeOpacity ? 1.0 : this._nodeBackgroundOpacity;
         // Back pattern
         this._generatePattern();
@@ -240,10 +268,10 @@ class GraphEditor {
      */
     static registerCustomNode(type, baseClass) {
         if (!baseClass.prototype) {
-            throw "Cannot register a simple object, it must be a class with a prototype!";
+            throw 'Cannot register a simple object, it must be a class with a prototype!';
         }
         // Get info from path
-        const pos = type.lastIndexOf("/");
+        const pos = type.lastIndexOf('/');
         baseClass.category = type.substring(0, pos);
         baseClass.title = baseClass.title ?? type.substring(pos + 1);
         baseClass.type = type;
@@ -341,9 +369,12 @@ class GraphEditor {
      */
     loadGraph(url, callback) {
         const onComplete = (json) => {
-            let graph = (json.type == 'Graph') ? this.addGraph(json) : this.addGraphFunction(json);
-            if (callback)
+            let graph = (json.type == 'Graph')
+                ? this.addGraph(json)
+                : this.addGraphFunction(json);
+            if (callback) {
                 callback(graph);
+            }
         };
         const onError = (v) => console.error(v);
         LX.requestJSON(url, onComplete, onError);
@@ -363,7 +394,9 @@ class GraphEditor {
             graph.configure(o);
         }
         this.setGraph(graph);
-        this._sidebar.add(graph.name, { icon: "CircleNodes", className: graph.id, callback: () => { this.setGraph(graph); } });
+        this._sidebar.add(graph.name, { icon: 'CircleNodes', className: graph.id, callback: () => {
+                this.setGraph(graph);
+            } });
         this._sidebar.update();
         this._sidebar.select(graph.name);
         return graph;
@@ -388,8 +421,8 @@ class GraphEditor {
             static func;
             static gid;
             onCreate() {
-                this.addInput(null, "float");
-                this.addOutput(null, "any");
+                this.addInput(null, 'float');
+                this.addOutput(null, 'any');
             }
             onExecute() {
                 const func = NodeFunction.func;
@@ -399,8 +432,10 @@ class GraphEditor {
         }
         NodeFunction.func = func;
         NodeFunction.gid = func.id;
-        GraphEditor.registerCustomNode("function/" + func.name, NodeFunction);
-        this._sidebar.add(func.name, { icon: "Function", className: func.id, callback: () => { this.setGraph(func); } });
+        GraphEditor.registerCustomNode('function/' + func.name, NodeFunction);
+        this._sidebar.add(func.name, { icon: 'Function', className: func.id, callback: () => {
+                this.setGraph(func);
+            } });
         this._sidebar.update();
         this._sidebar.select(func.name);
         return func;
@@ -409,8 +444,8 @@ class GraphEditor {
      * @method clear
      */
     clear() {
-        this._domNodes.innerHTML = "";
-        this._domLinks.innerHTML = "";
+        this._domNodes.innerHTML = '';
+        this._domLinks.innerHTML = '';
         this.nodes = {};
     }
     setVariable(name, value) {
@@ -425,12 +460,12 @@ class GraphEditor {
         }
         const nodes = this.currentGraph.nodes;
         for (let node of nodes) {
-            if (!node[eventName])
+            if (!node[eventName]) {
                 continue;
+            }
             node[eventName].apply(this, params);
         }
     }
-    ;
     /**
      * @method addCastType
      * @param {String} type: Type to cast
@@ -444,7 +479,7 @@ class GraphEditor {
      * @method unSelectAll
      */
     unSelectAll(keepPropDialog = false) {
-        this._domNodes.querySelectorAll('.lexgraphnode').forEach(v => v.classList.remove('selected'));
+        this._domNodes.querySelectorAll('.lexgraphnode').forEach((v) => v.classList.remove('selected'));
         this.selectedNodes.length = 0;
         if (!keepPropDialog) {
             this._togglePropertiesDialog(false);
@@ -455,8 +490,8 @@ class GraphEditor {
         node.graphID = this.currentGraph?.id;
         var nodeContainer = document.createElement('div');
         nodeContainer.classList.add('lexgraphnode');
-        nodeContainer.style.left = "0";
-        nodeContainer.style.top = "0";
+        nodeContainer.style.left = '0';
+        nodeContainer.style.top = '0';
         this._translateNode(nodeContainer, node.position);
         var color;
         // Get color from type if color if not manually specified
@@ -465,7 +500,7 @@ class GraphEditor {
             nodeContainer.classList.add(category);
         }
         else {
-            const pos = node.type.lastIndexOf("/");
+            const pos = node.type.lastIndexOf('/');
             const category = node.type.substring(0, pos);
             nodeContainer.classList.add(category);
         }
@@ -481,12 +516,13 @@ class GraphEditor {
                 color = LX.hexToRgb(color);
                 color.forEach((v, i) => color[i] = v * 255);
             }
-            nodeContainer.style.backgroundColor = "rgba(" + color + ", " + this._nodeBackgroundOpacity + ")";
+            nodeContainer.style.backgroundColor = 'rgba(' + color + ', ' + this._nodeBackgroundOpacity + ')';
         }
         nodeContainer.addEventListener('mousedown', (e) => {
             // Only for left click..
-            if (e.button != LX.MOUSE_LEFT_CLICK)
+            if (e.button != LX.MOUSE_LEFT_CLICK) {
                 return;
+            }
             if (e.altKey) {
                 this._unSelectNode(nodeContainer);
             }
@@ -495,16 +531,16 @@ class GraphEditor {
                     this.unSelectAll(true);
                 }
                 if (!nodeContainer.classList.contains('selected')) {
-                    this._selectNode(nodeContainer, (e.ctrlKey || e.shiftKey));
+                    this._selectNode(nodeContainer, e.ctrlKey || e.shiftKey);
                 }
             }
         });
-        nodeContainer.addEventListener('contextmenu', e => {
+        nodeContainer.addEventListener('contextmenu', (e) => {
             e.preventDefault();
             e.stopPropagation();
             e.stopImmediatePropagation();
             LX.addContextMenu(null, e, (m) => {
-                m.add("Copy", () => {
+                m.add('Copy', () => {
                     this._clipboardData = {
                         id: node.id,
                         gid: this.currentGraph?.id
@@ -513,16 +549,17 @@ class GraphEditor {
                 // TODO
                 // m.add( "Paste", () => {
                 // } );
-                m.add("");
-                m.add("Delete", () => {
+                m.add('');
+                m.add('Delete', () => {
                     this._deleteNode(nodeContainer.dataset['id']);
                 });
             });
         });
-        nodeContainer.addEventListener('dblclick', e => {
+        nodeContainer.addEventListener('dblclick', (e) => {
             // Only for left click..
-            if (e.button != LX.MOUSE_LEFT_CLICK)
+            if (e.button != LX.MOUSE_LEFT_CLICK) {
                 return;
+            }
             // Open graph function..
             if (node.constructor.func) {
                 this._sidebar.select(node.constructor.func.name);
@@ -569,7 +606,7 @@ class GraphEditor {
         if (hasInputs) {
             const nodeInputs = document.createElement('div');
             nodeInputs.classList.add('lexgraphnodeinputs');
-            nodeInputs.style.width = hasOutputs ? "50%" : "100%";
+            nodeInputs.style.width = hasOutputs ? '50%' : '100%';
             nodeIO.appendChild(nodeInputs);
             for (let i of node.inputs) {
                 if (!i.type) {
@@ -601,7 +638,7 @@ class GraphEditor {
         if (hasOutputs) {
             const nodeOutputs = document.createElement('div');
             nodeOutputs.classList.add('lexgraphnodeoutputs');
-            nodeOutputs.style.width = hasInputs ? "50%" : "100%";
+            nodeOutputs.style.width = hasInputs ? '50%' : '100%';
             nodeIO.appendChild(nodeOutputs);
             for (let o of node.outputs) {
                 if (!o.type) {
@@ -644,11 +681,12 @@ class GraphEditor {
             this.main = id;
         }
         node.size = new vec2(nodeContainer.offsetWidth, nodeContainer.offsetHeight);
-        node.resizeObserver = new ResizeObserver(entries => {
+        node.resizeObserver = new ResizeObserver((entries) => {
             for (const entry of entries) {
                 const bb = entry.contentRect;
-                if (!bb.width || !bb.height)
+                if (!bb.width || !bb.height) {
                     continue;
+                }
                 node.size = new vec2(nodeContainer.offsetWidth, nodeContainer.offsetHeight);
             }
         });
@@ -663,7 +701,7 @@ class GraphEditor {
         // Inputs
         if (hasInputs) {
             const nodeInputs = nodeIO?.querySelector('.lexgraphnodeinputs');
-            nodeInputs.innerHTML = "";
+            nodeInputs.innerHTML = '';
             for (let i of node.inputs) {
                 if (!i.type) {
                     console.warn(`Missing type for node [${node.constructor.name}], skipping...`);
@@ -692,7 +730,7 @@ class GraphEditor {
         // Outputs
         if (hasOutputs) {
             const nodeOutputs = nodeIO?.querySelector('.lexgraphnodeoutputs');
-            nodeOutputs.innerHTML = "";
+            nodeOutputs.innerHTML = '';
             for (let o of node.outputs) {
                 if (!o.type) {
                     console.warn(`Missing type for node [${node.constructor.name}], skipping...`);
@@ -725,8 +763,9 @@ class GraphEditor {
         nodeIO?.querySelectorAll('.lexgraphnodeio').forEach((el) => {
             el.addEventListener('mousedown', (e) => {
                 // Only for left click..
-                if (e.button != LX.MOUSE_LEFT_CLICK)
+                if (e.button != LX.MOUSE_LEFT_CLICK) {
                     return;
+                }
                 this._lastMouseDown = LX.getTime();
                 this._generatingLink = {
                     index: parseInt(el.dataset['index']),
@@ -755,8 +794,9 @@ class GraphEditor {
                 }
             });
             el.addEventListener('click', (e) => {
-                if (!el.links)
+                if (!el.links) {
                     return;
+                }
                 const nodeId = nodeContainer.dataset['id'];
                 this._deleteLinks(nodeId, el);
             });
@@ -771,7 +811,7 @@ class GraphEditor {
             elements = Array.from(this._domNodes.childNodes).filter((v) => v.classList.contains('lexgraphnode'));
         }
         if (exclude) {
-            elements = elements.filter(v => v != exclude);
+            elements = elements.filter((v) => v != exclude);
         }
         return elements;
     }
@@ -785,8 +825,9 @@ class GraphEditor {
         }
     }
     _onDragNode(target, e) {
-        if (!e.shiftKey)
+        if (!e.shiftKey) {
             return;
+        }
         this._cloneNodes();
     }
     _onMoveGroup(target) {
@@ -815,8 +856,9 @@ class GraphEditor {
             const x = parseFloat(dom.style.left);
             const y = parseFloat(dom.style.top);
             const node_bb = new BoundingBox(new vec2(x, y), new vec2(dom.offsetWidth - 6, dom.offsetHeight - 6));
-            if (!group_bb.inside(node_bb))
+            if (!group_bb.inside(node_bb)) {
                 continue;
+            }
             groupNodeIds.push(dom.dataset['id'] ?? dom);
         }
         target.nodes = groupNodeIds;
@@ -852,27 +894,39 @@ class GraphEditor {
             switch (p.type) {
                 case 'float':
                 case 'int':
-                    panel.addNumber(p.name, p.value, (v) => { p.value = v; });
+                    panel.addNumber(p.name, p.value, (v) => {
+                        p.value = v;
+                    });
                     break;
                 case 'string':
-                    panel.addText(p.name, p.value, (v) => { p.value = v; });
+                    panel.addText(p.name, p.value, (v) => {
+                        p.value = v;
+                    });
                     break;
                 case 'vec2':
-                    panel.addVector2(p.name, p.value, (v) => { p.value = v; });
+                    panel.addVector2(p.name, p.value, (v) => {
+                        p.value = v;
+                    });
                     break;
                 case 'vec3':
-                    panel.addVector3(p.name, p.value, (v) => { p.value = v; });
+                    panel.addVector3(p.name, p.value, (v) => {
+                        p.value = v;
+                    });
                     break;
                 case 'vec4':
-                    panel.addVector4(p.name, p.value, (v) => { p.value = v; });
+                    panel.addVector4(p.name, p.value, (v) => {
+                        p.value = v;
+                    });
                     break;
                 case 'select':
-                    panel.addSelect(p.name, p.options, p.value, (v) => { p.value = v; });
+                    panel.addSelect(p.name, p.options, p.value, (v) => {
+                        p.value = v;
+                    });
                     break;
                 case 'array':
                     panel.addArray(p.name, p.value, (v) => {
                         p.value = v;
-                        if (node.type == "function/Input") {
+                        if (node.type == 'function/Input') {
                             node.setOutputs(v);
                             this._updateNodeDOMIOs(dom, node);
                         }
@@ -887,8 +941,9 @@ class GraphEditor {
         // Delete from selected..
         const idx = this.selectedNodes.indexOf(dom.dataset['id']);
         this.selectedNodes.splice(idx, 1);
-        if (!this.selectedNodes.length)
+        if (!this.selectedNodes.length) {
             this._togglePropertiesDialog(false);
+        }
     }
     _translateNode(dom, deltaTranslation, updateBasePosition = true) {
         const translation = deltaTranslation.add(new vec2(parseFloat(dom.style.left), parseFloat(dom.style.top)));
@@ -898,8 +953,8 @@ class GraphEditor {
             translation.y = Math.floor(translation.y / snapSize) * snapSize;
             dom.mustSnap = false;
         }
-        dom.style.left = (translation.x) + "px";
-        dom.style.top = (translation.y) + "px";
+        dom.style.left = (translation.x) + 'px';
+        dom.style.top = (translation.y) + 'px';
         // Update base node position..
         if (updateBasePosition && dom.dataset['id']) {
             let baseNode = this.nodes[dom.dataset['id']];
@@ -921,13 +976,14 @@ class GraphEditor {
         // Delete from the editor
         delete this.nodes[nodeId];
         // Delete from the graph data
-        const idx = this.currentGraph.nodes.findIndex(v => v.id === nodeId);
+        const idx = this.currentGraph.nodes.findIndex((v) => v.id === nodeId);
         console.assert(idx >= 0);
         this.currentGraph.nodes.splice(idx, 1);
         // Delete connected links..
         for (let key in this.currentGraph.links) {
-            if (!key.includes(nodeId))
+            if (!key.includes(nodeId)) {
                 continue;
+            }
             const aIdx = key.indexOf('@');
             const targetIsInput = key.substring(aIdx + 1) != nodeId;
             // Remove the connection from the other before deleting..
@@ -950,14 +1006,16 @@ class GraphEditor {
                 else {
                     var active = false;
                     for (var links of io.links) {
-                        if (!links)
+                        if (!links) {
                             continue;
+                        }
                         for (var j of links) {
                             active = active || (!!j);
                         }
                     }
-                    if (!active)
+                    if (!active) {
                         delete io.dataset['active'];
+                    }
                 }
             }
             delete this.currentGraph.links[key];
@@ -971,7 +1029,7 @@ class GraphEditor {
         // Delete from the editor
         delete this.groups[groupId];
         // Delete from the graph data
-        const idx = this.currentGraph.groups.findIndex(v => v.id === groupId);
+        const idx = this.currentGraph.groups.findIndex((v) => v.id === groupId);
         console.assert(idx >= 0);
         this.currentGraph.groups.splice(idx, 1);
     }
@@ -980,8 +1038,9 @@ class GraphEditor {
             return;
         const graph = this.graphs[graphId ?? this.currentGraph.id];
         const nodeData = graph.getNodeById(nodeId);
-        if (!nodeData)
+        if (!nodeData) {
             return;
+        }
         const el = this._getNodeDOMElement(nodeId);
         const newNode = GraphEditor.addNode(nodeData.type);
         newNode.properties = LX.deepCopy(nodeData.properties);
@@ -1012,10 +1071,12 @@ class GraphEditor {
     _deleteLinks(nodeId, io) {
         const isInput = io.classList.contains('ioinput');
         const srcIndex = parseInt(io.dataset['index']);
-        if (isInput) // Only one "link to output" to delete
-         {
+        if (isInput) { // Only one "link to output" to delete
             let targetIndex = -1;
-            const targets = io.links.filter((v, i) => { targetIndex = i; return v !== undefined; })[0];
+            const targets = io.links.filter((v, i) => {
+                targetIndex = i;
+                return v !== undefined;
+            })[0];
             const targetId = targets[0];
             // It has been deleted..
             if (!targetId) {
@@ -1046,14 +1107,15 @@ class GraphEditor {
                 delete targetIO.dataset['active'];
             }
         }
-        else // Delete ALL "to input links"
-         {
+        // Delete ALL "to input links"
+        else {
             const numLinks = io.links.length;
             for (let targetIndex = 0; targetIndex < numLinks; ++targetIndex) {
                 const targets = io.links[targetIndex];
-                if (!targets)
+                if (!targets) {
                     continue;
-                for (let it = (targets.length - 1); it >= 0; --it) {
+                }
+                for (let it = targets.length - 1; it >= 0; --it) {
                     const targetId = targets[it];
                     var links = this._getLinks(nodeId, targetId);
                     var linkIdx = links.findIndex((i) => (i.inputIdx == targetIndex && i.outputIdx == srcIndex));
@@ -1078,8 +1140,9 @@ class GraphEditor {
     }
     _processKeyDown(e) {
         // Prevent processing keys on inputs and others
-        if (document.activeElement != this.root)
+        if (document.activeElement != this.root) {
             return;
+        }
         const detail = e.detail;
         var key = e.key ?? detail.key;
         switch (key) {
@@ -1114,8 +1177,9 @@ class GraphEditor {
     }
     _processKeyUp(e) {
         // Prevent processing keys on inputs and others
-        if (document.activeElement != this.root)
+        if (document.activeElement != this.root) {
             return;
+        }
         const detail = e.detail;
         const key = e.key ?? detail.key;
         delete this.keys[key];
@@ -1146,8 +1210,7 @@ class GraphEditor {
         else if (e.type == 'mousemove') {
             this._processMouseMove(e);
         }
-        else if (e.type == 'click') // trick
-         {
+        else if (e.type == 'click') { // trick
             switch (e.detail) {
                 case LX.MOUSE_DOUBLE_CLICK:
                     break;
@@ -1205,8 +1268,9 @@ class GraphEditor {
             this._processContextMenu(e, linkInfo);
         }
         else if (this._boxSelecting) {
-            if (!e.ctrlKey && !e.altKey)
+            if (!e.ctrlKey && !e.altKey) {
                 this.unSelectAll();
+            }
             this._selectNodesInBox(this._boxSelecting, this._mousePosition, e.altKey);
             LX.deleteElement(this._currentBoxSelectionSVG);
             delete this._currentBoxSelectionSVG;
@@ -1218,7 +1282,7 @@ class GraphEditor {
         if (!this.currentGraph) {
             return;
         }
-        const rightPressed = (e.which == 3);
+        const rightPressed = e.which == 3;
         if (rightPressed) {
             this.currentGraph.translation.add(this._deltaMousePosition.div(this.currentGraph.scale), this.currentGraph.translation);
             this._updatePattern();
@@ -1234,8 +1298,9 @@ class GraphEditor {
         }
     }
     _processWheel(e) {
-        if (this._boxSelecting || !this.currentGraph)
+        if (this._boxSelecting || !this.currentGraph) {
             return;
+        }
         // Compute zoom center in pattern space using current scale
         const rect = this.root.getBoundingClientRect();
         const zoomCenter = this._mousePosition ?? new vec2(rect.width * 0.5, rect.height * 0.5);
@@ -1244,7 +1309,7 @@ class GraphEditor {
         if (delta > 0.0)
             this.currentGraph.scale *= 0.9;
         else
-            this.currentGraph.scale *= (1.0 / 0.9);
+            this.currentGraph.scale *= 1.0 / 0.9;
         this.currentGraph.scale = LX.clamp(this.currentGraph.scale, GraphEditor.MIN_SCALE, GraphEditor.MAX_SCALE);
         // Compute zoom center in pattern space using new scale
         // and get delta..
@@ -1264,17 +1329,18 @@ class GraphEditor {
                 eventPosition = this._getPatternPosition(localPosition);
             }
             if (this._clipboardData) {
-                m.add("Paste", () => {
+                m.add('Paste', () => {
                     const nodeId = this._clipboardData.id;
                     const graphId = this._clipboardData.gid;
                     this._cloneNode(nodeId, graphId, eventPosition);
                 });
-                m.add("");
+                m.add('');
             }
             for (let type in GraphEditor.NODE_TYPES) {
                 const baseClass = GraphEditor.NODE_TYPES[type];
-                if (baseClass.blockAdd)
+                if (baseClass.blockAdd) {
                     continue;
+                }
                 m.add(type, () => {
                     const newNode = GraphEditor.addNode(type);
                     const dom = this._createNodeDOM(newNode);
@@ -1295,7 +1361,7 @@ class GraphEditor {
                             inputType: srcIsInput ? srcType : newNode.inputs[0].type,
                             outputNode: srcIsInput ? newNode.id : srcId,
                             outputIdx: srcIsInput ? 0 : autoConnect.index,
-                            outputType: srcIsInput ? newNode.inputs[0].type : srcType,
+                            outputType: srcIsInput ? newNode.inputs[0].type : srcType
                         };
                         // Store link
                         const pathId = newLink.outputNode + '@' + newLink.inputNode;
@@ -1354,10 +1420,10 @@ class GraphEditor {
             pattern.appendChild(circle);
         }
         var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-        svg.classList.add("background-svg");
-        svg.style.width = "100%";
-        svg.style.height = "100%";
-        svg.style.stroke = "none";
+        svg.classList.add('background-svg');
+        svg.style.width = '100%';
+        svg.style.height = '100%';
+        svg.style.stroke = 'none';
         svg.appendChild(pattern);
         var rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
         rect.setAttribute('x', '0');
@@ -1433,12 +1499,12 @@ class GraphEditor {
         const dst_node = this.nodes[dst_nodeId].data;
         const dst_ioIndex = parseInt(e.target.parentElement.dataset['index']);
         // Discard different types
-        const srcIsInput = (linkData.ioType == GraphEditor.NODE_IO_INPUT);
+        const srcIsInput = linkData.ioType == GraphEditor.NODE_IO_INPUT;
         const src_ios = src_node[srcIsInput ? 'inputs' : 'outputs'];
         const src_ioType = src_ios[src_ioIndex].type;
         const dst_ios = dst_node[ioType == GraphEditor.NODE_IO_INPUT ? 'inputs' : 'outputs'];
         const dst_ioType = dst_ios[dst_ioIndex].type;
-        if (src_ioType != dst_ioType && src_ioType != "any" && dst_ioType != "any") {
+        if (src_ioType != dst_ioType && src_ioType != 'any' && dst_ioType != 'any') {
             // Different types, but it might be possible to cast types
             const inputType = srcIsInput ? src_ioType : dst_ioType;
             const outputType = srcIsInput ? dst_ioType : src_ioType;
@@ -1477,7 +1543,7 @@ class GraphEditor {
             inputType: srcIsInput ? src_ioType : dst_ioType,
             outputNode: srcIsInput ? dst_nodeId : src_nodeId,
             outputIdx: srcIsInput ? dst_ioIndex : src_ioIndex,
-            outputType: srcIsInput ? dst_ioType : src_ioType,
+            outputType: srcIsInput ? dst_ioType : src_ioType
         });
         path.dataset['id'] = pathId;
         // Mark as active links...
@@ -1490,9 +1556,9 @@ class GraphEditor {
         var path = this._generatingLink.path;
         if (!path) {
             var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-            svg.classList.add("link-svg");
-            svg.style.width = "100%";
-            svg.style.height = "100%";
+            svg.classList.add('link-svg');
+            svg.style.width = '100%';
+            svg.style.height = '100%';
             this._domLinks.appendChild(svg);
             path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
             path.setAttribute('fill', 'none');
@@ -1539,16 +1605,17 @@ class GraphEditor {
             startPos = tmp;
         }
         let color = getComputedStyle(ioEl).backgroundColor;
-        if (type == GraphEditor.NODE_IO_OUTPUT && endioEl)
+        if (type == GraphEditor.NODE_IO_OUTPUT && endioEl) {
             color = getComputedStyle(endioEl).backgroundColor;
+        }
         this._createLinkPath(path, startPos, endPos, color, !!e);
         return path;
     }
     _createLink(link) {
         var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-        svg.classList.add("link-svg");
-        svg.style.width = "100%";
-        svg.style.height = "100%";
+        svg.classList.add('link-svg');
+        svg.style.width = '100%';
+        svg.style.height = '100%';
         this._domLinks.appendChild(svg);
         var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
         path.setAttribute('fill', 'none');
@@ -1611,14 +1678,16 @@ class GraphEditor {
         const nodeDOM = this._getNodeDOMElement(nodeId);
         // Update input links
         for (let input of nodeDOM.querySelectorAll('.ioinput')) {
-            if (!input.links)
+            if (!input.links) {
                 continue;
+            }
             // Get first and only target output..
             const targets = input.links.filter((v) => v !== undefined)[0];
             const targetNodeId = targets[0];
             // It has been deleted..
-            if (!targetNodeId)
+            if (!targetNodeId) {
                 continue;
+            }
             const ioIndex = parseInt(input.dataset['index']);
             var links = this._getLinks(targetNodeId, nodeId);
             // Inputs only have 1 possible output connected
@@ -1637,13 +1706,15 @@ class GraphEditor {
         }
         // Update output links
         for (let output of nodeDOM.querySelectorAll('.iooutput')) {
-            if (!output.links)
+            if (!output.links) {
                 continue;
+            }
             const srcIndex = parseInt(output.dataset['index']);
             for (let targetIndex = 0; targetIndex < output.links.length; ++targetIndex) {
                 const targets = output.links[targetIndex];
-                if (!targets)
+                if (!targets) {
                     continue;
+                }
                 for (let targetId of targets) {
                     var links = this._getLinks(nodeId, targetId);
                     var link = links.find((i) => (i.inputIdx == targetIndex && i.outputIdx == srcIndex));
@@ -1668,12 +1739,12 @@ class GraphEditor {
         var svg = this._currentBoxSelectionSVG;
         if (!svg) {
             var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-            svg.classList.add("box-selection-svg");
+            svg.classList.add('box-selection-svg');
             if (this._boxSelectRemoving) {
-                svg.classList.add("removing");
+                svg.classList.add('removing');
             }
-            svg.style.width = "100%";
-            svg.style.height = "100%";
+            svg.style.width = '100%';
+            svg.style.height = '100%';
             this._domLinks.appendChild(svg);
             this._currentBoxSelectionSVG = svg;
         }
@@ -1694,7 +1765,7 @@ class GraphEditor {
     _getNonVisibleNodes() {
         const nonVisibleNodes = [];
         if (!this.currentGraph) {
-            console.warn("No graph set");
+            console.warn('No graph set');
             return [];
         }
         const graph_bb = new BoundingBox(new vec2(0, 0), new vec2(this.root.offsetWidth, this.root.offsetHeight));
@@ -1734,12 +1805,15 @@ class GraphEditor {
         for (let nodeEl of nodes) {
             let pos = this._getNodePosition(nodeEl);
             let size = new vec2(nodeEl.offsetWidth, nodeEl.offsetHeight);
-            if ((!(pos.x < lt.x && (pos.x + size.x) < lt.x) && !(pos.x > rb.x && (pos.x + size.x) > rb.x)) &&
-                (!(pos.y < lt.y && (pos.y + size.y) < lt.y) && !(pos.y > rb.y && (pos.y + size.y) > rb.y))) {
-                if (remove)
+            if ((!(pos.x < lt.x && (pos.x + size.x) < lt.x) && !(pos.x > rb.x && (pos.x + size.x) > rb.x))
+                && (!(pos.y < lt.y && (pos.y + size.y) < lt.y)
+                    && !(pos.y > rb.y && (pos.y + size.y) > rb.y))) {
+                if (remove) {
                     this._unSelectNode(nodeEl);
-                else
+                }
+                else {
                     this._selectNode(nodeEl, true, false);
+                }
             }
         }
     }
@@ -1795,10 +1869,10 @@ class GraphEditor {
         let groupDOM = document.createElement('div');
         groupDOM.id = group_id;
         groupDOM.classList.add('lexgraphgroup');
-        groupDOM.style.left = group_bb.origin.x + "px";
-        groupDOM.style.top = group_bb.origin.y + "px";
-        groupDOM.style.width = group_bb.size.x + "px";
-        groupDOM.style.height = group_bb.size.y + "px";
+        groupDOM.style.left = group_bb.origin.x + 'px';
+        groupDOM.style.top = group_bb.origin.y + 'px';
+        groupDOM.style.width = group_bb.size.x + 'px';
+        groupDOM.style.height = group_bb.size.y + 'px';
         let groupResizer = document.createElement('div');
         groupResizer.classList.add('lexgraphgroupresizer');
         groupResizer.addEventListener('mousedown', inner_mousedown);
@@ -1819,8 +1893,8 @@ class GraphEditor {
         function inner_mousemove(e) {
             let dt = new vec2(lastPos[0] - e.x, lastPos[1] - e.y);
             dt.div(that.currentGraph?.scale, dt);
-            groupDOM.style.width = (parseFloat(groupDOM.style.width) - dt.x) + "px";
-            groupDOM.style.height = (parseFloat(groupDOM.style.height) - dt.y) + "px";
+            groupDOM.style.width = (parseFloat(groupDOM.style.width) - dt.x) + 'px';
+            groupDOM.style.height = (parseFloat(groupDOM.style.height) - dt.y) + 'px';
             lastPos[0] = e.x;
             lastPos[1] = e.y;
             e.stopPropagation();
@@ -1839,37 +1913,39 @@ class GraphEditor {
         groupTitle.classList.add('lexgraphgrouptitle');
         groupTitle.disabled = true;
         // Dbl click to rename
-        groupTitle.addEventListener('mousedown', e => {
+        groupTitle.addEventListener('mousedown', (e) => {
             e.stopPropagation();
             e.stopImmediatePropagation();
         });
-        groupTitle.addEventListener('focusout', e => {
+        groupTitle.addEventListener('focusout', (e) => {
             groupTitle.disabled = true;
-            if (!groupTitle.value.length)
+            if (!groupTitle.value.length) {
                 groupTitle.value = defaultName;
+            }
         });
-        groupTitle.addEventListener('keyup', e => {
+        groupTitle.addEventListener('keyup', (e) => {
             if (e.key == 'Enter') {
                 groupTitle.blur();
             }
             else if (e.key == 'Escape') {
-                groupTitle.value = "";
+                groupTitle.value = '';
                 groupTitle.blur();
             }
         });
-        groupDOM.addEventListener('dblclick', e => {
+        groupDOM.addEventListener('dblclick', (e) => {
             // Only for left click..
-            if (e.button != LX.MOUSE_LEFT_CLICK)
+            if (e.button != LX.MOUSE_LEFT_CLICK) {
                 return;
+            }
             groupTitle.disabled = false;
             groupTitle.focus();
         });
-        groupDOM.addEventListener('contextmenu', e => {
+        groupDOM.addEventListener('contextmenu', (e) => {
             e.preventDefault();
             e.stopPropagation();
             e.stopImmediatePropagation();
             LX.addContextMenu(null, e, (m) => {
-                m.add("Delete", () => {
+                m.add('Delete', () => {
                     this._deleteGroup(group_id);
                 });
             });
@@ -1904,7 +1980,7 @@ class GraphEditor {
         this._undoSteps.pop();
         // Set old state
         // TODO
-        console.log("Undo!!");
+        console.log('Undo!!');
     }
     _addRedoStep() {
         this._redoSteps.push({
@@ -1920,7 +1996,7 @@ class GraphEditor {
         this._redoSteps.pop();
         // Set old state
         // TODO
-        console.log("Redo!!");
+        console.log('Redo!!');
     }
     _togglePropertiesDialog(force = false) {
         this.propertiesDialog.root.classList.toggle('opened', force);
@@ -1942,26 +2018,26 @@ class GraphEditor {
     }
     _onSidebarCreate(e) {
         new LX.DropdownMenu(e.target, [
-            { name: "Create Graph", icon: "Workflow", callback: () => this.addGraph() },
-            { name: "Create Function", icon: "Function", callback: () => this.addGraphFunction() },
-        ], { side: "right", align: "start" });
+            { name: 'Create Graph', icon: 'Workflow', callback: () => this.addGraph() },
+            { name: 'Create Function', icon: 'Function', callback: () => this.addGraphFunction() }
+        ], { side: 'right', align: 'start' });
     }
     _showRenameGraphDialog() {
         if (!this.currentGraph)
             return;
         const dialog = new LX.Dialog(this.currentGraph.constructor.name, (p) => {
-            p.addText("Name", this.currentGraph?.name, (v) => {
+            p.addText('Name', this.currentGraph?.name, (v) => {
                 this._updateGraphName(v);
                 dialog.close();
             });
-        }, { modal: true, size: ["350px", null] });
+        }, { modal: true, size: ['350px', null] });
     }
     _updateGraphName(name) {
         if (!this.currentGraph)
             return;
         const newNameKey = name.replace(/\s/g, '').replaceAll('.', '');
         // Change graph name button
-        const nameDom = this._sidebar.root.querySelectorAll(".lexsidebarheader span")[1];
+        const nameDom = this._sidebar.root.querySelectorAll('.lexsidebarheader span')[1];
         console.assert(nameDom);
         nameDom.innerText = name;
         // Change name in sidebar
@@ -1978,7 +2054,7 @@ class GraphEditor {
         if (nodeClass) {
             delete GraphEditor.NODE_TYPES[oldType];
             nodeClass.title = name;
-            GraphEditor.registerCustomNode("function/" + name, nodeClass);
+            GraphEditor.registerCustomNode('function/' + name, nodeClass);
         }
         this.currentGraph.name = name;
     }
@@ -1990,9 +2066,9 @@ LX.GraphEditor = GraphEditor;
  * @class Graph
  */
 class Graph {
-    name = "Unnamed Graph";
+    name = 'Unnamed Graph';
     type = 'Graph';
-    id = "";
+    id = '';
     editor;
     nodes = [];
     groups = [];
@@ -2049,13 +2125,15 @@ class Graph {
         // Reser variables each step?
         this.variables = {};
         const addNode = (id) => {
-            if (visitedNodes[id])
+            if (visitedNodes[id]) {
                 return;
+            }
             visitedNodes[id] = true;
             for (let linkId in this.links) {
                 const idx = linkId.indexOf('@' + id);
-                if (idx < 0)
+                if (idx < 0) {
                     continue;
+                }
                 const preNodeId = linkId.substring(0, idx);
                 this._executionNodes.push(preNodeId);
                 addNode(preNodeId);
@@ -2067,11 +2145,13 @@ class Graph {
         addNode(mainId);
         for (var i = this._executionNodes.length - 1; i >= 0; --i) {
             const node = nodes[this._executionNodes[i]];
-            if (node.onBeforeStep)
+            if (node.onBeforeStep) {
                 node.onBeforeStep();
+            }
             node.execute();
-            if (node.onBeforeStep)
+            if (node.onBeforeStep) {
                 node.onAfterStep();
+            }
         }
     }
     /**
@@ -2123,7 +2203,7 @@ class Graph {
      */
     export() {
         const o = this.serialize();
-        LX.downloadFile(this.name + ".json", o);
+        LX.downloadFile(this.name + '.json', o);
     }
 }
 LX.Graph = Graph;
@@ -2134,10 +2214,10 @@ class GraphNode {
     static title;
     static blockDelete = false;
     static blockAdd = false;
-    static description = "";
-    id = "";
-    type = "";
-    title = "";
+    static description = '';
+    id = '';
+    type = '';
+    title = '';
     inputs = [];
     outputs = [];
     properties = [];
@@ -2155,8 +2235,9 @@ class GraphNode {
         // This should be empty
     }
     execute() {
-        if (!this._hasOutputsConnected())
+        if (!this._hasOutputsConnected()) {
             return;
+        }
         if (this.onExecute) {
             this.onExecute();
         }
@@ -2171,38 +2252,45 @@ class GraphNode {
         this.properties.push({ name, type, value, options: selectOptions });
     }
     getInput(index) {
-        if (!this.inputs || !this.inputs.length || !this.inputs[index])
+        if (!this.inputs || !this.inputs.length || !this.inputs[index]) {
             return;
+        }
         const graph = this.editor?.graphs[this.graphID];
         // Get data from link
         for (let linkId in graph.links) {
             const idx = linkId.indexOf('@' + this.id);
-            if (idx < 0)
+            if (idx < 0) {
                 continue;
+            }
             const nodeLinks = graph.links[linkId];
             for (var link of nodeLinks) {
-                if (link.inputIdx != index)
+                if (link.inputIdx != index) {
                     continue;
+                }
                 // This is the value!!
                 return link.data;
             }
         }
     }
     setOutput(index, data) {
-        if (!this.outputs || !this.outputs.length || !this.outputs[index])
+        if (!this.outputs || !this.outputs.length || !this.outputs[index]) {
             return;
+        }
         const graph = this.editor?.graphs[this.graphID];
         // Set data in link
         for (let linkId in graph.links) {
             const idx = linkId.indexOf(this.id + '@');
-            if (idx < 0)
+            if (idx < 0) {
                 continue;
+            }
             const nodeLinks = graph.links[linkId];
             for (var link of nodeLinks) {
-                if (link.outputIdx != index)
+                if (link.outputIdx != index) {
                     continue;
+                }
                 let innerData = data;
-                if (innerData != undefined && link.inputType != link.outputType && link.inputType != "any" && link.outputType != "any") {
+                if (innerData != undefined && link.inputType != link.outputType && link.inputType != 'any'
+                    && link.outputType != 'any') {
                     // In case of supported casting, use function to cast..
                     var fn = this.editor?.supportedCastTypes[link.outputType + '@' + link.inputType];
                     // Use function if it's possible to cast!
@@ -2232,12 +2320,12 @@ LX.GraphNode = GraphNode;
 class GraphFunction extends Graph {
     constructor(name, options = {}) {
         super();
-        this.name = name ?? ("GraphFunction" + GraphEditor.LAST_FUNCTION_ID);
+        this.name = name ?? ('GraphFunction' + GraphEditor.LAST_FUNCTION_ID);
         this.type = 'GraphFunction';
         GraphEditor.LAST_FUNCTION_ID++;
-        const nodeInput = GraphEditor.addNode("function/Input");
+        const nodeInput = GraphEditor.addNode('function/Input');
         nodeInput.position = new vec2(150, 250);
-        const nodeOutput = GraphEditor.addNode("function/Output");
+        const nodeOutput = GraphEditor.addNode('function/Output');
         nodeOutput.position = new vec2(650, 350);
         this.nodes.push(nodeInput, nodeOutput);
     }
@@ -2265,8 +2353,9 @@ LX.GraphFunction = GraphFunction;
 */
 class NodeFuncInput extends GraphNode {
     onCreate() {
-        this.addOutput(null, "float");
-        this.addProperty("Outputs", "array", ["float"], ['float', 'int', 'bool', 'vec2', 'vec3', 'vec4', 'mat44']);
+        this.addOutput(null, 'float');
+        this.addProperty('Outputs', 'array', ['float'], ['float', 'int', 'bool', 'vec2', 'vec3', 'vec4',
+            'mat44']);
     }
     onExecute() {
         // var a = this.getInput( 0 ) ?? this.properties[ 0 ].value;
@@ -2282,10 +2371,10 @@ class NodeFuncInput extends GraphNode {
 }
 NodeFuncInput.blockDelete = true;
 NodeFuncInput.blockAdd = true;
-GraphEditor.registerCustomNode("function/Input", NodeFuncInput);
+GraphEditor.registerCustomNode('function/Input', NodeFuncInput);
 class NodeFuncOutput extends GraphNode {
     onCreate() {
-        this.addInput(null, "any");
+        this.addInput(null, 'any');
     }
     onExecute() {
         // var a = this.getInput( 0 ) ?? this.properties[ 0 ].value;
@@ -2295,17 +2384,17 @@ class NodeFuncOutput extends GraphNode {
 }
 NodeFuncOutput.blockDelete = true;
 NodeFuncOutput.blockAdd = true;
-GraphEditor.registerCustomNode("function/Output", NodeFuncOutput);
+GraphEditor.registerCustomNode('function/Output', NodeFuncOutput);
 /*
     Math nodes
 */
 class NodeAdd extends GraphNode {
     onCreate() {
-        this.addInput(null, "float");
-        this.addInput(null, "float");
-        this.addOutput(null, "float");
-        this.addProperty("A", "float", 0);
-        this.addProperty("B", "float", 0);
+        this.addInput(null, 'float');
+        this.addInput(null, 'float');
+        this.addOutput(null, 'float');
+        this.addProperty('A', 'float', 0);
+        this.addProperty('B', 'float', 0);
     }
     onExecute() {
         var a = this.getInput(0) ?? this.properties[0].value;
@@ -2313,15 +2402,15 @@ class NodeAdd extends GraphNode {
         this.setOutput(0, a + b);
     }
 }
-NodeAdd.description = "Addition of 2 values (A+B).";
-GraphEditor.registerCustomNode("math/Add", NodeAdd);
+NodeAdd.description = 'Addition of 2 values (A+B).';
+GraphEditor.registerCustomNode('math/Add', NodeAdd);
 class NodeSubstract extends GraphNode {
     onCreate() {
-        this.addInput(null, "float");
-        this.addInput(null, "float");
-        this.addOutput(null, "float");
-        this.addProperty("A", "float", 0);
-        this.addProperty("B", "float", 0);
+        this.addInput(null, 'float');
+        this.addInput(null, 'float');
+        this.addOutput(null, 'float');
+        this.addProperty('A', 'float', 0);
+        this.addProperty('B', 'float', 0);
     }
     onExecute() {
         var a = this.getInput(0) ?? this.properties[0].value;
@@ -2329,15 +2418,15 @@ class NodeSubstract extends GraphNode {
         this.setOutput(0, a - b);
     }
 }
-NodeSubstract.description = "Substraction of 2 values (A-B).";
-GraphEditor.registerCustomNode("math/Substract", NodeSubstract);
+NodeSubstract.description = 'Substraction of 2 values (A-B).';
+GraphEditor.registerCustomNode('math/Substract', NodeSubstract);
 class NodeMultiply extends GraphNode {
     onCreate() {
-        this.addInput(null, "float");
-        this.addInput(null, "float");
-        this.addOutput(null, "float");
-        this.addProperty("A", "float", 0);
-        this.addProperty("B", "float", 0);
+        this.addInput(null, 'float');
+        this.addInput(null, 'float');
+        this.addOutput(null, 'float');
+        this.addProperty('A', 'float', 0);
+        this.addProperty('B', 'float', 0);
     }
     onExecute() {
         var a = this.getInput(0) ?? this.properties[0].value;
@@ -2345,15 +2434,15 @@ class NodeMultiply extends GraphNode {
         this.setOutput(0, a * b);
     }
 }
-NodeMultiply.description = "Multiplication of 2 values (A*B).";
-GraphEditor.registerCustomNode("math/Multiply", NodeMultiply);
+NodeMultiply.description = 'Multiplication of 2 values (A*B).';
+GraphEditor.registerCustomNode('math/Multiply', NodeMultiply);
 class NodeDivide extends GraphNode {
     onCreate() {
-        this.addInput(null, "float");
-        this.addInput(null, "float");
-        this.addOutput(null, "float");
-        this.addProperty("A", "float", 0);
-        this.addProperty("B", "float", 0);
+        this.addInput(null, 'float');
+        this.addInput(null, 'float');
+        this.addOutput(null, 'float');
+        this.addProperty('A', 'float', 0);
+        this.addProperty('B', 'float', 0);
     }
     onExecute() {
         var a = this.getInput(0) ?? this.properties[0].value;
@@ -2361,21 +2450,21 @@ class NodeDivide extends GraphNode {
         this.setOutput(0, a / b);
     }
 }
-NodeDivide.description = "Division of 2 values (A/B).";
-GraphEditor.registerCustomNode("math/Divide", NodeDivide);
+NodeDivide.description = 'Division of 2 values (A/B).';
+GraphEditor.registerCustomNode('math/Divide', NodeDivide);
 class NodeSqrt extends GraphNode {
     onCreate() {
-        this.addInput(null, "float");
-        this.addOutput(null, "float");
-        this.addProperty("Value", "float", 0);
+        this.addInput(null, 'float');
+        this.addOutput(null, 'float');
+        this.addProperty('Value', 'float', 0);
     }
     onExecute() {
         var a = this.getInput(0) ?? this.properties[0].value;
         this.setOutput(0, Math.sqrt(a));
     }
 }
-NodeSqrt.description = "Square root of a scalar.";
-GraphEditor.registerCustomNode("math/SQRT", NodeSqrt);
+NodeSqrt.description = 'Square root of a scalar.';
+GraphEditor.registerCustomNode('math/SQRT', NodeSqrt);
 /*
 Math Missing:
 - abs
@@ -2400,270 +2489,282 @@ Math Missing:
 */
 class NodeAnd extends GraphNode {
     onCreate() {
-        this.addInput(null, "bool");
-        this.addInput(null, "bool");
-        this.addOutput(null, "bool");
+        this.addInput(null, 'bool');
+        this.addInput(null, 'bool');
+        this.addOutput(null, 'bool');
     }
     onExecute() {
         var a = this.getInput(0), b = this.getInput(1);
-        if (a == undefined || b == undefined)
+        if (a == undefined || b == undefined) {
             return;
-        this.setOutput(0, !!(a) && !!(b));
+        }
+        this.setOutput(0, !!a && !!b);
     }
 }
-GraphEditor.registerCustomNode("logic/And", NodeAnd);
+GraphEditor.registerCustomNode('logic/And', NodeAnd);
 class NodeOr extends GraphNode {
     onCreate() {
-        this.addInput(null, "bool");
-        this.addInput(null, "bool");
-        this.addOutput(null, "bool");
+        this.addInput(null, 'bool');
+        this.addInput(null, 'bool');
+        this.addOutput(null, 'bool');
     }
     onExecute() {
         var a = this.getInput(0), b = this.getInput(1);
-        if (a == undefined || b == undefined)
+        if (a == undefined || b == undefined) {
             return;
-        this.setOutput(0, !!(a) || !!(b));
+        }
+        this.setOutput(0, !!a || !!b);
     }
 }
-GraphEditor.registerCustomNode("logic/Or", NodeOr);
+GraphEditor.registerCustomNode('logic/Or', NodeOr);
 class NodeEqual extends GraphNode {
     onCreate() {
-        this.addInput(null, "float");
-        this.addInput(null, "float");
-        this.addOutput(null, "bool");
+        this.addInput(null, 'float');
+        this.addInput(null, 'float');
+        this.addOutput(null, 'bool');
     }
     logicOp(a, b) {
         return a == b;
     }
     onExecute() {
         var a = this.getInput(0), b = this.getInput(1);
-        if (a == undefined || b == undefined)
+        if (a == undefined || b == undefined) {
             return;
+        }
         this.setOutput(0, this.logicOp(a, b));
     }
 }
-GraphEditor.registerCustomNode("logic/Equal", NodeEqual);
+GraphEditor.registerCustomNode('logic/Equal', NodeEqual);
 class NodeNotEqual extends NodeEqual {
     logicOp(a, b) {
         return a != b;
     }
 }
-GraphEditor.registerCustomNode("logic/NotEqual", NodeNotEqual);
+GraphEditor.registerCustomNode('logic/NotEqual', NodeNotEqual);
 class NodeLess extends NodeEqual {
     logicOp(a, b) {
         return a < b;
     }
 }
-GraphEditor.registerCustomNode("logic/Less", NodeLess);
+GraphEditor.registerCustomNode('logic/Less', NodeLess);
 class NodeLessEqual extends NodeEqual {
     logicOp(a, b) {
         return a <= b;
     }
 }
-GraphEditor.registerCustomNode("logic/LessEqual", NodeLessEqual);
+GraphEditor.registerCustomNode('logic/LessEqual', NodeLessEqual);
 class NodeGreater extends NodeEqual {
     logicOp(a, b) {
         return a > b;
     }
 }
-GraphEditor.registerCustomNode("logic/Greater", NodeGreater);
+GraphEditor.registerCustomNode('logic/Greater', NodeGreater);
 class NodeGreaterEqual extends NodeEqual {
     logicOp(a, b) {
         return a >= b;
     }
 }
-GraphEditor.registerCustomNode("logic/GreaterEqual", NodeGreaterEqual);
+GraphEditor.registerCustomNode('logic/GreaterEqual', NodeGreaterEqual);
 class NodeSelect extends GraphNode {
     onCreate() {
-        this.addInput("True", "any");
-        this.addInput("False", "any");
-        this.addInput("Condition", "bool");
-        this.addOutput(null, "any");
+        this.addInput('True', 'any');
+        this.addInput('False', 'any');
+        this.addInput('Condition', 'bool');
+        this.addOutput(null, 'any');
     }
     onExecute() {
         var a = this.getInput(0), b = this.getInput(1), cond = this.getInput(2);
-        if (a == undefined || b == undefined || cond == undefined)
+        if (a == undefined || b == undefined || cond == undefined) {
             return;
+        }
         this.setOutput(0, cond ? a : b);
     }
 }
-GraphEditor.registerCustomNode("logic/Select", NodeSelect);
+GraphEditor.registerCustomNode('logic/Select', NodeSelect);
 class NodeCompare extends GraphNode {
     onCreate() {
-        this.addInput("A", "any");
-        this.addInput("B", "any");
-        this.addInput("True", "any");
-        this.addInput("False", "any");
-        this.addProperty("Condition", "select", 'Equal', ['Equal', 'Not Equal', 'Less', 'Less Equal', 'Greater', 'Greater Equal']);
-        this.addOutput(null, "any");
+        this.addInput('A', 'any');
+        this.addInput('B', 'any');
+        this.addInput('True', 'any');
+        this.addInput('False', 'any');
+        this.addProperty('Condition', 'select', 'Equal', ['Equal', 'Not Equal', 'Less', 'Less Equal', 'Greater',
+            'Greater Equal']);
+        this.addOutput(null, 'any');
     }
     onExecute() {
         var a = this.getInput(0), b = this.getInput(1), TrueVal = this.getInput(2), FalseVal = this.getInput(3);
         var cond = this.properties[0].value;
-        if (a == undefined || b == undefined || TrueVal == undefined || FalseVal == undefined)
+        if (a == undefined || b == undefined || TrueVal == undefined || FalseVal == undefined) {
             return;
+        }
         var output;
         switch (cond) {
             case 'Equal':
-                output = (a == b ? TrueVal : FalseVal);
+                output = a == b ? TrueVal : FalseVal;
                 break;
             case 'Not Equal':
-                output = (a != b ? TrueVal : FalseVal);
+                output = a != b ? TrueVal : FalseVal;
                 break;
             case 'Less':
-                output = (a < b ? TrueVal : FalseVal);
+                output = a < b ? TrueVal : FalseVal;
                 break;
             case 'Less Equal':
-                output = (a <= b ? TrueVal : FalseVal);
+                output = a <= b ? TrueVal : FalseVal;
                 break;
             case 'Greater':
-                output = (a > b ? TrueVal : FalseVal);
+                output = a > b ? TrueVal : FalseVal;
                 break;
             case 'Greater Equal':
-                output = (a >= b ? TrueVal : FalseVal);
+                output = a >= b ? TrueVal : FalseVal;
                 break;
         }
         this.setOutput(0, output);
     }
 }
-NodeCompare.description = "Compare A to B given the selected operator. If true, return value of True else return value of False.";
-GraphEditor.registerCustomNode("logic/Compare", NodeCompare);
+NodeCompare.description =
+    'Compare A to B given the selected operator. If true, return value of True else return value of False.';
+GraphEditor.registerCustomNode('logic/Compare', NodeCompare);
 /*
     Event nodes
 */
 class NodeKeyDown extends GraphNode {
     onCreate() {
-        this.addOutput(null, "bool");
-        this.addProperty("Key", "string", " ");
+        this.addOutput(null, 'bool');
+        this.addProperty('Key', 'string', ' ');
     }
     onExecute() {
         this.setOutput(0, !!this.editor?.keys[this.properties[0].value]);
     }
 }
-GraphEditor.registerCustomNode("events/KeyDown", NodeKeyDown);
+GraphEditor.registerCustomNode('events/KeyDown', NodeKeyDown);
 /*
     Input nodes
 */
 class NodeString extends GraphNode {
     onCreate() {
-        this.addOutput(null, "string");
-        this.addProperty(null, "string", "text");
+        this.addOutput(null, 'string');
+        this.addProperty(null, 'string', 'text');
     }
     onExecute() {
         this.setOutput(0, this.properties[0].value);
     }
 }
-GraphEditor.registerCustomNode("inputs/String", NodeString);
+GraphEditor.registerCustomNode('inputs/String', NodeString);
 class NodeFloat extends GraphNode {
     onCreate() {
-        this.addOutput(null, "float");
-        this.addProperty(null, "float", 0.0);
+        this.addOutput(null, 'float');
+        this.addProperty(null, 'float', 0.0);
     }
     onExecute() {
         this.setOutput(0, this.properties[0].value);
     }
 }
-GraphEditor.registerCustomNode("inputs/Float", NodeFloat);
+GraphEditor.registerCustomNode('inputs/Float', NodeFloat);
 class NodeVector2 extends GraphNode {
     onCreate() {
-        this.addOutput("Value", "vec2");
-        this.addProperty("Value", "vec2", [0, 0]);
+        this.addOutput('Value', 'vec2');
+        this.addProperty('Value', 'vec2', [0, 0]);
     }
     onExecute() {
         this.setOutput(0, this.properties[0].value);
     }
 }
-GraphEditor.registerCustomNode("inputs/Vector2", NodeVector2);
+GraphEditor.registerCustomNode('inputs/Vector2', NodeVector2);
 class NodeVector3 extends GraphNode {
     onCreate() {
-        this.addOutput("Value", "vec3");
-        this.addProperty("Value", "vec3", [0, 0, 0]);
+        this.addOutput('Value', 'vec3');
+        this.addProperty('Value', 'vec3', [0, 0, 0]);
     }
     onExecute() {
         this.setOutput(0, this.properties[0].value);
     }
 }
-GraphEditor.registerCustomNode("inputs/Vector3", NodeVector3);
+GraphEditor.registerCustomNode('inputs/Vector3', NodeVector3);
 class NodeVector4 extends GraphNode {
     onCreate() {
-        this.addOutput("Value", "vec4");
-        this.addProperty("Value", "vec4", [0, 0, 0, 0]);
+        this.addOutput('Value', 'vec4');
+        this.addProperty('Value', 'vec4', [0, 0, 0, 0]);
     }
     onExecute() {
         this.setOutput(0, this.properties[0].value);
     }
 }
-GraphEditor.registerCustomNode("inputs/Vector4", NodeVector4);
+GraphEditor.registerCustomNode('inputs/Vector4', NodeVector4);
 /*
     Variable nodes
 */
 class NodeSetVariable extends GraphNode {
     onCreate() {
-        this.addInput("Value", "any");
-        this.addOutput(null, "any");
-        this.addProperty("Name", "string", "");
+        this.addInput('Value', 'any');
+        this.addOutput(null, 'any');
+        this.addProperty('Name', 'string', '');
     }
     onExecute() {
         var varName = this.getInput(0);
-        if (varName == undefined)
+        if (varName == undefined) {
             return;
+        }
         var varValue = this.getInput(1);
-        if (varValue == undefined)
+        if (varValue == undefined) {
             return;
+        }
         this.editor?.setVariable(varName, varValue);
         this.setOutput(0, varValue);
     }
 }
-NodeSetVariable.title = "Set Variable";
-GraphEditor.registerCustomNode("variables/SetVariable", NodeSetVariable);
+NodeSetVariable.title = 'Set Variable';
+GraphEditor.registerCustomNode('variables/SetVariable', NodeSetVariable);
 class NodeGetVariable extends GraphNode {
     onCreate() {
-        this.addOutput(null, "any");
-        this.addProperty("Name", "string", "");
+        this.addOutput(null, 'any');
+        this.addProperty('Name', 'string', '');
     }
     onExecute() {
         var varName = this.getInput(0);
-        if (varName == undefined)
+        if (varName == undefined) {
             return;
+        }
         var data = this.editor?.getVariable(varName);
-        if (data != undefined)
+        if (data != undefined) {
             this.setOutput(0, data);
+        }
     }
 }
-NodeGetVariable.title = "Get Variable";
-GraphEditor.registerCustomNode("variables/GetVariable", NodeGetVariable);
+NodeGetVariable.title = 'Get Variable';
+GraphEditor.registerCustomNode('variables/GetVariable', NodeGetVariable);
 /*
     System nodes
 */
 class NodeConsoleLog extends GraphNode {
     onCreate() {
-        this.addInput(null, "any");
+        this.addInput(null, 'any');
     }
     onExecute() {
         var data = this.getInput(0);
-        if (data == undefined)
+        if (data == undefined) {
             return;
+        }
         console.log(data);
     }
 }
-NodeConsoleLog.title = "Console Log";
-GraphEditor.registerCustomNode("system/ConsoleLog", NodeConsoleLog);
+NodeConsoleLog.title = 'Console Log';
+GraphEditor.registerCustomNode('system/ConsoleLog', NodeConsoleLog);
 class NodeMain extends GraphNode {
     onCreate() {
-        this.addInput("a", "float");
-        this.addInput("b", "bool");
-        this.addInput("Color", "vec4");
+        this.addInput('a', 'float');
+        this.addInput('b', 'bool');
+        this.addInput('Color', 'vec4');
     }
     onExecute() {
         var data = this.getInput(2);
-        if (data == undefined)
+        if (data == undefined) {
             return;
+        }
         console.log(data);
     }
-    ;
 }
 NodeMain.blockDelete = true;
-GraphEditor.registerCustomNode("system/Main", NodeMain);
+GraphEditor.registerCustomNode('system/Main', NodeMain);
 
 export { BoundingBox, GraphEditor, GraphNode };
 //# sourceMappingURL=GraphEditor.js.map

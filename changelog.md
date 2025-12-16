@@ -2,8 +2,18 @@
 
 ## dev
 
+## 8.1.1 (master)
+
+Fixed Table Component bug when there's a filter but no custom filters.
+Fixed AssetView `onEnterFolder` not allowing async callbacks.
+
+## 8.1.0
+
 AssetView:
 - Added CreateFolder implementation to the MoveItem dialog button.
+- Added more event attributes, added also to docs.
+- `enterFolder` event can now modify data.
+- Passing user parameters through `resolve` call is now allowed.
 
 New Component: Alert Dialog.
 Use `dprint` to auto-format code.
@@ -12,7 +22,7 @@ Improved Icons page using Pagination Component & moved to main page Menubar.
 Added Counter Component docs.
 Minor mobile version fixes.
 
-## 8.0.0 (master)
+## 8.0.0
 
 From 8.0 (changed versioning to set `8` as the major version), the full library is written in TypeScript to facilitate integrations in newer frameworks (Builds are still available as a JS module with its extensions).
 Replaced Skypack for jsDelivr CDN.

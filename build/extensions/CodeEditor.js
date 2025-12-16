@@ -3,7 +3,7 @@ import { LX } from '../core/Namespace.js';
 
 // CodeEditor.ts @jxarco
 if (!LX) {
-    throw ("Missing LX namespace!");
+    throw ('Missing LX namespace!');
 }
 LX.extensions.push('CodeEditor');
 const g = globalThis;
@@ -13,20 +13,36 @@ LX.Panel;
 LX.Tree;
 LX.Tabs;
 LX.ContextMenu;
-function swapElements(obj, a, b) { [obj[a], obj[b]] = [obj[b], obj[a]]; }
-function swapArrayElements(array, id0, id1) { [array[id0], array[id1]] = [array[id1], array[id0]]; }
-function sliceChars(str, idx, n = 1) { return str.substr(0, idx) + str.substr(idx + n); }
-function firstNonspaceIndex(str) { const index = str.search(/\S|$/); return index < str.length ? index : -1; }
-function strReverse(str) { return str.split("").reverse().join(""); }
-function isLetter(c) { return /[a-zA-Z]/.test(c); }
-function isSymbol(c) { return /[^\w\s]/.test(c); }
+function swapElements(obj, a, b) {
+    [obj[a], obj[b]] = [obj[b], obj[a]];
+}
+function swapArrayElements(array, id0, id1) {
+    [array[id0], array[id1]] = [array[id1], array[id0]];
+}
+function sliceChars(str, idx, n = 1) {
+    return str.substr(0, idx) + str.substr(idx + n);
+}
+function firstNonspaceIndex(str) {
+    const index = str.search(/\S|$/);
+    return index < str.length ? index : -1;
+}
+function strReverse(str) {
+    return str.split('').reverse().join('');
+}
+function isLetter(c) {
+    return /[a-zA-Z]/.test(c);
+}
+function isSymbol(c) {
+    return /[^\w\s]/.test(c);
+}
 function indexOfFrom(str, reg, from, reverse = false) {
     from = from ?? 0;
     if (reverse) {
         str = str.substring(0, from);
         var k = from - 1;
-        while (str[k] && str[k] != reg)
+        while (str[k] && str[k] != reg) {
             k--;
+        }
         return str[k] ? k : -1;
     }
     else {
@@ -45,24 +61,28 @@ function codeScopesEqual(a, b) {
 }
 class Cursor {
     root;
-    name = "";
+    name = '';
     editor;
     isMain = false;
     selection = null;
     _line = 0;
     _position = 0;
-    get line() { return this._line; }
+    get line() {
+        return this._line;
+    }
     set line(v) {
         this._line = v;
         if (this.isMain)
             this.editor._setActiveLine(v);
     }
-    get position() { return this._position; }
+    get position() {
+        return this._position;
+    }
     set position(v) {
         this._position = v;
         if (this.isMain) {
             const activeLine = this.editor.state.activeLine;
-            this.editor._updateDataInfoPanel("@cursor-data", `Ln ${activeLine + 1}, Col ${v + 1}`);
+            this.editor._updateDataInfoPanel('@cursor-data', `Ln ${activeLine + 1}, Col ${v + 1}`);
         }
     }
     left = 0;
@@ -73,8 +93,8 @@ class Cursor {
         this.isMain = isMain;
         this.root = document.createElement('div');
         this.root.name = name;
-        this.root.className = "cursor";
-        this.root.innerHTML = "&nbsp;";
+        this.root.className = 'cursor';
+        this.root.innerHTML = '&nbsp;';
         this.set(position, line, false);
     }
     set(position = 0, line = 0, updateEditor = true) {
@@ -107,7 +127,7 @@ class CodeSelection {
     editor;
     cursor;
     className;
-    constructor(editor, cursor, className = "lexcodeselection") {
+    constructor(editor, cursor, className = 'lexcodeselection') {
         this.editor = editor;
         this.cursor = cursor;
         this.className = className;
@@ -142,10 +162,10 @@ class CodeSelection {
         var domEl = document.createElement('div');
         domEl.className = this.className;
         domEl._top = y * this.editor.lineHeight;
-        domEl.style.top = domEl._top + "px";
+        domEl.style.top = domEl._top + 'px';
         domEl._left = x * this.editor.charWidth;
-        domEl.style.left = "calc(" + domEl._left + "px + " + this.editor.xPadding + ")";
-        domEl.style.width = width + "px";
+        domEl.style.left = 'calc(' + domEl._left + 'px + ' + this.editor.xPadding + ')';
+        domEl.style.width = width + 'px';
         if (isSearchResult) {
             this.editor.searchResultSelections.appendChild(domEl);
         }
@@ -190,40 +210,44 @@ class ScrollBar {
         this.editor = editor;
         this.type = type;
         this.root = document.createElement('div');
-        this.root.className = "lexcodescrollbar hidden";
-        if (type & ScrollBar.SCROLLBAR_VERTICAL)
+        this.root.className = 'lexcodescrollbar hidden';
+        if (type & ScrollBar.SCROLLBAR_VERTICAL) {
             this.root.classList.add('vertical');
-        else if (type & ScrollBar.SCROLLBAR_HORIZONTAL)
+        }
+        else if (type & ScrollBar.SCROLLBAR_HORIZONTAL) {
             this.root.classList.add('horizontal');
+        }
         this.thumb = document.createElement('div');
         this.thumb._top = 0;
         this.thumb._left = 0;
         this.root.appendChild(this.thumb);
-        this.thumb.addEventListener("mousedown", inner_mousedown);
+        this.thumb.addEventListener('mousedown', inner_mousedown);
         this.lastPosition = new LX.vec2(0, 0);
         let that = this;
         function inner_mousedown(e) {
             var doc = editor.root.ownerDocument;
-            doc.addEventListener("mousemove", inner_mousemove);
-            doc.addEventListener("mouseup", inner_mouseup);
+            doc.addEventListener('mousemove', inner_mousemove);
+            doc.addEventListener('mouseup', inner_mouseup);
             that.lastPosition.set(e.x, e.y);
             e.stopPropagation();
             e.preventDefault();
         }
         function inner_mousemove(e) {
             var dt = that.lastPosition.sub(new LX.vec2(e.x, e.y));
-            if (that.type & ScrollBar.SCROLLBAR_VERTICAL)
+            if (that.type & ScrollBar.SCROLLBAR_VERTICAL) {
                 editor.updateVerticalScrollFromScrollBar(dt.y);
-            else
+            }
+            else {
                 editor.updateHorizontalScrollFromScrollBar(dt.x);
+            }
             that.lastPosition.set(e.x, e.y);
             e.stopPropagation();
             e.preventDefault();
         }
         function inner_mouseup(e) {
             var doc = editor.root.ownerDocument;
-            doc.removeEventListener("mousemove", inner_mousemove);
-            doc.removeEventListener("mouseup", inner_mouseup);
+            doc.removeEventListener('mousemove', inner_mousemove);
+            doc.removeEventListener('mouseup', inner_mouseup);
         }
     }
 }
@@ -236,58 +260,106 @@ class ScrollBar {
 */
 const HighlightRules = {
     common: [
-        { test: (ctx) => ctx.inBlockComment, className: "cm-com" },
-        { test: (ctx) => ctx.inString, action: (ctx, editor) => editor._appendStringToken(ctx.token), discard: true },
-        { test: (ctx) => ctx.token.substr(0, ctx.singleLineCommentToken.length) == ctx.singleLineCommentToken, className: "cm-com" },
-        { test: (ctx, editor) => editor._isKeyword(ctx), className: "cm-kwd" },
-        { test: (ctx, editor) => editor._mustHightlightWord(ctx.token, CE.builtIn, ctx.lang) && (ctx.lang.tags ?? false ? (editor._enclosedByTokens(ctx.token, ctx.tokenIndex, '<', '>')) : true), className: "cm-bln" },
-        { test: (ctx, editor) => editor._mustHightlightWord(ctx.token, CE.statements, ctx.lang), className: "cm-std" },
-        { test: (ctx, editor) => editor._mustHightlightWord(ctx.token, CE.symbols, ctx.lang), className: "cm-sym" },
-        { test: (ctx, editor) => editor._mustHightlightWord(ctx.token, CE.types, ctx.lang), className: "cm-typ" },
-        { test: (ctx, editor) => editor._isNumber(ctx.token) || editor._isNumber(ctx.token.replace(/[px]|[em]|%/g, '')), className: "cm-dec" },
-        { test: (ctx) => ctx.lang.usePreprocessor && ctx.token.includes('#'), className: "cm-ppc" },
+        { test: (ctx) => ctx.inBlockComment, className: 'cm-com' },
+        { test: (ctx) => ctx.inString,
+            action: (ctx, editor) => editor._appendStringToken(ctx.token), discard: true },
+        { test: (ctx) => ctx.token.substr(0, ctx.singleLineCommentToken.length) == ctx.singleLineCommentToken,
+            className: 'cm-com' },
+        { test: (ctx, editor) => editor._isKeyword(ctx), className: 'cm-kwd' },
+        {
+            test: (ctx, editor) => editor._mustHightlightWord(ctx.token, CE.builtIn, ctx.lang) && (ctx.lang.tags ?? false
+                ? (editor._enclosedByTokens(ctx.token, ctx.tokenIndex, '<', '>'))
+                : true),
+            className: 'cm-bln'
+        },
+        { test: (ctx, editor) => editor._mustHightlightWord(ctx.token, CE.statements, ctx.lang),
+            className: 'cm-std' },
+        { test: (ctx, editor) => editor._mustHightlightWord(ctx.token, CE.symbols, ctx.lang),
+            className: 'cm-sym' },
+        { test: (ctx, editor) => editor._mustHightlightWord(ctx.token, CE.types, ctx.lang),
+            className: 'cm-typ' },
+        {
+            test: (ctx, editor) => editor._isNumber(ctx.token) || editor._isNumber(ctx.token.replace(/[px]|[em]|%/g, '')),
+            className: 'cm-dec'
+        },
+        { test: (ctx) => ctx.lang.usePreprocessor && ctx.token.includes('#'), className: 'cm-ppc' }
     ],
     javascript: [
-        { test: (ctx) => (ctx.prev === 'class' && ctx.next === '{'), className: "cm-typ" },
+        { test: (ctx) => (ctx.prev === 'class' && ctx.next === '{'), className: 'cm-typ' }
     ],
     typescript: [
-        { test: (ctx) => ctx.scope && (ctx.token !== ',' && ctx.scope.type == "enum"), className: "cm-enu" },
-        { test: (ctx) => (ctx.prev === ':' && ctx.next !== undefined && isLetter(ctx.token)) || (ctx.prev === 'interface' && ctx.next === '{') || (ctx.prev === 'enum' && ctx.next === '{'), className: "cm-typ" },
-        { test: (ctx) => (ctx.prev === 'class' && ctx.next === '{') || (ctx.prev === 'class' && ctx.next === '<') || (ctx.prev === 'new' && ctx.next === '(') || (ctx.prev === 'new' && ctx.next === '<'), className: "cm-typ" },
-        { test: (ctx, editor) => ctx.token !== ',' && editor._enclosedByTokens(ctx.token, ctx.tokenIndex, '<', '>'), className: "cm-typ" },
+        { test: (ctx) => ctx.scope && (ctx.token !== ',' && ctx.scope.type == 'enum'), className: 'cm-enu' },
+        {
+            test: (ctx) => (ctx.prev === ':' && ctx.next !== undefined && isLetter(ctx.token))
+                || (ctx.prev === 'interface' && ctx.next === '{') || (ctx.prev === 'enum' && ctx.next === '{'),
+            className: 'cm-typ'
+        },
+        {
+            test: (ctx) => (ctx.prev === 'class' && ctx.next === '{') || (ctx.prev === 'class' && ctx.next === '<')
+                || (ctx.prev === 'new' && ctx.next === '(') || (ctx.prev === 'new' && ctx.next === '<'),
+            className: 'cm-typ'
+        },
+        {
+            test: (ctx, editor) => ctx.token !== ',' && editor._enclosedByTokens(ctx.token, ctx.tokenIndex, '<', '>'),
+            className: 'cm-typ'
+        }
     ],
     cpp: [
-        { test: (ctx) => ctx.scope && (ctx.token !== ',' && ctx.scope.type == "enum"), className: "cm-enu" },
-        { test: (ctx) => ctx.isEnumValueSymbol(ctx.token), className: "cm-enu" },
-        { test: (ctx) => (ctx.prev === 'class' && ctx.next === '{') || (ctx.prev === 'struct' && ctx.next === '{'), className: "cm-typ" },
-        { test: (ctx) => ctx.prev === "<" && (ctx.next === ">" || ctx.next === "*"), className: "cm-typ" }, // Defining template type in C++
-        { test: (ctx) => ctx.next === "::" || (ctx.prev === "::" && ctx.next !== "("), className: "cm-typ" }, // C++ Class
-        { test: (ctx) => ctx.isClassSymbol(ctx.token) || ctx.isStructSymbol(ctx.token), className: "cm-typ" },
+        { test: (ctx) => ctx.scope && (ctx.token !== ',' && ctx.scope.type == 'enum'), className: 'cm-enu' },
+        { test: (ctx) => ctx.isEnumValueSymbol(ctx.token), className: 'cm-enu' },
+        {
+            test: (ctx) => (ctx.prev === 'class' && ctx.next === '{') || (ctx.prev === 'struct' && ctx.next === '{'),
+            className: 'cm-typ'
+        },
+        { test: (ctx) => ctx.prev === '<' && (ctx.next === '>' || ctx.next === '*'), className: 'cm-typ' }, // Defining template type in C++
+        { test: (ctx) => ctx.next === '::' || (ctx.prev === '::' && ctx.next !== '('), className: 'cm-typ' }, // C++ Class
+        { test: (ctx) => ctx.isClassSymbol(ctx.token) || ctx.isStructSymbol(ctx.token), className: 'cm-typ' }
     ],
     wgsl: [
-        { test: (ctx) => ctx.prev === '>' && (!ctx.next || ctx.next === '{'), className: "cm-typ" }, // Function return type
-        { test: (ctx) => (ctx.prev === ':' && ctx.next !== undefined) || (ctx.prev === 'struct' && ctx.next === '{'), className: "cm-typ" },
-        { test: (ctx, editor) => ctx.token !== ',' && editor._enclosedByTokens(ctx.token, ctx.tokenIndex, '<', '>'), className: "cm-typ" },
+        { test: (ctx) => ctx.prev === '>' && (!ctx.next || ctx.next === '{'), className: 'cm-typ' }, // Function return type
+        {
+            test: (ctx) => (ctx.prev === ':' && ctx.next !== undefined) || (ctx.prev === 'struct' && ctx.next === '{'),
+            className: 'cm-typ'
+        },
+        {
+            test: (ctx, editor) => ctx.token !== ',' && editor._enclosedByTokens(ctx.token, ctx.tokenIndex, '<', '>'),
+            className: 'cm-typ'
+        }
     ],
     css: [
-        { test: (ctx) => (ctx.prev == '.' || ctx.prev == '::' || (ctx.prev == ':' && ctx.next == '{') || (ctx.token[0] == '#' && ctx.prev != ':')), className: "cm-kwd" },
-        { test: (ctx) => ctx.prev === ':' && (ctx.next === ';' || ctx.next === '!important'), className: "cm-str" }, // CSS value
-        { test: (ctx) => (ctx.prev === undefined || ctx.prev === '{' || ctx.prev === ';') && ctx.next === ":", className: "cm-typ" }, // CSS attribute
-        { test: (ctx) => ctx.prev === "(" && ctx.next === ")" && ctx.token.startsWith("--"), className: "cm-typ" }, // CSS vars
+        {
+            test: (ctx) => (ctx.prev == '.' || ctx.prev == '::' || (ctx.prev == ':' && ctx.next == '{')
+                || (ctx.token[0] == '#' && ctx.prev != ':')),
+            className: 'cm-kwd'
+        },
+        { test: (ctx) => ctx.prev === ':' && (ctx.next === ';' || ctx.next === '!important'),
+            className: 'cm-str' }, // CSS value
+        { test: (ctx) => (ctx.prev === undefined || ctx.prev === '{' || ctx.prev === ';') && ctx.next === ':',
+            className: 'cm-typ' }, // CSS attribute
+        { test: (ctx) => ctx.prev === '(' && ctx.next === ')' && ctx.token.startsWith('--'),
+            className: 'cm-typ' } // CSS vars
     ],
     batch: [
-        { test: (ctx) => ctx.token === '@' || ctx.prev === ':' || ctx.prev === '@', className: "cm-kwd" }
+        { test: (ctx) => ctx.token === '@' || ctx.prev === ':' || ctx.prev === '@', className: 'cm-kwd' }
     ],
     markdown: [
-        { test: (ctx) => ctx.isFirstToken && ctx.token.replaceAll('#', '').length != ctx.token.length, action: (ctx, editor) => editor._markdownHeader = true, className: "cm-kwd" }
+        { test: (ctx) => ctx.isFirstToken && ctx.token.replaceAll('#', '').length != ctx.token.length,
+            action: (ctx, editor) => editor._markdownHeader = true, className: 'cm-kwd' }
     ],
     php: [
-        { test: (ctx) => ctx.token.startsWith('$'), className: "cm-var" },
-        { test: (ctx) => (ctx.prev === 'class' && (ctx.next === '{' || ctx.next === 'implements')) || (ctx.prev === 'enum'), className: "cm-typ" },
+        { test: (ctx) => ctx.token.startsWith('$'), className: 'cm-var' },
+        {
+            test: (ctx) => (ctx.prev === 'class' && (ctx.next === '{' || ctx.next === 'implements'))
+                || (ctx.prev === 'enum'),
+            className: 'cm-typ'
+        }
     ],
     post_common: [
-        { test: (ctx) => isLetter(ctx.token) && (ctx.token[0] != '@') && (ctx.token[0] != ',') && (ctx.next === '('), className: "cm-mtd" }
-    ],
+        {
+            test: (ctx) => isLetter(ctx.token) && (ctx.token[0] != '@') && (ctx.token[0] != ',') && (ctx.next === '('),
+            className: 'cm-mtd'
+        }
+    ]
 };
 /**
  * @class CodeEditor
@@ -331,7 +403,7 @@ class CodeEditor {
     explorerArea;
     code;
     gutter;
-    xPadding = "0px";
+    xPadding = '0px';
     hScrollbar;
     vScrollbar;
     codeScroller;
@@ -385,8 +457,8 @@ class CodeEditor {
     useAutoComplete = true;
     allowClosingTabs = true;
     allowLoadingFiles = true;
-    highlight = "Plain Text";
-    explorerName = "EXPLORER";
+    highlight = 'Plain Text';
+    explorerName = 'EXPLORER';
     newTabOptions;
     customSuggestions = [];
     // Editor callbacks
@@ -408,7 +480,7 @@ class CodeEditor {
     _lastProcessedCursorIndex = null;
     _lastMaxLineLength = undefined;
     _lastMouseDown = 0;
-    _lastTextFound = "";
+    _lastTextFound = '';
     _lastBaseareaWidth = undefined;
     _blockCommentCache = [];
     _pendingString = undefined;
@@ -471,7 +543,7 @@ class CodeEditor {
         this.onSelectTab = options.onSelectTab;
         // File explorer
         if (this.useFileExplorer) {
-            let [explorerArea, editorArea] = area.split({ sizes: ["15%", "85%"] });
+            let [explorerArea, editorArea] = area.split({ sizes: ['15%', '85%'] });
             // explorerArea.setLimitBox( 180, 20, 512 );
             this.explorerArea = explorerArea;
             let panel = new LX.Panel();
@@ -512,7 +584,7 @@ class CodeEditor {
             area = editorArea;
         }
         this.baseArea = area;
-        this.area = new LX.Area({ className: "lexcodeeditor", height: "100%", skipAppend: true });
+        this.area = new LX.Area({ className: 'lexcodeeditor', height: '100%', skipAppend: true });
         if (!this.skipTabs) {
             this.tabs = this.area.addTabs({ onclose: (name) => {
                     delete this.openedTabs[name];
@@ -521,7 +593,7 @@ class CodeEditor {
                         LX.removeClas(this.cursorsDOM, 'show');
                     }
                 } });
-            LX.addClass(this.tabs.root.parentElement, "rounded-t-lg");
+            LX.addClass(this.tabs.root.parentElement, 'rounded-t-lg');
             if (!this.disableEdition) {
                 this.tabs.root.parentElement.addEventListener('dblclick', (e) => {
                     if (options.allowAddScripts ?? true) {
@@ -535,12 +607,13 @@ class CodeEditor {
         else {
             this.codeArea = new LX.Area({ skipAppend: true });
             this.area.attach(this.codeArea);
-            const loadFileButton = LX.makeElement("button", "grid absolute self-center z-100 p-3 rounded-full bg-secondary hover:bg-tertiary cursor-pointer border", LX.makeIcon("FolderOpen").innerHTML, this.area, {
-                bottom: "8px"
+            const loadFileButton = LX.makeElement('button', 'grid absolute self-center z-100 p-3 rounded-full bg-secondary hover:bg-tertiary cursor-pointer border', LX.makeIcon('FolderOpen').innerHTML, this.area, {
+                bottom: '8px'
             });
-            loadFileButton.addEventListener("click", (e) => {
+            loadFileButton.addEventListener('click', (e) => {
                 const dropdownOptions = [];
-                for (const [key, value] of [...Object.entries(this.loadedTabs).slice(1), ...Object.entries(this._tabStorage)]) {
+                for (const [key, value] of [...Object.entries(this.loadedTabs).slice(1),
+                    ...Object.entries(this._tabStorage)]) {
                     const icon = this._getFileIcon(key);
                     const classes = icon ? icon.split(' ') : [];
                     dropdownOptions.push({
@@ -552,11 +625,11 @@ class CodeEditor {
                         }
                     });
                 }
-                new LX.DropdownMenu(loadFileButton, dropdownOptions, { side: "top", align: "center" });
+                new LX.DropdownMenu(loadFileButton, dropdownOptions, { side: 'top', align: 'center' });
             });
         }
         this.codeArea.root.classList.add('lexcodearea');
-        const codeResizeObserver = new ResizeObserver(entries => {
+        const codeResizeObserver = new ResizeObserver((entries) => {
             if (!this.code) {
                 return;
             }
@@ -566,13 +639,13 @@ class CodeEditor {
         // Full editor
         area.root.classList.add('codebasearea');
         const observer = new MutationObserver((e) => {
-            if (e[0].attributeName == "style") {
+            if (e[0].attributeName == 'style') {
                 this.resize();
             }
         });
         observer.observe(area.root.parentNode, {
             attributes: true,
-            attributeFilter: ['class', 'style'],
+            attributeFilter: ['class', 'style']
         });
         this.root = this.area.root;
         this.root.tabIndex = -1;
@@ -583,7 +656,7 @@ class CodeEditor {
             this.root.addEventListener('focusout', this.processFocus.bind(this, false));
         }
         else {
-            this.root.classList.add("disabled");
+            this.root.classList.add('disabled');
         }
         this.root.addEventListener('mousedown', this.processMouse.bind(this));
         this.root.addEventListener('mouseup', this.processMouse.bind(this));
@@ -603,7 +676,7 @@ class CodeEditor {
         // Store here selections per cursor
         this.selections = {};
         // Css char synchronization
-        this.xPadding = CodeEditor.LINE_GUTTER_WIDTH + "px";
+        this.xPadding = CodeEditor.LINE_GUTTER_WIDTH + 'px';
         // Add main cursor
         this._addCursor(0, 0, true, true);
         // Scroll stuff
@@ -625,8 +698,10 @@ class CodeEditor {
                         // Scroll down...
                         if (scrollTop > lastScrollTopValue) {
                             if (this.visibleLinesViewport.y < (this.code.lines.length - 1)) {
-                                const totalLinesInViewport = ((this.codeScroller.offsetHeight) / this.lineHeight) | 0;
-                                const scrollDownBoundary = (Math.max(this.visibleLinesViewport.y - totalLinesInViewport, 0) - 1) * this.lineHeight;
+                                const totalLinesInViewport = ((this.codeScroller.offsetHeight) / this.lineHeight)
+                                    | 0;
+                                const scrollDownBoundary = (Math.max(this.visibleLinesViewport.y - totalLinesInViewport, 0) - 1)
+                                    * this.lineHeight;
                                 if (scrollTop >= scrollDownBoundary) {
                                     this.processLines(CodeEditor.UPDATE_VISIBLE_LINES);
                                 }
@@ -650,7 +725,7 @@ class CodeEditor {
                     if (e.ctrlKey) {
                         e.preventDefault();
                         e.stopPropagation();
-                        (e.deltaY > 0.0 ? this._decreaseFontSize() : this._increaseFontSize());
+                        e.deltaY > 0.0 ? this._decreaseFontSize() : this._increaseFontSize();
                     }
                 });
                 this.codeScroller.addEventListener('wheel', (e) => {
@@ -666,7 +741,7 @@ class CodeEditor {
         {
             // This is only the container, line numbers are in the same line div
             this.gutter = document.createElement('div');
-            this.gutter.className = "lexcodegutter";
+            this.gutter.className = 'lexcodegutter';
             area.attach(this.gutter);
             // Add custom vertical scroll bar
             this.vScrollbar = new ScrollBar(this, ScrollBar.SCROLLBAR_VERTICAL);
@@ -680,22 +755,25 @@ class CodeEditor {
             // Add autocomplete box
             {
                 this.autocomplete = document.createElement('div');
-                this.autocomplete.className = "autocomplete";
+                this.autocomplete.className = 'autocomplete';
                 this.codeArea.attach(this.autocomplete);
             }
             // Add search box
             {
                 const box = document.createElement('div');
-                box.className = "searchbox";
+                box.className = 'searchbox';
                 const searchPanel = new LX.Panel();
                 box.appendChild(searchPanel.root);
                 searchPanel.sameLine(4);
-                searchPanel.addText(null, "", null, { placeholder: "Find", inputClass: "bg-secondary" });
-                searchPanel.addButton(null, "up", () => this.search(null, true), { icon: "ArrowUp", title: "Previous Match", tooltip: true });
-                searchPanel.addButton(null, "down", () => this.search(), { icon: "ArrowDown", title: "Next Match", tooltip: true });
-                searchPanel.addButton(null, "x", this.hideSearchBox.bind(this), { icon: "X", title: "Close", tooltip: true });
+                searchPanel.addText(null, '', null, { placeholder: 'Find', inputClass: 'bg-secondary' });
+                searchPanel.addButton(null, 'up', () => this.search(null, true), { icon: 'ArrowUp',
+                    title: 'Previous Match', tooltip: true });
+                searchPanel.addButton(null, 'down', () => this.search(), { icon: 'ArrowDown', title: 'Next Match',
+                    tooltip: true });
+                searchPanel.addButton(null, 'x', this.hideSearchBox.bind(this), { icon: 'X', title: 'Close',
+                    tooltip: true });
                 const searchInput = box.querySelector('input');
-                searchInput?.addEventListener('keyup', e => {
+                searchInput?.addEventListener('keyup', (e) => {
                     if (e.key == 'Escape')
                         this.hideSearchBox();
                     else if (e.key == 'Enter')
@@ -707,15 +785,16 @@ class CodeEditor {
             // Add search LINE box
             {
                 const box = document.createElement('div');
-                box.className = "searchbox";
+                box.className = 'searchbox';
                 const searchPanel = new LX.Panel();
                 box.appendChild(searchPanel.root);
                 searchPanel.sameLine(2);
-                searchPanel.addText(null, "", (value) => {
-                    input.value = ":" + value.replaceAll(':', '');
+                searchPanel.addText(null, '', (value) => {
+                    input.value = ':' + value.replaceAll(':', '');
                     this.goToLine(input.value.slice(1));
-                }, { placeholder: "Go to line", trigger: "input" });
-                searchPanel.addButton(null, "x", this.hideSearchLineBox.bind(this), { icon: "X", title: "Close", tooltip: true });
+                }, { placeholder: 'Go to line', trigger: 'input' });
+                searchPanel.addButton(null, 'x', this.hideSearchLineBox.bind(this), { icon: 'X', title: 'Close',
+                    tooltip: true });
                 let input = box.querySelector('input');
                 input.addEventListener('keyup', (e) => {
                     if (e.key == 'Escape')
@@ -728,7 +807,7 @@ class CodeEditor {
         // Add code-sizer
         {
             this.codeSizer = document.createElement('div');
-            this.codeSizer.className = "code-sizer pseudoparent-tabs";
+            this.codeSizer.className = 'code-sizer pseudoparent-tabs';
             // Append all childs
             while (this.codeScroller.firstChild) {
                 this.codeSizer.appendChild(this.codeScroller.firstChild);
@@ -744,22 +823,30 @@ class CodeEditor {
         };
         // Code
         this.pairKeys = {
-            "\"": "\"",
+            '"': '"',
             "'": "'",
-            "(": ")",
-            "{": "}",
-            "[": "]"
+            '(': ')',
+            '{': '}',
+            '[': ']'
         };
         this.stringKeys = {
-            "@\"": "\"",
+            '@"': '"',
             "@'": "'"
         };
         // Scan tokens..
         // setInterval( this.scanWordSuggestions.bind( this ), 2000 );
         this.specialKeys = [
-            'Backspace', 'Enter', 'ArrowUp', 'ArrowDown',
-            'ArrowRight', 'ArrowLeft', 'Delete', 'Home',
-            'End', 'Tab', 'Escape'
+            'Backspace',
+            'Enter',
+            'ArrowUp',
+            'ArrowDown',
+            'ArrowRight',
+            'ArrowLeft',
+            'Delete',
+            'Home',
+            'End',
+            'Tab',
+            'Escape'
         ];
         // Convert reserved word arrays to maps so we can search tokens faster
         if (!CodeEditor._staticReady) {
@@ -771,8 +858,9 @@ class CodeEditor {
                 CodeEditor.types[lang] = new Set(CodeEditor.types[lang]);
             for (let lang in CodeEditor.builtIn)
                 CodeEditor.builtIn[lang] = new Set(CodeEditor.builtIn[lang]);
-            for (let lang in CodeEditor.statements)
+            for (let lang in CodeEditor.statements) {
                 CodeEditor.statements[lang] = new Set(CodeEditor.statements[lang]);
+            }
             for (let lang in CodeEditor.symbols)
                 CodeEditor.symbols[lang] = new Set(CodeEditor.symbols[lang]);
             CodeEditor._staticReady = true;
@@ -780,10 +868,12 @@ class CodeEditor {
         // Action keys
         {
             this.action('Escape', false, (ln, cursor, e) => {
-                if (this.hideAutoCompleteBox())
+                if (this.hideAutoCompleteBox()) {
                     return;
-                if (this.hideSearchBox())
+                }
+                if (this.hideSearchBox()) {
                     return;
+                }
                 // Remove selections and cursors
                 this.endSelection();
                 this._removeSecondaryCursors();
@@ -912,23 +1002,28 @@ class CodeEditor {
             this.action('End', false, (ln, cursor, e) => {
                 if ((e.shiftKey || e._shiftKey) && !e.cancelShift) {
                     var string = this.code.lines[ln].substring(cursor.position);
-                    if (!cursor.selection)
+                    if (!cursor.selection) {
                         this.startSelection(cursor);
-                    if (cursor.selection.sameLine())
+                    }
+                    if (cursor.selection.sameLine()) {
                         cursor.selection.selectInline(cursor, cursor.position, cursor.line, this.measureString(string));
+                    }
                     else {
                         this.resetCursorPos(CodeEditor.CURSOR_LEFT, cursor);
                         this.cursorToString(cursor, this.code.lines[ln]);
                         this._processSelection(cursor, e);
                     }
                 }
-                else if (!e.keepSelection)
+                else if (!e.keepSelection) {
                     this.endSelection();
+                }
                 this.resetCursorPos(CodeEditor.CURSOR_LEFT, cursor);
                 this.cursorToString(cursor, this.code.lines[ln]);
-                var viewportSizeX = (this.codeScroller.clientWidth + this.getScrollLeft()) - CodeEditor.LINE_GUTTER_WIDTH; // Gutter offset
-                if ((cursor.position * this.charWidth) >= viewportSizeX)
+                var viewportSizeX = (this.codeScroller.clientWidth + this.getScrollLeft())
+                    - CodeEditor.LINE_GUTTER_WIDTH; // Gutter offset
+                if ((cursor.position * this.charWidth) >= viewportSizeX) {
                     this.setScrollLeft(this.code.lines[ln].length * this.charWidth);
+                }
                 // Merge cursors
                 this.mergeCursors(ln);
             });
@@ -945,7 +1040,7 @@ class CodeEditor {
                 this._addUndoStep(cursor, true);
                 var _c0 = this.getCharAtPos(cursor, -1);
                 var _c1 = this.getCharAtPos(cursor);
-                this.code.lines.splice(cursor.line + 1, 0, "");
+                this.code.lines.splice(cursor.line + 1, 0, '');
                 this.code.lines[cursor.line + 1] = this.code.lines[ln].substr(cursor.position); // new line (below)
                 this.code.lines[ln] = this.code.lines[ln].substr(0, cursor.position); // line above
                 this.lineDown(cursor, true);
@@ -953,9 +1048,9 @@ class CodeEditor {
                 var spaces = firstNonspaceIndex(this.code.lines[ln]);
                 var tabs = Math.floor(spaces / this.tabSpaces);
                 if (_c0 == '{' && _c1 == '}') {
-                    this.code.lines.splice(cursor.line, 0, "");
+                    this.code.lines.splice(cursor.line, 0, '');
                     this._addSpaceTabs(cursor, tabs + 1);
-                    this.code.lines[cursor.line + 1] = " ".repeat(spaces) + this.code.lines[cursor.line + 1];
+                    this.code.lines[cursor.line + 1] = ' '.repeat(spaces) + this.code.lines[cursor.line + 1];
                 }
                 else {
                     this._addSpaceTabs(cursor, tabs);
@@ -966,8 +1061,9 @@ class CodeEditor {
                 // Move cursor..
                 if (!this.isAutoCompleteActive) {
                     if (e.shiftKey) {
-                        if (!cursor.selection)
+                        if (!cursor.selection) {
                             this.startSelection(cursor);
+                        }
                         this.lineUp(cursor);
                         var letter = this.getCharAtPos(cursor);
                         if (!letter) {
@@ -993,8 +1089,9 @@ class CodeEditor {
                 // Move cursor..
                 if (!this.isAutoCompleteActive) {
                     if (e.shiftKey) {
-                        if (!cursor.selection)
+                        if (!cursor.selection) {
                             this.startSelection(cursor);
+                        }
                     }
                     else {
                         this.endSelection();
@@ -1017,8 +1114,9 @@ class CodeEditor {
             });
             this.action('ArrowLeft', false, (ln, cursor, e) => {
                 // Nothing to do..
-                if (cursor.line == 0 && cursor.position == 0)
+                if (cursor.line == 0 && cursor.position == 0) {
                     return;
+                }
                 if (e.metaKey) { // Apple devices (Command)
                     e.preventDefault();
                     this.actions['Home'].callback(ln, cursor, e);
@@ -1039,14 +1137,17 @@ class CodeEditor {
                     var substr = word.substr(0, diff);
                     // Selections...
                     if (e.shiftKey) {
-                        if (!cursor.selection)
+                        if (!cursor.selection) {
                             this.startSelection(cursor);
+                        }
                     }
-                    else
+                    else {
                         this.endSelection();
+                    }
                     this.cursorToString(cursor, substr, true);
-                    if (e.shiftKey)
+                    if (e.shiftKey) {
                         this._processSelection(cursor, e);
+                    }
                 }
                 else {
                     var letter = this.getCharAtPos(cursor, -1);
@@ -1060,8 +1161,9 @@ class CodeEditor {
                         else {
                             if (!cursor.selection) {
                                 this.cursorToLeft(letter, cursor);
-                                if (this.useAutoComplete && this.isAutoCompleteActive)
+                                if (this.useAutoComplete && this.isAutoCompleteActive) {
                                     this.showAutoCompleteBox('foo', cursor);
+                                }
                             }
                             else {
                                 cursor.selection.invertIfNecessary();
@@ -1087,16 +1189,15 @@ class CodeEditor {
             });
             this.action('ArrowRight', false, (ln, cursor, e) => {
                 // Nothing to do..
-                if (cursor.line == this.code.lines.length - 1 &&
-                    cursor.position == this.code.lines[cursor.line].length)
+                if (cursor.line == this.code.lines.length - 1
+                    && cursor.position == this.code.lines[cursor.line].length) {
                     return;
-                if (e.metaKey) // Apple devices (Command)
-                 {
+                }
+                if (e.metaKey) { // Apple devices (Command)
                     e.preventDefault();
                     this.actions['End'].callback(ln, cursor, e);
                 }
-                else if (e.ctrlKey) // Next word
-                 {
+                else if (e.ctrlKey) { // Next word
                     // Get next word
                     const [word, from, to] = this.getWordAtPos(cursor);
                     // If no length, we change line..
@@ -1106,31 +1207,36 @@ class CodeEditor {
                     var substr = word.substr(diff);
                     // Selections...
                     if (e.shiftKey) {
-                        if (!cursor.selection)
+                        if (!cursor.selection) {
                             this.startSelection(cursor);
+                        }
                     }
-                    else
+                    else {
                         this.endSelection();
+                    }
                     this.cursorToString(cursor, substr);
-                    if (e.shiftKey)
+                    if (e.shiftKey) {
                         this._processSelection(cursor, e);
+                    }
                 }
-                else // Next char
-                 {
+                // Next char
+                else {
                     var letter = this.getCharAtPos(cursor);
                     if (letter) {
                         // Selecting chars
                         if (e.shiftKey) {
-                            if (!cursor.selection)
+                            if (!cursor.selection) {
                                 this.startSelection(cursor);
+                            }
                             this.cursorToRight(letter, cursor);
                             this._processSelection(cursor, e, false, CodeEditor.SELECTION_X);
                         }
                         else {
                             if (!cursor.selection) {
                                 this.cursorToRight(letter, cursor);
-                                if (this.useAutoComplete && this.isAutoCompleteActive)
+                                if (this.useAutoComplete && this.isAutoCompleteActive) {
                                     this.showAutoCompleteBox('foo', cursor);
+                                }
                             }
                             else {
                                 cursor.selection.invertIfNecessary();
@@ -1165,22 +1271,22 @@ class CodeEditor {
             if (this.statusPanel) {
                 area.attach(this.statusPanel);
             }
-            if (document.fonts.status == "loading") {
+            if (document.fonts.status == 'loading') {
                 await document.fonts.ready;
             }
             // Load any font size from local storage
-            const savedFontSize = window.localStorage.getItem("lexcodeeditor-font-size");
+            const savedFontSize = window.localStorage.getItem('lexcodeeditor-font-size');
             if (savedFontSize) {
                 this._setFontSize(parseInt(savedFontSize));
             }
-            else // Use default size
-             {
+            // Use default size
+            else {
                 const r = document.querySelector(':root');
                 const s = getComputedStyle(r);
-                this.fontSize = parseInt(s.getPropertyValue("--code-editor-font-size"));
+                this.fontSize = parseInt(s.getPropertyValue('--code-editor-font-size'));
                 this.charWidth = this._measureChar();
             }
-            LX.emitSignal("@font-size", this.fontSize);
+            LX.emitSignal('@font-size', this.fontSize);
             // Get final sizes for editor elements based on Tabs and status bar offsets
             LX.doAsync(() => {
                 this._verticalTopOffset = this.tabs?.root.getBoundingClientRect().height ?? 0;
@@ -1202,17 +1308,18 @@ class CodeEditor {
         };
         if (options.allowAddScripts ?? true) {
             this.onCreateFile = options.onCreateFile;
-            this.addTab("+", false, "Create file");
+            this.addTab('+', false, 'Create file');
         }
         if (options.files) {
-            console.assert(options.files.constructor === Array, "_files_ must be an Array!");
+            console.assert(options.files.constructor === Array, '_files_ must be an Array!');
             const numFiles = options.files.length;
-            const loadAsync = (options.filesAsync !== undefined);
+            const loadAsync = options.filesAsync !== undefined;
             let filesLoaded = 0;
             for (let url of options.files) {
                 const finalUrl = url.constructor === Array ? url[0] : url;
                 const finalFileName = url.constructor === Array ? url[1] : undefined;
-                await this.loadFile(finalUrl, { filename: finalFileName, async: loadAsync, callback: (name, text) => {
+                await this.loadFile(finalUrl, { filename: finalFileName, async: loadAsync,
+                    callback: (name, text) => {
                         filesLoaded++;
                         if (filesLoaded == numFiles) {
                             onLoadAll();
@@ -1225,14 +1332,16 @@ class CodeEditor {
         }
         else {
             if (options.defaultTab ?? true) {
-                this.addTab(options.name || "untitled", true, options.title, { language: options.highlight ?? "Plain Text" });
+                this.addTab(options.name || 'untitled', true, options.title, {
+                    language: options.highlight ?? 'Plain Text'
+                });
             }
             onLoadAll();
         }
     }
     // Clear signals
     clear() {
-        console.assert(this.rightStatusPanel && this.leftStatusPanel, "No panels to clear.");
+        console.assert(this.rightStatusPanel && this.leftStatusPanel, 'No panels to clear.');
         this.rightStatusPanel.clear();
         this.leftStatusPanel.clear();
     }
@@ -1243,14 +1352,14 @@ class CodeEditor {
     onKeyPressed(e) {
         // Toggle visibility of the file explorer
         if (e.key == 'b' && e.ctrlKey && this.useFileExplorer) {
-            this.explorerArea.root.classList.toggle("hidden");
+            this.explorerArea.root.classList.toggle('hidden');
             if (this._lastBaseareaWidth) {
                 this.baseArea.root.style.width = this._lastBaseareaWidth;
                 delete this._lastBaseareaWidth;
             }
             else {
                 this._lastBaseareaWidth = this.baseArea.root.style.width;
-                this.baseArea.root.style.width = "100%";
+                this.baseArea.root.style.width = '100%';
             }
         }
     }
@@ -1258,7 +1367,7 @@ class CodeEditor {
         return this.code.lines.join(min ? ' ' : '\n');
     }
     // This can be used to empty all text...
-    setText(text = "", langString) {
+    setText(text = '', langString) {
         let newLines = text.split('\n');
         this.code.lines = [].concat(newLines);
         this._removeSecondaryCursors();
@@ -1292,15 +1401,16 @@ class CodeEditor {
                 this.code.lines[lidx].slice(0, cursor.position),
                 firstLine
             ].join('');
-            this.cursorToPosition(cursor, (cursor.position + (firstLine?.length ?? 0)));
+            this.cursorToPosition(cursor, cursor.position + (firstLine?.length ?? 0));
             // Enter next lines...
             let _text = null;
             for (var i = 0; i < newLines.length; ++i) {
                 _text = newLines[i];
                 this.cursorToLine(cursor, cursor.line++, true);
                 // Add remaining...
-                if (i == (newLines.length - 1))
+                if (i == (newLines.length - 1)) {
                     _text += remaining;
+                }
                 this.code.lines.splice(1 + lidx + i, 0, _text);
             }
             if (_text)
@@ -1315,7 +1425,7 @@ class CodeEditor {
                 newLines[0],
                 this.code.lines[lidx].slice(cursor.position)
             ].join('');
-            this.cursorToPosition(cursor, (cursor.position + newLines[0].length));
+            this.cursorToPosition(cursor, cursor.position + newLines[0].length);
             this.processLine(lidx);
         }
         this.resize(CodeEditor.RESIZE_SCROLLBAR_H_V, undefined, () => {
@@ -1365,7 +1475,7 @@ class CodeEditor {
             const filename = file;
             const name = options.filename ?? filename.substring(filename.lastIndexOf('/') + 1);
             if (options.async ?? false) {
-                const text = await this._requestFileAsync(filename, "text");
+                const text = await this._requestFileAsync(filename, 'text');
                 _innerAddTab(text, name, options.filename ?? filename);
             }
             else {
@@ -1374,11 +1484,11 @@ class CodeEditor {
                     } });
             }
         }
-        else // File Blob
-         {
+        // File Blob
+        else {
             const fr = new FileReader();
             fr.readAsText(file);
-            fr.onload = e => {
+            fr.onload = (e) => {
                 const text = e.currentTarget.result;
                 _innerAddTab(text, file.name);
             };
@@ -1386,8 +1496,9 @@ class CodeEditor {
     }
     _addUndoStep(cursor, force = false, deleteRedo = true) {
         // Only the mainc cursor stores undo steps
-        if (!cursor.isMain)
+        if (!cursor.isMain) {
             return;
+        }
         const d = new Date();
         const current = d.getTime();
         if (!force) {
@@ -1471,7 +1582,7 @@ class CodeEditor {
         if (override) {
             this.code.languageOverride = langString;
         }
-        this._updateDataInfoPanel("@highlight", langString);
+        this._updateDataInfoPanel('@highlight', langString);
         this.mustProcessLines = true;
         const ext = langExtension ?? CodeEditor.languages[langString].ext;
         const icon = this._getFileIcon(null, ext);
@@ -1481,14 +1592,13 @@ class CodeEditor {
             tab.firstChild.remove();
             console.assert(tab != undefined);
             var iconEl;
-            if (!icon.includes('.')) // Not a file
-             {
+            if (!icon.includes('.')) { // Not a file
                 const classes = icon.split(' ');
                 iconEl = LX.makeIcon(classes[0], { svgClass: classes.slice(0).join(' ') });
             }
             else {
                 iconEl = document.createElement('img');
-                iconEl.src = "https://raw.githubusercontent.com/jxarco/lexgui.js/master/" + icon;
+                iconEl.src = 'https://raw.githubusercontent.com/jxarco/lexgui.js/master/' + icon;
             }
             tab.prepend(iconEl);
         }
@@ -1523,37 +1633,47 @@ class CodeEditor {
         if (this.skipInfo) {
             return;
         }
-        let panel = new LX.Panel({ className: "lexcodetabinfo flex flex-row", height: "auto" });
+        let panel = new LX.Panel({ className: 'lexcodetabinfo flex flex-row', height: 'auto' });
         if (this.onCreateStatusPanel) {
             this.onCreateStatusPanel(panel, this);
         }
-        let leftStatusPanel = this.leftStatusPanel = new LX.Panel({ id: "FontSizeZoomStatusComponent", height: "auto" });
+        let leftStatusPanel = this.leftStatusPanel = new LX.Panel({ id: 'FontSizeZoomStatusComponent',
+            height: 'auto' });
         leftStatusPanel.sameLine();
         if (this.skipTabs) {
-            leftStatusPanel.addButton(null, "ZoomOutButton", this._decreaseFontSize.bind(this), { icon: "ZoomOut", width: "32px", title: "Zoom Out", tooltip: true });
+            leftStatusPanel.addButton(null, 'ZoomOutButton', this._decreaseFontSize.bind(this), { icon: 'ZoomOut',
+                width: '32px', title: 'Zoom Out', tooltip: true });
         }
-        leftStatusPanel.addButton(null, "ZoomOutButton", this._decreaseFontSize.bind(this), { icon: "ZoomOut", width: "32px", title: "Zoom Out", tooltip: true });
-        leftStatusPanel.addLabel(this.fontSize, { fit: true, signal: "@font-size" });
-        leftStatusPanel.addButton(null, "ZoomInButton", this._increaseFontSize.bind(this), { icon: "ZoomIn", width: "32px", title: "Zoom In", tooltip: true });
-        leftStatusPanel.endLine("justify-start");
+        leftStatusPanel.addButton(null, 'ZoomOutButton', this._decreaseFontSize.bind(this), { icon: 'ZoomOut',
+            width: '32px', title: 'Zoom Out', tooltip: true });
+        leftStatusPanel.addLabel(this.fontSize, { fit: true, signal: '@font-size' });
+        leftStatusPanel.addButton(null, 'ZoomInButton', this._increaseFontSize.bind(this), { icon: 'ZoomIn',
+            width: '32px', title: 'Zoom In', tooltip: true });
+        leftStatusPanel.endLine('justify-start');
         panel.attach(leftStatusPanel.root);
-        let rightStatusPanel = this.rightStatusPanel = new LX.Panel({ height: "auto" });
+        let rightStatusPanel = this.rightStatusPanel = new LX.Panel({ height: 'auto' });
         rightStatusPanel.sameLine();
-        rightStatusPanel.addLabel(this.code?.title ?? "", { id: "EditorFilenameStatusComponent", fit: true, signal: "@tab-name" });
-        rightStatusPanel.addButton(null, "Ln 1, Col 1", this.showSearchLineBox.bind(this), { id: "EditorSelectionStatusComponent", fit: true, signal: "@cursor-data" });
-        rightStatusPanel.addButton(null, "Spaces: " + this.tabSpaces, (value, event) => {
-            LX.addContextMenu("Spaces", event, (m) => {
+        rightStatusPanel.addLabel(this.code?.title ?? '', { id: 'EditorFilenameStatusComponent', fit: true,
+            signal: '@tab-name' });
+        rightStatusPanel.addButton(null, 'Ln 1, Col 1', this.showSearchLineBox.bind(this), {
+            id: 'EditorSelectionStatusComponent',
+            fit: true,
+            signal: '@cursor-data'
+        });
+        rightStatusPanel.addButton(null, 'Spaces: ' + this.tabSpaces, (value, event) => {
+            LX.addContextMenu('Spaces', event, (m) => {
                 const options = [2, 4, 8];
-                for (const n of options)
+                for (const n of options) {
                     m.add(n, (v) => {
                         this.tabSpaces = v;
                         this.processLines();
-                        this._updateDataInfoPanel("@tab-spaces", "Spaces: " + this.tabSpaces);
+                        this._updateDataInfoPanel('@tab-spaces', 'Spaces: ' + this.tabSpaces);
                     });
+                }
             });
-        }, { id: "EditorIndentationStatusComponent", nameWidth: "15%", signal: "@tab-spaces" });
-        rightStatusPanel.addButton("<b>{ }</b>", this.highlight, (value, event) => {
-            LX.addContextMenu("Language", event, (m) => {
+        }, { id: 'EditorIndentationStatusComponent', nameWidth: '15%', signal: '@tab-spaces' });
+        rightStatusPanel.addButton('<b>{ }</b>', this.highlight, (value, event) => {
+            LX.addContextMenu('Language', event, (m) => {
                 for (const lang of Object.keys(CodeEditor.languages)) {
                     m.add(lang, (v) => {
                         this._changeLanguage(v, undefined, true);
@@ -1561,32 +1681,34 @@ class CodeEditor {
                     });
                 }
             });
-        }, { id: "EditorLanguageStatusComponent", nameWidth: "15%", signal: "@highlight" });
-        rightStatusPanel.endLine("justify-end");
+        }, { id: 'EditorLanguageStatusComponent', nameWidth: '15%', signal: '@highlight' });
+        rightStatusPanel.endLine('justify-end');
         panel.attach(rightStatusPanel.root);
         const itemVisibilityMap = {
-            "Font Size Zoom": options.statusShowFontSizeZoom ?? true,
-            "Editor Filename": options.statusShowEditorFilename ?? true,
-            "Editor Selection": options.statusShowEditorSelection ?? true,
-            "Editor Indentation": options.statusShowEditorIndentation ?? true,
-            "Editor Language": options.statusShowEditorLanguage ?? true,
+            'Font Size Zoom': options.statusShowFontSizeZoom ?? true,
+            'Editor Filename': options.statusShowEditorFilename ?? true,
+            'Editor Selection': options.statusShowEditorSelection ?? true,
+            'Editor Indentation': options.statusShowEditorIndentation ?? true,
+            'Editor Language': options.statusShowEditorLanguage ?? true
         };
         const _setVisibility = (itemName) => {
-            const b = panel.root.querySelector(`#${itemName.replaceAll(" ", "")}StatusComponent`);
+            const b = panel.root.querySelector(`#${itemName.replaceAll(' ', '')}StatusComponent`);
             console.assert(b, `${itemName} has no status button!`);
-            b.classList.toggle("hidden", !itemVisibilityMap[itemName]);
+            b.classList.toggle('hidden', !itemVisibilityMap[itemName]);
         };
         for (const [itemName, v] of Object.entries(itemVisibilityMap)) {
             _setVisibility(itemName);
         }
-        panel.root.addEventListener("contextmenu", (e) => {
-            if (e.target && (e.target.classList.contains("lexpanel") || e.target.classList.contains("lexinlinecomponents"))) {
+        panel.root.addEventListener('contextmenu', (e) => {
+            if (e.target
+                && (e.target.classList.contains('lexpanel')
+                    || e.target.classList.contains('lexinlinecomponents'))) {
                 return;
             }
             const menuOptions = Object.keys(itemVisibilityMap).map((itemName, idx) => {
                 const item = {
                     name: itemName,
-                    icon: "Check",
+                    icon: 'Check',
                     callback: () => {
                         itemVisibilityMap[itemName] = !itemVisibilityMap[itemName];
                         _setVisibility(itemName);
@@ -1596,7 +1718,7 @@ class CodeEditor {
                     delete item.icon;
                 return item;
             });
-            new LX.DropdownMenu(e.target, menuOptions, { side: "top", align: "start" });
+            new LX.DropdownMenu(e.target, menuOptions, { side: 'top', align: 'start' });
         });
         return panel;
     }
@@ -1631,13 +1753,13 @@ class CodeEditor {
             }
         }
         if (langString === undefined) {
-            return "AlignLeft fg-neutral-500";
+            return 'AlignLeft fg-neutral-500';
         }
         const iconPlusClasses = CodeEditor.languages[langString]?.icon;
         if (iconPlusClasses) {
             return iconPlusClasses[extension] ?? iconPlusClasses;
         }
-        return "AlignLeft fg-neutral-500";
+        return 'AlignLeft fg-neutral-500';
     }
     _onNewTab(e) {
         this.processFocus(false);
@@ -1646,22 +1768,23 @@ class CodeEditor {
             return;
         }
         const dmOptions = this.newTabOptions ?? [
-            { name: "Create file", icon: "FilePlus", callback: this._onCreateNewFile.bind(this) },
-            { name: "Load file", icon: "FileUp", disabled: !this.allowLoadingFiles, callback: this.loadTabFromFile.bind(this) }
+            { name: 'Create file', icon: 'FilePlus', callback: this._onCreateNewFile.bind(this) },
+            { name: 'Load file', icon: 'FileUp', disabled: !this.allowLoadingFiles,
+                callback: this.loadTabFromFile.bind(this) }
         ];
-        new LX.DropdownMenu(e.target, dmOptions, { side: "bottom", align: "start" });
+        new LX.DropdownMenu(e.target, dmOptions, { side: 'bottom', align: 'start' });
     }
     _onCreateNewFile() {
         let options = {};
         if (this.onCreateFile) {
             options = this.onCreateFile(this);
-            if (!options) // Skip adding new file
-             {
+            if (!options) { // Skip adding new file
                 return;
             }
         }
-        const name = options.name ?? "unnamed.js";
-        this.addTab(name, true, name, { indexOffset: options.indexOffset, language: options.language ?? "JavaScript" });
+        const name = options.name ?? 'unnamed.js';
+        this.addTab(name, true, name, { indexOffset: options.indexOffset,
+            language: options.language ?? 'JavaScript' });
     }
     _onSelectTab(isNewTabButton, event, name) {
         if (this.disableEdition) {
@@ -1681,7 +1804,7 @@ class CodeEditor {
         this.restoreCursor(cursor, this.code.cursorState);
         this.endSelection();
         this.hideAutoCompleteBox();
-        this._updateDataInfoPanel("@tab-name", name);
+        this._updateDataInfoPanel('@tab-name', name);
         if (this.code.languageOverride) {
             this._changeLanguage(this.code.languageOverride);
         }
@@ -1698,15 +1821,17 @@ class CodeEditor {
             return;
         }
         new LX.DropdownMenu(event.target, [
-            { name: "Close", kbd: "MWB", disabled: !this.allowClosingTabs, callback: () => { this.closeTab(name); } },
-            { name: "Close Others", disabled: !this.allowClosingTabs, callback: () => {
+            { name: 'Close', kbd: 'MWB', disabled: !this.allowClosingTabs, callback: () => {
+                    this.closeTab(name);
+                } },
+            { name: 'Close Others', disabled: !this.allowClosingTabs, callback: () => {
                     for (const [key, data] of Object.entries(this.tabs.tabs)) {
                         if (key === '+' || key === name)
                             continue;
                         this.closeTab(key);
                     }
                 } },
-            { name: "Close All", disabled: !this.allowClosingTabs, callback: () => {
+            { name: 'Close All', disabled: !this.allowClosingTabs, callback: () => {
                     for (const [key, data] of Object.entries(this.tabs.tabs)) {
                         if (key === '+')
                             continue;
@@ -1714,10 +1839,10 @@ class CodeEditor {
                     }
                 } },
             null,
-            { name: "Copy Path", icon: "Copy", callback: () => {
-                    navigator.clipboard.writeText(this.openedTabs[name].path ?? "");
+            { name: 'Copy Path', icon: 'Copy', callback: () => {
+                    navigator.clipboard.writeText(this.openedTabs[name].path ?? '');
                 } }
-        ], { side: "bottom", align: "start", event });
+        ], { side: 'bottom', align: 'start', event });
     }
     addTab(name, selected, title, options = {}) {
         // If already loaded, set new name...
@@ -1728,15 +1853,15 @@ class CodeEditor {
         if (repeats > 0) {
             name = name.split('.').join('_' + repeats + '.');
         }
-        const isNewTabButton = (name === '+');
+        const isNewTabButton = name === '+';
         // Create code content
         let code = document.createElement('div');
         let codeAny = code;
         Object.assign(code, {
-            path: options.path ?? "",
+            path: options.path ?? '',
             className: 'code',
-            lines: [""],
-            language: options.language ?? "Plain Text",
+            lines: [''],
+            language: options.language ?? 'Plain Text',
             cursorState: {},
             undoSteps: [],
             redoSteps: [],
@@ -1748,17 +1873,15 @@ class CodeEditor {
             title: title ?? name,
             tokens: {}
         });
-        code.style.left = "0px",
-            code.style.top = "0px",
-            code.addEventListener('dragenter', function (e) {
-                e.preventDefault();
-                this.parentElement?.classList.add('dragging');
-            });
+        code.style.left = '0px', code.style.top = '0px', code.addEventListener('dragenter', function (e) {
+            e.preventDefault();
+            this.parentElement?.classList.add('dragging');
+        });
         code.addEventListener('dragleave', function (e) {
             e.preventDefault();
             this.parentElement?.classList.remove('dragging');
         });
-        code.addEventListener('drop', e => {
+        code.addEventListener('drop', (e) => {
             e.preventDefault();
             code.parentElement?.classList.remove('dragging');
             if (e.dataTransfer?.files) {
@@ -1808,17 +1931,17 @@ class CodeEditor {
             this.code = lastCode;
         }
         this._processLinesIfNecessary();
-        this._updateDataInfoPanel("@tab-name", name);
+        this._updateDataInfoPanel('@tab-name', name);
         // Bc it could be overrided..
         return name;
     }
     loadCode(name) {
         // Hide all others
-        this.codeSizer.querySelectorAll(".code").forEach((c) => c.classList.add("hidden"));
+        this.codeSizer.querySelectorAll('.code').forEach((c) => c.classList.add('hidden'));
         // Already open...
         if (this.openedTabs[name]) {
             let code = this.openedTabs[name];
-            code.classList.remove("hidden");
+            code.classList.remove('hidden');
             return;
         }
         let code = this.loadedTabs[name];
@@ -1850,7 +1973,7 @@ class CodeEditor {
         this.processLines();
         this._changeLanguageFromExtension(LX.getExtension(name));
         this._processLinesIfNecessary();
-        this._updateDataInfoPanel("@tab-name", code.tabName);
+        this._updateDataInfoPanel('@tab-name', code.tabName);
     }
     loadTab(name) {
         // Already open...
@@ -1877,9 +2000,9 @@ class CodeEditor {
             return;
         }
         // Reset visibility
-        code.style.display = "block";
+        code.style.display = 'block';
         this.openedTabs[name] = code;
-        const isNewTabButton = (name === '+');
+        const isNewTabButton = name === '+';
         const tabIcon = this._getFileIcon(name);
         this.tabs.add(name, code, {
             selected: true,
@@ -1897,7 +2020,7 @@ class CodeEditor {
         this.code = code;
         this.resetCursorPos(CodeEditor.CURSOR_LEFT_TOP, undefined, true);
         this._changeLanguageFromExtension(LX.getExtension(name));
-        this._updateDataInfoPanel("@tab-name", code.tabName);
+        this._updateDataInfoPanel('@tab-name', code.tabName);
         this.processLines();
     }
     closeTab(name, eraseAll = false) {
@@ -1919,7 +2042,7 @@ class CodeEditor {
         input.type = 'file';
         document.body.appendChild(input);
         input.click();
-        input.addEventListener('change', e => {
+        input.addEventListener('change', (e) => {
             const target = e.target;
             if (target.files && target.files[0]) {
                 this.loadFile(target.files[0]);
@@ -1944,7 +2067,7 @@ class CodeEditor {
             return;
         var cursor = this.getCurrentCursor();
         var code_rect = this.code.getBoundingClientRect();
-        var mouse_pos = [(e.clientX - code_rect.x), (e.clientY - code_rect.y)];
+        var mouse_pos = [e.clientX - code_rect.x, e.clientY - code_rect.y];
         // Discard out of lines click...
         var ln = (mouse_pos[1] / this.lineHeight) | 0;
         if (ln < 0)
@@ -1955,10 +2078,12 @@ class CodeEditor {
                 this.processClick(e);
                 this.canOpenContextMenu = !cursor.selection;
                 if (cursor.selection) {
-                    this.canOpenContextMenu = this.canOpenContextMenu || ((cursor.line >= cursor.selection.fromY && cursor.line <= cursor.selection.toY
-                        && cursor.position >= cursor.selection.fromX && cursor.position <= cursor.selection.toX));
-                    if (this.canOpenContextMenu)
+                    this.canOpenContextMenu = this.canOpenContextMenu
+                        || (cursor.line >= cursor.selection.fromY && cursor.line <= cursor.selection.toY
+                            && cursor.position >= cursor.selection.fromX && cursor.position <= cursor.selection.toX);
+                    if (this.canOpenContextMenu) {
                         return;
+                    }
                 }
             }
             this._mouseDown = true;
@@ -1975,8 +2100,7 @@ class CodeEditor {
                 this.processSelections(e);
             }
         }
-        else if (e.type == 'click') // trip
-         {
+        else if (e.type == 'click') { // trip
             switch (e.detail) {
                 case LX.MOUSE_DOUBLE_CLICK:
                     const [word, from, to] = this.getWordAtPos(cursor);
@@ -2001,10 +2125,16 @@ class CodeEditor {
                 return;
             }
             LX.addContextMenu(null, e, (m) => {
-                m.add("Copy", () => { this._copyContent(cursor); });
+                m.add('Copy', () => {
+                    this._copyContent(cursor);
+                });
                 if (!this.disableEdition) {
-                    m.add("Cut", () => { this._cutContent(cursor); });
-                    m.add("Paste", () => { this._pasteContent(cursor); });
+                    m.add('Cut', () => {
+                        this._cutContent(cursor);
+                    });
+                    m.add('Paste', () => {
+                        this._pasteContent(cursor);
+                    });
                 }
                 if (!this.onContextMenu) {
                     return;
@@ -2014,21 +2144,22 @@ class CodeEditor {
                     // Some selections don't depend on mouse up..
                     if (cursor.selection)
                         cursor.selection.invertIfNecessary();
-                    const separator = "_NEWLINE_";
+                    const separator = '_NEWLINE_';
                     let code = this.code.lines.join(separator);
                     // Get linear start index
                     let index = 0;
                     for (let i = 0; i <= cursor.selection.fromY; i++) {
-                        index += (i == cursor.selection.fromY ? cursor.selection.fromX : this.code.lines[i].length);
+                        index += i == cursor.selection.fromY ? cursor.selection.fromX : this.code.lines[i].length;
                     }
                     index += cursor.selection.fromY * separator.length;
-                    const num_chars = cursor.selection.chars + (cursor.selection.toY - cursor.selection.fromY) * separator.length;
+                    const num_chars = cursor.selection.chars
+                        + (cursor.selection.toY - cursor.selection.fromY) * separator.length;
                     const text = code.substr(index, num_chars);
                     content = text.split(separator).join('\n');
                 }
                 const options = this.onContextMenu(this, content, e);
                 if (options.length) {
-                    m.add("");
+                    m.add('');
                     for (const o of options) {
                         m.add(o.path, { disabled: o.disabled, callback: o.callback });
                     }
@@ -2065,7 +2196,8 @@ class CodeEditor {
     processClick(e) {
         var cursor = this.getCurrentCursor();
         var code_rect = this.codeScroller.getBoundingClientRect();
-        var position = [(e.clientX - code_rect.x) + this.getScrollLeft(), (e.clientY - code_rect.y) + this.getScrollTop()];
+        var position = [(e.clientX - code_rect.x) + this.getScrollLeft(),
+            (e.clientY - code_rect.y) + this.getScrollTop()];
         var ln = (position[1] / this.lineHeight) | 0;
         // Check out of range line
         const outOfRange = ln > this.code.lines.length - 1;
@@ -2112,9 +2244,10 @@ class CodeEditor {
         if (!keepRange) {
             let ccw = true;
             // Check if we must change ccw or not ... (not with mouse)
-            if (!isMouseEvent && cursor.line >= selection.fromY &&
-                (cursor.line == selection.fromY ? cursor.position >= selection.fromX : true)) {
-                ccw = (e && this._lastSelectionKeyDir && (e.key == 'ArrowRight' || e.key == 'ArrowDown' || e.key == 'End'));
+            if (!isMouseEvent && cursor.line >= selection.fromY
+                && (cursor.line == selection.fromY ? cursor.position >= selection.fromX : true)) {
+                ccw = e && this._lastSelectionKeyDir
+                    && (e.key == 'ArrowRight' || e.key == 'ArrowDown' || e.key == 'End');
             }
             if (ccw) {
                 if (flags & CodeEditor.SELECTION_X)
@@ -2141,8 +2274,9 @@ class CodeEditor {
         let cursorSelections = this.selections[cursor.name];
         // Selection goes down...
         if (deltaY >= 0) {
-            while (deltaY < (cursorSelections.childElementCount - 1))
+            while (deltaY < (cursorSelections.childElementCount - 1)) {
                 LX.deleteElement(cursorSelections.lastChild);
+            }
             for (let i = fromY; i <= toY; i++) {
                 const sId = i - fromY;
                 const isVisible = i >= this.visibleLinesViewport.x && i <= this.visibleLinesViewport.y;
@@ -2152,17 +2286,19 @@ class CodeEditor {
                     domEl = cursorSelections.childNodes[sId];
                     if (!domEl) {
                         domEl = document.createElement('div');
-                        domEl.className = "lexcodeselection";
+                        domEl.className = 'lexcodeselection';
                         cursorSelections.appendChild(domEl);
                     }
                 }
                 // Compute new width and selection margins
-                let string = "";
-                if (sId == 0) // First line 2 cases (single line, multiline)
-                 {
+                let string = '';
+                if (sId == 0) { // First line 2 cases (single line, multiline)
                     const reverse = fromX > toX;
-                    if (deltaY == 0)
-                        string = !reverse ? this.code.lines[i].substring(fromX, toX) : this.code.lines[i].substring(toX, fromX);
+                    if (deltaY == 0) {
+                        string = !reverse
+                            ? this.code.lines[i].substring(fromX, toX)
+                            : this.code.lines[i].substring(toX, fromX);
+                    }
                     else
                         string = this.code.lines[i].substr(fromX);
                     const pixels = (reverse && deltaY == 0 ? toX : fromX) * this.charWidth;
@@ -2177,16 +2313,17 @@ class CodeEditor {
                 const stringWidth = this.measureString(string);
                 selection.chars += stringWidth / this.charWidth;
                 if (isVisible) {
-                    domEl.style.width = (stringWidth || (deltaY == 0 ? 0 : 8)) + "px";
+                    domEl.style.width = (stringWidth || (deltaY == 0 ? 0 : 8)) + 'px';
                     domEl._top = i * this.lineHeight;
-                    domEl.style.top = domEl._top + "px";
+                    domEl.style.top = domEl._top + 'px';
                 }
             }
         }
-        else // Selection goes up...
-         {
-            while (Math.abs(deltaY) < (cursorSelections.childElementCount - 1))
+        // Selection goes up...
+        else {
+            while (Math.abs(deltaY) < (cursorSelections.childElementCount - 1)) {
                 LX.deleteElement(cursorSelections.firstChild);
+            }
             for (let i = toY; i <= fromY; i++) {
                 const sId = i - toY;
                 const isVisible = i >= this.visibleLinesViewport.x && i <= this.visibleLinesViewport.y;
@@ -2196,7 +2333,7 @@ class CodeEditor {
                     domEl = cursorSelections.childNodes[sId];
                     if (!domEl) {
                         domEl = document.createElement('div');
-                        domEl.className = "lexcodeselection";
+                        domEl.className = 'lexcodeselection';
                         cursorSelections.appendChild(domEl);
                     }
                 }
@@ -2206,7 +2343,7 @@ class CodeEditor {
                     string = this.code.lines[i].substr(toX);
                     const pixels = toX * this.charWidth;
                     if (isVisible)
-                        domEl.style.left = "calc(" + pixels + "px + " + this.xPadding + ")";
+                        domEl.style.left = 'calc(' + pixels + 'px + ' + this.xPadding + ')';
                 }
                 else {
                     string = (i == fromY) ? this.code.lines[i].substring(0, fromX) : this.code.lines[i]; // Last line, any multiple line...
@@ -2216,17 +2353,18 @@ class CodeEditor {
                 const stringWidth = this.measureString(string);
                 selection.chars += stringWidth / this.charWidth;
                 if (isVisible) {
-                    domEl.style.width = (stringWidth || 8) + "px";
+                    domEl.style.width = (stringWidth || 8) + 'px';
                     domEl._top = i * this.lineHeight;
-                    domEl.style.top = domEl._top + "px";
+                    domEl.style.top = domEl._top + 'px';
                 }
             }
         }
     }
     async processKey(e) {
         const numCursors = this.cursors.length;
-        if (!this.code || e.srcElement?.constructor != HTMLDivElement)
+        if (!this.code || e.srcElement?.constructor != HTMLDivElement) {
             return;
+        }
         const detail = e.detail ?? {};
         const key = e.key ?? detail.key;
         // Do not propagate "space to scroll" event
@@ -2251,8 +2389,9 @@ class CodeEditor {
         for (var i = 0; i < numCursors; i++) {
             let cursor = this.cursors[i];
             // We could delete secondary cursor while iterating..
-            if (!cursor)
+            if (!cursor) {
                 break;
+            }
             // Arrows don't modify code lines.. And only add offset if in the same line
             if (lastProcessedCursor && lastProcessedCursor.line == cursor.line && !key.includes('Arrow')) {
                 cursor.position += cursorOffset.x;
@@ -2262,8 +2401,8 @@ class CodeEditor {
             lastProcessedCursor = this.saveCursor(cursor);
             this._lastProcessedCursorIndex = i;
             this._processKeyAtCursor(e, key, cursor);
-            cursorOffset.x += (cursor.position - lastProcessedCursor.position);
-            cursorOffset.y += (cursor.line - lastProcessedCursor.line);
+            cursorOffset.x += cursor.position - lastProcessedCursor.position;
+            cursorOffset.y += cursor.line - lastProcessedCursor.line;
             // Set active line in case it's blurred
             if (!cursor.selection) {
                 cursor.line = cursor.line;
@@ -2275,8 +2414,9 @@ class CodeEditor {
     async processKeyAtTargetCursor(e, key, targetIdx) {
         let cursor = this.cursors[targetIdx];
         // We could delete secondary cursor while iterating..
-        if (!cursor)
+        if (!cursor) {
             return;
+        }
         this._processKeyAtCursor(e, key, cursor);
         this._processGlobalKeys(e, key);
     }
@@ -2367,7 +2507,7 @@ class CodeEditor {
             return;
         }
         let lidx = cursor.line;
-        this.code.lines[lidx] = this.code.lines[lidx] ?? "";
+        this.code.lines[lidx] = this.code.lines[lidx] ?? '';
         // Check combinations
         const isLastCursor = cursor.isLast();
         if (e.ctrlKey || e.metaKey) {
@@ -2409,8 +2549,9 @@ class CodeEditor {
         }
         // Apply binded actions...
         for (const actKey in this.actions) {
-            if (key != actKey)
+            if (key != actKey) {
                 continue;
+            }
             e.preventDefault();
             if (this._actionMustDelete(cursor, this.actions[key], e)) {
                 this.actions['Backspace'].callback(lidx, cursor, e);
@@ -2418,17 +2559,19 @@ class CodeEditor {
             return this.actions[key].callback(lidx, cursor, e);
         }
         // From now on, don't allow ctrl, shift or meta (mac) combinations
-        if (e.ctrlKey || e.metaKey)
+        if (e.ctrlKey || e.metaKey) {
             return;
+        }
         // Add undo steps
         if (!skipUndo && this.code.lines.length) {
             this._addUndoStep(cursor);
         }
         //  Some custom cases for word enclosing (), {}, "", '', ...
-        const enclosableKeys = ["\"", "'", "(", "{"];
+        const enclosableKeys = ['"', "'", '(', '{'];
         if (enclosableKeys.indexOf(key) > -1) {
-            if (this._encloseSelectedWordWithKey(key, lidx, cursor))
+            if (this._encloseSelectedWordWithKey(key, lidx, cursor)) {
                 return;
+            }
         }
         // Until this point, if there was a selection, we need
         // to delete the content..
@@ -2448,7 +2591,7 @@ class CodeEditor {
         }
         this.cursorToRight(key, cursor);
         //  Some custom cases for auto key pair (), {}, "", '', ...
-        const keyMustPair = (this.pairKeys[key] !== undefined);
+        const keyMustPair = this.pairKeys[key] !== undefined;
         if (keyMustPair && !this.wasKeyPaired) {
             // Make sure to detect later that the key is paired automatically to avoid loops...
             this.wasKeyPaired = true;
@@ -2470,7 +2613,7 @@ class CodeEditor {
         }
     }
     async _pasteContent(cursor) {
-        const mustDetectLanguage = (!this.getText().length);
+        const mustDetectLanguage = !this.getText().length;
         let text = await navigator.clipboard.readText();
         // Remove any possible tabs (\t) and add spaces
         text = text.replaceAll(/\t|\\t/g, ' '.repeat(this.tabSpaces));
@@ -2489,23 +2632,24 @@ class CodeEditor {
         }
     }
     async _copyContent(cursor) {
-        let textToCopy = "";
+        let textToCopy = '';
         if (!cursor.selection) {
-            textToCopy = "\n" + this.code.lines[cursor.line];
+            textToCopy = '\n' + this.code.lines[cursor.line];
         }
         else {
             // Some selections don't depend on mouse up..
             if (cursor.selection)
                 cursor.selection.invertIfNecessary();
-            const separator = "_NEWLINE_";
+            const separator = '_NEWLINE_';
             let code = this.code.lines.join(separator);
             // Get linear start index
             let index = 0;
             for (let i = 0; i <= cursor.selection.fromY; i++) {
-                index += (i == cursor.selection.fromY ? cursor.selection.fromX : this.code.lines[i].length);
+                index += i == cursor.selection.fromY ? cursor.selection.fromX : this.code.lines[i].length;
             }
             index += cursor.selection.fromY * separator.length;
-            const num_chars = cursor.selection.chars + (cursor.selection.toY - cursor.selection.fromY) * separator.length;
+            const num_chars = cursor.selection.chars
+                + (cursor.selection.toY - cursor.selection.fromY) * separator.length;
             const text = code.substr(index, num_chars);
             const lines = text.split(separator);
             textToCopy = lines.join('\n');
@@ -2515,10 +2659,10 @@ class CodeEditor {
     }
     async _cutContent(cursor) {
         let lidx = cursor.line;
-        let textToCut = "";
+        let textToCut = '';
         this._addUndoStep(cursor, true);
         if (!cursor.selection) {
-            textToCut = "\n" + this.code.lines[cursor.line];
+            textToCut = '\n' + this.code.lines[cursor.line];
             this.code.lines.splice(lidx, 1);
             this.processLines();
             this.resetCursorPos(CodeEditor.CURSOR_LEFT, cursor);
@@ -2530,15 +2674,16 @@ class CodeEditor {
             // Some selections don't depend on mouse up..
             if (cursor.selection)
                 cursor.selection.invertIfNecessary();
-            const separator = "_NEWLINE_";
+            const separator = '_NEWLINE_';
             let code = this.code.lines.join(separator);
             // Get linear start index
             let index = 0;
             for (let i = 0; i <= cursor.selection.fromY; i++) {
-                index += (i == cursor.selection.fromY ? cursor.selection.fromX : this.code.lines[i].length);
+                index += i == cursor.selection.fromY ? cursor.selection.fromX : this.code.lines[i].length;
             }
             index += cursor.selection.fromY * separator.length;
-            const numChars = cursor.selection.chars + (cursor.selection.toY - cursor.selection.fromY) * separator.length;
+            const numChars = cursor.selection.chars
+                + (cursor.selection.toY - cursor.selection.fromY) * separator.length;
             const text = code.substr(index, numChars);
             const lines = text.split(separator);
             textToCut = lines.join('\n');
@@ -2570,7 +2715,7 @@ class CodeEditor {
                 return idx < 0 ? 1e10 : idx;
             }));
             if (useCommentBlock) {
-                const tokens = (lang.blockCommentsTokens ?? this.defaultBlockCommentTokens);
+                const tokens = lang.blockCommentsTokens ?? this.defaultBlockCommentTokens;
                 const fromString = this.code.lines[cursor.selection.fromY];
                 let fromIdx = firstNonspaceIndex(fromString);
                 if (fromIdx == -1) {
@@ -2578,11 +2723,11 @@ class CodeEditor {
                 }
                 this.code.lines[cursor.selection.fromY] = [
                     fromString.substring(0, fromIdx),
-                    tokens[0] + " ",
+                    tokens[0] + ' ',
                     fromString.substring(fromIdx)
                 ].join('');
-                this.code.lines[cursor.selection.toY] += " " + tokens[1];
-                cursor.selection.fromX += (tokens[0].length + 1);
+                this.code.lines[cursor.selection.toY] += ' ' + tokens[1];
+                cursor.selection.fromX += tokens[0].length + 1;
                 this._processSelection(cursor);
             }
             else {
@@ -2610,8 +2755,9 @@ class CodeEditor {
     }
     _commentLine(cursor, line, minNonspaceIdx, updateCursor = true) {
         const lang = CodeEditor.languages[this.highlight];
-        if (!(lang.singleLineComments ?? true))
+        if (!(lang.singleLineComments ?? true)) {
             return;
+        }
         const token = (lang.singleLineCommentToken ?? this.defaultSingleLineCommentToken) + ' ';
         const string = this.code.lines[line];
         let idx = firstNonspaceIndex(string);
@@ -2649,29 +2795,31 @@ class CodeEditor {
     }
     _uncommentLine(cursor, line) {
         const lang = CodeEditor.languages[this.highlight];
-        if (!(lang.singleLineComments ?? true))
+        if (!(lang.singleLineComments ?? true)) {
             return;
+        }
         const token = lang.singleLineCommentToken ?? this.defaultSingleLineCommentToken;
         const string = this.code.lines[line];
         if (string.includes(token)) {
             this.code.lines[line] = string.replace(token + ' ', '');
             // try deleting token + space, and then if not, delete only the token
-            if (string.length == this.code.lines[line].length)
+            if (string.length == this.code.lines[line].length) {
                 this.code.lines[line] = string.replace(token, '');
+            }
             this.cursorToString(cursor, 'X'.repeat(Math.abs(string.length - this.code.lines[line].length)), true);
         }
     }
     action(key, deleteSelection = false, fn, eventSkipDeleteFn) {
         this.actions[key] = {
-            "key": key,
-            "callback": fn,
-            "deleteSelection": deleteSelection,
-            "eventSkipDeleteFn": eventSkipDeleteFn
+            'key': key,
+            'callback': fn,
+            'deleteSelection': deleteSelection,
+            'eventSkipDeleteFn': eventSkipDeleteFn
         };
     }
     _actionMustDelete(cursor, action, e) {
-        return cursor.selection && action.deleteSelection &&
-            !(action.eventSkipDeleteFn ? action.eventSkipDeleteFn(cursor, e) : false);
+        return cursor.selection && action.deleteSelection
+            && !(action.eventSkipDeleteFn ? action.eventSkipDeleteFn(cursor, e) : false);
     }
     scanWordSuggestions() {
         this.code.tokens = {};
@@ -2698,15 +2846,16 @@ class CodeEditor {
         if (!this.code) {
             return;
         }
-        var htmlCode = "";
+        var htmlCode = '';
         this._blockCommentCache.length = 0;
         this.mustProcessLines = false;
         // Reset all lines content
-        this.code.innerHTML = "";
+        this.code.innerHTML = '';
         // Get info about lines in viewport
         const lastScrollTop = this.getScrollTop();
-        this.firstLineInViewport = (mode ?? CodeEditor.KEEP_VISIBLE_LINES) & CodeEditor.UPDATE_VISIBLE_LINES ?
-            ((lastScrollTop / this.lineHeight) | 0) : this.firstLineInViewport;
+        this.firstLineInViewport = (mode ?? CodeEditor.KEEP_VISIBLE_LINES) & CodeEditor.UPDATE_VISIBLE_LINES
+            ? ((lastScrollTop / this.lineHeight) | 0)
+            : this.firstLineInViewport;
         const totalLinesInViewport = ((this.codeScroller.offsetHeight) / this.lineHeight) | 0;
         this.visibleLinesViewport = new LX.vec2(Math.max(this.firstLineInViewport - this.lineScrollMargin.x, 0), Math.min(this.firstLineInViewport + totalLinesInViewport + this.lineScrollMargin.y, this.code.lines.length));
         // Add remaining lines if we are near the end of the scroll
@@ -2716,7 +2865,7 @@ class CodeEditor {
                 this.visibleLinesViewport.y += diff;
             }
         }
-        this._scopeStack = [{ name: "", type: "global" }];
+        this._scopeStack = [{ name: '', type: 'global' }];
         // Process visible lines
         for (let i = this.visibleLinesViewport.x; i < this.visibleLinesViewport.y; ++i) {
             htmlCode += this.processLine(i, true);
@@ -2724,7 +2873,7 @@ class CodeEditor {
         this.code.innerHTML = htmlCode;
         // Update scroll data
         this.codeScroller.scrollTop = lastScrollTop;
-        this.code.style.top = (this.visibleLinesViewport.x * this.lineHeight) + "px";
+        this.code.style.top = (this.visibleLinesViewport.x * this.lineHeight) + 'px';
         // Update selections
         this.updateSelections(null, true);
         this._clearTmpVariables();
@@ -2764,9 +2913,9 @@ class CodeEditor {
         this._currentLineString = lineString;
         const tokensToEvaluate = this._getTokensFromLine(lineString);
         if (!tokensToEvaluate.length) {
-            return this._updateLine(force, lineNumber, "", skipPropagation);
+            return this._updateLine(force, lineNumber, '', skipPropagation);
         }
-        let lineInnerHtml = "";
+        let lineInnerHtml = '';
         let pushedScope = false;
         const newSignature = this._getLineSignatureFromTokens(tokensToEvaluate);
         const cachedSignature = this.code.lineSignatures[lineNumber];
@@ -2775,7 +2924,7 @@ class CodeEditor {
         const blockCommentsTokens = lang.blockCommentsTokens ?? this.defaultBlockCommentTokens;
         // Reset scope stack if structural changes in current line
         if (mustUpdateScopes) {
-            this._scopeStack = [{ name: "", type: "global" }];
+            this._scopeStack = [{ name: '', type: 'global' }];
         }
         // Process all tokens
         for (let i = 0; i < tokensToEvaluate.length; ++i) {
@@ -2801,7 +2950,7 @@ class CodeEditor {
             }
             // Compare line signature for structural changes
             // to pop current scope if necessary
-            if (token === "}" && this._scopeStack.length > 1) {
+            if (token === '}' && this._scopeStack.length > 1) {
                 this._scopeStack.pop();
             }
             lineInnerHtml += this._evaluateToken({
@@ -2818,10 +2967,11 @@ class CodeEditor {
             if (blockComments && this._buildingBlockComment != undefined
                 && token.substr(0, blockCommentsTokens[1].length) == blockCommentsTokens[1]) {
                 const [commentLineNumber, tokenPos] = this._buildingBlockComment;
-                this._blockCommentCache.push([new LX.vec2(commentLineNumber, lineNumber), new LX.vec2(tokenPos, tokenStartIndex)]);
+                this._blockCommentCache.push([new LX.vec2(commentLineNumber, lineNumber),
+                    new LX.vec2(tokenPos, tokenStartIndex)]);
                 delete this._buildingBlockComment;
             }
-            if (token !== "{") {
+            if (token !== '{') {
                 continue;
             }
             // Store current scopes
@@ -2850,10 +3000,10 @@ class CodeEditor {
                     }
                 }
             }
-            contextTokens = contextTokens.reverse().filter(v => v.length && v != ' ');
+            contextTokens = contextTokens.reverse().filter((v) => v.length && v != ' ');
             // Keywords that can open a *named* scope
             // TODO: Do this per language
-            const scopeKeywords = ["class", "enum", "function", "interface", "type", "struct", "namespace"];
+            const scopeKeywords = ['class', 'enum', 'function', 'interface', 'type', 'struct', 'namespace'];
             let scopeType = null; // This is the type of scope (function, class, enum, etc)
             let scopeName = null;
             for (let i = 0; i < contextTokens.length; i++) {
@@ -2865,21 +3015,21 @@ class CodeEditor {
                 }
             }
             // Special case: enum type specification `enum Foo : int {`
-            if (scopeType === "enum" && contextTokens.includes(":")) {
-                const colonIndex = contextTokens.indexOf(":");
+            if (scopeType === 'enum' && contextTokens.includes(':')) {
+                const colonIndex = contextTokens.indexOf(':');
                 scopeName = contextTokens[colonIndex + 1] || scopeName;
             }
             if (!scopeType) {
-                const parOpenIndex = contextTokens.indexOf("(");
+                const parOpenIndex = contextTokens.indexOf('(');
                 scopeName = contextTokens[parOpenIndex + 1] || scopeName;
                 if (scopeName) {
-                    scopeType = "method";
+                    scopeType = 'method';
                 }
             }
             // Only push if it's not already reflected in the cached scopes
             const lastScope = this._scopeStack.at(-1);
             if (lastScope?.lineNumber !== lineNumber) {
-                this._scopeStack.push({ name: scopeName ?? "", type: scopeType ?? "anonymous", lineNumber });
+                this._scopeStack.push({ name: scopeName ?? '', type: scopeType ?? 'anonymous', lineNumber });
             }
             pushedScope = true;
         }
@@ -2890,14 +3040,14 @@ class CodeEditor {
     }
     _getLineSignatureFromTokens(tokens) {
         const structuralChars = new Set(['{', '}']);
-        const sign = tokens.filter(t => structuralChars.has(t));
-        return sign.join("_");
+        const sign = tokens.filter((t) => structuralChars.has(t));
+        return sign.join('_');
     }
     _updateBlockComments(section, lineNumber, tokens) {
         const lang = CodeEditor.languages[this.highlight];
         const blockCommentsTokens = lang.blockCommentsTokens ?? this.defaultBlockCommentTokens;
-        const lineOpensBlock = (section[0].x === lineNumber);
-        const lineClosesBlock = (section[0].y === lineNumber);
+        const lineOpensBlock = section[0].x === lineNumber;
+        const lineClosesBlock = section[0].y === lineNumber;
         (section[0].x !== lineNumber) && (section[0].y !== lineNumber);
         delete this._buildingBlockComment;
         /*
@@ -2905,7 +3055,7 @@ class CodeEditor {
             until reaching new delimiters
         */
         if (lineOpensBlock) {
-            const r = tokens.filter(t => t.substr(0, blockCommentsTokens[0].length) == blockCommentsTokens[0]);
+            const r = tokens.filter((t) => t.substr(0, blockCommentsTokens[0].length) == blockCommentsTokens[0]);
             if (!r.length) {
                 this._buildingBlockComment = [lineNumber - 1, 0];
                 this.mustProcessPreviousLine = (tokens) => {
@@ -2927,7 +3077,7 @@ class CodeEditor {
             }
         }
         else if (lineClosesBlock) {
-            const r = tokens.filter(t => t.substr(0, blockCommentsTokens[1].length) == blockCommentsTokens[1]);
+            const r = tokens.filter((t) => t.substr(0, blockCommentsTokens[1].length) == blockCommentsTokens[1]);
             if (!r.length) {
                 this._buildingBlockComment = [section[0].x, section[1].x];
                 this.mustProcessNextLine = (tokens) => {
@@ -2952,7 +3102,7 @@ class CodeEditor {
     }
     _processExtraLineIfNecessary(lineNumber, tokens, oldSymbols, skipPropagation = false) {
         if (!this._scopeStack) {
-            console.warn("CodeEditor: No scope available");
+            console.warn('CodeEditor: No scope available');
             return;
         }
         // Update block comments if necessary
@@ -2969,7 +3119,7 @@ class CodeEditor {
         }
         const newSignature = this._getLineSignatureFromTokens(tokens);
         const cachedSignature = this.code.lineSignatures[lineNumber];
-        const mustUpdateScopes = (cachedSignature !== newSignature);
+        const mustUpdateScopes = cachedSignature !== newSignature;
         const sameScopes = codeScopesEqual(this._scopeStack, this.code.lineScopes[lineNumber + 1]);
         // Only update scope stack if something changed when editing a single line
         // Compare line signature for structural changes
@@ -3000,12 +3150,15 @@ class CodeEditor {
     _updateLine(force = false, lineNumber, html, skipPropagation = false, symbols = [], tokens = []) {
         const gutterLineHtml = `<span class='line-gutter'>${lineNumber + 1}</span>`;
         const oldSymbols = this._updateLineSymbols(lineNumber, symbols);
-        const lineScope = CodeEditor.debugScopes && this.code.lineScopes[lineNumber] ? this.code.lineScopes[lineNumber].map((s) => `${s.type}`).join(", ") : "";
-        const lineSymbols = CodeEditor.debugSymbols && this.code.lineSymbols[lineNumber] ? this.code.lineSymbols[lineNumber].map((s) => `${s.name}(${s.kind})`).join(", ") : "";
-        const debugString = lineScope + (lineScope.length ? " - " : "") + lineSymbols;
-        if (!force) // Single line update
-         {
-            this.code.childNodes[this.toLocalLine(lineNumber)].innerHTML = (gutterLineHtml + html + debugString);
+        const lineScope = CodeEditor.debugScopes && this.code.lineScopes[lineNumber]
+            ? this.code.lineScopes[lineNumber].map((s) => `${s.type}`).join(', ')
+            : '';
+        const lineSymbols = CodeEditor.debugSymbols && this.code.lineSymbols[lineNumber]
+            ? this.code.lineSymbols[lineNumber].map((s) => `${s.name}(${s.kind})`).join(', ')
+            : '';
+        const debugString = lineScope + (lineScope.length ? ' - ' : '') + lineSymbols;
+        if (!force) { // Single line update
+            this.code.childNodes[this.toLocalLine(lineNumber)].innerHTML = gutterLineHtml + html + debugString;
             if (!skipPropagation) {
                 this._processExtraLineIfNecessary(lineNumber, tokens, oldSymbols, skipPropagation);
             }
@@ -3026,7 +3179,7 @@ class CodeEditor {
                 }
             }
             if (CodeEditor.debugProcessedLines) {
-                this.code.childNodes[lineNumber]?.classList.add("debug");
+                this.code.childNodes[lineNumber]?.classList.add('debug');
             }
             this._setActiveLine(lineNumber);
             this._clearTmpVariables();
@@ -3058,31 +3211,34 @@ class CodeEditor {
             symbols.push(s);
         };
         // Don't make symbols from preprocessor lines
-        if (text.startsWith("#")) {
+        if (text.startsWith('#')) {
             return [];
         }
         const nativeTypes = CodeEditor.nativeTypes[this.highlight];
         const topLevelRegexes = [
-            [/^class\s+([A-Za-z0-9_]+)/, "class"],
-            [/^struct\s+([A-Za-z0-9_]+)/, "struct"],
-            [/^enum\s+([A-Za-z0-9_]+)/, "enum"],
-            [/^interface\s+([A-Za-z0-9_]+)/, "interface"],
-            [/^type\s+([A-Za-z0-9_]+)/, "type"],
-            [/^function\s+([A-Za-z0-9_]+)/, "method"],
-            [/^fn\s+([A-Za-z0-9_]+)/, "method"],
-            [/^def\s+([A-Za-z0-9_]+)/, "method"],
-            [/^([A-Za-z0-9_]+)\s*=\s*\(?.*\)?\s*=>/, "method"] // arrow functions
+            [/^class\s+([A-Za-z0-9_]+)/, 'class'],
+            [/^struct\s+([A-Za-z0-9_]+)/, 'struct'],
+            [/^enum\s+([A-Za-z0-9_]+)/, 'enum'],
+            [/^interface\s+([A-Za-z0-9_]+)/, 'interface'],
+            [/^type\s+([A-Za-z0-9_]+)/, 'type'],
+            [/^function\s+([A-Za-z0-9_]+)/, 'method'],
+            [/^fn\s+([A-Za-z0-9_]+)/, 'method'],
+            [/^def\s+([A-Za-z0-9_]+)/, 'method'],
+            [/^([A-Za-z0-9_]+)\s*=\s*\(?.*\)?\s*=>/, 'method'] // arrow functions
         ];
         // Add regexes to detect methods, variables ( including "id : nativeType" )
         {
             if (nativeTypes) {
-                topLevelRegexes.push([new RegExp(`^(?:${nativeTypes.join('|')})\\s+([A-Za-z0-9_]+)\s*[\(]+`), 'method']);
-                if (this.highlight === "WGSL") {
-                    topLevelRegexes.push([new RegExp(`[A-Za-z0-9]+(\\s*)+:(\\s*)+(${nativeTypes.join('|')})`), 'variable', (m) => m[0].split(":")[0].trim()]);
+                topLevelRegexes.push([new RegExp(`^(?:${nativeTypes.join('|')})\\s+([A-Za-z0-9_]+)\s*[\(]+`),
+                    'method']);
+                if (this.highlight === 'WGSL') {
+                    topLevelRegexes.push([new RegExp(`[A-Za-z0-9]+(\\s*)+:(\\s*)+(${nativeTypes.join('|')})`),
+                        'variable', (m) => m[0].split(':')[0].trim()]);
                 }
             }
-            const declarationKeywords = CodeEditor.declarationKeywords[this.highlight] ?? ["const", "let", "var"];
-            topLevelRegexes.push([new RegExp(`^(?:${declarationKeywords.join('|')})\\s+([A-Za-z0-9_]+)`), 'variable']);
+            const declarationKeywords = CodeEditor.declarationKeywords[this.highlight] ?? ['const', 'let', 'var'];
+            topLevelRegexes.push([new RegExp(`^(?:${declarationKeywords.join('|')})\\s+([A-Za-z0-9_]+)`),
+                'variable']);
         }
         for (let [regex, kind, fn] of topLevelRegexes) {
             const m = text.match(regex);
@@ -3091,8 +3247,8 @@ class CodeEditor {
             }
         }
         const usageRegexes = [
-            [/new\s+([A-Za-z0-9_]+)\s*\(/, "constructor-call"],
-            [/this.([A-Za-z_][A-Za-z0-9_]*)\s*\=/, "class-property"],
+            [/new\s+([A-Za-z0-9_]+)\s*\(/, 'constructor-call'],
+            [/this.([A-Za-z_][A-Za-z0-9_]*)\s*\=/, 'class-property']
         ];
         for (let [regex, kind, fn] of usageRegexes) {
             const m = text.match(regex);
@@ -3108,31 +3264,32 @@ class CodeEditor {
             const before = text.slice(0, match.index);
             if (/(new|function|fn|def)\s+$/.test(before))
                 continue; // skip constructor calls
-            if (["constructor", "location", ...(nativeTypes ?? [])].indexOf(name) > -1)
+            if (['constructor', 'location', ...(nativeTypes ?? [])].indexOf(name) > -1)
                 continue; // skip hardcoded non method symbol
-            if (previousLineScope && previousLineScope.at(-1)?.type === "class")
+            if (previousLineScope && previousLineScope.at(-1)?.type === 'class')
                 continue; // skip class methods
-            _pushSymbol({ name, kind: "method-call", scope: scopeName, line: lineNumber });
+            _pushSymbol({ name, kind: 'method-call', scope: scopeName, line: lineNumber });
         }
         // Stop after matches for top-level declarations and usage symbols
         if (symbols.length) {
             return symbols;
         }
-        const nonWhiteSpaceTokens = tokens.filter(t => t.trim().length);
+        const nonWhiteSpaceTokens = tokens.filter((t) => t.trim().length);
         for (let i = 0; i < nonWhiteSpaceTokens.length; i++) {
             const prev = nonWhiteSpaceTokens[i - 1];
             const token = nonWhiteSpaceTokens[i];
             const next = nonWhiteSpaceTokens[i + 1];
-            if (scopeType.startsWith("class")) {
-                if (next === "(" && /^[a-zA-Z_]\w*$/.test(token) && prev === undefined) {
-                    if (token === "constructor")
+            if (scopeType.startsWith('class')) {
+                if (next === '(' && /^[a-zA-Z_]\w*$/.test(token) && prev === undefined) {
+                    if (token === 'constructor')
                         continue; // skip constructor symbol
-                    _pushSymbol({ name: token, kind: "method", scope: scopeName, line: lineNumber });
+                    _pushSymbol({ name: token, kind: 'method', scope: scopeName, line: lineNumber });
                 }
             }
-            else if (scopeType.startsWith("enum")) {
-                if (!isSymbol(token) && !this._isNumber(token) && !this._mustHightlightWord(token, CodeEditor.statements)) {
-                    _pushSymbol({ name: token, kind: "enum_value", scope: scopeName, line: lineNumber });
+            else if (scopeType.startsWith('enum')) {
+                if (!isSymbol(token) && !this._isNumber(token)
+                    && !this._mustHightlightWord(token, CodeEditor.statements)) {
+                    _pushSymbol({ name: token, kind: 'enum_value', scope: scopeName, line: lineNumber });
                 }
             }
         }
@@ -3182,8 +3339,8 @@ class CodeEditor {
             // Count times we started a string BEFORE the comment
             var err = false;
             err = err || (stringKeys.some(function (v) {
-                var re = new RegExp(v, "g");
-                var matches = (lineString.substring(0, idx).match(re) || []);
+                var re = new RegExp(v, 'g');
+                var matches = lineString.substring(0, idx).match(re) || [];
                 return (matches.length % 2) !== 0;
             }));
             return err ? undefined : idx;
@@ -3203,8 +3360,9 @@ class CodeEditor {
         let charCounterList = [];
         let charCounter = 0;
         const pushToken = function (t) {
-            if ((skipNonWords && (t.includes('"') || t.length < 3)))
+            if ((skipNonWords && (t.includes('"') || t.length < 3))) {
                 return;
+            }
             tokensToEvaluate.push(t);
             charCounterList.push(charCounter);
             // Update positions
@@ -3252,7 +3410,7 @@ class CodeEditor {
             }
             const importantIdx = tokens.indexOf('important');
             if (this.highlight == 'CSS' && importantIdx > -1 && tokens[importantIdx - 1] === '!') {
-                tokens[importantIdx - 1] = "!important";
+                tokens[importantIdx - 1] = '!important';
                 tokens.splice(importantIdx, 1);
             }
         }
@@ -3262,11 +3420,11 @@ class CodeEditor {
             while (dollarIdx > -1) {
                 const offsetIdx = dollarIdx + offset;
                 if (tokens[offsetIdx + 1] === 'this-') {
-                    tokens[offsetIdx] = "$this";
-                    tokens[offsetIdx + 1] = "-";
+                    tokens[offsetIdx] = '$this';
+                    tokens[offsetIdx + 1] = '-';
                 }
                 else {
-                    tokens[offsetIdx] += (tokens[offsetIdx + 1] ?? "");
+                    tokens[offsetIdx] += tokens[offsetIdx + 1] ?? '';
                     tokens.splice(offsetIdx + 1, 1);
                 }
                 dollarIdx = tokens.slice(offsetIdx).indexOf('$');
@@ -3278,7 +3436,7 @@ class CodeEditor {
             let atIdx = tokens.indexOf('@');
             while (atIdx > -1) {
                 const offsetIdx = atIdx + offset;
-                tokens[offsetIdx] += (tokens[offsetIdx + 1] ?? "");
+                tokens[offsetIdx] += tokens[offsetIdx + 1] ?? '';
                 tokens.splice(offsetIdx + 1, 1);
                 atIdx = tokens.slice(offsetIdx).indexOf('$');
                 offset = offsetIdx;
@@ -3297,7 +3455,8 @@ class CodeEditor {
         return wordCategory[this.highlight] && wordCategory[this.highlight].has(t);
     }
     _getTokenHighlighting(ctx, highlight) {
-        const rules = [...HighlightRules.common, ...(HighlightRules[highlight] || []), ...HighlightRules.post_common];
+        const rules = [...HighlightRules.common, ...(HighlightRules[highlight] || []),
+            ...HighlightRules.post_common];
         for (const rule of rules) {
             if (!rule.test(ctx, this)) {
                 continue;
@@ -3312,14 +3471,14 @@ class CodeEditor {
     _evaluateToken(ctxData) {
         let { token, prev, next, tokenIndex, isFirstToken, isLastToken } = ctxData;
         const lang = CodeEditor.languages[this.highlight];
-        const highlight = this.highlight.replace(/\s/g, '').replaceAll("+", "p").toLowerCase();
+        const highlight = this.highlight.replace(/\s/g, '').replaceAll('+', 'p').toLowerCase();
         const customStringKeys = Object.assign({}, this.stringKeys);
         const lineNumber = this._currentLineNumber;
         const tokenStartIndex = this._currentTokenPositions[tokenIndex];
-        const inBlockComment = (this._buildingBlockComment ?? this._inBlockCommentSection(lineNumber, tokenStartIndex, token.length)) !== undefined;
+        const inBlockComment = (this._buildingBlockComment ?? this._inBlockCommentSection(lineNumber, tokenStartIndex, token.length))
+            !== undefined;
         var usePreviousTokenToCheckString = false;
-        if (['cpp', 'c'].indexOf(highlight) > -1 && prev && prev.includes('#')) // preprocessor code..
-         {
+        if (['cpp', 'c'].indexOf(highlight) > -1 && prev && prev.includes('#')) { // preprocessor code..
             customStringKeys['@<'] = '>';
         }
         else if (highlight == 'markdown' && (ctxData.prevWithSpaces == '[' || ctxData.nextWithSpaces == ']')) {
@@ -3328,14 +3487,16 @@ class CodeEditor {
             customStringKeys['@['] = ']';
         }
         else if (highlight == 'javascript' || highlight == 'typescript') {
-            customStringKeys["@`"] = "`";
+            customStringKeys['@`'] = '`';
         }
         // Manage strings
         this._stringEnded = false;
-        if (usePreviousTokenToCheckString || (!inBlockComment && (lang.tags ?? false ? (this._enclosedByTokens(token, tokenIndex, '<', '>')) : true))) {
+        if (usePreviousTokenToCheckString
+            || (!inBlockComment
+                && (lang.tags ?? false ? (this._enclosedByTokens(token, tokenIndex, '<', '>')) : true))) {
             const _checkIfStringEnded = (t) => {
                 if (this._stringInterpolation) {
-                    if (token == "$" && next == "{") {
+                    if (token == '$' && next == '{') {
                         delete this._stringInterpolation;
                         this._stringInterpolationOpened = true;
                         this._stringEnded = true;
@@ -3343,15 +3504,17 @@ class CodeEditor {
                     }
                 }
                 const idx = Object.values(customStringKeys).indexOf(t);
-                this._stringEnded = (idx > -1) && (idx == Object.values(customStringKeys).indexOf(customStringKeys['@' + this._buildingString]));
+                this._stringEnded = (idx > -1)
+                    && (idx
+                        == Object.values(customStringKeys).indexOf(customStringKeys['@' + this._buildingString]));
             };
             if (this._buildingString != undefined) {
                 _checkIfStringEnded(usePreviousTokenToCheckString ? ctxData.nextWithSpaces : token);
             }
             else if (customStringKeys['@' + (usePreviousTokenToCheckString ? ctxData.prevWithSpaces : token)]) {
                 // Start new string
-                this._buildingString = (usePreviousTokenToCheckString ? ctxData.prevWithSpaces : token);
-                if ((highlight == 'javascript' || highlight == 'typescript') && token == "`") {
+                this._buildingString = usePreviousTokenToCheckString ? ctxData.prevWithSpaces : token;
+                if ((highlight == 'javascript' || highlight == 'typescript') && token == '`') {
                     this._stringInterpolation = true;
                 }
                 // Check if string ended in same token using next...
@@ -3359,47 +3522,47 @@ class CodeEditor {
                     _checkIfStringEnded(ctxData.nextWithSpaces);
                 }
             }
-            else if (this._stringInterpolationOpened && prev == "}") {
+            else if (this._stringInterpolationOpened && prev == '}') {
                 delete this._stringInterpolationOpened;
                 this._stringInterpolation = true;
-                this._buildingString = "`";
+                this._buildingString = '`';
             }
         }
         // Update context data for next tests
         ctxData.discardToken = false;
         ctxData.inBlockComment = inBlockComment;
         ctxData.markdownHeader = this._markdownHeader;
-        ctxData.inString = (this._buildingString !== undefined);
+        ctxData.inString = this._buildingString !== undefined;
         ctxData.singleLineCommentToken = lang.singleLineCommentToken ?? this.defaultSingleLineCommentToken;
         ctxData.lang = lang;
         ctxData.scope = this._scopeStack.at(-1);
         // Add utils functions for the rules
-        ctxData.isVariableSymbol = (token) => this.code.symbolsTable.has(token) && this.code.symbolsTable.get(token)[0].kind === "variable";
-        ctxData.isEnumValueSymbol = (token) => this.code.symbolsTable.has(token) && this.code.symbolsTable.get(token)[0].kind === "enum_value";
-        ctxData.isClassSymbol = (token) => this.code.symbolsTable.has(token) && this.code.symbolsTable.get(token)[0].kind === "class";
-        ctxData.isStructSymbol = (token) => this.code.symbolsTable.has(token) && this.code.symbolsTable.get(token)[0].kind === "struct";
-        ctxData.isEnumSymbol = (token) => this.code.symbolsTable.has(token) && this.code.symbolsTable.get(token)[0].kind === "enum";
+        ctxData.isVariableSymbol = (token) => this.code.symbolsTable.has(token) && this.code.symbolsTable.get(token)[0].kind === 'variable';
+        ctxData.isEnumValueSymbol = (token) => this.code.symbolsTable.has(token) && this.code.symbolsTable.get(token)[0].kind === 'enum_value';
+        ctxData.isClassSymbol = (token) => this.code.symbolsTable.has(token) && this.code.symbolsTable.get(token)[0].kind === 'class';
+        ctxData.isStructSymbol = (token) => this.code.symbolsTable.has(token) && this.code.symbolsTable.get(token)[0].kind === 'struct';
+        ctxData.isEnumSymbol = (token) => this.code.symbolsTable.has(token) && this.code.symbolsTable.get(token)[0].kind === 'enum';
         // Get highlighting class based on language common and specific rules
         let tokenClass = this._getTokenHighlighting(ctxData, highlight);
         if (this._stringInterpolationOpened && this._pendingString) {
-            this._pendingString = this._pendingString.substring(0, this._pendingString.indexOf("$"));
-            if (ctxData.tokens[tokenIndex + 1] == "{") {
-                ctxData.tokens[tokenIndex + 1] = "${";
+            this._pendingString = this._pendingString.substring(0, this._pendingString.indexOf('$'));
+            if (ctxData.tokens[tokenIndex + 1] == '{') {
+                ctxData.tokens[tokenIndex + 1] = '${';
             }
         }
         // We finished constructing a string
         if (this._buildingString && (this._stringEnded || isLastToken) && !inBlockComment) {
             token = this._getCurrentString();
-            tokenClass = "cm-str";
+            tokenClass = 'cm-str';
             ctxData.discardToken = false;
         }
         // Update state
         this._buildingString = this._stringEnded ? undefined : this._buildingString;
         if (ctxData.discardToken) {
-            return "";
+            return '';
         }
         // Replace html chars
-        token = token.replace("<", "&lt;").replace(">", "&gt;");
+        token = token.replace('<', '&lt;').replace('>', '&gt;');
         // No highlighting, no need to put it inside another span..
         if (!tokenClass) {
             return token;
@@ -3408,7 +3571,7 @@ class CodeEditor {
     }
     _appendStringToken(token) {
         if (!this._pendingString) {
-            this._pendingString = "";
+            this._pendingString = '';
         }
         this._pendingString += token;
         return true;
@@ -3421,15 +3584,19 @@ class CodeEditor {
     _enclosedByTokens(token, tokenIndex, tagStart, tagEnd) {
         const tokenStartIndex = this._currentTokenPositions[tokenIndex];
         const tagStartIndex = indexOfFrom(this._currentLineString, tagStart, tokenStartIndex, true);
-        if (tagStartIndex < 0) // Not found..
+        if (tagStartIndex < 0) { // Not found..
             return;
+        }
         const tagStartIndexOpposite = indexOfFrom(this._currentLineString, tagEnd, tokenStartIndex, true);
-        if (tagStartIndexOpposite >= 0 && tagStartIndexOpposite > tagStartIndex) // Found the opposite first while reversing..
+        if (tagStartIndexOpposite >= 0 && tagStartIndexOpposite > tagStartIndex) { // Found the opposite first while reversing..
             return;
+        }
         const tagEndIndex = indexOfFrom(this._currentLineString, tagEnd, tokenStartIndex);
-        if (tagEndIndex < 0) // Not found..
+        if (tagEndIndex < 0) { // Not found..
             return;
-        if ((tagStartIndex < tokenStartIndex) && (tagEndIndex >= (tokenStartIndex + token.length)) && !this._mustHightlightWord(token, CodeEditor.symbols)) {
+        }
+        if ((tagStartIndex < tokenStartIndex) && (tagEndIndex >= (tokenStartIndex + token.length))
+            && !this._mustHightlightWord(token, CodeEditor.symbols)) {
             return [tagStartIndex, tagEndIndex];
         }
     }
@@ -3440,15 +3607,18 @@ class CodeEditor {
             const lineRange = section[0];
             const posRange = section[1];
             // Outside the lines range
-            const meetsLineRange = (lineNumber >= lineRange.x && lineNumber <= lineRange.y);
+            const meetsLineRange = lineNumber >= lineRange.x && lineNumber <= lineRange.y;
             if (!meetsLineRange) {
                 continue;
             }
-            if ((lineNumber != lineRange.x && lineNumber != lineRange.y) || // Inside the block, not first nor last line
-                (lineNumber == lineRange.x && tokenPosition >= posRange.x &&
-                    ((lineNumber == lineRange.y && (tokenPosition + tokenLength) <= (posRange.y + blockCommentsTokens[1].length)) || lineNumber !== lineRange.y)) ||
-                (lineNumber == lineRange.y && ((tokenPosition + tokenLength) <= (posRange.y + blockCommentsTokens[1].length))) &&
-                    ((lineNumber == lineRange.x && tokenPosition >= posRange.x) || lineNumber !== lineRange.x)) {
+            if ((lineNumber != lineRange.x && lineNumber != lineRange.y) // Inside the block, not first nor last line
+                || (lineNumber == lineRange.x && tokenPosition >= posRange.x
+                    && ((lineNumber == lineRange.y
+                        && (tokenPosition + tokenLength) <= (posRange.y + blockCommentsTokens[1].length))
+                        || lineNumber !== lineRange.y))
+                || (lineNumber == lineRange.y
+                    && ((tokenPosition + tokenLength) <= (posRange.y + blockCommentsTokens[1].length)))
+                    && ((lineNumber == lineRange.x && tokenPosition >= posRange.x) || lineNumber !== lineRange.x)) {
                 return section;
             }
         }
@@ -3467,7 +3637,7 @@ class CodeEditor {
             }
         }
         if (this.highlight == 'Markdown') {
-            isKwd = (this._markdownHeader !== undefined);
+            isKwd = this._markdownHeader !== undefined;
         }
         else if (lang.tags) {
             isKwd = isKwd && (this._enclosedByTokens(token, tokenIndex, '<', '>') != undefined);
@@ -3516,13 +3686,13 @@ class CodeEditor {
         // Change next key?
         switch (key) {
             case "'":
-            case "\"":
+            case '"':
                 break;
-            case "(":
-                key = ")";
+            case '(':
+                key = ')';
                 break;
-            case "{":
-                key = "}";
+            case '{':
+                key = '}';
                 break;
         }
         // Insert the other
@@ -3544,13 +3714,13 @@ class CodeEditor {
         const scores = {};
         // Check strong indicators first
         const strongIndicators = {
-            "JavaScript": ["import ", "export default", "console.", "=>", "document.", "window."],
-            "TypeScript": ["import ", "export default", "console.", "=>", "document.", "window."],
-            "C++": ["#include", "::", "std::", "template <", "using namespace"],
-            "Python": ["def ", "import ", "print(", "self", "None", "True", "False"],
-            "HTML": ["<html", "<div", "<body", "<script", "<style"],
-            "CSS": ["@media"],
-            "Markdown": ["#", "##", "###", "](", "![", "**"],
+            'JavaScript': ['import ', 'export default', 'console.', '=>', 'document.', 'window.'],
+            'TypeScript': ['import ', 'export default', 'console.', '=>', 'document.', 'window.'],
+            'C++': ['#include', '::', 'std::', 'template <', 'using namespace'],
+            'Python': ['def ', 'import ', 'print(', 'self', 'None', 'True', 'False'],
+            'HTML': ['<html', '<div', '<body', '<script', '<style'],
+            'CSS': ['@media'],
+            'Markdown': ['#', '##', '###', '](', '![', '**']
         };
         for (const [lang, indicators] of Object.entries(strongIndicators)) {
             scores[lang] = scores[lang] ?? 0;
@@ -3565,30 +3735,33 @@ class CodeEditor {
             CodeEditor.statements,
             CodeEditor.utils,
             CodeEditor.types,
-            CodeEditor.builtIn,
+            CodeEditor.builtIn
         ];
         for (const group of groups) {
             for (let [lang, wordList] of Object.entries(group)) {
                 scores[lang] = scores[lang] ?? 0;
-                for (let kw of wordList)
+                for (let kw of wordList) {
                     if (tokenSet.has(kw))
                         scores[lang]++;
+                }
             }
         }
         const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]);
         return sorted[0][1] > 0 ? sorted[0][0] : undefined;
     }
     lineUp(cursor, resetLeft = false) {
-        if (this.code.lines[cursor.line - 1] == undefined)
+        if (this.code.lines[cursor.line - 1] == undefined) {
             return false;
+        }
         cursor.line--;
         cursor.line = Math.max(0, cursor.line);
         this.cursorToTop(cursor, resetLeft);
         return true;
     }
     lineDown(cursor, resetLeft = false) {
-        if (this.code.lines[cursor.line + 1] == undefined)
+        if (this.code.lines[cursor.line + 1] == undefined) {
             return false;
+        }
         cursor.line++;
         this.cursorToBottom(cursor, resetLeft);
         return true;
@@ -3615,12 +3788,14 @@ class CodeEditor {
             return;
         clearInterval(this.blinker);
         LX.addClass(this.cursorsDOM, 'show');
-        if (this.cursorBlinkRate > 0)
+        if (this.cursorBlinkRate > 0) {
             this.blinker = setInterval(() => {
                 LX.toggleClass(this.cursorsDOM, 'show');
             }, this.cursorBlinkRate);
-        else if (this.cursorBlinkRate < 0)
+        }
+        else if (this.cursorBlinkRate < 0) {
             LX.removeClass(this.cursorsDOM, 'show');
+        }
     }
     startSelection(cursor) {
         // Show elements
@@ -3641,12 +3816,13 @@ class CodeEditor {
         if (cursor.selection)
             cursor.selection.invertIfNecessary();
         const selection = cursor.selection;
-        const separator = "_NEWLINE_";
+        const separator = '_NEWLINE_';
         let code = this.code.lines.join(separator);
         // Get linear start index
         let index = 0;
-        for (let i = 0; i <= selection.fromY; i++)
-            index += (i == selection.fromY ? selection.fromX : this.code.lines[i].length);
+        for (let i = 0; i <= selection.fromY; i++) {
+            index += i == selection.fromY ? selection.fromX : this.code.lines[i].length;
+        }
         index += selection.fromY * separator.length;
         const num_chars = selection.chars + (selection.toY - selection.fromY) * separator.length;
         const pre = code.slice(0, index);
@@ -3718,7 +3894,7 @@ class CodeEditor {
         // Check if we need to add scroll; if not then we might have to reduce it
         if (!this.updateScrollLeft(cursor)) {
             const leftMargin = this.charWidth;
-            const cursorX = (cursor.position * this.charWidth);
+            const cursorX = cursor.position * this.charWidth;
             const currentScrollLeft = this.getScrollLeft();
             if (cursorX < (currentScrollLeft + leftMargin)) {
                 const scroll = Math.max(cursorX - leftMargin, 0);
@@ -3776,7 +3952,7 @@ class CodeEditor {
     cursorToLine(cursor, line, resetLeft = false) {
         cursor.line = line;
         cursor.top = this.lineHeight * line;
-        cursor.root.style.top = cursor.top + "px";
+        cursor.root.style.top = cursor.top + 'px';
         if (resetLeft)
             this.resetCursorPos(CodeEditor.CURSOR_LEFT, cursor);
     }
@@ -3832,7 +4008,7 @@ class CodeEditor {
         cursor = cursor ?? this.getCurrentCursor();
         if (flag & CodeEditor.CURSOR_LEFT) {
             cursor.left = 0;
-            cursor.root.style.left = "calc(" + this.xPadding + ")";
+            cursor.root.style.left = 'calc(' + this.xPadding + ')';
             cursor.position = 0;
             if (resetScroll) {
                 this.setScrollLeft(0);
@@ -3840,7 +4016,7 @@ class CodeEditor {
         }
         if (flag & CodeEditor.CURSOR_TOP) {
             cursor.top = 0;
-            cursor.root.style.top = "0px";
+            cursor.root.style.top = '0px';
             cursor.line = 0;
             if (resetScroll) {
                 this.setScrollTop(0);
@@ -3851,11 +4027,12 @@ class CodeEditor {
         // If cursor in that position exists, remove it instead..
         const exists = this.cursors.find((v) => v.position == position && v.line == line);
         if (exists && !force) {
-            if (!exists.isMain)
+            if (!exists.isMain) {
                 exists.remove();
+            }
             return null;
         }
-        let cursor = new Cursor("cursor" + this.cursors.length, position, line, isMain, this);
+        let cursor = new Cursor('cursor' + this.cursors.length, position, line, isMain, this);
         this.cursors.push(cursor);
         this.cursorsDOM.appendChild(cursor.root);
         return cursor;
@@ -3898,7 +4075,7 @@ class CodeEditor {
                 }
                 let indentSpaces = lineStart % this.tabSpaces;
                 indentSpaces = indentSpaces == 0 ? this.tabSpaces : this.tabSpaces - indentSpaces;
-                const spacesString = " ".repeat(indentSpaces);
+                const spacesString = ' '.repeat(indentSpaces);
                 this.code.lines[lidx] = [
                     lineString.slice(0, lineStart),
                     spacesString,
@@ -3953,7 +4130,7 @@ class CodeEditor {
             ].join('');
             this.processLine(lidx);
             if (cursor.line === lidx) {
-                this.cursorToString(cursor, " ".repeat(indentSpaces), true);
+                this.cursorToString(cursor, ' '.repeat(indentSpaces), true);
             }
             if (cursor.selection) {
                 if (cursor.selection.fromY === lidx) {
@@ -3969,7 +4146,7 @@ class CodeEditor {
     updateScrollLeft(cursor) {
         cursor = cursor ?? this.getCurrentCursor();
         const rightMargin = this.charWidth;
-        const cursorX = (cursor.position * this.charWidth);
+        const cursorX = cursor.position * this.charWidth;
         const currentScrollLeft = this.getScrollLeft();
         const viewportSizeX = this.codeScroller.clientWidth - CodeEditor.LINE_GUTTER_WIDTH; // Gutter offset
         const viewportX = viewportSizeX + currentScrollLeft;
@@ -4013,11 +4190,11 @@ class CodeEditor {
                 const maxLineLength = pMaxLength ?? this.getMaxLineLength();
                 this._lastMaxLineLength = maxLineLength;
                 scrollWidth = maxLineLength * this.charWidth + CodeEditor.LINE_GUTTER_WIDTH;
-                this.codeSizer.style.minWidth = scrollWidth + "px";
+                this.codeSizer.style.minWidth = scrollWidth + 'px';
             }
             if (flag & CodeEditor.RESIZE_SCROLLBAR_V) {
                 scrollHeight = this.code.lines.length * this.lineHeight;
-                this.codeSizer.style.minHeight = scrollHeight + "px";
+                this.codeSizer.style.minHeight = scrollHeight + 'px';
             }
             this.resizeScrollBars(flag);
             if (onResize) {
@@ -4039,10 +4216,10 @@ class CodeEditor {
     resizeScrollBars(flag = CodeEditor.RESIZE_SCROLLBAR_H_V) {
         if (flag & CodeEditor.RESIZE_SCROLLBAR_V) {
             const totalLinesInViewport = ((this.codeScroller.offsetHeight) / this.lineHeight) | 0;
-            const needsVerticalScrollbar = (this.code.lines.length >= totalLinesInViewport);
+            const needsVerticalScrollbar = this.code.lines.length >= totalLinesInViewport;
             if (needsVerticalScrollbar) {
-                this.vScrollbar.thumb.size = (totalLinesInViewport / this.code.lines.length);
-                this.vScrollbar.thumb.style.height = (this.vScrollbar.thumb.size * 100.0) + "%";
+                this.vScrollbar.thumb.size = totalLinesInViewport / this.code.lines.length;
+                this.vScrollbar.thumb.style.height = (this.vScrollbar.thumb.size * 100.0) + '%';
             }
             this.vScrollbar.root.classList.toggle('hidden', !needsVerticalScrollbar);
             this.hScrollbar.root.style.width = `calc(100% - ${48 + (needsVerticalScrollbar ? ScrollBar.SCROLLBAR_VERTICAL_WIDTH : 0)}px)`; // 48 is the line gutter
@@ -4053,8 +4230,8 @@ class CodeEditor {
             const maxLineLength = this._lastMaxLineLength;
             const needsHorizontalScrollbar = maxLineLength >= numViewportChars;
             if (needsHorizontalScrollbar) {
-                this.hScrollbar.thumb.size = (numViewportChars / maxLineLength);
-                this.hScrollbar.thumb.style.width = (this.hScrollbar.thumb.size * 100.0) + "%";
+                this.hScrollbar.thumb.size = numViewportChars / maxLineLength;
+                this.hScrollbar.thumb.style.width = (this.hScrollbar.thumb.size * 100.0) + '%';
             }
             this.hScrollbar.root.classList.toggle('hidden', !needsHorizontalScrollbar);
             this.codeArea.root.style.height = `calc(100% - ${this._fullVerticalOffset + (needsHorizontalScrollbar ? ScrollBar.SCROLLBAR_HORIZONTAL_HEIGHT : 0)}px)`;
@@ -4068,7 +4245,7 @@ class CodeEditor {
                 const scrollThumbHeight = this.vScrollbar.thumb.offsetHeight;
                 const currentScroll = this.codeScroller.scrollTop;
                 this.vScrollbar.thumb._top = (currentScroll / scrollHeight) * (scrollBarHeight - scrollThumbHeight);
-                this.vScrollbar.thumb.style.top = this.vScrollbar.thumb._top + "px";
+                this.vScrollbar.thumb.style.top = this.vScrollbar.thumb._top + 'px';
             }
         }
         else {
@@ -4082,7 +4259,7 @@ class CodeEditor {
                 const scrollThumbWidth = this.hScrollbar.thumb.offsetWidth;
                 const currentScroll = this.codeScroller.scrollLeft;
                 this.hScrollbar.thumb._left = (currentScroll / scrollWidth) * (scrollBarWidth - scrollThumbWidth);
-                this.hScrollbar.thumb.style.left = this.hScrollbar.thumb._left + "px";
+                this.hScrollbar.thumb.style.left = this.hScrollbar.thumb._left + 'px';
             }
         }
     }
@@ -4091,8 +4268,8 @@ class CodeEditor {
         // Move scrollbar thumb
         const scrollBarWidth = this.hScrollbar.thumb.parentElement.offsetWidth;
         const scrollThumbWidth = this.hScrollbar.thumb.offsetWidth;
-        this.hScrollbar.thumb._left = LX.clamp(value, 0, (scrollBarWidth - scrollThumbWidth));
-        this.hScrollbar.thumb.style.left = this.hScrollbar.thumb._left + "px";
+        this.hScrollbar.thumb._left = LX.clamp(value, 0, scrollBarWidth - scrollThumbWidth);
+        this.hScrollbar.thumb.style.left = this.hScrollbar.thumb._left + 'px';
         // Scroll code
         const scrollWidth = this.codeScroller.scrollWidth - this.codeScroller.clientWidth;
         const currentScroll = (this.hScrollbar.thumb._left * scrollWidth) / (scrollBarWidth - scrollThumbWidth);
@@ -4104,8 +4281,8 @@ class CodeEditor {
         // Move scrollbar thumb
         const scrollBarHeight = this.vScrollbar.thumb.parentElement.offsetHeight;
         const scrollThumbHeight = this.vScrollbar.thumb.offsetHeight;
-        this.vScrollbar.thumb._top = LX.clamp(value, 0, (scrollBarHeight - scrollThumbHeight));
-        this.vScrollbar.thumb.style.top = this.vScrollbar.thumb._top + "px";
+        this.vScrollbar.thumb._top = LX.clamp(value, 0, scrollBarHeight - scrollThumbHeight);
+        this.vScrollbar.thumb.style.top = this.vScrollbar.thumb._top + 'px';
         // Scroll code
         const scrollHeight = this.codeScroller.scrollHeight - this.codeScroller.clientHeight;
         const currentScroll = (this.vScrollbar.thumb._top * scrollHeight) / (scrollBarHeight - scrollThumbHeight);
@@ -4120,46 +4297,52 @@ class CodeEditor {
         const isChar = (char) => {
             const exceptions = ['_', '#', '!'];
             const code = char.charCodeAt(0);
-            return (exceptions.indexOf(char) > -1) || (code > 47 && code < 58) || (code > 64 && code < 91) || (code > 96 && code < 123);
+            return (exceptions.indexOf(char) > -1) || (code > 47 && code < 58) || (code > 64 && code < 91)
+                || (code > 96 && code < 123);
         };
         let from = cursor.position + offset;
         let to = cursor.position + offset;
         // Check left ...
-        while (words[from] && isChar(words[from]))
+        while (words[from] && isChar(words[from])) {
             from--;
+        }
         from++;
         // Check right ...
-        while (words[to] && isChar(words[to]))
+        while (words[to] && isChar(words[to])) {
             to++;
+        }
         // Skip spaces ...
         let word = words.substring(from, to);
         if (word == ' ') {
             if (offset < 0) {
-                while (words[from - 1] != undefined && words[from - 1] == ' ')
+                while (words[from - 1] != undefined && words[from - 1] == ' ') {
                     from--;
+                }
                 to++;
                 word = words.substring(from, to + 1);
             }
             else {
-                while (words[to] != undefined && words[to] == ' ')
+                while (words[to] != undefined && words[to] == ' ') {
                     to++;
+                }
                 from--;
                 word = words.substring(from, to);
             }
         }
         return [word, from, to];
     }
-    _measureChar(char = "M", useFloating = true, getBB = false) {
-        const parentContainer = LX.makeContainer(null, "lexcodeeditor", "", document.body);
-        const container = LX.makeContainer(null, "code", "", parentContainer);
-        const line = document.createElement("pre");
+    _measureChar(char = 'M', useFloating = true, getBB = false) {
+        const parentContainer = LX.makeContainer(null, 'lexcodeeditor', '', document.body);
+        const container = LX.makeContainer(null, 'code', '', parentContainer);
+        const line = document.createElement('pre');
         container.appendChild(line);
-        const text = document.createElement("span");
+        const text = document.createElement('span');
         line.appendChild(text);
         text.innerText = char;
         var rect = text.getBoundingClientRect();
         LX.deleteElement(parentContainer);
-        const bb = [useFloating ? rect.width : Math.floor(rect.width), useFloating ? rect.height : Math.floor(rect.height)];
+        const bb = [useFloating ? rect.width : Math.floor(rect.width),
+            useFloating ? rect.height : Math.floor(rect.height)];
         return getBB ? bb : bb[0];
     }
     measureString(str) {
@@ -4179,14 +4362,17 @@ class CodeEditor {
         for (let i = 0; i < params.length; i++) {
             let key = params[i].split(',');
             if (key.length > 1) {
-                if (key[key.length - 1].includes(']'))
+                if (key[key.length - 1].includes(']')) {
                     continue;
+                }
                 key = key[key.length - 1];
             }
-            else if (key[0].includes('}'))
+            else if (key[0].includes('}')) {
                 continue;
-            else
+            }
+            else {
                 key = key[0];
+            }
             key = key.replaceAll(/[{}\n\r]/g, '').replaceAll(' ', '');
             if (key[0] != '"' && key[key.length - 1] != '"') {
                 params[i] = params[i].replace(key, '"' + key + '"');
@@ -4198,7 +4384,7 @@ class CodeEditor {
             return JSON.stringify(json, undefined, 4);
         }
         catch (e) {
-            alert("Invalid JSON format");
+            alert('Invalid JSON format');
             return;
         }
     }
@@ -4211,7 +4397,7 @@ class CodeEditor {
             this.hideAutoCompleteBox();
             return;
         }
-        this.autocomplete.innerHTML = ""; // Clear all suggestions
+        this.autocomplete.innerHTML = ''; // Clear all suggestions
         // Add language special keys...
         let suggestions = [
             ...Array.from(CodeEditor.keywords[this.highlight] ?? []),
@@ -4222,8 +4408,8 @@ class CodeEditor {
         ];
         const scopeStack = [...this.code.lineScopes[cursor.line]];
         const scope = scopeStack.at(-1);
-        if (scope.type.startsWith("enum")) {
-            const enumValues = Array.from(this.code.symbolsTable).filter((s) => s[1][0].kind === "enum_value" && s[1][0].scope === scope.name).map((s) => s[0]);
+        if (scope.type.startsWith('enum')) {
+            const enumValues = Array.from(this.code.symbolsTable).filter((s) => s[1][0].kind === 'enum_value' && s[1][0].scope === scope.name).map((s) => s[0]);
             suggestions = suggestions.concat(enumValues.slice(0, -1));
         }
         else {
@@ -4248,34 +4434,36 @@ class CodeEditor {
             const pre = document.createElement('pre');
             this.autocomplete.appendChild(pre);
             const symbol = this.code.symbolsTable.get(s);
-            let iconName = "CaseLower";
-            let iconClass = "foo";
+            let iconName = 'CaseLower';
+            let iconClass = 'foo';
             if (symbol) {
-                switch (symbol[0].kind) // Get first occurrence
-                 {
-                    case "variable":
-                        iconName = "Cuboid";
-                        iconClass = "fg-blue-400";
+                switch (symbol[0].kind) 
+                // Get first occurrence
+                {
+                    case 'variable':
+                        iconName = 'Cuboid';
+                        iconClass = 'fg-blue-400';
                         break;
-                    case "method":
-                        iconName = "Box";
-                        iconClass = "fg-fuchsia-500";
+                    case 'method':
+                        iconName = 'Box';
+                        iconClass = 'fg-fuchsia-500';
                         break;
-                    case "class":
-                        iconName = "CircleNodes";
-                        iconClass = "fg-orange-500";
+                    case 'class':
+                        iconName = 'CircleNodes';
+                        iconClass = 'fg-orange-500';
                         break;
                 }
             }
             else {
-                if (this._mustHightlightWord(currSuggestion, CodeEditor.utils))
-                    iconName = "ToolCase";
+                if (this._mustHightlightWord(currSuggestion, CodeEditor.utils)) {
+                    iconName = 'ToolCase';
+                }
                 else if (this._mustHightlightWord(currSuggestion, CodeEditor.types)) {
-                    iconName = "Type";
-                    iconClass = "fg-blue-400";
+                    iconName = 'Type';
+                    iconClass = 'fg-blue-400';
                 }
             }
-            pre.appendChild(LX.makeIcon(iconName, { iconClass: "mr-1", svgClass: "sm " + iconClass }));
+            pre.appendChild(LX.makeIcon(iconName, { iconClass: 'mr-1', svgClass: 'sm ' + iconClass }));
             pre.addEventListener('click', () => {
                 this.autoCompleteWord(currSuggestion);
             });
@@ -4303,7 +4491,8 @@ class CodeEditor {
         this.autocomplete.classList.toggle('show', true);
         this.autocomplete.classList.toggle('no-scrollbar', !(this.autocomplete.scrollHeight > this.autocomplete.offsetHeight));
         this.autocomplete.style.left = `${Math.min(cursor.left + CodeEditor.LINE_GUTTER_WIDTH - this.getScrollLeft(), maxX)}px`;
-        this.autocomplete.style.top = `${(cursor.top + this._verticalTopOffset + this.lineHeight - this.getScrollTop())}px`;
+        this.autocomplete.style.top =
+            `${(cursor.top + this._verticalTopOffset + this.lineHeight - this.getScrollTop())}px`;
         this.isAutoCompleteActive = true;
     }
     hideAutoCompleteBox() {
@@ -4313,19 +4502,19 @@ class CodeEditor {
         const isActive = this.isAutoCompleteActive;
         this.isAutoCompleteActive = false;
         this.autocomplete.classList.remove('show');
-        this.autocomplete.innerHTML = ""; // Clear all suggestions
+        this.autocomplete.innerHTML = ''; // Clear all suggestions
         return isActive != this.isAutoCompleteActive;
     }
     autoCompleteWord(suggestion) {
-        if (!this.isAutoCompleteActive)
+        if (!this.isAutoCompleteActive) {
             return;
+        }
         let [suggestedWord, idx] = this._getSelectedAutoComplete();
         suggestedWord = suggestion ?? suggestedWord;
         for (let cursor of this.cursors) {
             const [word, start, end] = this.getWordAtPos(cursor, -1);
             const lineString = this.code.lines[cursor.line];
-            this.code.lines[cursor.line] =
-                lineString.slice(0, start) + suggestedWord + lineString.slice(end);
+            this.code.lines[cursor.line] = lineString.slice(0, start) + suggestedWord + lineString.slice(end);
             // Process lines and remove suggestion box
             this.cursorToPosition(cursor, start + suggestedWord.length);
             this.processLine(cursor.line);
@@ -4338,7 +4527,7 @@ class CodeEditor {
         for (let i = 0; i < this.autocomplete.childElementCount; ++i) {
             const child = this.autocomplete.childNodes[i];
             if (child.classList.contains('selected')) {
-                var word = "";
+                var word = '';
                 for (let childSpan of child.childNodes) {
                     if (childSpan.constructor != HTMLSpanElement) {
                         continue;
@@ -4351,8 +4540,9 @@ class CodeEditor {
         return [null, -1];
     }
     _moveArrowSelectedAutoComplete(dir) {
-        if (!this.isAutoCompleteActive)
+        if (!this.isAutoCompleteActive) {
             return;
+        }
         const [word, idx] = this._getSelectedAutoComplete();
         const offset = dir == 'down' ? 1 : -1;
         const fIdx = idx + offset;
@@ -4373,8 +4563,8 @@ class CodeEditor {
             }
         }
         // Remove selected from the current word and add it to the next one
-        LX.removeClass(this.autocomplete.childNodes[idx], "selected");
-        LX.addClass(this.autocomplete.childNodes[idx + offset], "selected");
+        LX.removeClass(this.autocomplete.childNodes[idx], 'selected');
+        LX.addClass(this.autocomplete.childNodes[idx + offset], 'selected');
     }
     showSearchBox(clear = false) {
         this.hideSearchLineBox();
@@ -4382,7 +4572,7 @@ class CodeEditor {
         this.isSearchboxActive = true;
         const input = this.searchbox.querySelector('input');
         if (clear) {
-            input.value = "";
+            input.value = '';
         }
         else {
             const cursor = this.getCurrentCursor();
@@ -4454,7 +4644,7 @@ class CodeEditor {
         }
         if (line == null) {
             if (!skipAlert) {
-                alert("No results!");
+                alert('No results!');
             }
             const lastLine = this.code.lines.length - 1;
             this._lastResult = {
@@ -4469,7 +4659,7 @@ class CodeEditor {
             have to add the length of the substring (0, first_ocurrence)
         */
         if (!reverse) {
-            char += (line == cursorData.y ? cursorData.x : 0);
+            char += line == cursorData.y ? cursorData.x : 0;
         }
         // Text found..
         this._lastTextFound = text;
@@ -4481,7 +4671,7 @@ class CodeEditor {
             // Show elements
             this.searchResultSelections.classList.add('show');
             // Create new selection instance
-            cursor.selection = new CodeSelection(this, cursor, "lexcodesearchresult");
+            cursor.selection = new CodeSelection(this, cursor, 'lexcodesearchresult');
             cursor.selection.selectInline(cursor, char, line, this.measureString(text), true);
         }
         this._lastResult = {
@@ -4500,7 +4690,7 @@ class CodeEditor {
         this.searchlinebox.classList.add('opened');
         this.isSearchlineboxActive = true;
         const input = this.searchlinebox.querySelector('input');
-        input.value = ":";
+        input.value = ':';
         input.focus();
     }
     hideSearchLineBox() {
@@ -4510,19 +4700,22 @@ class CodeEditor {
         }
     }
     goToLine(line) {
-        if (!this._isNumber(line))
+        if (!this._isNumber(line)) {
             return;
+        }
         this.codeScroller.scrollTo(0, Math.max(line - 15) * this.lineHeight);
         // Select line ?
         var cursor = this.getCurrentCursor(true);
         this.cursorToLine(cursor, line - 1, true);
     }
     selectNextOcurrence(cursor) {
-        if (!cursor.selection)
+        if (!cursor.selection) {
             return;
+        }
         const text = cursor.selection.getText();
-        if (!text)
+        if (!text) {
             return;
+        }
         if (!this._currentOcurrences) {
             const currentKey = [cursor.position - text.length, cursor.line].join('_');
             this._currentOcurrences = {};
@@ -4545,7 +4738,7 @@ class CodeEditor {
     _updateDataInfoPanel(signal, value) {
         if (!this.skipInfo) {
             if (this.cursors.length > 1) {
-                value = "";
+                value = '';
             }
             LX.emitSignal(signal, value);
         }
@@ -4556,7 +4749,7 @@ class CodeEditor {
             return;
         }
         const cursor = this.getCurrentCursor();
-        this._updateDataInfoPanel("@cursor-data", `Ln ${n + 1}, Col ${cursor.position + 1}`);
+        this._updateDataInfoPanel('@cursor-data', `Ln ${n + 1}, Col ${cursor.position + 1}`);
         const oldLocal = this.toLocalLine(this.state.activeLine);
         let line = this.code.childNodes[oldLocal];
         if (!line) {
@@ -4579,19 +4772,19 @@ class CodeEditor {
         // Change font size
         this.fontSize = size;
         const r = document.querySelector(':root');
-        r.style.setProperty("--code-editor-font-size", `${this.fontSize}px`);
+        r.style.setProperty('--code-editor-font-size', `${this.fontSize}px`);
         this.charWidth = this._measureChar();
-        window.localStorage.setItem("lexcodeeditor-font-size", `${this.fontSize}`);
+        window.localStorage.setItem('lexcodeeditor-font-size', `${this.fontSize}`);
         // Change row size
         const rowPixels = this.fontSize + 6;
-        r.style.setProperty("--code-editor-row-height", `${rowPixels}px`);
+        r.style.setProperty('--code-editor-row-height', `${rowPixels}px`);
         this.lineHeight = rowPixels;
         // Relocate cursors
         this.relocateCursors();
         // Resize the code area
         this.processLines();
         // Emit event
-        LX.emitSignal("@font-size", this.fontSize);
+        LX.emitSignal('@font-size', this.fontSize);
     }
     _applyFontSizeOffset(offset = 0) {
         const newFontSize = LX.clamp(this.fontSize + offset, CodeEditor.CODE_MIN_FONT_SIZE, CodeEditor.CODE_MAX_FONT_SIZE);
@@ -4615,19 +4808,21 @@ class CodeEditor {
     }
     async _requestFileAsync(url, dataType, nocache = false) {
         return new Promise((resolve, reject) => {
-            dataType = dataType ?? "arraybuffer";
-            const mimeType = dataType === "arraybuffer" ? "application/octet-stream" : undefined;
+            dataType = dataType ?? 'arraybuffer';
+            const mimeType = dataType === 'arraybuffer' ? 'application/octet-stream' : undefined;
             var xhr = new XMLHttpRequest();
             xhr.open('GET', url, true);
             xhr.responseType = dataType;
-            if (mimeType)
+            if (mimeType) {
                 xhr.overrideMimeType(mimeType);
-            if (nocache)
+            }
+            if (nocache) {
                 xhr.setRequestHeader('Cache-Control', 'no-cache');
+            }
             xhr.onload = function () {
                 var response = this.response;
                 if (this.status != 200) {
-                    var err = "Error " + this.status;
+                    var err = 'Error ' + this.status;
                     reject(err);
                     return;
                 }
@@ -4642,143 +4837,168 @@ class CodeEditor {
     }
 }
 const CE = CodeEditor;
-CE.languages =
-    {
-        'Plain Text': { ext: "txt", blockComments: false, singleLineComments: false, numbers: false, icon: "AlignLeft fg-neutral-500" },
-        'JavaScript': { ext: "js", icon: "Js fg-yellow-500" },
-        'TypeScript': { ext: "ts", icon: "Ts fg-blue-600" },
-        'C': { ext: ['c', 'h'], usePreprocessor: true, icon: { 'c': "C fg-sky-400", 'h': "C fg-fuchsia-500" } },
-        'C++': { ext: ["cpp", "hpp"], usePreprocessor: true, icon: { 'cpp': "CPlusPlus fg-sky-400", 'hpp': "CPlusPlus fg-fuchsia-500" } },
-        'CSS': { ext: "css", icon: "Hash fg-blue-700" },
-        'CMake': { ext: "cmake", singleLineCommentToken: '#', blockComments: false, ignoreCase: true },
-        'GLSL': { ext: "glsl", usePreprocessor: true },
-        'WGSL': { ext: "wgsl", usePreprocessor: true },
-        'JSON': { ext: "json", blockComments: false, singleLineComments: false, icon: "Json fg-yellow-400" },
-        'XML': { ext: "xml", tags: true, icon: "Rss fg-orange-500" },
-        'Rust': { ext: "rs", icon: "Rust fg-primary" },
-        'Python': { ext: "py", singleLineCommentToken: '#', icon: "Python fg-cyan-600" },
-        'HTML': { ext: "html", tags: true, singleLineComments: false, blockCommentsTokens: ['<!--', '-->'], numbers: false, icon: "Code fg-orange-500" },
-        'Batch': { ext: "bat", blockComments: false, singleLineCommentToken: '::', ignoreCase: true, icon: "Windows fg-blue-400" },
-        'Markdown': { ext: "md", blockComments: false, singleLineCommentToken: '::', tags: true, numbers: false, icon: "Markdown fg-primary" },
-        'PHP': { ext: "php", icon: "Php fg-purple-700" },
-    };
-CE.nativeTypes =
-    {
-        'C++': ['int', 'float', 'double', 'bool', 'long', 'short', 'char', 'wchar_t', 'void'],
-        'WGSL': ['bool', 'u32', 'i32', 'f16', 'f32', 'vec2', 'vec3', 'vec4', 'vec2f', 'vec3f', 'vec4f', 'mat2x2f', 'mat3x3f', 'mat4x4f', 'array', 'vec2u', 'vec3u', 'vec4u', 'ptr', 'sampler']
-    };
-CE.declarationKeywords =
-    {
-        'JavaScript': ['var', 'let', 'const', 'this', 'static', 'class'],
-        'C++': [...CE.nativeTypes["C++"], 'const', 'auto', 'class', 'struct', 'namespace', 'enum', 'extern']
-    };
-CE.keywords =
-    {
-        'JavaScript': ['var', 'let', 'const', 'this', 'in', 'of', 'true', 'false', 'new', 'function', 'NaN', 'static', 'class', 'constructor', 'null', 'typeof', 'debugger', 'abstract',
-            'arguments', 'extends', 'instanceof', 'Infinity', 'get'],
-        'TypeScript': ['var', 'let', 'const', 'this', 'in', 'of', 'true', 'false', 'new', 'function', 'class', 'extends', 'instanceof', 'Infinity', 'private', 'public', 'protected', 'interface',
-            'enum', 'type', 'get'],
-        'C': ['int', 'float', 'double', 'long', 'short', 'char', 'const', 'void', 'true', 'false', 'auto', 'struct', 'typedef', 'signed', 'volatile', 'unsigned', 'static', 'extern', 'enum', 'register',
-            'union'],
-        'C++': [...CE.nativeTypes["C++"], 'const', 'static_cast', 'dynamic_cast', 'new', 'delete', 'true', 'false', 'auto', 'class', 'struct', 'typedef', 'nullptr',
-            'NULL', 'signed', 'unsigned', 'namespace', 'enum', 'extern', 'union', 'sizeof', 'static', 'private', 'public'],
-        'CMake': ['cmake_minimum_required', 'set', 'not', 'if', 'endif', 'exists', 'string', 'strequal', 'add_definitions', 'macro', 'endmacro', 'file', 'list', 'source_group', 'add_executable',
-            'target_include_directories', 'set_target_properties', 'set_property', 'add_compile_options', 'add_link_options', 'include_directories', 'add_library', 'target_link_libraries',
-            'target_link_options', 'add_subdirectory', 'add_compile_definitions', 'project', 'cache'],
-        'JSON': ['true', 'false'],
-        'GLSL': ['true', 'false', 'function', 'int', 'float', 'vec2', 'vec3', 'vec4', 'mat2x2', 'mat3x3', 'mat4x4', 'struct'],
-        'CSS': ['body', 'html', 'canvas', 'div', 'input', 'span', '.', 'table', 'tr', 'td', 'th', 'label', 'video', 'img', 'code', 'button', 'select', 'option', 'svg', 'media', 'all',
-            'i', 'a', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'last-child', 'tbody', 'pre', 'monospace', 'font-face'],
-        'WGSL': [...CE.nativeTypes["WGSL"], 'var', 'let', 'true', 'false', 'fn', 'atomic', 'struct', 'sampler_comparison', 'texture_depth_2d', 'texture_depth_2d_array', 'texture_depth_cube',
-            'texture_depth_cube_array', 'texture_depth_multisampled_2d', 'texture_external', 'texture_1d', 'texture_2d', 'texture_2d_array', 'texture_3d', 'texture_cube', 'texture_cube_array',
-            'texture_storage_1d', 'texture_storage_2d', 'texture_storage_2d_array', 'texture_storage_3d'],
-        'Rust': ['as', 'const', 'crate', 'enum', 'extern', 'false', 'fn', 'impl', 'in', 'let', 'mod', 'move', 'mut', 'pub', 'ref', 'self', 'Self', 'static', 'struct', 'super', 'trait', 'true',
-            'type', 'unsafe', 'use', 'where', 'abstract', 'become', 'box', 'final', 'macro', 'override', 'priv', 'typeof', 'unsized', 'virtual'],
-        'Python': ['False', 'def', 'None', 'True', 'in', 'is', 'and', 'lambda', 'nonlocal', 'not', 'or'],
-        'Batch': ['set', 'echo', 'off', 'del', 'defined', 'setlocal', 'enabledelayedexpansion', 'driverquery', 'print'],
-        'HTML': ['html', 'meta', 'title', 'link', 'script', 'body', 'DOCTYPE', 'head', 'br', 'i', 'a', 'li', 'img', 'tr', 'td', 'h1', 'h2', 'h3', 'h4', 'h5'],
-        'Markdown': ['br', 'i', 'a', 'li', 'img', 'table', 'title', 'tr', 'td', 'h1', 'h2', 'h3', 'h4', 'h5'],
-        'PHP': ['const', 'function', 'array', 'new', 'int', 'string', '$this', 'public', 'null', 'private', 'protected', 'implements', 'class', 'use', 'namespace', 'abstract', 'clone', 'final',
-            'enum'],
-    };
+CE.languages = {
+    'Plain Text': { ext: 'txt', blockComments: false, singleLineComments: false, numbers: false,
+        icon: 'AlignLeft fg-neutral-500' },
+    'JavaScript': { ext: 'js', icon: 'Js fg-yellow-500' },
+    'TypeScript': { ext: 'ts', icon: 'Ts fg-blue-600' },
+    'C': { ext: ['c', 'h'], usePreprocessor: true, icon: { 'c': 'C fg-sky-400', 'h': 'C fg-fuchsia-500' } },
+    'C++': { ext: ['cpp', 'hpp'], usePreprocessor: true,
+        icon: { 'cpp': 'CPlusPlus fg-sky-400', 'hpp': 'CPlusPlus fg-fuchsia-500' } },
+    'CSS': { ext: 'css', icon: 'Hash fg-blue-700' },
+    'CMake': { ext: 'cmake', singleLineCommentToken: '#', blockComments: false, ignoreCase: true },
+    'GLSL': { ext: 'glsl', usePreprocessor: true },
+    'WGSL': { ext: 'wgsl', usePreprocessor: true },
+    'JSON': { ext: 'json', blockComments: false, singleLineComments: false, icon: 'Json fg-yellow-400' },
+    'XML': { ext: 'xml', tags: true, icon: 'Rss fg-orange-500' },
+    'Rust': { ext: 'rs', icon: 'Rust fg-primary' },
+    'Python': { ext: 'py', singleLineCommentToken: '#', icon: 'Python fg-cyan-600' },
+    'HTML': { ext: 'html', tags: true, singleLineComments: false, blockCommentsTokens: ['<!--', '-->'],
+        numbers: false, icon: 'Code fg-orange-500' },
+    'Batch': { ext: 'bat', blockComments: false, singleLineCommentToken: '::', ignoreCase: true,
+        icon: 'Windows fg-blue-400' },
+    'Markdown': { ext: 'md', blockComments: false, singleLineCommentToken: '::', tags: true, numbers: false,
+        icon: 'Markdown fg-primary' },
+    'PHP': { ext: 'php', icon: 'Php fg-purple-700' }
+};
+CE.nativeTypes = {
+    'C++': ['int', 'float', 'double', 'bool', 'long', 'short', 'char', 'wchar_t', 'void'],
+    'WGSL': ['bool', 'u32', 'i32', 'f16', 'f32', 'vec2', 'vec3', 'vec4', 'vec2f', 'vec3f', 'vec4f', 'mat2x2f',
+        'mat3x3f', 'mat4x4f', 'array', 'vec2u', 'vec3u', 'vec4u', 'ptr', 'sampler']
+};
+CE.declarationKeywords = {
+    'JavaScript': ['var', 'let', 'const', 'this', 'static', 'class'],
+    'C++': [...CE.nativeTypes['C++'], 'const', 'auto', 'class', 'struct', 'namespace', 'enum', 'extern']
+};
+CE.keywords = {
+    'JavaScript': ['var', 'let', 'const', 'this', 'in', 'of', 'true', 'false', 'new', 'function', 'NaN', 'static',
+        'class', 'constructor', 'null', 'typeof', 'debugger', 'abstract', 'arguments', 'extends', 'instanceof',
+        'Infinity', 'get'],
+    'TypeScript': ['var', 'let', 'const', 'this', 'in', 'of', 'true', 'false', 'new', 'function', 'class', 'extends',
+        'instanceof', 'Infinity', 'private', 'public', 'protected', 'interface', 'enum', 'type', 'get'],
+    'C': ['int', 'float', 'double', 'long', 'short', 'char', 'const', 'void', 'true', 'false', 'auto', 'struct',
+        'typedef', 'signed', 'volatile', 'unsigned', 'static', 'extern', 'enum', 'register', 'union'],
+    'C++': [...CE.nativeTypes['C++'], 'const', 'static_cast', 'dynamic_cast', 'new', 'delete', 'true', 'false', 'auto',
+        'class', 'struct', 'typedef', 'nullptr', 'NULL', 'signed', 'unsigned', 'namespace', 'enum', 'extern', 'union',
+        'sizeof', 'static', 'private', 'public'],
+    'CMake': ['cmake_minimum_required', 'set', 'not', 'if', 'endif', 'exists', 'string', 'strequal', 'add_definitions',
+        'macro', 'endmacro', 'file', 'list', 'source_group', 'add_executable', 'target_include_directories',
+        'set_target_properties', 'set_property', 'add_compile_options', 'add_link_options', 'include_directories',
+        'add_library', 'target_link_libraries', 'target_link_options', 'add_subdirectory', 'add_compile_definitions',
+        'project', 'cache'],
+    'JSON': ['true', 'false'],
+    'GLSL': ['true', 'false', 'function', 'int', 'float', 'vec2', 'vec3', 'vec4', 'mat2x2', 'mat3x3', 'mat4x4',
+        'struct'],
+    'CSS': ['body', 'html', 'canvas', 'div', 'input', 'span', '.', 'table', 'tr', 'td', 'th', 'label', 'video', 'img',
+        'code', 'button', 'select', 'option', 'svg', 'media', 'all', 'i', 'a', 'li', 'h1', 'h2', 'h3', 'h4', 'h5',
+        'last-child', 'tbody', 'pre', 'monospace', 'font-face'],
+    'WGSL': [...CE.nativeTypes['WGSL'], 'var', 'let', 'true', 'false', 'fn', 'atomic', 'struct', 'sampler_comparison',
+        'texture_depth_2d', 'texture_depth_2d_array', 'texture_depth_cube', 'texture_depth_cube_array',
+        'texture_depth_multisampled_2d', 'texture_external', 'texture_1d', 'texture_2d', 'texture_2d_array',
+        'texture_3d', 'texture_cube', 'texture_cube_array', 'texture_storage_1d', 'texture_storage_2d',
+        'texture_storage_2d_array', 'texture_storage_3d'],
+    'Rust': ['as', 'const', 'crate', 'enum', 'extern', 'false', 'fn', 'impl', 'in', 'let', 'mod', 'move', 'mut', 'pub',
+        'ref', 'self', 'Self', 'static', 'struct', 'super', 'trait', 'true', 'type', 'unsafe', 'use', 'where',
+        'abstract', 'become', 'box', 'final', 'macro', 'override', 'priv', 'typeof', 'unsized', 'virtual'],
+    'Python': ['False', 'def', 'None', 'True', 'in', 'is', 'and', 'lambda', 'nonlocal', 'not', 'or'],
+    'Batch': ['set', 'echo', 'off', 'del', 'defined', 'setlocal', 'enabledelayedexpansion', 'driverquery', 'print'],
+    'HTML': ['html', 'meta', 'title', 'link', 'script', 'body', 'DOCTYPE', 'head', 'br', 'i', 'a', 'li', 'img', 'tr',
+        'td', 'h1', 'h2', 'h3', 'h4', 'h5'],
+    'Markdown': ['br', 'i', 'a', 'li', 'img', 'table', 'title', 'tr', 'td', 'h1', 'h2', 'h3', 'h4', 'h5'],
+    'PHP': ['const', 'function', 'array', 'new', 'int', 'string', '$this', 'public', 'null', 'private', 'protected',
+        'implements', 'class', 'use', 'namespace', 'abstract', 'clone', 'final', 'enum']
+};
 // These ones don't have hightlight, used as suggestions to autocomplete only...
-CE.utils =
-    {
-        'JavaScript': ['querySelector', 'body', 'addEventListener', 'removeEventListener', 'remove', 'sort', 'keys', 'filter', 'isNaN', 'parseFloat', 'parseInt', 'EPSILON', 'isFinite',
-            'bind', 'prototype', 'length', 'assign', 'entries', 'values', 'concat', 'substring', 'substr', 'splice', 'slice', 'buffer', 'appendChild', 'createElement', 'prompt',
-            'alert'],
-        'WGSL': ['textureSample'],
-        'Python': ['abs', 'all', 'any', 'ascii', 'bin', 'bool', 'bytearray', 'bytes', 'callable', 'chr', 'classmethod', 'compile', 'complex', 'delattr', 'dict', 'dir', 'divmod',
-            'enumerate', 'eval', 'exec', 'filter', 'float', 'format', 'frozenset', 'getattr', 'globals', 'hasattr', 'hash', 'help', 'hex', 'id', 'input', 'int', 'isinstance',
-            'issubclass', 'iter', 'len', 'list', 'locals', 'map', 'max', 'memoryview', 'min', 'next', 'object', 'oct', 'open', 'ord', 'pow', 'print', 'property', 'range', 'repr',
-            'reversed', 'round', 'set', 'setattr', 'slice', 'sorted', 'staticmethod', 'str', 'sum', 'super', 'tuple', 'type', 'vars', 'zip'],
-        'CSS': [...Object.keys(document.body.style).map(LX.toKebabCase), 'block', 'inline', 'inline-block', 'flex', 'grid', 'none', 'inherit', 'initial', 'unset', 'revert', 'sticky',
-            'relative', 'absolute', 'fixed', 'static', 'auto', 'visible', 'hidden', 'scroll', 'clip', 'ellipsis', 'nowrap', 'wrap', 'break-word', 'solid', 'dashed', 'dotted', 'double',
-            'groove', 'ridge', 'inset', 'outset', 'left', 'right', 'center', 'top', 'bottom', 'start', 'end', 'justify', 'stretch', 'space-between', 'space-around', 'space-evenly',
-            'baseline', 'middle', 'normal', 'bold', 'lighter', 'bolder', 'italic', 'blur', 'uppercase', 'lowercase', 'capitalize', 'transparent', 'currentColor', 'pointer', 'default',
-            'move', 'grab', 'grabbing', 'not-allowed', 'none', 'cover', 'contain', 'repeat', 'no-repeat', 'repeat-x', 'repeat-y', 'round', 'space', 'linear-gradient', 'radial-gradient',
-            'conic-gradient', 'url', 'calc', 'min', 'max', 'clamp', 'red', 'blue', 'green', 'black', 'white', 'gray', 'silver', 'yellow', 'orange', 'purple', 'pink', 'cyan', 'magenta',
-            'lime', 'teal', 'navy', 'transparent', 'currentcolor', 'inherit', 'initial', 'unset', 'revert', 'none', 'auto', 'fit-content', 'min-content', 'max-content']
-    };
-CE.types =
-    {
-        'JavaScript': ['Object', 'String', 'Function', 'Boolean', 'Symbol', 'Error', 'Number', 'TextEncoder', 'TextDecoder', 'Array', 'ArrayBuffer', 'InputEvent', 'MouseEvent',
-            'Int8Array', 'Int16Array', 'Int32Array', 'Float32Array', 'Float64Array', 'Element'],
-        'TypeScript': ['arguments', 'constructor', 'null', 'typeof', 'debugger', 'abstract', 'Object', 'string', 'String', 'Function', 'Boolean', 'boolean', 'Error', 'Number', 'number', 'TextEncoder',
-            'TextDecoder', 'Array', 'ArrayBuffer', 'InputEvent', 'MouseEvent', 'Int8Array', 'Int16Array', 'Int32Array', 'Float32Array', 'Float64Array', 'Element', 'bigint', 'unknown', 'any',
-            'Record'],
-        'Rust': ['u128'],
-        'Python': ['int', 'type', 'float', 'map', 'list', 'ArithmeticError', 'AssertionError', 'AttributeError', 'Exception', 'EOFError', 'FloatingPointError', 'GeneratorExit',
-            'ImportError', 'IndentationError', 'IndexError', 'KeyError', 'KeyboardInterrupt', 'LookupError', 'MemoryError', 'NameError', 'NotImplementedError', 'OSError',
-            'OverflowError', 'ReferenceError', 'RuntimeError', 'StopIteration', 'SyntaxError', 'TabError', 'SystemError', 'SystemExit', 'TypeError', 'UnboundLocalError',
-            'UnicodeError', 'UnicodeEncodeError', 'UnicodeDecodeError', 'UnicodeTranslateError', 'ValueError', 'ZeroDivisionError'],
-        'C++': ['uint8_t', 'uint16_t', 'uint32_t'],
-        'PHP': ['Exception', 'DateTime', 'JsonSerializable'],
-    };
-CE.builtIn =
-    {
-        'JavaScript': ['document', 'console', 'window', 'navigator', 'performance'],
-        'CSS': ['*', '!important'],
-        'C++': ['vector', 'list', 'map'],
-        'WGSL': ['@vertex', '@fragment'],
-        'HTML': ['type', 'xmlns', 'PUBLIC', 'http-equiv', 'src', 'style', 'lang', 'href', 'rel', 'content', 'xml', 'alt'], // attributes
-        'Markdown': ['type', 'src', 'style', 'lang', 'href', 'rel', 'content', 'valign', 'alt'], // attributes
-        'PHP': ['echo', 'print'],
-    };
-CE.statements =
-    {
-        'JavaScript': ['for', 'if', 'else', 'case', 'switch', 'return', 'while', 'continue', 'break', 'do', 'import', 'default', 'export', 'from', 'throw', 'async', 'try', 'catch', 'await', 'as'],
-        'TypeScript': ['for', 'if', 'else', 'case', 'switch', 'return', 'while', 'continue', 'break', 'do', 'import', 'default', 'export', 'from', 'throw', 'async', 'try', 'catch', 'await', 'as'],
-        'CSS': ['@', 'import'],
-        'C': ['for', 'if', 'else', 'return', 'continue', 'break', 'case', 'switch', 'while', 'using', 'default', 'goto', 'do'],
-        'C++': ['std', 'for', 'if', 'else', 'return', 'continue', 'break', 'case', 'switch', 'while', 'using', 'glm', 'spdlog', 'default'],
-        'GLSL': ['for', 'if', 'else', 'return', 'continue', 'break'],
-        'WGSL': ['const', 'for', 'if', 'else', 'return', 'continue', 'break', 'storage', 'read', 'read_write', 'uniform', 'function', 'workgroup', 'bitcast'],
-        'Rust': ['break', 'else', 'continue', 'for', 'if', 'loop', 'match', 'return', 'while', 'do', 'yield'],
-        'Python': ['if', 'raise', 'del', 'import', 'return', 'elif', 'try', 'else', 'while', 'as', 'except', 'with', 'assert', 'finally', 'yield', 'break', 'for', 'class', 'continue',
-            'global', 'pass', 'from'],
-        'Batch': ['if', 'IF', 'for', 'FOR', 'in', 'IN', 'do', 'DO', 'call', 'CALL', 'goto', 'GOTO', 'exit', 'EXIT'],
-        'PHP': ['declare', 'enddeclare', 'foreach', 'endforeach', 'if', 'else', 'elseif', 'endif', 'for', 'endfor', 'while', 'endwhile', 'switch', 'case', 'default', 'endswitch', 'return', 'break', 'continue',
-            'try', 'catch', 'die', 'do', 'exit', 'finally'],
-    };
-CE.symbols =
-    {
-        'JavaScript': ['<', '>', '[', ']', '{', '}', '(', ')', ';', '=', '|', '||', '&', '&&', '?', '??'],
-        'TypeScript': ['<', '>', '[', ']', '{', '}', '(', ')', ';', '=', '|', '||', '&', '&&', '?', '??'],
-        'C': ['<', '>', '[', ']', '{', '}', '(', ')', ';', '=', '|', '||', '&', '&&', '?', '*', '-', '+'],
-        'C++': ['<', '>', '[', ']', '{', '}', '(', ')', ';', '=', '|', '||', '&', '&&', '?', '::', '*', '-', '+'],
-        'CMake': ['{', '}'],
-        'JSON': ['[', ']', '{', '}', '(', ')'],
-        'GLSL': ['[', ']', '{', '}', '(', ')'],
-        'WGSL': ['[', ']', '{', '}', '(', ')', '->'],
-        'CSS': ['{', '}', '(', ')', '*'],
-        'Rust': ['<', '>', '[', ']', '(', ')', '='],
-        'Python': ['<', '>', '[', ']', '(', ')', '='],
-        'Batch': ['[', ']', '(', ')', '%'],
-        'HTML': ['<', '>', '/'],
-        'XML': ['<', '>', '/'],
-        'PHP': ['[', ']', '{', '}', '(', ')'],
-    };
+CE.utils = {
+    'JavaScript': ['querySelector', 'body', 'addEventListener', 'removeEventListener', 'remove', 'sort', 'keys',
+        'filter', 'isNaN', 'parseFloat', 'parseInt', 'EPSILON', 'isFinite', 'bind', 'prototype', 'length', 'assign',
+        'entries', 'values', 'concat', 'substring', 'substr', 'splice', 'slice', 'buffer', 'appendChild',
+        'createElement', 'prompt', 'alert'],
+    'WGSL': ['textureSample'],
+    'Python': ['abs', 'all', 'any', 'ascii', 'bin', 'bool', 'bytearray', 'bytes', 'callable', 'chr', 'classmethod',
+        'compile', 'complex', 'delattr', 'dict', 'dir', 'divmod', 'enumerate', 'eval', 'exec', 'filter', 'float',
+        'format', 'frozenset', 'getattr', 'globals', 'hasattr', 'hash', 'help', 'hex', 'id', 'input', 'int',
+        'isinstance', 'issubclass', 'iter', 'len', 'list', 'locals', 'map', 'max', 'memoryview', 'min', 'next',
+        'object', 'oct', 'open', 'ord', 'pow', 'print', 'property', 'range', 'repr', 'reversed', 'round', 'set',
+        'setattr', 'slice', 'sorted', 'staticmethod', 'str', 'sum', 'super', 'tuple', 'type', 'vars', 'zip'],
+    'CSS': [...Object.keys(document.body.style).map(LX.toKebabCase), 'block', 'inline', 'inline-block', 'flex',
+        'grid', 'none', 'inherit', 'initial', 'unset', 'revert', 'sticky', 'relative', 'absolute', 'fixed', 'static',
+        'auto', 'visible', 'hidden', 'scroll', 'clip', 'ellipsis', 'nowrap', 'wrap', 'break-word', 'solid', 'dashed',
+        'dotted', 'double', 'groove', 'ridge', 'inset', 'outset', 'left', 'right', 'center', 'top', 'bottom', 'start',
+        'end', 'justify', 'stretch', 'space-between', 'space-around', 'space-evenly', 'baseline', 'middle', 'normal',
+        'bold', 'lighter', 'bolder', 'italic', 'blur', 'uppercase', 'lowercase', 'capitalize', 'transparent',
+        'currentColor', 'pointer', 'default', 'move', 'grab', 'grabbing', 'not-allowed', 'none', 'cover', 'contain',
+        'repeat', 'no-repeat', 'repeat-x', 'repeat-y', 'round', 'space', 'linear-gradient', 'radial-gradient',
+        'conic-gradient', 'url', 'calc', 'min', 'max', 'clamp', 'red', 'blue', 'green', 'black', 'white', 'gray',
+        'silver', 'yellow', 'orange', 'purple', 'pink', 'cyan', 'magenta', 'lime', 'teal', 'navy', 'transparent',
+        'currentcolor', 'inherit', 'initial', 'unset', 'revert', 'none', 'auto', 'fit-content', 'min-content',
+        'max-content']
+};
+CE.types = {
+    'JavaScript': ['Object', 'String', 'Function', 'Boolean', 'Symbol', 'Error', 'Number', 'TextEncoder',
+        'TextDecoder', 'Array', 'ArrayBuffer', 'InputEvent', 'MouseEvent', 'Int8Array', 'Int16Array', 'Int32Array',
+        'Float32Array', 'Float64Array', 'Element'],
+    'TypeScript': ['arguments', 'constructor', 'null', 'typeof', 'debugger', 'abstract', 'Object', 'string', 'String',
+        'Function', 'Boolean', 'boolean', 'Error', 'Number', 'number', 'TextEncoder', 'TextDecoder', 'Array',
+        'ArrayBuffer', 'InputEvent', 'MouseEvent', 'Int8Array', 'Int16Array', 'Int32Array', 'Float32Array',
+        'Float64Array', 'Element', 'bigint', 'unknown', 'any', 'Record'],
+    'Rust': ['u128'],
+    'Python': ['int', 'type', 'float', 'map', 'list', 'ArithmeticError', 'AssertionError', 'AttributeError',
+        'Exception', 'EOFError', 'FloatingPointError', 'GeneratorExit', 'ImportError', 'IndentationError', 'IndexError',
+        'KeyError', 'KeyboardInterrupt', 'LookupError', 'MemoryError', 'NameError', 'NotImplementedError', 'OSError',
+        'OverflowError', 'ReferenceError', 'RuntimeError', 'StopIteration', 'SyntaxError', 'TabError', 'SystemError',
+        'SystemExit', 'TypeError', 'UnboundLocalError', 'UnicodeError', 'UnicodeEncodeError', 'UnicodeDecodeError',
+        'UnicodeTranslateError', 'ValueError', 'ZeroDivisionError'],
+    'C++': ['uint8_t', 'uint16_t', 'uint32_t'],
+    'PHP': ['Exception', 'DateTime', 'JsonSerializable']
+};
+CE.builtIn = {
+    'JavaScript': ['document', 'console', 'window', 'navigator', 'performance'],
+    'CSS': ['*', '!important'],
+    'C++': ['vector', 'list', 'map'],
+    'WGSL': ['@vertex', '@fragment'],
+    'HTML': ['type', 'xmlns', 'PUBLIC', 'http-equiv', 'src', 'style', 'lang', 'href', 'rel', 'content', 'xml', 'alt'], // attributes
+    'Markdown': ['type', 'src', 'style', 'lang', 'href', 'rel', 'content', 'valign', 'alt'], // attributes
+    'PHP': ['echo', 'print']
+};
+CE.statements = {
+    'JavaScript': ['for', 'if', 'else', 'case', 'switch', 'return', 'while', 'continue', 'break', 'do', 'import',
+        'default', 'export', 'from', 'throw', 'async', 'try', 'catch', 'await', 'as'],
+    'TypeScript': ['for', 'if', 'else', 'case', 'switch', 'return', 'while', 'continue', 'break', 'do', 'import',
+        'default', 'export', 'from', 'throw', 'async', 'try', 'catch', 'await', 'as'],
+    'CSS': ['@', 'import'],
+    'C': ['for', 'if', 'else', 'return', 'continue', 'break', 'case', 'switch', 'while', 'using', 'default', 'goto',
+        'do'],
+    'C++': ['std', 'for', 'if', 'else', 'return', 'continue', 'break', 'case', 'switch', 'while', 'using', 'glm',
+        'spdlog', 'default'],
+    'GLSL': ['for', 'if', 'else', 'return', 'continue', 'break'],
+    'WGSL': ['const', 'for', 'if', 'else', 'return', 'continue', 'break', 'storage', 'read', 'read_write', 'uniform',
+        'function', 'workgroup', 'bitcast'],
+    'Rust': ['break', 'else', 'continue', 'for', 'if', 'loop', 'match', 'return', 'while', 'do', 'yield'],
+    'Python': ['if', 'raise', 'del', 'import', 'return', 'elif', 'try', 'else', 'while', 'as', 'except', 'with',
+        'assert', 'finally', 'yield', 'break', 'for', 'class', 'continue', 'global', 'pass', 'from'],
+    'Batch': ['if', 'IF', 'for', 'FOR', 'in', 'IN', 'do', 'DO', 'call', 'CALL', 'goto', 'GOTO', 'exit', 'EXIT'],
+    'PHP': ['declare', 'enddeclare', 'foreach', 'endforeach', 'if', 'else', 'elseif', 'endif', 'for', 'endfor',
+        'while', 'endwhile', 'switch', 'case', 'default', 'endswitch', 'return', 'break', 'continue', 'try', 'catch',
+        'die', 'do', 'exit', 'finally']
+};
+CE.symbols = {
+    'JavaScript': ['<', '>', '[', ']', '{', '}', '(', ')', ';', '=', '|', '||', '&', '&&', '?', '??'],
+    'TypeScript': ['<', '>', '[', ']', '{', '}', '(', ')', ';', '=', '|', '||', '&', '&&', '?', '??'],
+    'C': ['<', '>', '[', ']', '{', '}', '(', ')', ';', '=', '|', '||', '&', '&&', '?', '*', '-', '+'],
+    'C++': ['<', '>', '[', ']', '{', '}', '(', ')', ';', '=', '|', '||', '&', '&&', '?', '::', '*', '-', '+'],
+    'CMake': ['{', '}'],
+    'JSON': ['[', ']', '{', '}', '(', ')'],
+    'GLSL': ['[', ']', '{', '}', '(', ')'],
+    'WGSL': ['[', ']', '{', '}', '(', ')', '->'],
+    'CSS': ['{', '}', '(', ')', '*'],
+    'Rust': ['<', '>', '[', ']', '(', ')', '='],
+    'Python': ['<', '>', '[', ']', '(', ')', '='],
+    'Batch': ['[', ']', '(', ')', '%'],
+    'HTML': ['<', '>', '/'],
+    'XML': ['<', '>', '/'],
+    'PHP': ['[', ']', '{', '}', '(', ')']
+};
 CE.REGISTER_LANGUAGE = function (name, options = {}, def, rules) {
     CE.languages[name] = options;
     if (def?.keywords)

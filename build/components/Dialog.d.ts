@@ -12,7 +12,7 @@ export declare class Dialog {
     branchData: any;
     close: () => void;
     _oncreate: any;
-    constructor(title: string, callback: any, options?: any);
+    constructor(title?: string, callback?: any, options?: any);
     destroy(): void;
     refresh(): void;
     setPosition(x: number, y: number): void;
