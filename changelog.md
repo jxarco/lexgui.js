@@ -2,6 +2,8 @@
 
 ## dev
 
+Fixed Table Component bug when there's a filter but no custom filters.
+
 ## 8.1.0 (master)
 
 AssetView:
