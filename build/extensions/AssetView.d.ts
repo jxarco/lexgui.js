@@ -114,7 +114,7 @@ export declare class AssetView {
     _previewAsset(file: AssetViewItem): void;
     _processDrop(e: DragEvent): void;
     _sortData(sortBy?: string, sortMode?: number): void;
-    _enterFolder(folderItem: AssetViewItem | undefined, storeCurrent?: boolean): void;
+    _enterFolder(folderItem: AssetViewItem | undefined, storeCurrent?: boolean): Promise<void>;
     _removeItemFromParent(item: AssetViewItem): boolean;
     _requestDeleteItem(item: AssetViewItem): void;
     _deleteItem(item: AssetViewItem): void;

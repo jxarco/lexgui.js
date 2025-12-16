@@ -16,7 +16,7 @@
     exports.LX = g$2.LX;
     if (!exports.LX) {
         exports.LX = {
-            version: '8.1.0',
+            version: '8.1.1',
             ready: false,
             extensions: [], // Store extensions used
             extraCommandbarEntries: [], // User specific entries for command bar
@@ -6352,7 +6352,7 @@
             }
             this.data = data;
             this.filter = options.filter ?? false;
-            this.customFilters = options.customFilters;
+            this.customFilters = options.customFilters ?? null;
             this.activeCustomFilters = {};
             this._toggleColumns = options.toggleColumns ?? false;
             this._sortColumns = options.sortColumns ?? true;
@@ -14638,7 +14638,7 @@
             this.toolsPanel.refresh();
             this._refreshContent();
         }
-        _enterFolder(folderItem, storeCurrent = true) {
+        async _enterFolder(folderItem, storeCurrent = true) {
             if (!folderItem) {
                 return;
             }
@@ -14660,7 +14660,7 @@
                     to: folderItem,
                     userInitiated: true
                 };
-                const r = onEnterFolder(event);
+                const r = await onEnterFolder(event);
                 mustRefresh = mustRefresh || r;
             }
             // Update this after the event since the user might have added or modified the data
