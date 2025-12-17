@@ -54,8 +54,7 @@ export class Counter extends BaseComponent
             let mult = step ?? 1;
             if ( e.shiftKey ) mult *= 10;
             this.set( this.count - mult, false, e );
-        }, { disabled: options.disabled,
-            className: `p-0 ${options.disabled ? '' : 'hover:bg-secondary'} border-l-color border-r-color`,
+        }, { disabled: options.disabled, className: `p-0 ${options.disabled ? '' : 'hover:bg-secondary'} border-l-color border-r-color`,
             buttonClass: 'px-0 bg-none h-7', icon: 'Minus' } );
         container.appendChild( substrButton.root );
 

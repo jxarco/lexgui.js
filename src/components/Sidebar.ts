@@ -124,15 +124,13 @@ export class Sidebar
         if ( !( options.skipHeader ?? false ) )
         {
             this.header = options.header ?? this._generateDefaultHeader( options );
-            console.assert( this.header.constructor === HTMLDivElement,
-                'Use an HTMLDivElement to build your custom header' );
+            console.assert( this.header.constructor === HTMLDivElement, 'Use an HTMLDivElement to build your custom header' );
             this.header.className = 'lexsidebarheader';
             this.root.appendChild( this.header );
 
             if ( this.collapsable )
             {
-                const icon = LX.makeIcon( this.side == 'left' ? 'PanelLeft' : 'PanelRight', { title: 'Toggle Sidebar',
-                    iconClass: 'toggler' } );
+                const icon = LX.makeIcon( this.side == 'left' ? 'PanelLeft' : 'PanelRight', { title: 'Toggle Sidebar', iconClass: 'toggler' } );
                 this.header.appendChild( icon );
 
                 if ( mobile )
@@ -183,8 +181,7 @@ export class Sidebar
         if ( !( options.skipFooter ?? false ) )
         {
             this.footer = options.footer ?? this._generateDefaultFooter( options );
-            console.assert( this.footer.constructor === HTMLDivElement,
-                'Use an HTMLDivElement to build your custom footer' );
+            console.assert( this.footer.constructor === HTMLDivElement, 'Use an HTMLDivElement to build your custom footer' );
             this.footer.className = 'lexsidebarfooter';
             this.root.appendChild( this.footer );
         }
@@ -638,9 +635,7 @@ export class Sidebar
                 // Manage selected
                 if ( this.displaySelected && !options.skipSelection )
                 {
-                    this.root.querySelectorAll( '.lexsidebarentry' ).forEach( ( e: HTMLElement ) =>
-                        e.classList.remove( 'selected' )
-                    );
+                    this.root.querySelectorAll( '.lexsidebarentry' ).forEach( ( e: HTMLElement ) => e.classList.remove( 'selected' ) );
                     entry.classList.add( 'selected' );
                 }
             } );
@@ -739,9 +734,7 @@ export class Sidebar
                     // Manage selected
                     if ( this.displaySelected && !suboptions.skipSelection )
                     {
-                        this.root.querySelectorAll( '.lexsidebarentry' ).forEach( ( e: HTMLElement ) =>
-                            e.classList.remove( 'selected' )
-                        );
+                        this.root.querySelectorAll( '.lexsidebarentry' ).forEach( ( e: HTMLElement ) => e.classList.remove( 'selected' ) );
                         subentry.classList.add( 'selected' );
                     }
                 } );

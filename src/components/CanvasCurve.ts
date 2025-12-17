@@ -117,8 +117,7 @@ export class CanvasCurve
         // Canvas to value
         function unconvert( v: number[] )
         {
-            return [ v[0] * element.xrange[1] / canvas.width + element.xrange[0],
-                v[1] * element.yrange[1] / canvas.height + element.yrange[0] ];
+            return [ v[0] * element.xrange[1] / canvas.width + element.xrange[0], v[1] * element.yrange[1] / canvas.height + element.yrange[0] ];
         }
 
         let selected = -1;

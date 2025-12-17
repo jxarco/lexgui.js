@@ -150,10 +150,8 @@ export class DropdownMenu
 
                 if ( this.avoidCollisions )
                 {
-                    position[0] = LX.clamp( position[0], 0,
-                        window.innerWidth - newParent.offsetWidth - this._windowPadding );
-                    position[1] = LX.clamp( position[1], 0,
-                        window.innerHeight - newParent.offsetHeight - this._windowPadding );
+                    position[0] = LX.clamp( position[0], 0, window.innerWidth - newParent.offsetWidth - this._windowPadding );
+                    position[1] = LX.clamp( position[1], 0, window.innerHeight - newParent.offsetHeight - this._windowPadding );
                 }
 
                 newParent.style.left = `${position[0]}px`;

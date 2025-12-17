@@ -77,9 +77,7 @@ export class RangeInput extends BaseComponent
 
                 slider.value = value = LX.clamp( +newValue, +slider.min, +slider.max );
                 const remapped = LX.remapRange( value, options.min, options.max, 0, 1 ) * 0.5;
-                container.dataset['tooltipOffsetX'] = `${
-                    container.offsetWidth * remapped - ( container.offsetWidth * 0.5 )
-                }`;
+                container.dataset['tooltipOffsetX'] = `${container.offsetWidth * remapped - ( container.offsetWidth * 0.5 )}`;
                 newTpContent = `${value}`;
             }
 
@@ -113,10 +111,8 @@ export class RangeInput extends BaseComponent
                 const diff = options.max - options.min;
                 const diffOffset = ( value / diff ) - 0.5;
                 const diffMaxOffset = ( ogValue[1] / diff ) - 0.5;
-                slider.style.setProperty( '--range-min-value',
-                    `${LX.remapRange( value, options.min, options.max, 0, 1 ) * 100}%` );
-                slider.style.setProperty( '--range-max-value',
-                    `${LX.remapRange( ogValue[1], options.min, options.max, 0, 1 ) * 100}%` );
+                slider.style.setProperty( '--range-min-value', `${LX.remapRange( value, options.min, options.max, 0, 1 ) * 100}%` );
+                slider.style.setProperty( '--range-max-value', `${LX.remapRange( ogValue[1], options.min, options.max, 0, 1 ) * 100}%` );
                 slider.style.setProperty( '--range-fix-min-offset', `${-diffOffset}rem` );
                 slider.style.setProperty( '--range-fix-max-offset', `${diffMaxOffset}rem` );
             }
@@ -206,10 +202,9 @@ export class RangeInput extends BaseComponent
                 const remapped = LX.remapRange( value, options.min, options.max, 0, 1 ) * 0.5;
                 offsetX = container.offsetWidth * remapped - ( container.offsetWidth * 0.5 );
             }
-            LX.asTooltip( container, `${value}${isRangeValue ? `- ${ogValue[1]}` : ``}`, { offsetX,
-                callback: ( tpDom: HTMLElement ) => {
-                    this._labelTooltip = tpDom;
-                } } );
+            LX.asTooltip( container, `${value}${isRangeValue ? `- ${ogValue[1]}` : ``}`, { offsetX, callback: ( tpDom: HTMLElement ) => {
+                this._labelTooltip = tpDom;
+            } } );
         } );
 
         if ( ogValue.constructor == Array )

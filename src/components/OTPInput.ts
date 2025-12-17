@@ -68,8 +68,8 @@ export class OTPInput extends BaseComponent
                     number = number == 'x' ? '' : number;
 
                     const slotDom = LX.makeContainer( [ '36px', '30px' ],
-                        'lexotpslot border-t-color border-b-color border-l-color px-3 cursor-text select-none font-medium outline-none',
-                        number, container );
+                        'lexotpslot border-t-color border-b-color border-l-color px-3 cursor-text select-none font-medium outline-none', number,
+                        container );
                     slotDom.tabIndex = '1';
 
                     if ( this.disabled )
@@ -100,9 +100,7 @@ export class OTPInput extends BaseComponent
                         if ( this.disabled ) return;
                         LX.doAsync( () => {
                             if ( container.contains( document.activeElement ) ) return;
-                            container.querySelectorAll( '.lexotpslot' ).forEach( ( s ) =>
-                                s.classList.remove( 'active' )
-                            );
+                            container.querySelectorAll( '.lexotpslot' ).forEach( ( s ) => s.classList.remove( 'active' ) );
                         }, 10 );
                     } );
 

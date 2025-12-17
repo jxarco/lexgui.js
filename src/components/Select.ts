@@ -280,8 +280,7 @@ export class Select extends BaseComponent
         }
 
         // Add select options list
-        list.refresh = ( currentOptions: any ) =>
-        {
+        list.refresh = ( currentOptions: any ) => {
             // Empty list
             while ( list.childElementCount > ( options.filter ?? false ? 1 : 0 ) )
             {

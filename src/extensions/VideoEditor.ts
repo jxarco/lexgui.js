@@ -185,8 +185,7 @@ export class TimeBar
         // Min-Max time markers
         this._drawTrimMarker( 'start', this.startX, { color: null, fillColor: TimeBar.ACTIVE_COLOR || '#5f88c9' } );
         this._drawTrimMarker( 'end', this.endX, { color: null, fillColor: TimeBar.ACTIVE_COLOR || '#5f88c9' } );
-        this._drawTimeMarker( 'current', this.currentX, { color: '#e5e5e5',
-            fillColor: TimeBar.ACTIVE_COLOR || '#5f88c9', width: this.markerWidth } );
+        this._drawTimeMarker( 'current', this.currentX, { color: '#e5e5e5', fillColor: TimeBar.ACTIVE_COLOR || '#5f88c9', width: this.markerWidth } );
 
         if ( this.onDraw )
         {
@@ -515,8 +514,7 @@ export class VideoEditor
         }
         else
         {
-            [ videoArea, controlsArea ] = area.split( { type: 'vertical', sizes: [ '85%', null ], minimizable: false,
-                resize: false } );
+            [ videoArea, controlsArea ] = area.split( { type: 'vertical', sizes: [ '85%', null ], minimizable: false, resize: false } );
         }
 
         controlsArea.root.classList.add( 'lexconstrolsarea' );
@@ -557,13 +555,10 @@ export class VideoEditor
 
         this.controlsArea = controlsArea;
         // Create playing timeline area and attach panels
-        let [ topArea, bottomArea ] = controlsArea.split( { type: 'vertical', sizes: [ '50%', null ],
-            minimizable: false, resize: false } );
+        let [ topArea, bottomArea ] = controlsArea.split( { type: 'vertical', sizes: [ '50%', null ], minimizable: false, resize: false } );
         bottomArea.setSize( [ bottomArea.size[0], 40 ] );
-        let [ leftArea, controlsRight ] = bottomArea.split( { type: 'horizontal', sizes: [ '92%', null ],
-            minimizable: false, resize: false } );
-        let [ controlsLeft, timeBarArea ] = leftArea.split( { type: 'horizontal', sizes: [ '10%', null ],
-            minimizable: false, resize: false } );
+        let [ leftArea, controlsRight ] = bottomArea.split( { type: 'horizontal', sizes: [ '92%', null ], minimizable: false, resize: false } );
+        let [ controlsLeft, timeBarArea ] = leftArea.split( { type: 'horizontal', sizes: [ '10%', null ], minimizable: false, resize: false } );
 
         topArea.root.classList.add( 'lexbar' );
         bottomArea.root.classList.add( 'lexbar' );
@@ -599,7 +594,7 @@ export class VideoEditor
                 {
                     this.video.pause();
                 }
-            }, { icon: 'Play@solid', swap: 'Pause@solid', hideName: true, title: "Play", tooltip: true, className: 'justify-center' } );
+            }, { icon: 'Play@solid', swap: 'Pause@solid', hideName: true, title: 'Play', tooltip: true, className: 'justify-center' } );
             playbtn.setState( this.playing, true );
 
             this.controlsPanelLeft.addButton( null, '', ( v: any, e: MouseEvent ) => {
@@ -614,12 +609,11 @@ export class VideoEditor
                 }, { min: 0, max: 2.5, step: 0.01, hideName: true } );
 
                 new LX.Popover( e.target, [ panel ], { align: 'start', side: 'top', sideOffset: 12 } );
-            }, { icon: 'Timer@solid', title: "Speed", tooltip: true, className: 'justify-center' } );
+            }, { icon: 'Timer@solid', title: 'Speed', tooltip: true, className: 'justify-center' } );
 
             this.controlsPanelLeft.addButton( null, 'Loop', ( v: boolean ) => {
                 this.loop = v;
-            }, { title: "Loop", tooltip: true, icon: ( 'Repeat@solid' ), className: `justify-center`, selectable: true,
-                selected: this.loop } );
+            }, { title: 'Loop', tooltip: true, icon: ( 'Repeat@solid' ), className: `justify-center`, selectable: true, selected: this.loop } );
 
             this.controlsPanelLeft.addLabel( this.startTimeString, { width: '100px' } );
             this.controlsPanelLeft.endLine();

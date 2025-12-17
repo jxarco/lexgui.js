@@ -14,8 +14,7 @@ const Panel = LX.Panel;
 const NodeTree = LX.NodeTree;
 const TreeEvent = LX.TreeEvent;
 
-export type AssetViewAction = 'select' | 'dbl_click' | 'check' | 'clone' | 'move' | 'delete' | 'rename' | 'enter_folder'
-    | 'create-folder';
+export type AssetViewAction = 'select' | 'dbl_click' | 'check' | 'clone' | 'move' | 'delete' | 'rename' | 'enter_folder' | 'create-folder';
 
 export interface AssetViewItem
 {
@@ -47,8 +46,7 @@ interface AssetViewEvent
  * Signature for cancelable events.
  * `resolve()` MUST be called by the user to perform the UI action
  */
-export type AssetViewEventCallback = ( event: AssetViewEvent, resolve?: ( ...args: any[] ) => void ) => boolean | void
-    | Promise<void>;
+export type AssetViewEventCallback = ( event: AssetViewEvent, resolve?: ( ...args: any[] ) => void ) => boolean | void | Promise<void>;
 
 /**
  * @class AssetView
@@ -240,8 +238,7 @@ export class AssetView
 
         if ( !this.skipBrowser )
         {
-            this.tree.refresh( { id: '/', children: this.data, type: 'folder',
-                metadata: { uid: LX.guidGenerator() } } );
+            this.tree.refresh( { id: '/', children: this.data, type: 'folder', metadata: { uid: LX.guidGenerator() } } );
         }
 
         this._refreshContent();
@@ -363,8 +360,7 @@ export class AssetView
         {
             if ( item.type === 'video' )
             {
-                const itemVideo = LX.makeElement( 'video',
-                    'absolute left-0 top-0 w-full border-none pointer-events-none', '', itemEl );
+                const itemVideo = LX.makeElement( 'video', 'absolute left-0 top-0 w-full border-none pointer-events-none', '', itemEl );
                 itemVideo.setAttribute( 'disablePictureInPicture', false );
                 itemVideo.setAttribute( 'disableRemotePlayback', false );
                 itemVideo.setAttribute( 'loop', true );
@@ -448,9 +444,7 @@ export class AssetView
             {
                 if ( !e.shiftKey )
                 {
-                    that.content.querySelectorAll( '.lexassetitem' ).forEach( ( i ) =>
-                        i.classList.remove( 'selected' )
-                    );
+                    that.content.querySelectorAll( '.lexassetitem' ).forEach( ( i ) => i.classList.remove( 'selected' ) );
                 }
 
                 this.classList.add( 'selected' );
@@ -513,8 +507,7 @@ export class AssetView
 
             if ( multiple <= 1 )
             {
-                options.push( { name: 'Rename', icon: 'TextCursor',
-                    callback: that._renameItemPopover.bind( that, item ) } );
+                options.push( { name: 'Rename', icon: 'TextCursor', callback: that._renameItemPopover.bind( that, item ) } );
             }
 
             if ( !isFolder )
@@ -526,8 +519,7 @@ export class AssetView
 
             if ( type == 'Script' && LX.has( 'CodeEditor' ) )
             {
-                options.push( { name: 'Open in Editor', icon: 'Code',
-                    callback: that._openScriptInEditor.bind( that, item ) } );
+                options.push( { name: 'Open in Editor', icon: 'Code', callback: that._openScriptInEditor.bind( that, item ) } );
             }
 
             if ( that.itemContextMenuOptions )
@@ -809,9 +801,7 @@ export class AssetView
 
                             if ( node.type !== 'folder' )
                             {
-                                this.content.querySelectorAll( '.lexassetitem' ).forEach( ( i ) =>
-                                    i.classList.remove( 'selected' )
-                                );
+                                this.content.querySelectorAll( '.lexassetitem' ).forEach( ( i ) => i.classList.remove( 'selected' ) );
                                 const dom = node.domEl;
                                 dom?.classList.add( 'selected' );
                             }
@@ -898,18 +888,15 @@ export class AssetView
                 { name: 'Name', icon: 'ALargeSmall', callback: () => this._sortData( 'id' ) },
                 { name: 'Type', icon: 'Type', callback: () => this._sortData( 'type' ) },
                 null,
-                { name: 'Ascending', icon: 'SortAsc',
-                    callback: () => this._sortData( undefined, AssetView.CONTENT_SORT_ASC ) },
-                { name: 'Descending', icon: 'SortDesc',
-                    callback: () => this._sortData( undefined, AssetView.CONTENT_SORT_DESC ) }
+                { name: 'Ascending', icon: 'SortAsc', callback: () => this._sortData( undefined, AssetView.CONTENT_SORT_ASC ) },
+                { name: 'Descending', icon: 'SortDesc', callback: () => this._sortData( undefined, AssetView.CONTENT_SORT_DESC ) }
             ], { side: 'bottom', align: 'start' } );
         };
 
         const _onChangeView = ( value: any, event: any ) => {
             LX.addDropdownMenu( event.target, [
                 { name: 'Grid', icon: 'LayoutGrid', callback: () => this._setContentLayout( AssetView.LAYOUT_GRID ) },
-                { name: 'Compact', icon: 'LayoutList',
-                    callback: () => this._setContentLayout( AssetView.LAYOUT_COMPACT ) },
+                { name: 'Compact', icon: 'LayoutList', callback: () => this._setContentLayout( AssetView.LAYOUT_COMPACT ) },
                 { name: 'List', icon: 'List', callback: () => this._setContentLayout( AssetView.LAYOUT_LIST ) }
             ], { side: 'bottom', align: 'start' } );
         };
@@ -926,8 +913,8 @@ export class AssetView
             }
 
             this.toolsPanel.sameLine();
-            const sortButton = this.toolsPanel.addButton( null, '', _onSort.bind( this ), { title: 'Sort',
-                tooltip: true, icon: ( this.sortMode === AssetView.CONTENT_SORT_ASC ) ? 'SortAsc' : 'SortDesc' } );
+            const sortButton = this.toolsPanel.addButton( null, '', _onSort.bind( this ), { title: 'Sort', tooltip: true,
+                icon: ( this.sortMode === AssetView.CONTENT_SORT_ASC ) ? 'SortAsc' : 'SortDesc' } );
             this.toolsPanel.addButton( null, '', _onChangeView.bind( this ), { title: 'View', tooltip: true,
                 icon: ( this.layout === AssetView.LAYOUT_GRID ) ? 'LayoutGrid' : 'LayoutList' } );
             this.toolsPanel.addSelect( null, typeEntries, this.filter ?? typeEntries[0], ( v: any ) => {
@@ -1506,21 +1493,18 @@ export class AssetView
             const area = new LX.Area( { className: 'flex flex-col rounded-lg' } );
             p.attach( area );
 
-            const content = LX.makeContainer( [ 'auto', '100%' ],
-                'flex flex-auto-fill flex-col overflow-scroll py-2 gap-1', `` );
+            const content = LX.makeContainer( [ 'auto', '100%' ], 'flex flex-auto-fill flex-col overflow-scroll py-2 gap-1', `` );
 
             {
                 const headerPanel = area.addPanel( { className: 'p-2 border-b-color flex flex-auto-keep', height: 'auto' } );
                 headerPanel.sameLine( 2, 'w-full' );
                 headerPanel.addButton( null, 'BackButton', () => {
                     if ( targetFolder && targetFolder.parent ) _openFolder( targetFolder.parent, content );
-                }, { icon: 'ArrowLeft', title: 'Back', tooltip: true, className: 'flex-auto-keep',
-                    buttonClass: 'ghost' } );
+                }, { icon: 'ArrowLeft', title: 'Back', tooltip: true, className: 'flex-auto-keep', buttonClass: 'ghost' } );
 
                 bcContainer = LX.makeElement( 'div' );
 
-                headerPanel.addContent( 'ITEM_MOVE_PATH', bcContainer, { signal: '@item_move_path',
-                    className: 'flex-auto-fill' } );
+                headerPanel.addContent( 'ITEM_MOVE_PATH', bcContainer, { signal: '@item_move_path', className: 'flex-auto-fill' } );
             }
 
             area.attach( content );
@@ -1528,12 +1512,10 @@ export class AssetView
             _openFolder( defaultFolder ?? this.data, content );
 
             {
-                const footerPanel = area.addPanel( { className: 'p-2 border-t-color flex flex-auto-keep justify-between',
-                    height: 'auto' } );
+                const footerPanel = area.addPanel( { className: 'p-2 border-t-color flex flex-auto-keep justify-between', height: 'auto' } );
                 footerPanel.addButton( null, 'NewFolderButton', () => {
                     this._requestCreateFolder( targetFolder );
-                }, { width: 'auto', icon: 'FolderPlus', title: 'Create Folder', tooltip: true, className: 'ml-2',
-                    buttonClass: 'ghost' } );
+                }, { width: 'auto', icon: 'FolderPlus', title: 'Create Folder', tooltip: true, className: 'ml-2', buttonClass: 'ghost' } );
 
                 footerPanel.sameLine( 2, 'mr-2' );
                 footerPanel.addButton( null, 'Cancel', () => {

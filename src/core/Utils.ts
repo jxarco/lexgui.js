@@ -1,7 +1,7 @@
 // Utils.ts @jxarco
 
 // @ts-ignore
-import { twMerge } from "https://cdn.jsdelivr.net/npm/tailwind-merge@3.4.0/+esm";
+import { twMerge } from 'https://cdn.jsdelivr.net/npm/tailwind-merge@3.4.0/+esm';
 import { Area } from './Area';
 import { LX } from './Namespace';
 import { Panel } from './Panel';
@@ -804,12 +804,8 @@ function makeDraggable( domEl: any, options: any = {} )
         const fixedOffset = isFixed ? new vec2( parentRect.x, parentRect.y ) : new vec2();
         left = left ?? e.clientX - offsetX - parentRect.x;
         top = top ?? e.clientY - offsetY - parentRect.y;
-        domEl.style.left =
-            LX.clamp( left, dragMargin + fixedOffset.x,
-                fixedOffset.x + parentRect.width - domEl.offsetWidth - dragMargin ) + 'px';
-        domEl.style.top =
-            LX.clamp( top, dragMargin + fixedOffset.y,
-                fixedOffset.y + parentRect.height - domEl.offsetHeight - dragMargin ) + 'px';
+        domEl.style.left = LX.clamp( left, dragMargin + fixedOffset.x, fixedOffset.x + parentRect.width - domEl.offsetWidth - dragMargin ) + 'px';
+        domEl.style.top = LX.clamp( top, dragMargin + fixedOffset.y, fixedOffset.y + parentRect.height - domEl.offsetHeight - dragMargin ) + 'px';
         domEl.style.translate = 'none'; // Force remove translation
     };
 
@@ -1134,8 +1130,7 @@ function makeBreadcrumb( items: any[], options: any = {} )
         }
 
         const lastElement = i == items.length - 1;
-        const breadcrumbItem = LX.makeContainer( [ 'auto', 'auto' ],
-            `p-1 flex flex-row gap-1 items-center ${lastElement ? '' : 'text-primary'}` );
+        const breadcrumbItem = LX.makeContainer( [ 'auto', 'auto' ], `p-1 flex flex-row gap-1 items-center ${lastElement ? '' : 'text-primary'}` );
         breadcrumb.appendChild( breadcrumbItem );
 
         let itemTitle = LX.makeElement( 'p', '', item.title );
@@ -1155,8 +1150,7 @@ function makeBreadcrumb( items: any[], options: any = {} )
         }
         else if ( item.url !== undefined )
         {
-            let itemUrl = LX.makeElement( 'a', `decoration-none text-${lastElement ? 'secondary' : 'accent'}`, '',
-                breadcrumbItem );
+            let itemUrl = LX.makeElement( 'a', `decoration-none text-${lastElement ? 'secondary' : 'accent'}`, '', breadcrumbItem );
             itemUrl.href = item.url;
             itemUrl.appendChild( itemTitle );
         }
@@ -1644,9 +1638,8 @@ function badge( text: string, className: string, options: any = {} )
 {
     const container = document.createElement( 'div' );
     container.innerHTML = text;
-    const cn = [ 'lexbadge', 'inline-flex', 'items-center', 'justify-center', 'rounded-full', 'border', 'px-2', 'py-0.5',
-        'text-xs', 'font-medium', 'w-fit', 'whitespace-nowrap', 'shrink-0', 'overflow-hidden', 'border-transparent', 'gap-1', 'min-w-5',
-        'bg-card text-primary' ];
+    const cn = [ 'lexbadge', 'inline-flex', 'items-center', 'justify-center', 'rounded-full', 'border', 'px-2', 'py-0.5', 'text-xs', 'font-medium',
+        'w-fit', 'whitespace-nowrap', 'shrink-0', 'overflow-hidden', 'border-transparent', 'gap-1', 'min-w-5', 'bg-card text-primary' ];
 
     container.className = className ? LX.twMerge( ...cn, ...className.split( ' ' ) ) : cn.join( ' ' );
 
@@ -2054,8 +2047,7 @@ Object.assign( LX, {
      * @param {Function} onComplete
      * @param {Function} onError
      */
-    requestText( url: string, onComplete: ( r: Response, rq: XMLHttpRequest ) => void,
-        onError: ( e: ProgressEvent ) => void )
+    requestText( url: string, onComplete: ( r: Response, rq: XMLHttpRequest ) => void, onError: ( e: ProgressEvent ) => void )
     {
         return this.request( { url: url, dataType: 'text', success: onComplete, error: onError } );
     },
@@ -2067,8 +2059,7 @@ Object.assign( LX, {
      * @param {Function} onComplete
      * @param {Function} onError
      */
-    requestJSON( url: string, onComplete: ( r: Response, rq: XMLHttpRequest ) => void,
-        onError: ( e: ProgressEvent ) => void )
+    requestJSON( url: string, onComplete: ( r: Response, rq: XMLHttpRequest ) => void, onError: ( e: ProgressEvent ) => void )
     {
         return this.request( { url: url, dataType: 'json', success: onComplete, error: onError } );
     },
@@ -2080,8 +2071,7 @@ Object.assign( LX, {
      * @param {Function} onComplete
      * @param {Function} onError
      */
-    requestBinary( url: string, onComplete: ( r: Response, rq: XMLHttpRequest ) => void,
-        onError: ( e: ProgressEvent ) => void )
+    requestBinary( url: string, onComplete: ( r: Response, rq: XMLHttpRequest ) => void, onError: ( e: ProgressEvent ) => void )
     {
         return this.request( { url: url, dataType: 'binary', success: onComplete, error: onError } );
     },
@@ -2094,9 +2084,8 @@ Object.assign( LX, {
      * @param {Function} onError
      * @param {Function} onProgress (if several files are required, onProgress is called after every file is added to the DOM)
      */
-    requireScript( url: any, onComplete: ( r: any[] ) => void,
-        onError: ( e: ProgressEvent, src: string, n: string ) => void, onProgress: ( src: string, n: string ) => void,
-        version?: string )
+    requireScript( url: any, onComplete: ( r: any[] ) => void, onError: ( e: ProgressEvent, src: string, n: string ) => void,
+        onProgress: ( src: string, n: string ) => void, version?: string )
     {
         if ( !url )
         {

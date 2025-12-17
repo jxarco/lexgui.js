@@ -123,8 +123,7 @@ export class Vector extends BaseComponent
                 }
                 else
                 {
-                    vecinput.value = LX.round( +vecinput.valueAsNumber - mult * ( e.deltaY > 0 ? 1 : -1 ),
-                        options.precision );
+                    vecinput.value = LX.round( +vecinput.valueAsNumber - mult * ( e.deltaY > 0 ? 1 : -1 ), options.precision );
                     BaseComponent._dispatchEvent( vecinput, 'change' );
                 }
             }, { passive: false } );

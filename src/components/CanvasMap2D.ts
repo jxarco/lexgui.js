@@ -421,8 +421,8 @@ export class CanvasMap2D
                 ctx.beginPath();
                 ctx.arc( this.circleCenter[0], this.circleCenter[1], this.circleRadius, 0, Math.PI * 2 );
                 ctx.clip();
-                ctx.drawImage( image, this.circleCenter[0] - this.circleRadius,
-                    this.circleCenter[1] - this.circleRadius, this.circleRadius * 2, this.circleRadius * 2 );
+                ctx.drawImage( image, this.circleCenter[0] - this.circleRadius, this.circleCenter[1] - this.circleRadius, this.circleRadius * 2,
+                    this.circleRadius * 2 );
                 ctx.restore();
             }
             else

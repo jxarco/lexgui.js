@@ -9,15 +9,12 @@ if ( !LX )
 
 LX.extensions.push( 'DocMaker' );
 
-const CPP_KEY_WORDS = [ 'int', 'float', 'double', 'bool', 'char', 'wchar_t', 'const', 'static_cast', 'dynamic_cast',
-    'new', 'delete', 'void', 'true', 'false', 'auto', 'struct', 'typedef', 'nullptr', 'NULL', 'unsigned', 'namespace',
-    'auto' ];
+const CPP_KEY_WORDS = [ 'int', 'float', 'double', 'bool', 'char', 'wchar_t', 'const', 'static_cast', 'dynamic_cast', 'new', 'delete', 'void', 'true',
+    'false', 'auto', 'struct', 'typedef', 'nullptr', 'NULL', 'unsigned', 'namespace', 'auto' ];
 const CLASS_WORDS = [ 'uint32_t', 'uint64_t', 'uint8_t' ];
-const STATEMENT_WORDS = [ 'for', 'if', 'else', 'return', 'continue', 'break', 'case', 'switch', 'while', 'import',
-    'from', 'await' ];
+const STATEMENT_WORDS = [ 'for', 'if', 'else', 'return', 'continue', 'break', 'case', 'switch', 'while', 'import', 'from', 'await' ];
 
-const JS_KEY_WORDS = [ 'var', 'let', 'const', 'static', 'function', 'null', 'undefined', 'new', 'delete', 'true',
-    'false', 'NaN', 'this' ];
+const JS_KEY_WORDS = [ 'var', 'let', 'const', 'static', 'function', 'null', 'undefined', 'new', 'delete', 'true', 'false', 'NaN', 'this' ];
 const HTML_ATTRIBUTES = [ 'html', 'charset', 'rel', 'src', 'href', 'crossorigin', 'type', 'lang' ];
 const HTML_TAGS = [ 'html', 'DOCTYPE', 'head', 'meta', 'title', 'link', 'script', 'body', 'style' ];
 
@@ -198,8 +195,7 @@ export class DocMaker
     list( list: any[], type: string, target?: Element )
     {
         const validTypes = [ 'bullet', 'numbered' ];
-        console.assert( list && list.length > 0 && validTypes.includes( type ),
-            'Invalid list type or empty list' + type );
+        console.assert( list && list.length > 0 && validTypes.includes( type ), 'Invalid list type or empty list' + type );
         const typeString = type == 'bullet' ? 'ul' : 'ol';
         let ul = document.createElement( typeString );
         target = target ?? this.root;
@@ -336,8 +332,7 @@ export class DocMaker
     {
         console.assert( text !== undefined );
 
-        const note = LX.makeContainer( [], 'border-color rounded-lg overflow-hidden text-sm text-primary my-6', '',
-            this.root );
+        const note = LX.makeContainer( [], 'border-color rounded-lg overflow-hidden text-sm text-primary my-6', '', this.root );
 
         let header = document.createElement( 'div' );
         header.className = 'flex bg-muted font-semibold px-3 py-2 gap-2 text-primary';

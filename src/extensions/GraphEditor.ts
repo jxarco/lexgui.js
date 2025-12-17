@@ -1113,9 +1113,7 @@ export class GraphEditor
         }
         else
         {
-            elements = Array.from( this._domNodes.childNodes ).filter( ( v: any ) =>
-                v.classList.contains( 'lexgraphnode' )
-            );
+            elements = Array.from( this._domNodes.childNodes ).filter( ( v: any ) => v.classList.contains( 'lexgraphnode' ) );
         }
 
         if ( exclude )
@@ -1822,8 +1820,7 @@ export class GraphEditor
 
         if ( rightPressed )
         {
-            this.currentGraph.translation.add( this._deltaMousePosition.div( this.currentGraph.scale ),
-                this.currentGraph.translation );
+            this.currentGraph.translation.add( this._deltaMousePosition.div( this.currentGraph.scale ), this.currentGraph.translation );
 
             this._updatePattern();
 
@@ -3400,8 +3397,7 @@ class NodeFuncInput extends GraphNode
     onCreate()
     {
         this.addOutput( null, 'float' );
-        this.addProperty( 'Outputs', 'array', [ 'float' ], [ 'float', 'int', 'bool', 'vec2', 'vec3', 'vec4',
-            'mat44' ] );
+        this.addProperty( 'Outputs', 'array', [ 'float' ], [ 'float', 'int', 'bool', 'vec2', 'vec3', 'vec4', 'mat44' ] );
     }
 
     onExecute()
@@ -3732,8 +3728,7 @@ class NodeCompare extends GraphNode
         this.addInput( 'B', 'any' );
         this.addInput( 'True', 'any' );
         this.addInput( 'False', 'any' );
-        this.addProperty( 'Condition', 'select', 'Equal', [ 'Equal', 'Not Equal', 'Less', 'Less Equal', 'Greater',
-            'Greater Equal' ] );
+        this.addProperty( 'Condition', 'select', 'Equal', [ 'Equal', 'Not Equal', 'Less', 'Less Equal', 'Greater', 'Greater Equal' ] );
         this.addOutput( null, 'any' );
     }
 
@@ -3770,8 +3765,7 @@ class NodeCompare extends GraphNode
         this.setOutput( 0, output );
     }
 }
-NodeCompare.description =
-    'Compare A to B given the selected operator. If true, return value of True else return value of False.';
+NodeCompare.description = 'Compare A to B given the selected operator. If true, return value of True else return value of False.';
 GraphEditor.registerCustomNode( 'logic/Compare', NodeCompare );
 
 /*

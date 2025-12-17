@@ -54,8 +54,7 @@ export class Pad extends BaseComponent
 
         let _updateValue = ( v: vec2 ) => {
             const [ w, h ] = [ pad.offsetWidth, pad.offsetHeight ];
-            const value0to1 = new vec2( LX.remapRange( v.x, thumb.min, thumb.max, 0.0, 1.0 ),
-                LX.remapRange( v.y, thumb.min, thumb.max, 0.0, 1.0 ) );
+            const value0to1 = new vec2( LX.remapRange( v.x, thumb.min, thumb.max, 0.0, 1.0 ), LX.remapRange( v.y, thumb.min, thumb.max, 0.0, 1.0 ) );
             thumb.style.transform = `translate(calc( ${w * value0to1.x}px - 50% ), calc( ${h * value0to1.y}px - 50%)`;
         };
 

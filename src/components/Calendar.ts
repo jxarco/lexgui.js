@@ -115,21 +115,21 @@ export class Calendar
 
             if ( !this.skipPrevMonth )
             {
-                const prevMonthIcon = LX.makeIcon( 'Left', { title: 'Previous Month',
-                    iconClass: 'border-color p-1 rounded hover:bg-secondary', svgClass: 'sm' } );
+                const prevMonthIcon = LX.makeIcon( 'Left', { title: 'Previous Month', iconClass: 'border-color p-1 rounded hover:bg-secondary',
+                    svgClass: 'sm' } );
                 header.appendChild( prevMonthIcon );
                 prevMonthIcon.addEventListener( 'click', () => {
                     this._previousMonth();
                 } );
             }
 
-            const monthYearLabel = LX.makeContainer( [ '100%', 'auto' ], 'text-center font-medium select-none',
-                `${this.monthName} ${this.year}`, header );
+            const monthYearLabel = LX.makeContainer( [ '100%', 'auto' ], 'text-center font-medium select-none', `${this.monthName} ${this.year}`,
+                header );
 
             if ( !this.skipNextMonth )
             {
-                const nextMonthIcon = LX.makeIcon( 'Right', { title: 'Next Month',
-                    iconClass: 'border-color p-1 rounded hover:bg-secondary', svgClass: 'sm' } );
+                const nextMonthIcon = LX.makeIcon( 'Right', { title: 'Next Month', iconClass: 'border-color p-1 rounded hover:bg-secondary',
+                    svgClass: 'sm' } );
                 header.appendChild( nextMonthIcon );
                 nextMonthIcon.addEventListener( 'click', () => {
                     this._nextMonth();
@@ -318,9 +318,7 @@ export class Calendar
 
     getFullDate( monthName?: string, day?: number, year?: number )
     {
-        return `${monthName ?? this.monthName} ${day ?? this.day}${this._getOrdinalSuffix( day ?? this.day )}, ${
-            year ?? this.year
-        }`;
+        return `${monthName ?? this.monthName} ${day ?? this.day}${this._getOrdinalSuffix( day ?? this.day )}, ${year ?? this.year}`;
     }
 
     setRange( range: string[] )

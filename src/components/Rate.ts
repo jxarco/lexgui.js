@@ -47,10 +47,10 @@ export class Rate extends BaseComponent
         this.root.appendChild( container );
 
         const starsContainer = LX.makeContainer( [ 'fit-content', 'auto' ], 'flex flex-row gap-1', '', container );
-        const filledStarsContainer = LX.makeContainer( [ 'fit-content', 'auto' ],
-            'absolute top-0 flex flex-row gap-1 pointer-events-none', '', container );
-        const halfStarsContainer = LX.makeContainer( [ 'fit-content', 'auto' ],
-            'absolute top-0 flex flex-row gap-1 pointer-events-none', '', container );
+        const filledStarsContainer = LX.makeContainer( [ 'fit-content', 'auto' ], 'absolute top-0 flex flex-row gap-1 pointer-events-none', '',
+            container );
+        const halfStarsContainer = LX.makeContainer( [ 'fit-content', 'auto' ], 'absolute top-0 flex flex-row gap-1 pointer-events-none', '',
+            container );
 
         starsContainer.addEventListener( 'mousemove', ( e: MouseEvent ) => {
             const star: any = e.target;

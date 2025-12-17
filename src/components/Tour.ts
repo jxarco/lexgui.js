@@ -177,8 +177,7 @@ export class Tour
             rect.setAttribute( 'x', `${boundingX - hOffset}` );
             rect.setAttribute( 'y', `${boundingY + boundingHeight + vOffset}` );
             rect.setAttribute( 'width', `${Math.max( 0, boundingWidth + hOffset * 2 )}` );
-            rect.setAttribute( 'height',
-                `${Math.max( 0, window.innerHeight - boundingY - boundingHeight - vOffset )}` );
+            rect.setAttribute( 'height', `${Math.max( 0, window.innerHeight - boundingY - boundingHeight - vOffset )}` );
             rect.setAttribute( 'stroke', 'none' );
             clipPath.appendChild( rect );
         }
@@ -248,8 +247,7 @@ export class Tour
         const footer = LX.makeContainer( [ '100%', 'auto' ], 'flex flex-row', '', popoverContainer );
 
         {
-            const footerSteps = LX.makeContainer( [ '50%', 'auto' ], 'p-2 gap-1 place-self-center flex flex-row', '',
-                footer );
+            const footerSteps = LX.makeContainer( [ '50%', 'auto' ], 'p-2 gap-1 place-self-center flex flex-row', '', footer );
             for ( let i = 0; i < this.steps.length; i++ )
             {
                 const stepIndicator = document.createElement( 'span' );

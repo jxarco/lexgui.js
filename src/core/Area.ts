@@ -331,8 +331,7 @@ export class Area
                 }
                 else if ( overlay == 'top' )
                 {
-                    let size = Math.min( document.body.clientHeight - LX.DEFAULT_SPLITBAR_SIZE,
-                        this.root.clientHeight );
+                    let size = Math.min( document.body.clientHeight - LX.DEFAULT_SPLITBAR_SIZE, this.root.clientHeight );
                     this.splitBar.style.height = LX.DEFAULT_SPLITBAR_SIZE + 'px';
                     this.splitBar.style.top = size + ( LX.DEFAULT_SPLITBAR_SIZE / 2.0 ) + 'px';
                 }
@@ -372,15 +371,13 @@ export class Area
                             break;
                         case 'left':
                             var dt = lastMousePosition[0] - e.x;
-                            var size: number = Math.min( document.body.clientWidth - LX.DEFAULT_SPLITBAR_SIZE,
-                                that.root.offsetWidth - dt );
+                            var size: number = Math.min( document.body.clientWidth - LX.DEFAULT_SPLITBAR_SIZE, that.root.offsetWidth - dt );
                             that.root.style.width = size + 'px';
                             that.splitBar.style.left = size + LX.DEFAULT_SPLITBAR_SIZE / 2 + 'px';
                             break;
                         case 'top':
                             var dt = lastMousePosition[1] - e.y;
-                            var size: number = Math.min( document.body.clientHeight - LX.DEFAULT_SPLITBAR_SIZE,
-                                that.root.offsetHeight - dt );
+                            var size: number = Math.min( document.body.clientHeight - LX.DEFAULT_SPLITBAR_SIZE, that.root.offsetHeight - dt );
                             that.root.style.height = size + 'px';
                             that.splitBar.style.top = size + LX.DEFAULT_SPLITBAR_SIZE / 2 + 'px';
                             break;
@@ -470,8 +467,7 @@ export class Area
             const type = layout.type ?? 'horizontal';
             const resize = layout.resize ?? true;
             const minimizable = layout.minimizable ?? false;
-            const [ splitA, splitB ] = area.split( { type, resize, minimizable,
-                sizes: [ layout.splits[0].size, layout.splits[1].size ] } );
+            const [ splitA, splitB ] = area.split( { type, resize, minimizable, sizes: [ layout.splits[0].size, layout.splits[1].size ] } );
 
             _splitArea( splitA, layout.splits[0] );
             _splitArea( splitB, layout.splits[1] );
@@ -605,8 +601,7 @@ export class Area
         // Create areas
         let area1 = new Area( { width: primarySize[0], height: primarySize[1], skipAppend: true,
             className: 'split' + ( options.menubar || options.sidebar ? '' : ' origin' ) } );
-        let area2 = new Area( { width: secondarySize[0], height: secondarySize[1], skipAppend: true,
-            className: 'split' } );
+        let area2 = new Area( { width: secondarySize[0], height: secondarySize[1], skipAppend: true, className: 'split' } );
 
         /*
             If the parent area is not in the DOM, we need to wait for the resize event to get the its correct size
@@ -974,8 +969,7 @@ export class Area
 
         LX.menubars.push( menubar );
 
-        const [ bar, content ] = this.split( { type: 'vertical', sizes: [ '48px', null ], resize: false,
-            menubar: true } );
+        const [ bar, content ] = this.split( { type: 'vertical', sizes: [ '48px', null ], resize: false, menubar: true } );
         menubar.siblingArea = content;
 
         bar.attach( menubar );

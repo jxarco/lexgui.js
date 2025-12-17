@@ -74,14 +74,14 @@ export class Form extends BaseComponent
                 container.appendChild( label.root );
             }
 
-            entryData.textComponent = new TextInput( null,
-                entryData.constructor == Object ? entryData.value : entryData, ( value: string, event: any ) => {
-                container.formData[entry] = value;
-                if ( entryData.submit && event.constructor === KeyboardEvent )
-                {
-                    primaryButton?.click();
-                }
-            }, entryData );
+            entryData.textComponent = new TextInput( null, entryData.constructor == Object ? entryData.value : entryData,
+                ( value: string, event: any ) => {
+                    container.formData[entry] = value;
+                    if ( entryData.submit && event.constructor === KeyboardEvent )
+                    {
+                        primaryButton?.click();
+                    }
+                }, entryData );
             container.appendChild( entryData.textComponent.root );
 
             container.formData[entry] = entryData.constructor == Object ? entryData.value : entryData;
@@ -91,49 +91,47 @@ export class Form extends BaseComponent
 
         if ( options.secondaryActionName || options.secondaryActionCallback )
         {
-            const secondaryButton = new Button( null, options.secondaryActionName ?? 'Cancel',
-                ( value: any, event: MouseEvent ) => {
-                    if ( options.secondaryActionCallback )
-                    {
-                        options.secondaryActionCallback( container.formData, event );
-                    }
-                }, { width: '100%', minWidth: '0', buttonClass: options.secondaryButtonClass ?? 'secondary' } );
+            const secondaryButton = new Button( null, options.secondaryActionName ?? 'Cancel', ( value: any, event: MouseEvent ) => {
+                if ( options.secondaryActionCallback )
+                {
+                    options.secondaryActionCallback( container.formData, event );
+                }
+            }, { width: '100%', minWidth: '0', buttonClass: options.secondaryButtonClass ?? 'secondary' } );
 
             buttonContainer.appendChild( secondaryButton.root );
         }
 
-        const primaryButton = new Button( null, options.primaryActionName ?? 'Submit',
-            ( value: any, event: MouseEvent ) => {
-                const errors = [];
+        const primaryButton = new Button( null, options.primaryActionName ?? 'Submit', ( value: any, event: MouseEvent ) => {
+            const errors = [];
 
-                for ( let entry in data )
+            for ( let entry in data )
+            {
+                let entryData = data[entry];
+
+                const pattern = entryData.pattern;
+                const matchField = pattern?.fieldMatchName ? container.formData[pattern.fieldMatchName] : undefined;
+
+                if ( !entryData.textComponent.valid( undefined, matchField ) )
                 {
-                    let entryData = data[entry];
-
-                    const pattern = entryData.pattern;
-                    const matchField = pattern?.fieldMatchName ? container.formData[pattern.fieldMatchName] : undefined;
-
-                    if ( !entryData.textComponent.valid( undefined, matchField ) )
+                    const err = { entry, type: 'input_not_valid', messages: [] };
+                    if ( pattern )
                     {
-                        const err = { entry, type: 'input_not_valid', messages: [] };
-                        if ( pattern )
-                        {
-                            err.messages = LX.validateValueAtPattern(
-                                container.formData[entry],
-                                pattern,
-                                matchField
-                            );
-                        }
-
-                        errors.push( err );
+                        err.messages = LX.validateValueAtPattern(
+                            container.formData[entry],
+                            pattern,
+                            matchField
+                        );
                     }
-                }
 
-                if ( callback )
-                {
-                    callback( container.formData, errors, event );
+                    errors.push( err );
                 }
-            }, { width: '100%', minWidth: '0', buttonClass: options.primaryButtonClass ?? 'primary' } );
+            }
+
+            if ( callback )
+            {
+                callback( container.formData, errors, event );
+            }
+        }, { width: '100%', minWidth: '0', buttonClass: options.primaryButtonClass ?? 'primary' } );
 
         buttonContainer.appendChild( primaryButton.root );
     }

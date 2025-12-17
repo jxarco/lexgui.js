@@ -160,8 +160,7 @@ export class Panel
                 {
                     if ( LX.signals[signal][i] == this.components[w] )
                     {
-                        LX.signals[signal] = [ ...LX.signals[signal].slice( 0, i ),
-                            ...LX.signals[signal].slice( i + 1 ) ];
+                        LX.signals[signal] = [ ...LX.signals[signal].slice( 0, i ), ...LX.signals[signal].slice( i + 1 ) ];
                     }
                 }
             }
@@ -177,8 +176,7 @@ export class Panel
                 {
                     if ( LX.signals[signal][i] == c )
                     {
-                        LX.signals[signal] = [ ...LX.signals[signal].slice( 0, i ),
-                            ...LX.signals[signal].slice( i + 1 ) ];
+                        LX.signals[signal] = [ ...LX.signals[signal].slice( 0, i ), ...LX.signals[signal].slice( i + 1 ) ];
                     }
                 }
             }

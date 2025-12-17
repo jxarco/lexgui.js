@@ -61,13 +61,11 @@ export class Pagination
 
         if ( options.allowChangeItemsPerPage ?? false )
         {
-            const itemsPerPageSelectContainer = LX.makeContainer( [ 'auto', 'auto' ], 'flex flex-row items-center', '',
-                this.root );
-            const itemsPerPageSelect = new Select( null, Pagination.ITEMS_PER_PAGE_VALUES, this._itemsPerPage,
-                ( v: number ) => {
-                    this._itemsPerPage = v;
-                    this.onItemsPerPageChange?.( this._itemsPerPage );
-                }, { overflowContainer: null } );
+            const itemsPerPageSelectContainer = LX.makeContainer( [ 'auto', 'auto' ], 'flex flex-row items-center', '', this.root );
+            const itemsPerPageSelect = new Select( null, Pagination.ITEMS_PER_PAGE_VALUES, this._itemsPerPage, ( v: number ) => {
+                this._itemsPerPage = v;
+                this.onItemsPerPageChange?.( this._itemsPerPage );
+            }, { overflowContainer: null } );
             itemsPerPageSelectContainer.appendChild( itemsPerPageSelect.root );
         }
 
@@ -219,7 +217,7 @@ export class Pagination
 
     _makePageButton( container: HTMLElement, i: number )
     {
-        const buttonClass = `h-8 ${ i === this.page ? 'bg-primary text-primary-foreground' : 'ghost' }`;
+        const buttonClass = `h-8 ${i === this.page ? 'bg-primary text-primary-foreground' : 'ghost'}`;
         return this._makeButton( String( i ), false, () => this.setPage( i ), buttonClass, container );
     }
 }

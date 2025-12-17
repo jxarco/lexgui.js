@@ -103,9 +103,7 @@ export class Knob extends BaseComponent
 
             if ( mustSnap )
             {
-                knob.value = ticks.reduce( ( prev, curr ) =>
-                    Math.abs( curr - knob.value ) < Math.abs( prev - knob.value ) ? curr : prev
-                );
+                knob.value = ticks.reduce( ( prev, curr ) => Math.abs( curr - knob.value ) < Math.abs( prev - knob.value ) ? curr : prev );
             }
 
             let val = knob.value = LX.clamp( knob.value, knob.min, knob.max );

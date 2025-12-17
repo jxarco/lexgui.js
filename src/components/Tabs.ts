@@ -112,8 +112,7 @@ export class Tabs
 
         area.root.classList.add( 'lexareatabscontainer' );
 
-        const [ tabButtons, content ] = area.split( { type: 'vertical', sizes: options.sizes ?? 'auto', resize: false,
-            top: 2 } );
+        const [ tabButtons, content ] = area.split( { type: 'vertical', sizes: options.sizes ?? 'auto', resize: false, top: 2 } );
         tabButtons.attach( container );
 
         if ( options.parentClass && container.parentElement )
@@ -190,9 +189,7 @@ export class Tabs
             this.root.querySelectorAll( 'span' ).forEach( ( s: HTMLElement ) => s.classList.remove( 'selected' ) );
             const pseudoParent = this.area.root.querySelector( ':scope > .pseudoparent-tabs' );
             const contentRoot = pseudoParent ?? this.area.root;
-            contentRoot.querySelectorAll( ':scope > .lextabcontent' ).forEach( ( s: HTMLElement ) =>
-                s.style.display = 'none'
-            );
+            contentRoot.querySelectorAll( ':scope > .lextabcontent' ).forEach( ( s: HTMLElement ) => s.style.display = 'none' );
         }
 
         isSelected = !Object.keys( this.tabs ).length && !this.folding ? true : isSelected;
@@ -208,8 +205,7 @@ export class Tabs
             if ( !options.icon.includes( '.' ) )
             { // Not a file
                 const classes = options.icon.split( ' ' );
-                options.icon =
-                    LX.makeIcon( classes[0], { svgClass: 'sm ' + classes.slice( 0 ).join( ' ' ) } ).innerHTML;
+                options.icon = LX.makeIcon( classes[0], { svgClass: 'sm ' + classes.slice( 0 ).join( ' ' ) } ).innerHTML;
             }
             // an image..
             else
@@ -262,16 +258,12 @@ export class Tabs
                 tabEl.parentElement.querySelectorAll( 'span' ).forEach( ( s: any ) => s.selected = false );
                 tabEl.selected = !lastValue || ( tabEl._forceSelect ? true : false );
                 // Manage selected
-                tabEl.parentElement.querySelectorAll( 'span' ).forEach( ( s: any ) =>
-                    s.classList.remove( 'selected' )
-                );
+                tabEl.parentElement.querySelectorAll( 'span' ).forEach( ( s: any ) => s.classList.remove( 'selected' ) );
                 tabEl.classList.toggle( 'selected', tabEl.selected );
                 // Manage visibility
                 const pseudoParent = scope.area.root.querySelector( ':scope > .pseudoparent-tabs' );
                 const contentRoot = pseudoParent ?? scope.area.root;
-                contentRoot.querySelectorAll( ':scope > .lextabcontent' ).forEach( ( s: any ) =>
-                    s.style.display = 'none'
-                );
+                contentRoot.querySelectorAll( ':scope > .lextabcontent' ).forEach( ( s: any ) => s.style.display = 'none' );
                 contentEl.style.display = contentEl.originalDisplay;
                 scope.selected = tabEl.dataset.name;
             }

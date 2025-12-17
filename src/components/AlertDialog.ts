@@ -21,8 +21,7 @@ export class AlertDialog extends Dialog
 
             LX.makeContainer( [ '100%', '100%' ], 'text-lg font-medium', title, p );
 
-            p.addTextArea( null, message, null, { disabled: true, fitHeight: true,
-                inputClass: 'bg-none text-sm text-muted-foreground' } );
+            p.addTextArea( null, message, null, { disabled: true, fitHeight: true, inputClass: 'bg-none text-sm text-muted-foreground' } );
 
             p.sameLine( 2, 'justify-end' );
             p.addButton( null, options.cancelText ?? 'Cancel', () => this.destroy(), {

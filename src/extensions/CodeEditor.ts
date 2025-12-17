@@ -358,10 +358,8 @@ class ScrollBar
 const HighlightRules: Record<string, any> = {
     common: [
         { test: ( ctx: any ) => ctx.inBlockComment, className: 'cm-com' },
-        { test: ( ctx: any ) => ctx.inString,
-            action: ( ctx: any, editor: CodeEditor ) => editor._appendStringToken( ctx.token ), discard: true },
-        { test: ( ctx: any ) => ctx.token.substr( 0, ctx.singleLineCommentToken.length ) == ctx.singleLineCommentToken,
-            className: 'cm-com' },
+        { test: ( ctx: any ) => ctx.inString, action: ( ctx: any, editor: CodeEditor ) => editor._appendStringToken( ctx.token ), discard: true },
+        { test: ( ctx: any ) => ctx.token.substr( 0, ctx.singleLineCommentToken.length ) == ctx.singleLineCommentToken, className: 'cm-com' },
         { test: ( ctx: any, editor: CodeEditor ) => editor._isKeyword( ctx ), className: 'cm-kwd' },
         {
             test: ( ctx: any, editor: CodeEditor ) =>
@@ -370,15 +368,11 @@ const HighlightRules: Record<string, any> = {
                     : true ),
             className: 'cm-bln'
         },
-        { test: ( ctx: any, editor: CodeEditor ) => editor._mustHightlightWord( ctx.token, CE.statements, ctx.lang ),
-            className: 'cm-std' },
-        { test: ( ctx: any, editor: CodeEditor ) => editor._mustHightlightWord( ctx.token, CE.symbols, ctx.lang ),
-            className: 'cm-sym' },
-        { test: ( ctx: any, editor: CodeEditor ) => editor._mustHightlightWord( ctx.token, CE.types, ctx.lang ),
-            className: 'cm-typ' },
+        { test: ( ctx: any, editor: CodeEditor ) => editor._mustHightlightWord( ctx.token, CE.statements, ctx.lang ), className: 'cm-std' },
+        { test: ( ctx: any, editor: CodeEditor ) => editor._mustHightlightWord( ctx.token, CE.symbols, ctx.lang ), className: 'cm-sym' },
+        { test: ( ctx: any, editor: CodeEditor ) => editor._mustHightlightWord( ctx.token, CE.types, ctx.lang ), className: 'cm-typ' },
         {
-            test: ( ctx: any, editor: CodeEditor ) =>
-                editor._isNumber( ctx.token ) || editor._isNumber( ctx.token.replace( /[px]|[em]|%/g, '' ) ),
+            test: ( ctx: any, editor: CodeEditor ) => editor._isNumber( ctx.token ) || editor._isNumber( ctx.token.replace( /[px]|[em]|%/g, '' ) ),
             className: 'cm-dec'
         },
         { test: ( ctx: any ) => ctx.lang.usePreprocessor && ctx.token.includes( '#' ), className: 'cm-ppc' }
@@ -403,8 +397,7 @@ const HighlightRules: Record<string, any> = {
             className: 'cm-typ'
         },
         {
-            test: ( ctx: any, editor: CodeEditor ) =>
-                ctx.token !== ',' && editor._enclosedByTokens( ctx.token, ctx.tokenIndex, '<', '>' ),
+            test: ( ctx: any, editor: CodeEditor ) => ctx.token !== ',' && editor._enclosedByTokens( ctx.token, ctx.tokenIndex, '<', '>' ),
             className: 'cm-typ'
         }
     ],
@@ -413,8 +406,7 @@ const HighlightRules: Record<string, any> = {
         { test: ( ctx: any ) => ctx.scope && ( ctx.token !== ',' && ctx.scope.type == 'enum' ), className: 'cm-enu' },
         { test: ( ctx: any ) => ctx.isEnumValueSymbol( ctx.token ), className: 'cm-enu' },
         {
-            test: ( ctx: any ) =>
-                ( ctx.prev === 'class' && ctx.next === '{' ) || ( ctx.prev === 'struct' && ctx.next === '{' ),
+            test: ( ctx: any ) => ( ctx.prev === 'class' && ctx.next === '{' ) || ( ctx.prev === 'struct' && ctx.next === '{' ),
             className: 'cm-typ'
         },
         { test: ( ctx: any ) => ctx.prev === '<' && ( ctx.next === '>' || ctx.next === '*' ), className: 'cm-typ' }, // Defining template type in C++
@@ -425,13 +417,11 @@ const HighlightRules: Record<string, any> = {
     wgsl: [
         { test: ( ctx: any ) => ctx.prev === '>' && ( !ctx.next || ctx.next === '{' ), className: 'cm-typ' }, // Function return type
         {
-            test: ( ctx: any ) =>
-                ( ctx.prev === ':' && ctx.next !== undefined ) || ( ctx.prev === 'struct' && ctx.next === '{' ),
+            test: ( ctx: any ) => ( ctx.prev === ':' && ctx.next !== undefined ) || ( ctx.prev === 'struct' && ctx.next === '{' ),
             className: 'cm-typ'
         },
         {
-            test: ( ctx: any, editor: CodeEditor ) =>
-                ctx.token !== ',' && editor._enclosedByTokens( ctx.token, ctx.tokenIndex, '<', '>' ),
+            test: ( ctx: any, editor: CodeEditor ) => ctx.token !== ',' && editor._enclosedByTokens( ctx.token, ctx.tokenIndex, '<', '>' ),
             className: 'cm-typ'
         }
     ],
@@ -444,12 +434,9 @@ const HighlightRules: Record<string, any> = {
                 || ( ctx.token[0] == '#' && ctx.prev != ':' ) ),
             className: 'cm-kwd'
         },
-        { test: ( ctx: any ) => ctx.prev === ':' && ( ctx.next === ';' || ctx.next === '!important' ),
-            className: 'cm-str' }, // CSS value
-        { test: ( ctx: any ) => ( ctx.prev === undefined || ctx.prev === '{' || ctx.prev === ';' ) && ctx.next === ':',
-            className: 'cm-typ' }, // CSS attribute
-        { test: ( ctx: any ) => ctx.prev === '(' && ctx.next === ')' && ctx.token.startsWith( '--' ),
-            className: 'cm-typ' } // CSS vars
+        { test: ( ctx: any ) => ctx.prev === ':' && ( ctx.next === ';' || ctx.next === '!important' ), className: 'cm-str' }, // CSS value
+        { test: ( ctx: any ) => ( ctx.prev === undefined || ctx.prev === '{' || ctx.prev === ';' ) && ctx.next === ':', className: 'cm-typ' }, // CSS attribute
+        { test: ( ctx: any ) => ctx.prev === '(' && ctx.next === ')' && ctx.token.startsWith( '--' ), className: 'cm-typ' } // CSS vars
     ],
 
     batch: [
@@ -473,8 +460,7 @@ const HighlightRules: Record<string, any> = {
 
     post_common: [
         {
-            test: ( ctx: any ) =>
-                isLetter( ctx.token ) && ( ctx.token[0] != '@' ) && ( ctx.token[0] != ',' ) && ( ctx.next === '(' ),
+            test: ( ctx: any ) => isLetter( ctx.token ) && ( ctx.token[0] != '@' ) && ( ctx.token[0] != ',' ) && ( ctx.next === '(' ),
             className: 'cm-mtd'
         }
     ]
@@ -785,8 +771,7 @@ export class CodeEditor
             loadFileButton.addEventListener( 'click', ( e: MouseEvent ) => {
                 const dropdownOptions = [];
 
-                for ( const [ key, value ] of [ ...Object.entries( this.loadedTabs ).slice( 1 ),
-                    ...Object.entries( this._tabStorage ) ] )
+                for ( const [ key, value ] of [ ...Object.entries( this.loadedTabs ).slice( 1 ), ...Object.entries( this._tabStorage ) ] )
                 {
                     const icon = this._getFileIcon( key );
                     const classes = icon ? icon.split( ' ' ) : [];
@@ -905,8 +890,7 @@ export class CodeEditor
                             {
                                 const totalLinesInViewport = ( ( this.codeScroller.offsetHeight ) / this.lineHeight )
                                     | 0;
-                                const scrollDownBoundary =
-                                    ( Math.max( this.visibleLinesViewport.y - totalLinesInViewport, 0 ) - 1 )
+                                const scrollDownBoundary = ( Math.max( this.visibleLinesViewport.y - totalLinesInViewport, 0 ) - 1 )
                                     * this.lineHeight;
 
                                 if ( scrollTop >= scrollDownBoundary )
@@ -989,8 +973,8 @@ export class CodeEditor
 
                 searchPanel.sameLine( 4 );
                 searchPanel.addText( null, '', null, { placeholder: 'Find', inputClass: 'bg-secondary' } );
-                searchPanel.addButton( null, 'up', () => this.search( null, true ), { icon: 'ArrowUp',
-                    buttonClass: 'ghost', title: 'Previous Match', tooltip: true } );
+                searchPanel.addButton( null, 'up', () => this.search( null, true ), { icon: 'ArrowUp', buttonClass: 'ghost', title: 'Previous Match',
+                    tooltip: true } );
                 searchPanel.addButton( null, 'down', () => this.search(), { icon: 'ArrowDown', buttonClass: 'ghost', title: 'Next Match',
                     tooltip: true } );
                 searchPanel.addButton( null, 'x', this.hideSearchBox.bind( this ), { icon: 'X', buttonClass: 'ghost', title: 'Close',
@@ -1019,8 +1003,8 @@ export class CodeEditor
                     input.value = ':' + value.replaceAll( ':', '' );
                     this.goToLine( input.value.slice( 1 ) );
                 }, { placeholder: 'Go to line', trigger: 'input' } );
-                searchPanel.addButton( null, 'x', this.hideSearchLineBox.bind( this ), { icon: 'X', title: 'Close',
-                    buttonClass: 'ghost', tooltip: true } );
+                searchPanel.addButton( null, 'x', this.hideSearchLineBox.bind( this ), { icon: 'X', title: 'Close', buttonClass: 'ghost',
+                    tooltip: true } );
 
                 let input: any = box.querySelector( 'input' );
                 input.addEventListener( 'keyup', ( e: KeyboardEvent ) => {
@@ -1297,8 +1281,7 @@ export class CodeEditor
                     }
                     if ( cursor.selection!.sameLine() )
                     {
-                        cursor.selection!.selectInline( cursor, cursor.position, cursor.line,
-                            this.measureString( string ) );
+                        cursor.selection!.selectInline( cursor, cursor.position, cursor.line, this.measureString( string ) );
                     }
                     else
                     {
@@ -1716,19 +1699,18 @@ export class CodeEditor
                 const finalUrl = url.constructor === Array ? url[0] : url;
                 const finalFileName = url.constructor === Array ? url[1] : undefined;
 
-                await this.loadFile( finalUrl, { filename: finalFileName, async: loadAsync,
-                    callback: ( name: string, text: string ) => {
-                        filesLoaded++;
-                        if ( filesLoaded == numFiles )
-                        {
-                            onLoadAll();
+                await this.loadFile( finalUrl, { filename: finalFileName, async: loadAsync, callback: ( name: string, text: string ) => {
+                    filesLoaded++;
+                    if ( filesLoaded == numFiles )
+                    {
+                        onLoadAll();
 
-                            if ( options.onFilesLoaded )
-                            {
-                                options.onFilesLoaded( this, this.loadedTabs, numFiles );
-                            }
+                        if ( options.onFilesLoaded )
+                        {
+                            options.onFilesLoaded( this, this.loadedTabs, numFiles );
                         }
-                    } } );
+                    }
+                } } );
             }
         }
         else
@@ -2177,22 +2159,27 @@ export class CodeEditor
             this.onCreateStatusPanel( panel, this );
         }
 
-        let leftStatusPanel = this.leftStatusPanel = new LX.Panel( { id: 'FontSizeZoomStatusComponent', className: 'flex-auto-keep', width: 'auto', height: 'auto' } );
+        let leftStatusPanel = this.leftStatusPanel = new LX.Panel( { id: 'FontSizeZoomStatusComponent', className: 'flex-auto-keep', width: 'auto',
+            height: 'auto' } );
         leftStatusPanel.sameLine();
 
-        leftStatusPanel.addButton( null, 'ZoomOutButton', this._decreaseFontSize.bind( this ), { icon: 'ZoomOut',
-            buttonClass: 'ghost sm', title: 'Zoom Out', tooltip: true } );
+        leftStatusPanel.addButton( null, 'ZoomOutButton', this._decreaseFontSize.bind( this ), { icon: 'ZoomOut', buttonClass: 'ghost sm',
+            title: 'Zoom Out', tooltip: true } );
         leftStatusPanel.addLabel( this.fontSize, { fit: true, signal: '@font-size' } );
-        leftStatusPanel.addButton( null, 'ZoomInButton', this._increaseFontSize.bind( this ), { icon: 'ZoomIn',
-            buttonClass: 'ghost sm', title: 'Zoom In', tooltip: true } );
+        leftStatusPanel.addButton( null, 'ZoomInButton', this._increaseFontSize.bind( this ), { icon: 'ZoomIn', buttonClass: 'ghost sm',
+            title: 'Zoom In', tooltip: true } );
         leftStatusPanel.endLine( 'justify-start' );
         panel.attach( leftStatusPanel.root );
 
         let rightStatusPanel = this.rightStatusPanel = new LX.Panel( { height: 'auto' } );
         rightStatusPanel.sameLine();
-        rightStatusPanel.addLabel( this.code?.title ?? '', { id: 'EditorFilenameStatusComponent', fit: true, inputClass: 'text-xs', signal: '@tab-name' } );
+        rightStatusPanel.addLabel( this.code?.title ?? '', { id: 'EditorFilenameStatusComponent', fit: true, inputClass: 'text-xs',
+            signal: '@tab-name' } );
         rightStatusPanel.addButton( null, 'Ln 1, Col 1', this.showSearchLineBox.bind( this ), {
-            id: 'EditorSelectionStatusComponent', buttonClass: 'outline xs', fit: true, signal: '@cursor-data'
+            id: 'EditorSelectionStatusComponent',
+            buttonClass: 'outline xs',
+            fit: true,
+            signal: '@cursor-data'
         } );
         rightStatusPanel.addButton( null, 'Spaces: ' + this.tabSpaces, ( value: any, event: any ) => {
             LX.addContextMenu( 'Spaces', event, ( m: typeof ContextMenu ) => {
@@ -2337,8 +2324,7 @@ export class CodeEditor
 
         const dmOptions = this.newTabOptions ?? [
             { name: 'Create file', icon: 'FilePlus', callback: this._onCreateNewFile.bind( this ) },
-            { name: 'Load file', icon: 'FileUp', disabled: !this.allowLoadingFiles,
-                callback: this.loadTabFromFile.bind( this ) }
+            { name: 'Load file', icon: 'FileUp', disabled: !this.allowLoadingFiles, callback: this.loadTabFromFile.bind( this ) }
         ];
 
         new LX.DropdownMenu( e.target, dmOptions, { side: 'bottom', align: 'start' } );
@@ -2358,8 +2344,7 @@ export class CodeEditor
         }
 
         const name = options.name ?? 'unnamed.js';
-        this.addTab( name, true, name, { indexOffset: options.indexOffset,
-            language: options.language ?? 'JavaScript' } );
+        this.addTab( name, true, name, { indexOffset: options.indexOffset, language: options.language ?? 'JavaScript' } );
     }
 
     _onSelectTab( isNewTabButton: boolean, event: any, name: string )
@@ -2927,8 +2912,7 @@ export class CodeEditor
     {
         var cursor = this.getCurrentCursor();
         var code_rect = this.codeScroller.getBoundingClientRect();
-        var position = [ ( e.clientX - code_rect.x ) + this.getScrollLeft(),
-            ( e.clientY - code_rect.y ) + this.getScrollTop() ];
+        var position = [ ( e.clientX - code_rect.x ) + this.getScrollLeft(), ( e.clientY - code_rect.y ) + this.getScrollTop() ];
         var ln = ( position[1] / this.lineHeight ) | 0;
 
         // Check out of range line
@@ -3784,8 +3768,7 @@ export class CodeEditor
         }
     }
 
-    action( key: string, deleteSelection: boolean = false, fn?: ( l: number, cursor: Cursor, e: any ) => void,
-        eventSkipDeleteFn?: any )
+    action( key: string, deleteSelection: boolean = false, fn?: ( l: number, cursor: Cursor, e: any ) => void, eventSkipDeleteFn?: any )
     {
         this.actions[key] = {
             'key': key,
@@ -3855,8 +3838,7 @@ export class CodeEditor
         const totalLinesInViewport = ( ( this.codeScroller.offsetHeight ) / this.lineHeight ) | 0;
         this.visibleLinesViewport = new LX.vec2(
             Math.max( this.firstLineInViewport - this.lineScrollMargin.x, 0 ),
-            Math.min( this.firstLineInViewport + totalLinesInViewport + this.lineScrollMargin.y,
-                this.code.lines.length )
+            Math.min( this.firstLineInViewport + totalLinesInViewport + this.lineScrollMargin.y, this.code.lines.length )
         );
 
         // Add remaining lines if we are near the end of the scroll
@@ -4009,8 +3991,7 @@ export class CodeEditor
                 && token.substr( 0, blockCommentsTokens[1].length ) == blockCommentsTokens[1] )
             {
                 const [ commentLineNumber, tokenPos ] = this._buildingBlockComment;
-                this._blockCommentCache.push( [ new LX.vec2( commentLineNumber, lineNumber ),
-                    new LX.vec2( tokenPos, tokenStartIndex ) ] );
+                this._blockCommentCache.push( [ new LX.vec2( commentLineNumber, lineNumber ), new LX.vec2( tokenPos, tokenStartIndex ) ] );
                 delete this._buildingBlockComment;
             }
 
@@ -4200,8 +4181,7 @@ export class CodeEditor
         }
     }
 
-    _processExtraLineIfNecessary( lineNumber: number, tokens: string[], oldSymbols: any[],
-        skipPropagation: boolean = false )
+    _processExtraLineIfNecessary( lineNumber: number, tokens: string[], oldSymbols: any[], skipPropagation: boolean = false )
     {
         if ( !this._scopeStack )
         {
@@ -4269,8 +4249,7 @@ export class CodeEditor
         }
     }
 
-    _updateLine( force: boolean = false, lineNumber: number, html: string, skipPropagation: boolean = false,
-        symbols: any[] = [], tokens: any[] = [] )
+    _updateLine( force: boolean = false, lineNumber: number, html: string, skipPropagation: boolean = false, symbols: any[] = [], tokens: any[] = [] )
     {
         const gutterLineHtml = `<span class='line-gutter'>${lineNumber + 1}</span>`;
         const oldSymbols = this._updateLineSymbols( lineNumber, symbols );
@@ -4383,19 +4362,17 @@ export class CodeEditor
         {
             if ( nativeTypes )
             {
-                topLevelRegexes.push( [ new RegExp( `^(?:${nativeTypes.join( '|' )})\\s+([A-Za-z0-9_]+)\s*[\(]+` ),
-                    'method' ] );
+                topLevelRegexes.push( [ new RegExp( `^(?:${nativeTypes.join( '|' )})\\s+([A-Za-z0-9_]+)\s*[\(]+` ), 'method' ] );
 
                 if ( this.highlight === 'WGSL' )
                 {
-                    topLevelRegexes.push( [ new RegExp( `[A-Za-z0-9]+(\\s*)+:(\\s*)+(${nativeTypes.join( '|' )})` ),
-                        'variable', ( m: string[] ) => m[0].split( ':' )[0].trim() ] );
+                    topLevelRegexes.push( [ new RegExp( `[A-Za-z0-9]+(\\s*)+:(\\s*)+(${nativeTypes.join( '|' )})` ), 'variable', ( m: string[] ) =>
+                        m[0].split( ':' )[0].trim() ] );
                 }
             }
 
             const declarationKeywords = CodeEditor.declarationKeywords[this.highlight] ?? [ 'const', 'let', 'var' ];
-            topLevelRegexes.push( [ new RegExp( `^(?:${declarationKeywords.join( '|' )})\\s+([A-Za-z0-9_]+)` ),
-                'variable' ] );
+            topLevelRegexes.push( [ new RegExp( `^(?:${declarationKeywords.join( '|' )})\\s+([A-Za-z0-9_]+)` ), 'variable' ] );
         }
 
         for ( let [ regex, kind, fn ] of topLevelRegexes )
@@ -4693,8 +4670,7 @@ export class CodeEditor
 
     _getTokenHighlighting( ctx: any, highlight: string )
     {
-        const rules = [ ...HighlightRules.common, ...( HighlightRules[highlight] || [] ),
-            ...HighlightRules.post_common ];
+        const rules = [ ...HighlightRules.common, ...( HighlightRules[highlight] || [] ), ...HighlightRules.post_common ];
 
         for ( const rule of rules )
         {
@@ -4720,9 +4696,8 @@ export class CodeEditor
         const customStringKeys = Object.assign( {}, this.stringKeys );
         const lineNumber = this._currentLineNumber;
         const tokenStartIndex = this._currentTokenPositions[tokenIndex];
-        const inBlockComment =
-            ( this._buildingBlockComment ?? this._inBlockCommentSection( lineNumber!, tokenStartIndex, token.length ) )
-                !== undefined;
+        const inBlockComment = ( this._buildingBlockComment ?? this._inBlockCommentSection( lineNumber!, tokenStartIndex, token.length ) )
+            !== undefined;
 
         var usePreviousTokenToCheckString = false;
 
@@ -4808,12 +4783,9 @@ export class CodeEditor
             this.code.symbolsTable.has( token ) && this.code.symbolsTable.get( token )[0].kind === 'variable';
         ctxData.isEnumValueSymbol = ( token: string ) =>
             this.code.symbolsTable.has( token ) && this.code.symbolsTable.get( token )[0].kind === 'enum_value';
-        ctxData.isClassSymbol = ( token: string ) =>
-            this.code.symbolsTable.has( token ) && this.code.symbolsTable.get( token )[0].kind === 'class';
-        ctxData.isStructSymbol = ( token: string ) =>
-            this.code.symbolsTable.has( token ) && this.code.symbolsTable.get( token )[0].kind === 'struct';
-        ctxData.isEnumSymbol = ( token: string ) =>
-            this.code.symbolsTable.has( token ) && this.code.symbolsTable.get( token )[0].kind === 'enum';
+        ctxData.isClassSymbol = ( token: string ) => this.code.symbolsTable.has( token ) && this.code.symbolsTable.get( token )[0].kind === 'class';
+        ctxData.isStructSymbol = ( token: string ) => this.code.symbolsTable.has( token ) && this.code.symbolsTable.get( token )[0].kind === 'struct';
+        ctxData.isEnumSymbol = ( token: string ) => this.code.symbolsTable.has( token ) && this.code.symbolsTable.get( token )[0].kind === 'enum';
 
         // Get highlighting class based on language common and specific rules
         let tokenClass = this._getTokenHighlighting( ctxData, highlight );
@@ -5805,12 +5777,8 @@ export class CodeEditor
             }
 
             this.vScrollbar.root.classList.toggle( 'hidden', !needsVerticalScrollbar );
-            this.hScrollbar.root.style.width = `calc(100% - ${
-                48 + ( needsVerticalScrollbar ? ScrollBar.SCROLLBAR_VERTICAL_WIDTH : 0 )
-            }px)`; // 48 is the line gutter
-            this.codeArea.root.style.width = `calc(100% - ${
-                needsVerticalScrollbar ? ScrollBar.SCROLLBAR_VERTICAL_WIDTH : 0
-            }px)`;
+            this.hScrollbar.root.style.width = `calc(100% - ${48 + ( needsVerticalScrollbar ? ScrollBar.SCROLLBAR_VERTICAL_WIDTH : 0 )}px)`; // 48 is the line gutter
+            this.codeArea.root.style.width = `calc(100% - ${needsVerticalScrollbar ? ScrollBar.SCROLLBAR_VERTICAL_WIDTH : 0}px)`;
         }
 
         if ( flag & CodeEditor.RESIZE_SCROLLBAR_H )
@@ -5984,8 +5952,7 @@ export class CodeEditor
         text.innerText = char;
         var rect = text.getBoundingClientRect();
         LX.deleteElement( parentContainer );
-        const bb = [ useFloating ? rect.width : Math.floor( rect.width ),
-            useFloating ? rect.height : Math.floor( rect.height ) ];
+        const bb = [ useFloating ? rect.width : Math.floor( rect.width ), useFloating ? rect.height : Math.floor( rect.height ) ];
         return getBB ? bb : bb[0];
     }
 
@@ -6188,13 +6155,9 @@ export class CodeEditor
 
         // Show box
         this.autocomplete.classList.toggle( 'show', true );
-        this.autocomplete.classList.toggle( 'no-scrollbar',
-            !( this.autocomplete.scrollHeight > this.autocomplete.offsetHeight ) );
-        this.autocomplete.style.left = `${
-            Math.min( cursor.left + CodeEditor.LINE_GUTTER_WIDTH - this.getScrollLeft(), maxX )
-        }px`;
-        this.autocomplete.style.top =
-            `${( cursor.top + this._verticalTopOffset + this.lineHeight - this.getScrollTop() )}px`;
+        this.autocomplete.classList.toggle( 'no-scrollbar', !( this.autocomplete.scrollHeight > this.autocomplete.offsetHeight ) );
+        this.autocomplete.style.left = `${Math.min( cursor.left + CodeEditor.LINE_GUTTER_WIDTH - this.getScrollLeft(), maxX )}px`;
+        this.autocomplete.style.top = `${( cursor.top + this._verticalTopOffset + this.lineHeight - this.getScrollTop() )}px`;
 
         this.isAutoCompleteActive = true;
     }
@@ -6353,8 +6316,7 @@ export class CodeEditor
         return ( active != this.isSearchboxActive );
     }
 
-    search( text?: string | null, reverse: boolean = false, callback?: any, skipAlert: boolean = false,
-        forceFocus: boolean = true )
+    search( text?: string | null, reverse: boolean = false, callback?: any, skipAlert: boolean = false, forceFocus: boolean = true )
     {
         text = text ?? this._lastTextFound;
 
@@ -6603,9 +6565,7 @@ export class CodeEditor
 
     _hideActiveLine()
     {
-        this.code.querySelectorAll( '.active-line' ).forEach( ( e: HTMLElement ) =>
-            e.classList.remove( 'active-line' )
-        );
+        this.code.querySelectorAll( '.active-line' ).forEach( ( e: HTMLElement ) => e.classList.remove( 'active-line' ) );
     }
 
     _setFontSize( size: number )
@@ -6635,8 +6595,7 @@ export class CodeEditor
 
     _applyFontSizeOffset( offset = 0 )
     {
-        const newFontSize = LX.clamp( this.fontSize + offset, CodeEditor.CODE_MIN_FONT_SIZE,
-            CodeEditor.CODE_MAX_FONT_SIZE );
+        const newFontSize = LX.clamp( this.fontSize + offset, CodeEditor.CODE_MIN_FONT_SIZE, CodeEditor.CODE_MAX_FONT_SIZE );
         this._setFontSize( newFontSize );
     }
 
@@ -6702,13 +6661,11 @@ export class CodeEditor
 const CE = CodeEditor as any;
 
 CE.languages = {
-    'Plain Text': { ext: 'txt', blockComments: false, singleLineComments: false, numbers: false,
-        icon: 'AlignLeft text-neutral-500' },
+    'Plain Text': { ext: 'txt', blockComments: false, singleLineComments: false, numbers: false, icon: 'AlignLeft text-neutral-500' },
     'JavaScript': { ext: 'js', icon: 'Js text-yellow-500' },
     'TypeScript': { ext: 'ts', icon: 'Ts text-blue-600' },
     'C': { ext: [ 'c', 'h' ], usePreprocessor: true, icon: { 'c': 'C text-sky-400', 'h': 'C text-fuchsia-500' } },
-    'C++': { ext: [ 'cpp', 'hpp' ], usePreprocessor: true,
-        icon: { 'cpp': 'CPlusPlus text-sky-400', 'hpp': 'CPlusPlus text-fuchsia-500' } },
+    'C++': { ext: [ 'cpp', 'hpp' ], usePreprocessor: true, icon: { 'cpp': 'CPlusPlus text-sky-400', 'hpp': 'CPlusPlus text-fuchsia-500' } },
     'CSS': { ext: 'css', icon: 'Hash text-blue-700' },
     'CMake': { ext: 'cmake', singleLineCommentToken: '#', blockComments: false, ignoreCase: true },
     'GLSL': { ext: 'glsl', usePreprocessor: true },
@@ -6717,19 +6674,17 @@ CE.languages = {
     'XML': { ext: 'xml', tags: true, icon: 'Rss text-orange-500' },
     'Rust': { ext: 'rs', icon: 'Rust text-foreground' },
     'Python': { ext: 'py', singleLineCommentToken: '#', icon: 'Python text-cyan-600' },
-    'HTML': { ext: 'html', tags: true, singleLineComments: false, blockCommentsTokens: [ '<!--', '-->' ],
-        numbers: false, icon: 'Code text-orange-500' },
-    'Batch': { ext: 'bat', blockComments: false, singleLineCommentToken: '::', ignoreCase: true,
-        icon: 'Windows text-blue-400' },
-    'Markdown': { ext: 'md', blockComments: false, singleLineCommentToken: '::', tags: true, numbers: false,
-        icon: 'Markdown text-foreground' },
+    'HTML': { ext: 'html', tags: true, singleLineComments: false, blockCommentsTokens: [ '<!--', '-->' ], numbers: false,
+        icon: 'Code text-orange-500' },
+    'Batch': { ext: 'bat', blockComments: false, singleLineCommentToken: '::', ignoreCase: true, icon: 'Windows text-blue-400' },
+    'Markdown': { ext: 'md', blockComments: false, singleLineCommentToken: '::', tags: true, numbers: false, icon: 'Markdown text-foreground' },
     'PHP': { ext: 'php', icon: 'Php text-purple-700' }
 };
 
 CE.nativeTypes = {
     'C++': [ 'int', 'float', 'double', 'bool', 'long', 'short', 'char', 'wchar_t', 'void' ],
-    'WGSL': [ 'bool', 'u32', 'i32', 'f16', 'f32', 'vec2', 'vec3', 'vec4', 'vec2f', 'vec3f', 'vec4f', 'mat2x2f',
-        'mat3x3f', 'mat4x4f', 'array', 'vec2u', 'vec3u', 'vec4u', 'ptr', 'sampler' ]
+    'WGSL': [ 'bool', 'u32', 'i32', 'f16', 'f32', 'vec2', 'vec3', 'vec4', 'vec2f', 'vec3f', 'vec4f', 'mat2x2f', 'mat3x3f', 'mat4x4f', 'array',
+        'vec2u', 'vec3u', 'vec4u', 'ptr', 'sampler' ]
 };
 
 CE.declarationKeywords = {
@@ -6738,86 +6693,72 @@ CE.declarationKeywords = {
 };
 
 CE.keywords = {
-    'JavaScript': [ 'var', 'let', 'const', 'this', 'in', 'of', 'true', 'false', 'new', 'function', 'NaN', 'static',
-        'class', 'constructor', 'null', 'typeof', 'debugger', 'abstract', 'arguments', 'extends', 'instanceof',
-        'Infinity', 'get' ],
-    'TypeScript': [ 'var', 'let', 'const', 'this', 'in', 'of', 'true', 'false', 'new', 'function', 'class', 'extends',
-        'instanceof', 'Infinity', 'private', 'public', 'protected', 'interface', 'enum', 'type', 'get' ],
-    'C': [ 'int', 'float', 'double', 'long', 'short', 'char', 'const', 'void', 'true', 'false', 'auto', 'struct',
-        'typedef', 'signed', 'volatile', 'unsigned', 'static', 'extern', 'enum', 'register', 'union' ],
-    'C++': [ ...CE.nativeTypes['C++'], 'const', 'static_cast', 'dynamic_cast', 'new', 'delete', 'true', 'false', 'auto',
-        'class', 'struct', 'typedef', 'nullptr', 'NULL', 'signed', 'unsigned', 'namespace', 'enum', 'extern', 'union',
-        'sizeof', 'static', 'private', 'public' ],
-    'CMake': [ 'cmake_minimum_required', 'set', 'not', 'if', 'endif', 'exists', 'string', 'strequal', 'add_definitions',
-        'macro', 'endmacro', 'file', 'list', 'source_group', 'add_executable', 'target_include_directories',
-        'set_target_properties', 'set_property', 'add_compile_options', 'add_link_options', 'include_directories',
-        'add_library', 'target_link_libraries', 'target_link_options', 'add_subdirectory', 'add_compile_definitions',
-        'project', 'cache' ],
+    'JavaScript': [ 'var', 'let', 'const', 'this', 'in', 'of', 'true', 'false', 'new', 'function', 'NaN', 'static', 'class', 'constructor', 'null',
+        'typeof', 'debugger', 'abstract', 'arguments', 'extends', 'instanceof', 'Infinity', 'get' ],
+    'TypeScript': [ 'var', 'let', 'const', 'this', 'in', 'of', 'true', 'false', 'new', 'function', 'class', 'extends', 'instanceof', 'Infinity',
+        'private', 'public', 'protected', 'interface', 'enum', 'type', 'get' ],
+    'C': [ 'int', 'float', 'double', 'long', 'short', 'char', 'const', 'void', 'true', 'false', 'auto', 'struct', 'typedef', 'signed', 'volatile',
+        'unsigned', 'static', 'extern', 'enum', 'register', 'union' ],
+    'C++': [ ...CE.nativeTypes['C++'], 'const', 'static_cast', 'dynamic_cast', 'new', 'delete', 'true', 'false', 'auto', 'class', 'struct', 'typedef',
+        'nullptr', 'NULL', 'signed', 'unsigned', 'namespace', 'enum', 'extern', 'union', 'sizeof', 'static', 'private', 'public' ],
+    'CMake': [ 'cmake_minimum_required', 'set', 'not', 'if', 'endif', 'exists', 'string', 'strequal', 'add_definitions', 'macro', 'endmacro', 'file',
+        'list', 'source_group', 'add_executable', 'target_include_directories', 'set_target_properties', 'set_property', 'add_compile_options',
+        'add_link_options', 'include_directories', 'add_library', 'target_link_libraries', 'target_link_options', 'add_subdirectory',
+        'add_compile_definitions', 'project', 'cache' ],
     'JSON': [ 'true', 'false' ],
-    'GLSL': [ 'true', 'false', 'function', 'int', 'float', 'vec2', 'vec3', 'vec4', 'mat2x2', 'mat3x3', 'mat4x4',
-        'struct' ],
-    'CSS': [ 'body', 'html', 'canvas', 'div', 'input', 'span', '.', 'table', 'tr', 'td', 'th', 'label', 'video', 'img',
-        'code', 'button', 'select', 'option', 'svg', 'media', 'all', 'i', 'a', 'li', 'h1', 'h2', 'h3', 'h4', 'h5',
-        'last-child', 'tbody', 'pre', 'monospace', 'font-face' ],
-    'WGSL': [ ...CE.nativeTypes['WGSL'], 'var', 'let', 'true', 'false', 'fn', 'atomic', 'struct', 'sampler_comparison',
-        'texture_depth_2d', 'texture_depth_2d_array', 'texture_depth_cube', 'texture_depth_cube_array',
-        'texture_depth_multisampled_2d', 'texture_external', 'texture_1d', 'texture_2d', 'texture_2d_array',
-        'texture_3d', 'texture_cube', 'texture_cube_array', 'texture_storage_1d', 'texture_storage_2d',
+    'GLSL': [ 'true', 'false', 'function', 'int', 'float', 'vec2', 'vec3', 'vec4', 'mat2x2', 'mat3x3', 'mat4x4', 'struct' ],
+    'CSS': [ 'body', 'html', 'canvas', 'div', 'input', 'span', '.', 'table', 'tr', 'td', 'th', 'label', 'video', 'img', 'code', 'button', 'select',
+        'option', 'svg', 'media', 'all', 'i', 'a', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'last-child', 'tbody', 'pre', 'monospace', 'font-face' ],
+    'WGSL': [ ...CE.nativeTypes['WGSL'], 'var', 'let', 'true', 'false', 'fn', 'atomic', 'struct', 'sampler_comparison', 'texture_depth_2d',
+        'texture_depth_2d_array', 'texture_depth_cube', 'texture_depth_cube_array', 'texture_depth_multisampled_2d', 'texture_external', 'texture_1d',
+        'texture_2d', 'texture_2d_array', 'texture_3d', 'texture_cube', 'texture_cube_array', 'texture_storage_1d', 'texture_storage_2d',
         'texture_storage_2d_array', 'texture_storage_3d' ],
-    'Rust': [ 'as', 'const', 'crate', 'enum', 'extern', 'false', 'fn', 'impl', 'in', 'let', 'mod', 'move', 'mut', 'pub',
-        'ref', 'self', 'Self', 'static', 'struct', 'super', 'trait', 'true', 'type', 'unsafe', 'use', 'where',
-        'abstract', 'become', 'box', 'final', 'macro', 'override', 'priv', 'typeof', 'unsized', 'virtual' ],
+    'Rust': [ 'as', 'const', 'crate', 'enum', 'extern', 'false', 'fn', 'impl', 'in', 'let', 'mod', 'move', 'mut', 'pub', 'ref', 'self', 'Self',
+        'static', 'struct', 'super', 'trait', 'true', 'type', 'unsafe', 'use', 'where', 'abstract', 'become', 'box', 'final', 'macro', 'override',
+        'priv', 'typeof', 'unsized', 'virtual' ],
     'Python': [ 'False', 'def', 'None', 'True', 'in', 'is', 'and', 'lambda', 'nonlocal', 'not', 'or' ],
     'Batch': [ 'set', 'echo', 'off', 'del', 'defined', 'setlocal', 'enabledelayedexpansion', 'driverquery', 'print' ],
-    'HTML': [ 'html', 'meta', 'title', 'link', 'script', 'body', 'DOCTYPE', 'head', 'br', 'i', 'a', 'li', 'img', 'tr',
-        'td', 'h1', 'h2', 'h3', 'h4', 'h5' ],
+    'HTML': [ 'html', 'meta', 'title', 'link', 'script', 'body', 'DOCTYPE', 'head', 'br', 'i', 'a', 'li', 'img', 'tr', 'td', 'h1', 'h2', 'h3', 'h4',
+        'h5' ],
     'Markdown': [ 'br', 'i', 'a', 'li', 'img', 'table', 'title', 'tr', 'td', 'h1', 'h2', 'h3', 'h4', 'h5' ],
-    'PHP': [ 'const', 'function', 'array', 'new', 'int', 'string', '$this', 'public', 'null', 'private', 'protected',
-        'implements', 'class', 'use', 'namespace', 'abstract', 'clone', 'final', 'enum' ]
+    'PHP': [ 'const', 'function', 'array', 'new', 'int', 'string', '$this', 'public', 'null', 'private', 'protected', 'implements', 'class', 'use',
+        'namespace', 'abstract', 'clone', 'final', 'enum' ]
 };
 
 // These ones don't have hightlight, used as suggestions to autocomplete only...
 CE.utils = {
-    'JavaScript': [ 'querySelector', 'body', 'addEventListener', 'removeEventListener', 'remove', 'sort', 'keys',
-        'filter', 'isNaN', 'parseFloat', 'parseInt', 'EPSILON', 'isFinite', 'bind', 'prototype', 'length', 'assign',
-        'entries', 'values', 'concat', 'substring', 'substr', 'splice', 'slice', 'buffer', 'appendChild',
-        'createElement', 'prompt', 'alert' ],
+    'JavaScript': [ 'querySelector', 'body', 'addEventListener', 'removeEventListener', 'remove', 'sort', 'keys', 'filter', 'isNaN', 'parseFloat',
+        'parseInt', 'EPSILON', 'isFinite', 'bind', 'prototype', 'length', 'assign', 'entries', 'values', 'concat', 'substring', 'substr', 'splice',
+        'slice', 'buffer', 'appendChild', 'createElement', 'prompt', 'alert' ],
     'WGSL': [ 'textureSample' ],
-    'Python': [ 'abs', 'all', 'any', 'ascii', 'bin', 'bool', 'bytearray', 'bytes', 'callable', 'chr', 'classmethod',
-        'compile', 'complex', 'delattr', 'dict', 'dir', 'divmod', 'enumerate', 'eval', 'exec', 'filter', 'float',
-        'format', 'frozenset', 'getattr', 'globals', 'hasattr', 'hash', 'help', 'hex', 'id', 'input', 'int',
-        'isinstance', 'issubclass', 'iter', 'len', 'list', 'locals', 'map', 'max', 'memoryview', 'min', 'next',
-        'object', 'oct', 'open', 'ord', 'pow', 'print', 'property', 'range', 'repr', 'reversed', 'round', 'set',
-        'setattr', 'slice', 'sorted', 'staticmethod', 'str', 'sum', 'super', 'tuple', 'type', 'vars', 'zip' ],
-    'CSS': [ ...Object.keys( document.body.style ).map( LX.toKebabCase ), 'block', 'inline', 'inline-block', 'flex',
-        'grid', 'none', 'inherit', 'initial', 'unset', 'revert', 'sticky', 'relative', 'absolute', 'fixed', 'static',
-        'auto', 'visible', 'hidden', 'scroll', 'clip', 'ellipsis', 'nowrap', 'wrap', 'break-word', 'solid', 'dashed',
-        'dotted', 'double', 'groove', 'ridge', 'inset', 'outset', 'left', 'right', 'center', 'top', 'bottom', 'start',
-        'end', 'justify', 'stretch', 'space-between', 'space-around', 'space-evenly', 'baseline', 'middle', 'normal',
-        'bold', 'lighter', 'bolder', 'italic', 'blur', 'uppercase', 'lowercase', 'capitalize', 'transparent',
-        'currentColor', 'pointer', 'default', 'move', 'grab', 'grabbing', 'not-allowed', 'none', 'cover', 'contain',
-        'repeat', 'no-repeat', 'repeat-x', 'repeat-y', 'round', 'space', 'linear-gradient', 'radial-gradient',
-        'conic-gradient', 'url', 'calc', 'min', 'max', 'clamp', 'red', 'blue', 'green', 'black', 'white', 'gray',
-        'silver', 'yellow', 'orange', 'purple', 'pink', 'cyan', 'magenta', 'lime', 'teal', 'navy', 'transparent',
-        'currentcolor', 'inherit', 'initial', 'unset', 'revert', 'none', 'auto', 'fit-content', 'min-content',
-        'max-content' ]
+    'Python': [ 'abs', 'all', 'any', 'ascii', 'bin', 'bool', 'bytearray', 'bytes', 'callable', 'chr', 'classmethod', 'compile', 'complex', 'delattr',
+        'dict', 'dir', 'divmod', 'enumerate', 'eval', 'exec', 'filter', 'float', 'format', 'frozenset', 'getattr', 'globals', 'hasattr', 'hash',
+        'help', 'hex', 'id', 'input', 'int', 'isinstance', 'issubclass', 'iter', 'len', 'list', 'locals', 'map', 'max', 'memoryview', 'min', 'next',
+        'object', 'oct', 'open', 'ord', 'pow', 'print', 'property', 'range', 'repr', 'reversed', 'round', 'set', 'setattr', 'slice', 'sorted',
+        'staticmethod', 'str', 'sum', 'super', 'tuple', 'type', 'vars', 'zip' ],
+    'CSS': [ ...Object.keys( document.body.style ).map( LX.toKebabCase ), 'block', 'inline', 'inline-block', 'flex', 'grid', 'none', 'inherit',
+        'initial', 'unset', 'revert', 'sticky', 'relative', 'absolute', 'fixed', 'static', 'auto', 'visible', 'hidden', 'scroll', 'clip', 'ellipsis',
+        'nowrap', 'wrap', 'break-word', 'solid', 'dashed', 'dotted', 'double', 'groove', 'ridge', 'inset', 'outset', 'left', 'right', 'center', 'top',
+        'bottom', 'start', 'end', 'justify', 'stretch', 'space-between', 'space-around', 'space-evenly', 'baseline', 'middle', 'normal', 'bold',
+        'lighter', 'bolder', 'italic', 'blur', 'uppercase', 'lowercase', 'capitalize', 'transparent', 'currentColor', 'pointer', 'default', 'move',
+        'grab', 'grabbing', 'not-allowed', 'none', 'cover', 'contain', 'repeat', 'no-repeat', 'repeat-x', 'repeat-y', 'round', 'space',
+        'linear-gradient', 'radial-gradient', 'conic-gradient', 'url', 'calc', 'min', 'max', 'clamp', 'red', 'blue', 'green', 'black', 'white',
+        'gray', 'silver', 'yellow', 'orange', 'purple', 'pink', 'cyan', 'magenta', 'lime', 'teal', 'navy', 'transparent', 'currentcolor', 'inherit',
+        'initial', 'unset', 'revert', 'none', 'auto', 'fit-content', 'min-content', 'max-content' ]
 };
 
 CE.types = {
-    'JavaScript': [ 'Object', 'String', 'Function', 'Boolean', 'Symbol', 'Error', 'Number', 'TextEncoder',
-        'TextDecoder', 'Array', 'ArrayBuffer', 'InputEvent', 'MouseEvent', 'Int8Array', 'Int16Array', 'Int32Array',
-        'Float32Array', 'Float64Array', 'Element' ],
-    'TypeScript': [ 'arguments', 'constructor', 'null', 'typeof', 'debugger', 'abstract', 'Object', 'string', 'String',
-        'Function', 'Boolean', 'boolean', 'Error', 'Number', 'number', 'TextEncoder', 'TextDecoder', 'Array',
-        'ArrayBuffer', 'InputEvent', 'MouseEvent', 'Int8Array', 'Int16Array', 'Int32Array', 'Float32Array',
-        'Float64Array', 'Element', 'bigint', 'unknown', 'any', 'Record' ],
+    'JavaScript': [ 'Object', 'String', 'Function', 'Boolean', 'Symbol', 'Error', 'Number', 'TextEncoder', 'TextDecoder', 'Array', 'ArrayBuffer',
+        'InputEvent', 'MouseEvent', 'Int8Array', 'Int16Array', 'Int32Array', 'Float32Array', 'Float64Array', 'Element' ],
+    'TypeScript': [ 'arguments', 'constructor', 'null', 'typeof', 'debugger', 'abstract', 'Object', 'string', 'String', 'Function', 'Boolean',
+        'boolean', 'Error', 'Number', 'number', 'TextEncoder', 'TextDecoder', 'Array', 'ArrayBuffer', 'InputEvent', 'MouseEvent', 'Int8Array',
+        'Int16Array', 'Int32Array', 'Float32Array', 'Float64Array', 'Element', 'bigint', 'unknown', 'any', 'Record' ],
     'Rust': [ 'u128' ],
-    'Python': [ 'int', 'type', 'float', 'map', 'list', 'ArithmeticError', 'AssertionError', 'AttributeError',
-        'Exception', 'EOFError', 'FloatingPointError', 'GeneratorExit', 'ImportError', 'IndentationError', 'IndexError',
-        'KeyError', 'KeyboardInterrupt', 'LookupError', 'MemoryError', 'NameError', 'NotImplementedError', 'OSError',
-        'OverflowError', 'ReferenceError', 'RuntimeError', 'StopIteration', 'SyntaxError', 'TabError', 'SystemError',
-        'SystemExit', 'TypeError', 'UnboundLocalError', 'UnicodeError', 'UnicodeEncodeError', 'UnicodeDecodeError',
-        'UnicodeTranslateError', 'ValueError', 'ZeroDivisionError' ],
+    'Python': [ 'int', 'type', 'float', 'map', 'list', 'ArithmeticError', 'AssertionError', 'AttributeError', 'Exception', 'EOFError',
+        'FloatingPointError', 'GeneratorExit', 'ImportError', 'IndentationError', 'IndexError', 'KeyError', 'KeyboardInterrupt', 'LookupError',
+        'MemoryError', 'NameError', 'NotImplementedError', 'OSError', 'OverflowError', 'ReferenceError', 'RuntimeError', 'StopIteration',
+        'SyntaxError', 'TabError', 'SystemError', 'SystemExit', 'TypeError', 'UnboundLocalError', 'UnicodeError', 'UnicodeEncodeError',
+        'UnicodeDecodeError', 'UnicodeTranslateError', 'ValueError', 'ZeroDivisionError' ],
     'C++': [ 'uint8_t', 'uint16_t', 'uint32_t' ],
     'PHP': [ 'Exception', 'DateTime', 'JsonSerializable' ]
 };
@@ -6833,25 +6774,22 @@ CE.builtIn = {
 };
 
 CE.statements = {
-    'JavaScript': [ 'for', 'if', 'else', 'case', 'switch', 'return', 'while', 'continue', 'break', 'do', 'import',
-        'default', 'export', 'from', 'throw', 'async', 'try', 'catch', 'await', 'as' ],
-    'TypeScript': [ 'for', 'if', 'else', 'case', 'switch', 'return', 'while', 'continue', 'break', 'do', 'import',
-        'default', 'export', 'from', 'throw', 'async', 'try', 'catch', 'await', 'as' ],
+    'JavaScript': [ 'for', 'if', 'else', 'case', 'switch', 'return', 'while', 'continue', 'break', 'do', 'import', 'default', 'export', 'from',
+        'throw', 'async', 'try', 'catch', 'await', 'as' ],
+    'TypeScript': [ 'for', 'if', 'else', 'case', 'switch', 'return', 'while', 'continue', 'break', 'do', 'import', 'default', 'export', 'from',
+        'throw', 'async', 'try', 'catch', 'await', 'as' ],
     'CSS': [ '@', 'import' ],
-    'C': [ 'for', 'if', 'else', 'return', 'continue', 'break', 'case', 'switch', 'while', 'using', 'default', 'goto',
-        'do' ],
-    'C++': [ 'std', 'for', 'if', 'else', 'return', 'continue', 'break', 'case', 'switch', 'while', 'using', 'glm',
-        'spdlog', 'default' ],
+    'C': [ 'for', 'if', 'else', 'return', 'continue', 'break', 'case', 'switch', 'while', 'using', 'default', 'goto', 'do' ],
+    'C++': [ 'std', 'for', 'if', 'else', 'return', 'continue', 'break', 'case', 'switch', 'while', 'using', 'glm', 'spdlog', 'default' ],
     'GLSL': [ 'for', 'if', 'else', 'return', 'continue', 'break' ],
-    'WGSL': [ 'const', 'for', 'if', 'else', 'return', 'continue', 'break', 'storage', 'read', 'read_write', 'uniform',
-        'function', 'workgroup', 'bitcast' ],
+    'WGSL': [ 'const', 'for', 'if', 'else', 'return', 'continue', 'break', 'storage', 'read', 'read_write', 'uniform', 'function', 'workgroup',
+        'bitcast' ],
     'Rust': [ 'break', 'else', 'continue', 'for', 'if', 'loop', 'match', 'return', 'while', 'do', 'yield' ],
-    'Python': [ 'if', 'raise', 'del', 'import', 'return', 'elif', 'try', 'else', 'while', 'as', 'except', 'with',
-        'assert', 'finally', 'yield', 'break', 'for', 'class', 'continue', 'global', 'pass', 'from' ],
+    'Python': [ 'if', 'raise', 'del', 'import', 'return', 'elif', 'try', 'else', 'while', 'as', 'except', 'with', 'assert', 'finally', 'yield',
+        'break', 'for', 'class', 'continue', 'global', 'pass', 'from' ],
     'Batch': [ 'if', 'IF', 'for', 'FOR', 'in', 'IN', 'do', 'DO', 'call', 'CALL', 'goto', 'GOTO', 'exit', 'EXIT' ],
-    'PHP': [ 'declare', 'enddeclare', 'foreach', 'endforeach', 'if', 'else', 'elseif', 'endif', 'for', 'endfor',
-        'while', 'endwhile', 'switch', 'case', 'default', 'endswitch', 'return', 'break', 'continue', 'try', 'catch',
-        'die', 'do', 'exit', 'finally' ]
+    'PHP': [ 'declare', 'enddeclare', 'foreach', 'endforeach', 'if', 'else', 'elseif', 'endif', 'for', 'endfor', 'while', 'endwhile', 'switch',
+        'case', 'default', 'endswitch', 'return', 'break', 'continue', 'try', 'catch', 'die', 'do', 'exit', 'finally' ]
 };
 
 CE.symbols = {

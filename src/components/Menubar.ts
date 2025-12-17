@@ -83,10 +83,9 @@ export class Menubar
                 this._resetMenubar( true );
                 entry.classList.add( 'selected' );
                 entry.dataset['built'] = 'true';
-                this._currentDropdown = LX.addDropdownMenu( entry, item.submenu ?? [], { side: 'bottom', align: 'start',
-                    onBlur: () => {
-                        this._resetMenubar();
-                    } } );
+                this._currentDropdown = LX.addDropdownMenu( entry, item.submenu ?? [], { side: 'bottom', align: 'start', onBlur: () => {
+                    this._resetMenubar();
+                } } );
             };
 
             entry.addEventListener( 'mousedown', ( e ) => {

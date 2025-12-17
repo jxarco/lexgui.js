@@ -20,14 +20,13 @@ export class Card extends BaseComponent
 
         this.root.classList.add( 'place-content-center' );
 
-        const container = LX.makeContainer( [ '100%', 'auto' ],
-            'lexcard max-w-sm flex flex-col gap-4 bg-card border-color rounded-xl py-6', '', this.root );
+        const container = LX.makeContainer( [ '100%', 'auto' ], 'lexcard max-w-sm flex flex-col gap-4 bg-card border-color rounded-xl py-6', '',
+            this.root );
 
         if ( options.header )
         {
             const hasAction = options.header.action !== undefined;
-            let header = LX.makeContainer( [ '100%', 'auto' ],
-                `flex ${hasAction ? 'flex-row gap-4' : 'flex-col gap-1'} px-6`, '', container );
+            let header = LX.makeContainer( [ '100%', 'auto' ], `flex ${hasAction ? 'flex-row gap-4' : 'flex-col gap-1'} px-6`, '', container );
 
             if ( hasAction )
             {

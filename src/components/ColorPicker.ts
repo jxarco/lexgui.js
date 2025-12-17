@@ -57,8 +57,7 @@ export class ColorPicker
         // Intensity, Sat
         this.colorPickerBackground = document.createElement( 'div' );
         this.colorPickerBackground.className = 'lexcolorpickerbg';
-        this.colorPickerBackground.style.backgroundColor =
-            `rgb(${hueColor.css.r}, ${hueColor.css.g}, ${hueColor.css.b})`;
+        this.colorPickerBackground.style.backgroundColor = `rgb(${hueColor.css.r}, ${hueColor.css.g}, ${hueColor.css.b})`;
         this.root.appendChild( this.colorPickerBackground );
 
         this.intSatMarker = document.createElement( 'div' );
@@ -123,8 +122,7 @@ export class ColorPicker
 
         this.colorPickerBackground.addEventListener( 'mousedown', innerMouseDown );
 
-        const hueAlphaContainer = LX.makeContainer( [ '100%', 'auto' ], 'flex flex-row gap-1 items-center', '',
-            this.root );
+        const hueAlphaContainer = LX.makeContainer( [ '100%', 'auto' ], 'flex flex-row gap-1 items-center', '', this.root );
 
         const EyeDropper = ( window as any ).EyeDropper;
         if ( EyeDropper )
@@ -157,13 +155,11 @@ export class ColorPicker
 
         const _fromHueX = ( hueX: number ) => {
             this.hueMarker.style.left = hueX + 'px';
-            this.currentColor.hsv.h = LX.remapRange( hueX, 0, this.colorPickerTracker.offsetWidth - this.markerSize, 0,
-                360 );
+            this.currentColor.hsv.h = LX.remapRange( hueX, 0, this.colorPickerTracker.offsetWidth - this.markerSize, 0, 360 );
 
             const hueColor = new Color( { h: this.currentColor.hsv.h, s: 1, v: 1 } );
             this.hueMarker.style.backgroundColor = `rgb(${hueColor.css.r}, ${hueColor.css.g}, ${hueColor.css.b})`;
-            this.colorPickerBackground.style.backgroundColor =
-                `rgb(${hueColor.css.r}, ${hueColor.css.g}, ${hueColor.css.b})`;
+            this.colorPickerBackground.style.backgroundColor = `rgb(${hueColor.css.r}, ${hueColor.css.g}, ${hueColor.css.b})`;
             this._updateColorValue();
         };
 
@@ -177,8 +173,7 @@ export class ColorPicker
             e.stopImmediatePropagation();
             e.stopPropagation();
 
-            const hueX = LX.clamp( e.offsetX - this.markerHalfSize, 0,
-                this.colorPickerTracker.offsetWidth - this.markerSize );
+            const hueX = LX.clamp( e.offsetX - this.markerHalfSize, 0, this.colorPickerTracker.offsetWidth - this.markerSize );
             _fromHueX( hueX );
 
             hueTrackerRect = this.colorPickerTracker.getBoundingClientRect();
@@ -191,8 +186,7 @@ export class ColorPicker
             if ( dX != 0 && ( mouseX >= this.markerHalfSize || dX < 0 )
                 && ( mouseX < ( this.colorPickerTracker.offsetWidth - this.markerHalfSize ) || dX > 0 ) )
             {
-                const hueX = LX.clamp( parseInt( this.hueMarker.style.left ) + dX, 0,
-                    this.colorPickerTracker.offsetWidth - this.markerSize );
+                const hueX = LX.clamp( parseInt( this.hueMarker.style.left ) + dX, 0, this.colorPickerTracker.offsetWidth - this.markerSize );
                 _fromHueX( hueX );
             }
 
@@ -214,8 +208,7 @@ export class ColorPicker
         {
             this.alphaTracker = document.createElement( 'div' );
             this.alphaTracker.className = 'lexalphatracker';
-            this.alphaTracker.style.color =
-                `rgb(${this.currentColor.css.r}, ${this.currentColor.css.g}, ${this.currentColor.css.b})`;
+            this.alphaTracker.style.color = `rgb(${this.currentColor.css.r}, ${this.currentColor.css.g}, ${this.currentColor.css.b})`;
             innerHueAlpha.appendChild( this.alphaTracker );
 
             this.alphaMarker = document.createElement( 'div' );
@@ -226,8 +219,7 @@ export class ColorPicker
 
             const _fromAlphaX = ( alphaX: number ) => {
                 this.alphaMarker.style.left = alphaX + 'px';
-                this.currentColor.hsv.a = LX.remapRange( alphaX, 0, this.alphaTracker.offsetWidth - this.markerSize, 0,
-                    1 );
+                this.currentColor.hsv.a = LX.remapRange( alphaX, 0, this.alphaTracker.offsetWidth - this.markerSize, 0, 1 );
                 this._updateColorValue();
                 // Update alpha marker once the color is updated
                 this.alphaMarker.style.backgroundColor =
@@ -243,8 +235,7 @@ export class ColorPicker
                 document.body.classList.add( 'noevents' );
                 e.stopImmediatePropagation();
                 e.stopPropagation();
-                const alphaX = LX.clamp( e.offsetX - this.markerHalfSize, 0,
-                    this.alphaTracker.offsetWidth - this.markerSize );
+                const alphaX = LX.clamp( e.offsetX - this.markerHalfSize, 0, this.alphaTracker.offsetWidth - this.markerSize );
                 _fromAlphaX( alphaX );
                 alphaTrackerRect = this.alphaTracker.getBoundingClientRect();
             };
@@ -256,8 +247,7 @@ export class ColorPicker
                 if ( dX != 0 && ( mouseX >= this.markerHalfSize || dX < 0 )
                     && ( mouseX < ( this.alphaTracker.offsetWidth - this.markerHalfSize ) || dX > 0 ) )
                 {
-                    const alphaX = LX.clamp( parseInt( this.alphaMarker.style.left ) + dX, 0,
-                        this.alphaTracker.offsetWidth - this.markerSize );
+                    const alphaX = LX.clamp( parseInt( this.alphaMarker.style.left ) + dX, 0, this.alphaTracker.offsetWidth - this.markerSize );
                     _fromAlphaX( alphaX );
                 }
 
@@ -314,14 +304,12 @@ export class ColorPicker
     {
         this._svToPosition( this.currentColor.hsv.s, this.currentColor.hsv.v );
 
-        const hueLeft = LX.remapRange( this.currentColor.hsv.h, 0, 360, 0,
-            this.colorPickerTracker.offsetWidth - this.markerSize );
+        const hueLeft = LX.remapRange( this.currentColor.hsv.h, 0, 360, 0, this.colorPickerTracker.offsetWidth - this.markerSize );
         this.hueMarker.style.left = hueLeft + 'px';
 
         if ( this.useAlpha )
         {
-            const alphaLeft = LX.remapRange( this.currentColor.hsv.a, 0, 1, 0,
-                this.alphaTracker.offsetWidth - this.markerSize );
+            const alphaLeft = LX.remapRange( this.currentColor.hsv.a, 0, 1, 0, this.alphaTracker.offsetWidth - this.markerSize );
             this.alphaMarker.style.left = alphaLeft + 'px';
         }
     }
@@ -332,18 +320,15 @@ export class ColorPicker
             LX.remapRange( s, 0, 1, -this.markerHalfSize, this.colorPickerBackground.offsetWidth - this.markerHalfSize )
         }px`;
         this.intSatMarker.style.top = `${
-            LX.remapRange( 1 - v, 0, 1, -this.markerHalfSize,
-                this.colorPickerBackground.offsetHeight - this.markerHalfSize )
+            LX.remapRange( 1 - v, 0, 1, -this.markerHalfSize, this.colorPickerBackground.offsetHeight - this.markerHalfSize )
         }px`;
     }
 
     _positionToSv( left: number, top: number )
     {
-        this.currentColor.hsv.s = LX.remapRange( left, -this.markerHalfSize,
-            this.colorPickerBackground.offsetWidth - this.markerHalfSize, 0, 1 );
+        this.currentColor.hsv.s = LX.remapRange( left, -this.markerHalfSize, this.colorPickerBackground.offsetWidth - this.markerHalfSize, 0, 1 );
         this.currentColor.hsv.v = 1
-            - LX.remapRange( top, -this.markerHalfSize, this.colorPickerBackground.offsetHeight - this.markerHalfSize,
-                0, 1 );
+            - LX.remapRange( top, -this.markerHalfSize, this.colorPickerBackground.offsetHeight - this.markerHalfSize, 0, 1 );
     }
 
     _updateColorValue( newHexValue?: string | null, skipCallback: boolean = false )
@@ -359,8 +344,7 @@ export class ColorPicker
 
         if ( this.useAlpha )
         {
-            this.alphaTracker.style.color =
-                `rgb(${this.currentColor.css.r}, ${this.currentColor.css.g}, ${this.currentColor.css.b})`;
+            this.alphaTracker.style.color = `rgb(${this.currentColor.css.r}, ${this.currentColor.css.g}, ${this.currentColor.css.b})`;
         }
 
         const toFixed = ( s: number, n: number = 2 ) => {
@@ -409,8 +393,7 @@ export class ColorPicker
         this.hueMarker.style.backgroundColor =
             this.colorPickerBackground.style.backgroundColor =
                 `rgb(${hueColor.css.r}, ${hueColor.css.g}, ${hueColor.css.b})`;
-        this.hueMarker.style.left =
-            LX.remapRange( h, 0, 360, -this.markerHalfSize, this.colorPickerTracker.offsetWidth - this.markerHalfSize )
+        this.hueMarker.style.left = LX.remapRange( h, 0, 360, -this.markerHalfSize, this.colorPickerTracker.offsetWidth - this.markerHalfSize )
             + 'px';
 
         this._updateColorValue( hexColor );

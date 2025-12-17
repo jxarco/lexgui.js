@@ -130,8 +130,7 @@ export abstract class Timeline
     onChangeLoopMode: Nullable<( l: boolean ) => void> = null;
     onSetDuration: Nullable<( d: number ) => void> = null;
     onSetTime: Nullable<( t: number ) => void> = null;
-    onItemSelected: Nullable<( selected: any[], itemsToAdd: Nullable<any[]>, itemsToRemove: Nullable<any[]> ) => void> =
-        null;
+    onItemSelected: Nullable<( selected: any[], itemsToAdd: Nullable<any[]>, itemsToRemove: Nullable<any[]> ) => void> = null;
     onSetTrackSelection: Nullable<( track: object, oldValue: boolean ) => void> = null;
     onSetTrackState: Nullable<( track: object, oldValue: boolean ) => void> = null;
     onSetTrackLock: Nullable<( track: object, oldValue: boolean ) => void> = null;
@@ -423,8 +422,7 @@ export abstract class Timeline
         const panel = this.leftPanel;
 
         panel.sameLine();
-        let titleComponent = panel.addTitle( 'Tracks', { style: { background: 'none' },
-            className: 'text-primary text-lg px-4' } );
+        let titleComponent = panel.addTitle( 'Tracks', { style: { background: 'none' }, className: 'text-primary text-lg px-4' } );
         let title = titleComponent.root;
 
         if ( !this.disableNewTracks )
@@ -802,8 +800,7 @@ export abstract class Timeline
 
             ctx.fillStyle = this.grabbingScroll ? Timeline.FONT_COLOR_TERTIARY : Timeline.FONT_COLOR_QUATERNARY;
 
-            let scrollBarHeight = Math.max( 10,
-                ( h - this.topMargin ) * ( h - this.topMargin ) / this.trackTreesPanel.root.scrollHeight );
+            let scrollBarHeight = Math.max( 10, ( h - this.topMargin ) * ( h - this.topMargin ) / this.trackTreesPanel.root.scrollHeight );
             let scrollLoc = this.currentScroll * ( h - this.topMargin - scrollBarHeight ) + this.topMargin;
             drawRoundRect( ctx, w - 10, scrollLoc, 10, scrollBarHeight, 5, true );
         }
@@ -848,11 +845,9 @@ export abstract class Timeline
         {
             ctx.globalAlpha = 0.15;
             ctx.fillStyle = Timeline.BOX_SELECTION_COLOR;
-            ctx.strokeRect( this.boxSelectionStart[0], this.boxSelectionStart[1],
-                this.boxSelectionEnd[0] - this.boxSelectionStart[0],
+            ctx.strokeRect( this.boxSelectionStart[0], this.boxSelectionStart[1], this.boxSelectionEnd[0] - this.boxSelectionStart[0],
                 this.boxSelectionEnd[1] - this.boxSelectionStart[1] );
-            ctx.fillRect( this.boxSelectionStart[0], this.boxSelectionStart[1],
-                this.boxSelectionEnd[0] - this.boxSelectionStart[0],
+            ctx.fillRect( this.boxSelectionStart[0], this.boxSelectionStart[1], this.boxSelectionEnd[0] - this.boxSelectionStart[0],
                 this.boxSelectionEnd[1] - this.boxSelectionStart[1] );
             ctx.stroke();
             ctx.globalAlpha = 1;
@@ -1295,8 +1290,7 @@ export abstract class Timeline
      * @param {Array} itemsToAdd [ trackIdx ], array of numbers identifying tracks by their index
      * @param {Array} itemsToRemove [ trackIdx ], array of numbers identifying tracks by their index
      */
-    changeSelectedItems( itemsToAdd: Nullable<any[]> = null, itemsToRemove: Nullable<any[]> = null,
-        skipCallback: boolean = false )
+    changeSelectedItems( itemsToAdd: Nullable<any[]> = null, itemsToRemove: Nullable<any[]> = null, skipCallback: boolean = false )
     {
         this.deselectAllElements();
         this.deselectAllTracks( false ); // no need to update left panel. It is going to be rebuilt anyways
@@ -1391,8 +1385,7 @@ export abstract class Timeline
      * @param {Boolean} updateTrackTree whether track tree panel needs a refresh
      * @returns
      */
-    setTrackSelection( trackIdx: number, isSelected: boolean, skipCallback: boolean = false,
-        updateTrackTree: boolean = true )
+    setTrackSelection( trackIdx: number, isSelected: boolean, skipCallback: boolean = false, updateTrackTree: boolean = true )
     {
         const track = this.animationClip.tracks[trackIdx];
         const oldValue = track.isSelected;
@@ -1468,8 +1461,7 @@ export abstract class Timeline
      * @param {Boolean} skipCallback onSetTrackState
      * @param {Boolean} updateTrackTree updates eye icon of the track, if it is visible in the timeline
      */
-    setTrackState( trackIdx: number, isEnbaled: boolean = true, skipCallback: boolean = false,
-        updateTrackTree: boolean = true )
+    setTrackState( trackIdx: number, isEnbaled: boolean = true, skipCallback: boolean = false, updateTrackTree: boolean = true )
     {
         const track = this.animationClip.tracks[trackIdx];
         const oldState = track.active;
@@ -1493,8 +1485,7 @@ export abstract class Timeline
      * @param {Boolean} skipCallback onSetTrackLock
      * @param {Boolean} updateTrackTree updates lock icon of the track, if it is visible in the timeline
      */
-    setTrackLock( trackIdx: number, isLocked: boolean = false, skipCallback: boolean = false,
-        updateTrackTree: boolean = true )
+    setTrackLock( trackIdx: number, isLocked: boolean = false, skipCallback: boolean = false, updateTrackTree: boolean = true )
     {
         const track = this.animationClip.tracks[trackIdx];
 
@@ -1652,8 +1643,8 @@ export abstract class Timeline
         for ( let i = 0; i < this.selectedItems.length; i++ )
         {
             const track = this.selectedItems[i];
-            treeTracks.push( { trackData: track, id: track.id, skipVisibility: this.skipVisibility,
-                visible: track.active, children: [], actions: this.skipLock ? null : [ {
+            treeTracks.push( { trackData: track, id: track.id, skipVisibility: this.skipVisibility, visible: track.active, children: [],
+                actions: this.skipLock ? null : [ {
                     'name': 'Lock edition',
                     'icon': ( track.locked ? 'TimelineLock' : 'TimelineLockOpen' ),
                     'swap': ( track.locked ? 'TimelineLockOpen' : 'TimelineLock' ),
@@ -1919,8 +1910,8 @@ export class KeyFramesTimeline extends Timeline
             for ( let j = 0; j < itemTracks.length; j++ )
             {
                 const track = itemTracks[j];
-                nodes.push( { 'trackData': track, 'id': track.id, 'skipVisibility': this.skipVisibility,
-                    visible: track.active, 'children': [], actions: this.skipLock ? null : [ {
+                nodes.push( { 'trackData': track, 'id': track.id, 'skipVisibility': this.skipVisibility, visible: track.active, 'children': [],
+                    actions: this.skipLock ? null : [ {
                         'name': 'Lock edition',
                         'icon': ( track.locked ? 'TimelineLock' : 'TimelineLockOpen' ),
                         'swap': ( track.locked ? 'TimelineLockOpen' : 'TimelineLock' ),
@@ -2119,8 +2110,7 @@ export class KeyFramesTimeline extends Timeline
      * @param {Array} itemsToAdd [ trackIdx, "groupId" ], array of strings and/or number identifying groups and/or tracks
      * @param {Array} itemsToRemove [ trackIdx, "groupId" ], array of strings and/or number identifying groups and/or tracks
      */
-    changeSelectedItems( itemsToAdd: Nullable<any[]> = null, itemsToRemove: Nullable<any[]> = null,
-        skipCallback: boolean = false )
+    changeSelectedItems( itemsToAdd: Nullable<any[]> = null, itemsToRemove: Nullable<any[]> = null, skipCallback: boolean = false )
     {
         this.deselectAllElements();
         this.deselectAllTracks( false ); // no need to update left panel. It is going to be rebuilt anyways
@@ -2311,8 +2301,7 @@ export class KeyFramesTimeline extends Timeline
             if ( !discard && track )
             {
                 const thresholdPixels = this.keyframeSize * 0.5; // radius of circle ( curves ) or rotated square (keyframes )
-                const keyFrameIdx = this.getCurrentKeyFrame( track, this.xToTime( localX ),
-                    this.secondsPerPixel * thresholdPixels );
+                const keyFrameIdx = this.getCurrentKeyFrame( track, this.xToTime( localX ), this.secondsPerPixel * thresholdPixels );
                 if ( keyFrameIdx > -1 )
                 {
                     track.selected[keyFrameIdx]
@@ -2355,8 +2344,7 @@ export class KeyFramesTimeline extends Timeline
             if ( track )
             {
                 const thresholdPixels = this.keyframeSize * 0.5; // radius of circle ( curves ) or rotated square (keyframes )
-                const keyFrameIndex = this.getCurrentKeyFrame( track, this.xToTime( localX ),
-                    this.secondsPerPixel * thresholdPixels );
+                const keyFrameIndex = this.getCurrentKeyFrame( track, this.xToTime( localX ), this.secondsPerPixel * thresholdPixels );
                 if ( keyFrameIndex > -1 )
                 {
                     this.processSelectionKeyFrame( track.trackIdx, keyFrameIndex, false ); // Settings this as multiple so time is not being set
@@ -2528,8 +2516,7 @@ export class KeyFramesTimeline extends Timeline
 
                     let value = track.values[keyIndex];
                     let delta = e.deltay * this.keyValuePerPixel * ( track.curvesRange[1] - track.curvesRange[0] );
-                    track.values[keyIndex] = Math.max( track.curvesRange[0],
-                        Math.min( track.curvesRange[1], value - delta ) ); // invert delta because of screen y
+                    track.values[keyIndex] = Math.max( track.curvesRange[0], Math.min( track.curvesRange[1], value - delta ) ); // invert delta because of screen y
                     track.edited[keyIndex] = true;
 
                     if ( this.onUpdateTrack && track.trackIdx != lastTrackChanged && lastTrackChanged > -1 )
@@ -2554,8 +2541,7 @@ export class KeyFramesTimeline extends Timeline
         {
             this.unHoverAll();
             const thresholdPixels = this.keyframeSize * 0.5; // radius of circle ( curves ) or rotated square (keyframes )
-            let keyFrameIndex = this.getCurrentKeyFrame( track, this.xToTime( localX ),
-                this.secondsPerPixel * thresholdPixels );
+            let keyFrameIndex = this.getCurrentKeyFrame( track, this.xToTime( localX ), this.secondsPerPixel * thresholdPixels );
 
             if ( keyFrameIndex > -1 )
             {
@@ -2724,8 +2710,7 @@ export class KeyFramesTimeline extends Timeline
         {
             let startPosX = this.timeToX( keyframes[0] );
             let startValue = values[0];
-            startValue =
-                LX.clamp( ( startValue - valueRange[0] ) / ( valueRange[1] - valueRange[0] ), 0, 1 ) * ( -displayRange )
+            startValue = LX.clamp( ( startValue - valueRange[0] ) / ( valueRange[1] - valueRange[0] ), 0, 1 ) * ( -displayRange )
                 + ( trackHeight - defaultPointSize ); // normalize and offset
             ctx.moveTo( startPosX, startValue );
 
@@ -2734,8 +2719,7 @@ export class KeyFramesTimeline extends Timeline
                 let time = keyframes[j];
                 let keyframePosX = this.timeToX( time );
                 let value = values[j];
-                value =
-                    LX.clamp( ( value - valueRange[0] ) / ( valueRange[1] - valueRange[0] ), 0, 1 ) * ( -displayRange )
+                value = LX.clamp( ( value - valueRange[0] ) / ( valueRange[1] - valueRange[0] ), 0, 1 ) * ( -displayRange )
                     + ( trackHeight - defaultPointSize ); // normalize and offset
 
                 if ( time < startTime )
@@ -3305,8 +3289,7 @@ export class KeyFramesTimeline extends Timeline
 
             this.saveState( track.trackIdx, Boolean( trackCount++ ) );
             this.historySaveEnabler = false;
-            this.addKeyFrames( track.trackIdx, values, times, -globalStart + pasteTime,
-                KeyFramesTimeline.ADDKEY_VALUESINARRAYS );
+            this.addKeyFrames( track.trackIdx, values, times, -globalStart + pasteTime, KeyFramesTimeline.ADDKEY_VALUESINARRAYS );
             this.historySaveEnabler = oldSaveEnabler;
         }
 
@@ -4084,8 +4067,8 @@ export class ClipsTimeline extends Timeline
 
                 for ( let t of tracks )
                 {
-                    let clipsIndices = this.getClipsInRange( t, this.xToTime( this.boxSelectionStart[0] ),
-                        this.xToTime( this.boxSelectionEnd[0] ), 0.000001 );
+                    let clipsIndices = this.getClipsInRange( t, this.xToTime( this.boxSelectionStart[0] ), this.xToTime( this.boxSelectionEnd[0] ),
+                        0.000001 );
 
                     if ( clipsIndices )
                     {
@@ -4218,36 +4201,31 @@ export class ClipsTimeline extends Timeline
                 let clip = track.clips[this.lastClipsSelected[0][1]];
                 if ( this.dragClipMode == 'fadein' )
                 {
-                    clip.fadein = Math.min( Math.max( clip.fadein + delta, clip.start ),
-                        clip.fadeout ?? ( clip.start + clip.duration ) );
+                    clip.fadein = Math.min( Math.max( clip.fadein + delta, clip.start ), clip.fadeout ?? ( clip.start + clip.duration ) );
                 }
                 else if ( this.dragClipMode == 'fadeout' )
                 {
-                    clip.fadeout = Math.max( Math.min( clip.fadeout + delta, clip.start + clip.duration ),
-                        clip.fadein ?? clip.start );
+                    clip.fadeout = Math.max( Math.min( clip.fadeout + delta, clip.start + clip.duration ), clip.fadein ?? clip.start );
                 }
                 else if ( this.dragClipMode == 'duration' )
                 {
                     let duration = Math.max( 0, clip.duration + delta );
                     if ( this.lastClipsSelected[0][1] < track.clips.length - 1 )
                     { // max next clip's start
-                        duration = Math.min( track.clips[this.lastClipsSelected[0][1] + 1].start - clip.start - 0.0001,
-                            duration );
+                        duration = Math.min( track.clips[this.lastClipsSelected[0][1] + 1].start - clip.start - 0.0001, duration );
                     }
                     clip.duration = duration;
                     if ( clip.fadeout != undefined )
                     {
                         clip.fadeout = Math.max(
-                            Math.min( ( clip.fadeout ?? ( clip.start + clip.duration ) ) + delta,
-                                clip.start + clip.duration ),
+                            Math.min( ( clip.fadeout ?? ( clip.start + clip.duration ) ) + delta, clip.start + clip.duration ),
                             clip.start
                         );
                     }
                     if ( clip.fadein != undefined )
                     {
                         clip.fadein = Math.max(
-                            Math.min( clip.fadein ?? ( clip.start + clip.duration ),
-                                clip.fadeout ?? ( clip.start + clip.duration ) ),
+                            Math.min( clip.fadein ?? ( clip.start + clip.duration ), clip.fadeout ?? ( clip.start + clip.duration ) ),
                             clip.start
                         );
                     }
@@ -4286,8 +4264,7 @@ export class ClipsTimeline extends Timeline
                             const newTrack = this.animationClip.tracks[this.lastClipsSelected[i][0] + deltaTracks];
                             const clip = track.clips[this.lastClipsSelected[i][1]];
 
-                            const clipsInRange = this.getClipsInRange( newTrack, clip.start, clip.start + clip.duration,
-                                0.0001 );
+                            const clipsInRange = this.getClipsInRange( newTrack, clip.start, clip.start + clip.duration, 0.0001 );
                             if ( !clipsInRange )
                             {
                                 continue;
@@ -4358,8 +4335,7 @@ export class ClipsTimeline extends Timeline
                                     // add clips of a track, from first to last
                                     for ( let c = startSel; c <= endSel; ++c )
                                     {
-                                        let newClipIdx = this.addClip( track.clips[selectedClips[c][1]], newTrackIdx,
-                                            0 );
+                                        let newClipIdx = this.addClip( track.clips[selectedClips[c][1]], newTrackIdx, 0 );
                                         selectedClips[c][0] = newClipIdx; // temporarily store new clip index in trackIndex (HACK START )
                                         newTrack.selected[newClipIdx] = true;
                                     }
@@ -4409,8 +4385,7 @@ export class ClipsTimeline extends Timeline
                         { // if next is selected, force AllOrNothing and let next clip manage the leastDelta
                             if ( trackClips[clipIdx + 1].start >= ( clip.start + clip.duration + delta ) ) continue; // has not reached next clip. Enough space. All allowed
                             const nextClip = trackClips[clipIdx + 1];
-                            leastDelta = Math.max( 0,
-                                Math.min( leastDelta, nextClip.start - clip.start - clip.duration ) );
+                            leastDelta = Math.max( 0, Math.min( leastDelta, nextClip.start - clip.start - clip.duration ) );
                         }
                     }
                     else if ( delta < 0 )
@@ -4421,8 +4396,7 @@ export class ClipsTimeline extends Timeline
                         if ( clipIdx > 0 )
                         {
                             const prevClip = trackClips[clipIdx - 1];
-                            leastDelta = Math.min( 0,
-                                Math.max( leastDelta, prevClip.start + prevClip.duration - clip.start ) ); // delta is a negative value, that is why the leastDelta is the max
+                            leastDelta = Math.min( 0, Math.max( leastDelta, prevClip.start + prevClip.duration - clip.start ) ); // delta is a negative value, that is why the leastDelta is the max
                         }
                         if ( clip.start + delta < 0 )
                         {
@@ -4432,8 +4406,7 @@ export class ClipsTimeline extends Timeline
                     }
 
                     if ( !moveAccepted ) continue;
-                    let clipsInRange = this.getClipsInRange( track, clip.start + delta,
-                        clip.start + clip.duration + delta, 0.01 );
+                    let clipsInRange = this.getClipsInRange( track, clip.start + delta, clip.start + clip.duration + delta, 0.01 );
                     if ( clipsInRange
                         && ( clipsInRange[0] != clipIdx || clipsInRange[clipsInRange.length - 1] != clipIdx ) )
                     {
@@ -4652,8 +4625,7 @@ export class ClipsTimeline extends Timeline
                 if ( clip.fadeout != undefined )
                 {
                     const fadeoutX = this.pixelsPerSecond * ( clip.start + clip.duration - ( clip.fadeout ) );
-                    drawRoundRect( ctx, x + w - fadeoutX, y + offset, fadeoutX, trackHeight, { tl: 0, bl: 0, tr: 5,
-                        br: 5 }, true );
+                    drawRoundRect( ctx, x + w - fadeoutX, y + offset, fadeoutX, trackHeight, { tl: 0, bl: 0, tr: 5, br: 5 }, true );
                 }
             }
 
@@ -4667,8 +4639,7 @@ export class ClipsTimeline extends Timeline
                 ctx.shadowOffsetY = 1.5;
 
                 selectedClipArea = [ x - 1, y + offset - 1, x2 - x + 2, trackHeight + 2 ];
-                drawRoundRect( ctx, selectedClipArea[0], selectedClipArea[1], selectedClipArea[2], selectedClipArea[3],
-                    5, false, true );
+                drawRoundRect( ctx, selectedClipArea[0], selectedClipArea[1], selectedClipArea[2], selectedClipArea[3], 5, false, true );
 
                 ctx.shadowBlur = 0;
                 ctx.shadowOffsetX = 0;
@@ -4747,8 +4718,7 @@ export class ClipsTimeline extends Timeline
             for ( let i = searchStartTrackIdx; i < this.animationClip.tracks.length; i++ )
             {
                 let clipInCurrentSlot = this.animationClip.tracks[i].clips.find( ( t: any ) => {
-                    return LX.compareThresholdRange( newStart, clip.start + clip.duration, t.start,
-                        t.start + t.duration );
+                    return LX.compareThresholdRange( newStart, clip.start + clip.duration, t.start, t.start + t.duration );
                 } );
 
                 if ( !clipInCurrentSlot )
@@ -5378,8 +5348,8 @@ LX.ClipsTimeline = ClipsTimeline;
  * @param {Boolean} [ stroke = true ] Whether to stroke the rectangle.
  */
 
-function drawRoundRect( ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number,
-    radius: any = 5, fill: boolean = false, stroke: boolean = false )
+function drawRoundRect( ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, radius: any = 5, fill: boolean = false,
+    stroke: boolean = false )
 {
     if ( typeof radius === 'number' )
     {

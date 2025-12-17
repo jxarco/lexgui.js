@@ -192,8 +192,7 @@ export class Table extends BaseComponent
             if ( this.customFilters !== null )
             {
                 const icon = LX.makeIcon( 'CirclePlus', { svgClass: 'sm' } );
-                const separatorHtml =
-                    `<div class="lexcontainer border-r-color place-self-center mx-1" style="width: 1px; height: 70%;"></div>`;
+                const separatorHtml = `<div class="lexcontainer border-r-color place-self-center mx-1" style="width: 1px; height: 70%;"></div>`;
 
                 for ( let f of this.customFilters )
                 {
@@ -215,8 +214,7 @@ export class Table extends BaseComponent
                                         const activeFilters = Object.keys( this.activeCustomFilters ).filter( ( k ) =>
                                             this.activeCustomFilters[k] == f.name
                                         );
-                                        const filterBadgesHtml = activeFilters.reduce( ( acc, key ) =>
-                                            acc += LX.badge( key, 'xs secondary' ), '' );
+                                        const filterBadgesHtml = activeFilters.reduce( ( acc, key ) => acc += LX.badge( key, 'xs secondary' ), '' );
                                         buttonRoot.innerHTML = icon.innerHTML + f.name
                                             + ( activeFilters.length ? separatorHtml : '' ) + filterBadgesHtml;
                                         this.refresh();
@@ -228,12 +226,10 @@ export class Table extends BaseComponent
                         }
                         else if ( f.type == 'range' )
                         {
-                            console.assert( f.min != undefined && f.max != undefined,
-                                'Range filter needs min and max values!' );
+                            console.assert( f.min != undefined && f.max != undefined, 'Range filter needs min and max values!' );
                             const container = LX.makeContainer( [ '240px', 'auto' ], 'text-base' );
-                            const panel: any = new LX.Panel({className: 'flex flex-col gap-2'});
-                            LX.makeContainer( [ '100%', 'auto' ], 'px-3 p-2 pb-0 text-base font-medium', f.name,
-                                container );
+                            const panel: any = new LX.Panel( { className: 'flex flex-col gap-2' } );
+                            LX.makeContainer( [ '100%', 'auto' ], 'px-3 p-2 pb-0 text-base font-medium', f.name, container );
 
                             f.start = f.start ?? f.min;
                             f.end = f.end ?? f.max;
@@ -246,8 +242,7 @@ export class Table extends BaseComponent
                                     const inUse = f.start != f.min || f.end != f.max;
                                     buttonRoot.innerHTML = icon.innerHTML + f.name + ( inUse
                                         ? separatorHtml
-                                            + LX.badge( `${f.start} - ${f.end} ${f.units ?? ''}`,
-                                                'xs secondary' )
+                                            + LX.badge( `${f.start} - ${f.end} ${f.units ?? ''}`, 'xs secondary' )
                                         : '' );
                                     if ( inUse )
                                     {
@@ -261,8 +256,7 @@ export class Table extends BaseComponent
                                     buttonRoot.innerHTML = icon.innerHTML + f.name
                                         + ( inUse
                                             ? separatorHtml
-                                                + LX.badge( `${f.start} - ${f.end} ${f.units ?? ''}`,
-                                                    'xs secondary' )
+                                                + LX.badge( `${f.start} - ${f.end} ${f.units ?? ''}`, 'xs secondary' )
                                             : '' );
                                     if ( inUse )
                                     {
@@ -286,8 +280,7 @@ export class Table extends BaseComponent
                         {
                             const container = LX.makeContainer( [ 'auto', 'auto' ], 'text-base' );
                             const panel: any = new LX.Panel();
-                            LX.makeContainer( [ '100%', 'auto' ], 'px-3 p-2 pb-0 text-base font-medium', f.name,
-                                container );
+                            LX.makeContainer( [ '100%', 'auto' ], 'px-3 p-2 pb-0 text-base font-medium', f.name, container );
 
                             panel.refresh = () => {
                                 panel.clear();
@@ -296,9 +289,7 @@ export class Table extends BaseComponent
                                 if ( !f.default )
                                 {
                                     const date = new Date();
-                                    const todayStringDate = `${date.getDate()}/${
-                                        date.getMonth() + 1
-                                    }/${date.getFullYear()}`;
+                                    const todayStringDate = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
                                     f.default = [ todayStringDate, todayStringDate ];
                                 }
 
@@ -307,8 +298,7 @@ export class Table extends BaseComponent
                                         f.value = dateRange;
                                         buttonRoot.innerHTML = icon.innerHTML + f.name
                                             + ( separatorHtml
-                                                + LX.badge( `${calendar.getFullDate()}`,
-                                                    'xs secondary' ) );
+                                                + LX.badge( `${calendar.getFullDate()}`, 'xs secondary' ) );
                                         this._resetCustomFiltersBtn?.root.classList.remove( 'hidden' );
                                         this.refresh();
                                     }
@@ -341,7 +331,7 @@ export class Table extends BaseComponent
                         }
                     }
                     this.refresh();
-                }, { title: 'Reset filters', tooltip: true, icon: 'X', buttonClass: "ghost" } );
+                }, { title: 'Reset filters', tooltip: true, icon: 'X', buttonClass: 'ghost' } );
                 headerContainer.appendChild( this._resetCustomFiltersBtn?.root );
                 this._resetCustomFiltersBtn?.root.classList.add( 'hidden' );
             }
@@ -350,25 +340,25 @@ export class Table extends BaseComponent
             {
                 const icon = LX.makeIcon( 'Settings2' );
                 const toggleColumnsBtn = new Button( 'toggleColumnsBtn', icon.innerHTML + 'View', ( value: any, e: any ) => {
-                        const menuOptions = data.head.map( ( colName: string, idx: number ) => {
-                            const item: any = {
-                                name: colName,
-                                icon: 'Check',
-                                callback: () => {
-                                    data.colVisibilityMap[idx] = !data.colVisibilityMap[idx];
-                                    const cells = table.querySelectorAll(
-                                        `tr > *:nth-child(${idx + this.rowOffsetCount + 1})`
-                                    );
-                                    cells.forEach( ( cell: any ) => {
-                                        cell.style.display = ( cell.style.display === 'none' ) ? '' : 'none';
-                                    } );
-                                }
-                            };
-                            if ( !data.colVisibilityMap[idx] ) delete item.icon;
-                            return item;
-                        } );
-                        LX.addDropdownMenu( e.target, menuOptions, { side: 'bottom', align: 'end' } );
-                }, { hideName: true, buttonClass: "outline" } );
+                    const menuOptions = data.head.map( ( colName: string, idx: number ) => {
+                        const item: any = {
+                            name: colName,
+                            icon: 'Check',
+                            callback: () => {
+                                data.colVisibilityMap[idx] = !data.colVisibilityMap[idx];
+                                const cells = table.querySelectorAll(
+                                    `tr > *:nth-child(${idx + this.rowOffsetCount + 1})`
+                                );
+                                cells.forEach( ( cell: any ) => {
+                                    cell.style.display = ( cell.style.display === 'none' ) ? '' : 'none';
+                                } );
+                            }
+                        };
+                        if ( !data.colVisibilityMap[idx] ) delete item.icon;
+                        return item;
+                    } );
+                    LX.addDropdownMenu( e.target, menuOptions, { side: 'bottom', align: 'end' } );
+                }, { hideName: true, buttonClass: 'outline' } );
                 headerContainer.appendChild( toggleColumnsBtn.root );
                 toggleColumnsBtn.root.style.marginLeft = 'auto';
             }
@@ -459,15 +449,14 @@ export class Table extends BaseComponent
                                 continue;
                             }
 
-                            menuOptions.push( { name: action.name, icon: action.icon, className: action.className,
-                                callback: () => {
-                                    const colRows = this.data.body.map( ( row: any[] ) => [ row[idx] ] );
-                                    const mustRefresh = action.callback( colRows, table );
-                                    if ( mustRefresh )
-                                    {
-                                        this.refresh();
-                                    }
-                                } } );
+                            menuOptions.push( { name: action.name, icon: action.icon, className: action.className, callback: () => {
+                                const colRows = this.data.body.map( ( row: any[] ) => [ row[idx] ] );
+                                const mustRefresh = action.callback( colRows, table );
+                                if ( mustRefresh )
+                                {
+                                    this.refresh();
+                                }
+                            } } );
                         }
                     }
 
@@ -930,14 +919,13 @@ export class Table extends BaseComponent
         // Make footer
         if ( showSelected || this._paginator )
         {
-            const footerContainer = LX.makeContainer( [ '100%', 'auto' ], 'flex flex-row px-3 my-1 align-center', '',
-                container );
+            const footerContainer = LX.makeContainer( [ '100%', 'auto' ], 'flex flex-row px-3 my-1 align-center', '', container );
 
             // Show num selected rows
             if ( showSelected )
             {
-                const selectedRowsLabelContainer = LX.makeContainer( [ '100%', 'auto' ],
-                    'flex justify-start items-center text-primary', '0 row(s) selected.', footerContainer );
+                const selectedRowsLabelContainer = LX.makeContainer( [ '100%', 'auto' ], 'flex justify-start items-center text-primary',
+                    '0 row(s) selected.', footerContainer );
                 LX.addSignal( '@rows_selected_changed', ( target: HTMLElement, n: number ) => {
                     if ( !this._showSelectedNumber ) return;
                     selectedRowsLabelContainer.innerHTML = n === 0 ? '' : `${n ?? 0} row(s) selected.`;
@@ -947,8 +935,7 @@ export class Table extends BaseComponent
             // Pagination
             if ( this._paginator )
             {
-                const paginationContainer = LX.makeContainer( [ '100%', 'auto' ], 'flex justify-end', '',
-                    footerContainer );
+                const paginationContainer = LX.makeContainer( [ '100%', 'auto' ], 'flex justify-end', '', footerContainer );
                 paginationContainer.appendChild( this._paginator.root );
             }
         }
