@@ -59,7 +59,7 @@ export class TabSections extends BaseComponent
             tabEl.className = 'lextab ' + ( ( tab.selected ?? false ) ? 'selected' : '' );
             tabEl.innerHTML = showNames ? tab.name : '';
             tabEl.appendChild(
-                LX.makeIcon( tab.icon ?? 'Hash', { title: tab.name, iconClass: tab.iconClass, svgClass: tab.svgClass } )
+                LX.makeIcon( tab.icon ?? 'Hash', { title: tab.name, iconClass: tab.iconClass, svgClass: `lg${tab.svgClass ? ' ' + tab.svgClass : ''}` } )
             );
             this.tabDOMs[tab.name] = tabEl;
 

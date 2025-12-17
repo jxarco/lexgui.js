@@ -5,10 +5,39 @@
     const componentName = "Custom";
 
     docMaker.header(componentName + ".", "h1", componentName.toLowerCase());
-    docMaker.paragraph(`Lexgui supports generating custom components based on specific object data. By calling the function ${docMaker.iCode("LX.ADD_CUSTOM_COMPONENT( name, options )")},
-        you can register a new Panel method that will create your custom components. Once the component has been registered, call ${docMaker.iCode("Panel.add&lt;ComponentName&gt;(name, value, callback)")} to add the Custom Component to your panel.`);
+    docMaker.paragraph(`Lexgui supports generating custom components based on specific object data. By calling the function ${docMaker.iCode("LX.REGISTER_COMPONENT( name, options )")},
+        you can register a new Panel method that will create your custom components. Once the component has been registered, call ${docMaker.iCode("Panel.add&lt;ComponentName&gt;(name, value, callback)")} to add the Custom Component to your panel.`, false, "text-muted-foreground");
+
+    {
+        window.__addInteractiveCodeExample( content, componentName, panel => {
+            LX.REGISTER_COMPONENT('Shader', {
+                icon: "Box",
+                default: {
+                    'position': [0, 0],
+                    'velocity': [0, 0, 0],
+                    'color': [0, 0, 0, 0],
+                    'hexColor': '#000',
+                    'highRes': false
+                },
+                onCreate: ( panel, buttonName, printName ) => {
+                    panel.addButton( null, buttonName, ( value ) => {
+                        console.log( printName )
+                    }, { buttonClass: "accent" } );
+                }
+            });
+
+            const shaderInstance = {
+                'hexColor': '#f5f505',
+                'highRes': true
+            };
+
+            panel.addShader("PBR Shader", shaderInstance, (instance) => { console.log(instance) }, "MyButton", "Print this" );
+            panel.addShader("Empty", null, null, "MySecondButton", "Print also this" );
+        });
+    }
+
     docMaker.header("Usage", "h2");
-    docMaker.paragraph(`Within the options of ${docMaker.iCode("LX.ADD_CUSTOM_COMPONENT")}, you can add the following data:`);
+    docMaker.paragraph(`Within the options of ${docMaker.iCode("LX.REGISTER_COMPONENT")}, you can add the following data:`);
 
     docMaker.codeBulletList( [
         [ "icon", "String", "Icon to be added into the custom component" ],
@@ -63,38 +92,10 @@
         @else@ {
             panel.@[mtd]addButton@( @null@, @"New Shader"@, ( value ) => {
                 @this@.@[mtd]createNewShader@( node );
-            }, { buttonClass: @"contrast"@ } );
+            }, { buttonClass: @"primary"@ } );
         }
     }
 });` );
-
-    {
-        window.__addInteractiveCodeExample( content, componentName, panel => {
-            LX.REGISTER_COMPONENT('Shader', {
-                icon: "Box",
-                default: {
-                    'position': [0, 0],
-                    'velocity': [0, 0, 0],
-                    'color': [0, 0, 0, 0],
-                    'hexColor': '#000',
-                    'highRes': false
-                },
-                onCreate: ( panel, buttonName, printName ) => {
-                    panel.addButton( null, buttonName, ( value ) => {
-                        console.log( printName )
-                    }, { buttonClass: "accent" } );
-                }
-            });
-
-            const shaderInstance = {
-                'hexColor': '#f5f505',
-                'highRes': true
-            };
-
-            panel.addShader("PBR Shader", shaderInstance, (instance) => { console.log(instance) }, "MyButton", "Print this" );
-            panel.addShader("Empty", null, null, "MySecondButton", "Print also this" );
-        });
-    }
 
     docMaker.header("API Reference", "h2");
 

@@ -3,9 +3,8 @@
 
     const content = document.getElementById('content');
     const componentName = "Popover";
-
     docMaker.header(componentName + ".", "h1", componentName.toLowerCase());
-    docMaker.paragraph( `Displays rich content in a portal, triggered by another elements, such as buttons.` );
+    docMaker.paragraph( `Displays rich content in a portal, triggered by another elements, such as buttons.`, false, "text-muted-foreground");
 
     {
         window.__addInteractiveCodeExample( content, componentName, panel => {

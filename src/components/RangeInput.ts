@@ -127,7 +127,7 @@ export class RangeInput extends BaseComponent
         this.root.appendChild( container );
 
         let slider: any = document.createElement( 'input' );
-        slider.className = 'lexrangeslider ' + ( isRangeValue ? 'pointer-events-none ' : '' )
+        slider.className = 'lexrangeslider ' + ( isRangeValue ? 'range pointer-events-none ' : '' )
             + ( options.className ?? '' );
         slider.min = options.min ?? 0;
         slider.max = options.max ?? 100;
@@ -213,9 +213,9 @@ export class RangeInput extends BaseComponent
         } );
 
         if ( ogValue.constructor == Array )
-        { // Its a range value
+        {
             let maxSlider = document.createElement( 'input' );
-            maxSlider.className = 'lexrangeslider no-fill pointer-events-none overlap absolute top-0 left-0 '
+            maxSlider.className = 'lexrangeslider no-fill pointer-events-none overlap absolute left-0 '
                 + ( options.className ?? '' );
             maxSlider.min = options.min ?? 0;
             maxSlider.max = options.max ?? 100;

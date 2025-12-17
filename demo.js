@@ -305,6 +305,7 @@ if( mobile )
             panel.addColor("Font Color", "#303b8d", null);
             panel.addNumber("Font Size", 36, null, { min: 1, max: 48, step: 1, units: "px"});
             panel.addSelect("Font Family", ["Arial", "GeistSans", "Inter", "Monospace", "CascadiaCode"], "GeistSans");
+            panel.addSeparator();
             panel.addRange("Threshold Range", [2, 7], (v) => console.log(v), { min: 0, max: 10, step: 1, className: "accent" });
             panel.addVector2("2D Position", [300, 350], null, { min: 0, max: 1024 });
             const opacityValues = [
@@ -459,7 +460,7 @@ if( mobile )
             const inboxTabs = left.addTabs({ parentClass: "flex p-3 items-end border-b-color", sizes: [ "auto", "auto" ], float: "end" });
             const tabsRowContainer = inboxTabs.root.parentElement;
 
-            const mailSectionTitle = LX.makeContainer( [ "auto", "auto" ], "mr-auto ml-2 place-self-center text-xxl font-semibold", "Inbox" );
+            const mailSectionTitle = LX.makeContainer( [ "auto", "auto" ], "mr-auto ml-2 place-self-center text-2xl font-semibold", "Inbox" );
             tabsRowContainer.prepend( mailSectionTitle );
 
             window.__showMailList = ( container, unreadOnly = false ) => {

@@ -1,12 +1,26 @@
 <script type="module">
 
-    docMaker.header( "Graph Editor.", "h1", "graph-editor" );
+    const content = document.getElementById('content');
+    const componentName = "Graph Editor";
+    docMaker.header(componentName + ".", "h1", componentName.toLowerCase());
 
-    docMaker.lineBreak();
-    docMaker.image(`../data/Screenshot_Graph.png`, "graph_editor" );
-    docMaker.lineBreak();
+    docMaker.paragraph( `The Graph Editor is a tool to create and manage node-based graphs. It can be used for various purposes, such as visual scripting,
+        shader creation, or any other application using a node-based interface.`, false, "text-muted-foreground" );
 
-    docMaker.header( "Creating the editor", "h2", "init" );
+    {
+        window.__addInteractiveCodeExample( content, componentName, panel => {
+            const area = new LX.Area( { skipAppend: true, height: "700px" } );
+            panel.attach( area.root );
+
+            let graphEditor = new LX.GraphEditor( area, {
+                sidebar: false,
+            } );
+
+            graphEditor.loadGraph("../data/graph_sample.json");
+        }, "p-0" );
+    }
+
+    docMaker.header("Usage", "h2");
 
     docMaker.paragraph( `The Editor has to be appended to an existing area. It means that it can be created anywhere in the document window (e.g. dialogs, panels, areas, etc.), since to create an area it's as easy as instancing a new
     one. The following lines instanciate the DOM element for the editor:` );

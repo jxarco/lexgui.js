@@ -268,6 +268,8 @@
     --text-lg--line-height: calc(1.75 / 1.125);
     --text-xl: 1.25rem;
     --text-xl--line-height: calc(1.75 / 1.25);
+    --text-2xl: 1.5rem;
+    --text-2xl--line-height: calc(2 / 1.5);
     --text-4xl: 2.25rem;
     --text-4xl--line-height: calc(2.5 / 2.25);
     --text-5xl: 3rem;
@@ -568,6 +570,9 @@
   .ml-2 {
     margin-left: calc(var(--spacing) * 2);
   }
+  .ml-4 {
+    margin-left: calc(var(--spacing) * 4);
+  }
   .ml-auto {
     margin-left: auto;
   }
@@ -619,6 +624,9 @@
   .h-4 {
     height: calc(var(--spacing) * 4);
   }
+  .h-5 {
+    height: calc(var(--spacing) * 5);
+  }
   .h-6 {
     height: calc(var(--spacing) * 6);
   }
@@ -648,9 +656,6 @@
   }
   .w-2\/3 {
     width: calc(2/3 * 100%);
-  }
-  .w-4 {
-    width: calc(var(--spacing) * 4);
   }
   .w-10 {
     width: calc(var(--spacing) * 10);
@@ -685,8 +690,14 @@
   .shrink-0 {
     flex-shrink: 0;
   }
+  .shrink-1 {
+    flex-shrink: 1;
+  }
   .grow-0 {
     flex-grow: 0;
+  }
+  .grow-1 {
+    flex-grow: 1;
   }
   .transform {
     transform: var(--tw-rotate-x,) var(--tw-rotate-y,) var(--tw-rotate-z,) var(--tw-skew-x,) var(--tw-skew-y,);
@@ -1658,6 +1669,10 @@
   .font-sans {
     font-family: var(--font-sans);
   }
+  .text-2xl {
+    font-size: var(--text-2xl);
+    line-height: var(--tw-leading, var(--text-2xl--line-height));
+  }
   .text-4xl {
     font-size: var(--text-4xl);
     line-height: var(--tw-leading, var(--text-4xl--line-height));
@@ -2046,13 +2061,14 @@
 }
 :root {
   color-scheme: dark;
+  --global-font: "Inter", sans-serif;
+  --global-title-font: "Inter", sans-serif;
+  --global-code-font: "CascadiaCode", monospace;
+  --radius: 0.625rem;
   --black: #000000;
   --white: #ffffff;
-  --global-font: "Inter", sans-serif;
-  --global-code-font: "CascadiaCode", monospace;
-  --global-title-font: "Inter", sans-serif;
-  --radius: 0.625rem;
   --background: light-dark(#fafafa, #0a0a0a);
+  --background-blur: light-dark(#f7f7f7d8, #1f1f1fe7);
   --foreground: light-dark(#0a0a0a, #fafafa);
   --card: light-dark(#ffffff, #171717);
   --card-foreground: light-dark(#0a0a0a, #fafafa);
@@ -2080,14 +2096,14 @@
   --spacing-md: 0.4rem;
   --spacing-lg: 0.5rem;
   --spacing-xl: 0.75rem;
-  --spacing-xxl: 1rem;
-  --svg-size-xxs: 0.5rem;
+  --spacing-2xl: 1rem;
+  --svg-size-2xs: 0.5rem;
   --svg-size-xs: 0.7rem;
   --svg-size-sm: 0.85rem;
   --svg-size-md: 1rem;
   --svg-size-lg: 1.25rem;
   --svg-size-xl: 1.4rem;
-  --svg-size-xxl: 1.6rem;
+  --svg-size-2xl: 1.6rem;
   --av-grid-scale: 1;
   --code-editor-font-size: 14px;
   --code-editor-row-height: 20px;
@@ -2099,7 +2115,7 @@
   --spacing-md: 0.3rem;
   --spacing-lg: 0.4rem;
   --spacing-xl: 0.5rem;
-  --spacing-xxl: 0.75rem;
+  --spacing-2xl: 0.75rem;
 }
 :root[data-theme="light"] {
   color-scheme: light;
@@ -2259,9 +2275,9 @@ body.noevents * {
 .animate-pulse {
   animation: var(--animate-pulse);
 }
-svg.xxs {
-  width: var(--svg-size-xxs);
-  height: var(--svg-size-xxs);
+svg.\2xs {
+  width: var(--svg-size-2xs);
+  height: var(--svg-size-2xs);
 }
 svg.xs {
   width: var(--svg-size-xs);
@@ -2283,9 +2299,9 @@ svg.xl {
   width: var(--svg-size-xl);
   height: var(--svg-size-xl);
 }
-svg.xxl {
-  width: var(--svg-size-xxl);
-  height: var(--svg-size-xxl);
+svg.\2xl {
+  width: var(--svg-size-2xl);
+  height: var(--svg-size-2xl);
 }
 #modal {
   inset: 0;
@@ -2449,7 +2465,7 @@ a svg, svg path {
   opacity: 1;
 }
 .commandbar {
-  background-color: var(--global-blur-background);
+  background-color: var(--background-blur);
   --webkit-backdrop-filter: blur(12px);
   backdrop-filter: blur(12px);
   width: 30%;
@@ -2633,7 +2649,7 @@ a svg, svg path {
   right: 0.75em;
 }
 .lexdialogcloser:hover {
-  color: var(--global-text-tertiary);
+  color: var(--muted-foreground);
 }
 .lexdialogcloser:active {
   transform: scale(0.99);
@@ -2645,7 +2661,7 @@ a svg, svg path {
   color: var(--secondary-foreground);
 }
 .lexdialog.pocket {
-  background-color: var(--primary);
+  background-color: var(--background);
 }
 .lexdialog.pocket.dockable {
   transition: ease-out left 0.2s, ease-out top 0.2s, ease-in transform 0.2s;
@@ -2973,11 +2989,8 @@ a svg, svg path {
   margin: 0;
 }
 .lexsplitbar {
-  background: rgba(186, 188, 207, 0.01);
+  background: var(--border);
   border-radius: 8px;
-}
-.lexsplitbar:hover {
-  background-color: #8e949be8;
 }
 .lexsplitbar.horizontal {
   cursor: ew-resize;
@@ -2987,7 +3000,7 @@ a svg, svg path {
   left: calc(50% - 32px);
 }
 .lexsplitbar:hover {
-  background: rgba(186, 188, 207, 0.45);
+  background: var(--input);
 }
 .lexsplitbar.dragging-split-area {
   background-color: red;
@@ -3068,7 +3081,7 @@ a svg, svg path {
 .lexcomponent {
   display: flex;
   align-items: center;
-  padding: var(--spacing-xs);
+  padding: var(--spacing-sm);
   font-size: var(--text-sm);
   color: var(--foreground);
   min-height: calc(var(--spacing)*8);
@@ -3112,7 +3125,7 @@ a svg, svg path {
   height: 2px;
   width: 11px;
   cursor: ew-resize;
-  color: var(--global-text-tertiary);
+  color: var(--muted-foreground);
 }
 .lexcomponentseparator div:hover {
   color: #4d4d5ac4;
@@ -3134,12 +3147,12 @@ a svg, svg path {
 }
 .lexseparator {
   border-top: 1px solid var(--secondary);
-  border-bottom: 1px solid var(--global-color-tertiary);
+  border-bottom: 1px solid var(--background);
   margin: 5px 0 5px 0px;
 }
 .lexbranch .lexseparator {
-  border-top: 1px solid var(--primary);
-  border-bottom: 1px solid var(--global-color-tertiary);
+  border-top: 1px solid var(--secondary);
+  border-bottom: 1px solid var(--background);
   width: -moz-calc(100% - 8px);
   width: -webkit-calc(100% - 8px);
   width: calc(100% - 8px);
@@ -3187,7 +3200,7 @@ a svg, svg path {
   border: 1px solid transparent;
 }
 .lexcomponent .lextext:disabled {
-  background-color: var(--global-color-tertiary);
+  background-color: var(--muted);
   color: var(--muted-foreground);
 }
 .lexcomponent .lextext.formlabel {
@@ -3294,7 +3307,6 @@ a svg, svg path {
   padding: 0px;
 }
 .lexcolorpicker {
-  background-color: var(--primary);
   font-size: var(--text-sm);
   width: 256px;
   display: flex;
@@ -3353,16 +3365,16 @@ a svg, svg path {
 .lextitle {
   width: fit-content !important;
   width: -moz-fit-content;
-  color: var(--secondary-foreground);
+  background-color: var(--accent);
+  color: var(--accent-foreground);
   font-weight: 600;
   font-size: var(--text-sm);
   margin: 12px;
-  padding: var(--spacing-xs) var(--spacing-lg);
+  padding: var(--spacing-sm) var(--spacing-xl);
   line-height: 1.5;
   display: grid;
   align-content: center;
-  border-radius: 12px;
-  background-color: var(--global-color-tertiary);
+  border-radius: 0.75rem;
   display: flex;
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -3398,6 +3410,7 @@ a svg, svg path {
   min-width: calc(var(--spacing)*8);
   gap: calc(var(--spacing)*1.5);
   border-radius: calc(var(--radius) - 2px);
+  overflow: hidden;
   & svg {
     width: calc(var(--spacing) * 4);
     height: calc(var(--spacing) * 4);
@@ -3546,8 +3559,14 @@ a svg, svg path {
 }
 .lexbutton.selected {
   --button-color: var(--primary);
-  --border-color: var(--global-color-quaternary);
+  --border-color: var(--input);
   color: var(--primary-foreground);
+}
+.lexbutton.selected:hover {
+  --button-color: var(--primary);
+  @supports (color: color-mix(in lab, red, red)) {
+    --button-color: color-mix(in oklab, var(--primary) 80%, transparent);
+  }
 }
 .lexbutton.xs {
   height: calc(var(--spacing)*6);
@@ -3989,9 +4008,16 @@ dialog .lexselect .lexselectoptions {
   color: var(--toggle-bg-color);
   background-color: var(--secondary);
 }
-.lextoggle.outline.primary:checked, .lextoggle.outline.primary[aria-checked=true], .lextoggle.outline.primary:has(>input:checked), .lextoggle.outline.secondary:checked, .lextoggle.outline.secondary[aria-checked=true], .lextoggle.outline.secondary:has(>input:checked) {
-  background-color: var(--global-color-quaternary);
-  border: 1px solid var(--global-text-tertiary);
+.lextoggle.outline.primary:checked, .lextoggle.outline.primary[aria-checked=true], .lextoggle.outline.primary:has(>input:checked) {
+  border: 1px solid var(--primary);
+}
+.lextoggle.outline.secondary:checked, .lextoggle.outline.secondary[aria-checked=true], .lextoggle.outline.secondary:has(>input:checked) {
+  color: var(--primary);
+  border: 1px solid var(--input);
+}
+.lextoggle.outline.accent:checked, .lextoggle.outline.accent[aria-checked=true], .lextoggle.outline.accent:has(>input:checked) {
+  color: var(--accent);
+  border: 1px solid var(--input);
 }
 :is(.lextoggle:checked, .lextoggle[aria-checked=true], .lextoggle:has(>input:checked)):before {
   background-color: currentColor;
@@ -4000,11 +4026,11 @@ dialog .lexselect .lexselectoptions {
   grid-template-columns: 0.5fr 1fr 0.5fr;
 }
 .lextoggle:disabled {
-  border: 1px solid var(--global-text-tertiary);
+  border: 1px solid var(--muted-foreground);
   cursor: not-allowed;
 }
 .lextoggle:disabled:before {
-  background-color: var(--global-text-tertiary);
+  background-color: var(--muted-foreground);
 }
 .lextogglesubmenu {
   width: 100%;
@@ -4019,13 +4045,10 @@ dialog .lexselect .lexselectoptions {
   display: flex;
   flex-direction: column;
 }
-.lexradiogroup span {
-  font-weight: 500;
-}
 .lexradiogroup .lexradiogroupitem {
   display: flex;
-  padding: 0.1em;
-  padding-inline: 1.4em;
+  padding-block: 0.25em;
+  padding-inline: 1.5em;
   gap: 0.5em;
   align-items: center;
 }
@@ -4056,22 +4079,16 @@ dialog .lexselect .lexselectoptions {
 .lexradiogroup .lexradiogroupitem:has(button:disabled) span {
   color: var(--muted-foreground) !important;
 }
-.lexradiogroup.primary .lexradiogroupitem button.checked span {
-  background-color: var(--accent);
-}
 .lexradiogroup.secondary .lexradiogroupitem button.checked span {
-  background-color: var(--accent-light);
+  background-color: var(--secondary);
 }
 .lexradiogroup.accent .lexradiogroupitem button.checked span {
   background-color: var(--accent);
 }
-.lexradiogroup.contrast .lexradiogroupitem button.checked span {
-  background-color: var(--primary-foreground);
-}
 .lexradiogroup.success .lexradiogroupitem button.checked span {
   background-color: var(--success);
 }
-.lexradiogroup.error .lexradiogroupitem button.checked span {
+.lexradiogroup.destructive .lexradiogroupitem button.checked span {
   background-color: var(--destructive);
 }
 .lexradiogroup.warning .lexradiogroupitem button.checked span {
@@ -4253,11 +4270,11 @@ input[type=number] {
   border: 1px solid var(--primary);
 }
 .lexrangeslider {
-  --range-thumb-color: var(--primary);
-  --range-thumb-size: 0.75rem;
+  --range-thumb-color: var(--primary-foreground);
+  --range-thumb-size: 0.85rem;
   --range-progress: currentColor;
   --range-fill: 1;
-  --range-thumb-padding: 0.1rem;
+  --range-thumb-padding: 0.125rem;
   --range-bg: currentColor;
   @supports (color: color-mix(in lab, red, red)) {
     --range-bg: color-mix(in oklab,currentColor 20%,#0000);
@@ -4273,7 +4290,7 @@ input[type=number] {
   height: var(--range-thumb-size);
   border: none;
   outline: none;
-  color: var(--global-text-tertiary);
+  color: var(--primary);
   background-color: #0000;
   overflow: hidden;
   padding: 0;
@@ -4288,7 +4305,7 @@ input[type=number] {
 }
 .lexrangeslider.primary {
   color: var(--primary);
-  --range-thumb-color: var(--secondary-foreground);
+  --range-thumb-color: var(--primary-foreground);
 }
 .lexrangeslider.secondary {
   color: var(--secondary);
@@ -4296,33 +4313,50 @@ input[type=number] {
 }
 .lexrangeslider.accent {
   color: var(--accent);
+  --range-thumb-color: var(--accent-foreground);
 }
 .lexrangeslider.success {
   color: var(--success);
+  --range-thumb-color: var(--success);
+  @supports (color: color-mix(in lab, red, red)) {
+    --range-thumb-color: color-mix(in oklab, var(--success) 50%, #000);
+  }
 }
 .lexrangeslider.warning {
   color: var(--warning);
+  --range-thumb-color: var(--warning);
+  @supports (color: color-mix(in lab, red, red)) {
+    --range-thumb-color: color-mix(in oklab, var(--warning) 50%, #000);
+  }
 }
-.lexrangeslider.error {
+.lexrangeslider.destructive {
   color: var(--destructive);
+  --range-thumb-color: var(--destructive);
+  @supports (color: color-mix(in lab, red, red)) {
+    --range-thumb-color: color-mix(in oklab, var(--destructive) 50%, #000);
+  }
 }
-.lexrangeslider.left {
-  --range-dir: -1;
-}
-.lexrangeslider.no-fill {
+.lexrangeslider.range {
   --range-fill: 0;
   --in-range-color: currentColor;
   @supports (color: color-mix(in lab, red, red)) {
     --in-range-color: color-mix(in oklab,currentColor 30%,#0000);
   }
   --range-bg: linear-gradient(to right,
-    var(--in-range-color) 0%,
-    var(--in-range-color) calc(var(--range-min-value) + var(--range-fix-min-offset)),
-    currentColor calc(var(--range-min-value) + var(--range-fix-min-offset)),
-    currentColor calc( var(--range-max-value) - var(--range-fix-max-offset)),
-    var(--in-range-color) calc( var(--range-max-value) - var(--range-fix-max-offset)),
-    var(--in-range-color) 100%);
+        var(--in-range-color) 0%,
+        var(--in-range-color) calc(var(--range-min-value) + var(--range-fix-min-offset) - 0.25rem),
+        currentColor calc(var(--range-min-value) + var(--range-fix-min-offset)),
+        currentColor calc( var(--range-max-value) - var(--range-fix-max-offset)),
+        var(--in-range-color) calc( var(--range-max-value) - var(--range-fix-max-offset) + 0.25rem),
+        var(--in-range-color) 100%
+    );
   background: var(--range-bg);
+}
+.lexrangeslider.no-fill {
+  --range-fill: 0;
+}
+.lexrangeslider.left {
+  --range-dir: -1;
 }
 .lexrangeslider.overlap {
   --range-bg: transparent;
@@ -4343,7 +4377,7 @@ input[type=number] {
   height: calc(var(--range-thumb-size)*0.5);
 }
 .lexrangeslider:disabled::-webkit-slider-runnable-track {
-  color: var(--global-color-quaternary);
+  color: var(--muted);
 }
 .lexrangeslider::-webkit-slider-thumb {
   box-sizing: border-box;
@@ -4420,7 +4454,7 @@ input[type=number] {
 .lextabscontainer .tabs {
   padding: 4px;
   background: none !important;
-  border-right: 1px solid #a2a5c36a;
+  border-right: 1px solid var(--input);
   justify-items: center;
   min-width: 32px;
   display: flex;
@@ -4429,7 +4463,7 @@ input[type=number] {
 }
 .lextabscontainer.horizontal .tabs {
   border-right: none;
-  border-bottom: 1px solid #a2a5c36a;
+  border-bottom: 1px solid var(--input);
   flex-direction: row;
 }
 .lextabscontainer .components {
@@ -4439,7 +4473,7 @@ input[type=number] {
 .lextabscontainer .tabs .lextab {
   padding: 4px;
   border-radius: 4px;
-  color: #8184a264;
+  color: var(--primary);
   cursor: pointer;
   text-align: center;
 }
@@ -4461,15 +4495,13 @@ input[type=number] {
   background: none;
 }
 .lextree .lextreetools {
-  background: var(--global-color-tertiary);
+  background: var(--secondary);
   padding-inline: 8px;
   display: flex;
   align-items: center;
   border-radius: 10px;
   gap: 0.5rem;
-}
-.lexcomponent.nobranch .lextree .lextreetools {
-  background: var(--secondary);
+  margin-block: 0.25rem;
 }
 .lextree .lextreetools input {
   font-size: var(--text-sm);
@@ -4502,12 +4534,6 @@ input[type=number] {
 .lextree .lextreeitem input:hover {
   background: none;
 }
-.lextree .lextreeitem div {
-  display: flex;
-  gap: 0.25rem;
-  margin-left: auto;
-  margin-right: 8px;
-}
 .lextree .lextreeitem img {
   width: 16px;
   height: 16px;
@@ -4515,12 +4541,12 @@ input[type=number] {
   vertical-align: middle;
 }
 .lextree .lextreeitem.draggingover {
-  background: light-dark(var(--accent-light), var(--accent-dark));
-  color: #f4f4f5;
+  background: var(--muted);
+  color: var(--muted-foreground);
 }
 .lextree .lextreeitem:hover {
-  color: var(--primary-foreground);
-  background: var(--primary);
+  background: var(--secondary);
+  color: var(--secondary-foreground);
 }
 .lextree .lextreeitem.selected {
   color: #f4f4f5;
@@ -4687,6 +4713,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
   color: var(--primary);
   font-size: var(--text-sm);
   font-weight: 500;
+  padding-inline: var(--spacing-sm);
 }
 .lexmenubar .lexmenuentry {
   min-height: 48px;
@@ -4760,7 +4787,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
   margin-left: 0px !important;
 }
 .lexmenubar .lexmenubutton.main a {
-  font-size: var(--text-xxl);
+  font-size: var(--text-2xl);
 }
 .lexmenubar .lexmenubutton.disabled a {
   color: var(--muted-foreground);
@@ -4771,7 +4798,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
   position: fixed;
   border-radius: 6px;
   box-shadow: 0 0 6px rgba(46, 46, 46, 0.2) !important;
-  background-color: var(--global-blur-background);
+  background-color: var(--background-blur);
   border: 1px solid #91909036;
 }
 .lexcontextmenu:before {
@@ -5383,11 +5410,9 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
   flex-wrap: wrap;
 }
 .lexcomponent:has(.lexarrayitems)[data-opened=true], .lexcomponent:has(.lexcheckboxsubmenu)[data-opened=true], .lexcomponent:has(.lextogglesubmenu)[data-opened=true], .lexcomponent:has(.lexcustomcontainer)[data-opened=true] {
-  background-color: light-dark(var(--global-color-tertiary), var(--background-secondary));
-}
-.lexarray .lexcomponent {
-  padding: 0px;
-  width: 100% !important;
+  background-color: light-dark(var(--accent), var(--card));
+  padding: var(--spacing-lg);
+  border-radius: 0.5rem;
 }
 .lexarrayitems {
   width: 100%;
@@ -5398,7 +5423,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
   grid-column: span 2;
 }
 .lexarrayitems .lexcomponentname {
-  color: var(--global-text-tertiary);
+  color: var(--muted-foreground);
   font-size: var(--text-sm);
   justify-content: center;
   margin-right: 0.4rem;
@@ -5433,7 +5458,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
   user-select: none;
 }
 .lextags .lextag a:hover {
-  color: light-dark(var(--global-text-tertiary), var(--secondary-foreground));
+  color: light-dark(var(--muted-foreground), var(--secondary-foreground));
   cursor: pointer;
 }
 .lextable {
@@ -5577,7 +5602,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
   margin-top: -1px;
   grid-column: span 2;
 }
-.lexcustomcontainer button.custom span {
+.lexcustomcontainer button.custom {
   align-items: center;
   display: flex;
   justify-content: space-between;
@@ -5663,10 +5688,10 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
   margin-top: 6px;
 }
 .lexknob.disabled .knobmarker {
-  background-color: var(--global-text-tertiary);
+  background-color: var(--muted-foreground);
 }
 .lexknob.disabled .knobmarker {
-  background-color: var(--global-text-tertiary);
+  background-color: var(--muted-foreground);
 }
 .lexknob.sm .knobmarker {
   width: 5px;
@@ -5883,10 +5908,6 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
   border-radius: 0px;
   left: 0 !important;
   top: 0;
-  background-color: var(--secondary);
-}
-.lexassetbrowser .lexsplitbar.horizontal:hover {
-  background-color: var(--secondary-foreground);
 }
 .lexassetbrowser .lexsplitbar.vertical {
   position: unset;
@@ -5984,7 +6005,7 @@ ul.lexassetscontent {
   font-family: var(--global-code-font);
   font-feature-settings: "ss02", 'ss19', "ss20";
   font-weight: 800;
-  color: var(--global-text-tertiary);
+  color: var(--muted-foreground);
 }
 .lexassetscontent li:hover {
   outline: 2px solid var(--accent);
@@ -6116,7 +6137,7 @@ ul.lexassetscontent {
   background-color: #1f1f1fe7;
   --webkit-backdrop-filter: blur(2px);
   backdrop-filter: blur(2px);
-  z-index: 99;
+  z-index: 109;
   clip-path: url(#svgTourClipPath);
 }
 .tour-ref-mask {
@@ -6124,18 +6145,18 @@ ul.lexassetscontent {
   background-color: #1f1f1fe7;
   --webkit-backdrop-filter: blur(2px);
   backdrop-filter: blur(2px);
-  z-index: 100;
+  z-index: 110;
   mask: url(#svgTourReferenceMask);
 }
 .tour-step-indicator {
   width: 10px;
   height: 10px;
   border-radius: 5px;
-  background-color: var(--global-text-quaternary);
+  background-color: var(--accent);
   display: inline-flex;
 }
 .tour-step-indicator.active {
-  background-color: var(--primary-foreground);
+  background-color: var(--primary);
 }
 @keyframes skeletonHide {
   from {
@@ -6526,10 +6547,10 @@ ul.lexassetscontent {
   cursor: inherit;
 }
 .lexcodeeditor .autocomplete pre span.word-highlight {
-  color: var(--accent-light);
+  color: var(--color-blue-500);
 }
 .lexcodeeditor .autocomplete pre.selected span.word-highlight {
-  color: #95a0e1;
+  color: var(--color-blue-400);
 }
 .lexcodesnippet {
   position: relative;
@@ -7003,33 +7024,35 @@ ul.lexassetscontent {
 }
 .lexgraphnode .lexgraphnodeios .lexgraphnodeinputs {
   margin-right: 6px;
+  flex: 1 1 auto;
 }
 .lexgraphnode .lexgraphnodeios .lexgraphnodeoutputs {
   margin-left: 6px;
+  flex: 0 0 auto;
 }
 .lexgraphnode .lexgraphnodeio {
   font-family: var(--global-title-font);
-  font-weight: 600;
-  font-size: var(--text-sm);
+  font-size: var(--text-xs);
   color: #d9d9e3;
   text-shadow: 0px 1px 6px #22222283;
   min-height: 18px;
   display: flex;
   gap: 0.3rem;
   align-items: center;
+  position: relative;
 }
 .lexgraphnode .lexgraphnodeio.iooutput {
   justify-content: right;
 }
 .lexgraphnode .lexgraphnodeio .io__type {
-  font-size: calc(var(--text-xs) - 1px);
+  font-size: calc(var(--text-xs) - 0.25rem);
   font-weight: 700;
   line-height: 1;
   min-width: 11px;
   max-width: 11px;
   min-height: 10px;
   max-height: 10px;
-  background-color: #afafaf;
+  background-color: var(--accent);
   align-self: center;
   border-radius: 3px;
   text-align: -webkit-center;
@@ -7043,19 +7066,22 @@ ul.lexassetscontent {
 }
 .lexgraphnode .lexgraphnodeio .io__typedesc {
   position: absolute;
-  margin-left: -30px;
+  margin-left: -2rem;
   font-weight: 600;
-  background-color: #afafaf;
+  background-color: var(--accent);
   color: var(--primary);
-  font-size: var(--text-xs);
+  font-size: calc(var(--text-xs) - 0.15rem);
   border-radius: 4px;
-  width: 28px;
+  padding-inline: 0.25rem;
   text-align: center;
   opacity: 0;
   transition: opacity ease-in 0.1s;
 }
 .lexgraphnode .lexgraphnodeio .io__typedesc.output {
-  margin-right: -30px;
+  margin-right: -2rem;
+}
+.lexgraphnode .lexgraphnodeio .io__type.bool, .lexgraphnode .lexgraphnodeio .io__typedesc.bool {
+  background-color: #e43636;
 }
 .lexgraphnode .lexgraphnodeio .io__type.vec2, .lexgraphnode .lexgraphnodeio .io__typedesc.vec2 {
   background-color: #ecea4c;
@@ -7067,7 +7093,7 @@ ul.lexassetscontent {
   background-color: #9d56d8;
 }
 .lexgraphnode .lexgraphnodeio .io__type.string, .lexgraphnode .lexgraphnodeio .io__typedesc.string {
-  background-color: #79cc9c;
+  background-color: #53b97e;
 }
 .lexgraphnode .lexgraphnodeio .io__type.mat, .lexgraphnode .lexgraphnodeio .io__typedesc.mat {
   background-color: #56a8d8;
@@ -7118,16 +7144,16 @@ ul.lexassetscontent {
   background-origin: border-box;
   -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
-  border: 1px solid var(--primary-foreground);
+  border: 1px solid var(--input);
   transition: border 0.05s linear;
   opacity: 0.5;
 }
 .lexgraphgroup .lexgraphgrouptitle {
-  font-size: var(--text-xl);
+  font-size: var(--text-lg);
   font-family: var(--global-title-font);
   font-weight: 600;
   margin: 8px;
-  color: var(--primary-foreground);
+  color: var(--foreground);
   outline: none;
   border: none;
   background: none;
@@ -7308,7 +7334,7 @@ ul.lexassetscontent {
   background-color: var(--background-color);
 }
 .bg-blur {
-  --background-color: var(--global-blur-background);
+  --background-color: var(--background-blur);
   background-color: var(--background-color);
 }
 .bg-none {
@@ -7342,12 +7368,6 @@ ul.lexassetscontent {
   background-color: var(--background-color) !important;
   @supports (color: color-mix(in lab, red, red)) {
     background-color: color-mix(in srgb, var(--background-color), var(--primary-foreground) 5%) !important;
-  }
-}
-.hover\:bg-mix-contrast:hover {
-  background-color: var(--background-color) !important;
-  @supports (color: color-mix(in lab, red, red)) {
-    background-color: color-mix(in srgb, var(--background-color), var(--primary) 5%) !important;
   }
 }
 .hover\:bg-none:hover {

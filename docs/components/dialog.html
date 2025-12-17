@@ -1,10 +1,11 @@
 <script type="module">
 
-    docMaker.header( "Dialogs.", "h1", "dialogs" );
+    const content = document.getElementById('content');
+    const componentName = "Dialogs";
+    docMaker.header(componentName + ".", "h1", componentName.toLowerCase());
 
-    docMaker.paragraph( `Also known as modal windows or pop-ups, allow developers to display
-    important information, gather user input, or prompt for user actions without navigating away from the current context.
-    The possible dialogs are the following:` );
+    docMaker.paragraph( `Modal windows or pop-ups. Allow developers to display
+    important information, gather user input, or prompt for user actions without navigating away from the current context.`, false, "text-muted-foreground");
 
     docMaker.lineBreak();
     docMaker.image(`../examples/previews/dialogs.png`, "dialogs" );

@@ -47,9 +47,8 @@ export class RadioGroup extends BaseComponent
         container.className = 'lexradiogroup ' + ( options.className ?? '' );
         this.root.appendChild( container );
 
-        let labelSpan = document.createElement( 'span' );
-        labelSpan.innerHTML = label;
-        container.appendChild( labelSpan );
+        // Make label
+        LX.makeElement( 'span', 'font-medium mb-2', label, container );
 
         for ( let i = 0; i < values.length; ++i )
         {

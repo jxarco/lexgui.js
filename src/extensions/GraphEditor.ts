@@ -831,7 +831,7 @@ export class GraphEditor
         {
             const nodeInputs = document.createElement( 'div' );
             nodeInputs.classList.add( 'lexgraphnodeinputs' );
-            nodeInputs.style.width = hasOutputs ? '50%' : '100%';
+            // nodeInputs.style.width = hasOutputs ? '50%' : '100%';
             nodeIO.appendChild( nodeInputs );
 
             for ( let i of node.inputs )
@@ -859,10 +859,7 @@ export class GraphEditor
 
                 if ( i.name )
                 {
-                    var name = document.createElement( 'span' );
-                    name.classList.add( 'io__name' );
-                    name.innerText = i.name;
-                    input.appendChild( name );
+                    LX.makeElement( 'span', 'io__name', i.name, input );
                 }
 
                 nodeInputs.appendChild( input );
@@ -874,7 +871,7 @@ export class GraphEditor
         {
             const nodeOutputs = document.createElement( 'div' );
             nodeOutputs.classList.add( 'lexgraphnodeoutputs' );
-            nodeOutputs.style.width = hasInputs ? '50%' : '100%';
+            // nodeOutputs.style.width = hasInputs ? '50%' : '100%';
             nodeIO.appendChild( nodeOutputs );
 
             for ( let o of node.outputs )

@@ -1155,7 +1155,7 @@ function makeBreadcrumb( items: any[], options: any = {} )
         }
         else if ( item.url !== undefined )
         {
-            let itemUrl = LX.makeElement( 'a', `decoration-none fg-${lastElement ? 'primary' : 'secondary'}`, '',
+            let itemUrl = LX.makeElement( 'a', `decoration-none text-${lastElement ? 'secondary' : 'accent'}`, '',
                 breadcrumbItem );
             itemUrl.href = item.url;
             itemUrl.appendChild( itemTitle );
@@ -1654,7 +1654,7 @@ function badge( text: string, className: string, options: any = {} )
 
     if ( options.callback )
     {
-        const arrowIcon = LX.makeIcon( 'ArrowUpRight', { svgClass: 'xs fg-contrast' } );
+        const arrowIcon = LX.makeIcon( 'ArrowUpRight', { svgClass: 'xs' } );
         arrowIcon.querySelector( 'svg' ).style.marginLeft = '-0.25rem';
         container.innerHTML += arrowIcon.innerHTML;
         container.addEventListener( 'click', ( e ) => {
@@ -1894,16 +1894,20 @@ function hasClass( el: any, list: string | string[] )
 
 LX.hasClass = hasClass;
 
-function addClass( el: any, className: string )
+function addClass( el: any, className: string | undefined )
 {
-    if ( className ) el.classList.add( className );
+    if ( !className ) return;
+    const cn = className.split( ' ' );
+    el.classList.add( ...cn );
 }
 
 LX.addClass = addClass;
 
-function removeClass( el: any, className: string )
+function removeClass( el: any, className: string | undefined )
 {
-    if ( className ) el.classList.remove( className );
+    if ( !className ) return;
+    const cn = className.split( ' ' );
+    el.classList.remove( ...cn );
 }
 
 LX.removeClass = removeClass;

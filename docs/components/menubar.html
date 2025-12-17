@@ -1,80 +1,68 @@
 <script type="module">
     import { LX } from 'lexgui';
 
-    docMaker.header( "Menubar.", "h1", "menubar" );
-    docMaker.paragraph( `A visually persistent menu common in desktop applications that provides quick access to a consistent set of commands.` );
-    docMaker.lineBreak();
-
+    const content = document.getElementById('content');
+    const componentName = "Menubar";
+    docMaker.header(componentName + ".", "h1", componentName.toLowerCase());
+    docMaker.paragraph( `A visually persistent menu common in desktop applications that provides quick access to a consistent set of commands.`, false, "text-muted-foreground");
+    
     {
-        const area = new LX.Area( { skipAppend: true, height: "200px" } );
-        content.appendChild( area.root );
+        window.__addInteractiveCodeExample( content, componentName, panel => {
 
-        const menubar = area.addMenubar( [
-            { name: "Scene", submenu: [
-                { name: "New Scene" },
-                { name: "Open Scene", icon: "FolderOpen", kbd: "S" },
-                { name: "Open Recent", icon: "File",  submenu: [
-                    { name: "hello.scene" },
-                    { name: "goodbye.scene" }
-                ] }
-            ] },
-            { name: "Project", submenu: [
-                { name: "Project Settings", disabled: true },
-                null,
-                { name: "Export", submenu: [
-                    { name: "DAE", icon: "Frame", kbd: "D" },
-                    { name: "GLTF", kbd:  "G" }
+            const area = new LX.Area( { skipAppend: true, height: "128px" } );
+            panel.attach( area );
+
+            const menubar = area.addMenubar( [
+                { name: "Scene", submenu: [
+                    { name: "New Scene" },
+                    { name: "Open Scene", icon: "FolderOpen", kbd: "S" },
+                    { name: "Open Recent", icon: "File",  submenu: [
+                        { name: "hello.scene" },
+                        { name: "goodbye.scene" }
+                    ] }
                 ] },
-                { name: "Export", icon: "Download" }
-            ] },
-            { name: "Editor", submenu: [
-                { name: "Autosave", checked: true, icon: "Save" },
-                { name: "Settings",  icon: "Settings2" },
-            ] },
-            { name: "Account", submenu: [
-                { name: "Login", icon: "User" },
-            ] },
-            { name: "Help", submenu: [
-                { name: "Search Help", icon: "Search", kbd:  "F1" },
-                { name: "Support LexGUI", icon: "Heart" },
-            ] },
-        ], { sticky: false });
+                { name: "Project", submenu: [
+                    { name: "Project Settings", disabled: true },
+                    null,
+                    { name: "Export", submenu: [
+                        { name: "DAE", icon: "Frame", kbd: "D" },
+                        { name: "GLTF", kbd:  "G" }
+                    ] },
+                    { name: "Export", icon: "Download" }
+                ] },
+                { name: "Editor", submenu: [
+                    { name: "Autosave", checked: true, icon: "Save" },
+                    { name: "Settings",  icon: "Settings2" },
+                ] },
+                { name: "Account", submenu: [
+                    { name: "Login", icon: "User" },
+                ] },
+                { name: "Help", submenu: [
+                    { name: "Search Help", icon: "Search", kbd:  "F1" },
+                    { name: "Support LexGUI", icon: "Heart" },
+                ] },
+            ], { sticky: false });
 
-        menubar.addButtons( [
-            {
-                title: "Play",
-                icon: "Play@solid",
-                swap: "Stop@solid"
-            },
-            {
-                title: "Pause",
-                icon: "Pause@solid",
-                disabled: true
-            }
-        ]);
-        area.root.className += " border-color rounded-lg shadow-lg bg-secondary overflow-hidden";
-        area.sections[ 1 ].root.className += " bg-none";
+            menubar.addButtons( [
+                {
+                    title: "Play",
+                    icon: "Play@solid",
+                    swap: "Stop@solid"
+                },
+                {
+                    title: "Pause",
+                    icon: "Pause@solid",
+                    disabled: true
+                }
+            ]);
+
+            const contentArea = menubar.siblingArea;
+            contentArea.root.classList.add( "bg-secondary" );
+
+        }, "p-0");
     }
 
     docMaker.header("Usage", "h2");
-    docMaker.code( `area.@[mtd]addMenubar@( [
-    { name: @"Scene"@, submenu: [
-        { name: @"New Scene"@ },
-        { name: @"Open Scene"@, icon: @"FolderOpen"@, kbd: @"S"@ },
-        { name: @"Open Recent"@, icon: @"File"@,  submenu: [
-            { name: @"hello.scene"@ },
-            { name: @"goodbye.scene"@ }
-        ] }
-    ] },
-    { name: @"Editor"@, submenu: [
-        { name: @"Autosave"@, checked: @true@, icon: @"Save"@ },
-        { name: @"Settings"@, icon: @"Settings2"@ },
-    ] },
-    { name: @"Help"@, submenu: [
-        { name: @"Search Help"@, icon: @"Search"@, kbd: @"F1"@ },
-        { name: @"Support LexGUI"@, icon: @"Heart"@ },
-    ] },
-]);` );
 
     docMaker.paragraph( `To specify each of the menu entries, you should pass an <em>Array</em> filled with every entry, which can contain the following options:` );
     docMaker.codeBulletList( [

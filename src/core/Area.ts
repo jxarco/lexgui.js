@@ -983,7 +983,7 @@ export class Area
 
         if ( options.sticky ?? true )
         {
-            bar.root.className += ' sticky top-0 z-1000';
+            bar.root.className += ' sticky top-0 z-100';
         }
 
         if ( options.parentClass )

@@ -90,7 +90,7 @@ export class ColorInput extends BaseComponent
             }
         } );
 
-        let sampleContainer = LX.makeContainer( [ '18px', '18px' ], 'flex flex-row bg-contrast rounded overflow-hidden',
+        let sampleContainer = LX.makeContainer( [ '18px', '18px' ], 'flex flex-row rounded overflow-hidden',
             '', container );
         sampleContainer.tabIndex = '1';
         sampleContainer.addEventListener( 'click', ( e: MouseEvent ) => {

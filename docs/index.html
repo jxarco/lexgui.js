@@ -24,6 +24,8 @@
         import { CodeEditor } from 'lexgui/extensions/CodeEditor.js';
         import { DocMaker } from 'lexgui/extensions/DocMaker.js';
         import { AssetView } from 'lexgui/extensions/AssetView.js';
+        import { GraphEditor } from 'lexgui/extensions/GraphEditor.js';
+        import { VideoEditor } from 'lexgui/extensions/VideoEditor.js';
 
         window.LX = LX;
 
@@ -179,7 +181,7 @@
 
             const runButton = new LX.Button( null, "Run", (value, event) => {
                 runCode();
-            } );
+            }, { buttonClass: 'primary' } );
             area.attach( runButton.root );
         }
 

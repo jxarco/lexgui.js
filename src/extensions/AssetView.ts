@@ -504,7 +504,7 @@ export class AssetView
             const options: any[] = [
                 {
                     name: ( multiple > 1 ) ? ( multiple + ' selected' ) : item.id,
-                    icon: LX.makeIcon( 'CircleSmall', { svgClass: `fill-current fg-${typeColor}` } ),
+                    icon: LX.makeIcon( 'CircleSmall', { svgClass: `fill-current text-${typeColor}` } ),
                     className: 'text-sm',
                     disabled: true
                 },
@@ -541,7 +541,7 @@ export class AssetView
                 }
             }
 
-            options.push( null, { name: 'Delete', icon: 'Trash2', className: 'fg-error',
+            options.push( null, { name: 'Delete', icon: 'Trash2', className: 'text-destructive',
                 callback: that._requestDeleteItem.bind( that, item ) } );
 
             LX.addClass( that.contentPanel.root, 'pointer-events-none' );
@@ -742,21 +742,21 @@ export class AssetView
             if ( !this.prevData.length || !this.currentFolder ) return;
             this.nextData.push( this.currentFolder );
             this._enterFolder( this.prevData.pop(), false );
-        }, { buttonClass: 'bg-none', title: 'Go Back', tooltip: true, icon: 'ArrowLeft' } );
+        }, { buttonClass: 'ghost', title: 'Go Back', tooltip: true, icon: 'ArrowLeft' } );
 
         panel.addButton( null, 'GoForwardButton', () => {
             if ( !this.nextData.length || !this.currentFolder ) return;
             this._enterFolder( this.nextData.pop() );
-        }, { buttonClass: 'bg-none', title: 'Go Forward', tooltip: true, icon: 'ArrowRight' } );
+        }, { buttonClass: 'ghost', title: 'Go Forward', tooltip: true, icon: 'ArrowRight' } );
 
         panel.addButton( null, 'GoUpButton', () => {
             const parentFolder = this.currentFolder?.parent;
             if ( parentFolder ) this._enterFolder( parentFolder );
-        }, { buttonClass: 'bg-none', title: 'Go Upper Folder', tooltip: true, icon: 'ArrowUp' } );
+        }, { buttonClass: 'ghost', title: 'Go Upper Folder', tooltip: true, icon: 'ArrowUp' } );
 
         panel.addButton( null, 'GoUpButton', () => {
             this._refreshContent();
-        }, { buttonClass: 'bg-none', title: 'Refresh', tooltip: true, icon: 'Refresh' } );
+        }, { buttonClass: 'ghost', title: 'Refresh', tooltip: true, icon: 'Refresh' } );
     }
 
     _createTreePanel( area: typeof Area )
@@ -955,7 +955,7 @@ export class AssetView
         if ( !this.skipBrowser )
         {
             this.contentPanel.addText( null, this.path.join( '/' ), null, {
-                inputClass: 'bg-none fg-quinary text-end',
+                inputClass: 'bg-none text-muted-foreground text-sm text-end',
                 disabled: true,
                 signal: '@on_folder_change'
             } );
@@ -1419,6 +1419,8 @@ export class AssetView
         this.tree?.refresh();
         this._moveItemDialog?.destroy();
         this._movingItem = undefined;
+
+        this.previewPanel?.clear();
     }
 
     _moveItem( item: AssetViewItem, defaultFolder?: AssetViewItem | AssetViewItem[] )
@@ -1445,24 +1447,24 @@ export class AssetView
                 const isFolder = pi.type === 'folder';
 
                 const rowItem = LX.makeContainer( [ '100%', 'auto' ],
-                    `move-item flex flex-row gap-1 py-1 px-3 cursor-pointer ${
-                        isFolder ? 'text-foreground font-medium' : 'fg-quinary'
-                    } rounded-2xl ${isFolder ? 'hover:bg-secondary' : 'hover:bg-primary'}`,
+                    `move-item flex flex-row gap-1 py-1 px-3 cursor-pointer items-center ${
+                        isFolder ? 'text-foreground font-medium' : 'text-muted-foreground'
+                    } rounded-2xl ${isFolder ? 'hover:bg-accent' : 'hover:bg-muted'}`,
                     `${isFolder ? LX.makeIcon( 'FolderOpen', { svgClass: '' } ).innerHTML : ''}${pi.id}`, row );
 
                 if ( isFolder )
                 {
                     rowItem.addEventListener( 'click', () => {
                         container.querySelectorAll( '.move-item' ).forEach( ( el: any ) =>
-                            LX.removeClass( el, 'bg-quinary' )
+                            LX.removeClass( el, 'bg-primary text-primary-foreground' )
                         );
-                        LX.addClass( rowItem, 'bg-quinary' );
+                        LX.addClass( rowItem, 'bg-primary text-primary-foreground' );
                         targetFolder = pi;
                     } );
 
                     const fPathButton = new LX.Button( null, 'FPathButton', () => {
                         _openFolder( pi, container );
-                    }, { icon: 'ChevronRight', className: 'ml-auto h-8', buttonClass: 'bg-none hover:bg-secondary' } );
+                    }, { icon: 'ChevronRight', className: 'ml-auto h-8', buttonClass: 'ghost' } );
                     row.appendChild( fPathButton.root );
                 }
             }
@@ -1508,12 +1510,12 @@ export class AssetView
                 'flex flex-auto-fill flex-col overflow-scroll py-2 gap-1', `` );
 
             {
-                const headerPanel = area.addPanel( { className: 'p-2 border-b-color flex flex-auto', height: 'auto' } );
+                const headerPanel = area.addPanel( { className: 'p-2 border-b-color flex flex-auto-keep', height: 'auto' } );
                 headerPanel.sameLine( 2, 'w-full' );
                 headerPanel.addButton( null, 'BackButton', () => {
                     if ( targetFolder && targetFolder.parent ) _openFolder( targetFolder.parent, content );
-                }, { icon: 'ArrowLeft', title: 'Back', tooltip: true, className: 'flex-auto',
-                    buttonClass: 'bg-none hover:bg-secondary' } );
+                }, { icon: 'ArrowLeft', title: 'Back', tooltip: true, className: 'flex-auto-keep',
+                    buttonClass: 'ghost' } );
 
                 bcContainer = LX.makeElement( 'div' );
 
@@ -1526,20 +1528,20 @@ export class AssetView
             _openFolder( defaultFolder ?? this.data, content );
 
             {
-                const footerPanel = area.addPanel( { className: 'p-2 border-t-color flex flex-auto justify-between',
+                const footerPanel = area.addPanel( { className: 'p-2 border-t-color flex flex-auto-keep justify-between',
                     height: 'auto' } );
                 footerPanel.addButton( null, 'NewFolderButton', () => {
                     this._requestCreateFolder( targetFolder );
                 }, { width: 'auto', icon: 'FolderPlus', title: 'Create Folder', tooltip: true, className: 'ml-2',
-                    buttonClass: 'bg-none hover:bg-secondary' } );
+                    buttonClass: 'ghost' } );
 
                 footerPanel.sameLine( 2, 'mr-2' );
                 footerPanel.addButton( null, 'Cancel', () => {
                     this._moveItemDialog.close();
-                }, { buttonClass: 'bg-none fg-error' } );
+                }, { buttonClass: 'ghost text-destructive' } );
                 footerPanel.addButton( null, 'Move', () => {
                     this._requestMoveItemToFolder( item, targetFolder );
-                }, { className: '', buttonClass: 'contrast' } );
+                }, { className: '', buttonClass: 'primary' } );
             }
         }, { modal: true, size: [ '616px', '500px' ], closable: true, onBeforeClose: () => {
             delete this._moveItemDialog;
@@ -1754,7 +1756,7 @@ export class AssetView
         } );
         panel.addButton( null, 'Save', () => {
             onRename( newName );
-        }, { buttonClass: 'contrast' } );
+        }, { buttonClass: 'primary' } );
 
         const p = new LX.Popover( item.domEl, [ panel ], { align: 'center', side: 'bottom', sideOffset: -128 } );
     }
@@ -1807,15 +1809,16 @@ export class AssetView
             throw ( '_createFolder: Something went wrong!' );
         }
 
+        const dir = folder.children ?? folder;
         const newFolder = {
-            id: this._getClonedName( 'New Folder', folder.children ),
+            id: this._getClonedName( 'New Folder', dir ),
             type: 'folder',
             children: [],
             parent: this.currentFolder,
             metadata: {}
         };
 
-        folder.children.push( newFolder );
+        dir.push( newFolder );
 
         this._refreshContent();
         this.tree?.refresh();

@@ -1,26 +1,36 @@
 <script type="module">
-    // Header
-    docMaker.header("Video Editor.", "h1", "video-editor");
 
-    // Overview
-    docMaker.paragraph("Adds a rich video trimming/cropping UI with a time bar. It integrates with LX panels/areas and exposes controls for playback, start/end trimming, current time, and crop region, all with theming and responsive interaction.");
+    const content = document.getElementById('content');
+    const componentName = "Video Editor";
+    docMaker.header(componentName + ".", "h1", componentName.toLowerCase());
+    docMaker.paragraph( `Adds a rich video trimming/cropping UI with a time bar. It integrates with LX panels/areas and exposes controls for playback,
+        start/end trimming, current time, and crop region, all with theming and responsive interaction.`, false, "text-muted-foreground" );
+
+    {
+        window.__addInteractiveCodeExample( content, componentName, panel => {
+            const area = new LX.Area( { skipAppend: true, height: "700px" } );
+            panel.attach( area.root );
+
+            const editor = new LX.VideoEditor(area, {
+                src: "../data/video.mp4",
+                crop: true,
+                controls: true
+            });
+
+            editor.onSetTime = ( t ) => {
+                console.log("Current time:", t);
+            };
+
+            editor.onCropArea = ( rect ) => {
+                console.log("Cropped area:", rect);
+            };
+            
+        } );
+    }
 
     // Quick usage
     docMaker.header("Usage", "h2");
     docMaker.paragraph("Instantiate the editor by providing an LX area and options. You can supply a video source or element, enable crop, and react to time changes:");
-    docMaker.code(`@const@ editor = @new@ @[cls]LX@.@[cls]VideoEditor@(area, {
-  src: @"video.mp4"@,
-  crop: @true@,
-  controls: @true@
-});
-
-editor.@[mtd]onSetTime@ = (t) => {
-  console.log(@"Current time:"@, t);
-};
-
-editor.@[mtd]onCropArea@ = (rect) => {
-  console.log(@"Cropped area:"@, rect);
-};`, "js");
 
     docMaker.header("API Reference", "h2");
 
@@ -38,21 +48,21 @@ editor.@[mtd]onCropArea@ = (rect) => {
     docMaker.paragraph(`High-level editor that embeds video playback with trimming and optional cropping overlay. Provides playback controls, time synchronization, and crop management.
     It has to be appended to an existing area. It means that it can be created anywhere in the document window (e.g. dialogs, panels, areas, etc.), since to create an area it's as easy as instancing a new one.
     When creating it, you can use different options to adapt the editor to your needs:` );
-    docMaker.codeBulletList( [
+    docMaker.codeBulletList([
         ["src", "String", "Video URL"],
         ["video", "HTMLVideoElement", "Video native element"],
         ["crop", "Boolean", "Enable crop functionality"],
         ["controls", "Boolean", "Enable playing ontrols for the video"],
         ["handleStyle", "Object", "Style properties for the resize handles"]
-    ] );
+    ]);
 
     docMaker.header("Statics", "h4");
-    
+
     docMaker.codeBulletList([
-      ["CROP_HANDLE_L", `${docMaker.iCode(`setCropAreaHandles`)}, enables the left resize handle.`],
-      ["CROP_HANDLE_R", `${docMaker.iCode(`setCropAreaHandles`)}, enables the right resize handle.`],
-      ["CROP_HANDLE_T", `${docMaker.iCode(`setCropAreaHandles`)}, enables the top resize handle.`],
-      ["CROP_HANDLE_B", `${docMaker.iCode(`setCropAreaHandles`)}, enables the bottom resize handle.`],
+        ["CROP_HANDLE_L", `${docMaker.iCode(`setCropAreaHandles`)}, enables the left resize handle.`],
+        ["CROP_HANDLE_R", `${docMaker.iCode(`setCropAreaHandles`)}, enables the right resize handle.`],
+        ["CROP_HANDLE_T", `${docMaker.iCode(`setCropAreaHandles`)}, enables the top resize handle.`],
+        ["CROP_HANDLE_B", `${docMaker.iCode(`setCropAreaHandles`)}, enables the bottom resize handle.`],
     ]);
 
     docMaker.header("Methods", "h4");

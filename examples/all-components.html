@@ -214,7 +214,12 @@
         // Radiogroup
         {
             checkLeftPanel.branch("Radio Group", { closed: closedDefault });
-            checkLeftPanel.addRadioGroup(null, "Notify me about...", ["All new messages", "Direct messages and mentions", "Nothing"], null, { className: "accent", xdisabled: true, selected: 1 });
+            checkLeftPanel.addRadioGroup(null, "Primary Radio", ["All new messages", "Direct messages and mentions", "Nothing"], null, { className: "primary", selected: 1 });
+            checkLeftPanel.addRadioGroup(null, "Secondary Radio", ["All new messages", "Direct messages and mentions", "Nothing"], null, { className: "secondary", selected: 1 });
+            checkLeftPanel.addRadioGroup(null, "Accent Radio", ["All new messages", "Direct messages and mentions", "Nothing"], null, { className: "accent", selected: 1 });
+            checkLeftPanel.addRadioGroup(null, "Success Radio", ["All new messages", "Direct messages and mentions", "Nothing"], null, { className: "success", selected: 1 });
+            checkLeftPanel.addRadioGroup(null, "Warning Radio", ["All new messages", "Direct messages and mentions", "Nothing"], null, { className: "warning", selected: 1 });
+            checkLeftPanel.addRadioGroup(null, "Destructive Radio", ["All new messages", "Direct messages and mentions", "Nothing"], null, { className: "destructive", selected: 1 });
             checkLeftPanel.addRadioGroup(null, "Disabled Options...", ["All new messages", "Direct messages and mentions", "Nothing"], null, { disabled: true, selected: 1 });
         }
 
@@ -274,14 +279,12 @@
             panelB.addColor("Color With Alpha", "#47c1b7ff");
             panelB.addColor("Disabled Color", "#b7a9b1", null, { disabled: true });
             panelB.branch("Range Inputs", { closed: closedDefault });
-            panelB.addRange("Classic", 1, null, { min: 0, max: 10, step: 1 });
             panelB.addRange("Primary", 7, null, { min: 0, max: 10, step: 1, className: "primary" });
             panelB.addRange("Secondary", 4, null, { min: 0, max: 10, step: 1, className: "secondary" });
             panelB.addRange("Accent", 3, null, { min: 0, max: 10, step: 1, className: "accent" });
-            panelB.addRange("Contrast", 5, null, { min: 0, max: 10, step: 1, className: "contrast" });
             panelB.addRange("Success", 9, null, { min: 0, max: 10, step: 1, className: "success" });
-            panelB.addRange("Error", 6, null, { min: 0, max: 10, step: 1, className: "error" });
             panelB.addRange("Warning", 2, null, { min: 0, max: 10, step: 1, className: "warning" });
+            panelB.addRange("Destructive", 6, null, { min: 0, max: 10, step: 1, className: "destructive" });
             panelB.addRange("Inverted", 22, null, { min: 20, max: 48, step: 1, left: true });
             panelB.addRange("NoFill", 10, null, { min: 1, max: 48, step: 1, fill: false });
             panelB.addRange("With Range", [2, 6], null, { min: 1, max: 10, step: 1 });
@@ -289,7 +292,7 @@
             panelB.branch("Select Inputs", { closed: closedDefault });
             panelB.addSelect("Classic", selectValues, "Unity", null);
             panelB.addSelect("With Suboptions", selectValues, "Unity", null, { on_Unity: (p) => {
-                p.addButton("Unity Button", "Click me!", null, { buttonClass: "contrast" });
+                p.addButton("Unity Button", "Click me!", null, { buttonClass: "primary" });
             } });
             panelB.addSelect("With Labels", selectValuesWithLabels, "Unity", null);
             panelB.addSelect("With Filter", selectValuesWithLabels, "Godot", null, { filter: true, placeholder: "Search tools..." });
@@ -399,6 +402,14 @@
             panelC.addList("Number List", [ 1, 2, 3, 4 ] );
             panelC.addList("String List", [ 'GPTeam', 'Blat Bunny', 'Blat Panthers' ], 'Blat Panthers');
             panelC.addList("String List with Icons", [['GPTeam', 'Gpu'], ['Blat Bunny', 'Bone'], ['Blat Panthers', 'PawPrint']], 'Blat Panthers');
+        }
+
+        // List
+        {
+            panelC.branch("Array", { closed: closedDefault });
+            panelC.addArray("Array", ['GPTeam', 'Blat Panthers', 'Blat Bunny'], (value, event) => {
+                console.log(value);
+            });
         }
 
         // Table

@@ -298,7 +298,7 @@ export class ColorPicker
                 }, 3000 );
             }, { swap: 'Check', icon: 'Copy', buttonClass: 'bg-none', className: 'ml-auto', title: 'Copy' } );
 
-            copyButtonComponent.root.querySelector( '.swap-on svg' ).classList.add( 'fg-success' );
+            copyButtonComponent.root.querySelector( '.swap-on svg' ).classList.add( 'text-success' );
 
             colorLabel.appendChild( copyButtonComponent.root );
         }

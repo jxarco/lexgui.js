@@ -276,7 +276,7 @@ export class Table extends BaseComponent
                                     buttonRoot.innerHTML = icon.innerHTML + f.name;
                                     panel.refresh();
                                     this.refresh();
-                                }, { buttonClass: 'contrast' } );
+                                }, { buttonClass: 'ghost' } );
                             };
                             panel.refresh();
                             container.appendChild( panel.root );

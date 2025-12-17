@@ -754,7 +754,7 @@ export class CodeEditor
                 if ( Object.keys( this.openedTabs ).length < 2 )
                 {
                     clearInterval( this.blinker );
-                    LX.removeClas( this.cursorsDOM, 'show' );
+                    LX.removeClass( this.cursorsDOM, 'show' );
                 }
             } } );
 
@@ -990,10 +990,10 @@ export class CodeEditor
                 searchPanel.sameLine( 4 );
                 searchPanel.addText( null, '', null, { placeholder: 'Find', inputClass: 'bg-secondary' } );
                 searchPanel.addButton( null, 'up', () => this.search( null, true ), { icon: 'ArrowUp',
-                    title: 'Previous Match', tooltip: true } );
-                searchPanel.addButton( null, 'down', () => this.search(), { icon: 'ArrowDown', title: 'Next Match',
+                    buttonClass: 'ghost', title: 'Previous Match', tooltip: true } );
+                searchPanel.addButton( null, 'down', () => this.search(), { icon: 'ArrowDown', buttonClass: 'ghost', title: 'Next Match',
                     tooltip: true } );
-                searchPanel.addButton( null, 'x', this.hideSearchBox.bind( this ), { icon: 'X', title: 'Close',
+                searchPanel.addButton( null, 'x', this.hideSearchBox.bind( this ), { icon: 'X', buttonClass: 'ghost', title: 'Close',
                     tooltip: true } );
 
                 const searchInput = box.querySelector( 'input' );
@@ -1020,7 +1020,7 @@ export class CodeEditor
                     this.goToLine( input.value.slice( 1 ) );
                 }, { placeholder: 'Go to line', trigger: 'input' } );
                 searchPanel.addButton( null, 'x', this.hideSearchLineBox.bind( this ), { icon: 'X', title: 'Close',
-                    tooltip: true } );
+                    buttonClass: 'ghost', tooltip: true } );
 
                 let input: any = box.querySelector( 'input' );
                 input.addEventListener( 'keyup', ( e: KeyboardEvent ) => {

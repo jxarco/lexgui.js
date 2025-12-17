@@ -1,8 +1,9 @@
 <script type="module">
 
-    docMaker.header( "Code Editor.", "h1", "code-editor" );
-
-    docMaker.paragraph( `Provides an embedded editing tool with syntax highlighting, line numbers, and editing conveniences like autocomplete and undo/redo.` );
+    const content = document.getElementById('content');
+    const componentName = "Code Editor";
+    docMaker.header(componentName + ".", "h1", componentName.toLowerCase());
+    docMaker.paragraph( `Provides an embedded editing tool with syntax highlighting, line numbers, and editing conveniences like autocomplete and undo/redo.`, false, "text-muted-foreground");
     docMaker.lineBreak();
 
     {

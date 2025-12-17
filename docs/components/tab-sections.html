@@ -7,12 +7,12 @@
     docMaker.header(componentName + ".", "h1", componentName.toLowerCase());
     docMaker.paragraph(`Represents panel sections as tabs, either in horizontal or vertical mode. Quickly switch between the different sets of information.`, false, "text-muted-foreground");
 
-
     {
         window.__addInteractiveCodeExample( content, componentName, panel => {
             panel.addTabSections("tabsName", [
                 {
-                    name: "First tab", icon: "Discord",
+                    name: "First tab",
+                    icon: "Discord",
                     onCreate: ( p, c ) => {
                         p.addTitle("Discord tab");
                         p.addButton(null, "Connect");
@@ -22,7 +22,8 @@
                     }
                 },
                 {
-                    name: "Second tab", icon: "Github",
+                    name: "Second tab",
+                    icon: "Github",
                     onCreate: ( p, c ) => {
                         p.addTitle("Github tab");
                         p.addButton(null, "Go", () => { window.open("https://github.com/jxarco/lexgui.js/") });

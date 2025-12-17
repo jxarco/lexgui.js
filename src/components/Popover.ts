@@ -234,7 +234,7 @@ class PopConfirm
         footerPanel.addButton( null, cancelText, () => {
             if ( onCancel ) onCancel();
             this._popover?.destroy();
-        }, { xbuttonClass: 'contrast' } );
+        } );
         footerPanel.addButton( null, okText, () => {
             if ( onConfirm ) onConfirm();
             this._popover?.destroy();

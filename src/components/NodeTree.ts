@@ -88,7 +88,7 @@ export class NodeTree
 
         if ( icon )
         {
-            item.appendChild( LX.makeIcon( icon, { iconClass: 'hierarchy', svgClass: 'xs' } ) );
+            item.appendChild( LX.makeIcon( icon, { iconClass: 'hierarchy', svgClass: 'sm' } ) );
         }
 
         // Add display icon
@@ -459,7 +459,7 @@ export class NodeTree
 
         // Add button icons
 
-        const inputContainer = document.createElement( 'div' );
+        const inputContainer = LX.makeElement( 'div', 'flex flex-row ml-auto mr-2' );
         item.appendChild( inputContainer );
 
         if ( node.actions )
@@ -473,16 +473,8 @@ export class NodeTree
                     {
                         action.callback( node, swapValue, event );
                     }
-                }, { icon: action.icon, swap: action.swap, title: action.name, hideName: true, className: 'p-0 m-0',
-                    buttonClass: 'p-0 m-0 bg-none no-h' } );
-                actionBtn.root.style.minWidth = 'fit-content';
-                actionBtn.root.style.margin = '0'; // adding classes does not work
-                actionBtn.root.style.padding = '0'; // adding classes does not work
-                const _btn = actionBtn.root.querySelector( 'button' );
-                _btn.style.minWidth = 'fit-content';
-                _btn.style.margin = '0'; // adding classes does not work
-                _btn.style.padding = '0'; // adding classes does not work
-
+                }, { icon: action.icon, swap: action.swap, title: action.name, hideName: true, className: 'p-0 m-0', buttonClass: 'px-0 h-5 bg-none' } );
+                actionBtn.root.style.padding = '0'; // override style
                 inputContainer.appendChild( actionBtn.root );
             }
         }
@@ -498,8 +490,8 @@ export class NodeTree
                     const event = new TreeEvent( TreeEvent.NODE_VISIBILITY, node, node.visible, e );
                     that.onevent( event );
                 }
-            }, { icon: node.visible ? 'Eye' : 'EyeOff', swap: node.visible ? 'EyeOff' : 'Eye', title: 'Toggle visible',
-                className: 'p-0 m-0', buttonClass: 'bg-none' } );
+            }, { icon: node.visible ? 'Eye' : 'EyeOff', swap: node.visible ? 'EyeOff' : 'Eye', title: 'Toggle visible', className: 'p-0 m-0', buttonClass: 'px-0 h-5 bg-none' } );
+            visibilityBtn.root.style.padding = '0'; // override style
             inputContainer.appendChild( visibilityBtn.root );
         }
 

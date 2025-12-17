@@ -232,7 +232,7 @@ export class DropdownMenu
         {
             if ( item.name === this._radioGroup.selected )
             {
-                const icon = LX.makeIcon( 'Circle', { svgClass: 'xxs fill-current' } );
+                const icon = LX.makeIcon( 'Circle', { svgClass: '2xs fill-current' } );
                 menuItem.prepend( icon );
             }
 

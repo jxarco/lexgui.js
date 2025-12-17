@@ -19,7 +19,7 @@ export class ArrayInput extends BaseComponent
 
     constructor( name: string, values: any[] = [], callback: any, options: any = {} )
     {
-        options.nameWidth = '100%';
+        options.nameWidth = 'auto';
 
         super( ComponentType.ARRAY, name, null, options );
 
@@ -39,8 +39,8 @@ export class ArrayInput extends BaseComponent
         // Add open array button
 
         let container = document.createElement( 'div' );
-        container.className = 'lexarray';
-        container.style.width = '100%';
+        container.className = 'lexarray shrink-1 grow-1 ml-4';
+        container.style.width = 'auto';
         this.root.appendChild( container );
         this.root.dataset['opened'] = false;
 
@@ -114,7 +114,7 @@ export class ArrayInput extends BaseComponent
                     values.splice( values.indexOf( value ), 1 );
                     this._updateItems();
                     this._trigger( new IEvent( name, values, event ), callback );
-                }, { buttonClass: 'ghost', title: 'Remove item', icon: 'Trash2' } );
+                }, { buttonClass: 'ghost xs p-0', title: 'Remove item', icon: 'Trash2' } );
 
                 component.root.appendChild( removeComponent.root );
             }

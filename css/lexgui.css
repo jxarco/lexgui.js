@@ -28,15 +28,15 @@
     /* default color scheme */
     color-scheme: dark;
 
-    --black: #000000;
-    --white: #ffffff;
-
     --global-font: "Inter", sans-serif;
-    --global-code-font: "CascadiaCode", monospace;
     --global-title-font: "Inter", sans-serif;
+    --global-code-font: "CascadiaCode", monospace;
 
     --radius: 0.625rem;
+    --black: #000000;
+    --white: #ffffff;
     --background: light-dark(#fafafa, #0a0a0a);
+    --background-blur: light-dark(#f7f7f7d8, #1f1f1fe7);
     --foreground: light-dark(#0a0a0a, #fafafa);
     --card: light-dark(#ffffff, #171717);
     --card-foreground: light-dark(#0a0a0a, #fafafa);
@@ -57,35 +57,26 @@
     --input: light-dark(#e5e5e5, #ffffff26);
     --ring: light-dark(#a1a1a1, #737373);
 
-    /* --background-secondary: light-dark(#eeeeee, #1a1a1a); */
-    /* --global-blur-background: light-dark(#f7f7f7d8, #1f1f1fe7); */
-
-    /* --accent: var(--blue-700);
-    --accent-light: var(--blue-400);
-    --accent-dark: var(--blue-900); */
-    /* --success: var(--green-500); */
-
     --global-chart-color-1: oklch(0.488 0.243 264.376);
     --global-chart-color-2: oklch(0.696 0.17 162.48);
     --global-chart-color-3: oklch(0.769 0.188 70.08);
     --global-chart-color-4: oklch(0.627 0.265 303.9);
     --global-chart-color-5: oklch(0.645 0.246 16.439);
 
-
     --spacing-xs: 0.15rem 0.25rem;
     --spacing-sm: 0.25rem;
     --spacing-md: 0.4rem;
     --spacing-lg: 0.5rem;
     --spacing-xl: 0.75rem;
-    --spacing-xxl: 1rem;
+    --spacing-2xl: 1rem;
 
-    --svg-size-xxs: 0.5rem;
+    --svg-size-2xs: 0.5rem;
     --svg-size-xs: 0.7rem;
     --svg-size-sm: 0.85rem;
     --svg-size-md: 1rem;
     --svg-size-lg: 1.25rem;
     --svg-size-xl: 1.4rem;
-    --svg-size-xxl: 1.6rem;
+    --svg-size-2xl: 1.6rem;
 
     --av-grid-scale: 1;
     --code-editor-font-size: 14px;
@@ -99,36 +90,10 @@
     --spacing-md: 0.3rem;
     --spacing-lg: 0.4rem;
     --spacing-xl: 0.5rem;
-    --spacing-xxl: 0.75rem;
+    --spacing-2xl: 0.75rem;
 }
 
 :root[data-theme="light"] { color-scheme: light }
-
-/* Retina & HiDPI Displays (2x) */
-/* @media screen and (min-resolution: 2dppx),
-       screen and (-webkit-min-device-pixel-ratio: 2) {
-    :root {
-        --text-xs: 0.625rem;
-        --text-sm: 0.75rem;
-        --text-base: 0.875rem;
-        --text-lg: 1rem;
-        --text-xl: 1.125rem;
-        --text-xxl: 1.375rem;
-    }
-} */
-
-/* Ultra Retina & 4K Screens (3x and above) */
-/* @media screen and (min-resolution: 3dppx),
-       screen and (-webkit-min-device-pixel-ratio: 3) {
-    :root {
-        --text-xs: 0.6875rem;
-        --text-sm: 0.8125rem;
-        --text-base: 0.9375rem;
-        --text-lg: 1.0625rem;
-        --text-xl: 1.25rem;
-        --text-xxl: 1.5rem;
-    }
-} */
 
 ::-webkit-scrollbar {
     height: 3px;
@@ -333,13 +298,13 @@ body.noevents * {
 
 /* Some global colors */
 
-svg.xxs { width: var(--svg-size-xxs); height: var(--svg-size-xxs); }
+svg.\2xs { width: var(--svg-size-2xs); height: var(--svg-size-2xs); }
 svg.xs { width: var(--svg-size-xs); height: var(--svg-size-xs); }
 svg.sm { width: var(--svg-size-sm); height: var(--svg-size-sm); }
 svg.md { width: var(--svg-size-md); height: var(--svg-size-md); }
 svg.lg { width: var(--svg-size-lg); height: var(--svg-size-lg); }
 svg.xl { width: var(--svg-size-xl); height: var(--svg-size-xl); }
-svg.xxl { width: var(--svg-size-xxl); height: var(--svg-size-xxl); }
+svg.\2xl { width: var(--svg-size-2xl); height: var(--svg-size-2xl); }
 
 #modal {
     inset: 0;
@@ -535,7 +500,7 @@ a svg, svg path {
 /* Commandbar */
 
 .commandbar {
-    background-color: var(--global-blur-background);
+    background-color: var(--background-blur);
     --webkit-backdrop-filter: blur(12px);
     backdrop-filter: blur(12px);
     width: 30%;
@@ -755,7 +720,7 @@ a svg, svg path {
 }
 
 .lexdialogcloser:hover {
-    color: var(--global-text-tertiary);
+    color: var(--muted-foreground);
 }
 
 .lexdialogcloser:active {
@@ -773,7 +738,7 @@ a svg, svg path {
 /* Pocket Dialog */
 
 .lexdialog.pocket {
-    background-color: var(--primary);
+    background-color: var(--background);
 }
 
 .lexdialog.pocket.dockable {
@@ -1171,12 +1136,8 @@ a svg, svg path {
 /* Split bar */
 
 .lexsplitbar {
-    background: rgba(186, 188, 207, 0.01);
+    background: var(--border);
     border-radius: 8px;
-}
-
-.lexsplitbar:hover {
-    background-color: #8e949be8;
 }
 
 .lexsplitbar.horizontal {
@@ -1189,7 +1150,7 @@ a svg, svg path {
 }
 
 .lexsplitbar:hover {
-    background: rgba(186, 188, 207, 0.45);
+    background: var(--input);
 }
 
 .lexsplitbar.dragging-split-area {
@@ -1291,7 +1252,7 @@ a svg, svg path {
 .lexcomponent {
     display: flex;
     align-items: center;
-    padding: var(--spacing-xs);
+    padding: var(--spacing-sm);
     font-size: var(--text-sm);
     color: var(--foreground);
     min-height: calc(var(--spacing)*8);
@@ -1344,7 +1305,7 @@ a svg, svg path {
     height: 2px;
     width: 11px;
     cursor: ew-resize;
-    color: var(--global-text-tertiary);
+    color: var(--muted-foreground);
 }
 
 .lexcomponentseparator div:hover {
@@ -1371,13 +1332,13 @@ a svg, svg path {
 
 .lexseparator {
     border-top: 1px solid var(--secondary);
-    border-bottom: 1px solid var(--global-color-tertiary);
+    border-bottom: 1px solid var(--background);
     margin: 5px 0 5px 0px;
 }
 
 .lexbranch .lexseparator {
-    border-top: 1px solid var(--primary);
-    border-bottom: 1px solid var(--global-color-tertiary);
+    border-top: 1px solid var(--secondary);
+    border-bottom: 1px solid var(--background);
     width: -moz-calc(100% - 8px);
     width: -webkit-calc(100% - 8px);
     width: calc(100% - 8px);
@@ -1432,7 +1393,7 @@ a svg, svg path {
 }
 
 .lexcomponent .lextext:disabled {
-    background-color: var(--global-color-tertiary);
+    background-color: var(--muted);
     color: var(--muted-foreground);
 }
 
@@ -1553,7 +1514,6 @@ a svg, svg path {
 }
 
 .lexcolorpicker {
-    background-color: var(--primary);
     font-size: var(--text-sm);
     width: 256px;
     display: flex;
@@ -1624,16 +1584,16 @@ a svg, svg path {
 .lextitle {
     width: fit-content !important;
     width: -moz-fit-content;
-    color: var(--secondary-foreground);
+    background-color: var(--accent);
+    color: var(--accent-foreground);
     font-weight: 600;
     font-size: var(--text-sm);
     margin: 12px;
-    padding: var(--spacing-xs) var(--spacing-lg);
+    padding: var(--spacing-sm) var(--spacing-xl);
     line-height: 1.5;
     display: grid;
     align-content: center;
-    border-radius: 12px;
-    background-color: var(--global-color-tertiary);
+    border-radius: 0.75rem;
     display: flex;
     -webkit-user-select: none;
     -moz-user-select: none;
@@ -1677,6 +1637,7 @@ a svg, svg path {
     min-width: calc(var(--spacing)*8);
     gap: calc(var(--spacing)*1.5);
     border-radius: calc(var(--radius) - 2px);
+    overflow: hidden;
 
     & svg {
         width: calc(var(--spacing) * 4);
@@ -1738,9 +1699,11 @@ a svg, svg path {
 
 .lexbutton.selected {
     --button-color: var(--primary);
-    --border-color: var(--global-color-quaternary);
+    --border-color: var(--input);
     color: var(--primary-foreground);
 }
+
+.lexbutton.selected:hover { --button-color: color-mix(in oklab, var(--primary) 80%, transparent) }
 
 /* Button Extra Small */
 
@@ -2194,10 +2157,18 @@ dialog .lexselect .lexselectoptions {
     background-color: var(--secondary);
 }
 
-.lextoggle.outline.primary:checked, .lextoggle.outline.primary[aria-checked=true], .lextoggle.outline.primary:has(>input:checked),
+.lextoggle.outline.primary:checked, .lextoggle.outline.primary[aria-checked=true], .lextoggle.outline.primary:has(>input:checked) {
+    border: 1px solid var(--primary);
+}
+
 .lextoggle.outline.secondary:checked, .lextoggle.outline.secondary[aria-checked=true], .lextoggle.outline.secondary:has(>input:checked) {
-    background-color: var(--global-color-quaternary);
-    border: 1px solid var(--global-text-tertiary);
+    color: var(--primary);
+    border: 1px solid var(--input);
+}
+
+.lextoggle.outline.accent:checked, .lextoggle.outline.accent[aria-checked=true], .lextoggle.outline.accent:has(>input:checked) {
+    color: var(--accent);
+    border: 1px solid var(--input);
 }
 
 :is(.lextoggle:checked, .lextoggle[aria-checked=true], .lextoggle:has(>input:checked)):before {
@@ -2209,12 +2180,12 @@ dialog .lexselect .lexselectoptions {
 }
 
 .lextoggle:disabled {
-    border: 1px solid var(--global-text-tertiary);
+    border: 1px solid var(--muted-foreground);
     cursor: not-allowed;
 }
 
 .lextoggle:disabled:before {
-    background-color: var(--global-text-tertiary);
+    background-color: var(--muted-foreground);
 }
 
 .lextogglesubmenu {
@@ -2234,14 +2205,10 @@ dialog .lexselect .lexselectoptions {
     flex-direction: column;
 }
 
-.lexradiogroup span {
-    font-weight: 500;
-}
-
 .lexradiogroup .lexradiogroupitem {
     display: flex;
-    padding: 0.1em;
-    padding-inline: 1.4em;
+    padding-block: 0.25em;
+    padding-inline: 1.5em;
     gap: 0.5em;
     align-items: center;
 }
@@ -2279,12 +2246,10 @@ dialog .lexselect .lexselectoptions {
 }
 
 /* Colors */
-.lexradiogroup.primary .lexradiogroupitem button.checked span { background-color: var(--accent); }
-.lexradiogroup.secondary .lexradiogroupitem button.checked span { background-color: var(--accent-light); }
+.lexradiogroup.secondary .lexradiogroupitem button.checked span { background-color: var(--secondary); }
 .lexradiogroup.accent .lexradiogroupitem button.checked span { background-color: var(--accent); }
-.lexradiogroup.contrast .lexradiogroupitem button.checked span { background-color: var(--primary-foreground); }
 .lexradiogroup.success .lexradiogroupitem button.checked span { background-color: var(--success); }
-.lexradiogroup.error .lexradiogroupitem button.checked span { background-color: var(--destructive); }
+.lexradiogroup.destructive .lexradiogroupitem button.checked span { background-color: var(--destructive); }
 .lexradiogroup.warning .lexradiogroupitem button.checked span { background-color: var(--warning); }
 
 /* Vector Component */
@@ -2501,11 +2466,11 @@ input[type=number] {
 /* Range Component */
 
 .lexrangeslider {
-    --range-thumb-color: var(--primary);
-    --range-thumb-size: 0.75rem;
+    --range-thumb-color: var(--primary-foreground);
+    --range-thumb-size: 0.85rem;
     --range-progress: currentColor;
     --range-fill: 1;
-    --range-thumb-padding: 0.1rem;
+    --range-thumb-padding: 0.125rem;
     --range-bg: color-mix(in oklab,currentColor 20%,#0000);
     --range-dir: 1;
     --radius-selector: 0.5rem;
@@ -2518,7 +2483,7 @@ input[type=number] {
     height: var(--range-thumb-size);
     border: none;
     outline: none;
-    color: var(--global-text-tertiary);
+    color: var(--primary);
     background-color: #0000;
     overflow: hidden;
     padding: 0;
@@ -2534,37 +2499,34 @@ input[type=number] {
 }
 
 /* Colors */
-.lexrangeslider.primary { color: var(--primary); --range-thumb-color: var(--secondary-foreground); }
+.lexrangeslider.primary { color: var(--primary); --range-thumb-color: var(--primary-foreground); }
 .lexrangeslider.secondary { color: var(--secondary); --range-thumb-color: var(--secondary-foreground); }
-.lexrangeslider.accent { color: var(--accent); }
-.lexrangeslider.success { color: var(--success); }
-.lexrangeslider.warning { color: var(--warning); }
-.lexrangeslider.error { color: var(--destructive); }
+.lexrangeslider.accent { color: var(--accent); --range-thumb-color: var(--accent-foreground); }
+.lexrangeslider.success { color: var(--success); --range-thumb-color: color-mix(in oklab, var(--success) 50%, #000); }
+.lexrangeslider.warning { color: var(--warning); --range-thumb-color: color-mix(in oklab, var(--warning) 50%, #000); }
+.lexrangeslider.destructive {  color: var(--destructive); --range-thumb-color: color-mix(in oklab, var(--destructive) 50%, #000); }
 
-.lexrangeslider.left {
-    --range-dir: -1;
+.lexrangeslider.range {
+    --range-fill: 0;
+    --in-range-color: color-mix(in oklab,currentColor 30%,#0000);
+    --range-bg: linear-gradient(to right,
+        var(--in-range-color) 0%,
+        var(--in-range-color) calc(var(--range-min-value) + var(--range-fix-min-offset) - 0.25rem),
+        currentColor calc(var(--range-min-value) + var(--range-fix-min-offset)),
+        currentColor calc( var(--range-max-value) - var(--range-fix-max-offset)),
+        var(--in-range-color) calc( var(--range-max-value) - var(--range-fix-max-offset) + 0.25rem),
+        var(--in-range-color) 100%
+    );
+    background: var(--range-bg);
 }
 
 .lexrangeslider.no-fill {
     --range-fill: 0;
-    --in-range-color: color-mix(in oklab,currentColor 30%,#0000);
-    --range-bg: linear-gradient(to right,
-    var(--in-range-color) 0%,
-    var(--in-range-color) calc(var(--range-min-value) + var(--range-fix-min-offset)),
-    currentColor calc(var(--range-min-value) + var(--range-fix-min-offset)),
-    currentColor calc( var(--range-max-value) - var(--range-fix-max-offset)),
-    var(--in-range-color) calc( var(--range-max-value) - var(--range-fix-max-offset)),
-    var(--in-range-color) 100%);
-    background: var(--range-bg);
 }
 
-.lexrangeslider.overlap {
-    --range-bg: transparent;
-}
-
-.lexrangeslider:hover {
-    filter: brightness(1.1);
-}
+.lexrangeslider.left { --range-dir: -1; }
+.lexrangeslider.overlap { --range-bg: transparent; }
+.lexrangeslider:hover { filter: brightness(1.1); }
 
 .lexrangeslider::-moz-range-track {
     background-color: var(--range-bg);
@@ -2581,7 +2543,7 @@ input[type=number] {
 }
 
 .lexrangeslider:disabled::-webkit-slider-runnable-track {
-    color: var(--global-color-quaternary);
+    color: var(--muted);
 }
 
 .lexrangeslider::-webkit-slider-thumb {
@@ -2666,7 +2628,7 @@ input[type=number] {
 .lextabscontainer .tabs {
     padding: 4px;
     background: none !important;
-    border-right: 1px solid #a2a5c36a;
+    border-right: 1px solid var(--input);
     justify-items: center;
     min-width: 32px;
     display: flex;
@@ -2676,7 +2638,7 @@ input[type=number] {
 
 .lextabscontainer.horizontal .tabs {
     border-right: none;
-    border-bottom: 1px solid #a2a5c36a;
+    border-bottom: 1px solid var(--input);
     flex-direction: row;
 }
 
@@ -2688,7 +2650,7 @@ input[type=number] {
 .lextabscontainer .tabs .lextab {
     padding: 4px;
     border-radius: 4px;
-    color: #8184a264;
+    color: var(--primary);
     cursor: pointer;
     text-align: center;
 }
@@ -2716,16 +2678,13 @@ input[type=number] {
 }
 
 .lextree .lextreetools {
-    background: var(--global-color-tertiary);
+    background: var(--secondary);
     padding-inline: 8px;
     display: flex;
     align-items: center;
     border-radius: 10px;
     gap: 0.5rem;
-}
-
-.lexcomponent.nobranch .lextree .lextreetools {
-    background: var(--secondary);
+    margin-block: 0.25rem;
 }
 
 .lextree .lextreetools input {
@@ -2766,13 +2725,6 @@ input[type=number] {
     background: none;
 }
 
-.lextree .lextreeitem div {
-    display: flex;
-    gap: 0.25rem;
-    margin-left: auto;
-    margin-right: 8px;
-}
-
 .lextree .lextreeitem img {
     width: 16px;
     height: 16px;
@@ -2781,13 +2733,13 @@ input[type=number] {
 }
 
 .lextree .lextreeitem.draggingover {
-    background: light-dark(var(--accent-light), var(--accent-dark));
-    color: #f4f4f5;
+    background: var(--muted);
+    color: var(--muted-foreground);
 }
 
 .lextree .lextreeitem:hover {
-    color: var(--primary-foreground);
-    background: var(--primary);
+    background: var(--secondary);
+    color: var(--secondary-foreground);
 }
 
 .lextree .lextreeitem.selected {
@@ -2943,6 +2895,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     color: var(--primary);
     font-size: var(--text-sm);
     font-weight: 500;
+    padding-inline: var(--spacing-sm);
 }
 
 .lexmenubar .lexmenuentry {
@@ -3032,7 +2985,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexmenubar .lexmenubutton.main a {
-    font-size: var(--text-xxl);
+    font-size: var(--text-2xl);
 }
 
 .lexmenubar .lexmenubutton.disabled a {
@@ -3047,7 +3000,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     position: fixed;
     border-radius: 6px;
     box-shadow: 0 0 6px rgba(46, 46, 46, 0.2) !important;
-    background-color: var(--global-blur-background);
+    background-color: var(--background-blur);
     border: 1px solid #91909036;
 }
 
@@ -3798,12 +3751,9 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 .lexcomponent:has(.lexcheckboxsubmenu)[data-opened=true],
 .lexcomponent:has(.lextogglesubmenu)[data-opened=true],
 .lexcomponent:has(.lexcustomcontainer)[data-opened=true] {
-    background-color: light-dark(var(--global-color-tertiary), var(--background-secondary));
-}
-
-.lexarray .lexcomponent {
-    padding: 0px;
-    width: 100% !important;
+    background-color: light-dark(var(--accent), var(--card));
+    padding: var(--spacing-lg);
+    border-radius: 0.5rem;
 }
 
 .lexarrayitems {
@@ -3816,7 +3766,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexarrayitems .lexcomponentname {
-    color: var(--global-text-tertiary);
+    color: var(--muted-foreground);
     font-size: var(--text-sm);
     justify-content: center;
     margin-right: 0.4rem;
@@ -3857,7 +3807,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lextags .lextag a:hover {
-    color: light-dark(var(--global-text-tertiary), var(--secondary-foreground));
+    color: light-dark(var(--muted-foreground), var(--secondary-foreground));
     cursor: pointer;
 }
 
@@ -4033,7 +3983,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     grid-column: span 2;
 }
 
-.lexcustomcontainer button.custom span {
+.lexcustomcontainer button.custom {
     align-items: center;
     display: flex;
     justify-content: space-between;
@@ -4139,11 +4089,11 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexknob.disabled .knobmarker {
-    background-color: var(--global-text-tertiary);
+    background-color: var(--muted-foreground);
 }
 
 .lexknob.disabled .knobmarker {
-  background-color: var(--global-text-tertiary);
+  background-color: var(--muted-foreground);
 }
 
 .lexknob.sm .knobmarker {
@@ -4441,11 +4391,6 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     border-radius: 0px;
     left: 0 !important;
     top: 0;
-    background-color: var(--secondary);
-}
-
-.lexassetbrowser .lexsplitbar.horizontal:hover {
-    background-color: var(--secondary-foreground);
 }
 
 .lexassetbrowser .lexsplitbar.vertical {
@@ -4555,7 +4500,7 @@ ul.lexassetscontent {
     font-feature-settings: "ss02", 'ss19',  "ss20";
     font-feature-settings: "ss02", 'ss19',  "ss20";
     font-weight: 800;
-    color: var(--global-text-tertiary);
+    color: var(--muted-foreground);
 }
 
 .lexassetscontent li:hover {
@@ -4703,7 +4648,7 @@ ul.lexassetscontent {
     background-color: #1f1f1fe7;
     --webkit-backdrop-filter: blur(2px);
     backdrop-filter: blur(2px);
-    z-index: 99;
+    z-index: 109;
     clip-path: url(#svgTourClipPath);
 }
 
@@ -4712,7 +4657,7 @@ ul.lexassetscontent {
     background-color: #1f1f1fe7;
     --webkit-backdrop-filter: blur(2px);
     backdrop-filter: blur(2px);
-    z-index: 100;
+    z-index: 110;
     mask: url(#svgTourReferenceMask);
 }
 
@@ -4720,12 +4665,12 @@ ul.lexassetscontent {
     width: 10px;
     height: 10px;
     border-radius: 5px;
-    background-color: var(--global-text-quaternary);
+    background-color: var(--accent);
     display: inline-flex;
 }
 
 .tour-step-indicator.active {
-    background-color: var(--primary-foreground);
+    background-color: var(--primary);
 }
 
 /* Skeleton */
@@ -5188,11 +5133,11 @@ ul.lexassetscontent {
 }
 
 .lexcodeeditor .autocomplete pre span.word-highlight {
-    color: var(--accent-light);
+    color: var(--color-blue-500);
 }
 
 .lexcodeeditor .autocomplete pre.selected span.word-highlight {
-    color: #95a0e1;
+    color: var(--color-blue-400);
 }
 
 .lexcodesnippet {
@@ -5539,22 +5484,24 @@ ul.lexassetscontent {
 
 .lexgraphnode .lexgraphnodeios .lexgraphnodeinputs {
     margin-right: 6px;
+    flex: 1 1 auto;
 }
 
 .lexgraphnode .lexgraphnodeios .lexgraphnodeoutputs {
     margin-left: 6px;
+    flex: 0 0 auto;
 }
 
 .lexgraphnode .lexgraphnodeio {
     font-family: var(--global-title-font);
-    font-weight: 600;
-    font-size: var(--text-sm);
+    font-size: var(--text-xs);
     color: #d9d9e3;
     text-shadow: 0px 1px 6px #22222283;
     min-height: 18px;
     display: flex;
     gap: 0.3rem;
     align-items: center;
+    position: relative;
 }
 
 .lexgraphnode .lexgraphnodeio.iooutput {
@@ -5562,14 +5509,14 @@ ul.lexassetscontent {
 }
 
 .lexgraphnode .lexgraphnodeio .io__type {
-    font-size: calc(var(--text-xs) - 1px);
+    font-size: calc(var(--text-xs) - 0.25rem);
     font-weight: 700;
     line-height: 1;
     min-width: 11px;
     max-width: 11px;
     min-height: 10px;
     max-height: 10px;
-    background-color: #afafaf;
+    background-color: var(--accent);
     align-self: center;
     border-radius: 3px;
     text-align: -webkit-center;
@@ -5585,20 +5532,26 @@ ul.lexassetscontent {
 
 .lexgraphnode .lexgraphnodeio .io__typedesc {
     position: absolute;
-    margin-left: -30px;
+    margin-left: -2rem;
     font-weight: 600;
-    background-color: #afafaf;
+    background-color: var(--accent);
     color: var(--primary);
-    font-size: var(--text-xs);
+    font-size: calc(var(--text-xs) - 0.15rem);
     border-radius: 4px;
-    width: 28px;
+    padding-inline: 0.25rem;
+    /* width: 2.5rem; */
     text-align: center;
     opacity: 0;
     transition: opacity ease-in 0.1s;
 }
 
 .lexgraphnode .lexgraphnodeio .io__typedesc.output {
-    margin-right: -30px;
+    margin-right: -2rem;
+}
+
+.lexgraphnode .lexgraphnodeio .io__type.bool,
+.lexgraphnode .lexgraphnodeio .io__typedesc.bool {
+    background-color: #e43636;
 }
 
 .lexgraphnode .lexgraphnodeio .io__type.vec2,
@@ -5618,7 +5571,7 @@ ul.lexassetscontent {
 
 .lexgraphnode .lexgraphnodeio .io__type.string,
 .lexgraphnode .lexgraphnodeio .io__typedesc.string {
-    background-color: #79cc9c;
+    background-color: #53b97e;
 }
 
 .lexgraphnode .lexgraphnodeio .io__type.mat,
@@ -5684,17 +5637,17 @@ ul.lexassetscontent {
 
     -webkit-backdrop-filter: blur(4px);
     backdrop-filter: blur(4px);
-    border: 1px solid var(--primary-foreground);
+    border: 1px solid var(--input);
     transition: border 0.05s linear;
     opacity: 0.5;
 }
 
 .lexgraphgroup .lexgraphgrouptitle {
-    font-size: var(--text-xl);
+    font-size: var(--text-lg);
     font-family: var(--global-title-font);
     font-weight: 600;
     margin: 8px;
-    color: var(--primary-foreground);
+    color: var(--foreground);
     outline: none;
     border: none;
     background: none;
@@ -5878,7 +5831,7 @@ ul.lexassetscontent {
 .bg-success { --background-color: var(--success); background-color: var(--background-color) }
 .bg-warning { --background-color: var(--warning); background-color: var(--background-color) }
 .bg-destructive { --background-color: var(--destructive); background-color: var(--background-color) }
-.bg-blur { --background-color: var(--global-blur-background); background-color: var(--background-color) }
+.bg-blur { --background-color: var(--background-blur); background-color: var(--background-color) }
 .bg-none { background: none !important }
 
 .hover\:bg-primary:hover { background-color: var(--primary) !important }
@@ -5890,7 +5843,6 @@ ul.lexassetscontent {
 .hover\:bg-destructive:hover { background-color: var(--destructive) !important }
 .hover\:bg-warning:hover { background-color: var(--warning) !important }
 .hover\:bg-mix:hover { background-color: color-mix(in srgb, var(--background-color), var(--primary-foreground) 5%) !important }
-.hover\:bg-mix-contrast:hover { background-color: color-mix(in srgb, var(--background-color), var(--primary) 5%) !important }
 .hover\:bg-none:hover { background: none !important }
 
 .text-foreground { color: var(--foreground) }

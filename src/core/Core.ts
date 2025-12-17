@@ -640,7 +640,7 @@ LX.REGISTER_COMPONENT = function( customComponentName: string, options: any = {}
             const menuIcon = LX.makeIcon( 'Menu' );
 
             let buttonName = customComponentName + ( !instance ? ' [empty]' : '' );
-            let buttonEl = this.addButton( null, buttonName, ( value: any, event: MouseEvent ) => {
+            let button = this.addButton( null, buttonName, ( value: any, event: MouseEvent ) => {
                 if ( instance )
                 {
                     element.querySelector( '.lexcustomitems' ).toggleAttribute( 'hidden' );
@@ -659,12 +659,12 @@ LX.REGISTER_COMPONENT = function( customComponentName: string, options: any = {}
                         } );
                     } );
                 }
-            }, { buttonClass: 'custom' } );
+            }, { buttonClass: 'outline custom' } );
 
-            const buttonSpan = buttonEl.root.querySelector( 'span' );
-            buttonSpan.prepend( customIcon );
-            buttonSpan.appendChild( menuIcon );
-            container.appendChild( buttonEl.root );
+            const buttonDom = button.root.querySelector( 'button' );
+            buttonDom.prepend( customIcon );
+            buttonDom.appendChild( menuIcon );
+            container.appendChild( button.root );
 
             if ( instance )
             {

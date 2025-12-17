@@ -23,9 +23,9 @@ export class TimeBar
     static TIMEBAR_PLAY = 1;
     static TIMEBAR_TRIM = 2;
 
-    static BACKGROUND_COLOR = LX.getThemeColor( 'global-branch-darker' );
-    static COLOR = LX.getThemeColor( 'global-button-color' );
-    static ACTIVE_COLOR = '#668ee4';
+    static BACKGROUND_COLOR = LX.getThemeColor( 'secondary' );
+    static COLOR = LX.getThemeColor( 'accent' );
+    static ACTIVE_COLOR = LX.getThemeColor( 'color-blue-400' );
 
     type: number = TimeBar.TIMEBAR_PLAY;
     duration: number = 1.0;
@@ -91,9 +91,9 @@ export class TimeBar
 
     updateTheme()
     {
-        TimeBar.BACKGROUND_COLOR = LX.getThemeColor( 'global-color-secondary' );
-        TimeBar.COLOR = LX.getThemeColor( 'global-color-quaternary' );
-        TimeBar.ACTIVE_COLOR = '#668ee4';
+        TimeBar.BACKGROUND_COLOR = LX.getThemeColor( 'secondary' );
+        TimeBar.COLOR = LX.getThemeColor( 'accent' );
+        TimeBar.ACTIVE_COLOR = LX.getThemeColor( 'color-blue-400' );
     }
 
     setDuration( duration: number )
@@ -585,7 +585,7 @@ export class VideoEditor
         this.controlsPanelLeft.refresh = () => {
             this.controlsPanelLeft.clear();
             this.controlsPanelLeft.sameLine();
-            let playbtn = this.controlsPanelLeft.addButton( 'Play', '', ( v: boolean ) => {
+            let playbtn = this.controlsPanelLeft.addButton( null, 'PlayButton', ( v: boolean ) => {
                 this.playing = v;
                 if ( this.playing )
                 {
@@ -599,11 +599,10 @@ export class VideoEditor
                 {
                     this.video.pause();
                 }
-            }, { width: '40px', icon: 'Play@solid', swap: 'Pause@solid', hideName: true,
-                className: 'justify-center' } );
+            }, { icon: 'Play@solid', swap: 'Pause@solid', hideName: true, title: "Play", tooltip: true, className: 'justify-center' } );
             playbtn.setState( this.playing, true );
 
-            this.controlsPanelLeft.addButton( '', '', ( v: any, e: MouseEvent ) => {
+            this.controlsPanelLeft.addButton( null, '', ( v: any, e: MouseEvent ) => {
                 const panel = new LX.Panel();
                 panel.addRange( 'Speed', this.speed, ( v: number ) => {
                     this.speed = v;
@@ -615,11 +614,11 @@ export class VideoEditor
                 }, { min: 0, max: 2.5, step: 0.01, hideName: true } );
 
                 new LX.Popover( e.target, [ panel ], { align: 'start', side: 'top', sideOffset: 12 } );
-            }, { width: '40px', title: 'speed', icon: 'Timer@solid', className: 'justify-center' } );
+            }, { icon: 'Timer@solid', title: "Speed", tooltip: true, className: 'justify-center' } );
 
-            this.controlsPanelLeft.addButton( '', 'Loop', ( v: boolean ) => {
+            this.controlsPanelLeft.addButton( null, 'Loop', ( v: boolean ) => {
                 this.loop = v;
-            }, { width: '40px', title: 'loop', icon: ( 'Repeat@solid' ), className: `justify-center`, selectable: true,
+            }, { title: "Loop", tooltip: true, icon: ( 'Repeat@solid' ), className: `justify-center`, selectable: true,
                 selected: this.loop } );
 
             this.controlsPanelLeft.addLabel( this.startTimeString, { width: '100px' } );

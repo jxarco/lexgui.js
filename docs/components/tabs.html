@@ -1,30 +1,30 @@
 <script type="module">
     import { LX } from 'lexgui';
 
-    docMaker.header( "Tabs.", "h1", "tabs" );
-    docMaker.paragraph(`A set of layered sections of content, created within areas, that are displayed one at a time.`);
-    docMaker.lineBreak();
-
+    const content = document.getElementById('content');
+    const componentName = "Tabs";
+    docMaker.header(componentName + ".", "h1", componentName.toLowerCase());
+    docMaker.paragraph(`A set of layered sections of content, created within areas, that are displayed one at a time.`, false, "text-muted-foreground");
+    
     {
-        const area = new LX.Area( { skipAppend: true, height: "200px" } );
-        content.appendChild( area.root );
+        window.__addInteractiveCodeExample( content, componentName, panel => {
 
-        const tabs = area.addTabs( { parentClass: "bg-none p-4", sizes: [ "auto", "auto" ], contentClass: "bg-none" } );
-        tabs.add( "App", document.createElement("div"), { selected: true } );
-        tabs.add( "Editor", document.createElement("div") );
-        tabs.add( "Examples", document.createElement("div") );
+            const area = new LX.Area( { skipAppend: true, height: "256px" } );
+            panel.attach( area );
 
-        area.root.className += " p-2 border-color rounded-lg shadow-lg bg-card overflow-hidden";
-    }
+            const tabs = area.addTabs( { parentClass: "bg-none p-4", sizes: [ "auto", "auto" ], contentClass: "bg-none" } );
+            tabs.add( "App", document.createElement("div"), { selected: true } );
+            tabs.add( "Editor", document.createElement("div") );
+            tabs.add( "Examples", document.createElement("div") );
+
+            area.root.className += " p-2 bg-accent overflow-hidden";
+
+        }, "p-0");
+    }    
 
     docMaker.header("Usage", "h2");
 
-    docMaker.code(`@[com]// You can use the _addTabs_ method of Area to directly attach it to an area@
-@const@ tabs = area.@[mtd]addTabs@();
-tabs.@[mtd]add@( @"App"@, appContainer, { selected: @true@ } );
-tabs.@[mtd]add@( @"Editor"@, editorContainer );
-tabs.@[mtd]add@( @"Examples"@, examplesContainer );
-`, "js");
+    docMaker.paragraph( `Create a Tabs element directly into any Area using ${docMaker.iCode("Area.addTabs(options)")}.` );
 
     docMaker.header("API Reference", "h2");
     docMaker.classCtor( "class LX.Tabs", [

@@ -232,7 +232,7 @@ export class Tour
 
         {
             const header = LX.makeContainer( [ '100%', 'auto' ], 'flex flex-row', '', popoverContainer );
-            const title = LX.makeContainer( [ '70%', 'auto' ], 'p-2 font-medium', step.title, header );
+            const title = LX.makeContainer( [ '70%', 'auto' ], 'p-2 font-medium text-base', step.title, header );
             const closer = LX.makeContainer( [ '30%', 'auto' ], 'flex flex-row p-2 justify-end', '', header );
             const closeIcon = LX.makeIcon( 'X' );
             closer.appendChild( closeIcon );
@@ -242,13 +242,13 @@ export class Tour
             } );
         }
 
-        const content = LX.makeContainer( [ '100%', 'auto' ], 'p-2 text-base', step.content, popoverContainer, {
+        const content = LX.makeContainer( [ '100%', 'auto' ], 'p-2 text-sm', step.content, popoverContainer, {
             maxWidth: '400px'
         } );
-        const footer = LX.makeContainer( [ '100%', 'auto' ], 'flex flex-row text-base', '', popoverContainer );
+        const footer = LX.makeContainer( [ '100%', 'auto' ], 'flex flex-row', '', popoverContainer );
 
         {
-            const footerSteps = LX.makeContainer( [ '50%', 'auto' ], 'p-2 gap-1 place-self-center flex flex-row text-base', '',
+            const footerSteps = LX.makeContainer( [ '50%', 'auto' ], 'p-2 gap-1 place-self-center flex flex-row', '',
                 footer );
             for ( let i = 0; i < this.steps.length; i++ )
             {
@@ -281,7 +281,7 @@ export class Tour
         {
             footerPanel.addButton( null, 'Previous', () => {
                 this._showStep( -1 );
-            }, { buttonClass: 'contrast' } );
+            }, { buttonClass: 'ghost' } );
         }
 
         if ( nextStep )
@@ -294,14 +294,12 @@ export class Tour
         {
             footerPanel.addButton( null, 'Finish', () => {
                 this.stop();
-            } );
+            }, { buttonClass: 'primary' } );
         }
 
         footerButtons.appendChild( footerPanel.root );
 
-        const sideOffset =
-            ( step.side === 'left' || step.side === 'right' ? this.horizontalOffset : this.verticalOffset )
-                ?? this.offset;
+        const sideOffset = ( step.side === 'left' || step.side === 'right' ? this.horizontalOffset : this.verticalOffset ) ?? this.offset;
         const alignOffset = step.align === 'start' || step.align === 'end' ? sideOffset : 0;
 
         this._popover?.destroy();
