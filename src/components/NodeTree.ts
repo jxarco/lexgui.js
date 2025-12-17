@@ -301,7 +301,7 @@ export class NodeTree
 
         const nameInput = document.createElement( 'input' );
         nameInput.toggleAttribute( 'hidden', !node.rename );
-        nameInput.className = 'fg-primary bg-none text-sm border-none outline-none';
+        nameInput.className = 'text-foreground bg-none text-sm border-none outline-none';
         nameInput.value = node.id;
         item.appendChild( nameInput );
 
@@ -644,7 +644,7 @@ export class Tree extends BaseComponent
 
         if ( name )
         {
-            let title = LX.makeElement( 'span', 'block p-1 fg-secondary select-none text-base font-medium whitespace-nowrap', name, container );
+            let title = LX.makeElement( 'span', 'block p-1 text-primary select-none text-base font-medium whitespace-nowrap', name, container );
         }
 
         let toolsDiv = document.createElement( 'div' );

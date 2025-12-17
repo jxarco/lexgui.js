@@ -20,9 +20,9 @@
                         password: { label: "Password", type: "password" }
                     }, ( d ) => {
                         console.log( d )
-                    }, { primaryActionName: "Login" } )
+                    }, { primaryActionName: "Login", secondaryActionName: "Cancel" } )
                 ],
-                footer: [ new LX.Button( null, "Login with Google" ) ]
+                footer: [ new LX.Button( null, "Login with Google", null, { buttonClass: "link" } ) ]
             });
         });
     }

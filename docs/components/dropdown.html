@@ -1,21 +1,22 @@
 <script type="module">
 
-    const content = document.getElementById( 'content' );
+    const content = document.getElementById('content');
+    const componentName = "Dropdown Menus";
 
-    docMaker.header( "Dropdown Menus.", "h1", "context-menu" );
+    docMaker.header(componentName + ".", "h1", componentName.toLowerCase());
 
-    docMaker.paragraph( `Context menus provide quick access to relevant actions and options based on the user's current context, enhancing the overall user experience. LexGUI offers two possible ways to create a custom Context Menu using Dropdowns.` );
+    docMaker.paragraph( `Context menus provide quick access to relevant actions and options based on the user's current context, enhancing the overall
+        user experience. LexGUI offers two possible ways to create a custom Context Menu using Dropdowns.`, false, "text-muted-foreground");
     docMaker.lineBreak();
 
     docMaker.header("Usage", "h2");
 
     docMaker.paragraph( `The first method is to use the ${ docMaker.iCode("LX.addContextMenu(title, event, callback, options)") } function, which allows you to create a reduced Context Menu,
     that can be triggered not only on right-click but in any custom event at any place where the mouse/trigger element is.` );
-    docMaker.lineBreak();
 
     {
         const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
-        const button = LX.makeContainer( ["auto", "auto"], "place-self-center bg-contrast fg-contrast p-2 rounded-lg cursor-pointer", "Click here", area );
+        const button = LX.makeContainer( ["auto", "auto"], "place-self-center bg-primary text-primary-foreground p-2 my-4 rounded-lg cursor-pointer", "Click here", area );
         LX.listen( button, "click", ( event ) => {
             event.preventDefault();
             LX.addContextMenu( "Nodes", event, ( m ) => {
@@ -53,7 +54,7 @@
 
     {
         const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
-        const button = LX.makeContainer( ["auto", "auto"], "place-self-center bg-contrast fg-contrast p-2 rounded-lg cursor-pointer", "Click here", area );
+        const button = LX.makeContainer( ["auto", "auto"], "place-self-center bg-primary text-primary-foreground p-2 my-4 rounded-lg cursor-pointer", "Click here", area );
         LX.listen( button, "click", ( event ) => {
             event.preventDefault();
             LX.addDropdownMenu( button, [
@@ -83,7 +84,7 @@
 
     {
         const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
-        const button = LX.makeContainer( ["auto", "auto"], "place-self-center bg-contrast fg-contrast p-2 rounded-lg cursor-pointer", "Click here", area );
+        const button = LX.makeContainer( ["auto", "auto"], "place-self-center bg-primary text-primary-foreground p-2 my-4 rounded-lg cursor-pointer", "Click here", area );
         LX.listen( button, "click", ( event ) => {
             event.preventDefault();
             LX.addDropdownMenu( button, [

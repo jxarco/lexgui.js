@@ -78,6 +78,7 @@ export class AreaOverlayButtons
                 icon: b.icon,
                 img: b.img,
                 className: b.class ?? '',
+                buttonClass: b.buttonClass ?? 'x', // Avoid using default outline
                 title: b.name,
                 overflowContainerX: overlayPanel.root,
                 swap: b.swap

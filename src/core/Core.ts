@@ -340,7 +340,7 @@ LX._createCommandbar = function( root: any )
         }
         e.stopPropagation();
         e.stopImmediatePropagation();
-        commandbar.close();
+        LX.setCommandbarState( false );
         _resetBar( true );
     } );
 
@@ -482,7 +482,7 @@ LX._createCommandbar = function( root: any )
             return;
         }
 
-        const icon = LX.makeIcon( 'ChevronRight', { svgClass: 'sm fg-secondary separator' } );
+        const icon = LX.makeIcon( 'ChevronRight', { svgClass: 'sm text-primary separator' } );
         path += name + icon.innerHTML;
 
         for ( let c of submenu )
@@ -566,6 +566,8 @@ LX.setCommandbarState = function( value: boolean, resetEntries: boolean = true )
 {
     const cb = this.commandbar;
 
+    LX.modal.toggle( !value );
+
     if ( value )
     {
         cb.show();
@@ -575,6 +577,8 @@ LX.setCommandbarState = function( value: boolean, resetEntries: boolean = true )
         {
             cb._addElements( undefined );
         }
+
+        LX.modal.toggle( false );
     }
     else
     {

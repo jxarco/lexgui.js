@@ -105,7 +105,7 @@
             for( let ex of examples )
             {
                 const id = ex.replace(" ", "-").toLowerCase();
-                const title = LX.makeContainer( ["auto", "auto"], "p-2 text-base fg-secondary font-semibold", ex, panel );
+                const title = LX.makeContainer( ["auto", "auto"], "p-2 text-base text-primary font-semibold", ex, panel );
                 const container = LX.makeContainer( ["100%", "auto"], "border-color overflow-hidden rounded-xl cursor-pointer", "", panel );
                 const image = document.createElement( "img" );
                 image.src = "previews/" + id + ".png";

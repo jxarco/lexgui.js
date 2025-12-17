@@ -96,10 +96,13 @@ export class Button extends BaseComponent
 
         var wValue: any = document.createElement( 'button' );
         wValue.title = options.tooltip ? '' : ( options.title ?? '' );
-        wValue.className = `lexbutton inline-flex items-center justify-center whitespace-nowrap
-            transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none shrink-0
-            [&_svg]:shrink-0 outline-none group/button select-none cursor-pointer
-            ${ options.buttonClass ?? 'primary' }`;
+        const cn = [ 'lexbutton', 'inline-flex', 'items-center', 'justify-center', 'whitespace-nowrap', 'transition-all', 'disabled:pointer-events-none',
+            'disabled:opacity-50', '[&_svg]:pointer-events-none', 'shrink-0', '[&_svg]:shrink-0', 'outline-none', 'select-none', 'cursor-pointer', 'h-9',
+            'px-2'
+        ];
+
+        wValue.className =  options.buttonClass ? LX.twMerge( ...cn, ... options.buttonClass.split( ' ' ) ) : [ 'outline', ...cn ].join( ' ' );
+
         this.root.appendChild( wValue );
 
         if ( options.selected )

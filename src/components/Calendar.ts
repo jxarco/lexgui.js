@@ -153,7 +153,7 @@ export class Calendar
                 for ( const headData of [ 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su' ] )
                 {
                     const th = document.createElement( 'th' );
-                    th.className = 'fg-tertiary text-xs font-normal select-none';
+                    th.className = 'text-muted-foreground text-xs font-normal w-10 select-none';
                     th.innerHTML = `<span>${headData}</span>`;
                     hrow.appendChild( th );
                 }
@@ -177,7 +177,7 @@ export class Calendar
                     for ( const dayData of weekDays )
                     {
                         const th = document.createElement( 'th' );
-                        th.className = 'leading-8 text-xs font-normal rounded select-none cursor-pointer';
+                        th.className = 'leading-8 text-xs font-normal rounded select-none cursor-pointer shrink-0 grow-0';
 
                         const dayDate = new Date( `${this.month}/${dayData.day}/${this.year}` );
                         const date = new Date();
@@ -204,15 +204,15 @@ export class Calendar
 
                         if ( ( !this.range && currentDay ) || this.range && ( currentFromRange || currentToRange ) )
                         {
-                            th.className += ` bg-contrast fg-contrast`;
+                            th.className += ` bg-primary text-primary-foreground`;
                         }
                         else if ( this.range && selectable && ( dayDate > fromRangeDate ) && ( dayDate < toRangeDate ) )
                         {
-                            th.className += ` bg-accent fg-contrast`;
+                            th.className += ` bg-accent text-accent-foreground`;
                         }
                         else
                         {
-                            th.className += ` ${selectable ? 'fg-primary' : 'fg-tertiary'} hover:bg-secondary`;
+                            th.className += ` ${selectable ? 'text-primary' : 'text-muted-foreground'} hover:bg-secondary`;
                         }
 
                         th.innerHTML = `<span>${dayData.day}</span>`;

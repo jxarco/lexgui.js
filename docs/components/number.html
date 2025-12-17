@@ -12,6 +12,10 @@
             panel.addNumber("Font Size", 36, (value, event) => {
                 console.log(value);
             }, { min: 1, max: 48 });
+
+            panel.addNumber("Distance", 4, (value, event) => {
+                console.log(value);
+            }, { min: 1, max: 12, step: 0.1, units: "cm" });
         });
     }
 

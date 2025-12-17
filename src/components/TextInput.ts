@@ -73,7 +73,8 @@ export class TextInput extends BaseComponent
         if ( !this.disabled )
         {
             wValue = document.createElement( 'input' );
-            wValue.className = 'lextext ' + ( options.inputClass ?? '' );
+            const cn = [ 'lextext', 'text-sm' ];
+            wValue.className =  options.inputClass ? LX.twMerge( ...cn, ... options.inputClass.split( ' ' ) ) : cn.join( ' ' );
             wValue.type = options.type || '';
             wValue.value = value || '';
             wValue.style.textAlign = options.float ?? '';

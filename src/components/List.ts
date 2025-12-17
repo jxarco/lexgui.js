@@ -96,7 +96,7 @@ export class List extends BaseComponent
         // Show list
 
         let listContainer = document.createElement( 'div' );
-        listContainer.className = 'lexlist';
+        listContainer.className = 'bg-background flex flex-col gap-1 rounded-xl border-color p-2';
         this.root.appendChild( listContainer );
 
         this._updateValues( values );

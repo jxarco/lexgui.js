@@ -11,7 +11,7 @@
         window.__addInteractiveCodeExample( content, componentName, panel => {
             panel.addOTP("Auth OTP", "65x321", (value, event) => {
                 console.log(value);
-            });
+            }, { disabled: false, pattern: "xxx-xxx" });
         });
     }
 

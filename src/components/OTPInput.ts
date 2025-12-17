@@ -35,7 +35,7 @@ export class OTPInput extends BaseComponent
 
             if ( !skipCallback )
             {
-                this._trigger( new IEvent( name, +newValue, event ), callback );
+                this._trigger( new IEvent( name, newValue, event ), callback );
             }
         };
 

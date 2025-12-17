@@ -569,7 +569,7 @@ export class Sidebar
                     const f = options.callback;
                     item.value = value;
                     if ( f ) f.call( this, key, value, event );
-                }, { className: 'accent', label: key, signal: ( '@checkbox_' + key ) } );
+                }, { className: 'primary', label: key, signal: ( '@checkbox_' + key ) } );
                 itemDom.appendChild( panel.root.childNodes[0] );
             }
             else

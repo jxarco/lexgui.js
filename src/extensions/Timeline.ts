@@ -426,7 +426,7 @@ export abstract class Timeline
 
         panel.sameLine();
         let titleComponent = panel.addTitle( 'Tracks', { style: { background: 'none' },
-            className: 'fg-secondary text-lg px-4' } );
+            className: 'text-primary text-lg px-4' } );
         let title = titleComponent.root;
 
         if ( !this.disableNewTracks )

@@ -6,7 +6,7 @@
 	--page-padding: 24px;
 	--max-width: 80%;
 	--icon-size: 20px;
-	--stylish-color: light-dark(#fd18a5, #e2c886);
+	--stylish-color: light-dark(#e01291, #e2c886);
 }
 
 #content {
@@ -20,6 +20,37 @@
 	word-break: break-word;
 	text-align: justify;
 	border-radius: 12px;
+
+	& ul, & ol {
+		list-style: unset;
+		margin-block: 1rem;
+	}
+
+	& h1 {
+		font-size: 32px;
+		line-height: 48px;
+		margin-left: -2px;
+		margin-block: 0.5em;
+		font-optical-sizing: auto;
+		font-weight: 600;
+		font-style: normal;
+		font-variation-settings: "wdth" 100;
+	}
+
+	& h2 {
+		font-size: 28px;
+		line-height: 36px;
+		font-weight: normal;
+		margin-left: -1px;
+		margin-block: 0.75em;
+	}
+
+	& h3 {
+		font-size: 20px;
+		line-height: 28px;
+		font-weight: normal;
+		margin-block: 0.75em;
+	}
 }
 
 #content .lexarea.docs {
@@ -60,47 +91,15 @@ button.copied svg {
 	color: #42d065;
 }
 
-#content a {
-	color: var(--global-color-accent-light);
-	cursor: pointer;
-	text-decoration: none;
-}
-
 #content .lexpanel a, #content .lexarea a {
 	color: unset;
-}
-
-#content h1 {
-	font-size: 32px;
-	line-height: 48px;
-	margin-left: -2px;
-	margin-block: 0.5em;
-	font-optical-sizing: auto;
-	font-weight: 600;
-	font-style: normal;
-	font-variation-settings: "wdth" 100;
-}
-
-#content h2 {
-	font-size: 28px;
-	line-height: 36px;
-	font-weight: normal;
-	margin-left: -1px;
-	margin-block: 0.75em;
-}
-
-#content h3 {
-	font-size: 20px;
-	line-height: 28px;
-	font-weight: normal;
-	margin-block: 0.75em;
 }
 
 code {
 	font-family: "CascadiaCode", monospace;
 	font-size: 14px;
 	line-height: calc(var(--line-height) - 1px);
-	background-color: var(--global-color-primary);
+	background-color: var(--card);
 	text-align: unset !important;
 	text-justify: unset !important;
 }
@@ -108,8 +107,8 @@ code {
 code.inline {
 	display: inline-block;
 	vertical-align: middle;
-	border-radius: 4px;
-	padding: 3px 6px;
+	border-radius: 0.5rem;
+	padding: 0 0.5rem;
 	margin: 0;
 }
 
@@ -127,22 +126,23 @@ code:not(.inline) {
 	position: relative;
 	border-radius: 1rem;
 	line-height: 1.5;
-	border: 1px solid var(--global-border-color);
+	border: 1px solid var(--border);
 }
 
 code.inline.table {
-	padding: 0px 2px;
+	padding: 0px 0.25rem;
 	line-height: unset;
-	font-size: 13px;
+	font-size: var(--text-sm);
 }
 
 code.inline.desc {
-	background-color: var(--global-color-tertiary);
-	color: var(--global-text-tertiary);
+	background-color: var(--muted);
+	color: var(--muted-foreground);
+	font-size: 12px;
 }
 
 #content strong {
-	font-weight:700;
+	font-weight: 700;
 }
 
 #content a.permalink {
@@ -241,11 +241,11 @@ pre .com, code .com { color: #4e994d; } /* comment */
 pre .pln, code .pln { color: #aaaaaa; } /* plaintext */
 
 .desc {
-	color: var(--global-text-tertiary);
+	color: var(--muted-foreground);
 }
 
 a .desc {
-	color: var(--global-color-accent);
+	color: var(--color-blue-500);
 }
 
 .param {
@@ -308,10 +308,6 @@ code:has(.constructor) {
 
 :root[data-theme="light"] .desc {
 	color: #70777a;
-}
-
-:root[data-theme="light"] a .desc {
-	color: var(--global-color-accent);
 }
 
 :root[data-theme="light"] .param {

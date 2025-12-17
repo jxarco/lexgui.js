@@ -118,7 +118,7 @@ export class Pagination
 
         // Previous page button
         this._makeButton( LX.makeIcon( 'ChevronLeft' ).innerHTML, this.page === 1, () => this.prev(),
-            `bg-none ${this.page === 1 ? '' : 'hover:bg-tertiary'}` );
+            `bg-none ${this.page === 1 ? '' : 'hover:bg-secondary'}` );
 
         const pagesContainer = LX.makeContainer( [ 'auto', 'auto' ], 'flex flex-row items-center', '', this.pagesRoot );
         const maxButtons = this._maxButtons + 2; // + next and prev
@@ -192,7 +192,7 @@ export class Pagination
 
         // Next page button
         this._makeButton( LX.makeIcon( 'ChevronRight' ).innerHTML, this.page === this.pages, () => this.next(),
-            `bg-none ${this.page === this.pages ? '' : 'hover:bg-tertiary'}` );
+            `bg-none ${this.page === this.pages ? '' : 'hover:bg-secondary'}` );
     }
 
     _emitChange()
@@ -219,7 +219,7 @@ export class Pagination
 
     _makePageButton( container: HTMLElement, i: number )
     {
-        const buttonClass = i === this.page ? 'bg-secondary border' : 'bg-none';
+        const buttonClass = i === this.page ? 'bg-primary text-primary-foreground' : 'ghost';
         return this._makeButton( String( i ), false, () => this.setPage( i ), buttonClass, container );
     }
 }

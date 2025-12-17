@@ -66,7 +66,7 @@ export class SizeInput extends BaseComponent
         if ( options.units )
         {
             let unitSpan = document.createElement( 'span' );
-            unitSpan.className = 'select-none fg-tertiary font-medium';
+            unitSpan.className = 'select-none text-muted-foreground font-medium';
             unitSpan.innerText = options.units;
             this.root.appendChild( unitSpan );
         }

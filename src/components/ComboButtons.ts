@@ -3,6 +3,7 @@
 import { IEvent } from './../core/Event';
 import { LX } from './../core/Namespace';
 import { BaseComponent, ComponentType } from './BaseComponent';
+import { Button } from './Button';
 
 /**
  * @class ComboButtons
@@ -38,39 +39,7 @@ export class ComboButtons extends BaseComponent
                 throw ( "Set 'value' for each button!" );
             }
 
-            let buttonEl = document.createElement( 'button' );
-            buttonEl.className = 'lexbutton combo';
-            buttonEl.title = b.icon ? b.value : '';
-            buttonEl.id = b.id ?? '';
-            buttonEl.dataset['value'] = b.value;
-
-            if ( options.buttonClass )
-            {
-                buttonEl.classList.add( options.buttonClass );
-            }
-
-            if ( shouldSelect && ( b.selected || options.selected?.includes( b.value ) ) )
-            {
-                buttonEl.classList.add( 'selected' );
-                currentValue = currentValue.concat( [ b.value ] );
-            }
-
-            if ( b.icon )
-            {
-                const icon = LX.makeIcon( b.icon );
-                buttonEl.appendChild( icon );
-            }
-            else
-            {
-                buttonEl.innerHTML = `<span>${b.value}</span>`;
-            }
-
-            if ( b.disabled )
-            {
-                buttonEl.setAttribute( 'disabled', 'true' );
-            }
-
-            buttonEl.addEventListener( 'click', ( e ) => {
+            const onClick = ( event: MouseEvent ) => {
                 currentValue = [];
 
                 if ( shouldSelect )
@@ -102,7 +71,24 @@ export class ComboButtons extends BaseComponent
                 currentValue = currentValue[0];
 
                 this.set( b.value, false, buttonEl.classList.contains( 'selected' ) );
-            } );
+            };
+
+            const button = new Button( b.name ?? null, b.value, onClick, {
+                title: b.icon ? b.value : '',
+                icon: b.icon,
+                disabled: b.disabled,
+                buttonClass: `w-auto combo ${ options.buttonClass ?? '' }`
+            }, );
+            
+            let buttonEl = button.root.querySelector( 'button' );
+            buttonEl.id = b.id ?? '';
+            buttonEl.dataset['value'] = b.value;
+
+            if ( shouldSelect && ( b.selected || options.selected?.includes( b.value ) ) )
+            {
+                buttonEl.classList.add( 'selected' );
+                currentValue = currentValue.concat( [ b.value ] );
+            }
 
             buttonsBox.appendChild( buttonEl );
         }

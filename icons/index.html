@@ -6,7 +6,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <title>Icons - LexGUI</title>
-    <link rel="stylesheet" href="../build/lexgui.css">
+    <link rel="stylesheet" href="../css/output.css">
     <link rel="icon" href="../images/favicon.png">
 
     <script type="importmap">
@@ -76,9 +76,10 @@
     {
         menubar = area.addMenubar( menubarButtons );
 
-        const commandButton = new LX.Button(null, `Search command...<span class="ml-auto">${ LX.makeKbd( ["Ctrl", "Space"], false, "bg-tertiary border-color px-1 rounded" ).innerHTML }</span>`, () => { LX.setCommandbarState( true ) }, {
-            width: "256px", className: "right", buttonClass: "p-4 fg-tertiary bg-primary" }
+        const commandButton = new LX.Button(null, `Search command...`, () => { LX.setCommandbarState( true ) }, {
+            width: "256px", className: "right", buttonClass: "p-4 border-input bg-card text-primary" }
         );
+        commandButton.root.querySelector( 'button' ).appendChild( LX.makeKbd( ["Ctrl", "Space"], false, "ml-auto" ) );
         menubar.root.appendChild( commandButton.root );
     }
 
@@ -111,16 +112,16 @@
     {
         menubar.root.querySelector( ".lexmenubuttons" ).style.marginLeft = "auto";
 
-        const commandButton = new LX.Button(null, LX.makeIcon( "Menu" ).innerHTML, () => {
+        const menuButton = new LX.Button(null, "MenuButton", () => {
             window.__currentSheet = new LX.Sheet("256px", [ sheetArea ] );
-        }, { buttonClass: "p-4 bg-none fg-tertiary" } );
-        menubar.root.prepend( commandButton.root );
+        }, { icon: "Menu", buttonClass: "p-4 bg-none" } );
+        menubar.root.prepend( menuButton.root );
     }
 
     const header = LX.makeContainer([null, "auto"], "flex flex-col gap-4 pt-8 pb-4 items-center", `
-    <a class="text-base">Get started with LexGUI.js <span class="text-sm fg-secondary">${LX.version}</span></a>
-    <p class="fg-primary font-medium tracking-tight leading-none text-center text-balance text-5xl xs:text-4xl">Lucide Icons and More</p>
-    <p class="fg-primary font-light text-xl xs:text-lg text-center text-balance leading-normal max-w-3xl">Built on Lucide icons, extended with additional packs, and fully customizable with your own SVGs.</p>`, area);
+    <a class="text-sm">Get started with LexGUI.js <span class="text-sm text-primary">${LX.version}</span></a>
+    <p class="text-primary font-semibold tracking-tight leading-none text-center text-balance text-4xl xl:text-5xl max-w-4xl">Lucide Icons and More</p>
+    <p class="text-primary font-light text-base sm:text-lg text-center text-balance leading-normal max-w-3xl">Built on Lucide icons, extended with additional packs, and fully customizable with your own SVGs.</p>`, area);
 
     {
         const params = new URLSearchParams( document.location.search );
@@ -141,7 +142,7 @@
 
         const toolsContainer = LX.makeContainer( ["100%", "auto"], `flex ${ mobile ? "flex-col" : "flex-row" } mt-4 mb-4 gap-2`, "", container );
 
-        const filterContainer = LX.makeContainer( ["auto", "auto"], "flex flex-auto", "", toolsContainer );
+        const filterContainer = LX.makeContainer( ["auto", "auto"], "flex flex-auto-fill", "", toolsContainer );
         const filter = new LX.TextInput( null, "", (v) => {
             nameFilter = v;
             refreshIcons();
@@ -149,7 +150,7 @@
         filterContainer.appendChild( filter.root );
 
         const iconsPerPage = 256;
-        const paginationContainer = LX.makeContainer( ["auto", "auto"], "flex flex-row", "", toolsContainer );
+        const paginationContainer = LX.makeContainer( ["auto", "auto"], "flex flex-row flex-auto-keep", "", toolsContainer );
         const paginator = new LX.Pagination({
             page: 1,
             itemsPerPage: iconsPerPage,
@@ -159,11 +160,11 @@
         });
         paginationContainer.appendChild( paginator.root );
 
-        const variantContainer = LX.makeContainer( ["auto", "auto"], "flex flex-row justify-end", "", toolsContainer );
+        const variantContainer = LX.makeContainer( ["auto", "auto"], `flex flex-row flex-auto-keep ${ mobile ? "justify-center" : "justify-end" }`, "", toolsContainer );
         const variantToggle = new LX.Toggle( null, forceSolid, (v) => {
             forceSolid = v;
             refreshIcons();
-        }, { label: "Solid Variant" } );
+        }, { className: "", label: "Solid Variant" } );
         variantContainer.appendChild( variantToggle.root );
 
         const allIcons = {
@@ -193,15 +194,15 @@
             for( let i = start; i < end; ++i )
             {
                 const iconName = filteredIcons[ i ];
-                const iconDiv = LX.makeContainer( ["56px", "56px"], "relative icon flex border-color rounded-lg content-center items-center justify-center cursor-pointer bg-primary hover:bg-tertiary", "", allIconsContainer );
+                const iconDiv = LX.makeContainer( ["56px", "56px"], "bg-secondary hover:bg-muted text-primary hover:text-muted-foreground relative icon flex border-color rounded-lg content-center items-center justify-center cursor-pointer", "", allIconsContainer );
                 if( !mobile )
                 {
                     LX.asTooltip( iconDiv, iconName, { side: "bottom" } );
                 }
 
                 const variant = forceSolid ? "solid" : "regular";
-                const icon = LX.makeIcon( iconName, { iconClass: "flex justify-center items-center", svgClass: "absolute xxl pointer-events-none hover:fg-primary", variant });
-                const checkIcon = LX.makeIcon( "Check", { iconClass: "opacity-0 flex justify-center items-center", svgClass: "absolute xxl pointer-events-none fg-success" });
+                const icon = LX.makeIcon( iconName, { iconClass: "flex justify-center items-center", svgClass: "absolute xxl pointer-events-none", variant });
+                const checkIcon = LX.makeIcon( "Check", { iconClass: "opacity-0 flex justify-center items-center", svgClass: "absolute xxl pointer-events-none text-success" });
                 icon.style.transition = "opacity 0.2s ease-out";
                 checkIcon.style.transition = "opacity 0.2s ease-out";
                 LX.removeClass( icon, "lexicon" );

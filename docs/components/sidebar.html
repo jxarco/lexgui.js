@@ -38,6 +38,7 @@
         }, { /* collapseToIcons: false, skipFooter: true, skipHeader: true,*/
             // side: "right",
             filter: true,
+            displaySelected: true,
             headerTitle: "LexGUI",
             headerSubtitle: LX.version,
             headerImage: "../images/favicon.png",
@@ -93,29 +94,42 @@
 
     docMaker.lineBreak();
     docMaker.paragraph( `Use ${docMaker.iCode(`Area.addSidebar`)} with the following options to build a Sidebar inside an area:` );
-    docMaker.codeBulletList( [
-        ["className", "String", " Extra class to customize root element"],
-        ["side", "String", "Side to attach the sidebar (left|right) [left]"],
-        ["filter", "Boolean", "Add search bar to filter entries [false]"],
-        ["displaySelected", "Boolean", "Indicate if an entry is displayed as selected [false]"],
-        ["skipHeader", "Boolean", "Do not use sidebar header [false]"],
-        ["headerImg", "String", "Image to be shown as avatar"],
-        ["headerIcon", "String", "Icon to be shown as avatar (from LX.ICONS)"],
-        ["headerTitle", "String", "Header title"],
-        ["headerSubtitle", "String", "Header subtitle"],
-        ["header", "HTMLElement", "HTMLElement to add a custom header"],
-        ["skipFooter", "Boolean", "Do not use sidebar footer [false]"],
-        ["footerImg", "String", "Image to be shown as avatar"],
-        ["footerIcon", "String", "Icon to be shown as avatar (from LX.ICONS)"],
-        ["footerTitle", "String", "Footer title"],
-        ["footerSubtitle", "String", "Footer subtitle"],
-        ["footer", "HTMLElement", "HTMLElement to add a custom footer"],
-        ["collapsable", "Boolean", "Sidebar can toggle between collapsed/expanded [true]"],
-        ["collapseToIcons", "Boolean", "When Sidebar collapses, icons remains visible [true]"],
-        ["onHeaderPressed", "Function", "Function to call when header is pressed"],
-        ["onFooterPressed", "Function", "Function to call when footer is pressed"],
-        ["width", "String", "Width of the sidebar [16rem]"],
-    ] );
+    docMaker.lineBreak();
+
+    {
+        const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
+        const panel = area.addPanel();
+        content.appendChild( area.root );
+
+        panel.addTable( null, {
+            head: [ "Option", "Type", "Description", "Default" ],
+            body: [
+                ["className", "String", " Extra class to customize root element", "—"],
+                ["side", "String", "Side to attach the sidebar (left|right)", `"left"`],
+                ["filter", "Boolean", "Add search bar to filter entries", "false"],
+                ["displaySelected", "Boolean", "Indicate if an entry is displayed as selected", "false"],
+                ["skipHeader", "Boolean", "Do not use sidebar header", "false"],
+                ["headerImg", "String", "Image to be shown as avatar", "—"],
+                ["headerIcon", "String", "Icon to be shown as avatar (from LX.ICONS)", "—"],
+                ["headerTitle", "String", "Header title", "—"],
+                ["headerSubtitle", "String", "Header subtitle", "—"],
+                ["header", "HTMLElement", "HTMLElement to add a custom header", "—"],
+                ["skipFooter", "Boolean", "Do not use sidebar footer", "false"],
+                ["footerImg", "String", "Image to be shown as avatar", "—"],
+                ["footerIcon", "String", "Icon to be shown as avatar (from LX.ICONS)", "—"],
+                ["footerTitle", "String", "Footer title", "—"],
+                ["footerSubtitle", "String", "Footer subtitle", "—"],
+                ["footer", "HTMLElement", "HTMLElement to add a custom footer", "—"],
+                ["collapsable", "Boolean", "Sidebar can toggle between collapsed/expanded", "true"],
+                ["collapseToIcons", "Boolean", "When Sidebar collapses, icons remains visible", "true"],
+                ["onHeaderPressed", "Function", "Function to call when header is pressed", "—"],
+                ["onFooterPressed", "Function", "Function to call when footer is pressed", "—"],
+                ["width", "String", "Width of the sidebar", `"16rem"`]
+            ].map( v => {
+                return [ docMaker.iCode( v[ 0 ], "table" ), docMaker.iCode( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? docMaker.iCode( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+    }
 
     docMaker.header( "Properties", "h3", "properties" );
 
@@ -125,19 +139,19 @@
         content.appendChild( area.root );
 
         panel.addTable( null, {
-            head: [ "Name", "Type", "Description", "Default" ],
+            head: [ "Name", "Type", "Description" ],
             body: [
-                ["collapsable", "Boolean", "Indicates whether the sidebar can be collapsed", "true"],
-                ["collapsed", "Boolean", "Indicates whether the sidebar is collapsed", "false"],
-                ["content", "HTMLElement", "Scrollable content element", "—"],
-                ["footer", "HTMLElement", "Footer element", "—"],
-                ["groups", "Object", "Map containing group data", "—"],
-                ["header", "HTMLElement", "Header element", "—"],
-                ["icons", "Array", "List of the sidebar items with the data: name, DOM element and callback", "—"],
-                ["items", "Object", "Map containing the icons for each entry", "—"],
-                ["root", "HTMLElement", "Container element of the sidebar", "—"]
+                ["collapsable", "Boolean", "Indicates whether the sidebar can be collapsed"],
+                ["collapsed", "Boolean", "Indicates whether the sidebar is collapsed"],
+                ["content", "HTMLElement", "Scrollable content element"],
+                ["footer", "HTMLElement", "Footer element"],
+                ["groups", "Object", "Map containing group data"],
+                ["header", "HTMLElement", "Header element"],
+                ["icons", "Array", "List of the sidebar items with the data: name, DOM element and callback"],
+                ["items", "Object", "Map containing the icons for each entry"],
+                ["root", "HTMLElement", "Container element of the sidebar"]
             ].map( v => {
-                return [ docMaker.iCode( v[ 0 ], "table" ), docMaker.iCode( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? docMaker.iCode( v[ 3 ], "table desc" ) : v[ 3 ] ];
+                return [ docMaker.iCode( v[ 0 ], "table" ), docMaker.iCode( v[ 1 ], "table desc" ), v[ 2 ] ];
             } )
         }, {});
     }

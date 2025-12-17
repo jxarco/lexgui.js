@@ -198,7 +198,7 @@ export class Table extends BaseComponent
                 for ( let f of this.customFilters )
                 {
                     f.component = new Button( null, icon.innerHTML + f.name, ( v: any ) => {
-                        const spanName = f.component.root.querySelector( 'span' );
+                        const buttonRoot = f.component.root.querySelector( 'button' );
 
                         if ( f.options )
                         {
@@ -216,8 +216,8 @@ export class Table extends BaseComponent
                                             this.activeCustomFilters[k] == f.name
                                         );
                                         const filterBadgesHtml = activeFilters.reduce( ( acc, key ) =>
-                                            acc += LX.badge( key, 'xs bg-tertiary fg-secondary border-0' ), '' );
-                                        spanName.innerHTML = icon.innerHTML + f.name
+                                            acc += LX.badge( key, 'xs secondary' ), '' );
+                                        buttonRoot.innerHTML = icon.innerHTML + f.name
                                             + ( activeFilters.length ? separatorHtml : '' ) + filterBadgesHtml;
                                         this.refresh();
                                     }
@@ -244,10 +244,10 @@ export class Table extends BaseComponent
                                 panel.addNumber( null, f.start, ( v: number ) => {
                                     f.start = v;
                                     const inUse = f.start != f.min || f.end != f.max;
-                                    spanName.innerHTML = icon.innerHTML + f.name + ( inUse
+                                    buttonRoot.innerHTML = icon.innerHTML + f.name + ( inUse
                                         ? separatorHtml
                                             + LX.badge( `${f.start} - ${f.end} ${f.units ?? ''}`,
-                                                'xs bg-tertiary fg-secondary border-0' )
+                                                'xs secondary' )
                                         : '' );
                                     if ( inUse )
                                     {
@@ -258,11 +258,11 @@ export class Table extends BaseComponent
                                 panel.addNumber( null, f.end, ( v: number ) => {
                                     f.end = v;
                                     const inUse = f.start != f.min || f.end != f.max;
-                                    spanName.innerHTML = icon.innerHTML + f.name
+                                    buttonRoot.innerHTML = icon.innerHTML + f.name
                                         + ( inUse
                                             ? separatorHtml
                                                 + LX.badge( `${f.start} - ${f.end} ${f.units ?? ''}`,
-                                                    'xs bg-tertiary fg-secondary border-0' )
+                                                    'xs secondary' )
                                             : '' );
                                     if ( inUse )
                                     {
@@ -273,7 +273,7 @@ export class Table extends BaseComponent
                                 panel.addButton( null, 'Reset', () => {
                                     f.start = f.min;
                                     f.end = f.max;
-                                    spanName.innerHTML = icon.innerHTML + f.name;
+                                    buttonRoot.innerHTML = icon.innerHTML + f.name;
                                     panel.refresh();
                                     this.refresh();
                                 }, { buttonClass: 'contrast' } );
@@ -305,10 +305,10 @@ export class Table extends BaseComponent
                                 const calendar = new CalendarRange( f.value ?? f.default, {
                                     onChange: ( dateRange: any ) => {
                                         f.value = dateRange;
-                                        spanName.innerHTML = icon.innerHTML + f.name
+                                        buttonRoot.innerHTML = icon.innerHTML + f.name
                                             + ( separatorHtml
                                                 + LX.badge( `${calendar.getFullDate()}`,
-                                                    'xs bg-tertiary fg-secondary border-0' ) );
+                                                    'xs secondary' ) );
                                         this._resetCustomFiltersBtn?.root.classList.remove( 'hidden' );
                                         this.refresh();
                                     }
@@ -320,7 +320,7 @@ export class Table extends BaseComponent
                             container.appendChild( panel.root );
                             new Popover( f.component.root, [ container ], { side: 'bottom' } );
                         }
-                    }, { buttonClass: 'p-4 primary dashed' } );
+                    }, { buttonClass: 'sm outline dashed' } );
                     headerContainer.appendChild( f.component.root );
                 }
 
@@ -329,7 +329,7 @@ export class Table extends BaseComponent
                     this._resetCustomFiltersBtn?.root.classList.add( 'hidden' );
                     for ( let f of this.customFilters ?? [] )
                     {
-                        f.component.root.querySelector( 'span' ).innerHTML = icon.innerHTML + f.name;
+                        f.component.root.querySelector( 'button' ).innerHTML = icon.innerHTML + f.name;
                         if ( f.type == 'range' )
                         {
                             f.start = f.min;
@@ -341,7 +341,7 @@ export class Table extends BaseComponent
                         }
                     }
                     this.refresh();
-                }, { title: 'Reset filters', tooltip: true, icon: 'X' } );
+                }, { title: 'Reset filters', tooltip: true, icon: 'X', buttonClass: "ghost" } );
                 headerContainer.appendChild( this._resetCustomFiltersBtn?.root );
                 this._resetCustomFiltersBtn?.root.classList.add( 'hidden' );
             }
@@ -349,8 +349,7 @@ export class Table extends BaseComponent
             if ( this._toggleColumns )
             {
                 const icon = LX.makeIcon( 'Settings2' );
-                const toggleColumnsBtn = new Button( 'toggleColumnsBtn', icon.innerHTML + 'View',
-                    ( value: any, e: any ) => {
+                const toggleColumnsBtn = new Button( 'toggleColumnsBtn', icon.innerHTML + 'View', ( value: any, e: any ) => {
                         const menuOptions = data.head.map( ( colName: string, idx: number ) => {
                             const item: any = {
                                 name: colName,
@@ -369,7 +368,7 @@ export class Table extends BaseComponent
                             return item;
                         } );
                         LX.addDropdownMenu( e.target, menuOptions, { side: 'bottom', align: 'end' } );
-                    }, { hideName: true } );
+                }, { hideName: true, buttonClass: "outline" } );
                 headerContainer.appendChild( toggleColumnsBtn.root );
                 toggleColumnsBtn.root.style.marginLeft = 'auto';
             }
@@ -410,7 +409,7 @@ export class Table extends BaseComponent
                     th.style.width = '0px';
                     const input = document.createElement( 'input' );
                     input.type = 'checkbox';
-                    input.className = 'lexcheckbox accent';
+                    input.className = 'lexcheckbox primary';
                     input.checked = data.checkMap[':root'] ?? false;
                     th.appendChild( input );
 
@@ -778,7 +777,7 @@ export class Table extends BaseComponent
                         const td = document.createElement( 'td' );
                         const input = document.createElement( 'input' );
                         input.type = 'checkbox';
-                        input.className = 'lexcheckbox accent';
+                        input.className = 'lexcheckbox primary';
                         input.checked = data.checkMap[rowId];
                         td.appendChild( input );
 
@@ -938,7 +937,7 @@ export class Table extends BaseComponent
             if ( showSelected )
             {
                 const selectedRowsLabelContainer = LX.makeContainer( [ '100%', 'auto' ],
-                    'flex justify-start items-center fg-secondary', '0 row(s) selected.', footerContainer );
+                    'flex justify-start items-center text-primary', '0 row(s) selected.', footerContainer );
                 LX.addSignal( '@rows_selected_changed', ( target: HTMLElement, n: number ) => {
                     if ( !this._showSelectedNumber ) return;
                     selectedRowsLabelContainer.innerHTML = n === 0 ? '' : `${n ?? 0} row(s) selected.`;

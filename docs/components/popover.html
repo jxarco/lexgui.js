@@ -20,7 +20,8 @@
             }, { primaryActionName: "Login", secondaryActionName: "Sign Up" });
 
             const p = area.addPanel();
-            p.addButton( null, "Open Popover", ( v, event ) => { new LX.Popover( event.target, [ popoverArea ], { side: "bottom" } ) }, { width: "20%", buttonClass: "contrast", className: "place-self-center" } );
+            p.addButton( null, "Open Popover", ( v, event ) => { new LX.Popover( event.target, [ popoverArea ], { side: "bottom" } ) },
+                { width: "20%", buttonClass: "outline", className: "place-self-center" } );
         });
     }
 

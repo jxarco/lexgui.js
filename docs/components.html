@@ -2,7 +2,7 @@
 
     import { LX } from 'lexgui';
 
-    docMaker.header( "Components.", "h1", "components" );
+    docMaker.header( 'Components.', 'h1', 'components' );
 
     docMaker.paragraph( `Here you can find all the available components in the library.<br> Feel free to open issues or open PR to add more components to LexGUI!`, false, "text-muted-foreground");
     docMaker.lineBreak();
@@ -10,20 +10,7 @@
     {
         const content = document.getElementById('content');
         const area = new LX.Area( { skipAppend: true, height: "auto" } );
-
-        function copySVG( svg, event )
-        {
-            navigator.clipboard.writeText( svg.dataset[ "name" ] + ( forceSolid ? "@solid" : "" ) );
-            console.log("Copied!");
-
-            svg.classList.add( "fg-success" );
-
-            setTimeout( () => {
-                svg.classList.remove( "fg-success" );
-            }, 2000 );
-        }
-
-        const allComponentsContainer = LX.makeContainer( ["100%", "auto"], "grid mb-8 gap-3", "", area );
+        const allComponentsContainer = LX.makeContainer( ["100%", "auto"], "grid mb-8 gap-6", "", area );
         allComponentsContainer.style.gridTemplateColumns = "repeat(auto-fit, minmax(333px, 1fr))";
 
         const generalComponents = [ "Area Overlay Buttons", "Badge", "Button", "Combo Buttons", "Radio Group" ];
@@ -32,24 +19,26 @@
         const feedbackComponents = [ "Progress", "Skeleton", "Spinner", "Toast" ];
         const navigationComponents = [ "Breadcrumb", "Dropdown", "Menubar", "Pagination", "Sidebar", "Tab Sections", "Tabs" ];
         const overlayComponents = [ "Alert Dialog", "Dialog", "Popover", "Sheet", "Tour" ];
-        const allComponents = [].concat( generalComponents, dataInputComponents, dataDisplayComponents, feedbackComponents, overlayComponents ).sort();
+        const allComponents = [].concat( generalComponents, dataInputComponents, dataDisplayComponents, feedbackComponents, navigationComponents, overlayComponents ).sort();
         allComponents.push( "Other Components" );
+        const featuredComponents = [ "Spinner", "Alert Dialog", "Pagination", "Card" ];
 
         for( const c of allComponents )
         {
+            const isFeatured = featuredComponents.indexOf( c ) !== -1;
             const page = "components/" + c.toLowerCase().replace( /\s/g, '-');
-            const b = new LX.Button( null, c, () => {
+            const hl = LX.makeElement( "a", `inline-flex gap-2 items-center cursor-pointer content-center font-medium text-base text-primary hover:underline-offset-4 hover:underline`,
+                    c + ( isFeatured ? `<span class="flex bg-blue-500 w-2 h-2 rounded-full"></span>` : `` ) );
+            hl.addEventListener( "click", ( e ) => {
+                e.preventDefault();
                 const title = window.setPath( page );
                 loadPage( page + ".html", true, title );
-            }, { buttonClass: "bg-none font-medium text-lg" } );
-            allComponentsContainer.appendChild( b.root );
+            } );
+            allComponentsContainer.appendChild( hl );
         }
 
         content.appendChild( area.root );
     }
-
-    docMaker.lineBreak();
-    docMaker.lineBreak();
 
     </script>
 

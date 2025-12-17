@@ -1446,7 +1446,7 @@ export class AssetView
 
                 const rowItem = LX.makeContainer( [ '100%', 'auto' ],
                     `move-item flex flex-row gap-1 py-1 px-3 cursor-pointer ${
-                        isFolder ? 'fg-primary font-medium' : 'fg-quinary'
+                        isFolder ? 'text-foreground font-medium' : 'fg-quinary'
                     } rounded-2xl ${isFolder ? 'hover:bg-secondary' : 'hover:bg-primary'}`,
                     `${isFolder ? LX.makeIcon( 'FolderOpen', { svgClass: '' } ).innerHTML : ''}${pi.id}`, row );
 

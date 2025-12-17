@@ -49,8 +49,8 @@ export class ArrayInput extends BaseComponent
         const toggleButton = new Button( null, buttonName, () => {
             this.root.dataset['opened'] = this.root.dataset['opened'] == 'true' ? false : true;
             this.root.querySelector( '.lexarrayitems' ).toggleAttribute( 'hidden' );
-        }, { buttonClass: 'array' } );
-        toggleButton.root.querySelector( 'span' ).appendChild( LX.makeIcon( 'Down', { svgClass: 'sm' } ) );
+        }, { buttonClass: 'outline [&_a]:ml-auto' } );
+        toggleButton.root.querySelector( 'button' ).appendChild( LX.makeIcon( 'Down', { svgClass: 'sm' } ) );
         container.appendChild( toggleButton.root );
 
         // Show elements
@@ -62,8 +62,8 @@ export class ArrayInput extends BaseComponent
 
         this._updateItems = () => {
             // Update num items
-            let buttonSpan = this.root.querySelector( '.lexbutton.array span' );
-            for ( let node of buttonSpan.childNodes )
+            let button = this.root.querySelector( 'button' );
+            for ( let node of button.childNodes )
             {
                 if ( node.nodeType === Node.TEXT_NODE )
                 {
@@ -114,17 +114,16 @@ export class ArrayInput extends BaseComponent
                     values.splice( values.indexOf( value ), 1 );
                     this._updateItems();
                     this._trigger( new IEvent( name, values, event ), callback );
-                }, { title: 'Remove item', icon: 'Trash3' } );
+                }, { buttonClass: 'ghost', title: 'Remove item', icon: 'Trash2' } );
 
                 component.root.appendChild( removeComponent.root );
             }
 
-            const addButton = new Button( null, LX.makeIcon( 'Plus', { svgClass: 'sm' } ).innerHTML + 'Add item',
-                ( v: any, event: MouseEvent ) => {
-                    values.push( options.innerValues ? options.innerValues[0] : '' );
-                    this._updateItems();
-                    this._trigger( new IEvent( name, values, event ), callback );
-                }, { buttonClass: 'array' } );
+            const addButton = new Button( null, LX.makeIcon( 'Plus', { svgClass: 'sm' } ).innerHTML + 'Add item', ( v: any, event: MouseEvent ) => {
+                values.push( options.innerValues ? options.innerValues[0] : '' );
+                this._updateItems();
+                this._trigger( new IEvent( name, values, event ), callback );
+            }, { buttonClass: 'ghost' } );
 
             arrayItems.appendChild( addButton.root );
         };

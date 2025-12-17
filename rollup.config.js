@@ -10,9 +10,13 @@ export default [
                 format: 'esm',
                 sourcemap: true,
                 name: "lexgui",
-                banner: '// This is a generated file. Do not edit.'
+                banner: '// This is a generated file. Do not edit.',
+                globals: {
+                    "https://cdn.jsdelivr.net/npm/tailwind-merge@3.4.0/+esm": "twMerge",
+                }
             }
         ],
+        external: ["https://cdn.jsdelivr.net/npm/tailwind-merge@3.4.0/+esm"],
         plugins: [
             postcss({
                 extract: 'lexgui.css'

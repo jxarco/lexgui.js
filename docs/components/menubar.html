@@ -144,14 +144,14 @@
         content.appendChild( area.root );
 
         panel.addTable( null, {
-            head: [ "Name", "Type", "Description", "Default" ],
+            head: [ "Name", "Type", "Description" ],
             body: [
-                [".icons", "Array", "List of the sidebar items with the data: name, DOM element and callback", "—"],
-                [".items", "Object", "Map containing the icons for each entry", "—"],
-                [".root", "HTMLElement", "Container element of the menubar", "—"],
-                [".shorts", "Object", "Map containing the shortcuts for each entry", "—"]
+                [".icons", "Array", "List of the sidebar items with the data: name, DOM element and callback"],
+                [".items", "Object", "Map containing the icons for each entry"],
+                [".root", "HTMLElement", "Container element of the menubar"],
+                [".shorts", "Object", "Map containing the shortcuts for each entry"]
             ].map( v => {
-                return [ docMaker.iCode( v[ 0 ], "table" ), docMaker.iCode( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? docMaker.iCode( v[ 3 ], "table desc" ) : v[ 3 ] ];
+                return [ docMaker.iCode( v[ 0 ], "table" ), docMaker.iCode( v[ 1 ], "table desc" ), v[ 2 ] ];
             } )
         }, {});
     }

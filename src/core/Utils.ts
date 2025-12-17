@@ -1,9 +1,14 @@
 // Utils.ts @jxarco
 
+// @ts-ignore
+import { twMerge } from "https://cdn.jsdelivr.net/npm/tailwind-merge@3.4.0/+esm";
 import { Area } from './Area';
 import { LX } from './Namespace';
 import { Panel } from './Panel';
 import { vec2 } from './Vec2';
+
+/* Add Tailwind merge utility to LX namespace */
+LX.twMerge = twMerge;
 
 function clamp( num: number, min: number, max: number )
 {
@@ -318,6 +323,7 @@ function setTheme( colorScheme: string, storeLocal: boolean = true )
 {
     colorScheme = ( colorScheme == 'light' ) ? 'light' : 'dark';
     document.documentElement.setAttribute( 'data-theme', colorScheme );
+    document.documentElement.classList.toggle( 'dark', colorScheme == 'dark' );
     if ( storeLocal ) localStorage.setItem( 'lxColorScheme', colorScheme );
     LX.emitSignal( '@on_new_color_scheme', colorScheme );
 }
@@ -1081,12 +1087,12 @@ function makeKbd( keys: string[], useSpecialKeys: boolean = true, extraClass: st
         'Space': '␣'
     };
 
-    const kbd = LX.makeContainer( [ 'auto', 'auto' ], 'flex flex-row ml-auto' );
+    const kbd = LX.makeContainer( [ 'auto', 'auto' ], `text-muted-foreground font-sans text-xs inline-flex
+        ml-auto pointer-events-none select-none items-center justify-center gap-1` );
 
     for ( const k of keys )
     {
-        LX.makeContainer( [ 'auto', 'auto' ], 'place-self-center text-xs fg-secondary select-none ' + extraClass,
-            useSpecialKeys ? specialKeys[k] ?? k : k, kbd );
+        LX.makeContainer( [ 'auto', 'auto' ], 'bg-muted px-1 rounded-sm ' + extraClass, useSpecialKeys ? specialKeys[k] ?? k : k, kbd );
     }
 
     return kbd;
@@ -1123,13 +1129,13 @@ function makeBreadcrumb( items: any[], options: any = {} )
 
         if ( i != 0 )
         {
-            const icon = LX.makeIcon( separatorIcon, { svgClass: 'sm fg-secondary separator' } );
+            const icon = LX.makeIcon( separatorIcon, { svgClass: 'sm text-primary separator' } );
             breadcrumb.appendChild( icon );
         }
 
         const lastElement = i == items.length - 1;
         const breadcrumbItem = LX.makeContainer( [ 'auto', 'auto' ],
-            `p-1 flex flex-row gap-1 items-center ${lastElement ? '' : 'fg-secondary'}` );
+            `p-1 flex flex-row gap-1 items-center ${lastElement ? '' : 'text-primary'}` );
         breadcrumb.appendChild( breadcrumbItem );
 
         let itemTitle = LX.makeElement( 'p', '', item.title );
@@ -1140,7 +1146,7 @@ function makeBreadcrumb( items: any[], options: any = {} )
 
         if ( item.items !== undefined )
         {
-            const bDropdownTrigger = LX.makeContainer( [ 'auto', 'auto' ], `${lastElement ? '' : 'fg-secondary'}` );
+            const bDropdownTrigger = LX.makeContainer( [ 'auto', 'auto' ], `${lastElement ? '' : 'text-primary'}` );
             LX.listen( bDropdownTrigger, 'click', ( e: any ) => {
                 LX.addDropdownMenu( e.target, item.items, { side: 'bottom', align: 'start' } );
             } );
@@ -1586,7 +1592,7 @@ function toast( title: string, description: string, options: any = {} )
             width: 'auto',
             maxWidth: '150px',
             className: 'right',
-            buttonClass: 'border'
+            buttonClass: 'outline sm'
         } );
         toast.appendChild( panel.root.childNodes[0] );
     }
@@ -1638,12 +1644,11 @@ function badge( text: string, className: string, options: any = {} )
 {
     const container = document.createElement( 'div' );
     container.innerHTML = text;
-    container.className = 'lexbadge ' + ( className ?? '' );
+    const cn = [ 'lexbadge', 'inline-flex', 'items-center', 'justify-center', 'rounded-full', 'border', 'px-2', 'py-0.5',
+        'text-xs', 'font-medium', 'w-fit', 'whitespace-nowrap', 'shrink-0', 'overflow-hidden', 'border-transparent', 'gap-1', 'min-w-5',
+        'bg-card text-primary' ];
 
-    if ( options.chip )
-    {
-        container.classList.add( 'chip' );
-    }
+    container.className = className ? LX.twMerge( ...cn, ...className.split( ' ' ) ) : cn.join( ' ' );
 
     Object.assign( container.style, options.style ?? {} );
 

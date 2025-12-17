@@ -47,7 +47,7 @@ export class Toggle extends BaseComponent
         };
 
         var container = document.createElement( 'div' );
-        container.className = 'flex gap-2 items-center';
+        container.className = 'flex flex-row gap-2 items-center';
         this.root.appendChild( container );
 
         let toggle: any = document.createElement( 'input' );

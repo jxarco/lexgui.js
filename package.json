@@ -41,10 +41,10 @@
     "scripts": {
         "format": "dprint fmt",
         "format:check": "dprint check",
-        "colors": "node generate-colors.js",
         "clean:css": "rimraf build/lexgui.css && rimraf build/lexgui.min.css",
         "clean": "rimraf build",
-        "build:twcss": "npx @tailwindcss/cli -i ./css/lexgui.css -o ./css/output.css --watch",
+        "build:css": "npx @tailwindcss/cli -i ./css/lexgui.css -o ./css/output.css",
+        "build:cssw": "npx @tailwindcss/cli -i ./css/lexgui.css -o ./css/output.css --watch",
         "bundle": "rollup -c",
         "bundle:ts": "rollup -c rollup.ts.build.config.js",
         "build:ts": "tsc --project tsconfig.all.json",

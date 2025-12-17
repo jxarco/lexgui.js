@@ -27,7 +27,7 @@ export class Select extends BaseComponent
             value = newValue;
 
             let item: any = null;
-            const listOptionsNodes = listOptions.childNodes;
+            const listOptionsNodes = list.childNodes;
             listOptionsNodes.forEach( ( e: any ) => {
                 e.classList.remove( 'selected' );
                 if ( e.getAttribute( 'value' ) == newValue )
@@ -196,22 +196,22 @@ export class Select extends BaseComponent
             {
                 filter.root.querySelector( 'input' ).focus();
             }
-        }, { buttonClass: 'array', skipInlineCount: true, disabled: options.disabled } );
+        }, { buttonClass: 'outline [&_a]:ml-auto', skipInlineCount: true, disabled: options.disabled } );
 
         selectedOption.root.style.width = '100%';
-        selectedOption.root.appendChild( LX.makeIcon( 'Down', { svgClass: 'sm' } ) );
+        selectedOption.root.querySelector( 'button' ).appendChild( LX.makeIcon( 'Down', { svgClass: 'sm' } ) );
 
         container.appendChild( selectedOption.root );
 
         selectedOption.refresh = ( v?: string ) => {
-            const buttonSpan = selectedOption.root.querySelector( 'span' );
-            if ( buttonSpan.innerText == '' )
+            const button = selectedOption.root.querySelector( 'button' );
+            if ( button.innerText == '' )
             {
-                buttonSpan.innerText = v;
+                button.innerText = v;
             }
             else
             {
-                buttonSpan.innerHTML = buttonSpan.innerHTML.replaceAll( buttonSpan.innerText, v );
+                button.innerHTML = button.innerHTML.replaceAll( button.innerText, v );
             }
         };
 
@@ -279,15 +279,14 @@ export class Select extends BaseComponent
             list.appendChild( filter.root );
         }
 
-        // Create option list to empty it easily..
-        const listOptions = document.createElement( 'span' );
-        listOptions.className = 'lexselectinnerlist';
-        list.appendChild( listOptions );
-
         // Add select options list
-        list.refresh = ( currentOptions: any ) => {
+        list.refresh = ( currentOptions: any ) =>
+        {
             // Empty list
-            listOptions.innerHTML = '';
+            while ( list.childElementCount > ( options.filter ?? false ? 1 : 0 ) )
+            {
+                list.removeChild( list.lastChild );
+            }
 
             if ( !currentOptions.length )
             {
@@ -301,7 +300,7 @@ export class Select extends BaseComponent
                 li.className = 'lexselectitem empty';
                 li.appendChild( option );
 
-                listOptions.appendChild( li );
+                list.appendChild( li );
                 return;
             }
 
@@ -368,7 +367,7 @@ export class Select extends BaseComponent
                     }
                 }
 
-                listOptions.appendChild( li );
+                list.appendChild( li );
             }
         };
 

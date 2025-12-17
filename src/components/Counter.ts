@@ -38,10 +38,10 @@ export class Counter extends BaseComponent
         const step = options.step ?? 1;
 
         const container = document.createElement( 'div' );
-        container.className = 'flex flex-row border-color bg-primary rounded-lg shadow';
+        container.className = 'flex flex-row border-color bg-card rounded-lg shadow';
         this.root.appendChild( container );
 
-        const input = LX.makeElement( 'input', 'lexcounter w-12 bg-primary px-2 fg-primary', '', container );
+        const input = LX.makeElement( 'input', 'lexcounter w-12 bg-card px-2 text-foreground', '', container );
         input.type = 'number';
         input.value = value;
 
@@ -56,7 +56,7 @@ export class Counter extends BaseComponent
             this.set( this.count - mult, false, e );
         }, { disabled: options.disabled,
             className: `p-0 ${options.disabled ? '' : 'hover:bg-secondary'} border-l-color border-r-color`,
-            buttonClass: 'bg-none', icon: 'Minus' } );
+            buttonClass: 'px-0 bg-none h-7', icon: 'Minus' } );
         container.appendChild( substrButton.root );
 
         const addButton = new Button( null, '', ( value: any, e: MouseEvent ) => {
@@ -64,7 +64,7 @@ export class Counter extends BaseComponent
             if ( e.shiftKey ) mult *= 10;
             this.set( this.count + mult, false, e );
         }, { disabled: options.disabled, className: `p-0 ${options.disabled ? '' : 'hover:bg-secondary'} rounded-r-lg`,
-            buttonClass: 'bg-none', icon: 'Plus' } );
+            buttonClass: 'px-0 bg-none h-7', icon: 'Plus' } );
         container.appendChild( addButton.root );
     }
 }

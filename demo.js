@@ -46,9 +46,10 @@ else
 {
     menubar = area.addMenubar( menubarButtons );
 
-    const commandButton = new LX.Button(null, `Search command...<span class="ml-auto">${ LX.makeKbd( ["Ctrl", "Space"], false, "bg-tertiary border-color px-1 rounded" ).innerHTML }</span>`, () => { LX.setCommandbarState( true ) }, {
-        width: "256px", className: "right", buttonClass: "p-4 fg-tertiary bg-primary" }
+    const commandButton = new LX.Button(null, `Search command...`, () => { LX.setCommandbarState( true ) }, {
+        width: "256px", className: "right", buttonClass: "p-4 border-input bg-card text-primary" }
     );
+    commandButton.root.querySelector( 'button' ).appendChild( LX.makeKbd( ["Ctrl", "Space"], false, "ml-auto" ) );
     menubar.root.appendChild( commandButton.root );
 }
 
@@ -82,24 +83,24 @@ if( mobile )
 {
     menubar.root.querySelector( ".lexmenubuttons" ).style.marginLeft = "auto";
 
-    const commandButton = new LX.Button(null, LX.makeIcon( "Menu" ).innerHTML, () => {
+    const menuButton = new LX.Button(null, "MenuButton", () => {
         window.__currentSheet = new LX.Sheet("256px", [ sheetArea ] );
-    }, { buttonClass: "p-4 bg-none fg-tertiary" } );
-    menubar.root.prepend( commandButton.root );
+    }, { icon: "Menu", buttonClass: "p-4 bg-none" } );
+    menubar.root.prepend( menuButton.root );
 }
 
 // Header
 {
     const header = LX.makeContainer( [ null, "auto" ], "flex flex-col gap-4 p-8 pb-4 items-center", `
-        <a href="docs?p=changelog" class="flex flex-row gap-1 items-center text-sm p-1 px-4 rounded-full fg-primary decoration-none hover:bg-secondary cursor-pointer"><span class="flex bg-accent w-2 h-2 rounded-full"></span>
+        <a href="docs?p=changelog" class="flex flex-row gap-1 items-center text-sm p-1 px-4 rounded-full text-primary decoration-none hover:bg-secondary cursor-pointer"><span class="flex bg-blue-500 w-2 h-2 rounded-full"></span>
             New Components: Spinner, Pagination and more${ LX.makeIcon( "ArrowRight", { svgClass: "sm" } ).innerHTML }</a>
-        <p class="fg fg-primary font-medium tracking-tight leading-none text-center text-balance sm:text-5xl text-4xl">Build your Application Interface</p>
-        <p class="fg-primary font-light text-xl xs:text-lg text-center text-balance leading-normal max-w-3xl">A modern-style UI kit, inspired by shadcn, built for the web. Pure JavaScript, CSS, zero dependencies. Fully Open Source.</p>
+        <p class="fg text-primary font-medium tracking-tight leading-none text-center text-balance sm:text-5xl text-4xl">Build your Application Interface</p>
+        <p class="text-primary font-light text-xl xs:text-lg text-center text-balance leading-normal max-w-3xl">A modern-style UI kit, inspired by shadcn, built for the web. Pure JavaScript, CSS, zero dependencies. Fully Open Source.</p>
     `, area );
 
     const headerButtons = LX.makeContainer( [ "auto", "auto" ], "flex flex-row mt-2", ``, header );
-    const getStartedButton = new LX.Button( null, `Get Started <span class="text-base">${ LX.version }</span>`, () => window.open( "./docs/", "_blank" ), { buttonClass: "contrast" } );
-    const componentsButton = new LX.Button( null, "View Components", () => window.open( "./docs/?p=components", "_blank" ), { buttonClass: "tertiary" } );
+    const getStartedButton = new LX.Button( null, `Get Started <span class="text-base">${ LX.version }</span>`, () => window.open( "./docs/", "_blank" ), { buttonClass: "primary" } );
+    const componentsButton = new LX.Button( null, "View Components", () => window.open( "./docs/?p=components", "_blank" ), { buttonClass: "ghost" } );
     headerButtons.appendChild( getStartedButton.root );
     headerButtons.appendChild( componentsButton.root );
 }
@@ -113,7 +114,7 @@ if( mobile )
     {
         tabs = area.addTabs( { parentClass: "p-4", sizes: [ "auto", "auto" ], contentClass: "p-6 pt-0" } );
 
-        const editorContainer = LX.makeContainer( [ null, "800px" ], "flex flex-col bg-primary border-color rounded-lg overflow-hidden" );
+        const editorContainer = LX.makeContainer( [ null, "800px" ], "flex flex-col border-color rounded-lg overflow-hidden" );
         tabs.add( "Editor", editorContainer, { selected: true } );
 
         const editorArea = new LX.Area({ className: "rounded-lg" });
@@ -337,7 +338,7 @@ if( mobile )
             panel.addVector3( "Position", [0.0, 0.0, 0.0] );
             panel.addVector4( "Rotation", [0.0, 0.0, 0.0, 1.0] );
             panel.addVector3( "Scale", [1.0, 1.0, 1.0] );
-            panel.addButton(null, "Export", () =>  { console.log("Exported!") }, { buttonClass: "contrast", xmustConfirm: true,
+            panel.addButton(null, "Export", () =>  { console.log("Exported!") }, { buttonClass: "primary", xmustConfirm: true,
                 // confirmSide: "left",
                 // confirmAlign: "start",
                 // confirmText: "Yeah",
@@ -418,8 +419,8 @@ if( mobile )
     // Mail
     if( !mobile )
     {
-        const mailContainer = LX.makeContainer( [ null, "800px" ], "flex flex-col bg-primary border-color rounded-lg overflow-hidden" );
-        tabs.add( "Mail", mailContainer, { xselected: true, badge: { content: "5", className: "xs fg-white bg-error", asChild: true } } );
+        const mailContainer = LX.makeContainer( [ null, "800px" ], "flex flex-col border-color rounded-lg overflow-hidden" );
+        tabs.add( "Mail", mailContainer, { xselected: true, badge: { content: "5", className: "destructive px-1", asChild: true } } );
 
         const mailArea = new LX.Area();
         mailContainer.appendChild( mailArea.root );
@@ -492,13 +493,13 @@ if( mobile )
                                 const msgName = LX.makeContainer( [ "auto", "auto" ], "flex font-semibold text-sm gap-2", "", msgNameDate );
                                 msgName.innerHTML = mail.name;
                                 msgName.innerHTML += ( mail.read ? "" : `<span class="rounded-full place-self-center bg-accent" style="width: 8px; height: 8px"></span>` );
-                                const msgDate = LX.makeContainer( [ "auto", "auto" ], "fg-tertiary text-xs ml-auto place-self-center", mail.date, msgNameDate );
+                                const msgDate = LX.makeContainer( [ "auto", "auto" ], "text-muted-foreground text-xs ml-auto place-self-center", mail.date, msgNameDate );
                             }
 
                             const msgSubject = LX.makeContainer( [ "100%", "auto" ], "font-semibold text-xs", mail.subject, msgInfo );
                         }
 
-                        const msgText = LX.makeContainer( [ "100%", "auto" ], "text-xs line-clamp-2 fg-tertiary", mail.content, msgContent );
+                        const msgText = LX.makeContainer( [ "100%", "auto" ], "text-xs line-clamp-2 text-muted-foreground", mail.content, msgContent );
                         const msgTags = LX.makeContainer( [ "100%", "auto" ], "flex flex-row gap-0.5 font-semibold", "", msgContent );
                         for( const tag of mail.tags )
                         {
@@ -563,7 +564,7 @@ if( mobile )
                     previewDataContent.innerHTML = "";
 
                     const mailPreviewInfo = LX.makeContainer( [ "100%", "auto" ], "flex flex-row border-b-color p-4 gap-3", "", previewDataContent );
-                    const avatarContainer = LX.makeContainer( [ "40px", "40px" ], "bg-tertiary rounded-full content-center", "", mailPreviewInfo );
+                    const avatarContainer = LX.makeContainer( [ "40px", "40px" ], "bg-muted rounded-full content-center", "", mailPreviewInfo );
 
                     const mailNames = mail.name.split( ' ' );
                     const avatarIcon = LX.makeContainer( [ "auto", "auto" ], "font-medium place-self-center", mailNames[ 0 ][ 0 ] + mailNames[ 1 ][ 0 ], avatarContainer );
@@ -574,7 +575,7 @@ if( mobile )
                     <div class="text-xs">Reply-To: ${ mail.email }</div>
                     `, mailPreviewInfo );
 
-                    const exactDate = LX.makeContainer( [ "auto", "auto" ], "flex flex-row text-xs fg-tertiary ml-auto", mail.exactDate, mailPreviewInfo );
+                    const exactDate = LX.makeContainer( [ "auto", "auto" ], "flex flex-row text-xs text-muted-foreground ml-auto", mail.exactDate, mailPreviewInfo );
                     const mailPreviewContent = LX.makeContainer( [ "100%", "515px" ], "flex flex-row border-b-color text-sm whitespace-pre-wrap p-4", mail.content, previewDataContent );
                     const previewFooter = LX.makeContainer( [ "100%", "auto" ], "flex flex-col p-2", "", previewDataContent );
 
@@ -585,14 +586,14 @@ if( mobile )
 
                     const previewButtons = LX.makeContainer( [ "100%", "auto" ], "flex flex-row p-1", "", previewFooter );
 
-                    const muteToggle = new LX.Toggle( null, false, null, { label: "Mute this thread", className: "contrast" } );
+                    const muteToggle = new LX.Toggle( null, false, null, { label: "Mute this thread" } );
                     previewButtons.appendChild( muteToggle.root );
 
                     const sendButton = new LX.Button( null, "Send", () => {
                         LX.toast( "Message sent!", "To:" + mail.email, { timeout: 5000, action: { name: "Undo", callback: ( toast, actionName, event ) => {
                             toast.close();
                         } } } );
-                    }, { className: "ml-auto", buttonClass: "contrast" } );
+                    }, { className: "ml-auto", buttonClass: "primary" } );
                     previewButtons.appendChild( sendButton.root );
                 };
             }
@@ -607,7 +608,7 @@ if( mobile )
 
         const header = LX.makeContainer( [ null, "auto" ], "col p-4", `
             <h2>Welcome back!</h2>
-            <p class="fg-tertiary text-sm">Here's a list of your tasks for this month!</p>
+            <p class="text-muted-foreground text-sm">Here's a list of your tasks for this month!</p>
         `, tasksContainer );
 
         const tableComponent = new LX.Table(null, {
@@ -646,7 +647,7 @@ if( mobile )
                     { name: "Make a copy" },
                     { name: "Favourite" },
                     null,
-                    { name: "Delete", icon: "Trash2", className: "fg-error" },
+                    { name: "Delete", icon: "Trash2", className: "text-destructive" },
                 ]
             }
         });

@@ -9,7 +9,8 @@
         const area = new LX.Area( { skipAppend: true, height: "500px" } );
         content.appendChild( area.root );
         let editor = new LX.CodeEditor( area, {
-            files: [ "../data/js_sample.js" ]
+            files: [ "../data/js_sample.js" ],
+            // skipTabs: true
         } );
         area.root.className += " border-color rounded-lg shadow-lg bg-secondary overflow-hidden";
     }
@@ -102,7 +103,7 @@
     blockCommentsTokens: [@"/*"@, @"*/"@],
     numbers: @true@,
     ignoreCase: @true@,
-    icon: { ml: @"Box fg-primary"@, mlb: @"Sphere violet"@ }
+    icon: { ml: @"Box text-foreground"@, mlb: @"Sphere violet"@ }
 }, {
     types: [@"int"@, @"float"@, @"string"@],
     builtIn: [@"print"@, @"len"@]

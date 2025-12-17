@@ -58,15 +58,15 @@ export class Progress extends BaseComponent
         container.appendChild( progress );
 
         const _updateColor = () => {
-            let backgroundColor = LX.getThemeColor( 'global-selected' );
+            let backgroundColor = LX.getThemeColor( 'color-blue-500' );
 
             if ( progress.low != undefined && progress.value < progress.low )
             {
-                backgroundColor = LX.getThemeColor( 'global-color-error' );
+                backgroundColor = LX.getThemeColor( 'destructive' );
             }
             else if ( progress.high != undefined && progress.value < progress.high )
             {
-                backgroundColor = LX.getThemeColor( 'global-color-warning' );
+                backgroundColor = LX.getThemeColor( 'warning' );
             }
 
             progress.style.background = `color-mix(in srgb, ${backgroundColor} 20%, transparent)`;
@@ -80,11 +80,8 @@ export class Progress extends BaseComponent
                 oldSpan.remove();
             }
 
-            let span: any = document.createElement( 'span' );
+            let span: any = LX.makeElement( 'span', 'w-12 flex-auto-keep text-center', value, container );
             span.id = 'progressvalue-' + name;
-            span.style.padding = '0px 5px';
-            span.innerText = value;
-            container.appendChild( span );
         }
 
         if ( options.editable ?? false )

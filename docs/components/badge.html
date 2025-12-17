@@ -5,28 +5,29 @@
     const componentName = "Badge";
 
     docMaker.header(componentName + ".", "h1", componentName.toLowerCase());
-    docMaker.paragraph( `Used to display short text or status labels, such as categories, states, or tags.`, false, "fg-tertiary");
+    docMaker.paragraph( `Used to display short text or status labels, such as categories, states, or tags.`, false, "text-muted-foreground");
 
     {
         window.__addInteractiveCodeExample( content, componentName, panel => {
-            const area = new LX.Area( { className: "flex flex-col p-12 gap-1", skipAppend: true, height: "auto" } );
+            const area = new LX.Area( { className: "flex flex-col p-12 gap-2", skipAppend: true, height: "auto" } );
             panel.attach( area );
 
-            const panelA = area.addPanel( { className: "flex flex-row gap-1 place-content-center" } );
-            panelA.attach( LX.badge("Badge", "border-none", { asElement: true }) );
+            const panelA = area.addPanel( { className: "flex flex-row gap-2 place-content-center" } );
+            panelA.attach( LX.badge("Default", "", { asElement: true }) );
             panelA.attach( LX.badge("Primary", "primary", { asElement: true }) );
+            panelA.attach( LX.badge("Secondary", "secondary", { asElement: true }) );
             panelA.attach( LX.badge("Destructive", "destructive", { asElement: true }) );
-            panelA.attach( LX.badge("Outline", "primary border-color", { asElement: true }) );
+            panelA.attach( LX.badge("Outline", "outline", { asElement: true }) );
 
-            const panelB = area.addPanel( { className: "flex flex-row gap-1 place-content-center" } );
-            panelB.attach( LX.badge( LX.makeIcon( "BadgeCheck", { svgClass: "sm" } ).innerHTML + "Verified", "accent", { asElement: true }) );
-            panelB.attach( LX.badge("8", "contrast", { asElement: true, chip: true }) );
-            panelB.attach( LX.badge("99", "destructive", { asElement: true, chip: true }) );
-            panelB.attach( LX.badge("20+", "primary border-color", { asElement: true, chip: true }) );
+            const panelB = area.addPanel( { className: "flex flex-row gap-2 place-content-center" } );
+            panelB.attach( LX.badge( LX.makeIcon( "BadgeCheck", { svgClass: "sm" } ).innerHTML + "Verified", "text-white bg-blue-500 dark:bg-blue-600", { asElement: true }) );
+            panelB.attach( LX.badge("8", "primary", { asElement: true }) );
+            panelB.attach( LX.badge("99", "destructive", { asElement: true }) );
+            panelB.attach( LX.badge("20+", "primary font-code", { asElement: true }) );
 
-            const panelC = area.addPanel( { className: "flex flex-row gap-1 place-content-center" } );
-            const chipParent = LX.makeContainer( ["auto", "auto"], "py-1 px-8 bg-tertiary rounded-lg", "Parent Chip", panelC );
-            LX.badge("9", "destructive", { asElement: true, xchip: true, parent: chipParent });
+            const panelC = area.addPanel( { className: "flex flex-row gap-2 place-content-center" } );
+            const chipParent = LX.makeContainer( ["auto", "auto"], "py-1 px-4 bg-secondary rounded-xl text-sm", "Parent Chip", panelC );
+            LX.badge("9", "destructive px-1", { asElement: true, parent: chipParent });
         });
     }
 
@@ -52,7 +53,6 @@
             body: [
                 ["asElement", "Boolean", "Return the badge as HTMLElement instead of html string", "false"],
                 ["callback", "Function", "Function to be called when the badge is clicked", "—"],
-                ["chip", "Boolean", "Use the badge as a chip indicator", "false"],
                 ["parent", "HTMLElement", "Append the badge into the desired parent to use badge as a child chip", "—"]
             ].map( v => {
                 return [ docMaker.iCode( v[ 0 ], "table" ), docMaker.iCode( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? docMaker.iCode( v[ 3 ], "table desc" ) : v[ 3 ] ];

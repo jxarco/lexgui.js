@@ -47,7 +47,7 @@ export class Form extends BaseComponent
         };
 
         let container: any = document.createElement( 'div' );
-        container.className = 'lexformdata';
+        container.className = 'flex flex-col gap-1';
         container.style.width = '100%';
         container.formData = {};
         this.root.appendChild( container );
@@ -70,7 +70,7 @@ export class Form extends BaseComponent
             if ( !( options.skipLabels ?? false ) )
             {
                 const label = new TextInput( null, entryData.label ?? entry, null, { disabled: true,
-                    inputClass: 'formlabel bg-none' } );
+                    inputClass: 'formlabel text-xs bg-none text-muted-foreground' } );
                 container.appendChild( label.root );
             }
 
@@ -97,7 +97,7 @@ export class Form extends BaseComponent
                     {
                         options.secondaryActionCallback( container.formData, event );
                     }
-                }, { width: '100%', minWidth: '0', buttonClass: options.secondaryButtonClass ?? 'primary' } );
+                }, { width: '100%', minWidth: '0', buttonClass: options.secondaryButtonClass ?? 'secondary' } );
 
             buttonContainer.appendChild( secondaryButton.root );
         }
@@ -133,7 +133,7 @@ export class Form extends BaseComponent
                 {
                     callback( container.formData, errors, event );
                 }
-            }, { width: '100%', minWidth: '0', buttonClass: options.primaryButtonClass ?? 'contrast' } );
+            }, { width: '100%', minWidth: '0', buttonClass: options.primaryButtonClass ?? 'primary' } );
 
         buttonContainer.appendChild( primaryButton.root );
     }

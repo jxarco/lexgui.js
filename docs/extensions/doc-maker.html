@@ -1,8 +1,11 @@
 <script type="module">
 
-    docMaker.header("Doc Maker.", "h1", "doc-maker");
+    const content = document.getElementById('content');
+    const componentName = "Doc Maker";
 
-    docMaker.paragraph("Doc Maker is a lightweight script used to programmatically build documentation pages. It exposes helpers for headers, paragraphs, code samples with syntax highlighting, lists, links, images, and notes. It's intended to be embedded by including only this script and calling its functions to compose the doc content.");
+    docMaker.header(componentName + ".", "h1", componentName.toLowerCase());
+    docMaker.paragraph(`Doc Maker is a lightweight script used to programmatically build documentation pages. It exposes helpers for headers, paragraphs, code samples with syntax highlighting, lists, links, images, and notes. It's intended to be embedded
+    by including only this script and calling its functions to compose the doc content.`, false, "text-muted-foreground");
 
     docMaker.header("Usage", "h2");
     docMaker.paragraph("Set the target container if you need to render into a subelement instead of the body:");

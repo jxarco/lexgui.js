@@ -123,7 +123,7 @@ export class RangeInput extends BaseComponent
         };
 
         const container = document.createElement( 'div' );
-        container.className = 'lexrange relative';
+        container.className = 'lexrange relative py-3';
         this.root.appendChild( container );
 
         let slider: any = document.createElement( 'input' );

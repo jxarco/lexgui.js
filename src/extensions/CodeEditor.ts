@@ -778,7 +778,7 @@ export class CodeEditor
             this.codeArea = new LX.Area( { skipAppend: true } );
             this.area.attach( this.codeArea );
             const loadFileButton = LX.makeElement( 'button',
-                'grid absolute place-self-center z-100 p-3 rounded-full bg-secondary hover:bg-tertiary cursor-pointer border',
+                'grid absolute place-self-center z-100 p-3 rounded-full bg-secondary hover:bg-accent cursor-pointer border-color',
                 LX.makeIcon( 'FolderOpen' ).innerHTML, this.area, {
                 bottom: '8px'
             } );
@@ -2177,32 +2177,22 @@ export class CodeEditor
             this.onCreateStatusPanel( panel, this );
         }
 
-        let leftStatusPanel = this.leftStatusPanel = new LX.Panel( { id: 'FontSizeZoomStatusComponent',
-            height: 'auto' } );
+        let leftStatusPanel = this.leftStatusPanel = new LX.Panel( { id: 'FontSizeZoomStatusComponent', className: 'flex-auto-keep', width: 'auto', height: 'auto' } );
         leftStatusPanel.sameLine();
 
-        if ( this.skipTabs )
-        {
-            leftStatusPanel.addButton( null, 'ZoomOutButton', this._decreaseFontSize.bind( this ), { icon: 'ZoomOut',
-                width: '32px', title: 'Zoom Out', tooltip: true } );
-        }
-
         leftStatusPanel.addButton( null, 'ZoomOutButton', this._decreaseFontSize.bind( this ), { icon: 'ZoomOut',
-            width: '32px', title: 'Zoom Out', tooltip: true } );
+            buttonClass: 'ghost sm', title: 'Zoom Out', tooltip: true } );
         leftStatusPanel.addLabel( this.fontSize, { fit: true, signal: '@font-size' } );
         leftStatusPanel.addButton( null, 'ZoomInButton', this._increaseFontSize.bind( this ), { icon: 'ZoomIn',
-            width: '32px', title: 'Zoom In', tooltip: true } );
+            buttonClass: 'ghost sm', title: 'Zoom In', tooltip: true } );
         leftStatusPanel.endLine( 'justify-start' );
         panel.attach( leftStatusPanel.root );
 
         let rightStatusPanel = this.rightStatusPanel = new LX.Panel( { height: 'auto' } );
         rightStatusPanel.sameLine();
-        rightStatusPanel.addLabel( this.code?.title ?? '', { id: 'EditorFilenameStatusComponent', fit: true,
-            signal: '@tab-name' } );
+        rightStatusPanel.addLabel( this.code?.title ?? '', { id: 'EditorFilenameStatusComponent', fit: true, inputClass: 'text-xs', signal: '@tab-name' } );
         rightStatusPanel.addButton( null, 'Ln 1, Col 1', this.showSearchLineBox.bind( this ), {
-            id: 'EditorSelectionStatusComponent',
-            fit: true,
-            signal: '@cursor-data'
+            id: 'EditorSelectionStatusComponent', buttonClass: 'outline xs', fit: true, signal: '@cursor-data'
         } );
         rightStatusPanel.addButton( null, 'Spaces: ' + this.tabSpaces, ( value: any, event: any ) => {
             LX.addContextMenu( 'Spaces', event, ( m: typeof ContextMenu ) => {
@@ -2216,7 +2206,7 @@ export class CodeEditor
                     } );
                 }
             } );
-        }, { id: 'EditorIndentationStatusComponent', nameWidth: '15%', signal: '@tab-spaces' } );
+        }, { id: 'EditorIndentationStatusComponent', buttonClass: 'outline xs', signal: '@tab-spaces' } );
         rightStatusPanel.addButton( '<b>{ }</b>', this.highlight, ( value: any, event: any ) => {
             LX.addContextMenu( 'Language', event, ( m: typeof ContextMenu ) => {
                 for ( const lang of Object.keys( CodeEditor.languages ) )
@@ -2227,7 +2217,7 @@ export class CodeEditor
                     } );
                 }
             } );
-        }, { id: 'EditorLanguageStatusComponent', nameWidth: '15%', signal: '@highlight' } );
+        }, { id: 'EditorLanguageStatusComponent', nameWidth: 'auto', buttonClass: 'outline xs', signal: '@highlight', title: '' } );
         rightStatusPanel.endLine( 'justify-end' );
         panel.attach( rightStatusPanel.root );
 
@@ -2323,7 +2313,7 @@ export class CodeEditor
 
         if ( langString === undefined )
         {
-            return 'AlignLeft fg-neutral-500';
+            return 'AlignLeft text-neutral-500';
         }
 
         const iconPlusClasses = CodeEditor.languages[langString]?.icon;
@@ -2332,7 +2322,7 @@ export class CodeEditor
             return iconPlusClasses[extension!] ?? iconPlusClasses;
         }
 
-        return 'AlignLeft fg-neutral-500';
+        return 'AlignLeft text-neutral-500';
     }
 
     _onNewTab( e: any )
@@ -6138,15 +6128,15 @@ export class CodeEditor
                 {
                     case 'variable':
                         iconName = 'Cuboid';
-                        iconClass = 'fg-blue-400';
+                        iconClass = 'text-blue-400';
                         break;
                     case 'method':
                         iconName = 'Box';
-                        iconClass = 'fg-fuchsia-500';
+                        iconClass = 'text-fuchsia-500';
                         break;
                     case 'class':
                         iconName = 'CircleNodes';
-                        iconClass = 'fg-orange-500';
+                        iconClass = 'text-orange-500';
                         break;
                 }
             }
@@ -6159,7 +6149,7 @@ export class CodeEditor
                 else if ( this._mustHightlightWord( currSuggestion, CodeEditor.types ) )
                 {
                     iconName = 'Type';
-                    iconClass = 'fg-blue-400';
+                    iconClass = 'text-blue-400';
                 }
             }
 
@@ -6713,27 +6703,27 @@ const CE = CodeEditor as any;
 
 CE.languages = {
     'Plain Text': { ext: 'txt', blockComments: false, singleLineComments: false, numbers: false,
-        icon: 'AlignLeft fg-neutral-500' },
-    'JavaScript': { ext: 'js', icon: 'Js fg-yellow-500' },
-    'TypeScript': { ext: 'ts', icon: 'Ts fg-blue-600' },
-    'C': { ext: [ 'c', 'h' ], usePreprocessor: true, icon: { 'c': 'C fg-sky-400', 'h': 'C fg-fuchsia-500' } },
+        icon: 'AlignLeft text-neutral-500' },
+    'JavaScript': { ext: 'js', icon: 'Js text-yellow-500' },
+    'TypeScript': { ext: 'ts', icon: 'Ts text-blue-600' },
+    'C': { ext: [ 'c', 'h' ], usePreprocessor: true, icon: { 'c': 'C text-sky-400', 'h': 'C text-fuchsia-500' } },
     'C++': { ext: [ 'cpp', 'hpp' ], usePreprocessor: true,
-        icon: { 'cpp': 'CPlusPlus fg-sky-400', 'hpp': 'CPlusPlus fg-fuchsia-500' } },
-    'CSS': { ext: 'css', icon: 'Hash fg-blue-700' },
+        icon: { 'cpp': 'CPlusPlus text-sky-400', 'hpp': 'CPlusPlus text-fuchsia-500' } },
+    'CSS': { ext: 'css', icon: 'Hash text-blue-700' },
     'CMake': { ext: 'cmake', singleLineCommentToken: '#', blockComments: false, ignoreCase: true },
     'GLSL': { ext: 'glsl', usePreprocessor: true },
     'WGSL': { ext: 'wgsl', usePreprocessor: true },
-    'JSON': { ext: 'json', blockComments: false, singleLineComments: false, icon: 'Json fg-yellow-400' },
-    'XML': { ext: 'xml', tags: true, icon: 'Rss fg-orange-500' },
-    'Rust': { ext: 'rs', icon: 'Rust fg-primary' },
-    'Python': { ext: 'py', singleLineCommentToken: '#', icon: 'Python fg-cyan-600' },
+    'JSON': { ext: 'json', blockComments: false, singleLineComments: false, icon: 'Json text-yellow-400' },
+    'XML': { ext: 'xml', tags: true, icon: 'Rss text-orange-500' },
+    'Rust': { ext: 'rs', icon: 'Rust text-foreground' },
+    'Python': { ext: 'py', singleLineCommentToken: '#', icon: 'Python text-cyan-600' },
     'HTML': { ext: 'html', tags: true, singleLineComments: false, blockCommentsTokens: [ '<!--', '-->' ],
-        numbers: false, icon: 'Code fg-orange-500' },
+        numbers: false, icon: 'Code text-orange-500' },
     'Batch': { ext: 'bat', blockComments: false, singleLineCommentToken: '::', ignoreCase: true,
-        icon: 'Windows fg-blue-400' },
+        icon: 'Windows text-blue-400' },
     'Markdown': { ext: 'md', blockComments: false, singleLineCommentToken: '::', tags: true, numbers: false,
-        icon: 'Markdown fg-primary' },
-    'PHP': { ext: 'php', icon: 'Php fg-purple-700' }
+        icon: 'Markdown text-foreground' },
+    'PHP': { ext: 'php', icon: 'Php text-purple-700' }
 };
 
 CE.nativeTypes = {

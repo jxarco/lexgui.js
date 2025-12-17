@@ -248,7 +248,7 @@
                 LX.addDropdownMenu( dom, [
                     "Other Projects",
                     null,
-                    { name: "wgpuEngine", icon: "Torus", callback: () => open( "https://github.com/upf-gti/wgpuEngine", "_blank" ) },
+                    { disabled: true, name: "wgpuEngine", icon: "Torus", callback: () => open( "https://github.com/upf-gti/wgpuEngine", "_blank" ) },
                     { name: "Rooms VR", icon: "DoorOpen", callback: () => open( "https://github.com/upf-gti/rooms", "_blank" ) },
                     null,
                     "Socials",
@@ -452,10 +452,10 @@
         {
             menubar.root.querySelector( ".lexmenubuttons" ).style.marginLeft = "auto";
 
-            const commandButton = new LX.Button(null, LX.makeIcon( "Menu" ).innerHTML, () => {
+            const menuButton = new LX.Button(null, "MenuButton", () => {
                 window.__currentSheet = new LX.Sheet("256px", [ sheetArea ] );
-            }, { buttonClass: "p-4 bg-none fg-tertiary" } );
-            menubar.root.prepend( commandButton.root );
+            }, { icon: "Menu", buttonClass: "p-4 bg-none" } );
+            menubar.root.prepend( menuButton.root );
         }
 
         const params = new URLSearchParams( document.location.search );

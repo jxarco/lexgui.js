@@ -21,7 +21,7 @@ export class Card extends BaseComponent
         this.root.classList.add( 'place-content-center' );
 
         const container = LX.makeContainer( [ '100%', 'auto' ],
-            'lexcard max-w-sm flex flex-col gap-4 bg-primary border-color rounded-xl py-6', '', this.root );
+            'lexcard max-w-sm flex flex-col gap-4 bg-card border-color rounded-xl py-6', '', this.root );
 
         if ( options.header )
         {
@@ -31,7 +31,7 @@ export class Card extends BaseComponent
 
             if ( hasAction )
             {
-                const actionBtn = new Button( null, options.header.action.name, options.header.action.callback );
+                const actionBtn = new Button( null, options.header.action.name, options.header.action.callback, { buttonClass: 'secondary' } );
                 header.appendChild( actionBtn.root );
 
                 const titleDescBox = LX.makeContainer( [ '75%', 'auto' ], `flex flex-col gap-1`, '' );
@@ -41,12 +41,12 @@ export class Card extends BaseComponent
 
             if ( options.header.title )
             {
-                LX.makeElement( 'div', 'text-base leading-none font-semibold', options.header.title, header );
+                LX.makeElement( 'div', 'text-sm text-primary leading-none font-semibold', options.header.title, header );
             }
 
             if ( options.header.description )
             {
-                LX.makeElement( 'div', 'text-sm fg-tertiary', options.header.description, header );
+                LX.makeElement( 'div', 'text-xs text-muted-foreground', options.header.description, header );
             }
         }
 

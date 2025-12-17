@@ -9,7 +9,7 @@
 
     {
         window.__addInteractiveCodeExample( content, componentName, panel => {
-            const area = new LX.Area( { className: "flex flex-col p-12 gap-1", skipAppend: true, height: "auto" } );
+            const area = new LX.Area( { className: "flex flex-col sm:p-12 p-2 gap-1", skipAppend: true, height: "auto" } );
             panel.attach( area );
 
             const sheetArea = new LX.Area( { className: "p-4", skipAppend: true } );
@@ -20,7 +20,8 @@
             }, { primaryActionName: "Login", secondaryActionName: "Sign Up" });
 
             const p = area.addPanel();
-            p.addButton( null, "Open Sheet", () => { new LX.Sheet( "400px", [ sheetArea ], { side: "right" } ) }, { width: "20%", buttonClass: "contrast", className: "place-self-center" } );
+            p.addButton( null, "Open Sheet", () => { new LX.Sheet( "min(400px, 80%)", [ sheetArea ], { side: "right" } ) },
+                { buttonClass: "outline", className: "place-self-center" } );
         });
     }
 

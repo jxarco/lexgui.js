@@ -241,7 +241,7 @@ export class DropdownMenu
         else if ( item.icon )
         {
             const icon = item.icon.constructor === String
-                ? LX.makeIcon( item.icon, { svgClass: disabled ? 'fg-tertiary' : item.svgClass ?? item.className } )
+                ? LX.makeIcon( item.icon, { svgClass: disabled ? 'text-muted-foreground' : item.svgClass ?? item.className } )
                 : item.icon;
             menuItem.prepend( icon );
         }
@@ -264,7 +264,7 @@ export class DropdownMenu
                 {
                     f.call( this, key, v, menuItem );
                 }
-            }, { className: 'accent' } );
+            }, { className: 'primary' } );
             const input = checkbox.root.querySelector( 'input' );
             input.classList.add( 'ml-auto' );
             menuItem.appendChild( input );

@@ -336,11 +336,11 @@ export class DocMaker
     {
         console.assert( text !== undefined );
 
-        const note = LX.makeContainer( [], 'border-color rounded-lg overflow-hidden text-base fg-secondary my-6', '',
+        const note = LX.makeContainer( [], 'border-color rounded-lg overflow-hidden text-sm text-primary my-6', '',
             this.root );
 
         let header = document.createElement( 'div' );
-        header.className = 'flex bg-tertiary font-semibold px-3 py-2 gap-2 fg-secondary';
+        header.className = 'flex bg-muted font-semibold px-3 py-2 gap-2 text-primary';
         header.appendChild( LX.makeIcon( icon ?? ( warning ? 'MessageSquareWarning' : 'NotepadText' ) ) );
         header.innerHTML += title ?? ( warning ? 'Important' : 'Note' );
         note.appendChild( header );

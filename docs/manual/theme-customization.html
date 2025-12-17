@@ -8,47 +8,42 @@
     docMaker.header( "Background Color <span class='desc'></span>", "h3" );
     docMaker.paragraph( `
         <div class="flex gap-2">
-        <span class="p-1 px-2 bg-primary rounded-lg">primary</span>
-        <span class="p-1 px-2 bg-secondary rounded-lg">secondary</span>
-        <span class="p-1 px-2 bg-tertiary rounded-lg">tertiary</span>
-        <span class="p-1 px-2 bg-quaternary rounded-lg">quaternary</span>
-        <span class="p-1 px-2 bg-quinary rounded-lg">quinary</span>
-        <span class="p-1 px-2 bg-accent rounded-lg">accent</span>
-        <span class="p-1 px-2 bg-success rounded-lg fg-contrast">success</span>
-        <span class="p-1 px-2 bg-error rounded-lg">error</span>
-        <span class="p-1 px-2 bg-warning rounded-lg fg-contrast">warning</span>
+        <span class="p-1 px-2 bg-primary text-primary-foreground rounded-lg">primary</span>
+        <span class="p-1 px-2 bg-secondary text-secondary-foreground rounded-lg">secondary</span>
+        <span class="p-1 px-2 bg-muted text-muted-foreground rounded-lg">muted</span>
+        <span class="p-1 px-2 bg-accent text-accent-foreground rounded-lg">accent</span>
+        <span class="p-1 px-2 bg-success rounded-lg text-primary-foreground">success</span>
+        <span class="p-1 px-2 bg-destructive rounded-lg">error</span>
+        <span class="p-1 px-2 bg-warning rounded-lg text-primary-foreground">warning</span>
         </div>
     ` );
 
     docMaker.header( "Foreground Color <span class='desc'></span>", "h3" );
     docMaker.paragraph( `
         <div class="flex gap-2">
-        <span class="p-1 px-2 fg-primary rounded-lg">primary</span>
-        <span class="p-1 px-2 fg-secondary rounded-lg">secondary</span>
-        <span class="p-1 px-2 fg-tertiary rounded-lg">tertiary</span>
-        <span class="p-1 px-2 fg-quaternary rounded-lg">quaternary</span>
-        <span class="p-1 px-2 fg-quinary rounded-lg">quinary</span>
-        <span class="p-1 px-2 fg-accent rounded-lg">accent</span>
-        <span class="p-1 px-2 fg-success rounded-lg">success</span>
-        <span class="p-1 px-2 fg-error rounded-lg">error</span>
-        <span class="p-1 px-2 fg-warning rounded-lg">warning</span>
+        <span class="p-1 px-2 text-primary-foreground rounded-lg">primary</span>
+        <span class="p-1 px-2 text-secondary-foreground rounded-lg">secondary</span>
+        <span class="p-1 px-2 text-muted-foreground rounded-lg">muted</span>
+        <span class="p-1 px-2 text-accent-foreground rounded-lg">accent</span>
+        <span class="p-1 px-2 text-success rounded-lg">success</span>
+        <span class="p-1 px-2 text-destructive rounded-lg">error</span>
+        <span class="p-1 px-2 text-warning rounded-lg">warning</span>
         </div>
     ` );
 
-    docMaker.header( "Tailwind Colors", "h3" );
-    docMaker.paragraph( `You can use Tailwind color palette as class names and CSS variables: ${docMaker.iCode("violet-500")} or ${docMaker.iCode("var(--violet-500)")}. Check the ${ docMaker.iLink( "Colors", "https://jxarco.github.io/lexgui.js/colors/" ) } page in the LexGUI main page to see all possible colors.` );
+    docMaker.header( "Tailwind Colors and Sizes", "h3" );
+    docMaker.paragraph( `You can use Tailwind color palette as class names and CSS variables: ${docMaker.iCode("bg-violet-500")} or ${docMaker.iCode("var(--color-violet-500)")}. Check the ${ docMaker.iLink( "Colors", "https://jxarco.github.io/lexgui.js/colors/" ) } page in the LexGUI main page (or the ${docMaker.iLink("Tailwind official site", "https://tailwindcss.com/docs/colors")}) to see all possible colors.` );
 
-    docMaker.header( "Sizes <span class='desc'>(for supported components)</span>", "h3" );
     docMaker.bulletList( [
-        "xs", "sm", "md (default)", "lg", "xl", "xxl", "3xl"
+        "xs", "sm", "md (default)", "lg", "xl", "2xl", "3xl", "..."
     ] );
 
     docMaker.header( "Styles <span class='desc'>(for supported components)</span>", "h3" );
     docMaker.paragraph( `
         <div class="flex gap-2">
-        <span class="p-1 px-2 bg-accent fg-white rounded-lg">solid</span>
-        <span class="p-1 px-2 fg-accent rounded-lg border-colored">outline</span>
-        <span class="p-1 px-2 fg-accent rounded-lg border-dashed border-colored">dashed</span>
+        <span class="p-1 px-2 bg-accent text-white rounded-lg">solid</span>
+        <span class="p-1 px-2 text-primary rounded-lg border-color">outline</span>
+        <span class="p-1 px-2 text-primary rounded-lg border border-dashed">dashed</span>
         </div>
     ` );
 

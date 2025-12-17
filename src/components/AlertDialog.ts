@@ -17,21 +17,21 @@ export class AlertDialog extends Dialog
         options.modal = true;
 
         super( undefined, ( p: Panel ) => {
-            p.root.classList.add( 'p-4', 'flex', 'flex-col', 'gap-2' );
+            p.root.classList.add( 'p-4!', 'flex', 'flex-col', 'gap-2' );
 
-            LX.makeContainer( [ '100%', '100%' ], 'text-xl font-medium', title, p );
+            LX.makeContainer( [ '100%', '100%' ], 'text-lg font-medium', title, p );
 
             p.addTextArea( null, message, null, { disabled: true, fitHeight: true,
-                inputClass: 'bg-none fg-tertiary' } );
+                inputClass: 'bg-none text-sm text-muted-foreground' } );
 
             p.sameLine( 2, 'justify-end' );
             p.addButton( null, options.cancelText ?? 'Cancel', () => this.destroy(), {
-                buttonClass: 'border-color bg-primary'
+                buttonClass: 'outline'
             } );
             p.addButton( null, options.continueText ?? 'Continue', () => {
                 this.destroy();
                 if ( callback ) callback();
-            }, { buttonClass: 'contrast' } );
+            }, { buttonClass: 'primary' } );
         }, options );
     }
 }

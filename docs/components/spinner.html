@@ -13,7 +13,7 @@
             panel.attach( area );
 
             const container = LX.makeContainer( ["50%", "auto"], 
-                "flex flex-row gap-3 items-center rounded-xl p-4 bg-primary text-base font-medium fg-tertiary", "", area );
+                "flex flex-row gap-3 items-center rounded-xl p-4 bg-secondary text-base font-medium text-secondary-foreground", "", area );
 
             const spinner = new LX.Spinner( { size: "md", icon: "LoaderCircle" } );
             container.appendChild( spinner.root );
@@ -21,8 +21,8 @@
             LX.makeContainer( ["100%", "auto"], "flex", "Processing payment...", container );
             LX.makeContainer( ["auto", "auto"], "flex whitespace-nowrap", "100.00€", container );
 
-            const buttonSpinner = new LX.Spinner( { size: "sm", icon: "Loader", svgClass: "fg-contrast" } );
-            const button = new LX.Button( null, buttonSpinner.html() + "Generating invoice...", null, { disabled: true, buttonClass: "contrast" } );
+            const buttonSpinner = new LX.Spinner( { size: "sm", icon: "Loader", svgClass: "text-primary-foreground" } );
+            const button = new LX.Button( null, buttonSpinner.html() + "Generating invoice...", null, { disabled: true, buttonClass: "primary" } );
             area.attach( button.root );
         });
     }

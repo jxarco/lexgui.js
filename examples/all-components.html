@@ -133,6 +133,7 @@
             buttonsLeftPanel.addButton(null, "Secondary", null, { buttonClass: "secondary" });
             buttonsLeftPanel.addButton(null, "Ghost", null, { buttonClass: "ghost" });
             buttonsLeftPanel.addButton(null, "Link", null, { buttonClass: "link" });
+            buttonsLeftPanel.addButton(null, "Muted", null, { buttonClass: "muted" });
             buttonsLeftPanel.addButton(null, "Accent", null, { buttonClass: "accent" });
             buttonsLeftPanel.addButton(null, "Success", null, { buttonClass: "success" });
             buttonsLeftPanel.addButton(null, "Warning", null, { buttonClass: "warning" });
@@ -140,8 +141,8 @@
             buttonsLeftPanel.branch("Disabled Buttons", { closed: closedDefault });
             buttonsLeftPanel.addButton(null, "Primary", null, { disabled: true, buttonClass: "primary" });
             buttonsLeftPanel.addButton(null, "Secondary", null, { disabled: true, buttonClass: "secondary" });
+            buttonsLeftPanel.addButton(null, "Muted", null, { disabled: true, buttonClass: "muted" });
             buttonsLeftPanel.addButton(null, "Accent", null, { disabled: true, buttonClass: "accent" });
-            buttonsLeftPanel.addButton(null, "Contrast", null, { disabled: true, buttonClass: "contrast" });
             buttonsLeftPanel.addButton(null, "Success", null, { disabled: true, buttonClass: "success" });
             buttonsLeftPanel.addButton(null, "Warning", null, { disabled: true, buttonClass: "warning" });
             buttonsLeftPanel.addButton(null, "Destructive", null, { disabled: true, buttonClass: "destructive" });
@@ -149,9 +150,9 @@
             buttonsLeftPanel.addButton("Icon Button", "Not used", null, { icon: "Skull" });
             buttonsLeftPanel.sameLine();
             buttonsLeftPanel.addLabel("Customized Inline Buttons");
-            buttonsLeftPanel.addButton(null, "Not used", null, { icon: "Skull", buttonClass: "bg-none" });
-            buttonsLeftPanel.addButton(null, "Not used", null, { icon: "Box", buttonClass: "bg-primary" });
-            buttonsLeftPanel.addButton(null, "Not used", null, { icon: "Grid3x3", buttonClass: "bg-tertiary fg-tertiary" });
+            buttonsLeftPanel.addButton(null, "Not used", null, { icon: "Skull", buttonClass: "ghost" });
+            buttonsLeftPanel.addButton(null, "Not used", null, { icon: "Box", buttonClass: "primary" });
+            buttonsLeftPanel.addButton(null, "Not used", null, { icon: "Grid3x3", buttonClass: "muted" });
             buttonsLeftPanel.endLine("justify-start");
             buttonsLeftPanel.sameLine();
             buttonsLeftPanel.addLabel("Swap Buttons");
@@ -163,15 +164,15 @@
             buttonsRightPanel.branch("Outline Buttons", { closed: closedDefault });
             buttonsRightPanel.addButton(null, "Secondary Outline", null, { buttonClass: "secondary outline" });
             buttonsRightPanel.addButton(null, "Link Outline", null, { buttonClass: "link outline" });
-            buttonsRightPanel.addButton(null, "Accent Outline", null, { buttonClass: "accent outline" });
+            buttonsRightPanel.addButton(null, "Muted Outline", null, { buttonClass: "muted outline" });
             buttonsRightPanel.addButton(null, "Success Outline", null, { buttonClass: "success outline" });
             buttonsRightPanel.addButton(null, "Warning Outline", null, { buttonClass: "warning outline" });
             buttonsRightPanel.addButton(null, "Destructive Outline", null, { buttonClass: "destructive outline" });
             buttonsRightPanel.branch("Dashed Buttons", { closed: closedDefault });
             buttonsRightPanel.addButton(null, "Primary Dashed", null, { buttonClass: "primary dashed" });
             buttonsRightPanel.addButton(null, "Secondary Dashed", null, { buttonClass: "secondary dashed" });
+            buttonsRightPanel.addButton(null, "Muted Dashed", null, { buttonClass: "muted dashed" });
             buttonsRightPanel.addButton(null, "Accent Dashed", null, { buttonClass: "accent dashed" });
-            buttonsRightPanel.addButton(null, "Contrast Dashed", null, { buttonClass: "contrast dashed" });
             buttonsRightPanel.addButton(null, "Success Dashed", null, { buttonClass: "success dashed" });
             buttonsRightPanel.addButton(null, "Warning Dashed", null, { buttonClass: "warning dashed" });
             buttonsRightPanel.addButton(null, "Destructive Dashed", null, { buttonClass: "destructive dashed" });
