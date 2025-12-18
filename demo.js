@@ -89,6 +89,8 @@ if( mobile )
     menubar.root.prepend( menuButton.root );
 }
 
+LX._registerIconsAndColors( "./" );
+
 // Header
 {
     const header = LX.makeContainer( [ null, "auto" ], "flex flex-col gap-4 p-8 pb-4 items-center", `

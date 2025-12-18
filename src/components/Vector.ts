@@ -251,7 +251,7 @@ export class Vector extends BaseComponent
 
         const lockerButton: any = new Button( null, '', ( swapValue: boolean ) => {
             lockerButton.locked = swapValue;
-        }, { title: 'Lock', icon: 'LockOpen', swap: 'Lock', buttonClass: 'no-h bg-none p-0' } );
+        }, { title: 'Lock', icon: 'LockOpen', swap: 'Lock', buttonClass: 'h-auto bg-none p-0' } );
         container.appendChild( lockerButton.root );
 
         LX.doAsync( this.onResize.bind( this ) );

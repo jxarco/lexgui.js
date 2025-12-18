@@ -45,8 +45,8 @@
         "clean": "rimraf build",
         "build:css": "npx @tailwindcss/cli -i ./css/lexgui.css -o ./css/output.css",
         "build:cssw": "npx @tailwindcss/cli -i ./css/lexgui.css -o ./css/output.css --watch",
-        "bundle": "rollup -c",
-        "bundle:ts": "rollup -c rollup.ts.build.config.js",
+        "bundle": "npm run build:css && rollup -c",
+        "bundle:ts": "npm run build:css && rollup -c rollup.ts.build.config.js",
         "build:ts": "tsc --project tsconfig.all.json",
         "build": "npm run bundle:ts"
     },

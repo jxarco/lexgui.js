@@ -411,6 +411,68 @@ LX._createCommandbar = function( root: any )
         }
     };
 
+    const _filterEntry = function( entryName: string, filter: string ) {
+        if ( !filter?.length ) return false;
+        const cleanName = LX.stripTags( entryName ).toLowerCase();
+        return cleanName.includes( filter.toLowerCase() );
+    };
+
+    const _getEntries = function( filter: string ) {
+
+        const entries = [];
+
+        for ( let m of LX.menubars )
+        {
+            for ( let i of m.items )
+            {
+                if( _filterEntry( i.name, filter ) ) entries.push( i );
+            }
+        }
+
+        for ( let m of LX.sidebars )
+        {
+            for ( let i of m.items )
+            {
+                if( _filterEntry( i.name, filter ) ) entries.push( i );
+            }
+        }
+
+        for ( let entry of LX.extraCommandbarEntries )
+        {
+            if( _filterEntry( entry.name, filter ) ) entries.push( entry );
+        }
+
+        if ( LX.has( 'CodeEditor' ) )
+        {
+            const instances = LX.CodeEditor.getInstances();
+            if ( !instances.length || !instances[0].area.root.offsetHeight ) return entries;
+
+            const languages = LX.CodeEditor.languages;
+
+            for ( let l of Object.keys( languages ) )
+            {
+                const key = 'Language: ' + l;
+                const icon = instances[0]._getFileIcon( null, languages[l].ext );
+                const classes = icon.split( ' ' );
+
+                let value = LX.makeIcon( classes[0], { svgClass: `${classes.slice( 0 ).join( ' ' )}` } ).innerHTML;
+                value += key + " <span class='lang-ext'>(" + languages[l].ext + ')</span>';
+
+                if ( !_filterEntry( key, filter ) )
+                    continue;
+
+                entries.push( { name: value, callback: () => {
+                    for ( let i of instances )
+                    {
+                        i._changeLanguage( l );
+                    }
+                } } );
+            }
+        }
+
+        return entries;
+    };
+
     const _addElement = ( t: any, c: any, p: any, i: any ) => {
         if ( !t.length )
         {
@@ -461,91 +523,56 @@ LX._createCommandbar = function( root: any )
         refPrevious = searchItem;
     };
 
-    const _propagateAdd = ( item: any, filter: string, path: string, skipPropagation?: boolean ) => {
+    const _propagateAdd = ( item: any, path: string, skipPropagation?: boolean ) => {
         if ( !item || ( item.constructor != Object ) )
         {
             return;
         }
 
-        let name = item.name;
-        if ( name.toLowerCase().includes( filter ) )
+        if ( item.callback )
         {
-            if ( item.callback )
-            {
-                _addElement( name, item.callback, path, item );
-            }
+            _addElement( item.name, item.callback, path, item );
         }
 
-        const submenu = item.submenu ?? item[name];
+        const submenu = item.submenu ?? item[item.name];
         if ( skipPropagation || !submenu )
         {
             return;
         }
 
         const icon = LX.makeIcon( 'ChevronRight', { svgClass: 'sm text-primary separator' } );
-        path += name + icon.innerHTML;
+        path += item.name + icon.innerHTML;
 
         for ( let c of submenu )
         {
-            _propagateAdd( c, filter, path );
+            _propagateAdd( c, path );
         }
     };
 
     commandbar._addElements = ( filter: string ) => {
         _resetBar();
 
-        for ( let m of LX.menubars )
+        let entries = _getEntries( filter );
+
+        // Order...
+
+        function scoreEntry( s: string, prefix: string )
         {
-            for ( let i of m.items )
-            {
-                _propagateAdd( i, filter, '' );
-            }
+            if ( s.startsWith( prefix ) ) return 0; // best option
+            if ( s.includes( prefix ) ) return 1;
+            return 2; // worst
         }
 
-        for ( let m of LX.sidebars )
+        entries = entries.sort( ( a, b ) => {
+            const nameA = LX.stripTags( a.name ), nameB = LX.stripTags( b.name );
+            return ( scoreEntry( nameA, filter ) - scoreEntry( nameB, filter ) ) || nameA.localeCompare( nameB );
+        } );
+
+        entries = entries.slice( 0, 48 ); // Get 48 ocurrences max
+
+        for ( let entry of entries )
         {
-            for ( let i of m.items )
-            {
-                _propagateAdd( i, filter, '' );
-            }
-        }
-
-        for ( let entry of LX.extraCommandbarEntries )
-        {
-            const name = entry.name;
-            if ( !name.toLowerCase().includes( filter ) )
-            {
-                continue;
-            }
-            _addElement( name, entry.callback, '', {} );
-        }
-
-        if ( LX.has( 'CodeEditor' ) )
-        {
-            const instances = LX.CodeEditor.getInstances();
-            if ( !instances.length || !instances[0].area.root.offsetHeight ) return;
-
-            const languages = LX.CodeEditor.languages;
-
-            for ( let l of Object.keys( languages ) )
-            {
-                const key = 'Language: ' + l;
-                const icon = instances[0]._getFileIcon( null, languages[l].ext );
-                const classes = icon.split( ' ' );
-
-                let value = LX.makeIcon( classes[0], { svgClass: `${classes.slice( 0 ).join( ' ' )}` } ).innerHTML;
-                value += key + " <span class='lang-ext'>(" + languages[l].ext + ')</span>';
-
-                if ( key.toLowerCase().includes( filter ) )
-                {
-                    _addElement( value, () => {
-                        for ( let i of instances )
-                        {
-                            i._changeLanguage( l );
-                        }
-                    }, '', {} );
-                }
-            }
+            _propagateAdd( entry, '' );
         }
     };
 
@@ -555,6 +582,46 @@ LX._createCommandbar = function( root: any )
 
     return commandbar;
 };
+
+LX._registerIconsAndColors = function( colorsRootPath: string = './' )
+{
+    LX.requestJSON( colorsRootPath + 'registry/colors.json', ( colors: any ) => 
+    {
+        // loop through each color
+        for( const key in colors )
+        {
+            const value = colors[ key ];
+
+            if( !Array.isArray( value ) )
+            {
+                continue;
+            }
+
+            value.forEach(entry => {
+                const color = `${key}-${entry.scale}`;
+                const val = `<span class="flex bg-${color} w-3 h-3 rounded-full mr-2"></span>${color}`;
+                LX.registerCommandbarEntry( val, () => {
+                    navigator.clipboard.writeText( color );
+                    LX.toast( `${ LX.makeIcon( 'CircleCheck' ).innerHTML } Copied ${ color } to clipboard.`, null, { position: 'top-center', timeout: 3000 } );
+                } );
+            });
+        }
+    });
+
+    const lucide = ( window as any ).lucide;
+    const allIcons = { ...LX.ICONS, ...lucide.icons };
+
+    for( const iconName in allIcons )
+    {
+        const variant = 'regular';
+        const icon = LX.makeIcon( iconName, { svgClass: 'mr-2 pointer-events-none', variant });
+        const val = `${icon.innerHTML}${iconName}`;
+        LX.registerCommandbarEntry( val, () => {
+            navigator.clipboard.writeText( iconName );
+            LX.toast( `${ LX.makeIcon( 'CircleCheck' ).innerHTML } Copied ${ iconName } to clipboard.`, null, { position: 'top-center', timeout: 3000 } );
+        } );
+    }
+}
 
 /**
  * @method setCommandbarState

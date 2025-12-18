@@ -6,7 +6,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <title>Colors - LexGUI</title>
-    <link rel="stylesheet" href="../css/output.css">
+    <link rel="stylesheet" href="../build/lexgui.css">
     <link rel="icon" href="../images/favicon.png">
 
     <script type="importmap">
@@ -115,6 +115,8 @@
         menubar.root.prepend( menuButton.root );
     }
 
+    LX._registerIconsAndColors( "../" );
+
     let copyFormat = "hex";
     let lastCopied = null;
 
@@ -180,7 +182,7 @@
         return block;
     }
 
-    const container = LX.makeElement( "div", `w-full 2xl:w-2/3 place-self-center ${ mobile ? "p-4" : "p-8" } flex flex-col gap-4`, "", area );
+    const container = LX.makeElement( "div", `sm:w-full xl:w-2/3 place-self-center ${ mobile ? "p-4" : "p-8" } flex flex-col gap-4`, "", area );
 
     LX.requestJSON( "../registry/colors.json", ( colors ) => 
     {

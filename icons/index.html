@@ -6,7 +6,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <title>Icons - LexGUI</title>
-    <link rel="stylesheet" href="../css/output.css">
+    <link rel="stylesheet" href="../build/lexgui.css">
     <link rel="icon" href="../images/favicon.png">
 
     <script type="importmap">
@@ -118,6 +118,8 @@
         menubar.root.prepend( menuButton.root );
     }
 
+    LX._registerIconsAndColors( "../" );
+
     const header = LX.makeContainer([null, "auto"], "flex flex-col gap-4 pt-8 pb-4 items-center", `
     <a class="text-sm">Get started with LexGUI.js <span class="text-sm text-primary">${LX.version}</span></a>
     <p class="text-primary font-semibold tracking-tight leading-none text-center text-balance text-4xl xl:text-5xl max-w-4xl">Lucide Icons and More</p>
@@ -126,7 +128,7 @@
     {
         const params = new URLSearchParams( document.location.search );
         const content = document.getElementById('content');
-        const container = LX.makeElement( "div", `xs:w-full lg:w-2/3 place-self-center ${ mobile ? "p-4" : "p-8" } flex flex-col gap-4`, "", area );
+        const container = LX.makeElement( "div", `sm:w-full xl:w-2/3 place-self-center ${ mobile ? "p-4" : "p-8" } flex flex-col gap-4`, "", area );
 
         let showMoreButton = null;
         let forceSolid = false;

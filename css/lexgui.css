@@ -298,13 +298,13 @@ body.noevents * {
 
 /* Some global colors */
 
-svg.\2xs { width: var(--svg-size-2xs); height: var(--svg-size-2xs); }
+svg.\32xs { width: var(--svg-size-2xs); height: var(--svg-size-2xs); }
 svg.xs { width: var(--svg-size-xs); height: var(--svg-size-xs); }
 svg.sm { width: var(--svg-size-sm); height: var(--svg-size-sm); }
 svg.md { width: var(--svg-size-md); height: var(--svg-size-md); }
 svg.lg { width: var(--svg-size-lg); height: var(--svg-size-lg); }
 svg.xl { width: var(--svg-size-xl); height: var(--svg-size-xl); }
-svg.\2xl { width: var(--svg-size-2xl); height: var(--svg-size-2xl); }
+svg.\32xl { width: var(--svg-size-2xl); height: var(--svg-size-2xl); }
 
 #modal {
     inset: 0;
@@ -503,10 +503,10 @@ a svg, svg path {
     background-color: var(--background-blur);
     --webkit-backdrop-filter: blur(12px);
     backdrop-filter: blur(12px);
-    width: 30%;
+    width: 40%;
     max-width: 740px;
     top: 15%;
-    left: calc(50% - min(15%, 740px));
+    left: calc(50% - min(20%, 740px));
     padding: 0 0 2px 0;
     flex-wrap: wrap;
     z-index: 105;
@@ -537,7 +537,7 @@ a svg, svg path {
 .commandbar .searchitembox .searchitem {
     padding: 6px;
     padding-left: 48px;
-    color: var(--primary-foreground);
+    color: var(--primary);
     font-size: var(--text-sm);
     cursor: pointer;
     display: flex;
@@ -4161,7 +4161,6 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     border: none;
     width: 100%;
     height: 100%;
-    transform: translate(-0.2rem, -0.2rem);
     background: none !important;
 }
 
