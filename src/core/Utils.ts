@@ -11,8 +11,8 @@ import { vec2 } from './Vec2';
 LX.twMerge = extendTailwindMerge({
     extend: {
         classGroups: {
-            spacing: [
-                { spacing: ['xs', 'sm', 'md', 'lg', 'xl', '2xl'] }
+            pad: [
+                { pad: ['xs', 'sm', 'md', 'lg', 'xl', '2xl'] }
             ]
         }
     }

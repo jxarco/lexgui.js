@@ -7,15 +7,15 @@
 @source inline("bg-{black,white,neutral,stone,zinc,slate,gray,red,orange,amber,yellow,lime,green,emerald,teal,cyan,sky,blue,indigo,violet,purple,fuchsia,pink,rose}-{50,{100..900..100},950}");
 
 @theme {
-    --spacing-xs: 0.15rem 0.25rem;
-    --spacing-sm: 0.25rem;
-    --spacing-md: 0.4rem;
-    --spacing-lg: 0.5rem;
-    --spacing-xl: 0.75rem;
-    --spacing-2xl: 1rem;
+    --pad-xs: 0.15rem 0.25rem;
+    --pad-sm: 0.25rem;
+    --pad-md: 0.4rem;
+    --pad-lg: 0.5rem;
+    --pad-xl: 0.75rem;
+    --pad-2xl: 1rem;
 }
 
-@utility spacing-* { padding: --value(--spacing-*); }
+@utility pad-* { padding: --value(--pad-*); }
 
 @layer utilities {
     .scrollbar-hidden::-webkit-scrollbar { display: none; }
@@ -97,12 +97,12 @@
 }
 
 :root[data-spacing="compact"] {
-    --spacing-xs: 0.075rem 0.25rem;
-    --spacing-sm: 0.15rem 0.25rem;
-    --spacing-md: 0.3rem;
-    --spacing-lg: 0.4rem;
-    --spacing-xl: 0.5rem;
-    --spacing-2xl: 0.75rem;
+    --pad-xs: 0.075rem 0.25rem;
+    --pad-sm: 0.15rem 0.25rem;
+    --pad-md: 0.3rem;
+    --pad-lg: 0.4rem;
+    --pad-xl: 0.5rem;
+    --pad-2xl: 0.75rem;
 }
 
 :root[data-theme="light"] { color-scheme: light }
@@ -682,7 +682,7 @@ a svg, svg path {
     font-size: var(--text-xl);
     color: var(--secondary-foreground);
     text-shadow: 0px 1px 6px #22222283;
-    padding: var(--spacing-lg);
+    padding: var(--pad-lg);
     border-top-left-radius: 8px;
     border-top-right-radius: 8px;
     outline: none;
@@ -1047,7 +1047,7 @@ a svg, svg path {
     z-index: 150;
     display: flex;
     flex-direction: column;
-    padding: var(--spacing-xs);
+    padding: var(--pad-xs);
     border-radius: 0.5rem;
     border: 1px solid var(--input);
     outline: none;
@@ -1059,7 +1059,7 @@ a svg, svg path {
 .lexdropdownmenuitem {
     display: flex;
     flex-direction: row;
-    padding: var(--spacing-md);
+    padding: var(--pad-md);
     border-radius: 0.5rem;
     gap: 0.5rem;
     white-space: nowrap;
@@ -1189,7 +1189,7 @@ a svg, svg path {
 }
 
 .lexbranch .lexbranchcontent {
-    padding: var(--spacing-xs);
+    padding: var(--pad-xs);
     background-color: var(--card);
     border-bottom-left-radius: 8px;
     border-bottom-right-radius: 8px;
@@ -1207,7 +1207,7 @@ a svg, svg path {
     background-color: var(--card);
     text-shadow: 0px 1px 6px #42424260;
     letter-spacing: calc(var(--text-lg) * 0.025);
-    padding: var(--spacing-lg);
+    padding: var(--pad-lg);
     display: flex;
     border-top-left-radius: 8px;
     border-top-right-radius: 8px;
@@ -1362,7 +1362,7 @@ a svg, svg path {
 }
 
 .lexcomponent input:not(.lexcheckbox, .lextoggle, .lexrangeslider, .lexcounter) {
-    padding: var(--spacing-sm);
+    padding: var(--pad-sm);
     padding-inline: 0.5rem;
     color: var(--primary);
     --background-color: var(--secondary);
@@ -1450,7 +1450,7 @@ a svg, svg path {
     font-family: var(--global-font);
     font-size: var(--text-sm);
     background: none;
-    padding: var(--spacing-md);
+    padding: var(--pad-md);
     color: var(--primary);
     outline: none;
     border-radius: 6px;
@@ -1590,7 +1590,7 @@ a svg, svg path {
     font-weight: 600;
     font-size: var(--text-sm);
     margin: 12px;
-    padding: var(--spacing-sm) var(--spacing-xl);
+    padding: var(--pad-sm) var(--pad-xl);
     line-height: 1.5;
     display: grid;
     align-content: center;
@@ -1780,7 +1780,7 @@ a svg, svg path {
     background-color: var(--secondary);
     width: max-content;
     justify-self: center;
-    padding: var(--spacing-sm);
+    padding: var(--pad-sm);
     border-radius: 0.5rem;
     gap: 0.2em;
 }
@@ -2378,7 +2378,7 @@ input[type=number] {
 }
 
 .lexcomponent .numberbox .input-box {
-    padding-block: var(--spacing-xs);
+    padding-block: var(--pad-xs);
 }
 
 .lexcomponent .numberbox .input-box input {
@@ -2896,7 +2896,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     color: var(--primary);
     font-size: var(--text-sm);
     font-weight: 500;
-    padding-inline: var(--spacing-sm);
+    padding-inline: var(--pad-sm);
 }
 
 .lexmenubar .lexmenuentry {
@@ -3096,14 +3096,6 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 
 /* Side Bar */
 
-.lexsidebar {
-    width: 100%;
-    height: 100%;
-    padding: 10px;
-    display: flex;
-    flex-direction: column;
-}
-
 .lexsidebar *::-webkit-scrollbar {
     display: none;
 }
@@ -3186,8 +3178,8 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 
 .lexsidebar .lexsidebarentry {
     width: 100%;
-    padding-inline: var(--spacing-md);
-    padding-block: var(--spacing-sm);
+    padding-inline: var(--pad-md);
+    padding-block: var(--pad-sm);
     margin-block: 0.15rem;
     border-radius: 8px;
     cursor: pointer;
@@ -3566,7 +3558,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexareatabs.row .lexareatab {
-    padding: var(--spacing-lg) 1.25em;
+    padding: var(--pad-lg) 1.25em;
     transition: 0.1s;
     background: none;
     border-radius: 6px;
@@ -3730,7 +3722,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 .lexcomponent:has(.lextogglesubmenu)[data-opened=true],
 .lexcomponent:has(.lexcustomcontainer)[data-opened=true] {
     background-color: light-dark(var(--accent), var(--card));
-    padding: var(--spacing-lg);
+    padding: var(--pad-lg);
     border-radius: 0.5rem;
 }
 
@@ -3759,7 +3751,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     line-height: 12px;
     background-color: var(--card);
     border-radius: 8px;
-    padding: var(--spacing-xs);
+    padding: var(--pad-xs);
 }
 
 .lextags input {
@@ -3843,7 +3835,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lextable th, .lextable td {
-    padding-block: var(--spacing-md);
+    padding-block: var(--pad-md);
     padding-inline: 12px;
     text-align: left;
     align-content: center;
@@ -3859,7 +3851,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     font-weight: 600;
     color: var(--th-color);
     font-size: var(--text-sm);
-    padding-block: var(--spacing-sm);
+    padding-block: var(--pad-sm);
     cursor: pointer;
     transition: all 0.1s linear;
     white-space: nowrap;

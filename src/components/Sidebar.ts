@@ -79,13 +79,13 @@ export class Sidebar
         const mobile = navigator && /Android|iPhone/i.test( navigator.userAgent );
 
         this.root = document.createElement( 'div' );
-        this.root.className = 'lexsidebar flex flex-col ' + ( options.className ?? '' );
+        this.root.className = LX.mergeClass( 'lexsidebar flex flex-col pad-xl size-full scrollbar-hidden', options.className );
         this.callback = options.callback ?? null;
-        this._displaySelected = options.displaySelected ?? false;
         this.side = options.side ?? 'left';
         this.collapsable = options.collapsable ?? true;
-        this._collapseWidth = ( options.collapseToIcons ?? true ) ? '58px' : '0px';
         this.collapsed = options.collapsed ?? mobile;
+        this._displaySelected = options.displaySelected ?? false;
+        this._collapseWidth = ( options.collapseToIcons ?? true ) ? '58px' : '0px';
         this.filterString = '';
 
         LX.doAsync( () => {

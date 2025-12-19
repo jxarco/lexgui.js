@@ -9,7 +9,7 @@ Added new Avatar Component (see docs).
 Avatar Component in now used in Sidebar header and footer.
 Fixed modal scroll bleed.
 Fixed Commandbar position when page has vertical scroll.
-Minor fixes Area Tabs' CSS.
+Minor fixes Area Tabs' and Sidebar's CSS.
 
 AssetView:
 - Removed `options.onRefreshContent`.

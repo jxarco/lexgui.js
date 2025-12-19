@@ -86,7 +86,7 @@ export class BaseComponent
         this._initialValue = value;
 
         const root: any = document.createElement( 'div' );
-        root.className = 'lexcomponent flex flex-row outline-none items-center text-foreground text-sm overflow-hidden min-h-8 spacing-sm';
+        root.className = 'lexcomponent flex flex-row outline-none items-center text-foreground text-sm overflow-hidden min-h-8 pad-sm';
 
         this.onResize = () => {};
 
