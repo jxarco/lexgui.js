@@ -7,38 +7,103 @@
     docMaker.paragraph(`Doc Maker is a lightweight script used to programmatically build documentation pages. It exposes helpers for headers, paragraphs, code samples with syntax highlighting, lists, links, images, and notes. It's intended to be embedded
     by including only this script and calling its functions to compose the doc content.`, false, "text-muted-foreground");
 
+    docMaker.note("All the LexGUI documentation has been created using the DocMaker component.");
+
     docMaker.header("Usage", "h2");
-    docMaker.paragraph("Set the target container if you need to render into a subelement instead of the body:");
-    docMaker.code(`@[mtd]SET_DOM_TARGET@(document.@[mtd]getElementById@(@"my-doc-area"@));`, "js");
+    docMaker.paragraph(`First create a DocMaker instance using ${ docMaker.iCode( "new LX.DocMaker()" ) }. Then set the target container if you need to render into a subelement instead of the body:`);
+    docMaker.code(`docMaker.@[mtd]setDomTarget@(document.@[mtd]querySelector@(@"#my-doc-area"@));`, "js");
 
     docMaker.paragraph("Then use the provided helpers to build content. Example:");
-    docMaker.code(`@[mtd]MAKE_HEADER@(@"API Reference"@, @"h2"@);
-@[mtd]MAKE_PARAGRAPH@(@"This section documents available functions."@);
-@[mtd]MAKE_CODE@(@"docMaker.code('console.log(\\'Hello World\\');');"@, @"js"@);`, "js");
+    docMaker.code(`docMaker.@[mtd]header@(@"API Reference"@, @"h2"@);
+docMaker.@[mtd]paragraph@(@"This section documents available functions."@);
+docMaker.@[mtd]code@(@"docMaker.code('console.log(\\'Hello World\\');');"@, @"js"@);`, "js");
 
     docMaker.header("API Reference", "h2");
 
-    docMaker.paragraph("Core helpers to compose documentation:", false);
-    docMaker.codeBulletList([
-        ["MAKE_HEADER", "Create a header element. Parameters: text, tag (e.g. 'h1'), optional id"],
-        ["MAKE_PARAGRAPH", "Add a paragraph or <sup> when flagged. Parameters: text, optional sup flag"],
-        ["MAKE_CODE", "Insert a syntax-highlighted code block. Parameters: code text, language"],
-        ["MAKE_BULLET_LIST / MAKE_NUMBERED_LIST", "Render bullet or numbered lists from arrays."],
-        ["INLINE_LINK", "Returns an HTML anchor string. Parameters: text, href"],
-        ["INLINE_PAGE", "Returns an in-page navigation link. Parameters: text, page identifier"],
-        ["INLINE_CODE", "Returns inline code markup."],
+    docMaker.header( "Methods", "h3", "methods" );
+
+    docMaker.classMethod( ".header", `Create a header element.`, [
+        ["text", "String"],
+        ["tag", "String"],
+        ["id", "String"]
+    ] );
+
+    docMaker.classMethod(".paragraph", "Add a paragraph or <sup> when flagged.", [
+        ["text", "String"],
+        ["sup", "Boolean (optional)"]
     ]);
 
-    docMaker.paragraph("Advanced content helpers:", false);
-    docMaker.codeBulletList([
-        ["MAKE_CLASS_METHOD", "Document a class method with signature and description."],
-        ["MAKE_CLASS_CONSTRUCTOR", "Document constructors (JS or C++ style)."],
-        ["MAKE_NOTE", "Create a styled note or warning."],
-        ["INSERT_IMAGE / INSERT_IMAGES", "Embed images with optional captions."],
-        ["INSERT_VIDEO", "Embed looping video content."],
+    docMaker.classMethod(".code", "Insert a syntax-highlighted code block.", [
+        ["code", "String"],
+        ["language", "String"]
+    ]);
+
+    docMaker.classMethod(".bulletList", "Render a bullet list from an array.", [
+        ["list", "Array"]
+    ]);
+
+    docMaker.classMethod(".numberedList", "Render a numbered list from an array.", [
+        ["list", "Array"]
+    ]);
+
+    docMaker.classMethod(".lineBreak", "Insert a line break element.", []);
+
+    docMaker.classMethod(".iLink", "Return an HTML anchor string.", [
+        ["text", "String"],
+        ["href", "String"]
+    ]);
+
+    docMaker.classMethod(".iPage", "Return an in-page navigation link.", [
+        ["text", "String"],
+        ["page", "String"]
+    ]);
+
+    docMaker.classMethod(".iCode", "Return inline code markup.", [
+        ["code", "String"],
+        ["codeClass", "String"]
+    ]);
+
+    docMaker.classMethod(".classMethod", "Document a class method with signature and description.", [
+        ["name", "String"],
+        ["description", "String"],
+        ["parameters", "Array"],
+        ["ret", "String"]
+    ]);
+
+    docMaker.classMethod(".classCtor", "Document a class constructor (JS or C++ style).", [
+        ["name", "String"],
+        ["parameters", "Array"],
+        ["language", "String"],
+    ]);
+
+    docMaker.classMethod(".note", "Create a styled note or warning.", [
+        ["text", "String"],
+        ["warning", "Boolean"],
+        ["title", "String"],
+        ["icon", "String"]
+    ]);
+
+    docMaker.classMethod(".image", "Embed an image with an optional caption.", [
+        ["src", "String"],
+        ["caption", "String"],
+        ["parent", "HTMLElement"]
+    ]);
+
+    docMaker.classMethod(".images", "Embed multiple images with optional captions.", [
+        ["sources", "String[]"],
+        ["captions", "String[]"],
+        ["width", "Number"],
+        ["height", "Number"]
+    ]);
+
+    docMaker.classMethod(".video", "Embed looping video content.", [
+        ["src", "String"],
+        ["caption", "String"],
+        ["controls", "Boolean"],
+        ["autoplay", "Boolean"]
     ]);
 
     // Footnote / tip
-    docMaker.note("After using resources or large dynamic content, you can reset the target by calling SET_DOM_TARGET to another element if needed.", false, "Tip", "Info");
+    docMaker.note("After using resources or large dynamic content, you can reset the target by calling setDomTarget to another element if needed.", false, "Tip", "Info");
 
 </script>
