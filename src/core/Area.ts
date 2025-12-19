@@ -235,15 +235,13 @@ export class Area
     constructor( options: any = {} )
     {
         var root = document.createElement( 'div' );
-        root.className = 'lexarea';
+
         if ( options.id )
         {
             root.id = options.id;
         }
-        if ( options.className )
-        {
-            root.className += ' ' + options.className;
-        }
+
+        root.className = LX.mergeClass( 'lexarea m-0 bg-background text-foreground', options.className );
 
         var width: any = options.width || '100%';
         var height: any = options.height || '100%';
@@ -982,7 +980,7 @@ export class Area
 
         if ( options.parentClass )
         {
-            bar.root.className += ` ${options.parentClass}`;
+            bar.root.className = LX.mergeClass( bar.root.className, options.parentClass );
         }
 
         return menubar;
@@ -1025,7 +1023,7 @@ export class Area
 
         if ( options.parentClass )
         {
-            bar.root.className += ` ${options.parentClass}`;
+            bar.root.className = LX.mergeClass( bar.root.className, options.parentClass );
         }
 
         return sidebar;

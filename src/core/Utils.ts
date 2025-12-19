@@ -984,7 +984,7 @@ function makeCodeSnippet( code: string, size: any[], options: any = {} )
     }
 
     const snippet = document.createElement( 'div' );
-    snippet.className = 'lexcodesnippet ' + ( options.className ?? '' );
+    snippet.className = LX.mergeClass( 'lexcodesnippet relative rounded-xl overflow-hidden', options.className );
     snippet.style.width = size ? size[0] : 'auto';
     snippet.style.height = size ? size[1] : 'auto';
     const area = new Area( { xskipAppend: true } );
@@ -1203,9 +1203,8 @@ function makeIcon( iconName: string, options: any = {} )
             mergedCn.split( ' ' ).forEach( ( c: string ) => svg.classList.add( c ) );
         }
 
-        const icon = document.createElement( 'a' );
+        const icon = LX.makeElement( 'a', LX.mergeClass( 'lexicon', options.iconClass ) );
         icon.title = options.title ?? '';
-        icon.className = 'lexicon ' + ( options.iconClass ?? '' );
         icon.appendChild( svg );
         svg.dataset['name'] = iconName;
         return icon;

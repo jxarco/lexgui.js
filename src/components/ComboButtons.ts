@@ -77,7 +77,7 @@ export class ComboButtons extends BaseComponent
                 title: b.icon ? b.value : '',
                 icon: b.icon,
                 disabled: b.disabled,
-                buttonClass: `w-auto combo ${options.buttonClass ?? ''}`
+                buttonClass: LX.mergeClass( 'combo w-auto', options.buttonClass )
             } );
 
             let buttonEl = button.root.querySelector( 'button' );

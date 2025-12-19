@@ -52,7 +52,7 @@ export class Checkbox extends BaseComponent
 
         let checkbox = document.createElement( 'input' );
         checkbox.type = 'checkbox';
-        checkbox.className = 'lexcheckbox rounded-xl ' + ( options.className ?? 'primary' );
+        checkbox.className = LX.mergeClass( 'lexcheckbox rounded-xl', options.className ?? 'primary' );
         checkbox.checked = value;
         checkbox.disabled = options.disabled ?? false;
         container.appendChild( checkbox );
@@ -68,8 +68,7 @@ export class Checkbox extends BaseComponent
 
         if ( options.suboptions )
         {
-            let suboptions = document.createElement( 'div' );
-            suboptions.className = 'lexcheckboxsubmenu';
+            let suboptions = LX.makeElement( 'div', 'lexcheckboxsubmenu' );
             suboptions.toggleAttribute( 'hidden', !checkbox.checked );
 
             const suboptionsPanel = new LX.Panel();

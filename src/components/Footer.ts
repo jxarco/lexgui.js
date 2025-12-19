@@ -21,7 +21,7 @@ export class Footer
     constructor( options: any = {} )
     {
         const root = document.createElement( 'footer' );
-        root.className = 'lexfooter' + ` ${options.className ?? ''}`;
+        root.className = LX.mergeClass( 'lexfooter', options.className );
 
         const wrapper = document.createElement( 'div' );
         wrapper.style.minHeight = '48px';

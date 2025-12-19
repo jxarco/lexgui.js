@@ -15,7 +15,7 @@ class CanvasDial
     constructor( value: any[], options: any = {} )
     {
         let element: any = document.createElement( 'div' );
-        element.className = 'dial ' + ( options.className ? options.className : '' );
+        element.className = LX.mergeClass( 'dial', options.className );
         element.style.width = element.style.height = options.size || '100%';
         element.style.minWidth = element.style.minHeight = '50px';
 

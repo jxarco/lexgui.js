@@ -117,7 +117,7 @@ export class Tabs
 
         if ( options.parentClass && container.parentElement )
         {
-            container.parentElement.className += ` ${options.parentClass}`;
+            container.parentElement.className = LX.mergeClass( container.parentElement.className, options.parentClass );
         }
 
         this.area = content;
@@ -125,7 +125,7 @@ export class Tabs
 
         if ( options.contentClass )
         {
-            this.area.root.className += ` ${options.contentClass}`;
+            this.area.root.className = LX.mergeClass( this.area.root.className, options.contentClass );
         }
 
         this.selected = null;
@@ -202,8 +202,8 @@ export class Tabs
         // Process icon
         if ( options.icon )
         {
-            if ( !options.icon.includes( '.' ) )
-            { // Not a file
+            if ( !options.icon.includes( '.' ) ) // Not a file
+            {
                 const classes = options.icon.split( ' ' );
                 options.icon = LX.makeIcon( classes[0], { svgClass: 'sm ' + classes.slice( 0 ).join( ' ' ) } ).innerHTML;
             }

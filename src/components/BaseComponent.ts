@@ -85,8 +85,7 @@ export class BaseComponent
         this.options = options;
         this._initialValue = value;
 
-        const root: any = document.createElement( 'div' );
-        root.className = 'lexcomponent flex flex-row outline-none items-center text-foreground text-sm overflow-hidden min-h-8 pad-sm';
+        const root: any = LX.makeElement( 'div', LX.mergeClass( 'lexcomponent flex flex-row outline-none items-center text-foreground text-sm overflow-hidden min-h-8 pad-sm', options.className ) );
 
         this.onResize = () => {};
 
@@ -98,11 +97,6 @@ export class BaseComponent
         if ( options.title )
         {
             root.title = options.title;
-        }
-
-        if ( options.className )
-        {
-            root.className += ' ' + options.className;
         }
 
         if ( type != ComponentType.TITLE )
@@ -131,15 +125,13 @@ export class BaseComponent
         {
             if ( !( options.hideName ?? false ) )
             {
-                let domName = document.createElement( 'div' );
-                domName.className = 'lexcomponentname text-sm';
+                let domName = LX.makeElement( 'div', 'lexcomponentname text-sm', name );
 
                 if ( options.justifyName )
                 {
                     domName.classList.add( 'float-' + options.justifyName );
                 }
 
-                domName.innerHTML = name;
                 domName.title = options.title ?? domName.innerHTML;
                 domName.style.width = options.nameWidth || LX.DEFAULT_NAME_WIDTH;
                 domName.style.minWidth = domName.style.width;
@@ -150,7 +142,7 @@ export class BaseComponent
                 const that = this;
 
                 // Copy-paste info
-                domName.addEventListener( 'contextmenu', function( e )
+                domName.addEventListener( 'contextmenu', function( e: MouseEvent )
                 {
                     e.preventDefault();
                     that.oncontextmenu( e );

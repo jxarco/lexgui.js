@@ -54,10 +54,7 @@ export class NumberInput extends BaseComponent
         container.className = 'lexnumber';
         this.root.appendChild( container );
 
-        let box = document.createElement( 'div' );
-        box.className = 'numberbox';
-        container.appendChild( box );
-
+        let box = LX.makeElement( 'div', 'numberbox scrollbar-hidden', '', container );
         let valueBox = LX.makeContainer( [ 'auto', '100%' ], 'relative flex flex-row cursor-text', '', box );
 
         let vecinput: any = document.createElement( 'input' );

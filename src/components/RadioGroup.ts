@@ -44,7 +44,7 @@ export class RadioGroup extends BaseComponent
         };
 
         var container = document.createElement( 'div' );
-        container.className = 'lexradiogroup ' + ( options.className ?? '' );
+        container.className = LX.mergeClass( 'lexradiogroup flex flex-col', options.className );
         this.root.appendChild( container );
 
         // Make label
@@ -53,7 +53,7 @@ export class RadioGroup extends BaseComponent
         for ( let i = 0; i < values.length; ++i )
         {
             const optionItem = document.createElement( 'div' );
-            optionItem.className = 'lexradiogroupitem';
+            optionItem.className = 'lexradiogroupitem flex items-center gap-2 px-6 py-1';
             container.appendChild( optionItem );
 
             const optionButton = document.createElement( 'button' );

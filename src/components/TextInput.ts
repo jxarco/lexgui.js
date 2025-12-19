@@ -72,9 +72,7 @@ export class TextInput extends BaseComponent
 
         if ( !this.disabled )
         {
-            wValue = document.createElement( 'input' );
-            const cn = [ 'lextext', 'text-sm' ];
-            wValue.className = options.inputClass ? LX.twMerge( ...cn, ...options.inputClass.split( ' ' ) ) : cn.join( ' ' );
+            wValue = LX.makeElement( 'input', LX.mergeClass( 'lextext text-sm', options.inputClass ) );
             wValue.type = options.type || '';
             wValue.value = value || '';
             wValue.style.textAlign = options.float ?? '';
@@ -143,7 +141,7 @@ export class TextInput extends BaseComponent
             wValue.disabled = true;
             wValue.value = value;
             wValue.style.textAlign = options.float ?? '';
-            wValue.className = 'lextext ellipsis-overflow ' + ( options.inputClass ?? '' );
+            wValue.className = LX.mergeClass( 'lextext ellipsis-overflow', options.inputClass );
         }
 
         if ( options.fit )

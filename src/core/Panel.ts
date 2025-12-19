@@ -69,17 +69,11 @@ export class Panel
 
     constructor( options: any = {} )
     {
-        var root = document.createElement( 'div' );
-        root.className = 'lexpanel';
+        const root = LX.makeElement( 'div', LX.mergeClass( 'lexpanel m-0 pad-md overflow-hidden overflow-y-scroll text-foreground scrollbar-hidden', options.className ) );
 
         if ( options.id )
         {
             root.id = options.id;
-        }
-
-        if ( options.className )
-        {
-            root.className += ' ' + options.className;
         }
 
         root.style.width = options.width || '100%';
@@ -632,7 +626,7 @@ export class Panel
     addLabel( value: string, options: any = {} )
     {
         options.disabled = true;
-        options.inputClass = ( options.inputClass ?? '' ) + ' bg-none';
+        options.inputClass = LX.mergeClass( 'bg-none', options.inputClass );
         const component = this.addText( null, value, null, options );
         component.type = ComponentType.LABEL;
         return component;

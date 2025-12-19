@@ -39,7 +39,7 @@ export class Dialog
             modal = options.modal ?? false;
 
         let root = document.createElement( 'dialog' );
-        root.className = 'lexdialog ' + ( options.className ?? '' );
+        root.className = LX.mergeClass( 'lexdialog', options.className );
         root.id = options.id ?? 'dialog' + Dialog._last_id++;
         root.dataset['modal'] = modal;
         LX.root.appendChild( root );

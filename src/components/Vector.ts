@@ -62,7 +62,7 @@ export class Vector extends BaseComponent
         const vectorInputs: any[] = [];
 
         var container = document.createElement( 'div' );
-        container.className = 'lexvector';
+        container.className = 'lexvector flex';
         this.root.appendChild( container );
 
         this.disabled = options.disabled ?? false;

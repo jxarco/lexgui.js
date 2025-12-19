@@ -35,14 +35,9 @@ LX.init = async function( options: any = {} )
 
     var root = document.createElement( 'div' );
     root.id = 'lexroot';
-    root.className = 'lexcontainer';
     root.tabIndex = -1;
-
-    if ( options.rootClass )
-    {
-        root.className += ` ${options.rootClass}`;
-    }
-
+    root.className = LX.mergeClass( 'lexcontainer', options.rootClass );
+    
     this.modal = document.createElement( 'div' );
     this.modal.id = 'modal';
     this.modal.classList.add( 'hidden-opacity' );
@@ -404,8 +399,7 @@ LX._createCommandbar = function( root: any )
         // cbTabs.add( "Main", document.createElement('div'), { onSelect: _onSelectTab } );
     }
 
-    const itemContainer = document.createElement( 'div' );
-    itemContainer.className = 'searchitembox';
+    const itemContainer = LX.makeElement( 'div', 'searchitembox overflow-y-scroll basis-full scrollbar-hidden' );
 
     let refPrevious: any = null;
 

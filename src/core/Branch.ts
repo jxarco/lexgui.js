@@ -27,17 +27,13 @@ export class Branch
         this.name = name;
 
         var root = document.createElement( 'div' );
-        root.className = 'lexbranch';
+
         if ( options.id )
         {
             root.id = options.id;
         }
-        if ( options.className )
-        {
-            root.className += ' ' + options.className;
-        }
 
-        root.style.margin = '0 auto';
+        root.className = LX.mergeClass( 'lexbranch w-full rounded-lg my-0 mx-auto', options.className );
 
         var that = this;
 
@@ -47,8 +43,7 @@ export class Branch
         this.panel = null;
 
         // Create element
-        const title: any = document.createElement( 'div' );
-        title.className = 'lexbranchtitle';
+        const title: any = LX.makeElement( 'div', 'lexbranchtitle flex cursor-pointer select-none pad-lg bg-card text-card-foreground text-lg', '', root );
 
         if ( options.icon )
         {
@@ -61,12 +56,8 @@ export class Branch
         const collapseIcon = LX.makeIcon( 'Right', { iconClass: 'switch-branch-button', svgClass: 'sm' } );
         title.appendChild( collapseIcon );
 
-        root.appendChild( title );
-
-        var branchContent = document.createElement( 'div' );
+        var branchContent = LX.makeElement( 'div', 'lexbranchcontent pad-xs bg-card', '', root );
         branchContent.id = name.replace( /\s/g, '' );
-        branchContent.className = 'lexbranchcontent';
-        root.appendChild( branchContent );
         this.content = branchContent;
 
         this._addBranchSeparator();

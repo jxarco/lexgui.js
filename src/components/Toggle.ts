@@ -50,9 +50,8 @@ export class Toggle extends BaseComponent
         container.className = 'flex flex-row gap-2 items-center';
         this.root.appendChild( container );
 
-        let toggle: any = document.createElement( 'input' );
+        let toggle: any = LX.makeElement( 'input', LX.mergeClass( 'lextoggle relative inline-grid place-content-center cursor-pointer shrink-0 select-none', options.className ) );
         toggle.type = 'checkbox';
-        toggle.className = 'lextoggle ' + ( options.className ?? '' );
         toggle.checked = value;
         toggle.iValue = value;
         toggle.disabled = options.disabled ?? false;
@@ -69,8 +68,7 @@ export class Toggle extends BaseComponent
 
         if ( options.suboptions )
         {
-            let suboptions = document.createElement( 'div' );
-            suboptions.className = 'lextogglesubmenu';
+            let suboptions = LX.makeElement( 'div', 'lextogglesubmenu w-full p-2' );
             suboptions.toggleAttribute( 'hidden', !toggle.checked );
 
             const suboptionsPanel = new LX.Panel();

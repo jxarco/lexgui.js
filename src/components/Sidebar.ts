@@ -459,9 +459,8 @@ export class Sidebar
             let pKey = LX.getSupportedDOMName( key );
             let currentGroup = null;
 
-            let entry = document.createElement( 'div' );
+            let entry = LX.makeElement( 'div', LX.mergeClass( 'lexsidebarentry w-full rounded-lg cursor-pointer select-none', options.className ) );
             entry.id = pKey;
-            entry.className = 'lexsidebarentry ' + ( options.className ?? '' );
 
             if ( this.displaySelected && options.selected )
             {

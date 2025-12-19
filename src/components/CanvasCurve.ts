@@ -15,7 +15,7 @@ export class CanvasCurve
     constructor( value: any[], options: any = {} )
     {
         let element: any = document.createElement( 'div' );
-        element.className = 'curve ' + ( options.className ? options.className : '' );
+        element.className = LX.mergeClass( 'curve', options.className );
         element.style.minHeight = '50px';
         element.style.width = options.width || '100%';
         element.style.minWidth = '50px';

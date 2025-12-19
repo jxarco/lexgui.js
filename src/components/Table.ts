@@ -366,9 +366,7 @@ export class Table extends BaseComponent
             container.appendChild( headerContainer );
         }
 
-        const table = document.createElement( 'table' );
-        LX.addClass( table, options.tableClass );
-        container.appendChild( table );
+        const table: HTMLTableElement = LX.makeElement( 'table', options.tableClass, '', container );
 
         this.refresh = () => {
             this._currentFilter = this._currentFilter ?? '';

@@ -14,8 +14,8 @@ export class Spinner
     {
         const icon = options.icon ?? 'LoaderCircle';
         const size = options.size ?? 'md';
-        const iconClass = `flex ${options.iconClass ?? ''}`.trim();
-        const svgClass = `animate-spin ${size} ${options.svgClass ?? ''}`.trim();
+        const iconClass = LX.mergeClass( 'flex', options.iconClass );
+        const svgClass = LX.mergeClass( `animate-spin ${size}`, options.svgClass );
 
         this.root = LX.makeIcon( icon, { iconClass, svgClass } );
     }

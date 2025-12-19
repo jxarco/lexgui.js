@@ -800,7 +800,7 @@ export class CodeEditor
             } );
         }
 
-        this.codeArea.root.classList.add( 'lexcodearea' );
+        this.codeArea.root.classList.add( 'lexcodearea', 'scrollbar-hidden' );
 
         const codeResizeObserver = new ResizeObserver( ( entries ) => {
             if ( !this.code )

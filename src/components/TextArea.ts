@@ -38,9 +38,8 @@ export class TextArea extends BaseComponent
         container.style.display = 'flex';
         this.root.appendChild( container );
 
-        let wValue = document.createElement( 'textarea' );
+        let wValue: HTMLTextAreaElement = LX.makeElement( 'textarea', options.inputClass ?? '' );
         wValue.value = value ?? '';
-        wValue.className = options.inputClass ?? '';
         wValue.style.textAlign = options.float ?? '';
         Object.assign( wValue.style, options.style ?? {} );
 

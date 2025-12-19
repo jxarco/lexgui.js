@@ -375,9 +375,7 @@ export class Select extends BaseComponent
         container.appendChild( listDialog );
 
         // Element suboptions
-        let suboptions = document.createElement( 'div' );
-        suboptions.className = 'lexcustomcontainer w-full';
-
+        let suboptions = LX.makeElement( 'div', 'lexcustomcontainer w-full' );
         const suboptionsFunc = options[`on_${value}`];
         suboptions.toggleAttribute( 'hidden', !suboptionsFunc );
 
