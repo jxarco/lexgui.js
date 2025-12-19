@@ -12,6 +12,7 @@ export * from './core/Panel';
 
 // Basic Components
 export * from './components/ArrayInput';
+export * from './components/Avatar';
 export * from './components/BaseComponent';
 export * from './components/Button';
 export * from './components/Checkbox';

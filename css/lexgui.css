@@ -52,7 +52,8 @@
     --accent-foreground: light-dark(#0a0a0a, #fafafa);
     --success: light-dark(#1ddb2d, #85f566);
     --warning: light-dark(#dfc622, #ffe864);
-    --destructive: light-dark(#df2225, #ff6467);
+    --destructive: light-dark(#e40014, #ff6467);
+    --destructive-foreground: light-dark(#fcf3f3, #df2225);
     --border: light-dark(#e5e5e5, #ffffff1a);
     --input: light-dark(#e5e5e5, #ffffff26);
     --ring: light-dark(#a1a1a1, #737373);
@@ -3335,16 +3336,11 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     transform: scale(0.99);
 }
 
-.lexsidebar .lexavatar {
-    background-color: var(--background);
-}
-
 .lexsidebar:not(.collapsing) .lexavatar:has(svg) {
     border: 1px solid #ffffff18;
 }
 
 .lexsidebar .lexsidebarfooter div, .lexsidebar .lexsidebarheader div {
-    height: 100%;
     transition: width 0.3s cubic-bezier(0,0,.2,1), padding-inline 0.3s cubic-bezier(0,0,.2,1);
 }
 
@@ -3616,24 +3612,6 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 
 .curve canvas {
     border-radius: 2px;
-}
-
-/* Avatar Component */
-
-.lexavatar {
-    width: 48px;
-    border-radius: 8px;
-    align-content: center;
-    aspect-ratio: 1;
-}
-
-.lexavatar * {
-    border-radius: 8px;
-}
-
-.lexavatar img {
-    width: 100%;
-    height: 100%;
 }
 
 /* Card Component */
@@ -5805,6 +5783,7 @@ ul.lexassetscontent {
 .hover\:bg-mix:hover { background-color: color-mix(in srgb, var(--background-color), var(--primary-foreground) 5%) !important }
 .hover\:bg-none:hover { background: none !important }
 
+.text-background { color: var(--background) }
 .text-foreground { color: var(--foreground) }
 .text-primary { color: var(--primary) }
 .text-secondary { color: var(--secondary) }
@@ -5818,6 +5797,7 @@ ul.lexassetscontent {
 .text-secondary-foreground { color: var(--secondary-foreground) }
 .text-muted-foreground { color: var(--muted-foreground) }
 .text-accent-foreground { color: var(--accent-foreground) }
+.text-destructive-foreground { color: var(--destructive-foreground) }
 .text-card-foreground { color: var(--card-foreground) }
 
 .hover\:text-primary:hover { color: var(--primary) !important }
@@ -5832,6 +5812,7 @@ ul.lexassetscontent {
 .hover\:text-secondary-foreground:hover { color: var(--secondary-foreground) !important }
 .hover\:text-muted-foreground:hover { color: var(--muted-foreground) !important }
 .hover\:text-accent-foreground:hover { color: var(--accent-foreground) !important }
+.hover\:text-destructive-foreground:hover { color: var(--destructive-foreground) !important }
 .hover\:text-card-foreground:hover { color: var(--card-foreground) !important }
 
 .hover\:scale-xs:hover { transform: scale(1.01); transition: transform 0.3s cubic-bezier(.42,.97,.52,1.19); }

@@ -3,7 +3,7 @@
         "name": "Emily Johnson",
         "email": "emily.johnson@example.com",
         "subject": "Dinner Plans This Weekend",
-        "content": "Hey!\n\nI was wondering if you’d be free this weekend to grab dinner together. It’s been a while since we caught up and I’d love to hear how things are going with you.\n\nLet me know what works for you. We could try that new Italian place downtown.\n\nLooking forward to it!\n\nCheers,\nEmily",
+        "content": "Hey!\n\nI was wondering if you'd be free this weekend to grab dinner together. It's been a while since we caught up and I'd love to hear how things are going with you.\n\nLet me know what works for you. We could try that new Italian place downtown.\n\nLooking forward to it!\n\nCheers,\nEmily",
         "tags": [
             "personal"
         ],
@@ -13,9 +13,10 @@
     },
     {
         "name": "Michael Thompson",
+        "avatar": "https://avatars.githubusercontent.com/u/25059187?v=4",
         "email": "michael.thompson@example.com",
         "subject": "Project Status Update",
-        "content": "Hi team,\n\nJust wanted to give a quick update on the current project. We’ve completed the initial phase and are moving into testing next week.\n\nIf you have any blockers or concerns, please let me know as soon as possible.\n\nThanks everyone for your hard work so far.\nLet’s keep the momentum going!\n\nBest,\nMichael",
+        "content": "Hi team,\n\nJust wanted to give a quick update on the current project. We've completed the initial phase and are moving into testing next week.\n\nIf you have any blockers or concerns, please let me know as soon as possible.\n\nThanks everyone for your hard work so far.\nLet's keep the momentum going!\n\nBest,\nMichael",
         "tags": [
             "work",
             "important"
@@ -26,9 +27,10 @@
     },
     {
         "name": "Sarah Mitchell",
+        "avatar": "https://avatars.githubusercontent.com/u/28149288?v=4",
         "email": "sarah.mitchell@example.com",
         "subject": "Birthday Party Invitation",
-        "content": "Hey!\n\nI’m organizing a small birthday party next Saturday at my place. It would mean a lot if you could come! There will be food, drinks, and of course cake.\n\nFeel free to bring someone with you. Just let me know if you can make it so I can plan accordingly.\n\nHope to see you there!\n\nHugs,\nSarah",
+        "content": "Hey!\n\nI'm organizing a small birthday party next Saturday at my place. It would mean a lot if you could come! There will be food, drinks, and of course cake.\n\nFeel free to bring someone with you. Just let me know if you can make it so I can plan accordingly.\n\nHope to see you there!\n\nHugs,\nSarah",
         "tags": [
             "personal"
         ],
@@ -38,9 +40,10 @@
     },
     {
         "name": "David Anderson",
+        "avatar": "https://avatars.githubusercontent.com/u/8772233?v=4",
         "email": "david.anderson@example.com",
         "subject": "Client Meeting Notes",
-        "content": "Hello team,\n\nHere are the notes from our last client meeting. Please review and let me know if I missed anything important.\n\nNext steps involve preparing a proposal by the end of next week. Let’s align early to avoid surprises or last-minute issues.\n\nThanks,\nDavid",
+        "content": "Hello team,\n\nHere are the notes from our last client meeting. Please review and let me know if I missed anything important.\n\nNext steps involve preparing a proposal by the end of next week. Let's align early to avoid surprises or last-minute issues.\n\nThanks,\nDavid",
         "tags": [
             "work",
             "meetings"
@@ -53,7 +56,7 @@
         "name": "Olivia White",
         "email": "olivia.white@example.com",
         "subject": "Travel Recommendations?",
-        "content": "Hi!\n\nI heard you recently went to Italy and I’m planning a trip there soon. Do you have any recommendations for places to visit, restaurants or things I absolutely shouldn’t miss?\n\nAny advice or tips would be super appreciated.\n\nThanks so much in advance!\n\nBest,\nOlivia",
+        "content": "Hi!\n\nI heard you recently went to Italy and I'm planning a trip there soon. Do you have any recommendations for places to visit, restaurants or things I absolutely shouldn't miss?\n\nAny advice or tips would be super appreciated.\n\nThanks so much in advance!\n\nBest,\nOlivia",
         "tags": [
             "personal"
         ],
@@ -63,9 +66,10 @@
     },
     {
         "name": "James Wilson",
+        "avatar": "https://avatars.githubusercontent.com/u/50079201?v=4",
         "email": "james.wilson@example.com",
         "subject": "Quarterly Report Attached",
-        "content": "Good afternoon,\n\nAttached you’ll find the quarterly report with all relevant metrics, KPIs, and performance indicators.\n\nPlease review at your earliest convenience and let me know if you have any questions, concerns, or would like to schedule a follow-up meeting.\n\nRegards,\nJames",
+        "content": "Good afternoon,\n\nAttached you'll find the quarterly report with all relevant metrics, KPIs, and performance indicators.\n\nPlease review at your earliest convenience and let me know if you have any questions, concerns, or would like to schedule a follow-up meeting.\n\nRegards,\nJames",
         "tags": [
             "work",
             "important"
@@ -78,7 +82,7 @@
         "name": "Sophia Martinez",
         "email": "sophia.martinez@example.com",
         "subject": "Coffee Next Week?",
-        "content": "Hey!\n\nIt’s been too long since we’ve seen each other. Want to grab coffee next week sometime?\n\nI’d love to catch up and hear what you’ve been up to lately. Let me know what days work best for you and we’ll figure something out.\n\nTake care!\nSophia",
+        "content": "Hey!\n\nIt's been too long since we've seen each other. Want to grab coffee next week sometime?\n\nI'd love to catch up and hear what you've been up to lately. Let me know what days work best for you and we'll figure something out.\n\nTake care!\nSophia",
         "tags": [
             "personal"
         ],
@@ -90,7 +94,7 @@
         "name": "Christopher Brown",
         "email": "christopher.brown@example.com",
         "subject": "Meeting Rescheduled",
-        "content": "Hi all,\n\nQuick note that the meeting originally scheduled for tomorrow has been moved to Friday at 2PM due to scheduling conflicts.\n\nApologies for the short notice. I’ll send out an updated invite shortly.\n\nThanks for understanding!\n\nBest,\nChris",
+        "content": "Hi all,\n\nQuick note that the meeting originally scheduled for tomorrow has been moved to Friday at 2PM due to scheduling conflicts.\n\nApologies for the short notice. I'll send out an updated invite shortly.\n\nThanks for understanding!\n\nBest,\nChris",
         "tags": [
             "work",
             "meetings"

@@ -243,7 +243,7 @@
             headerImage: "../images/favicon.png",
             footerTitle: "jxarco",
             footerSubtitle: "alexroco.30@gmail.com",
-            footerImage: "https://avatars.githubusercontent.com/u/25059187?s=400&u=ad8907b748c13e4e1a7cdd3882826acb6a2928b5&v=4",
+            footerImage: "https://avatars.githubusercontent.com/u/25059187?v=4",
             onFooterPressed: (event, dom) => {
                 event.preventDefault();
                 LX.addDropdownMenu( dom, [
@@ -298,12 +298,13 @@
 
         const generalComponents = [ "Area Overlay Buttons", "Badge", "Button", "Combo Buttons", "Radio Group" ];
         const dataInputComponents = [ "Array", "Checkbox", "Color", "Counter", "Curve", "Custom", "Date Picker", "File", "Form", "Layers", "Map 2D", "Number", "OTP Input", "Pad", "Range", "Rate", "Select", "Size", "Tags", "Text", "Text Area", "Toggle", "Vector" ];
-        const dataDisplayComponents = [ "Card", "Code Snippet", "Data Tree", "List", "Table", "Title" ];
+        const dataDisplayComponents = [ "Avatar", "Card", "Code Snippet", "Data Tree", "List", "Table", "Title" ];
         const feedbackComponents = [ "Progress", "Skeleton", "Spinner", "Toast" ];
         const navigationComponents = [ "Breadcrumb", "Dropdown", "Menubar", "Pagination", "Sidebar", "Tab Sections", "Tabs" ];
         const overlayComponents = [ "Alert Dialog", "Dialog", "Popover", "Sheet", "Tour" ];
 
         const componentVersion = {
+            "Avatar": "8.2",
             "Area Overlay Buttons": "6.10",
             "Breadcrumb": "7.0",
             "Card": "8.0",

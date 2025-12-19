@@ -204,21 +204,12 @@ export class Sidebar
             }
         } );
 
-        const avatar = document.createElement( 'span' );
-        avatar.className = 'lexavatar';
-        header.appendChild( avatar );
-
-        if ( options.headerImage )
-        {
-            const avatarImg = document.createElement( 'img' );
-            avatarImg.src = options.headerImage;
-            avatar.appendChild( avatarImg );
-        }
-        else if ( options.headerIcon )
-        {
-            const avatarIcon = LX.makeIcon( options.headerIcon );
-            avatar.appendChild( avatarIcon );
-        }
+        const avatar = new LX.Avatar( {
+            imgSource: options.headerImage,
+            fallback: options.headerIcon ? LX.makeIcon( options.headerIcon, { svgClass: "2xl" } ).innerHTML : undefined,
+            className: 'size-10 rounded-lg'
+        } );
+        header.appendChild( avatar.root );
 
         // Info
         {

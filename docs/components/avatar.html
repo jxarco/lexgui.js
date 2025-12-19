@@ -1,0 +1,67 @@
+<script type="module">
+
+    const componentName = "Avatar";
+
+    docMaker.header(componentName + ".", "h1", componentName.toLowerCase());
+    docMaker.paragraph( "An image element with a fallback for representing the user.", false, "text-muted-foreground");
+
+    {
+        window.__addInteractiveCodeExample( content, componentName, panel => {
+            const area = new LX.Area( { className: "flex flex-row p-12 gap-12 items-center justify-center", skipAppend: true, height: "auto" } );
+            panel.attach( area );
+
+            const avatar1 = new LX.Avatar( {
+                fallback: "AR",
+                className: 'size-10',
+                fallbackClass: "text-primary"
+            } );
+            area.attach( avatar1 );
+
+            const avatar2 = new LX.Avatar( {
+                imgSource: "https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?&w=128&h=128&dpr=2&q=80",
+                fallback: "TM",
+                className: 'size-10 rounded-lg'
+            } );
+            area.attach( avatar2 );
+
+            const avatarGroup = LX.makeContainer( ["auto", "auto"], "flex flex-row -space-x-2 [&_.lexavatar]:ring-3 [&_.lexavatar]:ring-current", "", area );
+
+            avatarGroup.appendChild( new LX.Avatar( {
+                imgSource: "https://avatars.githubusercontent.com/u/25059187?v=4",
+                fallback: "AR",
+                className: 'size-12 text-background'
+            } ).root );
+
+            avatarGroup.appendChild( new LX.Avatar( {
+                imgSource: "https://avatars.githubusercontent.com/u/60257601?v=4",
+                fallback: "JP",
+                className: 'size-12 text-background'
+            } ).root );
+        });
+    }
+
+    docMaker.header("Usage", "h2");
+
+    docMaker.paragraph( `To create an Avatar in LexGUI.js, instantiate a new ${ docMaker.iCode( "LX.Avatar" ) } using an Object with the following available options:` );
+    docMaker.lineBreak();
+
+    {
+        const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
+        const panel = area.addPanel();
+        content.appendChild( area.root );
+        panel.addTable( null, {
+            head: [ "Option", "Type", "Description", "Default" ],
+            body: [
+                ["className", "String", "Class name added to the Avatar root element", "—"],
+                ["imgSource", "String", "Image source path", "—"],
+                ["imgAlt", "String", "Image alt", "—"],
+                ["imgClass", "String", "Class name added to the Image inside the Avatar", "—"],
+                ["fallback", "String", "Fallback element html to use when no image available", "—"],
+                ["fallbackClass", "String", "Class name added to the Fallback element", "—"]
+            ].map( v => {
+                return [ docMaker.iCode( v[ 0 ], "table" ), docMaker.iCode( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? docMaker.iCode( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+    }
+
+</script>

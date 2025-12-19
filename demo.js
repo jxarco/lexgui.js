@@ -33,10 +33,10 @@ if( mobile )
     }, {
         headerTitle: `lexgui.js`,
         headerSubtitle: `v${ LX.version }`,
-        headerImage: "./images/favicon.png",
+        headerIcon: "UserRound",
         footerTitle: "jxarco",
             footerSubtitle: "alexroco.30@gmail.com",
-            footerImage: "https://avatars.githubusercontent.com/u/25059187?s=400&u=ad8907b748c13e4e1a7cdd3882826acb6a2928b5&v=4",
+            footerImage: "https://avatars.githubusercontent.com/u/25059187?v=4",
         collapsed: false,
         collapsable: false,
         displaySelected: false
@@ -95,7 +95,7 @@ LX._registerIconsAndColors( "./" );
 {
     const header = LX.makeContainer( [ null, "auto" ], "flex flex-col gap-4 p-8 pb-4 items-center", `
         <a href="docs?p=changelog" class="flex flex-row gap-1 items-center text-sm p-1 px-4 rounded-full text-primary decoration-none hover:bg-secondary cursor-pointer"><span class="flex bg-blue-500 w-2 h-2 rounded-full"></span>
-            New Components: Spinner, Pagination and more${ LX.makeIcon( "ArrowRight", { svgClass: "sm" } ).innerHTML }</a>
+            New Components: Avatar, Spinner, Pagination and more${ LX.makeIcon( "ArrowRight", { svgClass: "sm" } ).innerHTML }</a>
         <p class="fg text-primary font-medium tracking-tight leading-none text-center text-balance sm:text-5xl text-4xl">Build your Application Interface</p>
         <p class="text-primary font-light text-xl xs:text-lg text-center text-balance leading-normal max-w-3xl">A modern-style UI kit, inspired by shadcn, built for the web. Pure JavaScript, CSS, zero dependencies. Fully Open Source.</p>
     `, area );
@@ -446,7 +446,7 @@ LX._registerIconsAndColors( "./" );
             className: "border-r-color",
             headerTitle: "jxarco",
             headerSubtitle: "alexroco.30@gmail.com",
-            headerImage: "images/favicon.png",
+            headerIcon: "UserRound",
             skipFooter: true,
             displaySelected: true,
             onHeaderPressed: (e, element) => { }
@@ -566,11 +566,11 @@ LX._registerIconsAndColors( "./" );
 
                     previewDataContent.innerHTML = "";
 
-                    const mailPreviewInfo = LX.makeContainer( [ "100%", "auto" ], "flex flex-row border-b-color p-4 gap-3", "", previewDataContent );
-                    const avatarContainer = LX.makeContainer( [ "40px", "40px" ], "bg-muted rounded-full content-center", "", mailPreviewInfo );
-
                     const mailNames = mail.name.split( ' ' );
-                    const avatarIcon = LX.makeContainer( [ "auto", "auto" ], "font-medium place-self-center", mailNames[ 0 ][ 0 ] + mailNames[ 1 ][ 0 ], avatarContainer );
+                    const mailPreviewInfo = LX.makeContainer( [ "100%", "auto" ], "flex flex-row border-b-color p-4 gap-3", "", previewDataContent );
+
+                    const avatar = new LX.Avatar( { imgSource: mail.avatar, fallback: mailNames[ 0 ][ 0 ] + mailNames[ 1 ][ 0 ], className: 'size-10', fallbackClass: "text-primary" } );
+                    mailPreviewInfo.appendChild( avatar.root );
 
                     const senderData = LX.makeContainer( [ "auto", "auto" ], "flex flex-col gap-0.5", `
                     <div class="text-sm font-semibold">${ mail.name }</div>

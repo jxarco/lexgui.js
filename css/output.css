@@ -618,6 +618,25 @@
   .field-sizing-content {
     field-sizing: content;
   }
+  .aspect-square {
+    aspect-ratio: 1 / 1;
+  }
+  .size-8 {
+    width: calc(var(--spacing) * 8);
+    height: calc(var(--spacing) * 8);
+  }
+  .size-10 {
+    width: calc(var(--spacing) * 10);
+    height: calc(var(--spacing) * 10);
+  }
+  .size-12 {
+    width: calc(var(--spacing) * 12);
+    height: calc(var(--spacing) * 12);
+  }
+  .size-full {
+    width: 100%;
+    height: 100%;
+  }
   .h-2 {
     height: calc(var(--spacing) * 2);
   }
@@ -791,6 +810,16 @@
   }
   .gap-6 {
     gap: calc(var(--spacing) * 6);
+  }
+  .gap-12 {
+    gap: calc(var(--spacing) * 12);
+  }
+  .-space-x-2 {
+    :where(& > :not(:last-child)) {
+      --tw-space-x-reverse: 0;
+      margin-inline-start: calc(calc(var(--spacing) * -2) * var(--tw-space-x-reverse));
+      margin-inline-end: calc(calc(var(--spacing) * -2) * calc(1 - var(--tw-space-x-reverse)));
+    }
   }
   .place-self-center {
     place-self: center;
@@ -1597,6 +1626,9 @@
   .stroke-none {
     stroke: none;
   }
+  .object-cover {
+    object-fit: cover;
+  }
   .p-0 {
     padding: calc(var(--spacing) * 0);
   }
@@ -1937,6 +1969,17 @@
       background-color: var(--color-blue-600);
     }
   }
+  .\[\&_\.lexavatar\]\:ring-3 {
+    & .lexavatar {
+      --tw-ring-shadow: var(--tw-ring-inset,) 0 0 0 calc(3px + var(--tw-ring-offset-width)) var(--tw-ring-color, currentcolor);
+      box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+    }
+  }
+  .\[\&_\.lexavatar\]\:ring-current {
+    & .lexavatar {
+      --tw-ring-color: currentcolor;
+    }
+  }
   .\[\&_a\]\:ml-auto {
     & a {
       margin-left: auto;
@@ -2097,7 +2140,8 @@
   --accent-foreground: light-dark(#0a0a0a, #fafafa);
   --success: light-dark(#1ddb2d, #85f566);
   --warning: light-dark(#dfc622, #ffe864);
-  --destructive: light-dark(#df2225, #ff6467);
+  --destructive: light-dark(#e40014, #ff6467);
+  --destructive-foreground: light-dark(#fcf3f3, #df2225);
   --border: light-dark(#e5e5e5, #ffffff1a);
   --input: light-dark(#e5e5e5, #ffffff26);
   --ring: light-dark(#a1a1a1, #737373);
@@ -5092,14 +5136,10 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 .lexsidebar .lexsidebarfooter:active, .lexsidebar .lexsidebarheader:active {
   transform: scale(0.99);
 }
-.lexsidebar .lexavatar {
-  background-color: var(--background);
-}
 .lexsidebar:not(.collapsing) .lexavatar:has(svg) {
   border: 1px solid #ffffff18;
 }
 .lexsidebar .lexsidebarfooter div, .lexsidebar .lexsidebarheader div {
-  height: 100%;
   transition: width 0.3s cubic-bezier(0,0,.2,1), padding-inline 0.3s cubic-bezier(0,0,.2,1);
 }
 .lexsidebar .lexsidebarfooter div.infodefault, .lexsidebar .lexsidebarheader div.infodefault {
@@ -5316,19 +5356,6 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 .curve canvas {
   border-radius: 2px;
-}
-.lexavatar {
-  width: 48px;
-  border-radius: 8px;
-  align-content: center;
-  aspect-ratio: 1;
-}
-.lexavatar * {
-  border-radius: 8px;
-}
-.lexavatar img {
-  width: 100%;
-  height: 100%;
 }
 .lexcard.selectable:hover {
   border-color: var(--accent);
@@ -7358,6 +7385,9 @@ ul.lexassetscontent {
 .hover\:bg-none:hover {
   background: none !important;
 }
+.text-background {
+  color: var(--background);
+}
 .text-foreground {
   color: var(--foreground);
 }
@@ -7397,6 +7427,9 @@ ul.lexassetscontent {
 .text-accent-foreground {
   color: var(--accent-foreground);
 }
+.text-destructive-foreground {
+  color: var(--destructive-foreground);
+}
 .text-card-foreground {
   color: var(--card-foreground);
 }
@@ -7435,6 +7468,9 @@ ul.lexassetscontent {
 }
 .hover\:text-accent-foreground:hover {
   color: var(--accent-foreground) !important;
+}
+.hover\:text-destructive-foreground:hover {
+  color: var(--destructive-foreground) !important;
 }
 .hover\:text-card-foreground:hover {
   color: var(--card-foreground) !important;
@@ -7541,6 +7577,11 @@ ul.lexassetscontent {
 @property --tw-skew-y {
   syntax: "*";
   inherits: false;
+}
+@property --tw-space-x-reverse {
+  syntax: "*";
+  inherits: false;
+  initial-value: 0;
 }
 @property --tw-border-style {
   syntax: "*";
@@ -7704,6 +7745,7 @@ ul.lexassetscontent {
       --tw-rotate-z: initial;
       --tw-skew-x: initial;
       --tw-skew-y: initial;
+      --tw-space-x-reverse: 0;
       --tw-border-style: solid;
       --tw-leading: initial;
       --tw-font-weight: initial;

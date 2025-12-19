@@ -2,6 +2,7 @@
 
 ## dev
 
+Added new Avatar Component (see docs).
 Use Tailwind (finally) to compile CSS. Added `LX.twMerge` to merge elements class names to allow overrides.
 Removed custom utility classes, refactored theme colors and every theme variable used in LX.
 Fixed modal scroll bleed.
