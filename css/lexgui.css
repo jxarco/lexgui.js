@@ -3592,7 +3592,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexareatabs.fit .lexareatab.selected {
-    color: #f8f8f8;
+    color: var(--primary-foreground);
 }
 
 .lexareatabs.row .lexareatab.selected {

@@ -253,13 +253,14 @@ export class Tabs
 
             if ( !tabEl.fixed )
             {
-                // For folding tabs
                 const lastValue = tabEl.selected;
                 tabEl.parentElement.querySelectorAll( 'span' ).forEach( ( s: any ) => s.selected = false );
-                tabEl.selected = !lastValue || ( tabEl._forceSelect ? true : false );
+                tabEl.selected = ( scope.folding ? !lastValue : true ) || ( tabEl._forceSelect ? true : false );
+
                 // Manage selected
                 tabEl.parentElement.querySelectorAll( 'span' ).forEach( ( s: any ) => s.classList.remove( 'selected' ) );
                 tabEl.classList.toggle( 'selected', tabEl.selected );
+
                 // Manage visibility
                 const pseudoParent = scope.area.root.querySelector( ':scope > .pseudoparent-tabs' );
                 const contentRoot = pseudoParent ?? scope.area.root;

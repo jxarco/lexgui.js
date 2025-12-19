@@ -5295,7 +5295,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
   color: #b7b7cba4;
 }
 .lexareatabs.fit .lexareatab.selected {
-  color: #f8f8f8;
+  color: var(--primary-foreground);
 }
 .lexareatabs.row .lexareatab.selected {
   background-color: var(--card);

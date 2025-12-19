@@ -2,6 +2,10 @@
 
 ## dev
 
+Use Tailwind (finally) to compile CSS.
+Removed custom utility classes, refactored theme colors and every theme variable used in LX.
+Minor fixes Area Tabs.
+
 CodeEditor:
 - Fixed NextOcurrence (Ctrl+D) bug.
 - Fixed some issues with deleting using multiple cursors.
