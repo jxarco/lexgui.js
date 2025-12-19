@@ -154,6 +154,11 @@ class Cursor
         console.log( this.line, this.position );
     }
 
+    destroy()
+    {
+        LX.deleteElement( this.root );
+    }
+
     isLast(): boolean
     {
         return ( this.editor._getLastCursor() == this );
@@ -584,19 +589,31 @@ export class CodeEditor
     customSuggestions: any[] = [];
 
     // Editor callbacks
-    onSave: any;
-    onRun: any;
-    onCtrlSpace: any;
-    onCreateStatusPanel: any;
     onContextMenu: any;
-    onNewTab: any;
-    onSelectTab: any;
     onCreateFile: any;
+    onCreateStatusPanel: any;
+    onCtrlSpace: any;
+    onNewTab: any;
+    onSave: any;
+    onSelectTab: any;
+    onReady: any;
+    onRun: any;
 
     // Inner functions
     addExplorerItem: any;
 
-    // Temp variables
+    // Internal variables
+    _blockCommentCache: any[] = [];
+    _buildingBlockComment: any = undefined;
+    _buildingString: any = undefined;
+    _currentOcurrences: any = undefined;
+    _currentLineNumber: number | undefined = undefined;
+    _currentLineString: string | undefined = undefined;
+    _currentTokenPositions: any = undefined;
+    _discardScroll: boolean = false;
+    _displayObserver: any = null;
+    _fullVerticalOffset: number = -1;
+    _isReady: boolean = false;
     _lastTime: any = null;
     _lastProcessedLine: number = -1;
     _lastResult: any = undefined;
@@ -606,28 +623,21 @@ export class CodeEditor
     _lastMouseDown: number = 0;
     _lastTextFound: string = '';
     _lastBaseareaWidth: number | undefined = undefined;
-    _blockCommentCache: any[] = [];
-    _pendingString: string | undefined = undefined;
-    _skipTabs: number | undefined = undefined;
-    _discardScroll: boolean = false;
     _markdownHeader: any = undefined;
-    _tabStorage: Record<string, any> = {};
-    _tripleClickSelection: any = undefined;
-    _currentOcurrences: any = undefined;
-    _currentLineNumber: number | undefined = undefined;
-    _currentLineString: string | undefined = undefined;
-    _currentTokenPositions: any = undefined;
-    _buildingBlockComment: any = undefined;
-    _buildingString: any = undefined;
-    _verticalTopOffset: number = -1;
-    _verticalBottomOffset: number = -1;
-    _fullVerticalOffset: number = -1;
-    _scopeStack: any = null;
     _mouseDown: boolean | undefined = undefined;
+    _nextCursorPositionOffset: number | undefined = undefined;
+    _pendingString: string | undefined = undefined;
+    _preparedAt: number | undefined = undefined;
+    _scopeStack: any = null;
     _scopesUpdated: boolean | undefined = undefined;
+    _skipTabs: number | undefined = undefined;
     _stringEnded: boolean = false;
     _stringInterpolation: boolean | undefined = undefined;
     _stringInterpolationOpened: boolean | undefined = undefined;
+    _tabStorage: Record<string, any> = {};
+    _tripleClickSelection: any = undefined;
+    _verticalBottomOffset: number = -1;
+    _verticalTopOffset: number = -1;
 
     constructor( area: typeof Area, options: any = {} )
     {
@@ -675,6 +685,7 @@ export class CodeEditor
         this.onContextMenu = options.onContextMenu;
         this.onNewTab = options.onNewTab;
         this.onSelectTab = options.onSelectTab;
+        this.onReady = options.onReady;
 
         // File explorer
         if ( this.useFileExplorer )
@@ -1079,10 +1090,7 @@ export class CodeEditor
             for ( let lang in CodeEditor.utils ) CodeEditor.utils[lang] = new Set( CodeEditor.utils[lang] );
             for ( let lang in CodeEditor.types ) CodeEditor.types[lang] = new Set( CodeEditor.types[lang] );
             for ( let lang in CodeEditor.builtIn ) CodeEditor.builtIn[lang] = new Set( CodeEditor.builtIn[lang] );
-            for ( let lang in CodeEditor.statements )
-            {
-                CodeEditor.statements[lang] = new Set( CodeEditor.statements[lang] );
-            }
+            for ( let lang in CodeEditor.statements ) { CodeEditor.statements[lang] = new Set( CodeEditor.statements[lang] ); }
             for ( let lang in CodeEditor.symbols ) CodeEditor.symbols[lang] = new Set( CodeEditor.symbols[lang] );
 
             CodeEditor._staticReady = true;
@@ -1177,6 +1185,10 @@ export class CodeEditor
                     {
                         this.code.lines[ln] = sliceChars( this.code.lines[ln], cursor.position );
                         this.processLine( ln );
+
+                        // "Delete" removes the char at the right, so cursor position does not change
+                        // but line length does and next cursor position must be updated 1 position to the left
+                        this._nextCursorPositionOffset = -1;
                     }
                     else if ( this.code.lines[ln + 1] != undefined )
                     {
@@ -1489,21 +1501,21 @@ export class CodeEditor
                         }
                         else
                         {
-                            if ( !cursor.selection )
+                            if ( cursor.selection )
+                            {
+                                cursor.selection.invertIfNecessary();
+                                this.resetCursorPos( CodeEditor.CURSOR_LEFT_TOP, cursor );
+                                this.cursorToLine( cursor, cursor.selection.fromY );
+                                this.cursorToPosition( cursor, cursor.selection.fromX, true );
+                                this.endSelection( cursor );
+                            }
+                            else
                             {
                                 this.cursorToLeft( letter, cursor );
                                 if ( this.useAutoComplete && this.isAutoCompleteActive )
                                 {
                                     this.showAutoCompleteBox( 'foo', cursor );
                                 }
-                            }
-                            else
-                            {
-                                cursor.selection.invertIfNecessary();
-                                this.resetCursorPos( CodeEditor.CURSOR_LEFT_TOP, cursor );
-                                this.cursorToLine( cursor, cursor.selection.fromY );
-                                this.cursorToPosition( cursor, cursor.selection.fromX, true );
-                                this.endSelection();
                             }
                         }
                     }
@@ -1635,49 +1647,7 @@ export class CodeEditor
                 area.attach( this.statusPanel );
             }
 
-            if ( document.fonts.status == 'loading' )
-            {
-                await document.fonts.ready;
-            }
-
-            // Load any font size from local storage
-            const savedFontSize = window.localStorage.getItem( 'lexcodeeditor-font-size' );
-            if ( savedFontSize )
-            {
-                this._setFontSize( parseInt( savedFontSize ) );
-            }
-            // Use default size
-            else
-            {
-                const r: any = document.querySelector( ':root' );
-                const s = getComputedStyle( r );
-                this.fontSize = parseInt( s.getPropertyValue( '--code-editor-font-size' ) );
-                this.charWidth = this._measureChar() as number;
-            }
-
-            LX.emitSignal( '@font-size', this.fontSize );
-
-            // Get final sizes for editor elements based on Tabs and status bar offsets
-            LX.doAsync( () => {
-                this._verticalTopOffset = this.tabs?.root.getBoundingClientRect().height ?? 0;
-                this._verticalBottomOffset = this.statusPanel?.root.getBoundingClientRect().height ?? 0;
-                this._fullVerticalOffset = this._verticalTopOffset + this._verticalBottomOffset;
-
-                this.gutter.style.marginTop = `${this._verticalTopOffset}px`;
-                this.gutter.style.height = `calc(100% - ${this._fullVerticalOffset}px)`;
-                this.vScrollbar.root.style.marginTop = `${this._verticalTopOffset}px`;
-                this.vScrollbar.root.style.height = `calc(100% - ${this._fullVerticalOffset}px)`;
-                this.hScrollbar.root.style.bottom = `${this._verticalBottomOffset}px`;
-                this.codeArea.root.style.height = `calc(100% - ${this._fullVerticalOffset}px)`;
-
-                // Process lines on finish computing final sizes
-                this.processLines();
-            }, 50 );
-
-            if ( options.callback )
-            {
-                options.callback.call( this, this );
-            }
+            this._setupDisplayObserver();
 
             g.editor = this;
         };
@@ -1726,6 +1696,120 @@ export class CodeEditor
         }
     }
 
+    _setupDisplayObserver()
+    {
+        if ( this._displayObserver ) return;
+
+        this._isReady = false;
+
+        const root = this.root;
+
+        const _isVisible = () => {
+            return (
+                root.offsetParent !== null &&
+                root.clientWidth > 0 &&
+                root.clientHeight > 0
+            );
+        };
+
+        const _tryPrepare = async () => {
+            if ( this._isReady ) return;
+            if ( !_isVisible() ) return;
+
+            this._isReady = true;
+
+            // Stop observing once prepared
+            intersectionObserver.disconnect();
+            resizeObserver.disconnect();
+
+            await this._setupEditorWhenVisible();
+        };
+
+        // IntersectionObserver (for viewport)
+        const intersectionObserver = new IntersectionObserver( entries => {
+            for ( const entry of entries )
+            {
+                if ( entry.isIntersecting )
+                {
+                    _tryPrepare();
+                }
+            }
+        });
+        intersectionObserver.observe( root );
+
+        // ResizeObserver (for display property changes)
+        const resizeObserver = new ResizeObserver(() => {
+            _tryPrepare();
+        });
+        resizeObserver.observe( root );
+
+        // Fallback polling (don't use it for now)
+        // const interval = setInterval( () => {
+        //     if ( this._isReady ) {
+        //         clearInterval( interval );
+        //         return;
+        //     }
+        //     _tryPrepare();
+        // }, 250 );
+
+        this._displayObserver = {
+            intersectionObserver,
+            resizeObserver,
+            // interval,
+        };
+    }
+
+    async _setupEditorWhenVisible()
+    {
+        if ( document.fonts.status == 'loading' )
+        {
+            await document.fonts.ready;
+        }
+
+        // Load any font size from local storage
+        const savedFontSize = window.localStorage.getItem( 'lexcodeeditor-font-size' );
+        if ( savedFontSize )
+        {
+            this._setFontSize( parseInt( savedFontSize ) );
+        }
+        // Use default size
+        else
+        {
+            const r: any = document.querySelector( ':root' );
+            const s = getComputedStyle( r );
+            this.fontSize = parseInt( s.getPropertyValue( '--code-editor-font-size' ) );
+            this.charWidth = this._measureChar() as number;
+        }
+
+        LX.emitSignal( '@font-size', this.fontSize );
+
+        // Get final sizes for editor elements based on Tabs and status bar offsets
+        LX.doAsync( () => {
+            this._verticalTopOffset = this.tabs?.root.getBoundingClientRect().height ?? 0;
+            this._verticalBottomOffset = this.statusPanel?.root.getBoundingClientRect().height ?? 0;
+            this._fullVerticalOffset = this._verticalTopOffset + this._verticalBottomOffset;
+
+            this.gutter.style.marginTop = `${this._verticalTopOffset}px`;
+            this.gutter.style.height = `calc(100% - ${this._fullVerticalOffset}px)`;
+            this.vScrollbar.root.style.marginTop = `${this._verticalTopOffset}px`;
+            this.vScrollbar.root.style.height = `calc(100% - ${this._fullVerticalOffset}px)`;
+            this.hScrollbar.root.style.bottom = `${this._verticalBottomOffset}px`;
+            this.codeArea.root.style.height = `calc(100% - ${this._fullVerticalOffset}px)`;
+
+            // Process lines on finish computing final sizes
+            this.processLines();
+        }, 50 );
+
+        if ( this.onReady )
+        {
+            this.onReady( this );
+        }
+
+        this._preparedAt = performance.now();
+
+        console.log( `[LX.CodeEditor] Ready! (font size: ${this.fontSize}px)` );
+    }
+
     // Clear signals
     clear()
     {
@@ -1765,7 +1849,7 @@ export class CodeEditor
     }
 
     // This can be used to empty all text...
-    setText( text: string = '', langString?: string )
+    setText( text: string = '', langString?: string, detectLanguage: boolean = false )
     {
         let newLines = text.split( '\n' );
         this.code.lines = ( [] as string[] ).concat( newLines );
@@ -1779,6 +1863,11 @@ export class CodeEditor
         this.cursorToPosition( cursor, lastLine?.length ?? 0, true );
 
         this.mustProcessLines = true;
+
+        if ( detectLanguage )
+        {
+            langString = this._detectLanguage( text );
+        }
 
         if ( langString )
         {
@@ -3139,7 +3228,7 @@ export class CodeEditor
     {
         const numCursors = this.cursors.length;
 
-        if ( !this.code || e.srcElement?.constructor != HTMLDivElement )
+        if ( !this.code || e.target?.constructor != HTMLDivElement )
         {
             return;
         }
@@ -3147,7 +3236,7 @@ export class CodeEditor
         const detail = ( e as any ).detail ?? {};
         const key = e.key ?? detail.key;
 
-        // Do not propagate "space to scroll" event
+        // Don't propagate "space to scroll" event
         if ( key == ' ' )
         {
             e.preventDefault();
@@ -3173,6 +3262,7 @@ export class CodeEditor
         }
 
         this._lastProcessedCursorIndex = null;
+        this._nextCursorPositionOffset = 0;
 
         var lastProcessedCursor = null;
         var cursorOffset = new LX.vec2( 0, 0 );
@@ -3194,6 +3284,22 @@ export class CodeEditor
                 cursor.line += cursorOffset.y;
 
                 this.relocateCursors();
+
+                // Apart from relocation based on offsets, its selection (if any) must be relocated too
+                if ( cursor.selection )
+                {
+                    cursor.selection.fromX += cursorOffset.x;
+                    cursor.selection.toX += cursorOffset.x;
+                    cursor.selection.fromY += cursorOffset.y;
+                    cursor.selection.toY += cursorOffset.y;
+
+                    this._processSelection( cursor );
+                }
+            }
+            else if ( lastProcessedCursor && lastProcessedCursor.line != cursor.line )
+            {
+                // Reset offset X in case we changed line
+                cursorOffset.x = 0;
             }
 
             lastProcessedCursor = this.saveCursor( cursor );
@@ -3201,8 +3307,13 @@ export class CodeEditor
 
             this._processKeyAtCursor( e, key, cursor );
 
-            cursorOffset.x += cursor.position - lastProcessedCursor.position;
-            cursorOffset.y += cursor.line - lastProcessedCursor.line;
+            // Apply difference offset between last processed cursor and current positions plus any offset generated
+            // during processing the key pressed
+            const totalCursorOffsetX = ( cursor.position - lastProcessedCursor.position ) + this._nextCursorPositionOffset;
+            const totalCursorOffsetY = ( cursor.line - lastProcessedCursor.line );
+
+            cursorOffset.x += totalCursorOffsetX;
+            cursorOffset.y += totalCursorOffsetY;
 
             // Set active line in case it's blurred
             if ( !cursor.selection )
@@ -3212,6 +3323,7 @@ export class CodeEditor
         }
 
         // Clear tmp
+        delete this._nextCursorPositionOffset;
         delete this._lastProcessedCursorIndex;
     }
 
@@ -3433,8 +3545,9 @@ export class CodeEditor
 
         // Append key
 
+        const nextChar = this.getCharAtPos( cursor ); // Only pair keys if no next char or its a space
         const isPairKey = ( Object.values( this.pairKeys ).indexOf( key ) > -1 ) && !this.wasKeyPaired;
-        const sameKeyNext = isPairKey && ( this.code.lines[lidx][cursor.position] === key );
+        const sameKeyNext = isPairKey && ( nextChar === key );
 
         if ( !sameKeyNext )
         {
@@ -3449,7 +3562,7 @@ export class CodeEditor
 
         //  Some custom cases for auto key pair (), {}, "", '', ...
 
-        const keyMustPair = this.pairKeys[key] !== undefined;
+        const keyMustPair = ( this.pairKeys[key] !== undefined ) && ( !nextChar || /\s/.test( nextChar ) );
         if ( keyMustPair && !this.wasKeyPaired )
         {
             // Make sure to detect later that the key is paired automatically to avoid loops...
@@ -5167,15 +5280,15 @@ export class CodeEditor
     deleteSelection( cursor: Cursor )
     {
         // I think it's not necessary but...
-        if ( this.disableEdition )
+        if ( this.disableEdition || !cursor.selection )
         {
             return;
         }
 
         // Some selections don't depend on mouse up..
-        if ( cursor.selection ) cursor.selection.invertIfNecessary();
+        cursor.selection.invertIfNecessary();
 
-        const selection = cursor.selection!;
+        const selection = cursor.selection;
         const separator = '_NEWLINE_';
         let code = this.code.lines.join( separator );
 
@@ -5196,6 +5309,7 @@ export class CodeEditor
 
         this.cursorToLine( cursor, selection.fromY, true );
         this.cursorToPosition( cursor, selection.fromX );
+
         this.endSelection( cursor );
         this.processLines();
     }
@@ -5448,7 +5562,7 @@ export class CodeEditor
 
         LX.deleteElement( this.selections[cursor.name] );
         delete this.selections[cursor.name];
-        LX.deleteElement( cursor );
+        cursor.destroy();
     }
 
     resetCursorPos( flag: number, cursor?: Cursor, resetScroll = false )
@@ -6511,8 +6625,11 @@ export class CodeEditor
             if ( newCursor )
             {
                 this.startSelection( newCursor );
-                newCursor?.root.selection.selectInline( newCursor, col, ln, this.measureString( text ) );
-                this.cursorToString( newCursor, text );
+                if( newCursor.selection )
+                {
+                    newCursor.selection.selectInline( newCursor, col, ln, this.measureString( text ) );
+                    this.cursorToString( newCursor, text );
+                }
             }
 
             this._currentOcurrences[key] = true;

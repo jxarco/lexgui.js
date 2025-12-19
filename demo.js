@@ -672,6 +672,44 @@ LX._registerIconsAndColors( "./" );
             // disableEdition: true,
             // fileExplorer: false
         });
+
+        editor.setText(`interface Vec2 {
+    x: number;
+    y: number;
+}
+
+type Callback<T> = (value: T) => void;
+
+class Timer {
+    private startTime = 0;
+
+    start(): void {
+        this.startTime = performance.now();
+    }
+
+    elapsed(): number {
+        return performance.now() - this.startTime;
+    }
+}
+
+async function wait(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+const onTick: Callback<number> = time => {
+    console.log(\`Elapsed: \${time.toFixed(2)}ms\`);
+};
+
+async function main() {
+    const timer = new Timer();
+    timer.start();
+
+    await wait(500);
+    onTick(timer.elapsed());
+}
+
+main();
+`, undefined, true ); // Force detect language!
     }
 
     // Audio

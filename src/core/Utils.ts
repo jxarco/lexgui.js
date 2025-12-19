@@ -985,7 +985,7 @@ function makeCodeSnippet( code: string, size: any[], options: any = {} )
         disableEdition: true,
         allowAddScripts: false,
         name: options.tabName,
-        callback: ( instance: typeof LX.CodeEditor ) => {
+        onReady: ( instance: typeof LX.CodeEditor ) => {
             instance.setText( code, options.language ?? 'Plain Text' );
 
             if ( options.linesAdded )
