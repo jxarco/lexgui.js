@@ -766,7 +766,6 @@ export class AssetView
 
         const treeData = { id: '/', children: this.data };
         const tree = this.leftPanel.addTree( 'Content Browser', treeData, {
-            // icons: tree_icons,
             filter: false,
             onlyFolders: this.onlyFolders,
             onevent: ( event: typeof TreeEvent ) => {
@@ -1297,6 +1296,7 @@ export class AssetView
         {
             this._processData( this.data );
             this._refreshContent();
+            this.tree?.select( this.currentFolder.id );
         }
 
         this._updatePath();

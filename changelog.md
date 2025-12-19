@@ -12,6 +12,7 @@ Minor fixes Area Tabs.
 AssetView:
 - Removed `options.onRefreshContent`.
 - Added new `refreshContent`, `beforeRefreshContent` events.
+- Entering a folder now selects its folder item in the Explorer.
 
 CodeEditor:
 - Fixed NextOcurrence (Ctrl+D) bug.
