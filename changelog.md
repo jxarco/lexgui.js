@@ -7,6 +7,7 @@ Removed custom utility classes, refactored theme colors and every theme variable
 Added `LX.twMerge` and `LX.mergeClass` to merge elements class names to allow overrides.
 Added new Avatar Component (see docs).
 Avatar Component in now used in Sidebar header and footer.
+Added support for `oklch` format in ColorInput, new utils `LX.oklchToHex`.
 Fixed modal scroll bleed.
 Fixed Commandbar position when page has vertical scroll.
 Minor fixes Area Tabs' and Sidebar's CSS.

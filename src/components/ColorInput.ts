@@ -24,14 +24,19 @@ export class ColorInput extends BaseComponent
     {
         value = value ?? '#000000';
 
+        // Force always hex internally
+        if ( value.constructor === String && value.includes( 'oklch' ) )
+        {
+            value = LX.oklchToHex( value );
+        }
+
         const useAlpha = options.useAlpha
             ?? ( ( value.constructor === Object && 'a' in value )
                 || ( value.constructor === String && [ 5, 9 ].includes( value.length ) ) );
 
         const componentColor = new Color( value );
 
-        // Force always hex internally
-        value = useAlpha ? componentColor.hex : componentColor.hex.substr( 0, 7 );
+        value = useAlpha ? componentColor.hex : componentColor.hex.substring( 0, 7 );
 
         super( ComponentType.COLOR, name, value, options );
 
@@ -43,7 +48,7 @@ export class ColorInput extends BaseComponent
         this.onSetValue = ( newValue, skipCallback, event ) => {
             const newColor = new Color( newValue );
 
-            colorSampleRGB.style.color = value = newColor.hex.substr( 0, 7 );
+            colorSampleRGB.style.color = value = newColor.hex.substring( 0, 7 );
 
             if ( useAlpha )
             {
