@@ -2,16 +2,19 @@
 
 ## dev
 
-Added new Avatar Component (see docs).
-Use Tailwind (finally) to compile CSS. Added `LX.twMerge` to merge elements class names to allow overrides.
+Use Tailwind (finally) to create and compile CSS.
 Removed custom utility classes, refactored theme colors and every theme variable used in LX.
+Added `LX.twMerge` and `LX.mergeClass` to merge elements class names to allow overrides.
+Added new Avatar Component (see docs).
+Avatar Component in now used in Sidebar header and footer.
 Fixed modal scroll bleed.
 Fixed Commandbar position when page has vertical scroll.
-Minor fixes Area Tabs.
+Minor fixes Area Tabs' CSS.
 
 AssetView:
 - Removed `options.onRefreshContent`.
 - Added new `refreshContent`, `beforeRefreshContent` events.
+- Added new `nodeDragged`, `beforeNodeDragged` events for Explorer node movements.
 - Entering a folder now selects its folder item in the Explorer.
 
 CodeEditor:

@@ -1,8 +1,26 @@
 /* lexgui.css @jxarco */
 
 @import "tailwindcss";
+
 @custom-variant dark (&:where(.dark, .dark *));
+
 @source inline("bg-{black,white,neutral,stone,zinc,slate,gray,red,orange,amber,yellow,lime,green,emerald,teal,cyan,sky,blue,indigo,violet,purple,fuchsia,pink,rose}-{50,{100..900..100},950}");
+
+@theme {
+    --spacing-xs: 0.15rem 0.25rem;
+    --spacing-sm: 0.25rem;
+    --spacing-md: 0.4rem;
+    --spacing-lg: 0.5rem;
+    --spacing-xl: 0.75rem;
+    --spacing-2xl: 1rem;
+}
+
+@utility spacing-* { padding: --value(--spacing-*); }
+
+@layer utilities {
+    .scrollbar-hidden::-webkit-scrollbar { display: none; }
+    .scrollbar-hidden { -ms-overflow-style: none; scrollbar-width: none; }
+}
 
 /* cssnano start ignore */
 @font-face { font-family: 'Inter'; font-style: italic; font-weight: 100 900; font-display: swap; src: url(https://fonts.gstatic.com/s/inter/v20/UcCm3FwrK3iLTcvnUwkT9nA2.woff2) format('woff2'); unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F; }
@@ -63,13 +81,6 @@
     --global-chart-color-3: oklch(0.769 0.188 70.08);
     --global-chart-color-4: oklch(0.627 0.265 303.9);
     --global-chart-color-5: oklch(0.645 0.246 16.439);
-
-    --spacing-xs: 0.15rem 0.25rem;
-    --spacing-sm: 0.25rem;
-    --spacing-md: 0.4rem;
-    --spacing-lg: 0.5rem;
-    --spacing-xl: 0.75rem;
-    --spacing-2xl: 1rem;
 
     --svg-size-2xs: 0.5rem;
     --svg-size-xs: 0.7rem;
@@ -5840,13 +5851,6 @@ ul.lexassetscontent {
 /* Layout */
 .flex-auto-keep { flex: 0 0 auto }
 .flex-auto-fill { flex: 1 1 auto }
-
-.spacing-xs { padding: var(--spacing-xs) }
-.spacing-sm { padding: var(--spacing-sm) }
-.spacing-md { padding: var(--spacing-md) }
-.spacing-lg { padding: var(--spacing-lg) }
-.spacing-xl { padding: var(--spacing-xl) }
-.spacing-2xl { padding: var(--spacing-2xl) }
 
 /* flex-grow: 0
 flex-shrink: 1

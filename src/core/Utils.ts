@@ -1,14 +1,22 @@
 // Utils.ts @jxarco
 
 // @ts-ignore
-import { twMerge } from 'https://cdn.jsdelivr.net/npm/tailwind-merge@3.4.0/+esm';
+import { extendTailwindMerge } from 'https://cdn.jsdelivr.net/npm/tailwind-merge@3.4.0/+esm';
 import { Area } from './Area';
 import { LX } from './Namespace';
 import { Panel } from './Panel';
 import { vec2 } from './Vec2';
 
-/* Add Tailwind merge utility to LX namespace */
-LX.twMerge = twMerge;
+/* Add Tailwind merge utility to LX namespace EXTENDED with new LX class groups*/
+LX.twMerge = extendTailwindMerge({
+    extend: {
+        classGroups: {
+            spacing: [
+                { spacing: ['xs', 'sm', 'md', 'lg', 'xl', '2xl'] }
+            ]
+        }
+    }
+});
 
 function clamp( num: number, min: number, max: number )
 {
@@ -1918,6 +1926,15 @@ function toggleClass( el: any, className: string, force?: boolean )
 }
 
 LX.toggleClass = toggleClass;
+
+function mergeClass( className: string, classNameOverride?: string )
+{
+    if ( classNameOverride ) className = [ className, classNameOverride ].join( ' ' );
+
+    return LX.twMerge( ...className.split( ' ' ) );
+}
+
+LX.mergeClass = mergeClass;
 
 function lastChar( str: string )
 {
