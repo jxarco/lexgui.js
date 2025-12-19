@@ -2483,8 +2483,7 @@ a svg, svg path {
   backdrop-filter: blur(12px);
   width: 40%;
   max-width: 740px;
-  top: 15%;
-  left: calc(50% - min(20%, 740px));
+  left: calc(50% - min(20%, 370px));
   padding: 0 0 2px 0;
   flex-wrap: wrap;
   z-index: 105;

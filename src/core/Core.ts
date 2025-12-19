@@ -51,6 +51,14 @@ LX.init = async function( options: any = {} )
         this.classList.toggle( 'hidden-opacity', force );
     };
 
+    function blockScroll( e: Event ) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    this.modal.addEventListener( 'wheel', blockScroll, { passive: false } );
+    this.modal.addEventListener( 'touchmove', blockScroll, { passive: false } );
+
     this.root = root;
     this.container = document.body;
 
@@ -637,6 +645,9 @@ LX.setCommandbarState = function( value: boolean, resetEntries: boolean = true )
 
     if ( value )
     {
+        // Get current position based on main scroll
+        cb.style.top = `calc(15% + ${document.scrollingElement?.scrollTop ?? 0}px)`;
+
         cb.show();
         cb.querySelector( 'input' ).focus();
 

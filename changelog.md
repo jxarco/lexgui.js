@@ -4,6 +4,8 @@
 
 Use Tailwind (finally) to compile CSS. Added `LX.twMerge` to merge elements class names to allow overrides.
 Removed custom utility classes, refactored theme colors and every theme variable used in LX.
+Fixed modal scroll bleed.
+Fixed Commandbar position when page has vertical scroll.
 Minor fixes Area Tabs.
 
 CodeEditor:
