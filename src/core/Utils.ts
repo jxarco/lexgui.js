@@ -1185,11 +1185,16 @@ function makeIcon( iconName: string, options: any = {} )
 {
     let svg: any = null;
 
-    const _createIconFromSVG = ( svg: any ) => {
-        if ( options.svgClass && options.svgClass.length )
+    const _createIconFromSVG = function( svg: any )
+    {
+        const cn = options.svgClass;
+        if ( cn && cn.length )
         {
-            options.svgClass.split( ' ' ).forEach( ( c: string ) => svg.classList.add( c ) );
+            const mergedCn = LX.twMerge( ...svg.classList, ...cn.split( ' ' ) );
+            svg.classList.remove( ...svg.classList );
+            mergedCn.split( ' ' ).forEach( ( c: string ) => svg.classList.add( c ) );
         }
+
         const icon = document.createElement( 'a' );
         icon.title = options.title ?? '';
         icon.className = 'lexicon ' + ( options.iconClass ?? '' );
@@ -1226,6 +1231,7 @@ function makeIcon( iconName: string, options: any = {} )
         if ( ( requestedVariant == variant ) || !lucideData || variant == 'regular' )
         {
             svg = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
+            svg.classList.add( 'text-inherit' );
             svg.setAttribute( 'viewBox', `0 0 ${data[0]} ${data[1]}` );
 
             if ( data[5] )
@@ -1243,6 +1249,7 @@ function makeIcon( iconName: string, options: any = {} )
             }
 
             const path = document.createElement( 'path' );
+            path.classList.add( 'text-inherit' );
             path.setAttribute( 'fill', 'currentColor' );
             path.setAttribute( 'd', data[4] );
             svg.appendChild( path );

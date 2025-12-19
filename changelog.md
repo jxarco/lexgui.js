@@ -2,7 +2,7 @@
 
 ## dev
 
-Use Tailwind (finally) to compile CSS.
+Use Tailwind (finally) to compile CSS. Added `LX.twMerge` to merge elements class names to allow overrides.
 Removed custom utility classes, refactored theme colors and every theme variable used in LX.
 Minor fixes Area Tabs.
 

@@ -75,7 +75,7 @@ export class NodeTree
 
         let item: any = document.createElement( 'li' );
         item.className =
-            `lextreeitem inline-flex outline-none text-sm items-center cursor-pointer truncate rounded-lg select-none datalevel${level} ${
+            `lextreeitem inline-flex outline-none text-sm items-center h-7 cursor-pointer truncate rounded-lg select-none datalevel${level} ${
                 isParent ? 'parent' : ''
             } ${isSelected ? ' selected' : ''}`;
         item.id = LX.getSupportedDOMName( node.id );
@@ -474,9 +474,8 @@ export class NodeTree
                     {
                         action.callback( node, swapValue, event );
                     }
-                }, { icon: action.icon, swap: action.swap, title: action.name, hideName: true, className: 'p-0 m-0',
-                    buttonClass: 'px-0 h-5 bg-none' } );
-                actionBtn.root.style.padding = '0'; // override style
+                }, { icon: action.icon, swap: action.swap, title: action.name, hideName: true, className: 'p-0 min-h-fit',
+                    buttonClass: 'px-0 h-full bg-none' } );
                 inputContainer.appendChild( actionBtn.root );
             }
         }
@@ -492,9 +491,8 @@ export class NodeTree
                     const event = new TreeEvent( TreeEvent.NODE_VISIBILITY, node, node.visible, e );
                     that.onevent( event );
                 }
-            }, { icon: node.visible ? 'Eye' : 'EyeOff', swap: node.visible ? 'EyeOff' : 'Eye', title: 'Toggle visible', className: 'p-0 m-0',
-                buttonClass: 'px-0 h-5 bg-none' } );
-            visibilityBtn.root.style.padding = '0'; // override style
+            }, { icon: node.visible ? 'Eye' : 'EyeOff', swap: node.visible ? 'EyeOff' : 'Eye', title: 'Toggle visible', className: 'p-0 min-h-fit',
+                buttonClass: 'px-0 h-full bg-none' } );
             inputContainer.appendChild( visibilityBtn.root );
         }
 
