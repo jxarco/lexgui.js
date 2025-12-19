@@ -122,6 +122,9 @@
         {
             id: "godot",
             type: "folder",
+            metadata: {
+                draggable: false
+            },
             children: [
                 {
                     id: "color.png",
@@ -335,6 +338,19 @@
 
         assetView.on( "refreshContent", ( event ) => {
             console.log(`Content updated (${ event.items.length } items) [${ event.search.join( "," ) }]` );
+        } );
+    }
+
+    // Explorer dragging events
+    {
+        assetView.on( "beforeNodeDragged", ( event, resolve ) => {
+            LX.prompt(`"${ event.items[ 0 ].id }" will be dragged to "${ event.to.id }". Continue?`, "Server Message", () => {
+                resolve();
+            })
+        } );
+
+        assetView.on( "nodeDragged", ( event ) => {
+            console.log(`${ event.items[ 0 ].id } dragged to ${ event.to.id }` );
         } );
     }
 

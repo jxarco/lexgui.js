@@ -111,15 +111,16 @@ export class NodeTree
             else
             {
                 const rootPath = 'https://raw.githubusercontent.com/jxarco/lexgui.js/master/';
-                item.innerHTML += "<img src='" + ( rootPath + node.icon ) + "'>";
+                item.innerHTML += `<img src="${rootPath + node.icon}">`;
             }
         }
 
         item.innerHTML += node.rename ? '' : node.id;
-
-        item.setAttribute( 'draggable', true );
         item.style.paddingLeft = ( 3 + ( level + 1 ) * 15 ) + 'px';
         list.appendChild( item );
+
+        const isDraggable = parent && ( node.metadata?.draggable ?? ( this.options.defaultDraggable ?? true ) );
+        if ( isDraggable ) item.setAttribute( 'draggable', 'true' );
 
         // Callbacks
         item.addEventListener( 'click', ( e: MouseEvent ) => {
@@ -139,14 +140,13 @@ export class NodeTree
 
             // Add or remove
             const idx = this.selected.indexOf( node );
+            item.classList.toggle( 'selected', ( idx == -1 ) );
             if ( idx > -1 )
             {
-                item.classList.remove( 'selected' );
                 this.selected.splice( idx, 1 );
             }
             else
             {
-                item.classList.add( 'selected' );
                 this.selected.push( node );
             }
 
@@ -342,84 +342,82 @@ export class NodeTree
             that.refresh();
         } );
 
-        if ( this.options.draggable ?? true )
+        if ( isDraggable )
         {
-            // Drag nodes
-            if ( parent )
-            { // Root doesn't move!
-                item.addEventListener( 'dragstart', ( e: DragEvent ) => {
-                    ( window as any ).__tree_node_dragged = node;
-                } );
-            }
-
-            /* Events fired on other node items */
-            item.addEventListener( 'dragover', ( e: DragEvent ) => {
-                e.preventDefault(); // allow drop
-            }, false );
-            item.addEventListener( 'dragenter', ( e: any ) => {
-                e.target.classList.add( 'draggingover' );
-            } );
-            item.addEventListener( 'dragend', ( e: any ) => {
-                e.target.classList.remove( 'draggingover' );
-            } );
-            item.addEventListener( 'dragleave', ( e: any ) => {
-                e.target.classList.remove( 'draggingover' );
-            } );
-            item.addEventListener( 'drop', ( e: DragEvent ) => {
-                e.preventDefault(); // Prevent default action (open as link for some elements)
-                let dragged = ( window as any ).__tree_node_dragged;
-                if ( !dragged )
-                {
-                    // Test if we are moving from AssetView extension
-                    dragged = ( window as any ).__av_item_dragged;
-                    if ( dragged )
-                    {
-                        dragged._nodeTarget = node;
-                    }
-
-                    return;
-                }
-
-                let target = node;
-                // Can't drop to same node
-                if ( dragged.id == target.id )
-                {
-                    console.warn( 'Cannot parent node to itself!' );
-                    return;
-                }
-
-                // Can't drop to child node
-                const isChild = function( newParent: any, node: any ): boolean
-                {
-                    var result = false;
-                    for ( var c of node.children )
-                    {
-                        if ( c.id == newParent.id ) return true;
-                        result = result || isChild( newParent, c );
-                    }
-                    return result;
-                };
-
-                if ( isChild( target, dragged ) )
-                {
-                    console.warn( 'Cannot parent node to a current child!' );
-                    return;
-                }
-
-                // Trigger node dragger event
-                if ( that.onevent )
-                {
-                    const event = new TreeEvent( TreeEvent.NODE_DRAGGED, dragged, target, e );
-                    that.onevent( event );
-                }
-
-                const index = dragged.parent.children.findIndex( ( n: any ) => n.id == dragged.id );
-                const removed = dragged.parent.children.splice( index, 1 );
-                target.children.push( removed[0] );
-                that.refresh();
-                delete ( window as any ).__tree_node_dragged;
+            item.addEventListener( 'dragstart', ( e: DragEvent ) => {
+                ( window as any ).__tree_node_dragged = node;
             } );
         }
+
+        /* Events fired on other node items,
+        by now everyone is a drop target, cancel in the event if necessary */
+
+        item.addEventListener( 'dragover', ( e: DragEvent ) => {
+            e.preventDefault(); // allow drop
+        }, false );
+        item.addEventListener( 'dragenter', ( e: any ) => {
+            e.target.classList.add( 'draggingover' );
+        } );
+        item.addEventListener( 'dragend', ( e: any ) => {
+            e.target.classList.remove( 'draggingover' );
+        } );
+        item.addEventListener( 'dragleave', ( e: any ) => {
+            e.target.classList.remove( 'draggingover' );
+        } );
+        item.addEventListener( 'drop', ( e: DragEvent ) => {
+            e.preventDefault(); // Prevent default action (open as link for some elements)
+            let dragged = ( window as any ).__tree_node_dragged;
+            if ( !dragged )
+            {
+                // Test if we are moving from AssetView extension
+                dragged = ( window as any ).__av_item_dragged;
+                if ( dragged )
+                {
+                    dragged._nodeTarget = node;
+                }
+
+                return;
+            }
+
+            let target = node;
+            // Can't drop to same node
+            if ( dragged.id == target.id )
+            {
+                console.warn( 'Cannot parent node to itself!' );
+                return;
+            }
+
+            // Can't drop to child node
+            const isChild = function( newParent: any, node: any ): boolean
+            {
+                var result = false;
+                for ( var c of node.children )
+                {
+                    if ( c.id == newParent.id ) return true;
+                    result = result || isChild( newParent, c );
+                }
+                return result;
+            };
+
+            if ( isChild( target, dragged ) )
+            {
+                console.warn( 'Cannot parent node to a current child!' );
+                return;
+            }
+
+            // Trigger node dragger event
+            if ( that.onevent )
+            {
+                const event = new TreeEvent( TreeEvent.NODE_DRAGGED, dragged, target, e );
+                that.onevent( event );
+            }
+
+            const index = dragged.parent.children.findIndex( ( n: any ) => n.id == dragged.id );
+            const removed = dragged.parent.children.splice( index, 1 );
+            target.children.push( removed[0] );
+            that.refresh();
+            delete ( window as any ).__tree_node_dragged;
+        } );
 
         let handled = false;
 

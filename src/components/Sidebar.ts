@@ -206,8 +206,8 @@ export class Sidebar
 
         const avatar = new LX.Avatar( {
             imgSource: options.headerImage,
-            fallback: options.headerIcon ? LX.makeIcon( options.headerIcon, { svgClass: "2xl" } ).innerHTML : undefined,
-            className: 'size-10 rounded-lg'
+            fallback: options.headerIcon ? LX.makeIcon( options.headerIcon, { svgClass: "xl" } ).innerHTML : undefined,
+            className: 'rounded-lg'
         } );
         header.appendChild( avatar.root );
 
@@ -247,21 +247,12 @@ export class Sidebar
             }
         } );
 
-        const avatar = document.createElement( 'span' );
-        avatar.className = 'lexavatar';
-        footer.appendChild( avatar );
-
-        if ( options.footerImage )
-        {
-            const avatarImg = document.createElement( 'img' );
-            avatarImg.src = options.footerImage;
-            avatar.appendChild( avatarImg );
-        }
-        else if ( options.footerIcon )
-        {
-            const avatarIcon = LX.makeIcon( options.footerIcon );
-            avatar.appendChild( avatarIcon );
-        }
+        const avatar = new LX.Avatar( {
+            imgSource: options.footerImage,
+            fallback: options.footerIcon ? LX.makeIcon( options.footerIcon, { svgClass: "xl" } ).innerHTML : undefined,
+            className: 'rounded-lg'
+        } );
+        footer.appendChild( avatar.root );
 
         // Info
         {

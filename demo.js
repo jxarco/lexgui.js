@@ -35,8 +35,8 @@ if( mobile )
         headerSubtitle: `v${ LX.version }`,
         headerIcon: "UserRound",
         footerTitle: "jxarco",
-            footerSubtitle: "alexroco.30@gmail.com",
-            footerImage: "https://avatars.githubusercontent.com/u/25059187?v=4",
+        footerSubtitle: "alexroco.30@gmail.com",
+        footerImage: "https://avatars.githubusercontent.com/u/25059187?v=4",
         collapsed: false,
         collapsable: false,
         displaySelected: false

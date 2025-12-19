@@ -15,7 +15,7 @@ const NodeTree = LX.NodeTree;
 const TreeEvent = LX.TreeEvent;
 
 export type AssetViewAction = 'select' | 'dbl_click' | 'check' | 'clone' | 'move' | 'delete' | 'rename' 
-    | 'enter_folder' | 'create-folder' | 'refresh-content';
+    | 'enter_folder' | 'create-folder' | 'refresh-content' | 'node-drag';
 
 export interface AssetViewItem
 {
@@ -98,7 +98,6 @@ export class AssetView
     previewActions: any[] = [];
     contextMenu: any[] = [];
     itemContextMenuOptions: any = null;
-    onItemDragged: any = null;
 
     private _assetsPerPage: number = 24;
     get assetsPerPage(): any
@@ -151,7 +150,6 @@ export class AssetView
         this.allowMultipleSelection = options.allowMultipleSelection ?? this.allowMultipleSelection;
         this.previewActions = options.previewActions ?? [];
         this.itemContextMenuOptions = options.itemContextMenuOptions;
-        this.onItemDragged = options.onItemDragged;
         this.gridScale = options.gridScale ?? this.gridScale;
 
         if ( this.gridScale !== 1.0 )
@@ -768,78 +766,106 @@ export class AssetView
         const tree = this.leftPanel.addTree( 'Content Browser', treeData, {
             filter: false,
             onlyFolders: this.onlyFolders,
-            onevent: ( event: typeof TreeEvent ) => {
-                let node = event.node;
-                let value = event.value;
-
-                switch ( event.type )
-                {
-                    case LX.TreeEvent.NODE_SELECTED:
-                    {
-                        if ( event.multiple )
-                        {
-                            return;
-                        }
-                        if ( !node.parent )
-                        {
-                            if ( this.currentFolder )
-                            {
-                                this.prevData.push( this.currentFolder );
-                            }
-
-                            this.currentFolder = undefined;
-                            this.currentData = this.data;
-                            this._refreshContent();
-                            this._updatePath();
-                        }
-                        else
-                        {
-                            this._enterFolder( node.type === 'folder' ? node : node.parent );
-
-                            this._previewAsset( node );
-
-                            if ( node.type !== 'folder' )
-                            {
-                                this.content.querySelectorAll( '.lexassetitem' ).forEach( ( i ) => i.classList.remove( 'selected' ) );
-                                const dom = node.domEl;
-                                dom?.classList.add( 'selected' );
-                            }
-
-                            this.selectedItem = node;
-                        }
-                        break;
-                    }
-                    case LX.TreeEvent.NODE_DRAGGED:
-                    {
-                        if ( node.parent )
-                        {
-                            const idx = node.parent.children.indexOf( node );
-                            node.parent.children.splice( idx, 1 );
-                        }
-
-                        if ( !value.children )
-                        {
-                            value.children = [];
-                        }
-
-                        value.children.push( node );
-
-                        node.parent = value;
-                        node.dir = value.children;
-
-                        if ( this.onItemDragged )
-                        {
-                            this.onItemDragged( node, value );
-                        }
-
-                        this._refreshContent();
-                        break;
-                    }
-                }
-            }
+            onevent: this._processTreeEvents.bind( this )
         } );
 
         this.tree = tree.innerTree;
+    }
+
+    _processTreeEvents( event: typeof TreeEvent )
+    {
+        let node = event.node;
+        let value = event.value;
+
+        switch ( event.type )
+        {
+            case LX.TreeEvent.NODE_SELECTED:
+            {
+                if ( event.multiple )
+                {
+                    return;
+                }
+                if ( !node.parent )
+                {
+                    if ( this.currentFolder )
+                    {
+                        this.prevData.push( this.currentFolder );
+                    }
+
+                    this.currentFolder = undefined;
+                    this.currentData = this.data;
+                    this._refreshContent();
+                    this._updatePath();
+                }
+                else
+                {
+                    this._enterFolder( node.type === 'folder' ? node : node.parent );
+
+                    this._previewAsset( node );
+
+                    if ( node.type !== 'folder' )
+                    {
+                        this.content.querySelectorAll( '.lexassetitem' ).forEach( ( i ) => i.classList.remove( 'selected' ) );
+                        const dom = node.domEl;
+                        dom?.classList.add( 'selected' );
+                    }
+
+                    this.selectedItem = node;
+                }
+                break;
+            }
+            case LX.TreeEvent.NODE_DRAGGED:
+            {
+                const onBeforeNodeDragged = this._callbacks['beforeNodeDragged'];
+                const onNodeDragged = this._callbacks['nodeDragged'];
+
+                const resolve = ( ...args: any[] ) => {
+                    
+                    if ( node.parent )
+                    {
+                        const idx = node.parent.children.indexOf( node );
+                        node.parent.children.splice( idx, 1 );
+                    }
+
+                    if ( !value.children )
+                    {
+                        value.children = [];
+                    }
+
+                    value.children.push( node );
+
+                    node.parent = value;
+                    node.dir = value.children;
+                    
+                    const event: AssetViewEvent = {
+                        type: 'node-drag',
+                        items: [ node ],
+                        to: value,
+                        userInitiated: true
+                    };
+                    if ( onNodeDragged ) onNodeDragged( event, ...args );
+                };
+
+                if ( onBeforeNodeDragged )
+                {
+                    const event: AssetViewEvent = {
+                        type: 'node-drag',
+                        items: [ node ],
+                        to: value,
+                        userInitiated: true
+                    };
+
+                    onBeforeNodeDragged( event, resolve );
+                }
+                else
+                {
+                    resolve();
+                }
+
+                this._refreshContent();
+                break;
+            }
+        }
     }
 
     _setContentLayout( layoutMode: number )
@@ -1081,7 +1107,7 @@ export class AssetView
         if ( onBeforeRefreshContent )
         {
             const event: AssetViewEvent = {
-                type: 'delete',
+                type: 'refresh-content',
                 search: [ this.searchValue, this.filter ],
                 userInitiated
             };
