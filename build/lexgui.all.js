@@ -16,7 +16,7 @@
     exports.LX = g$2.LX;
     if (!exports.LX) {
         exports.LX = {
-            version: '8.1.1',
+            version: '8.1.2',
             ready: false,
             extensions: [], // Store extensions used
             extraCommandbarEntries: [], // User specific entries for command bar
@@ -23778,6 +23778,7 @@
             }
             this.updateTheme = updateTheme.bind(this);
             exports.LX.addSignal('@on_new_color_scheme', this.updateTheme);
+            this.updateTheme();
         }
         // makes it ready to be deleted
         clear() {
@@ -27931,6 +27932,7 @@
             }
             if (options.videoArea) {
                 options.videoArea.root.classList.add('lexvideoeditor');
+                options.videoArea.root.style.position = "relative";
                 options.videoArea.attach(this.cropArea);
                 videoArea.attach(options.videoArea);
             }
@@ -27939,6 +27941,7 @@
                 videoArea.attach(this.cropArea);
                 videoArea.root.classList.add('lexvideoeditor');
             }
+            videoArea.root.style.position = "relative";
             this.controlsArea = controlsArea;
             // Create playing timeline area and attach panels
             let [topArea, bottomArea] = controlsArea.split({ type: 'vertical', sizes: ['50%', null],

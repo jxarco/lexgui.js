@@ -253,12 +253,10 @@
 
     var kfTimeline = null;
     var clipsTimeline = null;
-    var curvesTimeline = null;
 
     bottom.onresize = bounding => {
         if (kfTimeline) kfTimeline.resize([bounding.width, bounding.height]);
         if (clipsTimeline) clipsTimeline.resize([bounding.width, bounding.height]);
-        if (curvesTimeline) curvesTimeline.resize([bounding.width, bounding.height]);
     }
 
     // another menu bar
@@ -272,9 +270,6 @@
                 el = document.getElementById('clips-timeline');
                 if (el)
                     el.style.display = 'none';
-                el = document.getElementById('curves-timeline');
-                if (el)
-                    el.style.display = 'none';
                 var bottomPanel = document.getElementById('bottom-panel');
                 bottomPanel.style.display = 'block';
             }
@@ -286,9 +281,6 @@
                 if (el)
                     el.style.display = 'none';
                 el = document.getElementById('clips-timeline');
-                if (el)
-                    el.style.display = 'none';
-                el = document.getElementById('curves-timeline');
                 if (el)
                     el.style.display = 'none';
                 var timeline = document.getElementById('kf-timeline');
@@ -327,9 +319,6 @@
                 el = document.getElementById('kf-timeline');
                 if (el)
                     el.style.display = 'none';
-                el = document.getElementById('curves-timeline');
-                if (el)
-                    el.style.display = 'none';
                 var ctimeline = document.getElementById('clips-timeline');
                 if (ctimeline) {
                     ctimeline.style.display = 'block';
@@ -355,35 +344,7 @@
                     clipsTimeline.draw(0);
                 }
             }
-        },
-        {
-            name: "Curves Timeline", callback: e => {
-                console.log(e);
-                let el = document.getElementById('bottom-panel');
-                if (el)
-                    el.style.display = 'none';
-                el = document.getElementById('kf-timeline');
-                if (el)
-                    el.style.display = 'none';
-                el = document.getElementById('clips-timeline');
-                if (el)
-                    el.style.display = 'none';
-
-                var timeline = document.getElementById('curves-timeline');
-                if (timeline) {
-                    timeline.style.display = 'block';
-                    curvesTimeline.resize();
-                }
-                else {
-                    curvesTimeline = new LX.CurvesTimeline("curves-timeline");
-                    curvesTimeline.setAnimationClip({ tracks: [{ name: "Item 1.position", values: [0, 1, 0, -1], times: [0, 0.1, 0.2, 0.3] }, { name: "Item 1.scale", values: [0, 1, 0, 0.5], times: [0, 0.1, 0.2, 0.3] }, { name: "Item 2", values: [0, 1, 0, 1], times: [0.1, 0.2, 0.3, 0.8] }, { name: "Item 3.position", values: [0, 0, 0, 1], times: [0, 0.1, 0.2, 0.3] }, { name: "Item 3.scale", values: [0, 1, 0], times: [0, 0.1, 0.2, 0.3] }], duration: 1 });
-                    curvesTimeline.setSelectedItems(["Item 1", "Item 2", "Item 3"]);
-                    bottom.attach(curvesTimeline.mainArea);
-                    curvesTimeline.resize();
-                    curvesTimeline.draw(0);
-                }
-            }
-        },
+        }
 
     ]);
 
@@ -393,9 +354,6 @@
 
         if (kfTimeline)
             kfTimeline.resize();
-
-        if (curvesTimeline)
-            curvesTimeline.resize();
     }
 
     var bottomPanel = bottom.addPanel({ id: "bottom-panel" });
@@ -544,9 +502,6 @@
 
         if (clipsTimeline)
             clipsTimeline.draw();
-
-        if (curvesTimeline)
-            curvesTimeline.draw();
 
         requestAnimationFrame(loop);
     }

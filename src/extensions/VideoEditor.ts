@@ -543,6 +543,7 @@ export class VideoEditor
         if ( options.videoArea )
         {
             options.videoArea.root.classList.add( 'lexvideoeditor' );
+            options.videoArea.root.style.position = "relative";
             options.videoArea.attach( this.cropArea );
             videoArea.attach( options.videoArea );
         }
@@ -552,6 +553,8 @@ export class VideoEditor
             videoArea.attach( this.cropArea );
             videoArea.root.classList.add( 'lexvideoeditor' );
         }
+
+        videoArea.root.style.position = "relative";
 
         this.controlsArea = controlsArea;
         // Create playing timeline area and attach panels
