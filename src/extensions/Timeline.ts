@@ -258,6 +258,7 @@ export abstract class Timeline
 
         this.updateTheme = updateTheme.bind( this );
         LX.addSignal( '@on_new_color_scheme', this.updateTheme );
+        this.updateTheme();
     }
 
     // makes it ready to be deleted

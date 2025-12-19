@@ -2,7 +2,17 @@
 
 ## dev
 
-## 8.1.1 (master)
+## 8.1.2 (master)
+
+Removed legacy code `CurvesTimeline` from `editor.html` example.
+
+VideoEditor:
+- Forced area to have position relative so cropArea is correctly positioned.
+
+Timeline:
+- Autmatically calls `updateTheme` color on instance creation.
+
+## 8.1.1
 
 Fixed Table Component bug when there's a filter but no custom filters.
 Fixed AssetView `onEnterFolder` not allowing async callbacks.
