@@ -2,6 +2,14 @@
 
 ## dev
 
+CodeEditor:
+- Fixed NextOcurrence (Ctrl+D) bug.
+- Fixed some issues with deleting using multiple cursors.
+- Fixed Cursor deleting bug when merging multiple cursors.
+- `options.callback` renamed to `options.onReady`, which is now called once the Editor is ready and visible.
+- Pair keys `(), {}, "", ...` now only pair if no next char (or space).
+- Added 3rd parameter to `setText(text, langString, _detectLanguage_)` to allow forcing language detection.
+
 ## 8.1.1 (master)
 
 Fixed Table Component bug when there's a filter but no custom filters.
