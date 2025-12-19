@@ -105,6 +105,10 @@
         [ "event", "{ type, userInitiated, where, result }" ]
     ] );
 
+    docMaker.classMethod( "refreshContent", `Content has been refreshed.`, [
+        [ "event", "{ type, userInitiated, items, search }" ]
+    ] );
+
     docMaker.classMethod( "beforeDelete", `Called before deleting assets.`, [
         [ "event", "{ type, userInitiated, items }" ],
         [ "resolve", "Function" ]
@@ -130,6 +134,11 @@
         [ "resolve", "Function" ]
     ] );
 
+    docMaker.classMethod( "beforeRefreshContent", `Called before refreshing items content.`, [
+        [ "event", "{ type, userInitiated, search }" ],
+        [ "resolve", "Function" ]
+    ] );
+
     docMaker.header("API Reference", "h2");
     docMaker.classCtor("class LX.AssetView", [ [ "options", "Object = {}" ] ]);
     docMaker.lineBreak();
@@ -149,7 +158,6 @@
                 ["itemContextMenuOptions", "Array", "Customize the asset context menu actions { name, callback }"],
                 ["layout", `<span class='cursor-pointer' title='"LAYOUT_GRID" | "LAYOUT_COMPACT" | "LAYOUT_LIST"'>Enum</span>`, `Layout appearance of the assets`, "AssetView.LAYOUT_GRID"],
                 ["onlyFolders", "Boolean", "Use onlyFolders option in TreeComponent", "true"],
-                ["onRefreshContent", "Function", "Function to call when the content is refreshed"],
                 ["onItemDragged", "Function", "Function to call when an item is moved in the file browser"],
                 ["previewActions", "Array", "Customize asset preview actions { name, callback, type (opt.), path (opt.) }"],
                 ["rootPath", "String", "Override default rootPath for internal data"],

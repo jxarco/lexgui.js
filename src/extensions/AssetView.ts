@@ -14,7 +14,8 @@ const Panel = LX.Panel;
 const NodeTree = LX.NodeTree;
 const TreeEvent = LX.TreeEvent;
 
-export type AssetViewAction = 'select' | 'dbl_click' | 'check' | 'clone' | 'move' | 'delete' | 'rename' | 'enter_folder' | 'create-folder';
+export type AssetViewAction = 'select' | 'dbl_click' | 'check' | 'clone' | 'move' | 'delete' | 'rename' 
+    | 'enter_folder' | 'create-folder' | 'refresh-content';
 
 export interface AssetViewItem
 {
@@ -39,6 +40,7 @@ interface AssetViewEvent
     where?: AssetViewItem;
     oldName?: string;
     newName?: string;
+    search?: any[]; // 0: search value, 1: filter applied
     userInitiated: boolean; // clicked by user vs programmatically
 }
 
@@ -95,7 +97,6 @@ export class AssetView
     allowMultipleSelection: boolean = false;
     previewActions: any[] = [];
     contextMenu: any[] = [];
-    onRefreshContent: any = null;
     itemContextMenuOptions: any = null;
     onItemDragged: any = null;
 
@@ -150,7 +151,6 @@ export class AssetView
         this.allowMultipleSelection = options.allowMultipleSelection ?? this.allowMultipleSelection;
         this.previewActions = options.previewActions ?? [];
         this.itemContextMenuOptions = options.itemContextMenuOptions;
-        this.onRefreshContent = options.onRefreshContent;
         this.onItemDragged = options.onItemDragged;
         this.gridScale = options.gridScale ?? this.gridScale;
 
@@ -746,8 +746,8 @@ export class AssetView
             if ( parentFolder ) this._enterFolder( parentFolder );
         }, { buttonClass: 'ghost', title: 'Go Upper Folder', tooltip: true, icon: 'ArrowUp' } );
 
-        panel.addButton( null, 'GoUpButton', () => {
-            this._refreshContent();
+        panel.addButton( null, 'RefreshButton', () => {
+            this._refreshContent( undefined, undefined, true );
         }, { buttonClass: 'ghost', title: 'Refresh', tooltip: true, icon: 'Refresh' } );
     }
 
@@ -1011,63 +1011,87 @@ export class AssetView
         return ( name ) => name.toLowerCase().includes( q.toLowerCase() );
     }
 
-    _refreshContent( searchValue?: string, filter?: string )
+    _refreshContent( searchValue?: string, filter?: string, userInitiated: boolean = false )
     {
-        const isCompactLayout = this.layout == AssetView.LAYOUT_COMPACT;
-        const isListLayout = this.layout == AssetView.LAYOUT_LIST;
+        const onBeforeRefreshContent = this._callbacks['beforeRefreshContent'];
+        const onRefreshContent = this._callbacks['refreshContent'];
 
-        this.filter = filter ?? ( this.filter ?? 'None' );
-        this.searchValue = searchValue ?? ( this.searchValue ?? '' );
-        this.content.innerHTML = '';
-        this.content.className = `lexassetscontent${isCompactLayout ? ' compact' : ( isListLayout ? ' list' : '' )}`;
+        const resolve = ( ...args: any[] ) => {
+            
+            const isCompactLayout = this.layout == AssetView.LAYOUT_COMPACT;
+            const isListLayout = this.layout == AssetView.LAYOUT_LIST;
 
-        if ( !this.currentData.length )
-        {
-            return;
-        }
+            this.filter = filter ?? ( this.filter ?? 'None' );
+            this.searchValue = searchValue ?? ( this.searchValue ?? '' );
+            this.content.innerHTML = '';
+            this.content.className = `lexassetscontent${isCompactLayout ? ' compact' : ( isListLayout ? ' list' : '' )}`;
 
-        const fr = new FileReader();
-        const nameFilterFn = this._makeNameFilterFn( this.searchValue );
-
-        const filteredData = this.currentData.filter( ( _i ) => {
-            const typeMatch = this.filter !== 'None' ? _i.type.toLowerCase() === this.filter.toLowerCase() : true;
-            const nameMatch = nameFilterFn( _i.id );
-            return typeMatch && nameMatch;
-        } );
-
-        this._paginator?.setPages( Math.max( Math.ceil( filteredData.length / this.assetsPerPage ), 1 ) );
-
-        // Show all data if using filters
-        const start = this._paginator ? ( this._paginator.page - 1 ) * this.assetsPerPage : 0;
-        const end = this._paginator ? Math.min( start + this.assetsPerPage, filteredData.length ) : filteredData.length;
-
-        for ( let i = start; i < end; ++i )
-        {
-            let item = filteredData[i];
-
-            if ( item.path )
+            if ( !this.currentData.length )
             {
-                LX.request( { url: item.path, dataType: 'blob', success: ( f: File ) => {
-                    item.metadata.bytesize = f.size;
-                    fr.readAsDataURL( f );
-                    fr.onload = ( e ) => {
-                        const target = e.currentTarget as any;
-                        item.src = target.result; // This is a base64 string...
-                        item.metadata.path = item.path;
-                        delete item.path;
-                        this._refreshContent( searchValue, filter );
-                    };
-                } } );
+                return;
             }
-            else
-            {
-                item.domEl = this.addItem( item, undefined, false );
-            }
-        }
 
-        if ( this.onRefreshContent )
+            const fr = new FileReader();
+            const nameFilterFn = this._makeNameFilterFn( this.searchValue );
+
+            const filteredData = this.currentData.filter( ( _i ) => {
+                const typeMatch = this.filter !== 'None' ? _i.type.toLowerCase() === this.filter.toLowerCase() : true;
+                const nameMatch = nameFilterFn( _i.id );
+                return typeMatch && nameMatch;
+            } );
+
+            this._paginator?.setPages( Math.max( Math.ceil( filteredData.length / this.assetsPerPage ), 1 ) );
+
+            // Show all data if using filters
+            const start = this._paginator ? ( this._paginator.page - 1 ) * this.assetsPerPage : 0;
+            const end = this._paginator ? Math.min( start + this.assetsPerPage, filteredData.length ) : filteredData.length;
+
+            for ( let i = start; i < end; ++i )
+            {
+                let item = filteredData[i];
+
+                if ( item.path )
+                {
+                    LX.request( { url: item.path, dataType: 'blob', success: ( f: File ) => {
+                        item.metadata.bytesize = f.size;
+                        fr.readAsDataURL( f );
+                        fr.onload = ( e ) => {
+                            const target = e.currentTarget as any;
+                            item.src = target.result; // This is a base64 string...
+                            item.metadata.path = item.path;
+                            delete item.path;
+                            this._refreshContent( searchValue, filter );
+                        };
+                    } } );
+                }
+                else
+                {
+                    item.domEl = this.addItem( item, undefined, false );
+                }
+            }
+            
+            const event: AssetViewEvent = {
+                type: 'refresh-content',
+                search: [ this.searchValue, this.filter ],
+                items: filteredData.slice( start, end ),
+                userInitiated
+            };
+            if ( onRefreshContent ) onRefreshContent( event, ...args );
+        };
+
+        if ( onBeforeRefreshContent )
         {
-            this.onRefreshContent( searchValue, filter );
+            const event: AssetViewEvent = {
+                type: 'delete',
+                search: [ this.searchValue, this.filter ],
+                userInitiated
+            };
+
+            onBeforeRefreshContent( event, resolve );
+        }
+        else
+        {
+            resolve();
         }
     }
 

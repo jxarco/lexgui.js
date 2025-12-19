@@ -9,6 +9,10 @@ Fixed modal scroll bleed.
 Fixed Commandbar position when page has vertical scroll.
 Minor fixes Area Tabs.
 
+AssetView:
+- Removed `options.onRefreshContent`.
+- Added new `refreshContent`, `beforeRefreshContent` events.
+
 CodeEditor:
 - Fixed NextOcurrence (Ctrl+D) bug.
 - Fixed some issues with deleting using multiple cursors.

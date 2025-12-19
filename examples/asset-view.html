@@ -327,6 +327,17 @@
         } );
     }
 
+    // Content events
+    {
+        assetView.on( "beforeRefreshContent", ( event, resolve ) => {
+            resolve();
+        } );
+
+        assetView.on( "refreshContent", ( event ) => {
+            console.log(`Content updated (${ event.items.length } items) [${ event.search.join( "," ) }]` );
+        } );
+    }
+
     assetView.load( assetData );
 
     function loop( dt )
