@@ -31,8 +31,15 @@ export class SizeInput extends BaseComponent
             }
         };
 
+        this.onResize = ( rect ) => {
+            const realNameWidth = this.root.domName?.style.width ?? '0px';
+            container.style.width = `calc( 100% - ${realNameWidth})`;
+        };
+
         this.root.aspectRatio = value.length == 2 ? value[0] / value[1] : null;
         this.root.dimensions = [];
+
+        const container = LX.makeElement( 'div', 'flex', '', this.root );
 
         for ( let i = 0; i < value.length; ++i )
         {
@@ -52,23 +59,20 @@ export class SizeInput extends BaseComponent
                 {
                     callback( value );
                 }
-            }, { min: 0, disabled: options.disabled, precision: options.precision, className: 'flex-fill' } );
+            }, { min: 0, disabled: options.disabled, precision: options.precision, className: 'flex-auto-fill' } );
 
-            this.root.appendChild( this.root.dimensions[i].root );
+            container.appendChild( this.root.dimensions[i].root );
 
             if ( ( i + 1 ) != value.length )
             {
                 const xIcon = LX.makeIcon( 'X', { svgClass: 'text-primary font-bold' } );
-                this.root.appendChild( xIcon );
+                container.appendChild( xIcon );
             }
         }
 
         if ( options.units )
         {
-            let unitSpan = document.createElement( 'span' );
-            unitSpan.className = 'select-none text-muted-foreground font-medium';
-            unitSpan.innerText = options.units;
-            this.root.appendChild( unitSpan );
+            LX.makeElement( 'span', 'text-muted-foreground align-center content-center font-medium flex-auto-keep select-none', options.units, container );
         }
 
         // Lock aspect ratio
@@ -82,9 +86,11 @@ export class SizeInput extends BaseComponent
                     const value = this.value();
                     this.root.aspectRatio = value[0] / value[1];
                 }
-            }, { title: 'Lock Aspect Ratio', icon: 'LockOpen', swap: 'Lock', buttonClass: 'bg-none p-0' } );
-            this.root.appendChild( lockerButton.root );
+            }, { title: 'Lock Aspect Ratio', icon: 'LockOpen', swap: 'Lock', className: 'flex-auto-keep', buttonClass: 'h-auto bg-none p-0' } );
+            container.appendChild( lockerButton.root );
         }
+
+        LX.doAsync( this.onResize.bind( this ) );
     }
 }
 
