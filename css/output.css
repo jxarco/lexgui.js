@@ -1193,6 +1193,9 @@
   .bg-indigo-950 {
     background-color: var(--color-indigo-950);
   }
+  .bg-inherit {
+    background-color: inherit;
+  }
   .bg-lime-50 {
     background-color: var(--color-lime-50);
   }
@@ -6187,11 +6190,6 @@ ul.lexassetscontent {
   pointer-events: none;
   animation: skeleton-shimmer 2.5s linear infinite;
 }
-.codebasearea {
-  display: flex;
-  position: relative;
-  background-color: var(--card) !important;
-}
 .codebasearea * {
   letter-spacing: 0em !important;
 }
@@ -6247,16 +6245,6 @@ ul.lexassetscontent {
 }
 .lexcodeeditor ::-webkit-scrollbar-thumb:hover {
   background: #afafb4c2;
-}
-.lexcodeeditor {
-  outline: none;
-  overflow: hidden;
-  width: 100%;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  background-color: inherit;
 }
 .lexcodeeditor .lexareatabscontent {
   overflow: hidden;

@@ -19,8 +19,8 @@ class CanvasDial
         element.style.width = element.style.height = options.size || '100%';
         element.style.minWidth = element.style.minHeight = '50px';
 
-        element.bgcolor = options.bgColor || LX.getThemeColor( 'global-background' );
-        element.pointscolor = options.pointsColor || LX.getThemeColor( 'global-color-accent-light' );
+        element.bgcolor = options.bgColor || LX.getThemeColor( 'background' );
+        element.pointscolor = options.pointsColor || LX.getThemeColor( 'primary' );
         element.linecolor = options.lineColor || '#555';
         element.value = value || [];
         element.xrange = options.xrange || [ 0, 1 ]; // min, max
@@ -35,8 +35,8 @@ class CanvasDial
         element.move_out = options.moveOutAction ?? LX.CURVE_MOVEOUT_DELETE;
 
         LX.addSignal( '@on_new_color_scheme', ( el: HTMLElement, value: string ) => {
-            element.bgcolor = options.bgColor || LX.getThemeColor( 'global-background' );
-            element.pointscolor = options.pointsColor || LX.getThemeColor( 'global-color-accent-light' );
+            element.bgcolor = options.bgColor || LX.getThemeColor( 'background' );
+            element.pointscolor = options.pointsColor || LX.getThemeColor( 'primary' );
             this.redraw();
         } );
 

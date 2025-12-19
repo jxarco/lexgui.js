@@ -4587,13 +4587,6 @@ ul.lexassetscontent {
 
 /* Code Editor */
 
-.codebasearea {
-    display: flex;
-    position: relative;
-    /* overflow: inherit; */
-    background-color: var(--card) !important;
-}
-
 .codebasearea * {
     letter-spacing: 0em !important;
 }
@@ -4660,17 +4653,6 @@ ul.lexassetscontent {
 
 .lexcodeeditor ::-webkit-scrollbar-thumb:hover {
     background: #afafb4c2;
-}
-
-.lexcodeeditor {
-    outline: none;
-    overflow: hidden;
-    width: 100%;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-    background-color: inherit;
 }
 
 .lexcodeeditor .lexareatabscontent {

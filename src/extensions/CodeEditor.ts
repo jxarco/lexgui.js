@@ -742,7 +742,7 @@ export class CodeEditor
         }
 
         this.baseArea = area;
-        this.area = new LX.Area( { className: 'lexcodeeditor', height: '100%', skipAppend: true } );
+        this.area = new LX.Area( { className: 'lexcodeeditor outline-none overflow-hidden size-full select-none bg-inherit', skipAppend: true } );
 
         if ( !this.skipTabs )
         {
@@ -813,7 +813,7 @@ export class CodeEditor
         codeResizeObserver.observe( this.codeArea.root );
 
         // Full editor
-        area.root.classList.add( 'codebasearea' );
+        area.root.className = LX.mergeClass( area.root.className, 'codebasearea flex relative bg-card' );
 
         const observer = new MutationObserver( ( e ) => {
             if ( e[0].attributeName == 'style' )

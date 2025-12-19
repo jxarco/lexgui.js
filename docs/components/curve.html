@@ -49,13 +49,14 @@ or other parameters is essential.`, false, "text-muted-foreground");
         panel.addTable( null, {
             head: [ "Option", "Type", "Description", "Default" ],
             body: [
-                ["bgColor", "String", "Curve background color", "root:global-intense-background"],
-                ["pointsColor", "String", "Curve points color", "root:global-color-accent"],
-                ["lineColor", "String", "Curve line color", `"#555"`],
-                ["noOverlap", "Boolean", "Points do not overlap, replacing themselves if necessary", "false"],
+                ["activePointsColor", "String", "Active curve points color", `"root:--accent"`],
                 ["allowAddValues", "Boolean", "Support adding values on click", "true"],
+                ["bgColor", "String", "Curve background color", `"root:--background"`],
+                ["lineColor", "String", "Curve line color", `"#555"`],
+                ["moveOutAction", "<span class='cursor-pointer' title='LX.CURVE_MOVEOUT_CLAMP | LX.CURVE_MOVEOUT_DELETE'>Enum</span>", "Clamp or delete points moved out of the curve", "LX.CURVE_MOVEOUT_DELETE"],
+                ["noOverlap", "Boolean", "Points do not overlap, replacing themselves if necessary", "false"],
+                ["pointsColor", "String", "Curve points color", `"root:--primary"`],
                 ["smooth", "Number", "Curve smoothness", "0.3"],
-                ["moveOutAction", "<span class='cursor-pointer' title='LX.CURVE_MOVEOUT_CLAMP | LX.CURVE_MOVEOUT_DELETE'>Enum</span>", "Clamp or delete points moved out of the curve", "LX.CURVE_MOVEOUT_DELETE"]
             ].map( v => {
                 return [ docMaker.iCode( v[ 0 ], "table" ), docMaker.iCode( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? docMaker.iCode( v[ 3 ], "table desc" ) : v[ 3 ] ];
             } )

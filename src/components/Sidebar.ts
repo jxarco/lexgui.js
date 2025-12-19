@@ -696,7 +696,7 @@ export class Sidebar
                     } );
                 }
 
-                subentry.className = 'lexsidebarentry';
+                subentry.className = 'lexsidebarentry w-full rounded-lg cursor-pointer select-none';
                 subentry.id = subkey;
 
                 if ( suboptions.content )
