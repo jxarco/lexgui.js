@@ -8,15 +8,15 @@ import { Panel } from './Panel';
 import { vec2 } from './Vec2';
 
 /* Add Tailwind merge utility to LX namespace EXTENDED with new LX class groups*/
-LX.twMerge = extendTailwindMerge({
+LX.twMerge = extendTailwindMerge( {
     extend: {
         classGroups: {
             pad: [
-                { pad: ['xs', 'sm', 'md', 'lg', 'xl', '2xl'] }
+                { pad: [ 'xs', 'sm', 'md', 'lg', 'xl', '2xl' ] }
             ]
         }
     }
-});
+} );
 
 function clamp( num: number, min: number, max: number )
 {
@@ -539,10 +539,10 @@ function oklchToHex( oklch: string ): string
     if ( !match )
     {
         console.error( 'Invalid OKLCH format' );
-        return "#000";
+        return '#000';
     }
 
-    let [, Lp, C, h]: string[] = match;
+    let [ , Lp, C, h ]: string[] = match;
     const L = parseFloat( Lp ) / 100;
     const H = ( parseFloat( h ) * Math.PI ) / 180;
 
@@ -1470,7 +1470,6 @@ function popup( text: string, title: string, options: any = {} )
     }
 
     options.size = options.size ?? [ 'max-content', 'auto' ];
-    options.class = 'lexpopup';
 
     const time = options.timeout || 3000;
     const dialog = new LX.Dialog( title, ( p: Panel ) => {
@@ -1568,9 +1567,8 @@ function toast( title: string, description: string, options: any = {} )
     const nots = LX.notifications;
     console.assert( nots );
 
-    const toast: any = document.createElement( 'li' );
-    toast.className = 'lextoast';
-    nots.prepend( toast );
+    const toast: any = LX.makeElement( 'li',
+        'lextoast flex flex-row relative w-full border-color overflow-hidden select-none pointer-events-auto touch-none rounded-lg p-3', '', nots );
 
     const [ positionVertical, positionHorizontal ] = options.position
         ? options.position.split( '-' )
@@ -1625,21 +1623,13 @@ function toast( title: string, description: string, options: any = {} )
         toast.dataset['open'] = true;
     }, 10 );
 
-    const content = document.createElement( 'div' );
-    content.className = 'lextoastcontent';
-    toast.appendChild( content );
-
-    const titleContent = document.createElement( 'div' );
-    titleContent.className = 'title';
-    titleContent.innerHTML = title;
-    content.appendChild( titleContent );
+    const content: HTMLDivElement = LX.makeElement( 'div', 'grid h-fit max-w-lg gap-1 items-center mr-6 [&_div]:truncate [&_svg]:shrink-0', '',
+        toast );
+    const titleContent: HTMLDivElement = LX.makeElement( 'div', 'flex flex-row gap-2 text-sm text-foreground items-center min-w-0', title, content );
 
     if ( description )
     {
-        const desc = document.createElement( 'div' );
-        desc.className = 'desc';
-        desc.innerHTML = description;
-        content.appendChild( desc );
+        LX.makeElement( 'div', 'text-primary text-xs', description, content );
     }
 
     if ( options.action )
@@ -1669,7 +1659,7 @@ function toast( title: string, description: string, options: any = {} )
 
     if ( options.closable ?? true )
     {
-        const closeIcon = LX.makeIcon( 'X', { iconClass: 'closer' } );
+        const closeIcon = LX.makeIcon( 'X', { iconClass: 'absolute top-2 right-2 text-sm' } );
         closeIcon.addEventListener( 'click', () => {
             toast.close();
         } );
@@ -1816,9 +1806,9 @@ function asTooltip( trigger: any, content: any, options: any = {} )
             return;
         }
 
-        tooltipDom = document.createElement( 'div' );
-        tooltipDom.className = 'lextooltip';
-        tooltipDom.innerHTML = trigger.dataset['tooltipContent'] ?? content;
+        tooltipDom = LX.makeElement( 'div',
+            'lextooltip fixed bg-primary text-primary-foreground text-xs px-2 py-1 rounded-lg pointer-events-none data-closed:opacity-0',
+            trigger.dataset['tooltipContent'] ?? content );
 
         const nestedDialog = trigger.closest( 'dialog' );
         const tooltipParent = nestedDialog ?? LX.root;

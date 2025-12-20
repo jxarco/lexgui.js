@@ -23,13 +23,12 @@ export class AreaOverlayButtons
 
     _buildButtons( buttonsArray: any[], options: any = {} )
     {
-        options.className = 'lexoverlaybuttons';
+        options.className = 'lexoverlaybuttons flex justify-start gap-2 bg-card m-2 p-1 rounded-2xl border-color';
 
         let overlayPanel = this.area.addPanel( options );
         let overlayGroup: any = null;
 
-        const container = document.createElement( 'div' );
-        container.className = 'lexoverlaybuttonscontainer';
+        const container = LX.makeElement( 'div', 'lexoverlaybuttonscontainer absolute flex top-0 w-full pointer-events-none' );
         container.appendChild( overlayPanel.root );
         this.area.attach( container );
 
@@ -89,7 +88,7 @@ export class AreaOverlayButtons
                 if ( !overlayGroup )
                 {
                     overlayGroup = document.createElement( 'div' );
-                    overlayGroup.className = 'lexoverlaygroup';
+                    overlayGroup.className = 'lexoverlaygroup flex flex-none bg-secondary rounded-xl';
                     overlayPanel.queuedContainer = overlayGroup;
                 }
 

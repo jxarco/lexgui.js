@@ -43,7 +43,8 @@ export class Branch
         this.panel = null;
 
         // Create element
-        const title: any = LX.makeElement( 'div', 'lexbranchtitle flex cursor-pointer select-none pad-lg bg-card text-card-foreground text-lg', '', root );
+        const title: any = LX.makeElement( 'div', 'lexbranchtitle flex cursor-pointer select-none pad-lg bg-card text-card-foreground text-lg', '',
+            root );
 
         if ( options.icon )
         {

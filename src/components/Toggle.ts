@@ -50,7 +50,8 @@ export class Toggle extends BaseComponent
         container.className = 'flex flex-row gap-2 items-center';
         this.root.appendChild( container );
 
-        let toggle: any = LX.makeElement( 'input', LX.mergeClass( 'lextoggle relative inline-grid place-content-center cursor-pointer shrink-0 select-none', options.className ) );
+        let toggle: any = LX.makeElement( 'input',
+            LX.mergeClass( 'lextoggle relative inline-grid place-content-center cursor-pointer shrink-0 select-none', options.className ) );
         toggle.type = 'checkbox';
         toggle.checked = value;
         toggle.iValue = value;

@@ -45,10 +45,9 @@ export class Popover
         this.avoidCollisions = options.avoidCollisions ?? true;
         this.reference = options.reference;
 
-        this.root = document.createElement( 'div' );
+        this.root = LX.makeElement( 'div', 'lexpopover fixed bg-background rounded-lg border-color p-1 left-0 top-0' );
         this.root.dataset['side'] = this.side;
         this.root.tabIndex = '1';
-        this.root.className = 'lexpopover';
 
         const refElement = trigger ?? this.reference;
         const nestedDialog = refElement.closest( 'dialog' );

@@ -202,8 +202,8 @@ export class Tabs
         // Process icon
         if ( options.icon )
         {
-            if ( !options.icon.includes( '.' ) ) // Not a file
-            {
+            if ( !options.icon.includes( '.' ) )
+            { // Not a file
                 const classes = options.icon.split( ' ' );
                 options.icon = LX.makeIcon( classes[0], { svgClass: 'sm ' + classes.slice( 0 ).join( ' ' ) } ).innerHTML;
             }

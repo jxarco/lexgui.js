@@ -35,10 +35,7 @@ export class Layers extends BaseComponent
             container.style.width = `calc( 100% - ${realNameWidth})`;
         };
 
-        const container = document.createElement( 'div' );
-        container.className = 'lexlayers';
-        this.root.appendChild( container );
-
+        const container = LX.makeElement( 'div', 'lexlayers grid', '', this.root );
         const maxBits = options.maxBits ?? 16;
 
         this.setLayers = ( val ) => {
@@ -56,7 +53,8 @@ export class Layers extends BaseComponent
             for ( let bit = 0; bit < maxBits; ++bit )
             {
                 let layer: any = document.createElement( 'div' );
-                layer.className = 'lexlayer';
+                layer.className =
+                    'lexlayer size-6 text-secondary-foreground text-center content-center place-self-center cursor-pointer font-semibold text-xs rounded-lg';
 
                 if ( val != undefined )
                 {

@@ -122,7 +122,7 @@ export class Tour
     {
         this.tourContainer.innerHTML = ''; // Clear previous content
 
-        this.tourMask = LX.makeContainer( [ '100%', '100%' ], 'tour-mask' );
+        this.tourMask = LX.makeContainer( [ '100%', '100%' ], 'tour-mask absolute inset-0' );
         this.tourContainer.appendChild( this.tourMask );
 
         const svg = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
@@ -194,7 +194,7 @@ export class Tour
         }
 
         // Reference Highlight
-        const refContainer = LX.makeContainer( [ '0', '0' ], 'tour-ref-mask' );
+        const refContainer = LX.makeContainer( [ '0', '0' ], 'tour-ref-mask absolute' );
         refContainer.style.left = `${boundingX - hOffset - 1}px`;
         refContainer.style.top = `${boundingY - vOffset - 1}px`;
         refContainer.style.width = `${boundingWidth + hOffset * 2 + 2}px`;
@@ -250,11 +250,11 @@ export class Tour
             const footerSteps = LX.makeContainer( [ '50%', 'auto' ], 'p-2 gap-1 place-self-center flex flex-row', '', footer );
             for ( let i = 0; i < this.steps.length; i++ )
             {
-                const stepIndicator = document.createElement( 'span' );
-                stepIndicator.className = 'tour-step-indicator';
+                const stepIndicator = LX.makeElement( 'span' );
+                stepIndicator.className = 'size-3 rounded-full bg-accent inline-flex data-active:bg-primary';
                 if ( i === this.currentStep )
                 {
-                    stepIndicator.classList.add( 'active' );
+                    stepIndicator.dataset['active'] = 'true';
                 }
                 footerSteps.appendChild( stepIndicator );
             }

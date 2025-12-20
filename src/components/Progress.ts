@@ -39,15 +39,12 @@ export class Progress extends BaseComponent
             container.style.width = `calc( 100% - ${realNameWidth})`;
         };
 
-        const container = document.createElement( 'div' );
-        container.className = 'lexprogress';
-        this.root.appendChild( container );
+        const container = LX.makeElement( 'div', 'flex justify-center items-center gap-2', '', this.root );
 
         // add slider (0-1 if not specified different )
 
-        let progress: any = document.createElement( 'meter' );
+        let progress: any = LX.makeElement( 'meter', 'lexprogressbar outline-none rounded-lg select-none' );
         progress.id = 'lexprogressbar-' + name;
-        progress.className = 'lexprogressbar';
         progress.step = 'any';
         progress.min = options.min ?? 0;
         progress.max = options.max ?? 1;
@@ -62,11 +59,11 @@ export class Progress extends BaseComponent
 
             if ( progress.low != undefined && progress.value < progress.low )
             {
-                backgroundColor = LX.getThemeColor( 'destructive' );
+                backgroundColor = LX.getThemeColor( 'color-destructive' );
             }
             else if ( progress.high != undefined && progress.value < progress.high )
             {
-                backgroundColor = LX.getThemeColor( 'warning' );
+                backgroundColor = LX.getThemeColor( 'color-warning' );
             }
 
             progress.style.background = `color-mix(in srgb, ${backgroundColor} 20%, transparent)`;

@@ -2,14 +2,15 @@
 
 import { LX } from './../core/Namespace';
 
-interface AvatarDesc {
+interface AvatarDesc
+{
     className?: string;
     imgSource?: string;
     imgAlt?: string;
     imgClass?: string;
     fallback?: string;
     fallbackClass?: string;
-};
+}
 
 export class Avatar
 {
@@ -33,7 +34,8 @@ export class Avatar
         else if ( desc.fallback )
         {
             const cn = 'size-full text-sm font-semibold place-self-center text-center content-center';
-            const span = LX.makeElement( 'span', desc.fallbackClass ? LX.twMerge( ...cn.split( ' ' ), ...desc.fallbackClass.split( ' ' ) ) : cn, desc.fallback, this.root );
+            const span = LX.makeElement( 'span', desc.fallbackClass ? LX.twMerge( ...cn.split( ' ' ), ...desc.fallbackClass.split( ' ' ) ) : cn,
+                desc.fallback, this.root );
             this.fallbackElement = span;
             rootCn += ' border-color';
         }

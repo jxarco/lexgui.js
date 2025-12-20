@@ -18,19 +18,18 @@ export class ComboButtons extends BaseComponent
         let shouldToggle = shouldSelect && ( options.toggle ?? false );
 
         let container = document.createElement( 'div' );
-        container.className = 'lexcombobuttons ';
+        container.className = 'lexcombobuttons flex justify-center';
 
         options.skipReset = true;
 
         if ( options.float )
         {
-            container.className += options.float;
+            const _justOptions = [ 'justify-start', 'justify-center', 'justify-end' ]; // force TW to include this
+            container.className = LX.mergeClass( container.className, `justify-${options.float}` );
         }
 
         let currentValue: any = [];
-        let buttonsBox = document.createElement( 'div' );
-        buttonsBox.className = 'lexcombobuttonsbox ';
-        container.appendChild( buttonsBox );
+        let buttonsBox = LX.makeElement( 'div', 'flex w-max bg-secondary pad-sm rounded-lg gap-1', '', container );
 
         for ( let b of values )
         {

@@ -15,15 +15,15 @@ export class CanvasCurve
     constructor( value: any[], options: any = {} )
     {
         let element: any = document.createElement( 'div' );
-        element.className = LX.mergeClass( 'curve', options.className );
+        element.className = LX.mergeClass( 'curve [&_canvas]:rounded', options.className );
         element.style.minHeight = '50px';
         element.style.width = options.width || '100%';
         element.style.minWidth = '50px';
         element.style.minHeight = '20px';
 
-        element.bgcolor = options.bgColor || LX.getThemeColor( 'background' );
-        element.pointscolor = options.pointsColor || LX.getThemeColor( 'primary' );
-        element.activepointscolor = options.activePointsColor || LX.getThemeColor( 'accent' );
+        element.bgcolor = options.bgColor || LX.getThemeColor( 'color-background' );
+        element.pointscolor = options.pointsColor || LX.getThemeColor( 'color-primary' );
+        element.activepointscolor = options.activePointsColor || LX.getThemeColor( 'color-accent' );
         element.linecolor = options.lineColor || '#555';
         element.value = value || [];
         element.xrange = options.xrange || [ 0, 1 ]; // min, max
@@ -38,9 +38,9 @@ export class CanvasCurve
         element.move_out = options.moveOutAction ?? LX.CURVE_MOVEOUT_DELETE;
 
         LX.addSignal( '@on_new_color_scheme', ( el: HTMLElement, value: string ) => {
-            element.bgcolor = options.bgColor || LX.getThemeColor( 'background' );
-            element.pointscolor = options.pointsColor || LX.getThemeColor( 'primary' );
-            element.activepointscolor = options.activePointsColor || LX.getThemeColor( 'accent' );
+            element.bgcolor = options.bgColor || LX.getThemeColor( 'color-background' );
+            element.pointscolor = options.pointsColor || LX.getThemeColor( 'color-primary' );
+            element.activepointscolor = options.activePointsColor || LX.getThemeColor( 'color-accent' );
             this.redraw();
         } );
 

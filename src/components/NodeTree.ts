@@ -140,7 +140,7 @@ export class NodeTree
 
             // Add or remove
             const idx = this.selected.indexOf( node );
-            item.classList.toggle( 'selected', ( idx == -1 ) );
+            item.classList.toggle( 'selected', idx == -1 );
             if ( idx > -1 )
             {
                 this.selected.splice( idx, 1 );
@@ -629,17 +629,14 @@ export class Tree extends BaseComponent
 
         super( ComponentType.TREE, name, null, options );
 
-        let container = document.createElement( 'div' );
-        container.className = 'lextree';
-        this.root.appendChild( container );
+        let container = LX.makeElement( 'div', 'lextree p-1 rounded-lg w-full my-0 mx-auto text-primary font-medium text-sm min-h-3', '', this.root );
 
         if ( name )
         {
             let title = LX.makeElement( 'span', 'block p-1 text-primary select-none text-base font-medium whitespace-nowrap', name, container );
         }
 
-        let toolsDiv = document.createElement( 'div' );
-        toolsDiv.className = 'lextreetools';
+        let toolsDiv = LX.makeElement( 'div', 'lextreetools flex items-center bg-secondary px-2 rounded-lg gap-2 my-1' );
         if ( !name )
         {
             toolsDiv.className += ' notitle';
@@ -683,7 +680,7 @@ export class Tree extends BaseComponent
 
         // Tree
 
-        let list = document.createElement( 'ul' );
+        let list: HTMLUListElement = LX.makeElement( 'ul', 'flex flex-col gap-1 ps-0' );
         list.addEventListener( 'contextmenu', function( e )
         {
             e.preventDefault();

@@ -72,7 +72,8 @@ export class SizeInput extends BaseComponent
 
         if ( options.units )
         {
-            LX.makeElement( 'span', 'text-muted-foreground align-center content-center font-medium flex-auto-keep select-none', options.units, container );
+            LX.makeElement( 'span', 'text-muted-foreground align-center content-center font-medium flex-auto-keep select-none', options.units,
+                container );
         }
 
         // Lock aspect ratio

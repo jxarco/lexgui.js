@@ -21,7 +21,7 @@ export class Sheet
         this.root.dataset['side'] = this.side;
         this.root.tabIndex = '1';
         this.root.role = 'dialog';
-        this.root.className = 'lexsheet fixed z-1000 bg-primary';
+        this.root.className = 'lexsheet fixed z-1000 bg-primary overflow-hidden';
         document.body.appendChild( this.root );
 
         this.root.addEventListener( 'keydown', ( e: KeyboardEvent ) => {

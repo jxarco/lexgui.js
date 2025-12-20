@@ -208,7 +208,8 @@ export class RangeInput extends BaseComponent
 
         if ( ogValue.constructor == Array )
         {
-            let maxSlider = LX.makeElement( 'input', LX.mergeClass( 'lexrangeslider no-fill pointer-events-none overlap absolute left-0', options.className ) );
+            let maxSlider = LX.makeElement( 'input',
+                LX.mergeClass( 'lexrangeslider no-fill pointer-events-none overlap absolute left-0', options.className ) );
             maxSlider.min = options.min ?? 0;
             maxSlider.max = options.max ?? 100;
             maxSlider.step = options.step ?? 1;

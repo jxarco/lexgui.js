@@ -33,20 +33,19 @@ LX.init = async function( options: any = {} )
     // LexGUI root
     console.log( `LexGUI v${this.version}` );
 
-    var root = document.createElement( 'div' );
+    const root: HTMLDivElement = LX.makeElement( 'div', LX.mergeClass( 'lexcontainer', options.rootClass ) );
     root.id = 'lexroot';
     root.tabIndex = -1;
-    root.className = LX.mergeClass( 'lexcontainer', options.rootClass );
-    
-    this.modal = document.createElement( 'div' );
+
+    this.modal = LX.makeElement( 'div', 'inset-0 hidden-opacity bg-black/50 fixed z-100 transition-opacity duration-100 ease-in' );
     this.modal.id = 'modal';
-    this.modal.classList.add( 'hidden-opacity' );
     this.modal.toggle = function( force: boolean )
     {
         this.classList.toggle( 'hidden-opacity', force );
     };
 
-    function blockScroll( e: Event ) {
+    function blockScroll( e: Event )
+    {
         e.preventDefault();
         e.stopPropagation();
     }
@@ -97,7 +96,7 @@ LX.init = async function( options: any = {} )
         const notifSection = document.createElement( 'section' );
         notifSection.className = 'notifications';
         this.notifications = document.createElement( 'ol' );
-        this.notifications.className = '';
+        this.notifications.className = 'fixed flex flex-col-reverse m-0 p-0 gap-1 z-1000';
         this.notifications.iWidth = 0;
         notifSection.appendChild( this.notifications );
         document.body.appendChild( notifSection );
@@ -413,21 +412,22 @@ LX._createCommandbar = function( root: any )
         }
     };
 
-    const _filterEntry = function( entryName: string, filter: string ) {
+    const _filterEntry = function( entryName: string, filter: string )
+    {
         if ( !filter?.length ) return false;
         const cleanName = LX.stripTags( entryName ).toLowerCase();
         return cleanName.includes( filter.toLowerCase() );
     };
 
-    const _getEntries = function( filter: string ) {
-
+    const _getEntries = function( filter: string )
+    {
         const entries = [];
 
         for ( let m of LX.menubars )
         {
             for ( let i of m.items )
             {
-                if( _filterEntry( i.name, filter ) ) entries.push( i );
+                if ( _filterEntry( i.name, filter ) ) entries.push( i );
             }
         }
 
@@ -435,13 +435,13 @@ LX._createCommandbar = function( root: any )
         {
             for ( let i of m.items )
             {
-                if( _filterEntry( i.name, filter ) ) entries.push( i );
+                if ( _filterEntry( i.name, filter ) ) entries.push( i );
             }
         }
 
         for ( let entry of LX.extraCommandbarEntries )
         {
-            if( _filterEntry( entry.name, filter ) ) entries.push( entry );
+            if ( _filterEntry( entry.name, filter ) ) entries.push( entry );
         }
 
         if ( LX.has( 'CodeEditor' ) )
@@ -461,7 +461,9 @@ LX._createCommandbar = function( root: any )
                 value += key + " <span class='lang-ext'>(" + languages[l].ext + ')</span>';
 
                 if ( !_filterEntry( key, filter ) )
+                {
                     continue;
+                }
 
                 entries.push( { name: value, callback: () => {
                     for ( let i of instances )
@@ -587,43 +589,43 @@ LX._createCommandbar = function( root: any )
 
 LX._registerIconsAndColors = function( colorsRootPath: string = './' )
 {
-    LX.requestJSON( colorsRootPath + 'registry/colors.json', ( colors: any ) => 
-    {
+    LX.requestJSON( colorsRootPath + 'registry/colors.json', ( colors: any ) => {
         // loop through each color
-        for( const key in colors )
+        for ( const key in colors )
         {
-            const value = colors[ key ];
+            const value = colors[key];
 
-            if( !Array.isArray( value ) )
+            if ( !Array.isArray( value ) )
             {
                 continue;
             }
 
-            value.forEach(entry => {
+            value.forEach( ( entry ) => {
                 const color = `${key}-${entry.scale}`;
                 const val = `<span class="flex bg-${color} w-3 h-3 rounded-full mr-2"></span>${color}`;
                 LX.registerCommandbarEntry( val, () => {
                     navigator.clipboard.writeText( color );
-                    LX.toast( `${ LX.makeIcon( 'CircleCheck' ).innerHTML } Copied ${ color } to clipboard.`, null, { position: 'top-center', timeout: 3000 } );
+                    LX.toast( `${LX.makeIcon( 'CircleCheck' ).innerHTML} Copied ${color} to clipboard.`, null, { position: 'top-center',
+                        timeout: 3000 } );
                 } );
-            });
+            } );
         }
-    });
+    } );
 
     const lucide = ( window as any ).lucide;
     const allIcons = { ...LX.ICONS, ...lucide.icons };
 
-    for( const iconName in allIcons )
+    for ( const iconName in allIcons )
     {
         const variant = 'regular';
-        const icon = LX.makeIcon( iconName, { svgClass: 'mr-2 pointer-events-none', variant });
+        const icon = LX.makeIcon( iconName, { svgClass: 'mr-2 pointer-events-none', variant } );
         const val = `${icon.innerHTML}${iconName}`;
         LX.registerCommandbarEntry( val, () => {
             navigator.clipboard.writeText( iconName );
-            LX.toast( `${ LX.makeIcon( 'CircleCheck' ).innerHTML } Copied ${ iconName } to clipboard.`, null, { position: 'top-center', timeout: 3000 } );
+            LX.toast( `${LX.makeIcon( 'CircleCheck' ).innerHTML} Copied ${iconName} to clipboard.`, null, { position: 'top-center', timeout: 3000 } );
         } );
     }
-}
+};
 
 /**
  * @method setCommandbarState

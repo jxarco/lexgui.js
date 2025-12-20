@@ -236,14 +236,14 @@ export abstract class Timeline
          */
         function updateTheme()
         {
-            Timeline.BACKGROUND_COLOR = LX.getThemeColor( 'background-blur' );
-            Timeline.TRACK_COLOR_PRIMARY = LX.getThemeColor( 'card' );
-            Timeline.TRACK_COLOR_SECONDARY = LX.getThemeColor( 'secondary' );
-            Timeline.TRACK_COLOR_TERTIARY = LX.getThemeColor( 'accent' );
+            Timeline.BACKGROUND_COLOR = LX.getThemeColor( 'color-background-blur' );
+            Timeline.TRACK_COLOR_PRIMARY = LX.getThemeColor( 'color-card' );
+            Timeline.TRACK_COLOR_SECONDARY = LX.getThemeColor( 'color-secondary' );
+            Timeline.TRACK_COLOR_TERTIARY = LX.getThemeColor( 'color-accent' );
             Timeline.FONT = LX.getThemeColor( 'global-font' );
-            Timeline.FONT_COLOR_PRIMARY = LX.getThemeColor( 'foreground' );
-            Timeline.FONT_COLOR_TERTIARY = LX.getThemeColor( 'primary' );
-            Timeline.FONT_COLOR_QUATERNARY = LX.getThemeColor( 'muted-foreground' );
+            Timeline.FONT_COLOR_PRIMARY = LX.getThemeColor( 'color-foreground' );
+            Timeline.FONT_COLOR_TERTIARY = LX.getThemeColor( 'color-primary' );
+            Timeline.FONT_COLOR_QUATERNARY = LX.getThemeColor( 'color-muted-foreground' );
             Timeline.KEYFRAME_COLOR = LX.getThemeColor( 'lxTimeline-keyframe' );
             Timeline.KEYFRAME_COLOR_SELECTED = Timeline.KEYFRAME_COLOR_HOVERED = LX.getThemeColor(
                 'lxTimeline-keyframe-selected'
@@ -1695,16 +1695,16 @@ export abstract class Timeline
     // ----- END OF BASE FUNCTIONS -----
 }
 
-Timeline.BACKGROUND_COLOR = LX.getThemeColor( 'background-blur' );
-Timeline.TRACK_COLOR_PRIMARY = LX.getThemeColor( 'card' );
-Timeline.TRACK_COLOR_SECONDARY = LX.getThemeColor( 'secondary' );
-Timeline.TRACK_COLOR_TERTIARY = LX.getThemeColor( 'accent' );
+Timeline.BACKGROUND_COLOR = LX.getThemeColor( 'color-background-blur' );
+Timeline.TRACK_COLOR_PRIMARY = LX.getThemeColor( 'color-card' );
+Timeline.TRACK_COLOR_SECONDARY = LX.getThemeColor( 'color-secondary' );
+Timeline.TRACK_COLOR_TERTIARY = LX.getThemeColor( 'color-accent' );
 Timeline.TRACK_SELECTED = LX.getThemeColor( 'color-blue-600' );
 Timeline.TRACK_SELECTED_LIGHT = LX.getThemeColor( 'color-blue-400' );
 Timeline.FONT = LX.getThemeColor( 'global-font' );
-Timeline.FONT_COLOR_PRIMARY = LX.getThemeColor( 'foreground' );
-Timeline.FONT_COLOR_TERTIARY = LX.getThemeColor( 'primary' );
-Timeline.FONT_COLOR_QUATERNARY = LX.getThemeColor( 'muted-foreground' );
+Timeline.FONT_COLOR_PRIMARY = LX.getThemeColor( 'color-foreground' );
+Timeline.FONT_COLOR_TERTIARY = LX.getThemeColor( 'color-primary' );
+Timeline.FONT_COLOR_QUATERNARY = LX.getThemeColor( 'color-muted-foreground' );
 Timeline.TIME_MARKER_COLOR = LX.getThemeColor( 'color-blue-600' );
 Timeline.TIME_MARKER_COLOR_TEXT = '#ffffff';
 

@@ -17,9 +17,9 @@ export class AlertDialog extends Dialog
         options.modal = true;
 
         super( undefined, ( p: Panel ) => {
-            p.root.classList.add( 'p-4!', 'flex', 'flex-col', 'gap-2' );
+            p.root.className = LX.mergeClass( p.root.className, 'pad-2xl flex flex-col gap-2' );
 
-            LX.makeContainer( [ '100%', '100%' ], 'text-lg font-medium', title, p );
+            LX.makeContainer( [ '100%', '100%' ], 'text-lg font-medium text-primary', title, p );
 
             p.addTextArea( null, message, null, { disabled: true, fitHeight: true, inputClass: 'bg-none text-sm text-muted-foreground' } );
 

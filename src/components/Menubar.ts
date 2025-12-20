@@ -24,12 +24,12 @@ export class Menubar
 
     constructor( items: any[], options: any = {} )
     {
-        this.root = document.createElement( 'div' );
-        this.root.className = 'lexmenubar';
+        this.root = LX.makeElement( 'div', 'lexmenubar size-full bg-background text-primary inline-flex gap-1 overflow-hidden text-sm font-medium' );
 
         if ( options.float )
         {
-            this.root.style.justifyContent = options.float;
+            const _justOptions = [ 'justify-start', 'justify-center', 'justify-end' ]; // force TW to include this
+            this.root.className = LX.mergeClass( this.root.className, `justify-${options.float}` );
         }
 
         this.items = items ?? [];

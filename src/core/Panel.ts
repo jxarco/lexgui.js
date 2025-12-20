@@ -69,7 +69,8 @@ export class Panel
 
     constructor( options: any = {} )
     {
-        const root = LX.makeElement( 'div', LX.mergeClass( 'lexpanel m-0 pad-md overflow-hidden overflow-y-scroll text-foreground scrollbar-hidden', options.className ) );
+        const root = LX.makeElement( 'div',
+            LX.mergeClass( 'lexpanel m-0 pad-md overflow-hidden overflow-y-scroll text-foreground scrollbar-hidden', options.className ) );
 
         if ( options.id )
         {

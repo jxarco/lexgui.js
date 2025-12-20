@@ -23,8 +23,8 @@ export class TimeBar
     static TIMEBAR_PLAY = 1;
     static TIMEBAR_TRIM = 2;
 
-    static BACKGROUND_COLOR = LX.getThemeColor( 'secondary' );
-    static COLOR = LX.getThemeColor( 'accent' );
+    static BACKGROUND_COLOR = LX.getThemeColor( 'color-secondary' );
+    static COLOR = LX.getThemeColor( 'color-accent' );
     static ACTIVE_COLOR = LX.getThemeColor( 'color-blue-400' );
 
     type: number = TimeBar.TIMEBAR_PLAY;
@@ -91,8 +91,8 @@ export class TimeBar
 
     updateTheme()
     {
-        TimeBar.BACKGROUND_COLOR = LX.getThemeColor( 'secondary' );
-        TimeBar.COLOR = LX.getThemeColor( 'accent' );
+        TimeBar.BACKGROUND_COLOR = LX.getThemeColor( 'color-secondary' );
+        TimeBar.COLOR = LX.getThemeColor( 'color-accent' );
         TimeBar.ACTIVE_COLOR = LX.getThemeColor( 'color-blue-400' );
     }
 
@@ -543,7 +543,7 @@ export class VideoEditor
         if ( options.videoArea )
         {
             options.videoArea.root.classList.add( 'lexvideoeditor' );
-            options.videoArea.root.style.position = "relative";
+            options.videoArea.root.style.position = 'relative';
             options.videoArea.attach( this.cropArea );
             videoArea.attach( options.videoArea );
         }
@@ -554,7 +554,7 @@ export class VideoEditor
             videoArea.root.classList.add( 'lexvideoeditor' );
         }
 
-        videoArea.root.style.position = "relative";
+        videoArea.root.style.position = 'relative';
 
         this.controlsArea = controlsArea;
         // Create playing timeline area and attach panels

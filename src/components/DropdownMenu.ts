@@ -187,8 +187,12 @@ export class DropdownMenu
         }
 
         const menuItem: any = document.createElement( 'div' );
-        menuItem.className = 'lexdropdownmenuitem' + ( ( item.name || item.options ) ? '' : ' label' )
-            + ( item.disabled ?? false ? ' disabled' : '' ) + ( ` ${item.className ?? ''}` );
+        menuItem.className = LX.mergeClass(
+            'lexdropdownmenuitem flex flex-row pad-md rounded-lg gap-2 truncate cursor-pointer select-none'
+                + ( ( item.name || item.options ) ? '' : ' label' )
+                + ( item.disabled ?? false ? ' disabled' : '' ),
+            item.className
+        );
         menuItem.dataset['id'] = pKey;
         menuItem.innerHTML = `<span class="ellipsis-overflow">${key}</span>`;
         menuItem.tabIndex = '1';

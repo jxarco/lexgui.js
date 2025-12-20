@@ -39,7 +39,10 @@ export class Dialog
             modal = options.modal ?? false;
 
         let root = document.createElement( 'dialog' );
-        root.className = LX.mergeClass( 'lexdialog', options.className );
+        root.className = LX.mergeClass(
+            'lexdialog absolute outline-none border-color m-0 p-0 min-w-3xs min-h-max overflow-hidden rounded-xl bg-background',
+            options.className
+        );
         root.id = options.id ?? 'dialog' + Dialog._last_id++;
         root.dataset['modal'] = modal;
         LX.root.appendChild( root );
@@ -54,7 +57,8 @@ export class Dialog
 
         if ( title )
         {
-            titleDiv.className = 'lexdialogtitle';
+            titleDiv.className =
+                'lexdialogtitle flex w-full outline-none items-center justify-between font-semibold text-xl text-secondary-foreground pad-xl select-none';
             titleDiv.innerHTML = title;
             titleDiv.setAttribute( 'draggable', 'false' );
             root.appendChild( titleDiv );
@@ -83,7 +87,8 @@ export class Dialog
                 }
             };
 
-            const closeButton = LX.makeIcon( 'X', { title: 'Close', iconClass: 'lexdialogcloser' } );
+            const closeButton = LX.makeIcon( 'X', { title: 'Close',
+                iconClass: 'lexdialogcloser text-lg color-secondary-foreground cursor-pointer z-1 select-none' } );
             closeButton.addEventListener( 'click', this.close );
 
             const dockButton = LX.makeIcon( 'Minus', { title: 'Dock', iconClass: 'ml-auto mr-2' } );
@@ -120,8 +125,7 @@ export class Dialog
             }
         }
 
-        const panel = new LX.Panel();
-        panel.root.classList.add( 'lexdialogcontent' );
+        const panel = new LX.Panel( { className: 'lexdialogcontent w-full p-1 text-primary-foreground text-sm ml-0 break-all' } );
 
         if ( !title )
         {

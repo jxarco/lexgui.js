@@ -45,23 +45,21 @@ export class ColorPicker
             console.warn( 'Define a callback in _options.onChange_ to allow getting new Color values!' );
         }
 
-        this.root = document.createElement( 'div' );
-        this.root.className = 'lexcolorpicker';
+        this.root = LX.makeElement( 'div', 'lexcolorpicker flex flex-col text-sm w-3xs gap-2 p-1' );
 
         this.markerHalfSize = 8;
         this.markerSize = this.markerHalfSize * 2;
         this.currentColor = new Color( hexValue );
 
         const hueColor = new Color( { h: this.currentColor.hsv.h, s: 1, v: 1 } );
+        const colorMarkerClass = 'size-4 rounded-lg bg-transparent absolute pointer-events-none border-3 border-solid border-white';
 
         // Intensity, Sat
-        this.colorPickerBackground = document.createElement( 'div' );
-        this.colorPickerBackground.className = 'lexcolorpickerbg';
+        this.colorPickerBackground = LX.makeElement( 'div', 'lexcolorpickerbg w-full aspect-square relative rounded-md cursor-pointer' );
         this.colorPickerBackground.style.backgroundColor = `rgb(${hueColor.css.r}, ${hueColor.css.g}, ${hueColor.css.b})`;
         this.root.appendChild( this.colorPickerBackground );
 
-        this.intSatMarker = document.createElement( 'div' );
-        this.intSatMarker.className = 'lexcolormarker';
+        this.intSatMarker = LX.makeElement( 'div', colorMarkerClass );
         this.intSatMarker.style.backgroundColor = this.currentColor.hex;
         this.colorPickerBackground.appendChild( this.intSatMarker );
 
@@ -144,12 +142,10 @@ export class ColorPicker
         const innerHueAlpha = LX.makeContainer( [ '100%', '100%' ], 'flex flex-col gap-2', '', hueAlphaContainer );
 
         // Hue
-        this.colorPickerTracker = document.createElement( 'div' );
-        this.colorPickerTracker.className = 'lexhuetracker';
+        this.colorPickerTracker = LX.makeElement( 'div', 'lexhuetracker w-full h-4 rounded-lg relative cursor-pointer' );
         innerHueAlpha.appendChild( this.colorPickerTracker );
 
-        this.hueMarker = document.createElement( 'div' );
-        this.hueMarker.className = 'lexcolormarker';
+        this.hueMarker = LX.makeElement( 'div', colorMarkerClass );
         this.hueMarker.style.backgroundColor = `rgb(${hueColor.css.r}, ${hueColor.css.g}, ${hueColor.css.b})`;
         this.colorPickerTracker.appendChild( this.hueMarker );
 
@@ -206,13 +202,11 @@ export class ColorPicker
         // Alpha
         if ( this.useAlpha )
         {
-            this.alphaTracker = document.createElement( 'div' );
-            this.alphaTracker.className = 'lexalphatracker';
+            this.alphaTracker = LX.makeElement( 'div', 'lexalphatracker w-full h-4 rounded-lg relative cursor-pointer' );
             this.alphaTracker.style.color = `rgb(${this.currentColor.css.r}, ${this.currentColor.css.g}, ${this.currentColor.css.b})`;
             innerHueAlpha.appendChild( this.alphaTracker );
 
-            this.alphaMarker = document.createElement( 'div' );
-            this.alphaMarker.className = 'lexcolormarker';
+            this.alphaMarker = LX.makeElement( 'div', colorMarkerClass );
             this.alphaMarker.style.backgroundColor =
                 `rgb(${this.currentColor.css.r}, ${this.currentColor.css.g}, ${this.currentColor.css.b},${this.currentColor.css.a})`;
             this.alphaTracker.appendChild( this.alphaMarker );

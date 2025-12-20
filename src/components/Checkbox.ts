@@ -47,20 +47,16 @@ export class Checkbox extends BaseComponent
         };
 
         var container = document.createElement( 'div' );
-        container.className = 'lexcheckboxcont items-center';
+        container.className = 'flex items-center gap-2 my-0 mx-auto [&_span]:truncate [&_span]:flex-auto-fill';
         this.root.appendChild( container );
 
-        let checkbox = document.createElement( 'input' );
+        let checkbox: HTMLInputElement = LX.makeElement( 'input', LX.mergeClass( 'lexcheckbox rounded-xl', options.className ?? 'primary' ) );
         checkbox.type = 'checkbox';
-        checkbox.className = LX.mergeClass( 'lexcheckbox rounded-xl', options.className ?? 'primary' );
         checkbox.checked = value;
         checkbox.disabled = options.disabled ?? false;
         container.appendChild( checkbox );
 
-        let valueName = document.createElement( 'span' );
-        valueName.className = 'text-sm';
-        valueName.innerHTML = options.label ?? 'On';
-        container.appendChild( valueName );
+        let valueName = LX.makeElement( 'span', 'text-sm', options.label ?? 'On', container );
 
         checkbox.addEventListener( 'change', ( e ) => {
             this.set( checkbox.checked, false, e );

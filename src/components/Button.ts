@@ -94,9 +94,12 @@ export class Button extends BaseComponent
             }
         };
 
-        var wValue: any = LX.makeElement( 'button', LX.mergeClass( ['lexbutton', 'inline-flex', 'items-center', 'justify-center', 'whitespace-nowrap',
-            'transition-all', 'disabled:pointer-events-none', 'disabled:opacity-50', '[&_svg]:pointer-events-none', 'shrink-0', '[&_svg]:shrink-0',
-            'outline-none', 'select-none', 'cursor-pointer', 'h-9', 'px-2'].join( ' ' ), options.buttonClass ?? 'outline' ) );
+        var wValue: any = LX.makeElement( 'button', LX.mergeClass(
+            [ 'lexbutton', 'inline-flex', 'items-center', 'justify-center', 'whitespace-nowrap', 'transition-all', 'disabled:pointer-events-none',
+                'disabled:opacity-50', '[&_svg]:pointer-events-none', 'shrink-0', '[&_svg]:shrink-0', 'outline-none', 'select-none', 'cursor-pointer',
+                'font-medium', 'text-sm', 'border-1', 'h-9', 'px-2', 'overflow-hidden', 'bg-clip-padding' ].join( ' ' ),
+            options.buttonClass ?? 'outline'
+        ) );
 
         wValue.title = options.tooltip ? '' : ( options.title ?? '' );
 

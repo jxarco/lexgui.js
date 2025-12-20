@@ -21,20 +21,17 @@ export class Footer
     constructor( options: any = {} )
     {
         const root = document.createElement( 'footer' );
-        root.className = LX.mergeClass( 'lexfooter', options.className );
+        root.className = LX.mergeClass( 'lexfooter bg-background p-2 w-full leading-6 [&_p]:text-xs', options.className );
 
         const wrapper = document.createElement( 'div' );
         wrapper.style.minHeight = '48px';
         wrapper.className = 'w-full';
         root.appendChild( wrapper );
 
-        // const hr = document.createElement( "hr" );
-        // wrapper.appendChild( hr );
-
         if ( options.columns && options.columns.constructor == Array )
         {
             const cols = document.createElement( 'div' );
-            cols.className = 'columns';
+            cols.className = 'grid text-center';
             cols.style.gridTemplateColumns = '1fr '.repeat( options.columns.length );
             wrapper.appendChild( cols );
 

@@ -85,7 +85,9 @@ export class BaseComponent
         this.options = options;
         this._initialValue = value;
 
-        const root: any = LX.makeElement( 'div', LX.mergeClass( 'lexcomponent flex flex-row outline-none items-center text-foreground text-sm overflow-hidden min-h-8 pad-sm', options.className ) );
+        const root: any = LX.makeElement( 'div',
+            LX.mergeClass( 'lexcomponent flex flex-row outline-none items-center text-foreground text-sm overflow-hidden min-h-8 pad-sm',
+                options.className ) );
 
         this.onResize = () => {};
 
@@ -125,7 +127,8 @@ export class BaseComponent
         {
             if ( !( options.hideName ?? false ) )
             {
-                let domName = LX.makeElement( 'div', 'lexcomponentname text-sm', name );
+                let domName = LX.makeElement( 'div',
+                    'lexcomponentname flex text-sm text-secondary-foreground justify-between whitespace-nowrap overflow-hidden', name );
 
                 if ( options.justifyName )
                 {

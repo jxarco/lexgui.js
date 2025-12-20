@@ -97,7 +97,7 @@ LX._registerIconsAndColors( "./" );
         <a href="docs?p=changelog" class="flex flex-row gap-1 items-center text-sm p-1 px-4 rounded-full text-primary decoration-none hover:bg-secondary cursor-pointer"><span class="flex bg-info w-2 h-2 rounded-full"></span>
             New Components: Avatar, Spinner, Pagination and more${ LX.makeIcon( "ArrowRight", { svgClass: "sm" } ).innerHTML }</a>
         <p class="fg text-primary font-medium tracking-tight leading-none text-center text-balance sm:text-5xl text-4xl">Build your Application Interface</p>
-        <p class="text-primary font-light text-xl xs:text-lg text-center text-balance leading-normal max-w-3xl">A modern-style UI kit, inspired by shadcn, built for the web. Pure JavaScript, CSS, zero dependencies. Fully Open Source.</p>
+        <p class="text-primary font-light text-xl xs:text-lg text-center text-balance leading-normal max-w-3xl">A modern-style UI kit, inspired by shadcn, built for the web. Pure HTML, JavaScript, and Tailwind CSS. Fully Open Source.</p>
     `, area );
 
     const headerButtons = LX.makeContainer( [ "auto", "auto" ], "flex flex-row mt-2", ``, header );
@@ -484,7 +484,7 @@ LX._registerIconsAndColors( "./" );
 
                         const selected = ( idx == 0 );
                         const msgContent = LX.makeContainer( [ "100%", "auto" ],
-                            `flex flex-col border-color p-3 rounded-lg gap-2 select-none hover:bg-mix cursor-pointer ${ selected ? "bg-secondary" : "" }`, "", mailContainer );
+                            `flex flex-col border-color p-3 rounded-lg gap-2 select-none cursor-pointer ${ selected ? "bg-secondary" : "" }`, "", mailContainer );
 
                         // Name, subject, date
                         {

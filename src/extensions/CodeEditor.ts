@@ -1090,7 +1090,7 @@ export class CodeEditor
             for ( let lang in CodeEditor.utils ) CodeEditor.utils[lang] = new Set( CodeEditor.utils[lang] );
             for ( let lang in CodeEditor.types ) CodeEditor.types[lang] = new Set( CodeEditor.types[lang] );
             for ( let lang in CodeEditor.builtIn ) CodeEditor.builtIn[lang] = new Set( CodeEditor.builtIn[lang] );
-            for ( let lang in CodeEditor.statements ) { CodeEditor.statements[lang] = new Set( CodeEditor.statements[lang] ); }
+            for ( let lang in CodeEditor.statements ) CodeEditor.statements[lang] = new Set( CodeEditor.statements[lang] );
             for ( let lang in CodeEditor.symbols ) CodeEditor.symbols[lang] = new Set( CodeEditor.symbols[lang] );
 
             CodeEditor._staticReady = true;
@@ -1706,9 +1706,9 @@ export class CodeEditor
 
         const _isVisible = () => {
             return (
-                root.offsetParent !== null &&
-                root.clientWidth > 0 &&
-                root.clientHeight > 0
+                root.offsetParent !== null
+                && root.clientWidth > 0
+                && root.clientHeight > 0
             );
         };
 
@@ -1726,7 +1726,7 @@ export class CodeEditor
         };
 
         // IntersectionObserver (for viewport)
-        const intersectionObserver = new IntersectionObserver( entries => {
+        const intersectionObserver = new IntersectionObserver( ( entries ) => {
             for ( const entry of entries )
             {
                 if ( entry.isIntersecting )
@@ -1734,13 +1734,13 @@ export class CodeEditor
                     _tryPrepare();
                 }
             }
-        });
+        } );
         intersectionObserver.observe( root );
 
         // ResizeObserver (for display property changes)
-        const resizeObserver = new ResizeObserver(() => {
+        const resizeObserver = new ResizeObserver( () => {
             _tryPrepare();
-        });
+        } );
         resizeObserver.observe( root );
 
         // Fallback polling (don't use it for now)
@@ -1754,7 +1754,7 @@ export class CodeEditor
 
         this._displayObserver = {
             intersectionObserver,
-            resizeObserver,
+            resizeObserver
             // interval,
         };
     }
@@ -3310,7 +3310,7 @@ export class CodeEditor
             // Apply difference offset between last processed cursor and current positions plus any offset generated
             // during processing the key pressed
             const totalCursorOffsetX = ( cursor.position - lastProcessedCursor.position ) + this._nextCursorPositionOffset;
-            const totalCursorOffsetY = ( cursor.line - lastProcessedCursor.line );
+            const totalCursorOffsetY = cursor.line - lastProcessedCursor.line;
 
             cursorOffset.x += totalCursorOffsetX;
             cursorOffset.y += totalCursorOffsetY;
@@ -6625,7 +6625,7 @@ export class CodeEditor
             if ( newCursor )
             {
                 this.startSelection( newCursor );
-                if( newCursor.selection )
+                if ( newCursor.selection )
                 {
                     newCursor.selection.selectInline( newCursor, col, ln, this.measureString( text ) );
                     this.cursorToString( newCursor, text );

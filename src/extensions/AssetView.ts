@@ -14,8 +14,8 @@ const Panel = LX.Panel;
 const NodeTree = LX.NodeTree;
 const TreeEvent = LX.TreeEvent;
 
-export type AssetViewAction = 'select' | 'dbl_click' | 'check' | 'clone' | 'move' | 'delete' | 'rename' 
-    | 'enter_folder' | 'create-folder' | 'refresh-content' | 'node-drag';
+export type AssetViewAction = 'select' | 'dbl_click' | 'check' | 'clone' | 'move' | 'delete' | 'rename' | 'enter_folder' | 'create-folder'
+    | 'refresh-content' | 'node-drag';
 
 export interface AssetViewItem
 {
@@ -349,10 +349,10 @@ export class AssetView
             itemEl.appendChild( checkbox );
         }
 
-        let title = document.createElement( 'span' );
-        title.className = 'lexassettitle';
-        title.innerText = item.id;
-        itemEl.appendChild( title );
+        // Asset title
+        LX.makeElement( 'span',
+            'lexassettitle absolute w-full h-8 bottom-0 text-sm bg-card text-card-foreground cursor-pointer text-center content-center block px-3 py-0.5 truncate z-1 pointer-events-none',
+            item.id, itemEl );
 
         if ( !this.skipPreview )
         {
@@ -820,7 +820,6 @@ export class AssetView
                 const onNodeDragged = this._callbacks['nodeDragged'];
 
                 const resolve = ( ...args: any[] ) => {
-                    
                     if ( node.parent )
                     {
                         const idx = node.parent.children.indexOf( node );
@@ -836,7 +835,7 @@ export class AssetView
 
                     node.parent = value;
                     node.dir = value.children;
-                    
+
                     const event: AssetViewEvent = {
                         type: 'node-drag',
                         items: [ node ],
@@ -1042,7 +1041,6 @@ export class AssetView
         const onRefreshContent = this._callbacks['refreshContent'];
 
         const resolve = ( ...args: any[] ) => {
-            
             const isCompactLayout = this.layout == AssetView.LAYOUT_COMPACT;
             const isListLayout = this.layout == AssetView.LAYOUT_LIST;
 
@@ -1094,7 +1092,7 @@ export class AssetView
                     item.domEl = this.addItem( item, undefined, false );
                 }
             }
-            
+
             const event: AssetViewEvent = {
                 type: 'refresh-content',
                 search: [ this.searchValue, this.filter ],

@@ -125,7 +125,7 @@ export class Sidebar
         {
             this.header = options.header ?? this._generateDefaultHeader( options );
             console.assert( this.header.constructor === HTMLDivElement, 'Use an HTMLDivElement to build your custom header' );
-            this.header.className = 'lexsidebarheader';
+            this.header.className = 'lexsidebarheader w-full h-[48px] flex rounded-lg p-2 mb-2 text-sm cursor-pointer items-center select-none';
             this.root.appendChild( this.header );
 
             if ( this.collapsable )
@@ -173,7 +173,7 @@ export class Sidebar
         // Content
         {
             this.content = document.createElement( 'div' );
-            this.content.className = 'lexsidebarcontent flex-auto';
+            this.content.className = 'lexsidebarcontent flex flex-col overflow-x-hidden overflow-y-scroll flex-auto-fill w-full';
             this.root.appendChild( this.content );
         }
 
@@ -206,7 +206,7 @@ export class Sidebar
 
         const avatar = new LX.Avatar( {
             imgSource: options.headerImage,
-            fallback: options.headerIcon ? LX.makeIcon( options.headerIcon, { svgClass: "xl" } ).innerHTML : undefined,
+            fallback: options.headerIcon ? LX.makeIcon( options.headerIcon, { svgClass: 'xl' } ).innerHTML : undefined,
             className: 'rounded-lg'
         } );
         header.appendChild( avatar.root );
@@ -249,7 +249,7 @@ export class Sidebar
 
         const avatar = new LX.Avatar( {
             imgSource: options.footerImage,
-            fallback: options.footerIcon ? LX.makeIcon( options.footerIcon, { svgClass: "xl" } ).innerHTML : undefined,
+            fallback: options.footerIcon ? LX.makeIcon( options.footerIcon, { svgClass: 'xl' } ).innerHTML : undefined,
             className: 'rounded-lg'
         } );
         footer.appendChild( avatar.root );
@@ -474,18 +474,15 @@ export class Sidebar
 
                 if ( !currentGroup )
                 {
-                    currentGroup = document.createElement( 'div' );
+                    currentGroup = LX.makeElement( 'div', 'lexsidebargroup flex flex-col gap-0.5' );
                     currentGroup.id = pGroupKey;
-                    currentGroup.className = 'lexsidebargroup';
                     this.content.appendChild( currentGroup );
 
-                    let groupEntry = document.createElement( 'div' );
-                    groupEntry.className = 'lexsidebargrouptitle';
+                    let groupEntry = LX.makeElement( 'div', 'lexsidebargrouptitle' );
                     currentGroup.appendChild( groupEntry );
 
-                    let groupLabel = document.createElement( 'div' );
-                    groupLabel.innerHTML = item.group;
-                    groupEntry.appendChild( groupLabel );
+                    // Group label
+                    LX.makeElement( 'div', '', item.group, groupEntry );
 
                     if ( this.groups[item.group] != null )
                     {
@@ -649,8 +646,7 @@ export class Sidebar
                 continue;
             }
 
-            let subentryContainer = document.createElement( 'div' );
-            subentryContainer.className = 'lexsidebarsubentrycontainer';
+            let subentryContainer = LX.makeElement( 'div', 'lexsidebarsubentrycontainer flex flex-col self-center w-full ml-4 px-4 select-none' );
 
             if ( isCollapsable )
             {
