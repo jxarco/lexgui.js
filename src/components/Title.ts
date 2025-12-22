@@ -17,7 +17,9 @@ export class Title extends BaseComponent
         // Note: Titles are not registered in Panel.components by now
         super( ComponentType.TITLE, null, null, options );
 
-        this.root.className = `lextitle ${this.root.className}`;
+        const cn = 'lextitle !w-fit bg-muted text-foreground text-sm font-semibold leading-normal m-3 flex content-center rounded-xl select-none';
+
+        this.root.className = LX.mergeClass( cn, options.className );
 
         if ( options.icon )
         {
@@ -30,18 +32,16 @@ export class Title extends BaseComponent
         text.innerText = name;
         this.root.appendChild( text );
 
-        Object.assign( this.root.style, options.style ?? {} );
-
         if ( options.link != undefined )
         {
-            let linkDom = document.createElement( 'a' );
-            linkDom.innerText = name;
+            let linkDom = LX.makeElement( 'a', `${cn} link`, name );
             linkDom.href = options.link;
             linkDom.target = options.target ?? '';
-            linkDom.className = 'lextitle link';
-            Object.assign( linkDom.style, options.style ?? {} );
             this.root.replaceWith( linkDom );
+            this.root = linkDom;
         }
+
+        Object.assign( this.root.style, options.style ?? {} );
     }
 }
 

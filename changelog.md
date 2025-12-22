@@ -6,6 +6,7 @@ Use Tailwind (finally) to create and compile CSS.
 Removed custom utility classes, refactored theme colors and every theme variable used in LX.
 Cleaned main CSS, move generic component styling to classes.
 Added `LX.twMerge` and `LX.mergeClass` to merge elements class names to allow overrides.
+`LX.getThemeColor` now allows to get colors with applied alpha using `color/{alpha}`.
 Added new Avatar Component (see docs).
 Avatar Component in now used in Sidebar header and footer.
 Added support for `oklch` format in ColorInput, new utils `LX.oklchToHex`.

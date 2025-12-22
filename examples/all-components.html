@@ -134,7 +134,6 @@
             buttonsLeftPanel.addButton(null, "Ghost", null, { buttonClass: "ghost" });
             buttonsLeftPanel.addButton(null, "Link", null, { buttonClass: "link" });
             buttonsLeftPanel.addButton(null, "Muted", null, { buttonClass: "muted" });
-            buttonsLeftPanel.addButton(null, "Accent", null, { buttonClass: "accent" });
             buttonsLeftPanel.addButton(null, "Success", null, { buttonClass: "success" });
             buttonsLeftPanel.addButton(null, "Warning", null, { buttonClass: "warning" });
             buttonsLeftPanel.addButton(null, "Destructive", null, { buttonClass: "destructive" });
@@ -142,7 +141,6 @@
             buttonsLeftPanel.addButton(null, "Primary", null, { disabled: true, buttonClass: "primary" });
             buttonsLeftPanel.addButton(null, "Secondary", null, { disabled: true, buttonClass: "secondary" });
             buttonsLeftPanel.addButton(null, "Muted", null, { disabled: true, buttonClass: "muted" });
-            buttonsLeftPanel.addButton(null, "Accent", null, { disabled: true, buttonClass: "accent" });
             buttonsLeftPanel.addButton(null, "Success", null, { disabled: true, buttonClass: "success" });
             buttonsLeftPanel.addButton(null, "Warning", null, { disabled: true, buttonClass: "warning" });
             buttonsLeftPanel.addButton(null, "Destructive", null, { disabled: true, buttonClass: "destructive" });
@@ -160,7 +158,7 @@
             buttonsLeftPanel.addButton(null, "Not used", null, { icon: "Eye", swap: "EyeOff" });
             buttonsLeftPanel.endLine("justify-start");
             buttonsLeftPanel.addButton(null, LX.makeIcon("CirclePlus").innerHTML + "Button with Inlined Icon", null);
-            buttonsLeftPanel.addButton(null, "With a Badge" + LX.badge("+99", "accent xs"));
+            buttonsLeftPanel.addButton(null, "With a Badge" + LX.badge("+99", "primary xs"));
             buttonsRightPanel.branch("Outline Buttons", { closed: closedDefault });
             buttonsRightPanel.addButton(null, "Secondary Outline", null, { buttonClass: "secondary outline" });
             buttonsRightPanel.addButton(null, "Link Outline", null, { buttonClass: "link outline" });
@@ -172,7 +170,6 @@
             buttonsRightPanel.addButton(null, "Primary Dashed", null, { buttonClass: "primary dashed" });
             buttonsRightPanel.addButton(null, "Secondary Dashed", null, { buttonClass: "secondary dashed" });
             buttonsRightPanel.addButton(null, "Muted Dashed", null, { buttonClass: "muted dashed" });
-            buttonsRightPanel.addButton(null, "Accent Dashed", null, { buttonClass: "accent dashed" });
             buttonsRightPanel.addButton(null, "Success Dashed", null, { buttonClass: "success dashed" });
             buttonsRightPanel.addButton(null, "Warning Dashed", null, { buttonClass: "warning dashed" });
             buttonsRightPanel.addButton(null, "Destructive Dashed", null, { buttonClass: "destructive dashed" });
@@ -205,7 +202,6 @@
             checkLeftPanel.branch("Checkboxes", { closed: closedDefault });
             checkLeftPanel.addCheckbox(null, true, null, { className: "primary", label: "Primary" });
             checkLeftPanel.addCheckbox(null, true, null, { className: "secondary", label: "Secondary" });
-            checkLeftPanel.addCheckbox(null, true, null, { className: "accent", label: "Accent" });
             checkLeftPanel.addCheckbox(null, true, null, { className: "success", label: "Success" });
             checkLeftPanel.addCheckbox(null, true, null, { className: "warning", label: "Warning" });
             checkLeftPanel.addCheckbox(null, true, null, { className: "destructive", label: "Destructive" });
@@ -216,7 +212,6 @@
             checkLeftPanel.branch("Radio Group", { closed: closedDefault });
             checkLeftPanel.addRadioGroup(null, "Primary Radio", ["All new messages", "Direct messages and mentions", "Nothing"], null, { className: "primary", selected: 1 });
             checkLeftPanel.addRadioGroup(null, "Secondary Radio", ["All new messages", "Direct messages and mentions", "Nothing"], null, { className: "secondary", selected: 1 });
-            checkLeftPanel.addRadioGroup(null, "Accent Radio", ["All new messages", "Direct messages and mentions", "Nothing"], null, { className: "accent", selected: 1 });
             checkLeftPanel.addRadioGroup(null, "Success Radio", ["All new messages", "Direct messages and mentions", "Nothing"], null, { className: "success", selected: 1 });
             checkLeftPanel.addRadioGroup(null, "Warning Radio", ["All new messages", "Direct messages and mentions", "Nothing"], null, { className: "warning", selected: 1 });
             checkLeftPanel.addRadioGroup(null, "Destructive Radio", ["All new messages", "Direct messages and mentions", "Nothing"], null, { className: "destructive", selected: 1 });
@@ -228,7 +223,6 @@
             checkRightPanel.branch("Classic Toggles", { closed: closedDefault });
             checkRightPanel.addToggle(null, true, null, { className: "primary", label: "Primary" });
             checkRightPanel.addToggle(null, true, null, { className: "secondary", label: "Secondary" });
-            checkRightPanel.addToggle(null, true, null, { className: "accent", label: "Accent" });
             checkRightPanel.addToggle(null, true, null, { className: "success", label: "Success" });
             checkRightPanel.addToggle(null, true, null, { className: "warning", label: "Warning" });
             checkRightPanel.addToggle(null, true, null, { className: "destructive", label: "Destructive" });
@@ -236,7 +230,6 @@
             checkRightPanel.branch("Outline Toggles", { closed: closedDefault });
             checkRightPanel.addToggle(null, true, null, { className: "primary outline", label: "Primary" });
             checkRightPanel.addToggle(null, true, null, { className: "secondary outline", label: "Secondary" });
-            checkRightPanel.addToggle(null, true, null, { className: "accent outline", label: "Accent" });
             checkRightPanel.addToggle(null, true, null, { className: "success outline", label: "Success" });
             checkRightPanel.addToggle(null, true, null, { className: "warning outline", label: "Warning" });
             checkRightPanel.addToggle(null, true, null, { className: "destructive outline", label: "Destructive" });
@@ -282,7 +275,6 @@
             panelB.branch("Range Inputs", { closed: closedDefault });
             panelB.addRange("Primary", 7, null, { min: 0, max: 10, step: 1, className: "primary" });
             panelB.addRange("Secondary", 4, null, { min: 0, max: 10, step: 1, className: "secondary" });
-            panelB.addRange("Accent", 3, null, { min: 0, max: 10, step: 1, className: "accent" });
             panelB.addRange("Success", 9, null, { min: 0, max: 10, step: 1, className: "success" });
             panelB.addRange("Warning", 2, null, { min: 0, max: 10, step: 1, className: "warning" });
             panelB.addRange("Destructive", 6, null, { min: 0, max: 10, step: 1, className: "destructive" });

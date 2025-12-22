@@ -2248,7 +2248,7 @@ export class CodeEditor
             this.onCreateStatusPanel( panel, this );
         }
 
-        let leftStatusPanel = this.leftStatusPanel = new LX.Panel( { id: 'FontSizeZoomStatusComponent', className: 'flex-auto-keep', width: 'auto',
+        let leftStatusPanel = this.leftStatusPanel = new LX.Panel( { id: 'FontSizeZoomStatusComponent', className: 'pad-xs content-center items-center flex-auto-keep', width: 'auto',
             height: 'auto' } );
         leftStatusPanel.sameLine();
 
@@ -2260,7 +2260,7 @@ export class CodeEditor
         leftStatusPanel.endLine( 'justify-start' );
         panel.attach( leftStatusPanel.root );
 
-        let rightStatusPanel = this.rightStatusPanel = new LX.Panel( { height: 'auto' } );
+        let rightStatusPanel = this.rightStatusPanel = new LX.Panel( { className: 'pad-xs content-center items-center', height: 'auto' } );
         rightStatusPanel.sameLine();
         rightStatusPanel.addLabel( this.code?.title ?? '', { id: 'EditorFilenameStatusComponent', fit: true, inputClass: 'text-xs',
             signal: '@tab-name' } );

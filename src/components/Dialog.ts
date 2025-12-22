@@ -88,7 +88,7 @@ export class Dialog
             };
 
             const closeButton = LX.makeIcon( 'X', { title: 'Close',
-                iconClass: 'lexdialogcloser text-lg color-secondary-foreground cursor-pointer z-1 select-none' } );
+                iconClass: 'lexdialogcloser text-lg text-secondary-foreground cursor-pointer z-1 select-none' } );
             closeButton.addEventListener( 'click', this.close );
 
             const dockButton = LX.makeIcon( 'Minus', { title: 'Dock', iconClass: 'ml-auto mr-2' } );

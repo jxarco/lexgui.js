@@ -12,7 +12,9 @@
         window.__addInteractiveCodeExample( content, componentName, panel => {
             panel.addTitle("A Title!");
 
-            panel.addTitle("A No-Background Big Title!", { style: { background: "none", fontSize: "24px" } });
+            panel.addTitle("A No-Background Big Title!", { className: "text-3xl bg-transparent" } );
+
+            panel.addTitle("A Link Title!", { link: "" } );
         });
     }
 

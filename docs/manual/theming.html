@@ -1,0 +1,52 @@
+<script type="module">
+
+    docMaker.header( "Theming.", "h1", "theming" );
+
+    docMaker.paragraph( `Even though LexGUI has a pretty locked appearance, you can still customize it using CSS Variables and color utilities:` );
+
+    docMaker.header( "CSS Variables", "h3" );
+
+    docMaker.paragraph( `Use LexGUI CSS theme variables:` );
+    docMaker.code( `&lt;@div@ @[atn]class@=@"bg-background text-foreground"@ /&gt;` );
+
+    docMaker.header( "Utility Classes", "h3" );
+
+    docMaker.paragraph( `You can also use Tailwind color palette using its utility classes (Check the ${ docMaker.iLink( "Colors", "https://jxarco.github.io/lexgui.js/colors/" ) } page in the LexGUI main page (or the ${docMaker.iLink("Tailwind official site", "https://tailwindcss.com/docs/colors")}) to see all possible colors):` );
+    docMaker.code( `&lt;@div@ @[atn]class@=@"bg-white text-neutral-900"@ /&gt;` );
+
+
+    docMaker.header( "Convention", "h3" );
+
+    docMaker.paragraph( `We use a simple ${docMaker.iCode("background")} and ${docMaker.iCode("foreground")} convention for colors. The background variable is used for the background color of the component and the foreground variable is used for the text color.` );
+    
+    docMaker.note( `The ${docMaker.iCode("background")} suffix is omitted when the variable is used for the background color of the component.` );
+
+    docMaker.header( "Sizes", "h3" );
+
+    docMaker.bulletList( [
+        "xs", "sm", "md (default)", "lg", "xl", "2xl", "3xl", "..."
+    ] );
+
+    docMaker.header( "Styles <span class='desc'>(for supported components)</span>", "h3" );
+    docMaker.paragraph( `
+        <div class="flex gap-2">
+        <span class="p-1 px-2 bg-accent text-white rounded-lg">solid</span>
+        <span class="p-1 px-2 text-primary rounded-lg border-color">outline</span>
+        <span class="p-1 px-2 text-primary rounded-lg border border-dashed">dashed</span>
+        </div>
+    ` );
+
+    docMaker.lineBreak();
+    docMaker.paragraph( `LexGUI uses a dark theme by default. You can change the theme by overriding your device or browser color scheme but the easiest way is to use ${docMaker.iCode("LX.setTheme")}
+     where you can use "light" or "dark". If any of your content depends on the selected theme (usually JavaScript code, not CSS), make sure you are listening to the ${docMaker.iCode("@on_new_color_scheme")} signal being emited when the theme changes.` );
+    docMaker.code( `LX.@[mtd]addSignal@( @"|@on_new_color_scheme"@, (el, value) => {
+    @[com]// Retrieve again the color using LX.getThemeColor, which checks the applied theme@
+    @const@ bgColor = LX.@[mtd]getThemeColor@( @"primary"@ );
+    @this@.redraw( bgColor );
+} );
+` );
+
+    docMaker.paragraph( `To use utilities only for dark mode, use ${ docMaker.iCode( "dark:" ) } prefix:` );
+    docMaker.code( `&lt;@div@ @[atn]class@=@"bg-black dark:bg-white"@ /&gt;` );
+
+</script>

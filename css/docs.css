@@ -235,7 +235,7 @@ pre .mtd, code .mtd { color: #e6e2b8; } /* method */
 pre .var, code .var { color: #d8d5d5; } /* variable */
 pre .enu, code .enu { color: #c0dec2; } /* enum */
 
-pre .tag, code .tag { color: #2194ce; } /* HTML tag */
+pre .tag, code .tag { color: #56d386; } /* HTML tag */
 pre .atn, code .atn { color: #81cdf8; } /* HTML attribute name */
 pre .com, code .com { color: #4e994d; } /* comment */
 pre .pln, code .pln { color: #aaaaaa; } /* plaintext */

@@ -173,7 +173,7 @@ export class Sidebar
         // Content
         {
             this.content = document.createElement( 'div' );
-            this.content.className = 'lexsidebarcontent flex flex-col overflow-x-hidden overflow-y-scroll flex-auto-fill w-full';
+            this.content.className = 'lexsidebarcontent overflow-mask flex flex-col overflow-x-hidden overflow-y-scroll flex-auto-fill w-full';
             this.root.appendChild( this.content );
         }
 
@@ -182,7 +182,7 @@ export class Sidebar
         {
             this.footer = options.footer ?? this._generateDefaultFooter( options );
             console.assert( this.footer.constructor === HTMLDivElement, 'Use an HTMLDivElement to build your custom footer' );
-            this.footer.className = 'lexsidebarfooter';
+            this.footer.className = 'lexsidebarfooter w-full h-[48px] flex rounded-lg p-2 mt-2 text-sm cursor-pointer items-center select-none';
             this.root.appendChild( this.footer );
         }
     }

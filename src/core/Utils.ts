@@ -402,11 +402,14 @@ LX.setThemeColor = setThemeColor;
  * @description Get the value for one of the main theme variables
  * @param {String} colorName Name of the theme variable
  */
-function getThemeColor( colorName: string )
+function getThemeColor( colorName: string ): string
 {
+    const [ name, opacity ] = colorName.split( '/' );
+
     const r: any = document.querySelector( ':root' );
     const s = getComputedStyle( r );
-    const value = s.getPropertyValue( '--' + colorName );
+    let value = s.getPropertyValue( '--' + name );
+    if ( !value ) return '';
 
     if ( value.includes( 'light-dark' ) )
     {
@@ -414,11 +417,29 @@ function getThemeColor( colorName: string )
 
         if ( currentScheme == 'light' )
         {
-            return value.substring( value.indexOf( '(' ) + 1, value.indexOf( ',' ) ).replace( /\s/g, '' );
+            value = value.substring( value.indexOf( '(' ) + 1, value.indexOf( ',' ) ).replace( /\s/g, '' );
         }
         else
         {
-            return value.substring( value.indexOf( ',' ) + 1, value.indexOf( ')' ) ).replace( /\s/g, '' );
+            value = value.substring( value.indexOf( ',' ) + 1, value.indexOf( ')' ) ).replace( /\s/g, '' );
+        }
+    }
+
+    if ( opacity )
+    {
+        if ( value.includes( '/' ) ) return value;
+
+        if ( value.startsWith( 'rgb(' ) || value.startsWith( 'hsl(' ) || value.startsWith( 'oklch(' )
+            || value.startsWith( 'lab(' ) || value.startsWith( 'lch(' ) )
+        {
+            return value.replace( /\)$/, ` / ${opacity})` );
+        }
+
+        // Hex fallback
+        if ( value.startsWith( '#' ) )
+        {
+            const rgba = LX.hexToRgb( value, opacity );
+            return LX.rgbToHex( rgba );
         }
     }
 
@@ -461,8 +482,9 @@ LX.getBase64Image = getBase64Image;
  * @method hexToRgb
  * @description Convert a hexadecimal string to a valid RGB color
  * @param {String} hex Hexadecimal color
+ * @param {Number} hex Opacity alpha value
  */
-function hexToRgb( hex: string )
+function hexToRgb( hex: string, alpha?: number )
 {
     const hexPattern = /^#(?:[A-Fa-f0-9]{3,4}|[A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})$/;
     if ( !hexPattern.test( hex ) )
@@ -486,7 +508,7 @@ function hexToRgb( hex: string )
     const a = ( hex.length === 8 ? ( bigint & 255 ) : ( hex.length === 4 ? parseInt( hex.slice( -2 ), 16 ) : 255 ) )
         / 255;
 
-    return { r, g, b, a };
+    return { r, g, b, a: ( alpha ? alpha / 100 : a ) };
 }
 
 LX.hexToRgb = hexToRgb;

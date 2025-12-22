@@ -23,8 +23,8 @@ export class TimeBar
     static TIMEBAR_PLAY = 1;
     static TIMEBAR_TRIM = 2;
 
-    static BACKGROUND_COLOR = LX.getThemeColor( 'color-secondary' );
-    static COLOR = LX.getThemeColor( 'color-accent' );
+    static BACKGROUND_COLOR = LX.getThemeColor( 'secondary' );
+    static COLOR = LX.getThemeColor( 'accent' );
     static ACTIVE_COLOR = LX.getThemeColor( 'color-blue-400' );
 
     type: number = TimeBar.TIMEBAR_PLAY;
@@ -91,8 +91,8 @@ export class TimeBar
 
     updateTheme()
     {
-        TimeBar.BACKGROUND_COLOR = LX.getThemeColor( 'color-secondary' );
-        TimeBar.COLOR = LX.getThemeColor( 'color-accent' );
+        TimeBar.BACKGROUND_COLOR = LX.getThemeColor( 'secondary' );
+        TimeBar.COLOR = LX.getThemeColor( 'accent' );
         TimeBar.ACTIVE_COLOR = LX.getThemeColor( 'color-blue-400' );
     }
 
