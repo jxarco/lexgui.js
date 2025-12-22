@@ -12,31 +12,31 @@
             panel.attach( area );
 
             area.attach( LX.makeBreadcrumb([
-                { title: "Home", url: "/" },
-                { title: "Projects", url: "/projects" },
-                { title: "MyApp", items: [
-                    { title: "Overview", url: "/projects/myapp/overview" },
-                    { title: "Settings", url: "/projects/myapp/settings" }
+                { name: "Home", url: "/" },
+                { name: "Projects", url: "/projects" },
+                { name: "MyApp", items: [
+                    { name: "Overview", url: "/projects/myapp/overview" },
+                    { name: "Settings", url: "/projects/myapp/settings" }
                     ] },
-                { title: "Editor" }
-            ], { maxItems: 4, separatorIcon: "ChevronRight" }) );
+                { name: "Editor" }
+            ], { maxItems: 3, separatorIcon: "ChevronRight" }) );
 
             area.attach( LX.makeBreadcrumb([
-                { title: "Home", url: "/" },
-                { title: "Projects", url: "/projects" },
-                { title: "MyApp", items: [
-                    { title: "Overview", url: "/projects/myapp/overview" },
-                    { title: "Settings", url: "/projects/myapp/settings" }
+                { name: "Home", url: "/" },
+                { name: "Projects", url: "/projects" },
+                { name: "MyApp", items: [
+                    { name: "Overview", url: "/projects/myapp/overview" },
+                    { name: "Settings", url: "/projects/myapp/settings" }
                     ] },
-                { title: "Editor" }
-            ], { maxItems: 3, separatorIcon: "ChevronRight" }) );
+                { name: "Editor" }
+            ], { maxItems: 4, separatorIcon: "ChevronRight" }) );
         });
     }
 
     docMaker.header("API Reference", "h2");
     docMaker.classCtor("function LX.makeBreadcrumb", [ [ "items", "Array" ], [ "options", "Object = {}" ] ]);
     docMaker.lineBreak();
-    docMaker.paragraph(`Where ${ docMaker.iCode( "items" ) } is the array that contains all the breadcrumb items (title, url, items), and ${ docMaker.iCode( "options" ) } can include the following:`)
+    docMaker.paragraph(`Where ${ docMaker.iCode( "items" ) } is the array that contains all the breadcrumb items (name, url, items), and ${ docMaker.iCode( "options" ) } can include the following:`)
 
     docMaker.codeBulletList([
         ["maxItems", "Number", "Maximum visible entries before the middle is collapsed into an ellipsis. Defaults to 4."],

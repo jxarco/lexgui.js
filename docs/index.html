@@ -88,12 +88,12 @@
 
                         for( let p of path )
                         {
-                            bcItems.push( { title: p } );
+                            bcItems.push( { name: p } );
                         }
 
                         if( title )
                         {
-                            bcItems.push( { title } );
+                            bcItems.push( { name: title } );
                         }
 
                         content.appendChild( LX.makeBreadcrumb( bcItems ) );

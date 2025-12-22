@@ -1193,26 +1193,26 @@ function makeBreadcrumb( items: any[], options: any = {} )
     if ( eraseNum > 0 )
     {
         const erased = items.splice( 1, eraseNum + 1 );
-        const ellipsisItem = { title: '...', ellipsis: erased.map( ( v ) => v.title ).join( '/' ) };
+        const ellipsisItem = { name: '...', ellipsis: erased.map( ( v ) => v.name ).join( '/' ) };
         items.splice( 1, 0, ellipsisItem );
     }
 
     for ( let i = 0; i < items.length; ++i )
     {
         const item = items[i];
-        console.assert( item.title, 'Breadcrumb item must have a title!' );
+        console.assert( item.name, 'Breadcrumb item must have a name!' );
 
         if ( i != 0 )
         {
-            const icon = LX.makeIcon( separatorIcon, { svgClass: 'sm text-primary separator' } );
+            const icon = LX.makeIcon( separatorIcon, { svgClass: 'sm text-foreground separator' } );
             breadcrumb.appendChild( icon );
         }
 
-        const lastElement = i == items.length - 1;
-        const breadcrumbItem = LX.makeContainer( [ 'auto', 'auto' ], `p-1 flex flex-row gap-1 items-center ${lastElement ? '' : 'text-primary'}` );
+        const lastElement = i == ( items.length - 1 );
+        const breadcrumbItem = LX.makeContainer( [ 'auto', 'auto' ], `p-1 flex flex-row gap-1 items-center ${lastElement ? 'text-foreground' : 'text-muted-foreground'}` );
         breadcrumb.appendChild( breadcrumbItem );
 
-        let itemTitle = LX.makeElement( 'p', '', item.title );
+        let itemName = LX.makeElement( 'p', '', item.name );
         if ( item.icon )
         {
             breadcrumbItem.appendChild( LX.makeIcon( item.icon, { svgClass: 'sm' } ) );
@@ -1220,22 +1220,22 @@ function makeBreadcrumb( items: any[], options: any = {} )
 
         if ( item.items !== undefined )
         {
-            const bDropdownTrigger = LX.makeContainer( [ 'auto', 'auto' ], `${lastElement ? '' : 'text-primary'}` );
+            const bDropdownTrigger = LX.makeContainer( [ 'auto', 'auto' ], `${lastElement ? 'text-foreground' : 'text-muted-foreground'}` );
             LX.listen( bDropdownTrigger, 'click', ( e: any ) => {
                 LX.addDropdownMenu( e.target, item.items, { side: 'bottom', align: 'start' } );
             } );
-            bDropdownTrigger.append( itemTitle );
+            bDropdownTrigger.append( itemName );
             breadcrumbItem.appendChild( bDropdownTrigger );
         }
         else if ( item.url !== undefined )
         {
-            let itemUrl = LX.makeElement( 'a', `decoration-none text-${lastElement ? 'secondary' : 'accent'}`, '', breadcrumbItem );
+            let itemUrl = LX.makeElement( 'a', `decoration-none hover:underline underline-offset-4 ${lastElement ? 'text-foreground' : 'text-muted-foreground'}`, '', breadcrumbItem );
             itemUrl.href = item.url;
-            itemUrl.appendChild( itemTitle );
+            itemUrl.appendChild( itemName );
         }
         else
         {
-            breadcrumbItem.appendChild( itemTitle );
+            breadcrumbItem.appendChild( itemName );
         }
 
         if ( item.ellipsis )

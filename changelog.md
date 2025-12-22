@@ -11,6 +11,7 @@ Added new Avatar Component (see docs).
 Avatar Component in now used in Sidebar header and footer.
 Added support for `oklch` format in ColorInput, new utils `LX.oklchToHex`.
 ComboButtons Component `options.float` now accepts `start, center, end` instead of `left, center, right`.
+Breadcrumb items `title` renamed to `name`.
 Fixed modal scroll bleed.
 Fixed Commandbar position when page has vertical scroll.
 Minor fixes Area Tabs' and Sidebar's CSS.
@@ -37,7 +38,7 @@ VideoEditor:
 - Forced area to have position relative so cropArea is correctly positioned.
 
 Timeline:
-- Autmatically calls `updateTheme` color on instance creation.
+- Automatically calls `updateTheme` color on instance creation.
 
 ## 8.1.1
 
