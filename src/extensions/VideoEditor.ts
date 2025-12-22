@@ -460,10 +460,8 @@ export class VideoEditor
     playing: boolean = false;
     videoReady: boolean = false;
     controls: boolean = true;
-    startTimeString: string = '0:0';
     endTimeString: string = '0:0';
     speed: number = 1.0;
-    currentTime: number = 0.0;
     startTime: number = 0.0;
     endTime: number = 0.0;
     requestId: any;
@@ -474,15 +472,12 @@ export class VideoEditor
     crop: boolean = false;
     dragOffsetX: number = 0.0;
     dragOffsetY: number = 0.0;
-    currentTimeString: string = '';
 
     timebar: TimeBar;
     mainArea: typeof Area;
     cropArea: any; // HTMLElement with normCoord attribute;
     controlsArea: typeof Area;
-    controlsPanelLeft: typeof Panel;
-    controlsPanelRight: typeof Panel;
-    controlsCurrentPanel: typeof Panel;
+    controlsComponents: any;
 
     onChangeCurrent: any;
     onChangeStart: any;
@@ -559,6 +554,17 @@ export class VideoEditor
         videoArea.root.style.position = "relative";
 
         this.controlsArea = controlsArea;
+        this.controlsComponents = {
+            timebar: null,
+            playBtn: null,
+            speedBtn: null,
+            loopBtn: null,
+            trimStartText: null,
+            trimEndText: null,
+            curTimeText: null,
+            resetCrop: null,
+        };
+
         // Create playing timeline area and attach panels
         let [ topArea, bottomArea ] = controlsArea.split( { type: 'vertical', sizes: [ '50%', null ],
             minimizable: false, resize: false } );
@@ -568,89 +574,75 @@ export class VideoEditor
         let [ controlsLeft, timeBarArea ] = leftArea.split( { type: 'horizontal', sizes: [ '10%', null ],
             minimizable: false, resize: false } );
 
-        topArea.root.classList.add( 'lexbar' );
-        bottomArea.root.classList.add( 'lexbar' );
-        this.controlsCurrentPanel = new LX.Panel( { className: 'lexcontrolspanel lextime' } );
-        this.controlsCurrentPanel.refresh = () => {
-            this.controlsCurrentPanel.clear();
-            this.controlsCurrentPanel.addLabel( this.currentTimeString, { float: 'center' } );
-        };
-        topArea.root.classList.add( 'lexflexarea' );
-        topArea.attach( this.controlsCurrentPanel );
-        this.controlsCurrentPanel.refresh();
-
+        const controlsCurrentPanel = topArea.addPanel( { className: 'flex' } );
+        this.controlsComponents.curTimeText = controlsCurrentPanel.addLabel( this.video.currentTime, { float: 'center' } );
+        
         const style = getComputedStyle( bottomArea.root );
         let padding = Number( style.getPropertyValue( 'padding' ).replace( 'px', '' ) );
-        this.timebar = new TimeBar( timeBarArea, TimeBar.TIMEBAR_TRIM, { offset: padding } );
-
-        // Create controls panel (play/pause button and start time)
-        this.controlsPanelLeft = new LX.Panel( { className: 'lexcontrolspanel' } );
-        this.controlsPanelLeft.refresh = () => {
-            this.controlsPanelLeft.clear();
-            this.controlsPanelLeft.sameLine();
-            let playbtn = this.controlsPanelLeft.addButton( 'Play', '', ( v: boolean ) => {
-                this.playing = v;
-                if ( this.playing )
-                {
-                    if ( this.video.currentTime + 0.000001 >= this.endTime )
-                    {
-                        this.video.currentTime = this.startTime;
-                    }
-                    this.video.play();
-                }
-                else
-                {
-                    this.video.pause();
-                }
-            }, { width: '40px', icon: 'Play@solid', swap: 'Pause@solid', hideName: true,
-                className: 'justify-center' } );
-            playbtn.setState( this.playing, true );
-
-            this.controlsPanelLeft.addButton( '', '', ( v: any, e: MouseEvent ) => {
-                const panel = new LX.Panel();
-                panel.addRange( 'Speed', this.speed, ( v: number ) => {
-                    this.speed = v;
-                    this.video.playbackRate = v;
-                    if ( this.onChangeSpeed )
-                    {
-                        this.onChangeSpeed( v );
-                    }
-                }, { min: 0, max: 2.5, step: 0.01, hideName: true } );
-
-                new LX.Popover( e.target, [ panel ], { align: 'start', side: 'top', sideOffset: 12 } );
-            }, { width: '40px', title: 'speed', icon: 'Timer@solid', className: 'justify-center' } );
-
-            this.controlsPanelLeft.addButton( '', 'Loop', ( v: boolean ) => {
-                this.loop = v;
-            }, { width: '40px', title: 'loop', icon: ( 'Repeat@solid' ), className: `justify-center`, selectable: true,
-                selected: this.loop } );
-
-            this.controlsPanelLeft.addLabel( this.startTimeString, { width: '100px' } );
-            this.controlsPanelLeft.endLine();
-
-            let availableWidth = leftArea.root.clientWidth - controlsLeft.root.clientWidth;
-            this.timebar.resize( [ availableWidth, timeBarArea.root.clientHeight ] );
-        };
-
-        this.controlsPanelLeft.refresh();
-        controlsLeft.root.style.minWidth = 'fit-content';
-        // controlsLeft.root.classList.add();
-        controlsLeft.attach( this.controlsPanelLeft );
-
-        // Create right controls panel (ens time)
-        this.controlsPanelRight = new LX.Panel( { className: 'lexcontrolspanel' } );
-        this.controlsPanelRight.refresh = () => {
-            this.controlsPanelRight.clear();
-            this.controlsPanelRight.addLabel( this.endTimeString, { width: 100 } );
-        };
-        this.controlsPanelRight.refresh();
-        controlsRight.root.style.minWidth = 'fit-content';
-        controlsRight.attach( this.controlsPanelRight );
-
+        this.timebar = this.controlsComponents.timebar = new TimeBar( timeBarArea, TimeBar.TIMEBAR_TRIM, { offset: padding } );
         this.timebar.onChangeCurrent = this._setCurrentTime.bind( this );
         this.timebar.onChangeStart = this._setStartTime.bind( this );
         this.timebar.onChangeEnd = this._setEndTime.bind( this );
 
+        // Create controls panel (play/pause button and start time)
+        const controlsPanelLeft = controlsLeft.addPanel( { className: 'lexcontrolspanel' } );
+        controlsLeft.root.style.minWidth = 'fit-content';
+        controlsPanelLeft.root.style.padding = "0px";
+        controlsPanelLeft.sameLine();
+        this.controlsComponents.playBtn = controlsPanelLeft.addButton( 'Play', '', ( v: boolean ) => {
+            this.playing = v;
+            if ( this.playing )
+            {
+                if ( this.video.currentTime + 0.000001 >= this.endTime )
+                {
+                    this.video.currentTime = this.startTime;
+                }
+                this.video.play();
+            }
+            else
+            {
+                this.video.pause();
+            }
+        }, { width: '40px', icon: 'Play@solid', swap: 'Pause@solid', hideName: true,
+            className: 'justify-center' } );
+        this.controlsComponents.playBtn.setState( this.playing, true );
+        
+        // speed button
+        this.controlsComponents.speedBtn = controlsPanelLeft.addButton( 'Speed', '', ( v: any, e: MouseEvent ) => {
+            const panel = new LX.Panel();
+            panel.addRange( 'Speed', this.speed, ( v: number ) => {
+                this.speed = v;
+                this.video.playbackRate = v;
+                if ( this.onChangeSpeed )
+                {
+                    this.onChangeSpeed( v );
+                }
+            }, { min: 0, max: 2.5, step: 0.01, hideName: true } );
+
+            new LX.Popover( e.target, [ panel ], { align: 'start', side: 'top', sideOffset: 12 } );
+        }, { width: '40px', title: 'speed', hideName: true, icon: 'Timer@solid', className: 'justify-center' } );
+
+        // loop button
+        this.controlsComponents.loopBtn = controlsPanelLeft.addButton( '', 'Loop', ( v: boolean ) => {
+            this.loop = v;
+        }, { width: '40px', hideName: true, title: 'loop', icon: ( 'Repeat@solid' ), className: `justify-center`, selectable: true,
+            selected: this.loop } );
+
+        // start trimming text
+        this.controlsComponents.trimStartText = controlsPanelLeft.addLabel( this.timeToString( this.startTime ), { width: '100px' } );
+
+        controlsPanelLeft.endLine();
+
+        // timebar resize
+        const availableWidth = leftArea.root.clientWidth - controlsLeft.root.clientWidth;
+        this.timebar.resize( [ availableWidth, timeBarArea.root.clientHeight ] );
+
+        // Create right controls panel (end time)
+        controlsRight.root.style.minWidth = 'fit-content';
+        const controlsPanelRight = controlsRight.addPanel( { className: 'lexcontrolspanel' } );
+        controlsPanelRight.root.style.padding = "0px";
+        this.controlsComponents.trimEndText = controlsPanelRight.addLabel( this.timeToString( this.endTime ), { width: 100 } );
+        
         this.resize = () => {
             bottomArea.setSize( [ this.controlsArea.root.clientWidth, 40 ] );
             let availableWidth = this.controlsArea.root.clientWidth - controlsLeft.root.clientWidth
@@ -664,6 +656,7 @@ export class VideoEditor
                 this.onResize( [ videoArea.root.clientWidth, videoArea.root.clientHeight ] );
             }
         };
+
         area.onresize = this.resize.bind( this );
         window.addEventListener( 'resize', area.onresize );
 
@@ -673,21 +666,8 @@ export class VideoEditor
                 e.preventDefault();
                 e.stopPropagation();
 
-                this.playing = !this.playing;
-                if ( this.playing )
-                {
-                    if ( this.video.currentTime + 0.000001 >= this.endTime )
-                    {
-                        this.video.currentTime = this.startTime;
-                    }
-                    this.video.play();
-                }
-                else
-                {
-                    this.video.pause();
-                }
-
-                this.controlsPanelLeft.refresh();
+                // do not skip callback
+                this.controlsComponents.playBtn.setState( !this.playing, false );
             }
         };
 
@@ -1043,7 +1023,7 @@ export class VideoEditor
                 if ( !this.loop )
                 {
                     this.playing = false;
-                    this.controlsPanelLeft.refresh();
+                    this.controlsComponents.playBtn.setState( false, true );
                 }
                 else
                 {
@@ -1079,8 +1059,7 @@ export class VideoEditor
             this.video.currentTime = t;
         }
 
-        this.currentTimeString = this.timeToString( t );
-        this.controlsCurrentPanel.refresh();
+        this.controlsComponents.curTimeText.set( this.timeToString( t ) );
 
         if ( this.onSetTime )
         {
@@ -1097,8 +1076,7 @@ export class VideoEditor
     {
         this.startTime = this.video.currentTime = t;
 
-        this.startTimeString = this.timeToString( t );
-        this.controlsPanelLeft.refresh();
+        this.controlsComponents.trimStartText.set( this.timeToString( t ) );
 
         if ( this.onSetTime )
         {
@@ -1115,8 +1093,7 @@ export class VideoEditor
     {
         this.endTime = this.video.currentTime = t;
 
-        this.endTimeString = this.timeToString( t );
-        this.controlsPanelRight.refresh();
+        this.controlsComponents.trimEndText.set( this.timeToString( t ) );
 
         if ( this.onSetTime )
         {
@@ -1208,7 +1185,7 @@ export class VideoEditor
 
         this.video.pause();
         this.playing = false;
-        this.controlsPanelLeft.refresh();
+        this.controlsComponents.playBtn.setState( false, true );
         this.video.src = '';
 
         window.removeEventListener( 'keyup', this.onKeyUp );
