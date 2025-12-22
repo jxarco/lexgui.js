@@ -125,7 +125,7 @@ export class Dialog
             }
         }
 
-        const panel = new LX.Panel( { className: 'lexdialogcontent w-full p-1 text-primary-foreground text-sm ml-0 break-all' } );
+        const panel = new LX.Panel( { className: 'lexdialogcontent w-full p-1 text-secondary-foreground text-sm ml-0 break-all' } );
 
         if ( !title )
         {

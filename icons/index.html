@@ -77,7 +77,7 @@
         menubar = area.addMenubar( menubarButtons );
 
         const commandButton = new LX.Button(null, `Search command...`, () => { LX.setCommandbarState( true ) }, {
-            width: "256px", className: "right", buttonClass: "p-4 border-input bg-card text-primary" }
+            width: "256px", className: "right", buttonClass: "p-4 border-input bg-card text-muted-foreground" }
         );
         commandButton.root.querySelector( 'button' ).appendChild( LX.makeKbd( ["Ctrl", "Space"], false, "ml-auto" ) );
         menubar.root.appendChild( commandButton.root );
@@ -121,9 +121,9 @@
     LX._registerIconsAndColors( "../" );
 
     const header = LX.makeContainer([null, "auto"], "flex flex-col gap-4 pt-8 pb-4 items-center", `
-    <a class="text-sm">Get started with LexGUI.js <span class="text-sm text-primary">${LX.version}</span></a>
-    <p class="text-primary font-semibold tracking-tight leading-none text-center text-balance text-4xl xl:text-5xl max-w-4xl">Lucide Icons and More</p>
-    <p class="text-primary font-light text-base sm:text-lg text-center text-balance leading-normal max-w-3xl">Built on Lucide icons, extended with additional packs, and fully customizable with your own SVGs.</p>`, area);
+    <a class="text-sm">Get started with LexGUI.js <span class="text-sm text-secondary-foreground">${LX.version}</span></a>
+    <p class="text-secondary-foreground font-semibold tracking-tight leading-none text-center text-balance text-4xl xl:text-5xl max-w-4xl">Lucide Icons and More</p>
+    <p class="text-secondary-foreground font-light text-base sm:text-lg text-center text-balance leading-normal max-w-3xl">Built on Lucide icons, extended with additional packs, and fully customizable with your own SVGs.</p>`, area);
 
     {
         const params = new URLSearchParams( document.location.search );
@@ -196,7 +196,7 @@
             for( let i = start; i < end; ++i )
             {
                 const iconName = filteredIcons[ i ];
-                const iconDiv = LX.makeContainer( ["56px", "56px"], "bg-secondary hover:bg-muted text-primary hover:text-muted-foreground relative icon flex border-color rounded-lg content-center items-center justify-center cursor-pointer", "", allIconsContainer );
+                const iconDiv = LX.makeContainer( ["56px", "56px"], "bg-secondary hover:bg-muted text-muted-foreground hover:text-foreground relative icon flex border-color rounded-lg content-center items-center justify-center cursor-pointer", "", allIconsContainer );
                 if( !mobile )
                 {
                     LX.asTooltip( iconDiv, iconName, { side: "bottom" } );

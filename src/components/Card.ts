@@ -40,7 +40,7 @@ export class Card extends BaseComponent
 
             if ( options.header.title )
             {
-                LX.makeElement( 'div', 'text-sm text-primary leading-none font-semibold', options.header.title, header );
+                LX.makeElement( 'div', 'text-sm text-foreground leading-none font-semibold', options.header.title, header );
             }
 
             if ( options.header.description )

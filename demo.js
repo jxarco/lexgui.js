@@ -47,7 +47,7 @@ else
     menubar = area.addMenubar( menubarButtons );
 
     const commandButton = new LX.Button(null, `Search command...`, () => { LX.setCommandbarState( true ) }, {
-        width: "256px", className: "right", buttonClass: "p-4 border-input bg-card text-primary" }
+        width: "256px", className: "right", buttonClass: "p-4 border-input bg-card text-muted-foreground" }
     );
     commandButton.root.querySelector( 'button' ).appendChild( LX.makeKbd( ["Ctrl", "Space"], false, "ml-auto" ) );
     menubar.root.appendChild( commandButton.root );
@@ -94,10 +94,10 @@ LX._registerIconsAndColors( "./" );
 // Header
 {
     const header = LX.makeContainer( [ null, "auto" ], "flex flex-col gap-4 p-8 pb-4 items-center", `
-        <a href="docs?p=changelog" class="flex flex-row gap-1 items-center text-sm p-1 px-4 rounded-full text-primary decoration-none hover:bg-secondary cursor-pointer"><span class="flex bg-info w-2 h-2 rounded-full"></span>
+        <a href="docs?p=changelog" class="flex flex-row gap-1 items-center text-sm p-1 px-4 rounded-full text-secondary-foreground decoration-none hover:bg-secondary cursor-pointer"><span class="flex bg-info w-2 h-2 rounded-full"></span>
             New Components: Avatar, Spinner, Pagination and more${ LX.makeIcon( "ArrowRight", { svgClass: "sm" } ).innerHTML }</a>
-        <p class="fg text-primary font-medium tracking-tight leading-none text-center text-balance sm:text-5xl text-4xl">Build your Application Interface</p>
-        <p class="text-primary font-light text-xl xs:text-lg text-center text-balance leading-normal max-w-3xl">A modern-style UI kit, inspired by shadcn, built for the web. Pure HTML, JavaScript, and Tailwind CSS. Fully Open Source.</p>
+        <p class="fg text-secondary-foreground font-medium tracking-tight leading-none text-center text-balance sm:text-5xl text-4xl">Build your Application Interface</p>
+        <p class="text-secondary-foreground font-light text-xl xs:text-lg text-center text-balance leading-normal max-w-3xl">A modern-style UI kit, inspired by shadcn, built for the web. Pure HTML, JavaScript, and Tailwind CSS. Fully Open Source.</p>
     `, area );
 
     const headerButtons = LX.makeContainer( [ "auto", "auto" ], "flex flex-row mt-2", ``, header );
@@ -569,7 +569,7 @@ LX._registerIconsAndColors( "./" );
                     const mailNames = mail.name.split( ' ' );
                     const mailPreviewInfo = LX.makeContainer( [ "100%", "auto" ], "flex flex-row border-b-color p-4 gap-3", "", previewDataContent );
 
-                    const avatar = new LX.Avatar( { imgSource: mail.avatar, fallback: mailNames[ 0 ][ 0 ] + mailNames[ 1 ][ 0 ], className: 'size-10', fallbackClass: "text-primary" } );
+                    const avatar = new LX.Avatar( { imgSource: mail.avatar, fallback: mailNames[ 0 ][ 0 ] + mailNames[ 1 ][ 0 ], className: 'size-10', fallbackClass: "text-foreground" } );
                     mailPreviewInfo.appendChild( avatar.root );
 
                     const senderData = LX.makeContainer( [ "auto", "auto" ], "flex flex-col gap-0.5", `

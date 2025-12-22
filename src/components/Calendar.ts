@@ -212,7 +212,7 @@ export class Calendar
                         }
                         else
                         {
-                            th.className += ` ${selectable ? 'text-primary' : 'text-muted-foreground'} hover:bg-secondary`;
+                            th.className += ` ${selectable ? 'text-secondary-foreground' : 'text-muted-foreground'} hover:bg-secondary`;
                         }
 
                         th.innerHTML = `<span>${dayData.day}</span>`;

@@ -145,7 +145,7 @@ function getSupportedDOMName( text: string )
     let name = text.trim();
 
     // Replace specific known symbols
-    name = name.replace( /@/g, '_at_' ).replace( /\+/g, '_plus_' ).replace( /\./g, '_dot_' );
+    name = name.replace( /\//g, '_slash_' ).replace( /@/g, '_at_' ).replace( /\+/g, '_plus_' ).replace( /\./g, '_dot_' );
     name = name.replace( /[^a-zA-Z0-9_-]/g, '_' );
 
     // prefix with an underscore if needed
@@ -320,6 +320,21 @@ function concatTypedArray( arrays: any[], ArrayType: any )
 }
 
 LX.concatTypedArray = concatTypedArray;
+
+/**
+ * @method setColorTheme
+ * @description Set colored theme
+ * @param {String} colorScheme Name of the scheme
+ * @param {Boolean} storeLocal Store in localStorage
+ */
+function setColorTheme( colorThemeName: string )
+{
+    document.documentElement.className = `theme-${colorThemeName}`;
+    const colorScheme = LX.getTheme();
+    document.documentElement.classList.toggle( 'dark', colorScheme == 'dark' );
+}
+
+LX.setColorTheme = setColorTheme;
 
 /**
  * @method setTheme
@@ -1651,7 +1666,7 @@ function toast( title: string, description: string, options: any = {} )
 
     if ( description )
     {
-        LX.makeElement( 'div', 'text-primary text-xs', description, content );
+        LX.makeElement( 'div', 'text-secondary-foreground text-xs', description, content );
     }
 
     if ( options.action )
@@ -1714,7 +1729,7 @@ function badge( text: string, className: string, options: any = {} )
     const container = document.createElement( 'div' );
     container.innerHTML = text;
     const cn = [ 'lexbadge', 'inline-flex', 'items-center', 'justify-center', 'rounded-full', 'border', 'px-2', 'py-0.5', 'text-xs', 'font-medium',
-        'w-fit', 'whitespace-nowrap', 'shrink-0', 'overflow-hidden', 'border-transparent', 'gap-1', 'min-w-5', 'bg-card text-primary' ];
+        'w-fit', 'whitespace-nowrap', 'shrink-0', 'overflow-hidden', 'border-transparent', 'gap-1', 'min-w-5', 'bg-card text-foreground' ];
 
     container.className = className ? LX.twMerge( ...cn, ...className.split( ' ' ) ) : cn.join( ' ' );
 
@@ -1829,7 +1844,7 @@ function asTooltip( trigger: any, content: any, options: any = {} )
         }
 
         tooltipDom = LX.makeElement( 'div',
-            'lextooltip fixed bg-primary text-primary-foreground text-xs px-2 py-1 rounded-lg pointer-events-none data-closed:opacity-0',
+            'lextooltip fixed bg-secondary-foreground text-secondary text-xs px-2 py-1 rounded-lg pointer-events-none data-closed:opacity-0',
             trigger.dataset['tooltipContent'] ?? content );
 
         const nestedDialog = trigger.closest( 'dialog' );

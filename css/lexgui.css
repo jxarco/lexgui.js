@@ -82,10 +82,10 @@
     --foreground: light-dark(#0a0a0a, #fafafa);
     --card: light-dark(#ffffff, #171717);
     --card-foreground: light-dark(#0a0a0a, #fafafa);
-    --primary: light-dark(#171717, #e5e5e5);
+    --primary: light-dark(#171717, #fafafa);
     --primary-foreground: light-dark(#fafafa, #171717);
     --secondary: light-dark(#f5f5f5, #262626);
-    --secondary-foreground: light-dark(#171717, #fafafa);
+    --secondary-foreground: light-dark(#171717, #e5e5e5);
     --muted: light-dark(#f5f5f5, #262626);
     --muted-foreground: light-dark(#737373, #a1a1a1);
     --accent: light-dark(#ddd, #404040);
@@ -130,6 +130,20 @@
 }
 
 :root[data-theme="light"] { color-scheme: light }
+
+/* themes */
+
+.theme-rose {
+    --primary: var(--color-rose-600);
+    --primary-foreground: var(--color-rose-50);
+    --ring: var(--color-rose-400);
+}
+
+.theme-rose:is(.dark *) {
+    --primary: var(--color-rose-500);
+    --primary-foreground: var(--color-rose-50);
+    --ring: var(--color-rose-900);
+}
 
 ::-webkit-scrollbar {
     height: 3px;
@@ -233,10 +247,6 @@ body {
 
 blockquote, dd, dl, figure, h1, h2, h3, h4, h5, h6, hr, p, pre {
     margin: 0;
-}
-
-a:any-link {
-    color: var(--color-blue-400);
 }
 
 .collapsible {
@@ -507,7 +517,7 @@ a svg, svg path {
 .commandbar .searchitembox .searchitem {
     padding: 6px;
     padding-left: 48px;
-    color: var(--primary);
+    color: var(--foreground);
     font-size: var(--text-sm);
     cursor: pointer;
     display: flex;
@@ -567,7 +577,7 @@ a svg, svg path {
 
     & a {
         text-decoration: none;
-        color: var(--primary);
+        color: var(--foreground);
         transition: all 0.15s ease-in-out;
     }
 
@@ -1140,7 +1150,7 @@ a svg, svg path {
 .lexcomponent input:not(.lexcheckbox, .lextoggle, .lexrangeslider, .lexcounter) {
     padding: var(--pad-sm);
     padding-inline: 0.5rem;
-    color: var(--primary);
+    color: var(--secondary-foreground);
     --background-color: var(--secondary);
     background-color: var(--background-color);
 }
@@ -1227,7 +1237,7 @@ a svg, svg path {
     font-size: var(--text-sm);
     background: none;
     padding: var(--pad-md);
-    color: var(--primary);
+    color: var(--foreground);
     outline: none;
     border-radius: 6px;
     border: 1px solid transparent;
@@ -1832,7 +1842,7 @@ dialog .lexselect .lexselectoptions {
 }
 
 .lextoggle.outline.secondary:checked, .lextoggle.outline.secondary[aria-checked=true], .lextoggle.outline.secondary:has(>input:checked) {
-    color: var(--primary);
+    color: var(--secondary-foreground);
     border: 1px solid var(--input);
 }
 

@@ -27,7 +27,7 @@
         {
             const isFeatured = featuredComponents.indexOf( c ) !== -1;
             const page = "components/" + c.toLowerCase().replace( /\s/g, '-');
-            const hl = LX.makeElement( "a", `inline-flex gap-2 items-center cursor-pointer content-center font-medium text-base text-primary hover:underline-offset-4 hover:underline`,
+            const hl = LX.makeElement( "a", `inline-flex gap-2 items-center cursor-pointer content-center font-medium text-base text-foreground hover:underline-offset-4 hover:underline`,
                     c + ( isFeatured ? `<span class="flex bg-info w-2 h-2 rounded-full"></span>` : `` ) );
             hl.addEventListener( "click", ( e ) => {
                 e.preventDefault();

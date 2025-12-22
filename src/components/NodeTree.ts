@@ -629,11 +629,11 @@ export class Tree extends BaseComponent
 
         super( ComponentType.TREE, name, null, options );
 
-        let container = LX.makeElement( 'div', 'lextree p-1 rounded-lg w-full my-0 mx-auto text-primary font-medium text-sm min-h-3', '', this.root );
+        let container = LX.makeElement( 'div', 'lextree p-1 rounded-lg w-full my-0 mx-auto font-medium text-sm min-h-3', '', this.root );
 
         if ( name )
         {
-            let title = LX.makeElement( 'span', 'block p-1 text-primary select-none text-base font-medium whitespace-nowrap', name, container );
+            let title = LX.makeElement( 'span', 'block p-1 select-none text-base font-medium whitespace-nowrap', name, container );
         }
 
         let toolsDiv = LX.makeElement( 'div', 'lextreetools flex items-center bg-secondary px-2 rounded-lg gap-2 my-1' );

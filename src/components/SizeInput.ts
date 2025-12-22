@@ -65,7 +65,7 @@ export class SizeInput extends BaseComponent
 
             if ( ( i + 1 ) != value.length )
             {
-                const xIcon = LX.makeIcon( 'X', { svgClass: 'text-primary font-bold' } );
+                const xIcon = LX.makeIcon( 'X', { svgClass: 'text-foreground font-bold' } );
                 container.appendChild( xIcon );
             }
         }

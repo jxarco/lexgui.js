@@ -174,6 +174,8 @@ LX.init = async function( options: any = {} )
         this._mqlPrefersDarkScheme.addEventListener( 'change', this._onChangeSystemTheme );
     }
 
+    LX.setColorTheme( 'rose' );
+
     return this.mainArea;
 };
 
@@ -544,7 +546,7 @@ LX._createCommandbar = function( root: any )
             return;
         }
 
-        const icon = LX.makeIcon( 'ChevronRight', { svgClass: 'sm text-primary separator' } );
+        const icon = LX.makeIcon( 'ChevronRight', { svgClass: 'sm text-muted-foreground separator' } );
         path += item.name + icon.innerHTML;
 
         for ( let c of submenu )

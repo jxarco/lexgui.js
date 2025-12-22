@@ -45,7 +45,7 @@ export class Map2D extends BaseComponent
         const calendarIcon = LX.makeIcon( 'SquareMousePointer' );
         const calendarButton = new Button( null, 'Open Map', () => {
             this._popover = new Popover( calendarButton.root, [ this.map2d ] );
-        }, { buttonClass: `outline text-primary justify-between` } );
+        }, { buttonClass: `outline justify-between` } );
 
         calendarButton.root.querySelector( 'button' ).appendChild( calendarIcon );
         container.appendChild( calendarButton.root );

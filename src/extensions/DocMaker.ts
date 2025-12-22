@@ -338,10 +338,10 @@ export class DocMaker
     {
         console.assert( text !== undefined );
 
-        const note = LX.makeContainer( [], 'border-color rounded-xl overflow-hidden text-sm text-primary my-6', '', this.root );
+        const note = LX.makeContainer( [], 'border-color rounded-xl overflow-hidden text-sm text-secondary-foreground my-6', '', this.root );
 
         let header = document.createElement( 'div' );
-        header.className = 'flex bg-muted font-semibold px-3 py-2 gap-2 text-primary';
+        header.className = 'flex bg-muted font-semibold px-3 py-2 gap-2 text-secondary-foreground';
         header.appendChild( LX.makeIcon( icon ?? ( warning ? 'MessageSquareWarning' : 'NotepadText' ) ) );
         header.innerHTML += title ?? ( warning ? 'Important' : 'Note' );
         note.appendChild( header );
@@ -401,7 +401,7 @@ export class DocMaker
     iLink( text: string, href: string )
     {
         console.assert( text !== undefined && href !== undefined );
-        return `<a href="${href}">${text}</a>`;
+        return `<a class="font-semibold underline-offset-4 hover:underline" href="${href}">${text}</a>`;
     }
 
     iPage( text: string, page: string )

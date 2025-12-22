@@ -74,7 +74,7 @@
         menubar = area.addMenubar( menubarButtons );
 
         const commandButton = new LX.Button(null, `Search command...`, () => { LX.setCommandbarState( true ) }, {
-            width: "256px", className: "right", buttonClass: "p-4 border-input bg-card text-primary" }
+            width: "256px", className: "right", buttonClass: "p-4 border-input bg-card text-muted-foreground" }
         );
         commandButton.root.querySelector( 'button' ).appendChild( LX.makeKbd( ["Ctrl", "Space"], false, "ml-auto" ) );
         menubar.root.appendChild( commandButton.root );
@@ -121,9 +121,9 @@
     let lastCopied = null;
 
     const header = LX.makeContainer([null, "auto"], "flex flex-col gap-4 pt-8 pb-4 items-center", `
-    <a class="text-sm">Get started with LexGUI.js <span class="text-sm text-primary">${LX.version}</span></a>
-    <p class="text-primary font-semibold tracking-tight leading-none text-center text-balance text-4xl xl:text-5xl max-w-4xl">Use Tailwind Colors</p>
-    <p class="text-primary font-light text-base sm:text-lg text-center text-balance leading-normal max-w-3xl">The complete Tailwind color palette in HEX, RGB, HSL, CSS variables, and classes. Ready to copy and paste into your project.</p>`, area);
+    <a class="text-sm">Get started with LexGUI.js <span class="text-sm text-secondary-foreground">${LX.version}</span></a>
+    <p class="text-secondary-foreground font-semibold tracking-tight leading-none text-center text-balance text-4xl xl:text-5xl max-w-4xl">Use Tailwind Colors</p>
+    <p class="text-secondary-foreground font-light text-base sm:text-lg text-center text-balance leading-normal max-w-3xl">The complete Tailwind color palette in HEX, RGB, HSL, CSS variables, and classes. Ready to copy and paste into your project.</p>`, area);
 
     const updateExampleString = () =>
     {
@@ -145,11 +145,11 @@
         updateExampleString();
     }, { skipReset: true } );
     headerButtons.appendChild( formatSelect.root );
-    const exampleString = LX.makeContainer( [ "auto", "auto" ], "text-sm content-center text-primary font-medium", `#fed7aa`, headerButtons );
+    const exampleString = LX.makeContainer( [ "auto", "auto" ], "text-sm content-center text-foreground font-medium", `#fed7aa`, headerButtons );
 
     function createColorBlock(name, value) {
         const block = document.createElement('div');
-        block.className = "w-full flex flex-col gap-2 text-muted-foreground hover:text-primary cursor-pointer";
+        block.className = "w-full flex flex-col gap-2 text-muted-foreground hover:text-foreground cursor-pointer";
         block.innerHTML = `
             <div class="h-32 bg-${ name } rounded-lg border-color">
                 ${ LX.makeIcon( "Clipboard", { svgClass: "copySvg ml-auto mr-2 mt-2 opacity-0" } ).innerHTML }

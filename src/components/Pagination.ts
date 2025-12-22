@@ -217,7 +217,7 @@ export class Pagination
 
     _makePageButton( container: HTMLElement, i: number )
     {
-        const buttonClass = `h-8 ${i === this.page ? 'bg-primary text-primary-foreground' : 'ghost'}`;
+        const buttonClass = `h-8 ${i === this.page ? 'primary text-primary-foreground' : 'ghost'}`;
         return this._makeButton( String( i ), false, () => this.setPage( i ), buttonClass, container );
     }
 }
