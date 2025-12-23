@@ -2495,9 +2495,9 @@
   --card-foreground: light-dark(#0a0a0a, #fafafa);
   --primary: light-dark(#171717, #fafafa);
   --primary-foreground: light-dark(#fafafa, #171717);
-  --secondary: light-dark(#f5f5f5, #262626);
+  --secondary: light-dark(#e5e5e5, #262626);
   --secondary-foreground: light-dark(#171717, #e5e5e5);
-  --muted: light-dark(#f5f5f5, #262626);
+  --muted: light-dark(#e5e5e5, #262626);
   --muted-foreground: light-dark(#737373, #a1a1a1);
   --accent: light-dark(#ddd, #404040);
   --accent-foreground: light-dark(#0a0a0a, #fafafa);
@@ -2841,9 +2841,6 @@ svg.\32xl {
   border-radius: 4px;
   transition: all 0.15s linear;
   place-self: center;
-  &:hover {
-    color: var(--foreground);
-  }
 }
 .lexicon.triggered {
   background-color: var(--secondary);
@@ -3357,6 +3354,7 @@ a svg, svg path {
   letter-spacing: calc(var(--text-lg) * 0.025);
   border-top-left-radius: 0.5rem;
   border-top-right-radius: 0.5rem;
+  white-space: nowrap;
 }
 .lexbranch.closed .lexbranchtitle {
   background-color: inherit;
@@ -3459,7 +3457,7 @@ a svg, svg path {
   --background-color: var(--secondary);
   background-color: var(--background-color);
 }
-.lexcomponent input:not(.lexcheckbox, .lextoggle, .lexrangeslider, .outline):hover {
+.lexcomponent input:not(.lexcheckbox, .lextoggle, .lexrangeslider, .lexinputslider, .outline):hover {
   background-color: var(--background-color);
   @supports (color: color-mix(in lab, red, red)) {
     background-color: color-mix(in srgb, var(--background-color), #000 5%);
@@ -4086,7 +4084,8 @@ dialog .lexselect .lexselectoptions {
   --toggle-fg-checked-color: var(--primary-foreground);
 }
 .lextoggle.secondary {
-  --toggle-bg-color: var(--secondary);
+  --toggle-bg-color: var(--muted);
+  --toggle-fg-checked-color: var(--secondary-foreground);
 }
 .lextoggle.success {
   --toggle-fg-color: var(--success);
@@ -4319,12 +4318,6 @@ input[type=number] {
   border: 1px solid transparent;
   margin-right: 2px;
   transition: 0.1s linear;
-}
-.lexcomponent .numberbox:hover {
-  background-color: var(--secondary);
-  @supports (color: color-mix(in lab, red, red)) {
-    background-color: color-mix(in srgb, var(--secondary), #000 7%);
-  }
 }
 .lexcomponent .numberbox:has(input:focus) {
   border: 1px solid var(--muted-foreground);
@@ -4948,7 +4941,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 .lexcontextmenu .lexmenuboxentry:hover:not(.cmtitle) {
   background-color: var(--accent);
-  color: #f5f5f5;
+  color: var(--accent-foreground);
 }
 .lexcontextmenu .lexmenuboxentry:active:not(.cmtitle, .cmseparator) {
   padding-top: 0.22em;
@@ -5033,12 +5026,12 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
   place-content: start;
 }
 .lexsidebar .lexsidebarentry:hover {
-  background-color: var(--accent);
-  color: var(--accent-foreground);
+  background-color: var(--secondary);
+  color: var(--secondary-foreground);
 }
 .lexsidebar .lexsidebarentry.selected {
-  background-color: var(--primary);
-  color: var(--primary-foreground);
+  background-color: var(--accent);
+  color: var(--accent-foreground);
 }
 .lexsidebar .lexsidebarentry:active {
   transform: scale(0.99);
@@ -5206,6 +5199,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
   justify-items: right;
 }
 .lexoverlaybuttons .lexbutton.selected {
+  --radius: 0.85rem;
   --button-color: var(--primary) !important;
   color: var(--primary-foreground) !important;
 }
@@ -5362,6 +5356,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
   align-items: center;
   display: flex;
   flex-direction: row;
+  white-space: nowrap;
   gap: 0.25rem;
   -webkit-user-select: none;
   -moz-user-select: none;

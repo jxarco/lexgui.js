@@ -221,7 +221,7 @@ LX._registerIconsAndColors( "./" );
         left.onresize = resizeCanvas;
         left.addOverlayButtons( [
             [
-                { name: "Select", icon: "MousePointer", selectable: true },
+                { name: "Select", icon: "MousePointer", selectable: true, selected: true },
                 { name: "Move", icon: "Move", selectable: true },
                 { name: "Rotate", icon: "RotateRight", selectable: true }
             ],
