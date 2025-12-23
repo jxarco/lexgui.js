@@ -20,7 +20,7 @@ class CanvasDial
         element.style.minWidth = element.style.minHeight = '50px';
 
         element.bgcolor = options.bgColor || LX.getThemeColor( 'background' );
-        element.pointscolor = options.pointsColor || LX.getThemeColor( 'primary' );
+        element.pointscolor = options.pointsColor || LX.getThemeColor( 'primary/50' );
         element.linecolor = options.lineColor || '#555';
         element.value = value || [];
         element.xrange = options.xrange || [ 0, 1 ]; // min, max
@@ -36,7 +36,7 @@ class CanvasDial
 
         LX.addSignal( '@on_new_color_scheme', ( el: HTMLElement, value: string ) => {
             element.bgcolor = options.bgColor || LX.getThemeColor( 'background' );
-            element.pointscolor = options.pointsColor || LX.getThemeColor( 'primary' );
+            element.pointscolor = options.pointsColor || LX.getThemeColor( 'primary/50' );
             this.redraw();
         } );
 

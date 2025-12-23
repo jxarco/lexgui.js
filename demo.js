@@ -7,6 +7,9 @@ const area = await LX.init( { layoutMode: "document", rootClass: "wrapper" } );
 const starterTheme = LX.getTheme();
 const mobile = navigator && /Android|iPhone/i.test( navigator.userAgent );
 const localHost = window.location.protocol !== "https:";
+const themes = [
+    'Amber', 'Blue', 'Green', 'Neutral', 'Orange', 'Purple', 'Red', 'Rose', 'Teal', 'Violet', 'Yellow'
+]
 const menubarButtons = [
     { name: "Docs", callback: () => { window.open("./docs/") } },
     { name: "Examples", callback: () => { window.open("./examples/") } },
@@ -115,6 +118,12 @@ LX._registerIconsAndColors( "./" );
     if( !mobile )
     {
         tabs = area.addTabs( { parentClass: "p-4", sizes: [ "auto", "auto" ], contentClass: "p-6 pt-0" } );
+
+        const tabsParent = tabs.root.parentElement;
+        tabsParent.className = LX.mergeClass( tabsParent.className, 'flex flex-row justify-between' );
+
+        const themeSelect = new LX.Select( null, themes, 'Neutral', (v) => LX.setColorTheme( v.toLowerCase() ), { overflowContainerY: null } );
+        tabsParent.appendChild( themeSelect.root );
 
         const editorContainer = LX.makeContainer( [ null, "800px" ], "flex flex-col border-color rounded-lg overflow-hidden" );
         tabs.add( "Editor", editorContainer, { selected: true } );

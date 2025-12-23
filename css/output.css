@@ -824,6 +824,9 @@
   .min-w-0 {
     min-width: calc(var(--spacing) * 0);
   }
+  .min-w-2 {
+    min-width: calc(var(--spacing) * 2);
+  }
   .min-w-3xs {
     min-width: var(--container-3xs);
   }
@@ -1118,6 +1121,12 @@
   }
   .bg-card {
     background-color: var(--color-card);
+  }
+  .bg-card\/50 {
+    background-color: var(--color-card);
+    @supports (color: color-mix(in lab, red, red)) {
+      background-color: color-mix(in oklab, var(--color-card) 50%, transparent);
+    }
   }
   .bg-cyan-50 {
     background-color: var(--color-cyan-50);
@@ -2309,6 +2318,11 @@
       white-space: nowrap;
     }
   }
+  .\[\&_input\]\:w-2\/3 {
+    & input {
+      width: calc(2/3 * 100%);
+    }
+  }
   .\[\&_p\]\:text-xs {
     & p {
       font-size: var(--text-xs);
@@ -2521,6 +2535,34 @@
 :root[data-theme="light"] {
   color-scheme: light;
 }
+.theme-blue {
+  --primary: var(--color-blue-700);
+  --primary-foreground: var(--color-blue-50);
+}
+.theme-blue:is(.dark *) {
+  --primary: var(--color-blue-700);
+  --primary-foreground: var(--color-blue-50);
+}
+.theme-green {
+  --primary: var(--color-lime-600);
+  --primary-foreground: var(--color-lime-50);
+  --ring: var(--color-lime-400);
+}
+.theme-green:is(.dark *) {
+  --primary: var(--color-lime-600);
+  --primary-foreground: var(--color-lime-50);
+  --ring: var(--color-lime-900);
+}
+.theme-amber {
+  --primary: var(--color-amber-600);
+  --primary-foreground: var(--color-amber-50);
+  --ring: var(--color-amber-400);
+}
+.theme-amber:is(.dark *) {
+  --primary: var(--color-amber-500);
+  --primary-foreground: var(--color-amber-50);
+  --ring: var(--color-amber-900);
+}
 .theme-rose {
   --primary: var(--color-rose-600);
   --primary-foreground: var(--color-rose-50);
@@ -2530,6 +2572,64 @@
   --primary: var(--color-rose-500);
   --primary-foreground: var(--color-rose-50);
   --ring: var(--color-rose-900);
+}
+.theme-purple {
+  --primary: var(--color-purple-600);
+  --primary-foreground: var(--color-purple-50);
+  --ring: var(--color-purple-400);
+}
+.theme-purple:is(.dark *) {
+  --primary: var(--color-purple-500);
+  --primary-foreground: var(--color-purple-50);
+  --ring: var(--color-purple-900);
+}
+.theme-orange {
+  --primary: var(--color-orange-600);
+  --primary-foreground: var(--color-orange-50);
+  --ring: var(--color-orange-400);
+}
+.theme-orange:is(.dark *) {
+  --primary: var(--color-orange-500);
+  --primary-foreground: var(--color-orange-50);
+  --ring: var(--color-orange-900);
+}
+.theme-teal {
+  --primary: var(--color-teal-600);
+  --primary-foreground: var(--color-teal-50);
+}
+.theme-teal:is(.dark *) {
+  --primary: var(--color-teal-500);
+  --primary-foreground: var(--color-teal-50);
+}
+.theme-red {
+  --primary: var(--color-red-600);
+  --primary-foreground: var(--color-red-50);
+  --ring: var(--color-red-400);
+}
+.theme-red:is(.dark *) {
+  --primary: var(--color-red-500);
+  --primary-foreground: var(--color-red-50);
+  --ring: var(--color-red-900);
+}
+.theme-yellow {
+  --primary: var(--color-yellow-400);
+  --primary-foreground: var(--color-yellow-900);
+  --ring: var(--color-yellow-400);
+}
+.theme-yellow:is(.dark *) {
+  --primary: var(--color-yellow-500);
+  --primary-foreground: var(--color-yellow-900);
+  --ring: var(--color-yellow-900);
+}
+.theme-violet {
+  --primary: var(--color-violet-600);
+  --primary-foreground: var(--color-violet-50);
+  --ring: var(--color-violet-400);
+}
+.theme-violet:is(.dark *) {
+  --primary: var(--color-violet-500);
+  --primary-foreground: var(--color-violet-50);
+  --ring: var(--color-violet-900);
 }
 ::-webkit-scrollbar {
   height: 3px;
@@ -3803,7 +3903,7 @@ dialog .lexselect .lexselectoptions {
 .lexselect .lexselectitem {
   width: 100%;
   cursor: pointer;
-  color: var(--primary);
+  color: var(--foreground);
   min-height: 20px;
   line-height: 22px;
   padding-inline: 0.35rem;
@@ -3854,13 +3954,6 @@ dialog .lexselect .lexselectoptions {
 .lexselect img {
   max-height: 4rem;
   margin-top: 0.5rem;
-}
-:root[data-theme="light"] .lexselect .lexfilter {
-  background-color: var(--primary);
-}
-:root[data-theme="light"] .lexselect ul {
-  background-color: var(--primary);
-  box-shadow: 0 0px 6px rgba(175, 175, 175, 0.788);
 }
 .lexcheckbox {
   --checkbox-bg-color: var(--card);
@@ -4068,11 +4161,12 @@ dialog .lexselect .lexselectoptions {
 }
 .lextoggle.outline:checked, .lextoggle.outline[aria-checked=true], .lextoggle.outline:has(>input:checked) {
   border: 1px solid currentColor;
-  color: var(--toggle-bg-color);
+  color: var(--toggle-fg-color);
   background-color: var(--secondary);
 }
 .lextoggle.outline.primary:checked, .lextoggle.outline.primary[aria-checked=true], .lextoggle.outline.primary:has(>input:checked) {
   border: 1px solid var(--primary);
+  color: var(--toggle-bg-color);
 }
 .lextoggle.outline.secondary:checked, .lextoggle.outline.secondary[aria-checked=true], .lextoggle.outline.secondary:has(>input:checked) {
   color: var(--secondary-foreground);
@@ -4192,7 +4286,7 @@ dialog .lexselect .lexselectoptions {
   background-color: var(--info);
 }
 .lexvector .vecbox span.w {
-  background-color: var(--primary);
+  background-color: var(--foreground);
 }
 input::-webkit-outer-spin-button, input::-webkit-inner-spin-button {
   appearance: none;
@@ -4247,9 +4341,9 @@ input[type=number] {
 .lexinputslider {
   --track-height: 0.25rem;
   --thumb-height: 0.75rem;
-  --color: var(--primary);
+  --color: var(--secondary-foreground);
   @supports (color: color-mix(in lab, red, red)) {
-    --color: color-mix(in oklab,var(--primary) 20%,transparent);
+    --color: color-mix(in oklab,var(--secondary-foreground) 20%,transparent);
   }
   appearance: none;
   -moz-appearance: none;
@@ -4503,7 +4597,7 @@ input[type=number] {
 .lextabscontainer .tabs .lextab {
   padding: 4px;
   border-radius: 4px;
-  color: var(--primary);
+  color: var(--foreground);
   cursor: pointer;
   text-align: center;
 }
@@ -4535,12 +4629,12 @@ input[type=number] {
   transition-duration: .15s;
 }
 .lextree .lextreeitem input {
-  color: var(--primary);
   padding: 0;
   border: none;
-}
-.lextree .lextreeitem input:hover {
   background: none;
+  &:hover {
+    background: none;
+  }
 }
 .lextree .lextreeitem img {
   width: 16px;
@@ -4582,9 +4676,9 @@ input[type=number] {
   transition: 0.1s linear;
 }
 .lexfileinput::file-selector-button:hover {
-  background-color: var(--primary);
+  background-color: var(--card);
   @supports (color: color-mix(in lab, red, red)) {
-    background-color: color-mix(in srgb, var(--primary) 20%, transparent);
+    background-color: color-mix(in srgb, var(--card) 30%, transparent);
   }
 }
 .lexfileinput:disabled::file-selector-button {
@@ -4606,9 +4700,9 @@ input[type=number] {
 .lexprogressbar::-webkit-meter-bar {
   border-radius: 0.25rem;
   height: 12px;
-  background: var(--primary);
+  background: var(--muted-foreground);
   @supports (color: color-mix(in lab, red, red)) {
-    background: color-mix(in srgb, var(--primary) 20%, transparent);
+    background: color-mix(in srgb, var(--muted-foreground) 30%, transparent);
   }
 }
 meter:-moz-meter-optimum::-moz-meter-bar {
@@ -4717,7 +4811,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
   border-radius: 0.5rem;
 }
 .lexmenubar .lexmenuentry:hover span, .lexmenubar .lexmenuentry.selected span {
-  color: var(--primary);
+  color: var(--foreground);
   background-color: var(--secondary);
 }
 .lexmenubar .lexmenuentry:active {
@@ -4967,7 +5061,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
   margin-left: auto;
 }
 .lexsidebar .lexsidebarentry > * {
-  color: var(--primary);
+  color: var(--foreground);
   font-size: var(--text-sm);
 }
 .lexsidebar .lexcheckbox {
@@ -5156,7 +5250,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
   text-align: center;
   align-items: center;
   padding: 3px;
-  color: var(--primary);
+  color: var(--foreground);
   cursor: pointer;
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -5255,7 +5349,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
   width: 100%;
   height: 24px;
   cursor: pointer;
-  color: var(--primary);
+  color: var(--secondary-foreground);
   font-size: var(--text-sm);
   border-radius: 0.5rem;
   padding-inline: 0.5rem;
@@ -5313,35 +5407,11 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
   margin-right: 0.4rem;
   font-weight: 600;
 }
-.lextags {
-  display: inline-flex;
-  flex-wrap: wrap;
-  line-height: 12px;
-  background-color: var(--card);
-  border-radius: 8px;
-  padding: var(--pad-xs);
-}
-.lextags input {
-  width: 60%;
-}
-.lextags .lextag {
-  padding: 6px;
-  background-color: var(--primary);
-  margin: 2px;
-  border-radius: 8px;
-  min-width: 16px;
-  justify-content: center;
-  color: var(--primary-foreground);
+.lextag {
   display: inherit;
-  gap: 0.2rem;
-  font-size: var(--text-sm);
   cursor: default;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
 }
-.lextags .lextag a:hover {
+.lextag a:hover {
   color: light-dark(var(--muted-foreground), var(--secondary-foreground));
   cursor: pointer;
 }
@@ -5358,10 +5428,10 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
   overflow: hidden;
   background-color: var(--background);
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  color: var(--primary);
+  color: var(--foreground);
 }
 .lextable svg {
-  color: var(--primary);
+  color: var(--foreground);
 }
 .lextable svg.success, .lextable svg.success path {
   color: #42d065 !important;
@@ -5672,26 +5742,6 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
   width: unset;
   height: unset;
 }
-.lexmin {
-  display: inline-block;
-  color: var(--color-blue-400);
-  background: var(--primary);
-  border-radius: 8px;
-  padding: 4px;
-  position: absolute;
-  transition: 0.3s;
-  font-size: initial;
-  cursor: pointer;
-}
-.lexmin.horizontal {
-  margin-top: 48px;
-  margin-left: -12px;
-  height: fit-content;
-}
-.lexmin.vertical {
-  margin-top: -12px;
-  margin-left: 12px;
-}
 .lexarea .minimize-vertical, .lexarea .maximize-vertical {
   transition: height 0.1s ease-out;
 }
@@ -5759,7 +5809,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
   top: 0;
 }
 .lexarea.overlay-bottom, .lexarea.overlay-top, .lexarea.overlay-left, .lexarea.overlay-right, .overlay-bottom .lexarea, .overlay-top .lexarea, .overlay-left .lexarea, .overlay-right .lexarea, .overlay-bottom .lextimeline, .overlay-top .lextimeline, .overlay-left .lextimeline, .overlay-right .lextimeline, .overlay-bottom .lextimelinearea, .overlay-top .lextimelinearea, .overlay-left .lextimeline, .overlay-right .lextimelinearea {
-  background-color: var(--primary);
+  background-color: var(--background);
 }
 .lexassetbrowser {
   min-height: 190px;
@@ -5835,8 +5885,8 @@ ul.lexassetscontent {
   position: fixed;
   font-weight: 600;
   white-space: nowrap;
-  background-color: var(--primary);
-  color: var(--primary-foreground);
+  background-color: var(--secondary-foreground);
+  color: var(--secondary);
   font-size: var(--text-xs);
   border-radius: 0.5rem;
   display: none;
@@ -6228,7 +6278,7 @@ ul.lexassetscontent {
   width: 0;
   height: var(--code-editor-row-height);
   position: absolute;
-  border-left: 3px solid var(--primary) !important;
+  border-left: 3px solid var(--foreground) !important;
   z-index: 1 !important;
   opacity: 0.6;
   left: 0px;
@@ -6268,7 +6318,7 @@ ul.lexassetscontent {
 .lexcodescrollbar div:hover {
   background-color: var(--secondary) !important;
   @supports (color: color-mix(in lab, red, red)) {
-    background-color: color-mix(in srgb, var(--secondary), var(--primary) 5%) !important;
+    background-color: color-mix(in srgb, var(--secondary), #fff 10%) !important;
   }
 }
 .lexcodeeditor .lexcodeselection, .lexcodeeditor .lexcodesearchresult {
@@ -6861,16 +6911,16 @@ ul.lexassetscontent {
   max-width: 11px;
   min-height: 10px;
   max-height: 10px;
-  background-color: var(--primary);
+  background-color: var(--secondary);
   @supports (color: color-mix(in lab, red, red)) {
-    background-color: color-mix(in oklab, var(--primary) 30%, transparent);
+    background-color: color-mix(in oklab, var(--secondary) 30%, transparent);
   }
   align-self: center;
   border-radius: 3px;
   text-align: -webkit-center;
   text-align: center;
   border: 1px solid #afafaf6b;
-  color: var(--primary);
+  color: var(--foreground);
   pointer-events: all;
 }
 .lexgraphnode .lexgraphnodeio .io__type span {
@@ -6880,11 +6930,11 @@ ul.lexassetscontent {
   position: absolute;
   margin-left: -2rem;
   font-weight: 600;
-  background-color: var(--primary);
+  background-color: var(--secondary);
   @supports (color: color-mix(in lab, red, red)) {
-    background-color: color-mix(in oklab, var(--primary) 30%, transparent);
+    background-color: color-mix(in oklab, var(--secondary) 30%, transparent);
   }
-  color: var(--primary);
+  color: var(--foreground);
   font-size: calc(var(--text-xs) - 0.15rem);
   border-radius: 4px;
   padding-inline: 0.25rem;
@@ -6976,7 +7026,7 @@ ul.lexassetscontent {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-  border-bottom: 1px solid var(--primary);
+  border-bottom: 1px solid var(--foreground);
 }
 .lexgraphgroup .lexgraphgrouptitle:disabled {
   pointer-events: none;
@@ -6988,8 +7038,8 @@ ul.lexassetscontent {
   right: 2px;
   width: 12px;
   height: 12px;
-  border-bottom: 2px solid var(--primary);
-  border-right: 2px solid var(--primary);
+  border-bottom: 2px solid var(--foreground);
+  border-right: 2px solid var(--foreground);
   border-bottom-right-radius: 8px;
 }
 .lexgraphgroup .lexgraphgroupresizer:hover {

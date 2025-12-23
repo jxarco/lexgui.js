@@ -174,7 +174,7 @@ LX.init = async function( options: any = {} )
         this._mqlPrefersDarkScheme.addEventListener( 'change', this._onChangeSystemTheme );
     }
 
-    LX.setColorTheme( 'rose' );
+    // LX.setColorTheme( 'rose' );
 
     return this.mainArea;
 };

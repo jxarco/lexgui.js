@@ -447,7 +447,7 @@ function getThemeColor( colorName: string ): string
         if ( value.startsWith( 'rgb(' ) || value.startsWith( 'hsl(' ) || value.startsWith( 'oklch(' )
             || value.startsWith( 'lab(' ) || value.startsWith( 'lch(' ) )
         {
-            return value.replace( /\)$/, ` / ${opacity})` );
+            return value.replace( /\)$/, ` / ${parseFloat( opacity ) / 100.0})` );
         }
 
         // Hex fallback

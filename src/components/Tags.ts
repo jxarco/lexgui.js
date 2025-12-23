@@ -43,7 +43,7 @@ export class Tags extends BaseComponent
         // Show tags
 
         const tagsContainer = document.createElement( 'div' );
-        tagsContainer.className = 'lextags';
+        tagsContainer.className = 'inline-flex flex-wrap gap-1 bg-card/50 rounded-lg pad-xs [&_input]:w-2/3';
         this.root.appendChild( tagsContainer );
 
         this.generateTags = ( value ) => {
@@ -52,10 +52,7 @@ export class Tags extends BaseComponent
             for ( let i = 0; i < value.length; ++i )
             {
                 const tagName = value[i];
-                const tag = document.createElement( 'span' );
-                tag.className = 'lextag';
-                tag.innerHTML = tagName;
-
+                const tag = LX.makeElement( 'span', 'lextag bg-primary px-2 py-1 rounded-xl min-w-2 justify-center text-primary-foreground gap-1 text-sm select-none', tagName );
                 const removeButton = LX.makeIcon( 'X', { svgClass: 'sm' } );
                 tag.appendChild( removeButton );
 
