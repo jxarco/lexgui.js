@@ -9,7 +9,7 @@ export declare class TimeBar {
     static TIMEBAR_TRIM: number;
     static BACKGROUND_COLOR: any;
     static COLOR: any;
-    static ACTIVE_COLOR: string;
+    static ACTIVE_COLOR: any;
     type: number;
     duration: number;
     canvas: HTMLCanvasElement;

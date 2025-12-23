@@ -12,12 +12,18 @@ export default [
                 format: 'esm',
                 sourcemap: true,
                 name: "lexgui",
-                banner: '// This is a generated file. Do not edit.'
+                banner: '// This is a generated file. Do not edit.',
+                globals: {
+                    "https://cdn.jsdelivr.net/npm/tailwind-merge@3.4.0/+esm": "twMerge",
+                }
             },
             {
                 file: 'build/lexgui.module.min.js',
                 format: 'esm',
                 sourcemap: false,
+                globals: {
+                    "https://cdn.jsdelivr.net/npm/tailwind-merge@3.4.0/+esm": "twMerge",
+                },
                 plugins: [terser()]
             },
             {
@@ -25,16 +31,23 @@ export default [
                 format: 'umd',
                 name: "lexgui",
                 sourcemap: true,
-                banner: '// This is a generated file. Do not edit.'
+                banner: '// This is a generated file. Do not edit.',
+                globals: {
+                    "https://cdn.jsdelivr.net/npm/tailwind-merge@3.4.0/+esm": "twMerge",
+                }
             },
             {
                 file: 'build/lexgui.min.js',
                 format: 'umd',
                 name: "lexgui",
                 sourcemap: false,
+                globals: {
+                    "https://cdn.jsdelivr.net/npm/tailwind-merge@3.4.0/+esm": "twMerge",
+                },
                 plugins: [terser()]
             }
         ],
+        external: ["https://cdn.jsdelivr.net/npm/tailwind-merge@3.4.0/+esm"],
         plugins: [
             postcss({
                 extract: 'lexgui.css'
@@ -52,12 +65,18 @@ export default [
                 file: 'build/lexgui.all.module.js',
                 format: 'esm',
                 sourcemap: true,
-                banner: '// This is a generated file. Do not edit.'
+                banner: '// This is a generated file. Do not edit.',
+                globals: {
+                    "https://cdn.jsdelivr.net/npm/tailwind-merge@3.4.0/+esm": "twMerge",
+                }
             },
             {
                 file: 'build/lexgui.all.module.min.js',
                 format: 'esm',
                 sourcemap: false,
+                globals: {
+                    "https://cdn.jsdelivr.net/npm/tailwind-merge@3.4.0/+esm": "twMerge",
+                },
                 plugins: [terser()]
             },
             {
@@ -65,16 +84,23 @@ export default [
                 format: 'umd',
                 name: "lexgui",
                 sourcemap: true,
-                banner: '// This is a generated file. Do not edit.'
+                banner: '// This is a generated file. Do not edit.',
+                globals: {
+                    "https://cdn.jsdelivr.net/npm/tailwind-merge@3.4.0/+esm": "twMerge",
+                }
             },
             {
                 file: 'build/lexgui.all.min.js',
                 format: 'umd',
                 name: "lexgui",
                 sourcemap: false,
+                globals: {
+                    "https://cdn.jsdelivr.net/npm/tailwind-merge@3.4.0/+esm": "twMerge",
+                },
                 plugins: [terser()]
             }
         ],
+        external: ["https://cdn.jsdelivr.net/npm/tailwind-merge@3.4.0/+esm"],
         plugins: [
             postcss({
                 extract: 'lexgui.min.css',

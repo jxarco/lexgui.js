@@ -1,4 +1,3 @@
-import './../css/colors.css';
-import './../css/lexgui.css';
-import './../css/lexguidocs.css';
+import './../css/output.css';
+import './../css/docs.css';
 export * from './index';

@@ -9,7 +9,7 @@ LX.extensions.push('AssetView');
 const Area = LX.Area;
 LX.Panel;
 LX.NodeTree;
-LX.TreeEvent;
+LX.Tree;
 /**
  * @class AssetView
  * @description Asset container with Tree for file system
@@ -51,9 +51,7 @@ class AssetView {
     allowMultipleSelection = false;
     previewActions = [];
     contextMenu = [];
-    onRefreshContent = null;
     itemContextMenuOptions = null;
-    onItemDragged = null;
     _assetsPerPage = 24;
     get assetsPerPage() {
         return this._assetsPerPage;
@@ -92,8 +90,6 @@ class AssetView {
         this.allowMultipleSelection = options.allowMultipleSelection ?? this.allowMultipleSelection;
         this.previewActions = options.previewActions ?? [];
         this.itemContextMenuOptions = options.itemContextMenuOptions;
-        this.onRefreshContent = options.onRefreshContent;
-        this.onItemDragged = options.onItemDragged;
         this.gridScale = options.gridScale ?? this.gridScale;
         if (this.gridScale !== 1.0) {
             const r = document.querySelector(':root');
@@ -154,8 +150,7 @@ class AssetView {
         this.currentData = this.data;
         this.path = ['@'];
         if (!this.skipBrowser) {
-            this.tree.refresh({ id: '/', children: this.data, type: 'folder',
-                metadata: { uid: LX.guidGenerator() } });
+            this.tree.refresh({ id: '/', children: this.data, type: 'folder', metadata: { uid: LX.guidGenerator() } });
         }
         this._refreshContent();
     }
@@ -239,10 +234,8 @@ class AssetView {
             });
             itemEl.appendChild(checkbox);
         }
-        let title = document.createElement('span');
-        title.className = 'lexassettitle';
-        title.innerText = item.id;
-        itemEl.appendChild(title);
+        // Asset title
+        LX.makeElement('span', 'lexassettitle absolute w-full h-8 bottom-0 text-sm bg-card text-card-foreground cursor-pointer text-center content-center block px-3 py-0.5 truncate z-1 pointer-events-none', item.id, itemEl);
         if (!this.skipPreview) {
             if (item.type === 'video') {
                 const itemVideo = LX.makeElement('video', 'absolute left-0 top-0 w-full border-none pointer-events-none', '', itemEl);
@@ -330,7 +323,6 @@ class AssetView {
                     userInitiated: true
                 };
                 onDblClick(event);
-                // event.multiple = !!e.shiftKey;
             }
             else if (!isDoubleClick && onSelect !== undefined) {
                 const event = {
@@ -339,7 +331,6 @@ class AssetView {
                     userInitiated: true
                 };
                 onSelect(event);
-                // event.multiple = !!e.shiftKey;
             }
         });
         itemEl.addEventListener('contextmenu', function (e) {
@@ -350,23 +341,21 @@ class AssetView {
             const options = [
                 {
                     name: (multiple > 1) ? (multiple + ' selected') : item.id,
-                    icon: LX.makeIcon('CircleSmall', { svgClass: `fill-current fg-${typeColor}` }),
+                    icon: LX.makeIcon('CircleSmall', { svgClass: `fill-current text-${typeColor}` }),
                     className: 'text-sm',
                     disabled: true
                 },
                 null
             ];
             if (multiple <= 1) {
-                options.push({ name: 'Rename', icon: 'TextCursor',
-                    callback: that._renameItemPopover.bind(that, item) });
+                options.push({ name: 'Rename', icon: 'TextCursor', callback: that._renameItemPopover.bind(that, item) });
             }
             if (!isFolder) {
                 options.push({ name: 'Clone', icon: 'Copy', callback: that._requestCloneItem.bind(that, item) });
             }
             options.push({ name: 'Move', icon: 'FolderInput', callback: () => that._moveItem(item) });
             if (type == 'Script' && LX.has('CodeEditor')) {
-                options.push({ name: 'Open in Editor', icon: 'Code',
-                    callback: that._openScriptInEditor.bind(that, item) });
+                options.push({ name: 'Open in Editor', icon: 'Code', callback: that._openScriptInEditor.bind(that, item) });
             }
             if (that.itemContextMenuOptions) {
                 options.push(null);
@@ -376,7 +365,7 @@ class AssetView {
                     options.push({ name: o.name, icon: o.icon, callback: o.callback?.bind(that, item) });
                 }
             }
-            options.push(null, { name: 'Delete', icon: 'Trash2', className: 'fg-error',
+            options.push(null, { name: 'Delete', icon: 'Trash2', className: 'text-destructive',
                 callback: that._requestDeleteItem.bind(that, item) });
             LX.addClass(that.contentPanel.root, 'pointer-events-none');
             LX.addDropdownMenu(e.target, options, { side: 'right', align: 'start', event: e, onBlur: () => {
@@ -530,20 +519,20 @@ class AssetView {
                 return;
             this.nextData.push(this.currentFolder);
             this._enterFolder(this.prevData.pop(), false);
-        }, { buttonClass: 'bg-none', title: 'Go Back', tooltip: true, icon: 'ArrowLeft' });
+        }, { buttonClass: 'ghost', title: 'Go Back', tooltip: true, icon: 'ArrowLeft' });
         panel.addButton(null, 'GoForwardButton', () => {
             if (!this.nextData.length || !this.currentFolder)
                 return;
             this._enterFolder(this.nextData.pop());
-        }, { buttonClass: 'bg-none', title: 'Go Forward', tooltip: true, icon: 'ArrowRight' });
+        }, { buttonClass: 'ghost', title: 'Go Forward', tooltip: true, icon: 'ArrowRight' });
         panel.addButton(null, 'GoUpButton', () => {
             const parentFolder = this.currentFolder?.parent;
             if (parentFolder)
                 this._enterFolder(parentFolder);
-        }, { buttonClass: 'bg-none', title: 'Go Upper Folder', tooltip: true, icon: 'ArrowUp' });
-        panel.addButton(null, 'GoUpButton', () => {
-            this._refreshContent();
-        }, { buttonClass: 'bg-none', title: 'Refresh', tooltip: true, icon: 'Refresh' });
+        }, { buttonClass: 'ghost', title: 'Go Upper Folder', tooltip: true, icon: 'ArrowUp' });
+        panel.addButton(null, 'RefreshButton', () => {
+            this._refreshContent(undefined, undefined, true);
+        }, { buttonClass: 'ghost', title: 'Refresh', tooltip: true, icon: 'Refresh' });
     }
     _createTreePanel(area) {
         if (this.leftPanel) {
@@ -555,61 +544,91 @@ class AssetView {
         this._createNavigationBar(this.leftPanel);
         const treeData = { id: '/', children: this.data };
         const tree = this.leftPanel.addTree('Content Browser', treeData, {
-            // icons: tree_icons,
             filter: false,
-            onlyFolders: this.onlyFolders,
-            onevent: (event) => {
-                let node = event.node;
-                let value = event.value;
-                switch (event.type) {
-                    case LX.TreeEvent.NODE_SELECTED:
-                        {
-                            if (event.multiple) {
-                                return;
-                            }
-                            if (!node.parent) {
-                                if (this.currentFolder) {
-                                    this.prevData.push(this.currentFolder);
-                                }
-                                this.currentFolder = undefined;
-                                this.currentData = this.data;
-                                this._refreshContent();
-                                this._updatePath();
-                            }
-                            else {
-                                this._enterFolder(node.type === 'folder' ? node : node.parent);
-                                this._previewAsset(node);
-                                if (node.type !== 'folder') {
-                                    this.content.querySelectorAll('.lexassetitem').forEach((i) => i.classList.remove('selected'));
-                                    const dom = node.domEl;
-                                    dom?.classList.add('selected');
-                                }
-                                this.selectedItem = node;
-                            }
-                            break;
-                        }
-                    case LX.TreeEvent.NODE_DRAGGED:
-                        {
-                            if (node.parent) {
-                                const idx = node.parent.children.indexOf(node);
-                                node.parent.children.splice(idx, 1);
-                            }
-                            if (!value.children) {
-                                value.children = [];
-                            }
-                            value.children.push(node);
-                            node.parent = value;
-                            node.dir = value.children;
-                            if (this.onItemDragged) {
-                                this.onItemDragged(node, value);
-                            }
-                            this._refreshContent();
-                            break;
-                        }
+            onlyFolders: this.onlyFolders
+        });
+        this._subscribeTreeEvents(tree);
+        this.tree = tree.innerTree;
+    }
+    _subscribeTreeEvents(tree) {
+        // If some of these events we don't have to call "resolve" since the AV itself
+        // will update the data and refresh when necessary
+        tree.on("select", (event, resolve) => {
+            if (event.items.length > 1) // Do nothing if multiple selection
+             {
+                return;
+            }
+            const node = event.items[0];
+            if (!node.parent) {
+                if (this.currentFolder) {
+                    this.prevData.push(this.currentFolder);
                 }
+                this.currentFolder = undefined;
+                this.currentData = this.data;
+                this._refreshContent();
+                this._updatePath();
+            }
+            else {
+                this._enterFolder(node.type === 'folder' ? node : node.parent);
+                this._previewAsset(node);
+                if (node.type !== 'folder') {
+                    this.content.querySelectorAll('.lexassetitem').forEach((i) => i.classList.remove('selected'));
+                    const dom = node.domEl;
+                    dom?.classList.add('selected');
+                }
+                this.selectedItem = node;
             }
         });
-        this.tree = tree.innerTree;
+        tree.on("beforeMove", (event, resolve) => {
+            const onBeforeNodeDragged = this._callbacks['beforeNodeDragged'];
+            const onNodeDragged = this._callbacks['nodeDragged'];
+            const node = event.items[0];
+            const value = event.to;
+            const av_resolve = (...args) => {
+                if (node.parent) {
+                    const idx = node.parent.children.indexOf(node);
+                    node.parent.children.splice(idx, 1);
+                }
+                if (!value.children) {
+                    value.children = [];
+                }
+                value.children.push(node);
+                node.parent = value;
+                node.dir = value.children;
+                // Resolve Tree move event
+                resolve(...args);
+                // Fire AV drag event, and not catch the onMove Tree vent
+                const av_event = {
+                    type: 'node-drag',
+                    items: [node],
+                    to: value,
+                    userInitiated: true
+                };
+                if (onNodeDragged)
+                    onNodeDragged(av_event, ...args);
+                this._refreshContent();
+            };
+            if (onBeforeNodeDragged) {
+                const av_event = {
+                    type: 'node-drag',
+                    items: [node],
+                    to: value,
+                    userInitiated: true
+                };
+                onBeforeNodeDragged(av_event, av_resolve);
+            }
+            else {
+                av_resolve();
+            }
+        });
+        tree.on("beforeDelete", (event, resolve) => {
+            const node = event.items[0];
+            this._requestDeleteItem(node);
+        });
+        tree.on("beforeRename", (event, resolve) => {
+            const node = event.items[0];
+            this._requestRenameItem(node, event.newName, true);
+        });
     }
     _setContentLayout(layoutMode) {
         this.layout = layoutMode;
@@ -647,17 +666,14 @@ class AssetView {
                 { name: 'Name', icon: 'ALargeSmall', callback: () => this._sortData('id') },
                 { name: 'Type', icon: 'Type', callback: () => this._sortData('type') },
                 null,
-                { name: 'Ascending', icon: 'SortAsc',
-                    callback: () => this._sortData(undefined, AssetView.CONTENT_SORT_ASC) },
-                { name: 'Descending', icon: 'SortDesc',
-                    callback: () => this._sortData(undefined, AssetView.CONTENT_SORT_DESC) }
+                { name: 'Ascending', icon: 'SortAsc', callback: () => this._sortData(undefined, AssetView.CONTENT_SORT_ASC) },
+                { name: 'Descending', icon: 'SortDesc', callback: () => this._sortData(undefined, AssetView.CONTENT_SORT_DESC) }
             ], { side: 'bottom', align: 'start' });
         };
         const _onChangeView = (value, event) => {
             LX.addDropdownMenu(event.target, [
                 { name: 'Grid', icon: 'LayoutGrid', callback: () => this._setContentLayout(AssetView.LAYOUT_GRID) },
-                { name: 'Compact', icon: 'LayoutList',
-                    callback: () => this._setContentLayout(AssetView.LAYOUT_COMPACT) },
+                { name: 'Compact', icon: 'LayoutList', callback: () => this._setContentLayout(AssetView.LAYOUT_COMPACT) },
                 { name: 'List', icon: 'List', callback: () => this._setContentLayout(AssetView.LAYOUT_LIST) }
             ], { side: 'bottom', align: 'start' });
         };
@@ -669,8 +685,8 @@ class AssetView {
                 this._createNavigationBar(this.toolsPanel);
             }
             this.toolsPanel.sameLine();
-            const sortButton = this.toolsPanel.addButton(null, '', _onSort.bind(this), { title: 'Sort',
-                tooltip: true, icon: (this.sortMode === AssetView.CONTENT_SORT_ASC) ? 'SortAsc' : 'SortDesc' });
+            const sortButton = this.toolsPanel.addButton(null, '', _onSort.bind(this), { title: 'Sort', tooltip: true,
+                icon: (this.sortMode === AssetView.CONTENT_SORT_ASC) ? 'SortAsc' : 'SortDesc' });
             this.toolsPanel.addButton(null, '', _onChangeView.bind(this), { title: 'View', tooltip: true,
                 icon: (this.layout === AssetView.LAYOUT_GRID) ? 'LayoutGrid' : 'LayoutList' });
             this.toolsPanel.addSelect(null, typeEntries, this.filter ?? typeEntries[0], (v) => {
@@ -692,7 +708,7 @@ class AssetView {
         this.contentPanel.attach(this.content);
         if (!this.skipBrowser) {
             this.contentPanel.addText(null, this.path.join('/'), null, {
-                inputClass: 'bg-none fg-quinary text-end',
+                inputClass: 'bg-none text-muted-foreground text-sm text-end',
                 disabled: true,
                 signal: '@on_folder_change'
             });
@@ -741,48 +757,68 @@ class AssetView {
         // default case, only check include
         return (name) => name.toLowerCase().includes(q.toLowerCase());
     }
-    _refreshContent(searchValue, filter) {
-        const isCompactLayout = this.layout == AssetView.LAYOUT_COMPACT;
-        const isListLayout = this.layout == AssetView.LAYOUT_LIST;
-        this.filter = filter ?? (this.filter ?? 'None');
-        this.searchValue = searchValue ?? (this.searchValue ?? '');
-        this.content.innerHTML = '';
-        this.content.className = `lexassetscontent${isCompactLayout ? ' compact' : (isListLayout ? ' list' : '')}`;
-        if (!this.currentData.length) {
-            return;
-        }
-        const fr = new FileReader();
-        const nameFilterFn = this._makeNameFilterFn(this.searchValue);
-        const filteredData = this.currentData.filter((_i) => {
-            const typeMatch = this.filter !== 'None' ? _i.type.toLowerCase() === this.filter.toLowerCase() : true;
-            const nameMatch = nameFilterFn(_i.id);
-            return typeMatch && nameMatch;
-        });
-        this._paginator?.setPages(Math.max(Math.ceil(filteredData.length / this.assetsPerPage), 1));
-        // Show all data if using filters
-        const start = this._paginator ? (this._paginator.page - 1) * this.assetsPerPage : 0;
-        const end = this._paginator ? Math.min(start + this.assetsPerPage, filteredData.length) : filteredData.length;
-        for (let i = start; i < end; ++i) {
-            let item = filteredData[i];
-            if (item.path) {
-                LX.request({ url: item.path, dataType: 'blob', success: (f) => {
-                        item.metadata.bytesize = f.size;
-                        fr.readAsDataURL(f);
-                        fr.onload = (e) => {
-                            const target = e.currentTarget;
-                            item.src = target.result; // This is a base64 string...
-                            item.metadata.path = item.path;
-                            delete item.path;
-                            this._refreshContent(searchValue, filter);
-                        };
-                    } });
+    _refreshContent(searchValue, filter, userInitiated = false) {
+        const onBeforeRefreshContent = this._callbacks['beforeRefreshContent'];
+        const onRefreshContent = this._callbacks['refreshContent'];
+        const resolve = (...args) => {
+            const isCompactLayout = this.layout == AssetView.LAYOUT_COMPACT;
+            const isListLayout = this.layout == AssetView.LAYOUT_LIST;
+            this.filter = filter ?? (this.filter ?? 'None');
+            this.searchValue = searchValue ?? (this.searchValue ?? '');
+            this.content.innerHTML = '';
+            this.content.className = `lexassetscontent${isCompactLayout ? ' compact' : (isListLayout ? ' list' : '')}`;
+            if (!this.currentData.length) {
+                return;
             }
-            else {
-                item.domEl = this.addItem(item, undefined, false);
+            const fr = new FileReader();
+            const nameFilterFn = this._makeNameFilterFn(this.searchValue);
+            const filteredData = this.currentData.filter((_i) => {
+                const typeMatch = this.filter !== 'None' ? _i.type.toLowerCase() === this.filter.toLowerCase() : true;
+                const nameMatch = nameFilterFn(_i.id);
+                return typeMatch && nameMatch;
+            });
+            this._paginator?.setPages(Math.max(Math.ceil(filteredData.length / this.assetsPerPage), 1));
+            // Show all data if using filters
+            const start = this._paginator ? (this._paginator.page - 1) * this.assetsPerPage : 0;
+            const end = this._paginator ? Math.min(start + this.assetsPerPage, filteredData.length) : filteredData.length;
+            for (let i = start; i < end; ++i) {
+                let item = filteredData[i];
+                if (item.path) {
+                    LX.request({ url: item.path, dataType: 'blob', success: (f) => {
+                            item.metadata.bytesize = f.size;
+                            fr.readAsDataURL(f);
+                            fr.onload = (e) => {
+                                const target = e.currentTarget;
+                                item.src = target.result; // This is a base64 string...
+                                item.metadata.path = item.path;
+                                delete item.path;
+                                this._refreshContent(searchValue, filter);
+                            };
+                        } });
+                }
+                else {
+                    item.domEl = this.addItem(item, undefined, false);
+                }
             }
+            const event = {
+                type: 'refresh-content',
+                search: [this.searchValue, this.filter],
+                items: filteredData.slice(start, end),
+                userInitiated
+            };
+            if (onRefreshContent)
+                onRefreshContent(event, ...args);
+        };
+        if (onBeforeRefreshContent) {
+            const event = {
+                type: 'refresh-content',
+                search: [this.searchValue, this.filter],
+                userInitiated
+            };
+            onBeforeRefreshContent(event, resolve);
         }
-        if (this.onRefreshContent) {
-            this.onRefreshContent(searchValue, filter);
+        else {
+            resolve();
         }
     }
     _previewAsset(file) {
@@ -935,6 +971,7 @@ class AssetView {
         if (mustRefresh) {
             this._processData(this.data);
             this._refreshContent();
+            this.tree?.select(this.currentFolder.id);
         }
         this._updatePath();
     }
@@ -1037,6 +1074,7 @@ class AssetView {
         this.tree?.refresh();
         this._moveItemDialog?.destroy();
         this._movingItem = undefined;
+        this.previewPanel?.clear();
     }
     _moveItem(item, defaultFolder) {
         if (this._moveItemDialog) {
@@ -1051,16 +1089,16 @@ class AssetView {
             for (let pi of (targetFolder.children ?? targetFolder)) {
                 const row = LX.makeContainer(['100%', 'auto'], 'flex flex-row px-1 items-center', '', container);
                 const isFolder = pi.type === 'folder';
-                const rowItem = LX.makeContainer(['100%', 'auto'], `move-item flex flex-row gap-1 py-1 px-3 cursor-pointer ${isFolder ? 'fg-primary font-medium' : 'fg-quinary'} rounded-xxl ${isFolder ? 'hover:bg-secondary' : 'hover:bg-primary'}`, `${isFolder ? LX.makeIcon('FolderOpen', { svgClass: '' }).innerHTML : ''}${pi.id}`, row);
+                const rowItem = LX.makeContainer(['100%', 'auto'], `move-item flex flex-row gap-1 py-1 px-3 cursor-pointer items-center ${isFolder ? 'text-foreground font-medium' : 'text-muted-foreground'} rounded-2xl ${isFolder ? 'hover:bg-accent' : 'hover:bg-muted'}`, `${isFolder ? LX.makeIcon('FolderOpen', { svgClass: '' }).innerHTML : ''}${pi.id}`, row);
                 if (isFolder) {
                     rowItem.addEventListener('click', () => {
-                        container.querySelectorAll('.move-item').forEach((el) => LX.removeClass(el, 'bg-quinary'));
-                        LX.addClass(rowItem, 'bg-quinary');
+                        container.querySelectorAll('.move-item').forEach((el) => LX.removeClass(el, 'bg-primary text-primary-foreground'));
+                        LX.addClass(rowItem, 'bg-primary text-primary-foreground');
                         targetFolder = pi;
                     });
                     const fPathButton = new LX.Button(null, 'FPathButton', () => {
                         _openFolder(pi, container);
-                    }, { icon: 'ChevronRight', className: 'ml-auto h-8', buttonClass: 'bg-none hover:bg-secondary' });
+                    }, { icon: 'ChevronRight', className: 'ml-auto h-8', buttonClass: 'ghost' });
                     row.appendChild(fPathButton.root);
                 }
             }
@@ -1094,33 +1132,29 @@ class AssetView {
             p.attach(area);
             const content = LX.makeContainer(['auto', '100%'], 'flex flex-auto-fill flex-col overflow-scroll py-2 gap-1', ``);
             {
-                const headerPanel = area.addPanel({ className: 'p-2 border-bottom flex flex-auto', height: 'auto' });
+                const headerPanel = area.addPanel({ className: 'p-2 border-b-color flex flex-auto-keep', height: 'auto' });
                 headerPanel.sameLine(2, 'w-full');
                 headerPanel.addButton(null, 'BackButton', () => {
                     if (targetFolder && targetFolder.parent)
                         _openFolder(targetFolder.parent, content);
-                }, { icon: 'ArrowLeft', title: 'Back', tooltip: true, className: 'flex-auto',
-                    buttonClass: 'bg-none hover:bg-secondary' });
+                }, { icon: 'ArrowLeft', title: 'Back', tooltip: true, className: 'flex-auto-keep', buttonClass: 'ghost' });
                 bcContainer = LX.makeElement('div');
-                headerPanel.addContent('ITEM_MOVE_PATH', bcContainer, { signal: '@item_move_path',
-                    className: 'flex-auto-fill' });
+                headerPanel.addContent('ITEM_MOVE_PATH', bcContainer, { signal: '@item_move_path', className: 'flex-auto-fill' });
             }
             area.attach(content);
             _openFolder(defaultFolder ?? this.data, content);
             {
-                const footerPanel = area.addPanel({ className: 'p-2 border-top flex flex-auto justify-between',
-                    height: 'auto' });
+                const footerPanel = area.addPanel({ className: 'p-2 border-t-color flex flex-auto-keep justify-between', height: 'auto' });
                 footerPanel.addButton(null, 'NewFolderButton', () => {
                     this._requestCreateFolder(targetFolder);
-                }, { width: 'auto', icon: 'FolderPlus', title: 'Create Folder', tooltip: true, className: 'ml-2',
-                    buttonClass: 'bg-none hover:bg-secondary' });
+                }, { width: 'auto', icon: 'FolderPlus', title: 'Create Folder', tooltip: true, className: 'ml-2', buttonClass: 'ghost' });
                 footerPanel.sameLine(2, 'mr-2');
                 footerPanel.addButton(null, 'Cancel', () => {
                     this._moveItemDialog.close();
-                }, { buttonClass: 'bg-none fg-error' });
+                }, { buttonClass: 'ghost text-destructive' });
                 footerPanel.addButton(null, 'Move', () => {
                     this._requestMoveItemToFolder(item, targetFolder);
-                }, { className: '', buttonClass: 'contrast' });
+                }, { className: '', buttonClass: 'primary' });
             }
         }, { modal: true, size: ['616px', '500px'], closable: true, onBeforeClose: () => {
                 delete this._moveItemDialog;
@@ -1218,12 +1252,12 @@ class AssetView {
         }
         return maxN === -1 ? originalName : `${base} (${maxN + 1})${ext}`;
     }
-    _requestRenameItem(item, newName) {
+    _requestRenameItem(item, newName, treeEvent = false) {
         const onBeforeRename = this._callbacks['beforeRename'];
         const onRename = this._callbacks['rename'];
         const oldName = item.id;
         const resolve = (...args) => {
-            this._renameItem(item, newName);
+            this._renameItem(item, newName, treeEvent ? item.dir : this.currentData);
             const event = {
                 type: 'rename',
                 items: [item],
@@ -1248,21 +1282,25 @@ class AssetView {
             resolve();
         }
     }
-    _renameItem(item, newName) {
-        const idx = this.currentData.indexOf(item);
+    _renameItem(item, newName, data) {
+        data = data ?? this.currentData;
+        const idx = data.indexOf(item);
         if (idx < 0) {
             return;
         }
-        const wasSelected = LX.hasClass(item.domEl, 'selected');
-        const hoverTitle = this.content.querySelector(`#floatingTitle_${item.id.replace(/\s/g, '_').replaceAll('.', '_')}`);
-        if (hoverTitle)
-            hoverTitle.remove();
-        item.domEl?.remove();
-        item.id = newName;
-        item.domEl = this.addItem(item, idx * 2);
-        if (wasSelected) {
-            this._previewAsset(item);
+        // It could be a Tree event, so maybe the elements is not created yet
+        if (item.domEl) {
+            const wasSelected = LX.hasClass(item.domEl, 'selected');
+            const hoverTitle = this.content.querySelector(`#floatingTitle_${item.id.replace(/\s/g, '_').replaceAll('.', '_')}`);
+            if (hoverTitle)
+                hoverTitle.remove();
+            item.domEl?.remove();
+            item.domEl = this.addItem(item, idx * 2);
+            if (wasSelected) {
+                this._previewAsset(item);
+            }
         }
+        item.id = newName;
         this.tree?.refresh();
         this._processData(this.data);
     }
@@ -1284,7 +1322,7 @@ class AssetView {
         });
         panel.addButton(null, 'Save', () => {
             onRename(newName);
-        }, { buttonClass: 'contrast' });
+        }, { buttonClass: 'primary' });
         const p = new LX.Popover(item.domEl, [panel], { align: 'center', side: 'bottom', sideOffset: -128 });
     }
     _requestCreateFolder(folder) {
@@ -1322,14 +1360,15 @@ class AssetView {
         if (!folder) {
             throw ('_createFolder: Something went wrong!');
         }
+        const dir = folder.children ?? folder;
         const newFolder = {
-            id: this._getClonedName('New Folder', folder.children),
+            id: this._getClonedName('New Folder', dir),
             type: 'folder',
             children: [],
             parent: this.currentFolder,
             metadata: {}
         };
-        folder.children.push(newFolder);
+        dir.push(newFolder);
         this._refreshContent();
         this.tree?.refresh();
         if (this._moveItemDialog && this._movingItem) {

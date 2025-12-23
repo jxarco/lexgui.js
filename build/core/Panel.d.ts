@@ -187,7 +187,7 @@ export declare class Panel {
      * @param {Function} callback Callback function on submit form
      * @param {Object} options:
      * primaryActionName: Text to be shown in the primary action button ['Submit']
-     * primaryButtonClass: Button class for primary action button ['contrast']
+     * primaryButtonClass: Button class for primary action button ['primary']
      * secondaryActionName: Text to be shown in the secondary action button ['Cancel']
      * secondaryActionCallback: Callback function on press secondary button
      * secondaryButtonClass: Button class for secondary action button ['primary']

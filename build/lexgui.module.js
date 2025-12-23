@@ -1,4 +1,6 @@
 // This is a generated file. Do not edit.
+import { extendTailwindMerge } from 'https://cdn.jsdelivr.net/npm/tailwind-merge@3.4.0/+esm';
+
 // Namespace.ts @jxarco
 /**
  * Main namespace
@@ -10,7 +12,7 @@ const g = globalThis;
 let LX = g.LX;
 if (!LX) {
     LX = {
-        version: '8.1.2',
+        version: '8.2',
         ready: false,
         extensions: [], // Store extensions used
         extraCommandbarEntries: [], // User specific entries for command bar
@@ -121,8 +123,7 @@ const RAW_ICONS = {
         'M432 48L208 48c-17.7 0-32 14.3-32 32l0 16-48 0 0-16c0-44.2 35.8-80 80-80L432 0c44.2 0 80 35.8 80 80l0 224c0 44.2-35.8 80-80 80l-16 0 0-48 16 0c17.7 0 32-14.3 32-32l0-224c0-17.7-14.3-32-32-32zM48 448c0 8.8 7.2 16 16 16l256 0c8.8 0 16-7.2 16-16l0-192L48 256l0 192zM64 128l256 0c35.3 0 64 28.7 64 64l0 256c0 35.3-28.7 64-64 64L64 512c-35.3 0-64-28.7-64-64L0 192c0-35.3 28.7-64 64-64z'],
     'WindowMaximize': [512, 512, [], 'solid',
         'M.3 89.5C.1 91.6 0 93.8 0 96L0 224 0 416c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-192 0-128c0-35.3-28.7-64-64-64L64 32c-2.2 0-4.4 .1-6.5 .3c-9.2 .9-17.8 3.8-25.5 8.2C21.8 46.5 13.4 55.1 7.7 65.5c-3.9 7.3-6.5 15.4-7.4 24zM48 224l416 0 0 192c0 8.8-7.2 16-16 16L64 432c-8.8 0-16-7.2-16-16l0-192z'],
-    'WindowMinimize': [512, 512, [], 'solid',
-        'M24 432c-13.3 0-24 10.7-24 24s10.7 24 24 24l464 0c13.3 0 24-10.7 24-24s-10.7-24-24-24L24 432z'],
+    'WindowMinimize': [512, 512, [], 'solid', 'M24 432c-13.3 0-24 10.7-24 24s10.7 24 24 24l464 0c13.3 0 24-10.7 24-24s-10.7-24-24-24L24 432z'],
     'VrCardboard': [640, 512, ['VR'], 'solid',
         'M576 64L64 64C28.7 64 0 92.7 0 128L0 384c0 35.3 28.7 64 64 64l120.4 0c24.2 0 46.4-13.7 57.2-35.4l32-64c8.8-17.5 26.7-28.6 46.3-28.6s37.5 11.1 46.3 28.6l32 64c10.8 21.7 33 35.4 57.2 35.4L576 448c35.3 0 64-28.7 64-64l0-256c0-35.3-28.7-64-64-64zM96 240a64 64 0 1 1 128 0A64 64 0 1 1 96 240zm384-64a64 64 0 1 1 0 128 64 64 0 1 1 0-128z'],
     'C': [32, 32, [], 'solid',
@@ -168,8 +169,7 @@ const RAW_ICONS = {
         'M0 256C0 114.6 114.6 0 256 0S512 114.6 512 256s-114.6 256-256 256L37.1 512c-13.7 0-20.5-16.5-10.9-26.2L75 437C28.7 390.7 0 326.7 0 256zM349.6 153.6c23.6 0 42.7-19.1 42.7-42.7s-19.1-42.7-42.7-42.7c-20.6 0-37.8 14.6-41.8 34c-34.5 3.7-61.4 33-61.4 68.4l0 .2c-37.5 1.6-71.8 12.3-99 29.1c-10.1-7.8-22.8-12.5-36.5-12.5c-33 0-59.8 26.8-59.8 59.8c0 24 14.1 44.6 34.4 54.1c2 69.4 77.6 125.2 170.6 125.2s168.7-55.9 170.6-125.3c20.2-9.6 34.1-30.2 34.1-54c0-33-26.8-59.8-59.8-59.8c-13.7 0-26.3 4.6-36.4 12.4c-27.4-17-62.1-27.7-100-29.1l0-.2c0-25.4 18.9-46.5 43.4-49.9l0 0c4.4 18.8 21.3 32.8 41.5 32.8zM177.1 246.9c16.7 0 29.5 17.6 28.5 39.3s-13.5 29.6-30.3 29.6s-31.4-8.8-30.4-30.5s15.4-38.3 32.1-38.3zm190.1 38.3c1 21.7-13.7 30.5-30.4 30.5s-29.3-7.9-30.3-29.6c-1-21.7 11.8-39.3 28.5-39.3s31.2 16.6 32.1 38.3zm-48.1 56.7c-10.3 24.6-34.6 41.9-63 41.9s-52.7-17.3-63-41.9c-1.2-2.9 .8-6.2 3.9-6.5c18.4-1.9 38.3-2.9 59.1-2.9s40.7 1 59.1 2.9c3.1 .3 5.1 3.6 3.9 6.5z'],
     'Rust': [512, 512, [], 'solid',
         'M508.52,249.75,486.7,236.24c-.17-2-.34-3.93-.55-5.88l18.72-17.5a7.35,7.35,0,0,0-2.44-12.25l-24-9c-.54-1.88-1.08-3.78-1.67-5.64l15-20.83a7.35,7.35,0,0,0-4.79-11.54l-25.42-4.15c-.9-1.73-1.79-3.45-2.73-5.15l10.68-23.42a7.35,7.35,0,0,0-6.95-10.39l-25.82.91q-1.79-2.22-3.61-4.4L439,81.84A7.36,7.36,0,0,0,430.16,73L405,78.93q-2.17-1.83-4.4-3.61l.91-25.82a7.35,7.35,0,0,0-10.39-7L367.7,53.23c-1.7-.94-3.43-1.84-5.15-2.73L358.4,25.08a7.35,7.35,0,0,0-11.54-4.79L326,35.26c-1.86-.59-3.75-1.13-5.64-1.67l-9-24a7.35,7.35,0,0,0-12.25-2.44l-17.5,18.72c-1.95-.21-3.91-.38-5.88-.55L262.25,3.48a7.35,7.35,0,0,0-12.5,0L236.24,25.3c-2,.17-3.93.34-5.88.55L212.86,7.13a7.35,7.35,0,0,0-12.25,2.44l-9,24c-1.89.55-3.79,1.08-5.66,1.68l-20.82-15a7.35,7.35,0,0,0-11.54,4.79l-4.15,25.41c-1.73.9-3.45,1.79-5.16,2.73L120.88,42.55a7.35,7.35,0,0,0-10.39,7l.92,25.81c-1.49,1.19-3,2.39-4.42,3.61L81.84,73A7.36,7.36,0,0,0,73,81.84L78.93,107c-1.23,1.45-2.43,2.93-3.62,4.41l-25.81-.91a7.42,7.42,0,0,0-6.37,3.26,7.35,7.35,0,0,0-.57,7.13l10.66,23.41c-.94,1.7-1.83,3.43-2.73,5.16L25.08,153.6a7.35,7.35,0,0,0-4.79,11.54l15,20.82c-.59,1.87-1.13,3.77-1.68,5.66l-24,9a7.35,7.35,0,0,0-2.44,12.25l18.72,17.5c-.21,1.95-.38,3.91-.55,5.88L3.48,249.75a7.35,7.35,0,0,0,0,12.5L25.3,275.76c.17,2,.34,3.92.55,5.87L7.13,299.13a7.35,7.35,0,0,0,2.44,12.25l24,9c.55,1.89,1.08,3.78,1.68,5.65l-15,20.83a7.35,7.35,0,0,0,4.79,11.54l25.42,4.15c.9,1.72,1.79,3.45,2.73,5.14L42.56,391.12a7.35,7.35,0,0,0,.57,7.13,7.13,7.13,0,0,0,6.37,3.26l25.83-.91q1.77,2.22,3.6,4.4L73,430.16A7.36,7.36,0,0,0,81.84,439L107,433.07q2.18,1.83,4.41,3.61l-.92,25.82a7.35,7.35,0,0,0,10.39,6.95l23.43-10.68c1.69.94,3.42,1.83,5.14,2.73l4.15,25.42a7.34,7.34,0,0,0,11.54,4.78l20.83-15c1.86.6,3.76,1.13,5.65,1.68l9,24a7.36,7.36,0,0,0,12.25,2.44l17.5-18.72c1.95.21,3.92.38,5.88.55l13.51,21.82a7.35,7.35,0,0,0,12.5,0l13.51-21.82c2-.17,3.93-.34,5.88-.56l17.5,18.73a7.36,7.36,0,0,0,12.25-2.44l9-24c1.89-.55,3.78-1.08,5.65-1.68l20.82,15a7.34,7.34,0,0,0,11.54-4.78l4.15-25.42c1.72-.9,3.45-1.79,5.15-2.73l23.42,10.68a7.35,7.35,0,0,0,10.39-6.95l-.91-25.82q2.22-1.79,4.4-3.61L430.16,439a7.36,7.36,0,0,0,8.84-8.84L433.07,405q1.83-2.17,3.61-4.4l25.82.91a7.23,7.23,0,0,0,6.37-3.26,7.35,7.35,0,0,0,.58-7.13L458.77,367.7c.94-1.7,1.83-3.43,2.73-5.15l25.42-4.15a7.35,7.35,0,0,0,4.79-11.54l-15-20.83c.59-1.87,1.13-3.76,1.67-5.65l24-9a7.35,7.35,0,0,0,2.44-12.25l-18.72-17.5c.21-1.95.38-3.91.55-5.87l21.82-13.51a7.35,7.35,0,0,0,0-12.5Zm-151,129.08A13.91,13.91,0,0,0,341,389.51l-7.64,35.67A187.51,187.51,0,0,1,177,424.44l-7.64-35.66a13.87,13.87,0,0,0-16.46-10.68l-31.51,6.76a187.38,187.38,0,0,1-16.26-19.21H258.3c1.72,0,2.89-.29,2.89-1.91V309.55c0-1.57-1.17-1.91-2.89-1.91H213.47l.05-34.35H262c4.41,0,23.66,1.28,29.79,25.87,1.91,7.55,6.17,32.14,9.06,40,2.89,8.82,14.6,26.46,27.1,26.46H407a187.3,187.3,0,0,1-17.34,20.09Zm25.77,34.49A15.24,15.24,0,1,1,368,398.08h.44A15.23,15.23,0,0,1,383.24,413.32Zm-225.62-.68a15.24,15.24,0,1,1-15.25-15.25h.45A15.25,15.25,0,0,1,157.62,412.64ZM69.57,234.15l32.83-14.6a13.88,13.88,0,0,0,7.06-18.33L102.69,186h26.56V305.73H75.65A187.65,187.65,0,0,1,69.57,234.15ZM58.31,198.09a15.24,15.24,0,0,1,15.23-15.25H74a15.24,15.24,0,1,1-15.67,15.24Zm155.16,24.49.05-35.32h63.26c3.28,0,23.07,3.77,23.07,18.62,0,12.29-15.19,16.7-27.68,16.7ZM399,306.71c-9.8,1.13-20.63-4.12-22-10.09-5.78-32.49-15.39-39.4-30.57-51.4,18.86-11.95,38.46-29.64,38.46-53.26,0-25.52-17.49-41.59-29.4-49.48-16.76-11-35.28-13.23-40.27-13.23H116.32A187.49,187.49,0,0,1,221.21,70.06l23.47,24.6a13.82,13.82,0,0,0,19.6.44l26.26-25a187.51,187.51,0,0,1,128.37,91.43l-18,40.57A14,14,0,0,0,408,220.43l34.59,15.33a187.12,187.12,0,0,1,.4,32.54H423.71c-1.91,0-2.69,1.27-2.69,3.13v8.82C421,301,409.31,305.58,399,306.71ZM240,60.21A15.24,15.24,0,0,1,255.21,45h.45A15.24,15.24,0,1,1,240,60.21ZM436.84,214a15.24,15.24,0,1,1,0-30.48h.44a15.24,15.24,0,0,1-.44,30.48Z'],
-    'Unity': [16, 16, [], 'solid',
-        'M8 6.5L5 5l2-1V2L2 5v5l2-1V6.5L7 8v4.5L4 11l-2 1l6 3l6-3l-2-1l-3 1.5V8l3-1.5V9l2 1V5L9 2v2l2 1Z'],
+    'Unity': [16, 16, [], 'solid', 'M8 6.5L5 5l2-1V2L2 5v5l2-1V6.5L7 8v4.5L4 11l-2 1l6 3l6-3l-2-1l-3 1.5V8l3-1.5V9l2 1V5L9 2v2l2 1Z'],
     'UnrealEngine': [24, 24, [], 'regular',
         'M12 0a12 12 0 1 0 12 12A12 12 0 0 0 12 0m0 23.52A11.52 11.52 0 1 1 23.52 12A11.52 11.52 0 0 1 12 23.52m7.13-9.791c-.206.997-1.126 3.557-4.06 4.942l-1.179-1.325l-1.988 2a7.34 7.34 0 0 1-5.804-2.978a3 3 0 0 0 .65.123c.326.006.678-.114.678-.66v-5.394a.89.89 0 0 0-1.116-.89c-.92.212-1.656 2.509-1.656 2.509a7.3 7.3 0 0 1 2.528-5.597a7.4 7.4 0 0 1 3.73-1.721c-1.006.573-1.57 1.507-1.57 2.29c0 1.262.76 1.109.984.923v7.28a1.2 1.2 0 0 0 .148.256a1.08 1.08 0 0 0 .88.445c.76 0 1.747-.868 1.747-.868V9.172c0-.6-.452-1.324-.905-1.572c0 0 .838-.149 1.484.346a6 6 0 0 1 .387-.425c1.508-1.48 2.929-1.902 4.112-2.112c0 0-2.151 1.69-2.151 3.96c0 1.687.043 5.801.043 5.801c.799.771 1.986-.342 3.059-1.441Z'],
     'UnrealEngine@solid': [24, 24, [], 'solid',
@@ -256,8 +256,7 @@ const RAW_ICONS = {
         'M448 480L64 480c-35.3 0-64-28.7-64-64L0 192l512 0 0 224c0 35.3-28.7 64-64 64zm64-320L0 160 0 96C0 60.7 28.7 32 64 32l128 0c20.1 0 39.1 9.5 51.2 25.6l19.2 25.6c6 8.1 15.5 12.8 25.6 12.8l160 0c35.3 0 64 28.7 64 64z'],
     'Function': [384, 512, [], 'solid',
         'M314.7 32c-38.8 0-73.7 23.3-88.6 59.1L170.7 224 64 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l80 0L98.9 396.3c-5 11.9-16.6 19.7-29.5 19.7L32 416c-17.7 0-32 14.3-32 32s14.3 32 32 32l37.3 0c38.8 0 73.7-23.3 88.6-59.1L213.3 288 320 288c17.7 0 32-14.3 32-32s-14.3-32-32-32l-80 0 45.1-108.3c5-11.9 16.6-19.7 29.5-19.7L352 96c17.7 0 32-14.3 32-32s-14.3-32-32-32l-37.3 0z'],
-    'Stop': [384, 512, [], 'solid',
-        'M0 128C0 92.7 28.7 64 64 64H320c35.3 0 64 28.7 64 64V384c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V128z'],
+    'Stop': [384, 512, [], 'solid', 'M0 128C0 92.7 28.7 64 64 64H320c35.3 0 64 28.7 64 64V384c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V128z'],
     'Image': [512, 512, [], 'solid',
         'M448 80c8.8 0 16 7.2 16 16l0 319.8-5-6.5-136-176c-4.5-5.9-11.6-9.3-19-9.3s-14.4 3.4-19 9.3L202 340.7l-30.5-42.7C167 291.7 159.8 288 152 288s-15 3.7-19.5 10.1l-80 112L48 416.3l0-.3L48 96c0-8.8 7.2-16 16-16l384 0zM64 32C28.7 32 0 60.7 0 96L0 416c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-320c0-35.3-28.7-64-64-64L64 32zm80 192a48 48 0 1 0 0-96 48 48 0 1 0 0 96z'],
     'Images': [576, 512, [], 'solid',
@@ -388,52 +387,6 @@ class IEvent {
     }
 }
 LX.IEvent = IEvent;
-class TreeEvent {
-    static NONE = 0;
-    static NODE_SELECTED = 1;
-    static NODE_DELETED = 2;
-    static NODE_DBLCLICKED = 3;
-    static NODE_CONTEXTMENU = 4;
-    static NODE_DRAGGED = 5;
-    static NODE_RENAMED = 6;
-    static NODE_VISIBILITY = 7;
-    static NODE_CARETCHANGED = 8;
-    type = TreeEvent.NONE;
-    node;
-    value;
-    event;
-    multiple = false; // Multiple selection
-    panel = null;
-    constructor(type, node, value, event) {
-        this.type = type || TreeEvent.NONE;
-        this.node = node;
-        this.value = value;
-        this.event = event;
-    }
-    string() {
-        switch (this.type) {
-            case TreeEvent.NONE:
-                return 'tree_event_none';
-            case TreeEvent.NODE_SELECTED:
-                return 'tree_event_selected';
-            case TreeEvent.NODE_DELETED:
-                return 'tree_event_deleted';
-            case TreeEvent.NODE_DBLCLICKED:
-                return 'tree_event_dblclick';
-            case TreeEvent.NODE_CONTEXTMENU:
-                return 'tree_event_contextmenu';
-            case TreeEvent.NODE_DRAGGED:
-                return 'tree_event_dragged';
-            case TreeEvent.NODE_RENAMED:
-                return 'tree_event_renamed';
-            case TreeEvent.NODE_VISIBILITY:
-                return 'tree_event_visibility';
-            case TreeEvent.NODE_CARETCHANGED:
-                return 'tree_event_caretchanged';
-        }
-    }
-}
-LX.TreeEvent = TreeEvent;
 
 // BaseComponent.ts @jxarco
 var ComponentType;
@@ -508,17 +461,13 @@ class BaseComponent {
         this.name = name;
         this.options = options;
         this._initialValue = value;
-        const root = document.createElement('div');
-        root.className = 'lexcomponent';
+        const root = LX.makeElement('div', LX.mergeClass('lexcomponent flex flex-row outline-none items-center text-foreground text-sm overflow-hidden min-h-8 pad-sm', options.className));
         this.onResize = () => { };
         if (options.id) {
             root.id = options.id;
         }
         if (options.title) {
             root.title = options.title;
-        }
-        if (options.className) {
-            root.className += ' ' + options.className;
         }
         if (type != ComponentType.TITLE) {
             if (options.width) {
@@ -537,12 +486,10 @@ class BaseComponent {
         }
         if (name != undefined) {
             if (!(options.hideName ?? false)) {
-                let domName = document.createElement('div');
-                domName.className = 'lexcomponentname';
+                let domName = LX.makeElement('div', 'lexcomponentname flex text-sm text-secondary-foreground justify-between whitespace-nowrap overflow-hidden', name);
                 if (options.justifyName) {
                     domName.classList.add('float-' + options.justifyName);
                 }
-                domName.innerHTML = name;
                 domName.title = options.title ?? domName.innerHTML;
                 domName.style.width = options.nameWidth || LX.DEFAULT_NAME_WIDTH;
                 domName.style.minWidth = domName.style.width;
@@ -771,7 +718,7 @@ class Button extends BaseComponent {
                 wValue.prepend(img);
             }
             else {
-                wValue.innerHTML = `<span>${(newValue ?? '')}</span>`;
+                wValue.innerHTML = `${(newValue ?? '')}`;
             }
         };
         this.onResize = (rect) => {
@@ -798,9 +745,10 @@ class Button extends BaseComponent {
                 this._trigger(new IEvent(name, swapInput ? swapInput.checked : (this.selectable ? v : value), null), callback);
             }
         };
-        var wValue = document.createElement('button');
+        var wValue = LX.makeElement('button', LX.mergeClass(['lexbutton', 'inline-flex', 'items-center', 'justify-center', 'whitespace-nowrap', 'transition-all', 'disabled:pointer-events-none',
+            'disabled:opacity-50', '[&_svg]:pointer-events-none', 'shrink-0', '[&_svg]:shrink-0', 'outline-none', 'select-none', 'cursor-pointer',
+            'font-medium', 'text-sm', 'border-1', 'h-9', 'px-2', 'overflow-hidden', 'bg-clip-padding'].join(' '), options.buttonClass ?? 'outline'));
         wValue.title = options.tooltip ? '' : (options.title ?? '');
-        wValue.className = 'lexbutton px-3 ' + (options.buttonClass ?? '');
         this.root.appendChild(wValue);
         if (options.selected) {
             wValue.classList.add('selected');
@@ -818,19 +766,19 @@ class Button extends BaseComponent {
                 wValue.prepend(icon);
             }
             else {
-                wValue.innerHTML = `<span>${(value || '')}</span>`;
+                wValue.innerHTML = `${(value || '')}`;
                 if (iconPosition == 'start') {
-                    wValue.querySelector('span').prepend(icon);
+                    wValue.prepend(icon);
                 }
                 // "end"
                 else {
-                    wValue.querySelector('span').appendChild(icon);
+                    wValue.appendChild(icon);
                 }
             }
             wValue.classList.add('justify-center');
         }
         else {
-            wValue.innerHTML = `<span>${(value || '')}</span>`;
+            wValue.innerHTML = `${(value || '')}`;
         }
         if (options.fileInput) {
             const fileInput = document.createElement('input');
@@ -955,10 +903,9 @@ class Menubar {
     focused = false;
     _currentDropdown;
     constructor(items, options = {}) {
-        this.root = document.createElement('div');
-        this.root.className = 'lexmenubar';
+        this.root = LX.makeElement('div', 'lexmenubar size-full bg-background text-foreground inline-flex gap-1 overflow-hidden text-sm font-medium');
         if (options.float) {
-            this.root.style.justifyContent = options.float;
+            this.root.className = LX.mergeClass(this.root.className, `justify-${options.float}`);
         }
         this.items = items ?? [];
         this.createEntries();
@@ -996,8 +943,7 @@ class Menubar {
                 this._resetMenubar(true);
                 entry.classList.add('selected');
                 entry.dataset['built'] = 'true';
-                this._currentDropdown = LX.addDropdownMenu(entry, item.submenu ?? [], { side: 'bottom', align: 'start',
-                    onBlur: () => {
+                this._currentDropdown = LX.addDropdownMenu(entry, item.submenu ?? [], { side: 'bottom', align: 'start', onBlur: () => {
                         this._resetMenubar();
                     } });
             };
@@ -1172,7 +1118,7 @@ class Menubar {
             const title = data.title;
             const button = new Button(title, data.label, data.callback, {
                 title,
-                buttonClass: 'bg-none',
+                buttonClass: 'ghost',
                 disabled: data.disabled,
                 icon: data.icon,
                 hideName: true,
@@ -1205,7 +1151,7 @@ class Tabs {
     constructor(area, options = {}) {
         this.onclose = options.onclose;
         let container = document.createElement('div');
-        container.className = 'lexareatabs ' + (options.fit ? 'fit' : 'row');
+        container.className = 'lexareatabs flex flex-row w-fit ' + (options.fit ? 'fit' : 'row');
         const folding = options.folding ?? false;
         if (folding)
             container.classList.add('folding');
@@ -1267,16 +1213,15 @@ class Tabs {
             that.tabs[tabDom.dataset['name']] = content;
         });
         area.root.classList.add('lexareatabscontainer');
-        const [tabButtons, content] = area.split({ type: 'vertical', sizes: options.sizes ?? 'auto', resize: false,
-            top: 2 });
+        const [tabButtons, content] = area.split({ type: 'vertical', sizes: options.sizes ?? 'auto', resize: false, top: 2 });
         tabButtons.attach(container);
         if (options.parentClass && container.parentElement) {
-            container.parentElement.className += ` ${options.parentClass}`;
+            container.parentElement.className = LX.mergeClass(container.parentElement.className, options.parentClass);
         }
         this.area = content;
         this.area.root.className += ' lexareatabscontent';
         if (options.contentClass) {
-            this.area.root.className += ` ${options.contentClass}`;
+            this.area.root.className = LX.mergeClass(this.area.root.className, options.contentClass);
         }
         this.selected = null;
         this.root = container;
@@ -1335,8 +1280,7 @@ class Tabs {
         if (options.icon) {
             if (!options.icon.includes('.')) { // Not a file
                 const classes = options.icon.split(' ');
-                options.icon =
-                    LX.makeIcon(classes[0], { svgClass: 'sm ' + classes.slice(0).join(' ') }).innerHTML;
+                options.icon = LX.makeIcon(classes[0], { svgClass: 'sm ' + classes.slice(0).join(' ') }).innerHTML;
             }
             // an image..
             else {
@@ -1371,10 +1315,9 @@ class Tabs {
             e.stopPropagation();
             const scope = tabEl.instance;
             if (!tabEl.fixed) {
-                // For folding tabs
                 const lastValue = tabEl.selected;
                 tabEl.parentElement.querySelectorAll('span').forEach((s) => s.selected = false);
-                tabEl.selected = !lastValue || (tabEl._forceSelect ? true : false);
+                tabEl.selected = (scope.folding ? !lastValue : true) || (tabEl._forceSelect ? true : false);
                 // Manage selected
                 tabEl.parentElement.querySelectorAll('span').forEach((s) => s.classList.remove('selected'));
                 tabEl.classList.toggle('selected', tabEl.selected);
@@ -1517,9 +1460,7 @@ class NumberInput extends BaseComponent {
         var container = document.createElement('div');
         container.className = 'lexnumber';
         this.root.appendChild(container);
-        let box = document.createElement('div');
-        box.className = 'numberbox';
-        container.appendChild(box);
+        let box = LX.makeElement('div', 'numberbox relative flex flex-col w-full bg-secondary rounded-lg scrollbar-hidden overflow-x-hidden', '', container);
         let valueBox = LX.makeContainer(['auto', '100%'], 'relative flex flex-row cursor-text', '', box);
         let vecinput = document.createElement('input');
         vecinput.id = 'number_' + LX.guidGenerator();
@@ -1537,7 +1478,7 @@ class NumberInput extends BaseComponent {
         const dragIcon = LX.makeIcon('MoveVertical', { iconClass: 'drag-icon hidden-opacity', svgClass: 'sm' });
         valueBox.appendChild(dragIcon);
         if (options.units) {
-            let unitBox = LX.makeContainer(['auto', 'auto'], 'px-2 bg-secondary content-center', options.units, valueBox, { 'word-break': 'keep-all' });
+            let unitBox = LX.makeContainer(['auto', 'auto'], 'px-2 bg-card content-center break-keep', options.units, valueBox);
             vecinput.unitBox = unitBox;
         }
         if (options.disabled) {
@@ -1698,8 +1639,7 @@ class TextInput extends BaseComponent {
         this.disabled = (options.disabled || options.warning) ?? (options.url ? true : false);
         let wValue = null;
         if (!this.disabled) {
-            wValue = document.createElement('input');
-            wValue.className = 'lextext ' + (options.inputClass ?? '');
+            wValue = LX.makeElement('input', LX.mergeClass('lextext text-sm', options.inputClass));
             wValue.type = options.type || '';
             wValue.value = value || '';
             wValue.style.textAlign = options.float ?? '';
@@ -1751,10 +1691,10 @@ class TextInput extends BaseComponent {
             wValue.disabled = true;
             wValue.value = value;
             wValue.style.textAlign = options.float ?? '';
-            wValue.className = 'lextext ellipsis-overflow ' + (options.inputClass ?? '');
+            wValue.className = LX.mergeClass('lextext ellipsis-overflow', options.inputClass);
         }
         if (options.fit) {
-            wValue.classList.add('size-content');
+            wValue.classList.add('field-sizing-content');
         }
         Object.assign(wValue.style, options.style ?? {});
         container.appendChild(wValue);
@@ -1778,7 +1718,7 @@ class Select extends BaseComponent {
         this.onSetValue = (newValue, skipCallback, event) => {
             value = newValue;
             let item = null;
-            const listOptionsNodes = listOptions.childNodes;
+            const listOptionsNodes = list.childNodes;
             listOptionsNodes.forEach((e) => {
                 e.classList.remove('selected');
                 if (e.getAttribute('value') == newValue) {
@@ -1879,8 +1819,9 @@ class Select extends BaseComponent {
                     const parentRect = overflowContainer.getBoundingClientRect();
                     maxX = parentRect.x + parentRect.width;
                 }
-                const showLeft = (leftPosition + listWidth) > maxX;
-                if (showLeft) {
+                // "align" basically forces left-right alignment
+                const showLeft = (options.align === 'end') || (leftPosition + listWidth) > maxX;
+                if (showLeft && (options.align ? options.align !== 'start' : true)) {
                     parent.style.left = (leftPosition - (listWidth - rect.width)) + 'px';
                 }
             }
@@ -1902,17 +1843,17 @@ class Select extends BaseComponent {
             if (filter) {
                 filter.root.querySelector('input').focus();
             }
-        }, { buttonClass: 'array', skipInlineCount: true, disabled: options.disabled });
+        }, { buttonClass: 'outline [&_a]:ml-auto', skipInlineCount: true, disabled: options.disabled });
         selectedOption.root.style.width = '100%';
-        selectedOption.root.querySelector('span').appendChild(LX.makeIcon('Down', { svgClass: 'sm' }));
+        selectedOption.root.querySelector('button').appendChild(LX.makeIcon('Down', { svgClass: 'sm' }));
         container.appendChild(selectedOption.root);
         selectedOption.refresh = (v) => {
-            const buttonSpan = selectedOption.root.querySelector('span');
-            if (buttonSpan.innerText == '') {
-                buttonSpan.innerText = v;
+            const button = selectedOption.root.querySelector('button');
+            if (button.innerText == '') {
+                button.innerText = v;
             }
             else {
-                buttonSpan.innerHTML = buttonSpan.innerHTML.replaceAll(buttonSpan.innerText, v);
+                button.innerHTML = button.innerHTML.replaceAll(button.innerText, v);
             }
         };
         // Add select options container
@@ -1963,14 +1904,12 @@ class Select extends BaseComponent {
             });
             list.appendChild(filter.root);
         }
-        // Create option list to empty it easily..
-        const listOptions = document.createElement('span');
-        listOptions.className = 'lexselectinnerlist';
-        list.appendChild(listOptions);
         // Add select options list
         list.refresh = (currentOptions) => {
             // Empty list
-            listOptions.innerHTML = '';
+            while (list.childElementCount > (options.filter ?? false ? 1 : 0)) {
+                list.removeChild(list.lastChild);
+            }
             if (!currentOptions.length) {
                 let iValue = options.emptyMsg ?? 'No options found.';
                 let option = document.createElement('div');
@@ -1979,7 +1918,7 @@ class Select extends BaseComponent {
                 let li = document.createElement('li');
                 li.className = 'lexselectitem empty';
                 li.appendChild(option);
-                listOptions.appendChild(li);
+                list.appendChild(li);
                 return;
             }
             for (let i = 0; i < currentOptions.length; i++) {
@@ -1997,7 +1936,7 @@ class Select extends BaseComponent {
                 if (iValue.constructor != Object) {
                     const asLabel = iValue[0] === '@';
                     if (!asLabel) {
-                        option.innerHTML = `<span>${iValue}</span>`;
+                        option.innerHTML = `<span class="flex flex-row justify-between">${iValue}</span>`;
                         option.appendChild(LX.makeIcon('Check'));
                         option.value = iValue;
                         li.setAttribute('value', iValue);
@@ -2029,14 +1968,13 @@ class Select extends BaseComponent {
                         li.classList.add('selected');
                     }
                 }
-                listOptions.appendChild(li);
+                list.appendChild(li);
             }
         };
         list.refresh(values);
         container.appendChild(listDialog);
         // Element suboptions
-        let suboptions = document.createElement('div');
-        suboptions.className = 'lexcustomcontainer w-full';
+        let suboptions = LX.makeElement('div', 'lexcustomcontainer w-full');
         const suboptionsFunc = options[`on_${value}`];
         suboptions.toggleAttribute('hidden', !suboptionsFunc);
         if (suboptionsFunc) {
@@ -2079,7 +2017,7 @@ LX.Select = Select;
 class ArrayInput extends BaseComponent {
     _updateItems;
     constructor(name, values = [], callback, options = {}) {
-        options.nameWidth = '100%';
+        options.nameWidth = 'auto';
         super(ComponentType.ARRAY, name, null, options);
         this.onGetValue = () => {
             return values;
@@ -2093,16 +2031,16 @@ class ArrayInput extends BaseComponent {
         };
         // Add open array button
         let container = document.createElement('div');
-        container.className = 'lexarray';
-        container.style.width = '100%';
+        container.className = 'lexarray shrink-1 grow-1 ml-4';
+        container.style.width = 'auto';
         this.root.appendChild(container);
         this.root.dataset['opened'] = false;
         let buttonName = `Array (size ${values.length})`;
         const toggleButton = new Button(null, buttonName, () => {
             this.root.dataset['opened'] = this.root.dataset['opened'] == 'true' ? false : true;
             this.root.querySelector('.lexarrayitems').toggleAttribute('hidden');
-        }, { buttonClass: 'array' });
-        toggleButton.root.querySelector('span').appendChild(LX.makeIcon('Down', { svgClass: 'sm' }));
+        }, { buttonClass: 'outline [&_a]:ml-auto' });
+        toggleButton.root.querySelector('button').appendChild(LX.makeIcon('Down', { svgClass: 'sm' }));
         container.appendChild(toggleButton.root);
         // Show elements
         let arrayItems = document.createElement('div');
@@ -2111,8 +2049,8 @@ class ArrayInput extends BaseComponent {
         this.root.appendChild(arrayItems);
         this._updateItems = () => {
             // Update num items
-            let buttonSpan = this.root.querySelector('.lexbutton.array span');
-            for (let node of buttonSpan.childNodes) {
+            let button = this.root.querySelector('button');
+            for (let node of button.childNodes) {
                 if (node.nodeType === Node.TEXT_NODE) {
                     node.textContent = `Array (size ${values.length})`;
                     break;
@@ -2150,14 +2088,14 @@ class ArrayInput extends BaseComponent {
                     values.splice(values.indexOf(value), 1);
                     this._updateItems();
                     this._trigger(new IEvent(name, values, event), callback);
-                }, { title: 'Remove item', icon: 'Trash3' });
+                }, { buttonClass: 'ghost xs p-0', title: 'Remove item', icon: 'Trash2' });
                 component.root.appendChild(removeComponent.root);
             }
             const addButton = new Button(null, LX.makeIcon('Plus', { svgClass: 'sm' }).innerHTML + 'Add item', (v, event) => {
                 values.push(options.innerValues ? options.innerValues[0] : '');
                 this._updateItems();
                 this._trigger(new IEvent(name, values, event), callback);
-            }, { buttonClass: 'array' });
+            }, { buttonClass: 'ghost' });
             arrayItems.appendChild(addButton.root);
         };
         this._updateItems();
@@ -2175,22 +2113,22 @@ class Card extends BaseComponent {
         options.hideName = true;
         super(ComponentType.CARD, name, null, options);
         this.root.classList.add('place-content-center');
-        const container = LX.makeContainer(['100%', 'auto'], 'lexcard max-w-sm flex flex-col gap-4 bg-primary border rounded-xl py-6', '', this.root);
+        const container = LX.makeContainer(['100%', 'auto'], 'lexcard max-w-sm flex flex-col gap-4 bg-card border-color rounded-xl py-6', '', this.root);
         if (options.header) {
             const hasAction = options.header.action !== undefined;
             let header = LX.makeContainer(['100%', 'auto'], `flex ${hasAction ? 'flex-row gap-4' : 'flex-col gap-1'} px-6`, '', container);
             if (hasAction) {
-                const actionBtn = new Button(null, options.header.action.name, options.header.action.callback);
+                const actionBtn = new Button(null, options.header.action.name, options.header.action.callback, { buttonClass: 'secondary' });
                 header.appendChild(actionBtn.root);
                 const titleDescBox = LX.makeContainer(['75%', 'auto'], `flex flex-col gap-1`, '');
                 header.prepend(titleDescBox);
                 header = titleDescBox;
             }
             if (options.header.title) {
-                LX.makeElement('div', 'text-md leading-none font-semibold', options.header.title, header);
+                LX.makeElement('div', 'text-sm text-foreground leading-none font-semibold', options.header.title, header);
             }
             if (options.header.description) {
-                LX.makeElement('div', 'text-sm fg-tertiary', options.header.description, header);
+                LX.makeElement('div', 'text-xs text-muted-foreground', options.header.description, header);
             }
         }
         if (options.content) {
@@ -2248,24 +2186,19 @@ class Checkbox extends BaseComponent {
             container.style.width = options.inputWidth ?? `calc( 100% - ${realNameWidth})`;
         };
         var container = document.createElement('div');
-        container.className = 'lexcheckboxcont';
+        container.className = 'flex items-center gap-2 my-0 mx-auto [&_span]:truncate [&_span]:flex-auto-fill';
         this.root.appendChild(container);
-        let checkbox = document.createElement('input');
+        let checkbox = LX.makeElement('input', LX.mergeClass('lexcheckbox rounded-xl', options.className ?? 'primary'));
         checkbox.type = 'checkbox';
-        checkbox.className = 'lexcheckbox ' + (options.className ?? 'primary');
         checkbox.checked = value;
         checkbox.disabled = options.disabled ?? false;
         container.appendChild(checkbox);
-        let valueName = document.createElement('span');
-        valueName.className = 'checkboxtext';
-        valueName.innerHTML = options.label ?? 'On';
-        container.appendChild(valueName);
+        LX.makeElement('span', 'text-sm', options.label ?? 'On', container);
         checkbox.addEventListener('change', (e) => {
             this.set(checkbox.checked, false, e);
         });
         if (options.suboptions) {
-            let suboptions = document.createElement('div');
-            suboptions.className = 'lexcheckboxsubmenu';
+            let suboptions = LX.makeElement('div', 'lexcheckboxsubmenu');
             suboptions.toggleAttribute('hidden', !checkbox.checked);
             const suboptionsPanel = new LX.Panel();
             suboptionsPanel.queue(suboptions);
@@ -2376,20 +2309,17 @@ class ColorPicker {
         if (!this.callback) {
             console.warn('Define a callback in _options.onChange_ to allow getting new Color values!');
         }
-        this.root = document.createElement('div');
-        this.root.className = 'lexcolorpicker';
+        this.root = LX.makeElement('div', 'lexcolorpicker flex flex-col text-sm w-3xs gap-2 p-1');
         this.markerHalfSize = 8;
         this.markerSize = this.markerHalfSize * 2;
         this.currentColor = new Color(hexValue);
         const hueColor = new Color({ h: this.currentColor.hsv.h, s: 1, v: 1 });
+        const colorMarkerClass = 'size-4 rounded-lg bg-transparent absolute pointer-events-none border-3 border-solid border-white';
         // Intensity, Sat
-        this.colorPickerBackground = document.createElement('div');
-        this.colorPickerBackground.className = 'lexcolorpickerbg';
-        this.colorPickerBackground.style.backgroundColor =
-            `rgb(${hueColor.css.r}, ${hueColor.css.g}, ${hueColor.css.b})`;
+        this.colorPickerBackground = LX.makeElement('div', 'lexcolorpickerbg w-full aspect-square relative rounded-md cursor-pointer');
+        this.colorPickerBackground.style.backgroundColor = `rgb(${hueColor.css.r}, ${hueColor.css.g}, ${hueColor.css.b})`;
         this.root.appendChild(this.colorPickerBackground);
-        this.intSatMarker = document.createElement('div');
-        this.intSatMarker.className = 'lexcolormarker';
+        this.intSatMarker = LX.makeElement('div', colorMarkerClass);
         this.intSatMarker.style.backgroundColor = this.currentColor.hex;
         this.colorPickerBackground.appendChild(this.intSatMarker);
         let pickerRect = null;
@@ -2450,11 +2380,9 @@ class ColorPicker {
         }
         const innerHueAlpha = LX.makeContainer(['100%', '100%'], 'flex flex-col gap-2', '', hueAlphaContainer);
         // Hue
-        this.colorPickerTracker = document.createElement('div');
-        this.colorPickerTracker.className = 'lexhuetracker';
+        this.colorPickerTracker = LX.makeElement('div', 'lexhuetracker w-full h-4 rounded-lg relative cursor-pointer');
         innerHueAlpha.appendChild(this.colorPickerTracker);
-        this.hueMarker = document.createElement('div');
-        this.hueMarker.className = 'lexcolormarker';
+        this.hueMarker = LX.makeElement('div', colorMarkerClass);
         this.hueMarker.style.backgroundColor = `rgb(${hueColor.css.r}, ${hueColor.css.g}, ${hueColor.css.b})`;
         this.colorPickerTracker.appendChild(this.hueMarker);
         const _fromHueX = (hueX) => {
@@ -2462,8 +2390,7 @@ class ColorPicker {
             this.currentColor.hsv.h = LX.remapRange(hueX, 0, this.colorPickerTracker.offsetWidth - this.markerSize, 0, 360);
             const hueColor = new Color({ h: this.currentColor.hsv.h, s: 1, v: 1 });
             this.hueMarker.style.backgroundColor = `rgb(${hueColor.css.r}, ${hueColor.css.g}, ${hueColor.css.b})`;
-            this.colorPickerBackground.style.backgroundColor =
-                `rgb(${hueColor.css.r}, ${hueColor.css.g}, ${hueColor.css.b})`;
+            this.colorPickerBackground.style.backgroundColor = `rgb(${hueColor.css.r}, ${hueColor.css.g}, ${hueColor.css.b})`;
             this._updateColorValue();
         };
         let hueTrackerRect = null;
@@ -2498,13 +2425,10 @@ class ColorPicker {
         this.colorPickerTracker.addEventListener('mousedown', innerMouseDownHue);
         // Alpha
         if (this.useAlpha) {
-            this.alphaTracker = document.createElement('div');
-            this.alphaTracker.className = 'lexalphatracker';
-            this.alphaTracker.style.color =
-                `rgb(${this.currentColor.css.r}, ${this.currentColor.css.g}, ${this.currentColor.css.b})`;
+            this.alphaTracker = LX.makeElement('div', 'lexalphatracker w-full h-4 rounded-lg relative cursor-pointer');
+            this.alphaTracker.style.color = `rgb(${this.currentColor.css.r}, ${this.currentColor.css.g}, ${this.currentColor.css.b})`;
             innerHueAlpha.appendChild(this.alphaTracker);
-            this.alphaMarker = document.createElement('div');
-            this.alphaMarker.className = 'lexcolormarker';
+            this.alphaMarker = LX.makeElement('div', colorMarkerClass);
             this.alphaMarker.style.backgroundColor =
                 `rgb(${this.currentColor.css.r}, ${this.currentColor.css.g}, ${this.currentColor.css.b},${this.currentColor.css.a})`;
             this.alphaTracker.appendChild(this.alphaMarker);
@@ -2566,7 +2490,7 @@ class ColorPicker {
                     copyButtonComponent.root.querySelector("input[type='checkbox']").style.pointerEvents = 'auto';
                 }, 3000);
             }, { swap: 'Check', icon: 'Copy', buttonClass: 'bg-none', className: 'ml-auto', title: 'Copy' });
-            copyButtonComponent.root.querySelector('.swap-on svg').classList.add('fg-success');
+            copyButtonComponent.root.querySelector('.swap-on svg').classList.add('text-success');
             colorLabel.appendChild(copyButtonComponent.root);
         }
         this._updateColorValue(hexValue, true);
@@ -2598,8 +2522,7 @@ class ColorPicker {
         }
         this.intSatMarker.style.backgroundColor = this.currentColor.hex;
         if (this.useAlpha) {
-            this.alphaTracker.style.color =
-                `rgb(${this.currentColor.css.r}, ${this.currentColor.css.g}, ${this.currentColor.css.b})`;
+            this.alphaTracker.style.color = `rgb(${this.currentColor.css.r}, ${this.currentColor.css.g}, ${this.currentColor.css.b})`;
         }
         const toFixed = (s, n = 2) => {
             return s.toFixed(n).replace(/([0-9]+(\.[0-9]+[1-9])?)(\.?0+$)/, '$1');
@@ -2636,9 +2559,8 @@ class ColorPicker {
         this.hueMarker.style.backgroundColor =
             this.colorPickerBackground.style.backgroundColor =
                 `rgb(${hueColor.css.r}, ${hueColor.css.g}, ${hueColor.css.b})`;
-        this.hueMarker.style.left =
-            LX.remapRange(h, 0, 360, -this.markerHalfSize, this.colorPickerTracker.offsetWidth - this.markerHalfSize)
-                + 'px';
+        this.hueMarker.style.left = LX.remapRange(h, 0, 360, -this.markerHalfSize, this.colorPickerTracker.offsetWidth - this.markerHalfSize)
+            + 'px';
         this._updateColorValue(hexColor);
     }
 }
@@ -2677,10 +2599,9 @@ class Popover {
         this.alignOffset = options.alignOffset ?? this.alignOffset;
         this.avoidCollisions = options.avoidCollisions ?? true;
         this.reference = options.reference;
-        this.root = document.createElement('div');
+        this.root = LX.makeElement('div', 'lexpopover fixed bg-background rounded-lg border-color p-1 left-0 top-0');
         this.root.dataset['side'] = this.side;
         this.root.tabIndex = '1';
-        this.root.className = 'lexpopover';
         const refElement = trigger ?? this.reference;
         const nestedDialog = refElement.closest('dialog');
         if (nestedDialog && nestedDialog.dataset['modal'] == 'true') {
@@ -2813,11 +2734,11 @@ class PopConfirm {
         const popoverContainer = LX.makeContainer(['auto', 'auto'], 'tour-step-container');
         {
             const headerDiv = LX.makeContainer(['100%', 'auto'], 'flex flex-row', '', popoverContainer);
-            LX.makeContainer(['100%', 'auto'], 'p-1 font-medium text-md', title, headerDiv);
+            LX.makeContainer(['100%', 'auto'], 'p-1 font-medium text-base', title, headerDiv);
         }
-        LX.makeContainer(['100%', 'auto'], 'p-1 text-md', content, popoverContainer, { maxWidth: '400px' });
-        const footer = LX.makeContainer(['100%', 'auto'], 'flex flex-row text-md', '', popoverContainer);
-        const footerButtons = LX.makeContainer(['100%', 'auto'], 'text-md', '', footer);
+        LX.makeContainer(['100%', 'auto'], 'p-1 text-base', content, popoverContainer, { maxWidth: '400px' });
+        const footer = LX.makeContainer(['100%', 'auto'], 'flex flex-row text-base', '', popoverContainer);
+        const footerButtons = LX.makeContainer(['100%', 'auto'], 'text-base', '', footer);
         const footerPanel = new LX.Panel();
         footerButtons.appendChild(footerPanel.root);
         footerPanel.sameLine(2, 'justify-end');
@@ -2825,7 +2746,7 @@ class PopConfirm {
             if (onCancel)
                 onCancel();
             this._popover?.destroy();
-        }, { xbuttonClass: 'contrast' });
+        });
         footerPanel.addButton(null, okText, () => {
             if (onConfirm)
                 onConfirm();
@@ -2854,12 +2775,15 @@ class ColorInput extends BaseComponent {
     _popover = undefined;
     constructor(name, value, callback, options = {}) {
         value = value ?? '#000000';
+        // Force always hex internally
+        if (value.constructor === String && value.includes('oklch')) {
+            value = LX.oklchToHex(value);
+        }
         const useAlpha = options.useAlpha
             ?? ((value.constructor === Object && 'a' in value)
                 || (value.constructor === String && [5, 9].includes(value.length)));
         const componentColor = new Color(value);
-        // Force always hex internally
-        value = useAlpha ? componentColor.hex : componentColor.hex.substr(0, 7);
+        value = useAlpha ? componentColor.hex : componentColor.hex.substring(0, 7);
         super(ComponentType.COLOR, name, value, options);
         this.onGetValue = () => {
             const currentColor = new Color(value);
@@ -2867,7 +2791,7 @@ class ColorInput extends BaseComponent {
         };
         this.onSetValue = (newValue, skipCallback, event) => {
             const newColor = new Color(newValue);
-            colorSampleRGB.style.color = value = newColor.hex.substr(0, 7);
+            colorSampleRGB.style.color = value = newColor.hex.substring(0, 7);
             if (useAlpha) {
                 colorSampleAlpha.style.color = value = newColor.hex;
             }
@@ -2899,7 +2823,7 @@ class ColorInput extends BaseComponent {
                 this.set(color.hex);
             }
         });
-        let sampleContainer = LX.makeContainer(['18px', '18px'], 'flex flex-row bg-contrast rounded overflow-hidden', '', container);
+        let sampleContainer = LX.makeContainer(['18px', '18px'], 'flex flex-row rounded overflow-hidden', '', container);
         sampleContainer.tabIndex = '1';
         sampleContainer.addEventListener('click', (e) => {
             if ((options.disabled ?? false)) {
@@ -2946,42 +2870,18 @@ class ComboButtons extends BaseComponent {
         const shouldSelect = !(options.noSelection ?? false);
         let shouldToggle = shouldSelect && (options.toggle ?? false);
         let container = document.createElement('div');
-        container.className = 'lexcombobuttons ';
+        container.className = 'lexcombobuttons flex justify-center';
         options.skipReset = true;
         if (options.float) {
-            container.className += options.float;
+            container.className = LX.mergeClass(container.className, `justify-${options.float}`);
         }
         let currentValue = [];
-        let buttonsBox = document.createElement('div');
-        buttonsBox.className = 'lexcombobuttonsbox ';
-        container.appendChild(buttonsBox);
+        let buttonsBox = LX.makeElement('div', 'flex w-max bg-secondary pad-sm rounded-lg gap-1', '', container);
         for (let b of values) {
             if (!b.value) {
                 throw ("Set 'value' for each button!");
             }
-            let buttonEl = document.createElement('button');
-            buttonEl.className = 'lexbutton combo';
-            buttonEl.title = b.icon ? b.value : '';
-            buttonEl.id = b.id ?? '';
-            buttonEl.dataset['value'] = b.value;
-            if (options.buttonClass) {
-                buttonEl.classList.add(options.buttonClass);
-            }
-            if (shouldSelect && (b.selected || options.selected?.includes(b.value))) {
-                buttonEl.classList.add('selected');
-                currentValue = currentValue.concat([b.value]);
-            }
-            if (b.icon) {
-                const icon = LX.makeIcon(b.icon);
-                buttonEl.appendChild(icon);
-            }
-            else {
-                buttonEl.innerHTML = `<span>${b.value}</span>`;
-            }
-            if (b.disabled) {
-                buttonEl.setAttribute('disabled', 'true');
-            }
-            buttonEl.addEventListener('click', (e) => {
+            const onClick = (event) => {
                 currentValue = [];
                 if (shouldSelect) {
                     if (shouldToggle) {
@@ -3003,7 +2903,20 @@ class ComboButtons extends BaseComponent {
                 }
                 currentValue = currentValue[0];
                 this.set(b.value, false, buttonEl.classList.contains('selected'));
+            };
+            const button = new Button(b.name ?? null, b.value, onClick, {
+                title: b.icon ? b.value : '',
+                icon: b.icon,
+                disabled: b.disabled,
+                buttonClass: LX.mergeClass('combo w-auto', options.buttonClass)
             });
+            let buttonEl = button.root.querySelector('button');
+            buttonEl.id = b.id ?? '';
+            buttonEl.dataset['value'] = b.value;
+            if (shouldSelect && (b.selected || options.selected?.includes(b.value))) {
+                buttonEl.classList.add('selected');
+                currentValue = currentValue.concat([b.value]);
+            }
             buttonsBox.appendChild(buttonEl);
         }
         if (currentValue.length > 1) {
@@ -3069,9 +2982,9 @@ class Counter extends BaseComponent {
         const max = options.max ?? 100;
         const step = options.step ?? 1;
         const container = document.createElement('div');
-        container.className = 'flex flex-row border bg-primary rounded-lg shadow';
+        container.className = 'flex flex-row border-color bg-card rounded-lg shadow';
         this.root.appendChild(container);
-        const input = LX.makeElement('input', 'lexcounter w-12 bg-primary px-2 fg-primary', '', container);
+        const input = LX.makeElement('input', 'lexcounter w-12 bg-card px-2 text-foreground', '', container);
         input.type = 'number';
         input.value = value;
         if (options.disabled) {
@@ -3082,9 +2995,8 @@ class Counter extends BaseComponent {
             if (e.shiftKey)
                 mult *= 10;
             this.set(this.count - mult, false, e);
-        }, { disabled: options.disabled,
-            className: `p-0 ${options.disabled ? '' : 'hover:bg-secondary'} border-left border-right`,
-            buttonClass: 'bg-none', icon: 'Minus' });
+        }, { disabled: options.disabled, className: `p-0 ${options.disabled ? '' : 'hover:bg-secondary'} border-l-color border-r-color`,
+            buttonClass: 'px-0 bg-none h-7', icon: 'Minus' });
         container.appendChild(substrButton.root);
         const addButton = new Button(null, '', (value, e) => {
             let mult = step ?? 1;
@@ -3092,7 +3004,7 @@ class Counter extends BaseComponent {
                 mult *= 10;
             this.set(this.count + mult, false, e);
         }, { disabled: options.disabled, className: `p-0 ${options.disabled ? '' : 'hover:bg-secondary'} rounded-r-lg`,
-            buttonClass: 'bg-none', icon: 'Plus' });
+            buttonClass: 'px-0 bg-none h-7', icon: 'Plus' });
         container.appendChild(addButton.root);
     }
 }
@@ -3108,14 +3020,14 @@ class CanvasCurve {
     canvas;
     constructor(value, options = {}) {
         let element = document.createElement('div');
-        element.className = 'curve ' + (options.className ? options.className : '');
+        element.className = LX.mergeClass('curve [&_canvas]:rounded', options.className);
         element.style.minHeight = '50px';
         element.style.width = options.width || '100%';
         element.style.minWidth = '50px';
         element.style.minHeight = '20px';
-        element.bgcolor = options.bgColor || LX.getThemeColor('global-background');
-        element.pointscolor = options.pointsColor || LX.getThemeColor('global-color-accent');
-        element.activepointscolor = options.activePointsColor || LX.getThemeColor('global-color-accent-light');
+        element.bgcolor = options.bgColor || LX.getCSSVariable('background');
+        element.pointscolor = options.pointsColor || LX.getCSSVariable('primary');
+        element.activepointscolor = options.activePointsColor || LX.getCSSVariable('primary/50');
         element.linecolor = options.lineColor || '#555';
         element.value = value || [];
         element.xrange = options.xrange || [0, 1]; // min, max
@@ -3129,9 +3041,9 @@ class CanvasCurve {
         element.smooth = (options.smooth && typeof (options.smooth) == 'number' ? options.smooth : 0.3) || false;
         element.move_out = options.moveOutAction ?? LX.CURVE_MOVEOUT_DELETE;
         LX.addSignal('@on_new_color_scheme', (el, value) => {
-            element.bgcolor = options.bgColor || LX.getThemeColor('global-background');
-            element.pointscolor = options.pointsColor || LX.getThemeColor('global-color-accent');
-            element.activepointscolor = options.activePointsColor || LX.getThemeColor('global-color-accent-light');
+            element.bgcolor = options.bgColor || LX.getCSSVariable('background');
+            element.pointscolor = options.pointsColor || LX.getCSSVariable('primary');
+            element.activepointscolor = options.activePointsColor || LX.getCSSVariable('primary/50');
             this.redraw();
         });
         this.element = element;
@@ -3188,8 +3100,7 @@ class CanvasCurve {
         }
         // Canvas to value
         function unconvert(v) {
-            return [v[0] * element.xrange[1] / canvas.width + element.xrange[0],
-                v[1] * element.yrange[1] / canvas.height + element.yrange[0]];
+            return [v[0] * element.xrange[1] / canvas.width + element.xrange[0], v[1] * element.yrange[1] / canvas.height + element.yrange[0]];
         }
         let selected = -1;
         element.redraw = function (o = {}) {
@@ -3466,7 +3377,7 @@ class Calendar {
     onPreviousMonth;
     onNextMonth;
     constructor(dateString, options = {}) {
-        this.root = LX.makeContainer(['256px', 'auto'], 'p-1 text-md');
+        this.root = LX.makeContainer(['256px', 'auto'], 'p-1 flex flex-col gap-2 text-sm');
         this.onChange = options.onChange;
         this.onPreviousMonth = options.onPreviousMonth;
         this.onNextMonth = options.onNextMonth;
@@ -3521,8 +3432,8 @@ class Calendar {
         {
             const header = LX.makeContainer(['100%', 'auto'], 'flex flex-row p-1', '', this.root);
             if (!this.skipPrevMonth) {
-                const prevMonthIcon = LX.makeIcon('Left', { title: 'Previous Month',
-                    iconClass: 'border p-1 rounded hover:bg-secondary', svgClass: 'sm' });
+                const prevMonthIcon = LX.makeIcon('Left', { title: 'Previous Month', iconClass: 'border-color p-1 rounded hover:bg-secondary',
+                    svgClass: 'sm' });
                 header.appendChild(prevMonthIcon);
                 prevMonthIcon.addEventListener('click', () => {
                     this._previousMonth();
@@ -3530,8 +3441,8 @@ class Calendar {
             }
             LX.makeContainer(['100%', 'auto'], 'text-center font-medium select-none', `${this.monthName} ${this.year}`, header);
             if (!this.skipNextMonth) {
-                const nextMonthIcon = LX.makeIcon('Right', { title: 'Next Month',
-                    iconClass: 'border p-1 rounded hover:bg-secondary', svgClass: 'sm' });
+                const nextMonthIcon = LX.makeIcon('Right', { title: 'Next Month', iconClass: 'border-color p-1 rounded hover:bg-secondary',
+                    svgClass: 'sm' });
                 header.appendChild(nextMonthIcon);
                 nextMonthIcon.addEventListener('click', () => {
                     this._nextMonth();
@@ -3550,7 +3461,7 @@ class Calendar {
                 const hrow = document.createElement('tr');
                 for (const headData of ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']) {
                     const th = document.createElement('th');
-                    th.className = 'fg-tertiary text-sm font-normal select-none';
+                    th.className = 'text-muted-foreground text-xs font-normal w-10 select-none';
                     th.innerHTML = `<span>${headData}</span>`;
                     hrow.appendChild(th);
                 }
@@ -3567,7 +3478,7 @@ class Calendar {
                     const weekDays = this.calendarDays.slice(week * 7, week * 7 + 7);
                     for (const dayData of weekDays) {
                         const th = document.createElement('th');
-                        th.className = 'leading-loose font-normal rounded select-none cursor-pointer';
+                        th.className = 'leading-8 text-xs font-normal rounded select-none cursor-pointer shrink-0 grow-0';
                         const dayDate = new Date(`${this.month}/${dayData.day}/${this.year}`);
                         const date = new Date();
                         // today inclusives
@@ -3591,13 +3502,13 @@ class Calendar {
                             && (this.month == (toRangeDate.getMonth() + 1))
                             && (this.year == toRangeDate.getFullYear());
                         if ((!this.range && currentDay) || this.range && (currentFromRange || currentToRange)) {
-                            th.className += ` bg-contrast fg-contrast`;
+                            th.className += ` bg-primary text-primary-foreground`;
                         }
                         else if (this.range && selectable && (dayDate > fromRangeDate) && (dayDate < toRangeDate)) {
-                            th.className += ` bg-accent fg-contrast`;
+                            th.className += ` bg-accent text-accent-foreground`;
                         }
                         else {
-                            th.className += ` ${selectable ? 'fg-primary' : 'fg-tertiary'} hover:bg-secondary`;
+                            th.className += ` ${selectable ? 'text-secondary-foreground' : 'text-muted-foreground'} hover:bg-secondary`;
                         }
                         th.innerHTML = `<span>${dayData.day}</span>`;
                         hrow.appendChild(th);
@@ -3841,7 +3752,7 @@ class DatePicker extends BaseComponent {
             const calendarIcon = LX.makeIcon('Calendar');
             const calendarButton = new Button(null, d0, () => {
                 this._popover = new Popover(calendarButton.root, [this.calendar]);
-            }, { buttonClass: `flex flex-row px-3 ${emptyDate ? '' : 'fg-tertiary'} justify-between` });
+            }, { buttonClass: `outline flex flex-row px-3 ${emptyDate ? '' : 'text-muted-foreground'} justify-between` });
             calendarButton.root.querySelector('button').appendChild(calendarIcon);
             calendarButton.root.style.width = '100%';
             container.appendChild(calendarButton.root);
@@ -3852,7 +3763,7 @@ class DatePicker extends BaseComponent {
                 const calendarIcon = LX.makeIcon('Calendar');
                 const calendarButton = new Button(null, d1, () => {
                     this._popover = new Popover(calendarButton.root, [this.calendar]);
-                }, { buttonClass: `flex flex-row px-3 ${emptyDate ? '' : 'fg-tertiary'} justify-between` });
+                }, { buttonClass: `outline flex flex-row px-3 ${emptyDate ? '' : 'text-muted-foreground'} justify-between` });
                 calendarButton.root.querySelector('button').appendChild(calendarIcon);
                 calendarButton.root.style.width = '100%';
                 container.appendChild(calendarButton.root);
@@ -3881,11 +3792,11 @@ class CanvasDial {
     canvas;
     constructor(value, options = {}) {
         let element = document.createElement('div');
-        element.className = 'dial ' + (options.className ? options.className : '');
+        element.className = LX.mergeClass('dial', options.className);
         element.style.width = element.style.height = options.size || '100%';
         element.style.minWidth = element.style.minHeight = '50px';
-        element.bgcolor = options.bgColor || LX.getThemeColor('global-background');
-        element.pointscolor = options.pointsColor || LX.getThemeColor('global-color-accent-light');
+        element.bgcolor = options.bgColor || LX.getCSSVariable('background');
+        element.pointscolor = options.pointsColor || LX.getCSSVariable('primary/50');
         element.linecolor = options.lineColor || '#555';
         element.value = value || [];
         element.xrange = options.xrange || [0, 1]; // min, max
@@ -3899,8 +3810,8 @@ class CanvasDial {
         element.smooth = (options.smooth && typeof (options.smooth) == 'number' ? options.smooth : 0.3) || false;
         element.move_out = options.moveOutAction ?? LX.CURVE_MOVEOUT_DELETE;
         LX.addSignal('@on_new_color_scheme', (el, value) => {
-            element.bgcolor = options.bgColor || LX.getThemeColor('global-background');
-            element.pointscolor = options.pointsColor || LX.getThemeColor('global-color-accent-light');
+            element.bgcolor = options.bgColor || LX.getCSSVariable('background');
+            element.pointscolor = options.pointsColor || LX.getCSSVariable('primary/50');
             this.redraw();
         });
         this.element = element;
@@ -3956,8 +3867,7 @@ class CanvasDial {
         }
         // Canvas to value
         function unconvert(v) {
-            return [v[0] * element.xrange[1] / canvas.width + element.xrange[0],
-                v[1] * element.yrange[1] / canvas.height + element.yrange[0]];
+            return [v[0] * element.xrange[1] / canvas.width + element.xrange[0], v[1] * element.yrange[1] / canvas.height + element.yrange[0]];
         }
         var selected = -1;
         element.redraw = function (o = {}) {
@@ -4314,7 +4224,7 @@ class Form extends BaseComponent {
             }
         };
         let container = document.createElement('div');
-        container.className = 'lexformdata';
+        container.className = 'flex flex-col gap-1';
         container.style.width = '100%';
         container.formData = {};
         this.root.appendChild(container);
@@ -4330,7 +4240,7 @@ class Form extends BaseComponent {
             entryData.ignoreValidation = true;
             if (!(options.skipLabels ?? false)) {
                 const label = new TextInput(null, entryData.label ?? entry, null, { disabled: true,
-                    inputClass: 'formlabel bg-none' });
+                    inputClass: 'formlabel text-xs bg-none text-muted-foreground' });
                 container.appendChild(label.root);
             }
             entryData.textComponent = new TextInput(null, entryData.constructor == Object ? entryData.value : entryData, (value, event) => {
@@ -4348,7 +4258,7 @@ class Form extends BaseComponent {
                 if (options.secondaryActionCallback) {
                     options.secondaryActionCallback(container.formData, event);
                 }
-            }, { width: '100%', minWidth: '0', buttonClass: options.secondaryButtonClass ?? 'primary' });
+            }, { width: '100%', minWidth: '0', buttonClass: options.secondaryButtonClass ?? 'secondary' });
             buttonContainer.appendChild(secondaryButton.root);
         }
         const primaryButton = new Button(null, options.primaryActionName ?? 'Submit', (value, event) => {
@@ -4368,7 +4278,7 @@ class Form extends BaseComponent {
             if (callback) {
                 callback(container.formData, errors, event);
             }
-        }, { width: '100%', minWidth: '0', buttonClass: options.primaryButtonClass ?? 'contrast' });
+        }, { width: '100%', minWidth: '0', buttonClass: options.primaryButtonClass ?? 'primary' });
         buttonContainer.appendChild(primaryButton.root);
     }
 }
@@ -4397,9 +4307,7 @@ class Layers extends BaseComponent {
             const realNameWidth = this.root.domName?.style.width ?? '0px';
             container.style.width = `calc( 100% - ${realNameWidth})`;
         };
-        const container = document.createElement('div');
-        container.className = 'lexlayers';
-        this.root.appendChild(container);
+        const container = LX.makeElement('div', 'lexlayers grid', '', this.root);
         const maxBits = options.maxBits ?? 16;
         this.setLayers = (val) => {
             container.innerHTML = '';
@@ -4411,7 +4319,8 @@ class Layers extends BaseComponent {
             }
             for (let bit = 0; bit < maxBits; ++bit) {
                 let layer = document.createElement('div');
-                layer.className = 'lexlayer';
+                layer.className =
+                    'lexlayer size-6 text-secondary-foreground text-center content-center place-self-center cursor-pointer font-semibold text-xs rounded-lg';
                 if (val != undefined) {
                     const valueBit = binary[maxBits - bit - 1];
                     if (valueBit != undefined && valueBit == '1') {
@@ -4499,7 +4408,7 @@ class List extends BaseComponent {
         };
         // Show list
         let listContainer = document.createElement('div');
-        listContainer.className = 'lexlist';
+        listContainer.className = 'bg-background flex flex-col gap-1 rounded-xl border-color p-2';
         this.root.appendChild(listContainer);
         this._updateValues(values);
         LX.doAsync(this.onResize.bind(this));
@@ -4945,7 +4854,7 @@ class Map2D extends BaseComponent {
         const calendarIcon = LX.makeIcon('SquareMousePointer');
         const calendarButton = new Button(null, 'Open Map', () => {
             this._popover = new Popover(calendarButton.root, [this.map2d]);
-        }, { buttonClass: `flex flex-row px-3 fg-secondary justify-between` });
+        }, { buttonClass: `outline justify-between` });
         calendarButton.root.querySelector('button').appendChild(calendarIcon);
         container.appendChild(calendarButton.root);
         LX.doAsync(this.onResize.bind(this));
@@ -4960,14 +4869,13 @@ LX.Map2D = Map2D;
 class NodeTree {
     domEl;
     data;
-    onevent;
     options;
     selected = [];
     _forceClose = false;
+    _callbacks = {};
     constructor(domEl, data, options = {}) {
         this.domEl = domEl;
         this.data = data;
-        this.onevent = options.onevent;
         this.options = options;
         if (data.constructor === Object) {
             this._createItem(null, data);
@@ -5001,8 +4909,8 @@ class NodeTree {
             isParent = !!hasFolders;
         }
         let item = document.createElement('li');
-        item.className = 'lextreeitem ' + 'datalevel' + level + (isParent ? ' parent' : '')
-            + (isSelected ? ' selected' : '');
+        item.className =
+            `lextreeitem inline-flex outline-none text-sm items-center h-7 cursor-pointer truncate rounded-lg select-none datalevel${level} ${isParent ? 'parent' : ''} ${isSelected ? ' selected' : ''}`;
         item.id = LX.getSupportedDOMName(node.id);
         item.tabIndex = '0';
         item.treeData = node;
@@ -5012,7 +4920,7 @@ class NodeTree {
             icon = node.closed ? 'Right' : 'Down';
         }
         if (icon) {
-            item.appendChild(LX.makeIcon(icon, { iconClass: 'hierarchy', svgClass: 'xs' }));
+            item.appendChild(LX.makeIcon(icon, { iconClass: 'hierarchy', svgClass: 'sm' }));
         }
         // Add display icon
         icon = node.icon;
@@ -5027,13 +4935,15 @@ class NodeTree {
             // an image..
             else {
                 const rootPath = 'https://raw.githubusercontent.com/jxarco/lexgui.js/master/';
-                item.innerHTML += "<img src='" + (rootPath + node.icon) + "'>";
+                item.innerHTML += `<img src="${rootPath + node.icon}">`;
             }
         }
         item.innerHTML += node.rename ? '' : node.id;
-        item.setAttribute('draggable', true);
         item.style.paddingLeft = (3 + (level + 1) * 15) + 'px';
         list.appendChild(item);
+        const isDraggable = parent && (node.metadata?.draggable ?? (this.options.defaultDraggable ?? true));
+        if (isDraggable)
+            item.setAttribute('draggable', 'true');
         // Callbacks
         item.addEventListener('click', (e) => {
             if (handled) {
@@ -5048,27 +4958,38 @@ class NodeTree {
             }
             // Add or remove
             const idx = this.selected.indexOf(node);
+            item.classList.toggle('selected', idx == -1);
             if (idx > -1) {
-                item.classList.remove('selected');
                 this.selected.splice(idx, 1);
             }
             else {
-                item.classList.add('selected');
                 this.selected.push(node);
             }
             // Only Show children...
             if (isParent && node.id.length > 1 /* Strange case... */) {
                 node.closed = false;
-                if (that.onevent) {
-                    const event = new TreeEvent(TreeEvent.NODE_CARETCHANGED, node, node.closed, e);
-                    that.onevent(event);
+                const onCaretChanged = that._callbacks['caretChanged'];
+                if (onCaretChanged !== undefined) {
+                    const event = {
+                        type: 'caret',
+                        items: [node],
+                        domEvent: e,
+                        userInitiated: true
+                    };
+                    onCaretChanged(event);
                 }
                 that.frefresh(node.id);
             }
-            if (that.onevent) {
-                const event = new TreeEvent(TreeEvent.NODE_SELECTED, node, this.selected, e);
-                event.multiple = e.shiftKey;
-                that.onevent(event);
+            const onSelect = that._callbacks['select'];
+            if (onSelect !== undefined) {
+                const event = {
+                    type: 'select',
+                    items: [node],
+                    result: this.selected,
+                    domEvent: e,
+                    userInitiated: true
+                };
+                onSelect(event);
             }
         });
         item.addEventListener('dblclick', function (e) {
@@ -5077,27 +4998,40 @@ class NodeTree {
                 node.rename = true;
                 that.refresh();
             }
-            if (that.onevent) {
-                const event = new TreeEvent(TreeEvent.NODE_DBLCLICKED, node, null, e);
-                that.onevent(event);
+            const onDblClick = that._callbacks['dblClick'];
+            if (onDblClick !== undefined) {
+                const event = {
+                    type: 'dbl_click',
+                    items: [node],
+                    domEvent: e,
+                    userInitiated: true
+                };
+                onDblClick(event);
             }
         });
-        item.addEventListener('contextmenu', (e) => {
+        item.addEventListener('contextmenu', async (e) => {
             e.preventDefault();
-            if (!that.onevent) {
+            const onContextMenu = that._callbacks['contextMenu'];
+            if (!onContextMenu) {
                 return;
             }
-            const event = new TreeEvent(TreeEvent.NODE_CONTEXTMENU, node, this.selected, e);
-            event.multiple = this.selected.length > 1;
-            LX.addContextMenu(event.multiple ? 'Selected Nodes' : event.node.id, event.event, (m) => {
-                event.panel = m;
-            });
-            that.onevent(event);
-            if (this.options.addDefault ?? false) {
-                if (event.panel.items) {
-                    event.panel.add('');
+            const event = {
+                type: 'context_menu',
+                items: this.selected,
+                from: node,
+                domEvent: e,
+                userInitiated: true
+            };
+            const r = await onContextMenu(event);
+            const multiple = this.selected.length > 1;
+            LX.addContextMenu(multiple ? 'Selected Nodes' : node.id, e, (m) => {
+                if (r?.length) {
+                    for (const i of r) {
+                        m.add(i.name, { callback: i.callback });
+                    }
+                    m.add('');
                 }
-                event.panel.add('Select Children', () => {
+                m.add('Select Children', () => {
                     const selectChildren = (n) => {
                         if (n.closed) {
                             return;
@@ -5116,15 +5050,53 @@ class NodeTree {
                     this.selected.length = 0;
                     // Add childs of the clicked node
                     selectChildren(node);
+                    const onSelect = this._callbacks['select'];
+                    if (onSelect !== undefined) {
+                        const event = {
+                            type: 'select',
+                            items: [node],
+                            result: this.selected,
+                            domEvent: e,
+                            userInitiated: true
+                        };
+                        onSelect(event);
+                    }
                 });
-                event.panel.add('Delete', { callback: () => {
-                        const ok = that.deleteNode(node);
-                        if (ok && that.onevent) {
-                            const event = new TreeEvent(TreeEvent.NODE_DELETED, node, [node], null);
-                            that.onevent(event);
+                m.add('Delete', { callback: () => {
+                        const onBeforeDelete = this._callbacks['beforeDelete'];
+                        const onDelete = this._callbacks['delete'];
+                        const resolve = (...args) => {
+                            let deletedNodes = [];
+                            if (this.selected.length) {
+                                deletedNodes.push(...that.deleteNodes(this.selected));
+                            }
+                            else if (that.deleteNode(node)) {
+                                deletedNodes.push(node);
+                            }
+                            this.refresh();
+                            const event = {
+                                type: 'delete',
+                                items: deletedNodes,
+                                userInitiated: true
+                            };
+                            if (onDelete)
+                                onDelete(event, ...args);
+                        };
+                        if (onBeforeDelete) {
+                            const event = {
+                                type: 'delete',
+                                items: this.selected.length ? this.selected : [node],
+                                userInitiated: true
+                            };
+                            onBeforeDelete(event, resolve);
                         }
-                        this.refresh();
+                        else {
+                            resolve();
+                        }
                     } });
+            });
+            if (!(this.options.addDefault ?? false)) {
+                return;
             }
         });
         item.addEventListener('keydown', (e) => {
@@ -5133,20 +5105,40 @@ class NodeTree {
             }
             e.preventDefault();
             if (e.key == 'Delete') {
-                const nodesDeleted = [];
-                for (let _node of this.selected) {
-                    if (that.deleteNode(_node)) {
-                        nodesDeleted.push(_node);
+                const onBeforeDelete = this._callbacks['beforeDelete'];
+                const onDelete = this._callbacks['delete'];
+                const resolve = (...args) => {
+                    const nodesDeleted = [];
+                    for (let n of this.selected) {
+                        if (that.deleteNode(n)) {
+                            nodesDeleted.push(n);
+                        }
                     }
+                    this.selected.length = 0;
+                    this.refresh();
+                    if (nodesDeleted.length) {
+                        const event = {
+                            type: 'delete',
+                            items: nodesDeleted,
+                            domEvent: e,
+                            userInitiated: true
+                        };
+                        if (onDelete)
+                            onDelete(event, ...args);
+                    }
+                };
+                if (onBeforeDelete) {
+                    const event = {
+                        type: 'delete',
+                        items: this.selected,
+                        domEvent: e,
+                        userInitiated: true
+                    };
+                    onBeforeDelete(event, resolve);
                 }
-                // Send event now so we have the info in selected array..
-                if (nodesDeleted.length && that.onevent) {
-                    const event = new TreeEvent(TreeEvent.NODE_DELETED, node, nodesDeleted, e);
-                    event.multiple = nodesDeleted.length > 1;
-                    that.onevent(event);
+                else {
+                    resolve();
                 }
-                this.selected.length = 0;
-                this.refresh();
             }
             else if (e.key == 'ArrowUp' || e.key == 'ArrowDown') { // Unique or zero selected
                 var selected = this.selected.length > 1
@@ -5162,7 +5154,7 @@ class NodeTree {
         // Node rename
         const nameInput = document.createElement('input');
         nameInput.toggleAttribute('hidden', !node.rename);
-        nameInput.className = 'bg-none';
+        nameInput.className = 'text-foreground bg-none text-sm border-none outline-none';
         nameInput.value = node.id;
         item.appendChild(nameInput);
         if (node.rename) {
@@ -5171,15 +5163,38 @@ class NodeTree {
         }
         nameInput.addEventListener('keyup', function (e) {
             if (e.key == 'Enter') {
+                const onBeforeRename = that._callbacks['beforeRename'];
+                const onRename = that._callbacks['rename'];
+                const oldName = node.id;
                 this.value = this.value.replace(/\s/g, '_');
-                if (that.onevent) {
-                    const event = new TreeEvent(TreeEvent.NODE_RENAMED, node, this.value, e);
-                    that.onevent(event);
+                const resolve = (...args) => {
+                    node.id = LX.getSupportedDOMName(this.value);
+                    delete node.rename;
+                    that.frefresh(node.id);
+                    list.querySelector(`#${node.id}`).classList.add('selected');
+                    const event = {
+                        type: 'rename',
+                        items: [node],
+                        oldName,
+                        newName: this.value,
+                        userInitiated: true
+                    };
+                    if (onRename)
+                        onRename(event, ...args);
+                };
+                if (onBeforeRename) {
+                    const event = {
+                        type: 'rename',
+                        items: [node],
+                        oldName,
+                        newName: this.value,
+                        userInitiated: true
+                    };
+                    onBeforeRename(event, resolve);
                 }
-                node.id = LX.getSupportedDOMName(this.value);
-                delete node.rename;
-                that.frefresh(node.id);
-                list.querySelector('#' + node.id).classList.add('selected');
+                else {
+                    resolve();
+                }
             }
             else if (e.key == 'Escape') {
                 delete node.rename;
@@ -5190,69 +5205,90 @@ class NodeTree {
             delete node.rename;
             that.refresh();
         });
-        if (this.options.draggable ?? true) {
-            // Drag nodes
-            if (parent) { // Root doesn't move!
-                item.addEventListener('dragstart', (e) => {
-                    window.__tree_node_dragged = node;
-                });
+        if (isDraggable) {
+            item.addEventListener('dragstart', (e) => {
+                window.__tree_node_dragged = node;
+            });
+        }
+        /* Events fired on other node items,
+        by now everyone is a drop target, cancel in the event if necessary */
+        item.addEventListener('dragover', (e) => {
+            e.preventDefault(); // allow drop
+        }, false);
+        item.addEventListener('dragenter', (e) => {
+            e.target.classList.add('draggingover');
+        });
+        item.addEventListener('dragend', (e) => {
+            e.target.classList.remove('draggingover');
+        });
+        item.addEventListener('dragleave', (e) => {
+            e.target.classList.remove('draggingover');
+        });
+        item.addEventListener('drop', (e) => {
+            e.preventDefault(); // Prevent default action (open as link for some elements)
+            let dragged = window.__tree_node_dragged;
+            if (!dragged) {
+                // Test if we are moving from AssetView extension
+                dragged = window.__av_item_dragged;
+                if (dragged) {
+                    dragged._nodeTarget = node;
+                }
+                return;
             }
-            /* Events fired on other node items */
-            item.addEventListener('dragover', (e) => {
-                e.preventDefault(); // allow drop
-            }, false);
-            item.addEventListener('dragenter', (e) => {
-                e.target.classList.add('draggingover');
-            });
-            item.addEventListener('dragend', (e) => {
-                e.target.classList.remove('draggingover');
-            });
-            item.addEventListener('dragleave', (e) => {
-                e.target.classList.remove('draggingover');
-            });
-            item.addEventListener('drop', (e) => {
-                e.preventDefault(); // Prevent default action (open as link for some elements)
-                let dragged = window.__tree_node_dragged;
-                if (!dragged) {
-                    // Test if we are moving from AssetView extension
-                    dragged = window.__av_item_dragged;
-                    if (dragged) {
-                        dragged._nodeTarget = node;
-                    }
-                    return;
+            const domTarget = e.target;
+            domTarget.classList.remove('draggingover');
+            let target = node;
+            // Can't drop to same node
+            if (dragged.id == target.id) {
+                console.warn('Cannot parent node to itself!');
+                return;
+            }
+            // Can't drop to child node
+            const isChild = function (newParent, node) {
+                var result = false;
+                for (var c of node.children) {
+                    if (c.id == newParent.id)
+                        return true;
+                    result = result || isChild(newParent, c);
                 }
-                let target = node;
-                // Can't drop to same node
-                if (dragged.id == target.id) {
-                    console.warn('Cannot parent node to itself!');
-                    return;
-                }
-                // Can't drop to child node
-                const isChild = function (newParent, node) {
-                    var result = false;
-                    for (var c of node.children) {
-                        if (c.id == newParent.id)
-                            return true;
-                        result = result || isChild(newParent, c);
-                    }
-                    return result;
-                };
-                if (isChild(target, dragged)) {
-                    console.warn('Cannot parent node to a current child!');
-                    return;
-                }
-                // Trigger node dragger event
-                if (that.onevent) {
-                    const event = new TreeEvent(TreeEvent.NODE_DRAGGED, dragged, target, e);
-                    that.onevent(event);
-                }
+                return result;
+            };
+            if (isChild(target, dragged)) {
+                console.warn('Cannot parent node to a current child!');
+                return;
+            }
+            const onBeforeMove = this._callbacks['beforeMove'];
+            const onMove = this._callbacks['move'];
+            const resolve = (...args) => {
                 const index = dragged.parent.children.findIndex((n) => n.id == dragged.id);
                 const removed = dragged.parent.children.splice(index, 1);
                 target.children.push(removed[0]);
                 that.refresh();
                 delete window.__tree_node_dragged;
-            });
-        }
+                const event = {
+                    type: 'move',
+                    items: [dragged],
+                    to: target,
+                    domEvent: e,
+                    userInitiated: true
+                };
+                if (onMove)
+                    onMove(event, ...args);
+            };
+            if (onBeforeMove) {
+                const event = {
+                    type: 'move',
+                    items: [dragged],
+                    to: target,
+                    domEvent: e,
+                    userInitiated: true
+                };
+                onBeforeMove(event, resolve);
+            }
+            else {
+                resolve();
+            }
+        });
         let handled = false;
         // Show/hide children
         if (isParent) {
@@ -5272,15 +5308,21 @@ class NodeTree {
                 else {
                     node.closed = !node.closed;
                 }
-                if (that.onevent) {
-                    const event = new TreeEvent(TreeEvent.NODE_CARETCHANGED, node, node.closed, e);
-                    that.onevent(event);
+                const onCaretChanged = that._callbacks['caretChanged'];
+                if (onCaretChanged !== undefined) {
+                    const event = {
+                        type: 'caret',
+                        items: [node],
+                        domEvent: e,
+                        userInitiated: true
+                    };
+                    onCaretChanged(event);
                 }
                 that.frefresh(node.id);
             });
         }
         // Add button icons
-        const inputContainer = document.createElement('div');
+        const inputContainer = LX.makeElement('div', 'flex flex-row ml-auto mr-2');
         item.appendChild(inputContainer);
         if (node.actions) {
             for (let i = 0; i < node.actions.length; ++i) {
@@ -5290,15 +5332,8 @@ class NodeTree {
                     if (action.callback) {
                         action.callback(node, swapValue, event);
                     }
-                }, { icon: action.icon, swap: action.swap, title: action.name, hideName: true, className: 'p-0 m-0',
-                    buttonClass: 'p-0 m-0 bg-none no-h' });
-                actionBtn.root.style.minWidth = 'fit-content';
-                actionBtn.root.style.margin = '0'; // adding classes does not work
-                actionBtn.root.style.padding = '0'; // adding classes does not work
-                const _btn = actionBtn.root.querySelector('button');
-                _btn.style.minWidth = 'fit-content';
-                _btn.style.margin = '0'; // adding classes does not work
-                _btn.style.padding = '0'; // adding classes does not work
+                }, { icon: action.icon, swap: action.swap, title: action.name, hideName: true, className: 'p-0 min-h-fit',
+                    buttonClass: 'px-0 h-full bg-none' });
                 inputContainer.appendChild(actionBtn.root);
             }
         }
@@ -5306,13 +5341,18 @@ class NodeTree {
             const visibilityBtn = new Button(null, '', (swapValue, e) => {
                 e.stopPropagation();
                 node.visible = node.visible === undefined ? false : !node.visible;
-                // Trigger visibility event
-                if (that.onevent) {
-                    const event = new TreeEvent(TreeEvent.NODE_VISIBILITY, node, node.visible, e);
-                    that.onevent(event);
+                const onVisibleChanged = this._callbacks['visibleChanged'];
+                if (onVisibleChanged !== undefined) {
+                    const event = {
+                        type: 'visibility',
+                        items: [node],
+                        domEvent: e,
+                        userInitiated: true
+                    };
+                    onVisibleChanged(event);
                 }
-            }, { icon: node.visible ? 'Eye' : 'EyeOff', swap: node.visible ? 'EyeOff' : 'Eye', title: 'Toggle visible',
-                className: 'p-0 m-0', buttonClass: 'bg-none' });
+            }, { icon: node.visible ? 'Eye' : 'EyeOff', swap: node.visible ? 'EyeOff' : 'Eye', title: 'Toggle visible', className: 'p-0 min-h-fit',
+                buttonClass: 'px-0 h-full bg-none' });
             inputContainer.appendChild(visibilityBtn.root);
         }
         const _hasChild = function (node, id) {
@@ -5375,6 +5415,15 @@ class NodeTree {
         this.selected = [el.treeData];
         el.focus();
     }
+    deleteNodes(nodes) {
+        const nodesDeleted = [];
+        for (const n of nodes) {
+            if (this.deleteNode(n)) {
+                nodesDeleted.push(n);
+            }
+        }
+        return nodesDeleted;
+    }
     deleteNode(node) {
         const dataAsArray = this.data.constructor === Array;
         // Can be either Array or Object type data
@@ -5407,16 +5456,11 @@ class Tree extends BaseComponent {
     constructor(name, data, options = {}) {
         options.hideName = true;
         super(ComponentType.TREE, name, null, options);
-        let container = document.createElement('div');
-        container.className = 'lextree';
-        this.root.appendChild(container);
+        let container = LX.makeElement('div', 'lextree p-1 rounded-lg w-full my-0 mx-auto font-medium text-sm min-h-3', '', this.root);
         if (name) {
-            let title = document.createElement('span');
-            title.innerHTML = name;
-            container.appendChild(title);
+            LX.makeElement('span', 'block p-1 select-none text-base font-medium whitespace-nowrap', name, container);
         }
-        let toolsDiv = document.createElement('div');
-        toolsDiv.className = 'lextreetools';
+        let toolsDiv = LX.makeElement('div', 'lextreetools flex items-center bg-secondary px-2 rounded-lg gap-2 my-1');
         if (!name) {
             toolsDiv.className += ' notitle';
         }
@@ -5447,12 +5491,19 @@ class Tree extends BaseComponent {
             container.appendChild(toolsDiv);
         }
         // Tree
-        let list = document.createElement('ul');
+        let list = LX.makeElement('ul', 'flex flex-col gap-1 ps-0');
         list.addEventListener('contextmenu', function (e) {
             e.preventDefault();
         });
         container.appendChild(list);
         this.innerTree = new NodeTree(container, data, options);
+    }
+    /**
+     * @method on
+     * @description Stores an event callback for the desired action
+     */
+    on(eventName, callback) {
+        this.innerTree._callbacks[eventName] = callback;
     }
 }
 LX.Tree = Tree;
@@ -5478,7 +5529,7 @@ class OTPInput extends BaseComponent {
             value = newValue;
             _refreshInput(value);
             if (!skipCallback) {
-                this._trigger(new IEvent(name, +newValue, event), callback);
+                this._trigger(new IEvent(name, newValue, event), callback);
             }
         };
         this.onResize = (rect) => {
@@ -5499,7 +5550,7 @@ class OTPInput extends BaseComponent {
                 for (let j = 0; j < g.length; ++j) {
                     let number = valueString[itemsCount++];
                     number = number == 'x' ? '' : number;
-                    const slotDom = LX.makeContainer(['36px', '30px'], 'lexotpslot border-top border-bottom border-left px-3 cursor-text select-none font-medium outline-none', number, container);
+                    const slotDom = LX.makeContainer(['36px', '30px'], 'lexotpslot border-t-color border-b-color border-l-color px-3 cursor-text select-none font-medium outline-none', number, container);
                     slotDom.tabIndex = '1';
                     if (this.disabled) {
                         slotDom.classList.add('disabled');
@@ -5509,7 +5560,7 @@ class OTPInput extends BaseComponent {
                         slotDom.className += ' rounded-l';
                     }
                     else if (j == (g.length - 1)) {
-                        slotDom.className += ' rounded-r border-right';
+                        slotDom.className += ' rounded-r border-r-color';
                     }
                     slotDom.addEventListener('click', () => {
                         if (this.disabled)
@@ -5691,13 +5742,10 @@ class Progress extends BaseComponent {
             const realNameWidth = this.root.domName?.style.width ?? '0px';
             container.style.width = `calc( 100% - ${realNameWidth})`;
         };
-        const container = document.createElement('div');
-        container.className = 'lexprogress';
-        this.root.appendChild(container);
+        const container = LX.makeElement('div', 'flex justify-center items-center gap-2', '', this.root);
         // add slider (0-1 if not specified different )
-        let progress = document.createElement('meter');
+        let progress = LX.makeElement('meter', 'lexprogressbar outline-none rounded-lg select-none');
         progress.id = 'lexprogressbar-' + name;
-        progress.className = 'lexprogressbar';
         progress.step = 'any';
         progress.min = options.min ?? 0;
         progress.max = options.max ?? 1;
@@ -5707,12 +5755,12 @@ class Progress extends BaseComponent {
         progress.value = value;
         container.appendChild(progress);
         const _updateColor = () => {
-            let backgroundColor = LX.getThemeColor('global-selected');
+            let backgroundColor = LX.getCSSVariable('blue-500');
             if (progress.low != undefined && progress.value < progress.low) {
-                backgroundColor = LX.getThemeColor('global-color-error');
+                backgroundColor = LX.getCSSVariable('destructive');
             }
             else if (progress.high != undefined && progress.value < progress.high) {
-                backgroundColor = LX.getThemeColor('global-color-warning');
+                backgroundColor = LX.getCSSVariable('warning');
             }
             progress.style.background = `color-mix(in srgb, ${backgroundColor} 20%, transparent)`;
         };
@@ -5721,11 +5769,8 @@ class Progress extends BaseComponent {
             if (oldSpan) {
                 oldSpan.remove();
             }
-            let span = document.createElement('span');
+            let span = LX.makeElement('span', 'w-12 flex-auto-keep text-center', value, container);
             span.id = 'progressvalue-' + name;
-            span.style.padding = '0px 5px';
-            span.innerText = value;
-            container.appendChild(span);
         }
         if (options.editable ?? false) {
             progress.classList.add('editable');
@@ -5795,14 +5840,13 @@ class RadioGroup extends BaseComponent {
             }
         };
         var container = document.createElement('div');
-        container.className = 'lexradiogroup ' + (options.className ?? '');
+        container.className = LX.mergeClass('lexradiogroup flex flex-col', options.className);
         this.root.appendChild(container);
-        let labelSpan = document.createElement('span');
-        labelSpan.innerHTML = label;
-        container.appendChild(labelSpan);
+        // Make label
+        LX.makeElement('span', 'font-medium mb-2', label, container);
         for (let i = 0; i < values.length; ++i) {
             const optionItem = document.createElement('div');
-            optionItem.className = 'lexradiogroupitem';
+            optionItem.className = 'lexradiogroupitem flex items-center gap-2 px-6 py-1';
             container.appendChild(optionItem);
             const optionButton = document.createElement('button');
             optionButton.className = 'flex p-0 rounded-lg cursor-pointer';
@@ -5910,11 +5954,10 @@ class RangeInput extends BaseComponent {
             }
         };
         const container = document.createElement('div');
-        container.className = 'lexrange relative';
+        container.className = 'lexrange relative py-3';
         this.root.appendChild(container);
         let slider = document.createElement('input');
-        slider.className = 'lexrangeslider ' + (isRangeValue ? 'pointer-events-none ' : '')
-            + (options.className ?? '');
+        slider.className = LX.mergeClass('lexrangeslider' + (isRangeValue ? ' range pointer-events-none' : ''), options.className);
         slider.min = options.min ?? 0;
         slider.max = options.max ?? 100;
         slider.step = options.step ?? 1;
@@ -5968,15 +6011,12 @@ class RangeInput extends BaseComponent {
                 const remapped = LX.remapRange(value, options.min, options.max, 0, 1) * 0.5;
                 offsetX = container.offsetWidth * remapped - (container.offsetWidth * 0.5);
             }
-            LX.asTooltip(container, `${value}${isRangeValue ? `- ${ogValue[1]}` : ``}`, { offsetX,
-                callback: (tpDom) => {
+            LX.asTooltip(container, `${value}${isRangeValue ? `- ${ogValue[1]}` : ``}`, { offsetX, callback: (tpDom) => {
                     this._labelTooltip = tpDom;
                 } });
         });
-        if (ogValue.constructor == Array) { // Its a range value
-            let maxSlider = document.createElement('input');
-            maxSlider.className = 'lexrangeslider no-fill pointer-events-none overlap absolute top-0 left-0 '
-                + (options.className ?? '');
+        if (ogValue.constructor == Array) {
+            let maxSlider = LX.makeElement('input', LX.mergeClass('lexrangeslider no-fill pointer-events-none overlap absolute left-0', options.className));
             maxSlider.min = options.min ?? 0;
             maxSlider.max = options.max ?? 100;
             maxSlider.step = options.step ?? 1;
@@ -6041,7 +6081,7 @@ class Rate extends BaseComponent {
         }, false);
         // Create all layers of stars
         for (let i = 0; i < 5; ++i) {
-            const starIcon = LX.makeIcon('Star', { svgClass: `lg fill-current fg-secondary` });
+            const starIcon = LX.makeIcon('Star', { svgClass: `lg fill-current text-accent` });
             starIcon.dataset['idx'] = i + 1;
             starsContainer.appendChild(starIcon);
             starIcon.addEventListener('click', (e) => {
@@ -6050,9 +6090,9 @@ class Rate extends BaseComponent {
                 const half = allowHalf && e.offsetX < (rect.width * 0.5);
                 this.set(parseFloat(star.dataset['idx']) - (half ? 0.5 : 0.0));
             }, false);
-            const filledStarIcon = LX.makeIcon('Star', { svgClass: `lg fill-current fg-yellow-500` });
+            const filledStarIcon = LX.makeIcon('Star', { svgClass: `lg fill-current text-yellow-400` });
             filledStarsContainer.appendChild(filledStarIcon);
-            const halfStarIcon = LX.makeIcon('StarHalf', { svgClass: `lg fill-current fg-yellow-500` });
+            const halfStarIcon = LX.makeIcon('StarHalf', { svgClass: `lg fill-current text-yellow-400` });
             halfStarsContainer.appendChild(halfStarIcon);
         }
         const _updateStars = (v) => {
@@ -6101,8 +6141,13 @@ class SizeInput extends BaseComponent {
                 this.root.dimensions[i].set(newValue[i], skipCallback);
             }
         };
+        this.onResize = (rect) => {
+            const realNameWidth = this.root.domName?.style.width ?? '0px';
+            container.style.width = `calc( 100% - ${realNameWidth})`;
+        };
         this.root.aspectRatio = value.length == 2 ? value[0] / value[1] : null;
         this.root.dimensions = [];
+        const container = LX.makeElement('div', 'flex', '', this.root);
         for (let i = 0; i < value.length; ++i) {
             const p = new LX.Panel();
             this.root.dimensions[i] = p.addNumber(null, value[i], (v) => {
@@ -6116,18 +6161,15 @@ class SizeInput extends BaseComponent {
                 if (callback) {
                     callback(value);
                 }
-            }, { min: 0, disabled: options.disabled, precision: options.precision, className: 'flex-fill' });
-            this.root.appendChild(this.root.dimensions[i].root);
+            }, { min: 0, disabled: options.disabled, precision: options.precision, className: 'flex-auto-fill' });
+            container.appendChild(this.root.dimensions[i].root);
             if ((i + 1) != value.length) {
-                const xIcon = LX.makeIcon('X', { svgClass: 'fg-accent font-bold' });
-                this.root.appendChild(xIcon);
+                const xIcon = LX.makeIcon('X', { svgClass: 'text-foreground font-bold' });
+                container.appendChild(xIcon);
             }
         }
         if (options.units) {
-            let unitSpan = document.createElement('span');
-            unitSpan.className = 'select-none fg-tertiary font-medium';
-            unitSpan.innerText = options.units;
-            this.root.appendChild(unitSpan);
+            LX.makeElement('span', 'text-muted-foreground align-center content-center font-medium flex-auto-keep select-none', options.units, container);
         }
         // Lock aspect ratio
         if (this.root.aspectRatio) {
@@ -6138,9 +6180,10 @@ class SizeInput extends BaseComponent {
                     const value = this.value();
                     this.root.aspectRatio = value[0] / value[1];
                 }
-            }, { title: 'Lock Aspect Ratio', icon: 'LockOpen', swap: 'Lock', buttonClass: 'bg-none p-0' });
-            this.root.appendChild(lockerButton.root);
+            }, { title: 'Lock Aspect Ratio', icon: 'LockOpen', swap: 'Lock', className: 'flex-auto-keep', buttonClass: 'h-auto bg-none p-0' });
+            container.appendChild(lockerButton.root);
         }
+        LX.doAsync(this.onResize.bind(this));
     }
 }
 LX.SizeInput = SizeInput;
@@ -6185,7 +6228,7 @@ class Pagination {
         if (typeof options.onItemsPerPageChange === 'function') {
             this.onItemsPerPageChange = options.onItemsPerPageChange;
         }
-        this.root = LX.makeContainer(['auto', 'auto'], 'flex flex-row gap-2 ' + (options.className ?? ''));
+        this.root = LX.makeContainer(['auto', 'auto'], LX.mergeClass('flex flex-row gap-2', options.className));
         if (options.allowChangeItemsPerPage ?? false) {
             const itemsPerPageSelectContainer = LX.makeContainer(['auto', 'auto'], 'flex flex-row items-center', '', this.root);
             const itemsPerPageSelect = new Select(null, Pagination.ITEMS_PER_PAGE_VALUES, this._itemsPerPage, (v) => {
@@ -6222,7 +6265,7 @@ class Pagination {
     refresh() {
         this.pagesRoot.innerHTML = '';
         // Previous page button
-        this._makeButton(LX.makeIcon('ChevronLeft').innerHTML, this.page === 1, () => this.prev(), `bg-none ${this.page === 1 ? '' : 'hover:bg-tertiary'}`);
+        this._makeButton(LX.makeIcon('ChevronLeft').innerHTML, this.page === 1, () => this.prev(), `bg-none ${this.page === 1 ? '' : 'hover:bg-secondary'}`);
         const pagesContainer = LX.makeContainer(['auto', 'auto'], 'flex flex-row items-center', '', this.pagesRoot);
         const maxButtons = this._maxButtons + 2; // + next and prev
         if (this.pages <= maxButtons) {
@@ -6272,7 +6315,7 @@ class Pagination {
             }
         }
         // Next page button
-        this._makeButton(LX.makeIcon('ChevronRight').innerHTML, this.page === this.pages, () => this.next(), `bg-none ${this.page === this.pages ? '' : 'hover:bg-tertiary'}`);
+        this._makeButton(LX.makeIcon('ChevronRight').innerHTML, this.page === this.pages, () => this.next(), `bg-none ${this.page === this.pages ? '' : 'hover:bg-secondary'}`);
     }
     _emitChange() {
         // Event callback
@@ -6290,7 +6333,7 @@ class Pagination {
         return btn.root;
     }
     _makePageButton(container, i) {
-        const buttonClass = i === this.page ? 'bg-secondary border' : 'bg-none';
+        const buttonClass = `h-8 ${i === this.page ? 'primary text-primary-foreground' : 'ghost'}`;
         return this._makeButton(String(i), false, () => this.setPage(i), buttonClass, container);
     }
 }
@@ -6444,10 +6487,10 @@ class Table extends BaseComponent {
             }
             if (this.customFilters !== null) {
                 const icon = LX.makeIcon('CirclePlus', { svgClass: 'sm' });
-                const separatorHtml = `<div class="lexcontainer border-right self-center mx-1" style="width: 1px; height: 70%;"></div>`;
+                const separatorHtml = `<div class="lexcontainer border-r-color place-self-center mx-1" style="width: 1px; height: 70%;"></div>`;
                 for (let f of this.customFilters) {
                     f.component = new Button(null, icon.innerHTML + f.name, (v) => {
-                        const spanName = f.component.root.querySelector('span');
+                        const buttonRoot = f.component.root.querySelector('button');
                         if (f.options) {
                             const menuOptions = f.options.map((colName, idx) => {
                                 const item = {
@@ -6460,8 +6503,8 @@ class Table extends BaseComponent {
                                             delete this.activeCustomFilters[key];
                                         }
                                         const activeFilters = Object.keys(this.activeCustomFilters).filter((k) => this.activeCustomFilters[k] == f.name);
-                                        const filterBadgesHtml = activeFilters.reduce((acc, key) => acc += LX.badge(key, 'bg-tertiary fg-secondary text-sm border-0'), '');
-                                        spanName.innerHTML = icon.innerHTML + f.name
+                                        const filterBadgesHtml = activeFilters.reduce((acc, key) => acc += LX.badge(key, 'xs secondary'), '');
+                                        buttonRoot.innerHTML = icon.innerHTML + f.name
                                             + (activeFilters.length ? separatorHtml : '') + filterBadgesHtml;
                                         this.refresh();
                                     }
@@ -6472,9 +6515,9 @@ class Table extends BaseComponent {
                         }
                         else if (f.type == 'range') {
                             console.assert(f.min != undefined && f.max != undefined, 'Range filter needs min and max values!');
-                            const container = LX.makeContainer(['240px', 'auto'], 'text-md');
-                            const panel = new LX.Panel();
-                            LX.makeContainer(['100%', 'auto'], 'px-3 p-2 pb-0 text-md font-medium', f.name, container);
+                            const container = LX.makeContainer(['240px', 'auto'], 'text-base');
+                            const panel = new LX.Panel({ className: 'flex flex-col gap-2' });
+                            LX.makeContainer(['100%', 'auto'], 'px-3 p-2 pb-0 text-base font-medium', f.name, container);
                             f.start = f.start ?? f.min;
                             f.end = f.end ?? f.max;
                             panel.refresh = () => {
@@ -6483,9 +6526,9 @@ class Table extends BaseComponent {
                                 panel.addNumber(null, f.start, (v) => {
                                     f.start = v;
                                     const inUse = f.start != f.min || f.end != f.max;
-                                    spanName.innerHTML = icon.innerHTML + f.name + (inUse
+                                    buttonRoot.innerHTML = icon.innerHTML + f.name + (inUse
                                         ? separatorHtml
-                                            + LX.badge(`${f.start} - ${f.end} ${f.units ?? ''}`, 'bg-tertiary fg-secondary text-sm border-0')
+                                            + LX.badge(`${f.start} - ${f.end} ${f.units ?? ''}`, 'xs secondary')
                                         : '');
                                     if (inUse) {
                                         this._resetCustomFiltersBtn?.root.classList.remove('hidden');
@@ -6495,10 +6538,10 @@ class Table extends BaseComponent {
                                 panel.addNumber(null, f.end, (v) => {
                                     f.end = v;
                                     const inUse = f.start != f.min || f.end != f.max;
-                                    spanName.innerHTML = icon.innerHTML + f.name
+                                    buttonRoot.innerHTML = icon.innerHTML + f.name
                                         + (inUse
                                             ? separatorHtml
-                                                + LX.badge(`${f.start} - ${f.end} ${f.units ?? ''}`, 'bg-tertiary fg-secondary text-sm border-0')
+                                                + LX.badge(`${f.start} - ${f.end} ${f.units ?? ''}`, 'xs secondary')
                                             : '');
                                     if (inUse) {
                                         this._resetCustomFiltersBtn?.root.classList.remove('hidden');
@@ -6508,19 +6551,19 @@ class Table extends BaseComponent {
                                 panel.addButton(null, 'Reset', () => {
                                     f.start = f.min;
                                     f.end = f.max;
-                                    spanName.innerHTML = icon.innerHTML + f.name;
+                                    buttonRoot.innerHTML = icon.innerHTML + f.name;
                                     panel.refresh();
                                     this.refresh();
-                                }, { buttonClass: 'contrast' });
+                                }, { buttonClass: 'ghost' });
                             };
                             panel.refresh();
                             container.appendChild(panel.root);
                             new Popover(f.component.root, [container], { side: 'bottom' });
                         }
                         else if (f.type == 'date') {
-                            const container = LX.makeContainer(['auto', 'auto'], 'text-md');
+                            const container = LX.makeContainer(['auto', 'auto'], 'text-base');
                             const panel = new LX.Panel();
-                            LX.makeContainer(['100%', 'auto'], 'px-3 p-2 pb-0 text-md font-medium', f.name, container);
+                            LX.makeContainer(['100%', 'auto'], 'px-3 p-2 pb-0 text-base font-medium', f.name, container);
                             panel.refresh = () => {
                                 panel.clear();
                                 // Generate default value once the filter is used
@@ -6532,9 +6575,9 @@ class Table extends BaseComponent {
                                 const calendar = new CalendarRange(f.value ?? f.default, {
                                     onChange: (dateRange) => {
                                         f.value = dateRange;
-                                        spanName.innerHTML = icon.innerHTML + f.name
+                                        buttonRoot.innerHTML = icon.innerHTML + f.name
                                             + (separatorHtml
-                                                + LX.badge(`${calendar.getFullDate()}`, 'bg-tertiary fg-secondary text-sm border-0'));
+                                                + LX.badge(`${calendar.getFullDate()}`, 'xs secondary'));
                                         this._resetCustomFiltersBtn?.root.classList.remove('hidden');
                                         this.refresh();
                                     }
@@ -6545,14 +6588,14 @@ class Table extends BaseComponent {
                             container.appendChild(panel.root);
                             new Popover(f.component.root, [container], { side: 'bottom' });
                         }
-                    }, { buttonClass: 'px-2 primary dashed' });
+                    }, { buttonClass: 'sm outline dashed' });
                     headerContainer.appendChild(f.component.root);
                 }
                 this._resetCustomFiltersBtn = new Button(null, 'resetButton', () => {
                     this.activeCustomFilters = {};
                     this._resetCustomFiltersBtn?.root.classList.add('hidden');
                     for (let f of this.customFilters ?? []) {
-                        f.component.root.querySelector('span').innerHTML = icon.innerHTML + f.name;
+                        f.component.root.querySelector('button').innerHTML = icon.innerHTML + f.name;
                         if (f.type == 'range') {
                             f.start = f.min;
                             f.end = f.max;
@@ -6562,7 +6605,7 @@ class Table extends BaseComponent {
                         }
                     }
                     this.refresh();
-                }, { title: 'Reset filters', tooltip: true, icon: 'X' });
+                }, { title: 'Reset filters', tooltip: true, icon: 'X', buttonClass: 'ghost' });
                 headerContainer.appendChild(this._resetCustomFiltersBtn?.root);
                 this._resetCustomFiltersBtn?.root.classList.add('hidden');
             }
@@ -6586,15 +6629,13 @@ class Table extends BaseComponent {
                         return item;
                     });
                     LX.addDropdownMenu(e.target, menuOptions, { side: 'bottom', align: 'end' });
-                }, { hideName: true });
+                }, { hideName: true, buttonClass: 'outline' });
                 headerContainer.appendChild(toggleColumnsBtn.root);
                 toggleColumnsBtn.root.style.marginLeft = 'auto';
             }
             container.appendChild(headerContainer);
         }
-        const table = document.createElement('table');
-        LX.addClass(table, options.tableClass);
-        container.appendChild(table);
+        const table = LX.makeElement('table', options.tableClass, '', container);
         this.refresh = () => {
             this._currentFilter = this._currentFilter ?? '';
             table.innerHTML = '';
@@ -6616,7 +6657,7 @@ class Table extends BaseComponent {
                     th.style.width = '0px';
                     const input = document.createElement('input');
                     input.type = 'checkbox';
-                    input.className = 'lexcheckbox accent';
+                    input.className = 'lexcheckbox primary';
                     input.checked = data.checkMap[':root'] ?? false;
                     th.appendChild(input);
                     input.addEventListener('change', function () {
@@ -6651,8 +6692,7 @@ class Table extends BaseComponent {
                                 console.warn('Invalid column action (missing name):', action);
                                 continue;
                             }
-                            menuOptions.push({ name: action.name, icon: action.icon, className: action.className,
-                                callback: () => {
+                            menuOptions.push({ name: action.name, icon: action.icon, className: action.className, callback: () => {
                                     const colRows = this.data.body.map((row) => [row[idx]]);
                                     const mustRefresh = action.callback(colRows, table);
                                     if (mustRefresh) {
@@ -6883,7 +6923,7 @@ class Table extends BaseComponent {
                         const td = document.createElement('td');
                         const input = document.createElement('input');
                         input.type = 'checkbox';
-                        input.className = 'lexcheckbox accent';
+                        input.className = 'lexcheckbox primary';
                         input.checked = data.checkMap[rowId];
                         td.appendChild(input);
                         input.addEventListener('change', function () {
@@ -6995,7 +7035,7 @@ class Table extends BaseComponent {
             const footerContainer = LX.makeContainer(['100%', 'auto'], 'flex flex-row px-3 my-1 align-center', '', container);
             // Show num selected rows
             if (showSelected) {
-                const selectedRowsLabelContainer = LX.makeContainer(['100%', 'auto'], 'flex justify-start items-center fg-secondary', '0 row(s) selected.', footerContainer);
+                const selectedRowsLabelContainer = LX.makeContainer(['100%', 'auto'], 'flex justify-start items-center', '0 row(s) selected.', footerContainer);
                 LX.addSignal('@rows_selected_changed', (target, n) => {
                     if (!this._showSelectedNumber)
                         return;
@@ -7091,7 +7131,8 @@ class TabSections extends BaseComponent {
             let tabEl = document.createElement('div');
             tabEl.className = 'lextab ' + ((tab.selected ?? false) ? 'selected' : '');
             tabEl.innerHTML = showNames ? tab.name : '';
-            tabEl.appendChild(LX.makeIcon(tab.icon ?? 'Hash', { title: tab.name, iconClass: tab.iconClass, svgClass: tab.svgClass }));
+            tabEl.appendChild(LX.makeIcon(tab.icon ?? 'Hash', { title: tab.name, iconClass: tab.iconClass,
+                svgClass: `lg${tab.svgClass ? ' ' + tab.svgClass : ''}` }));
             this.tabDOMs[tab.name] = tabEl;
             let infoContainer = document.createElement('div');
             infoContainer.id = tab.name.replace(/\s/g, '');
@@ -7164,15 +7205,13 @@ class Tags extends BaseComponent {
         };
         // Show tags
         const tagsContainer = document.createElement('div');
-        tagsContainer.className = 'lextags';
+        tagsContainer.className = 'inline-flex flex-wrap gap-1 bg-card/50 rounded-lg pad-xs [&_input]:w-2/3';
         this.root.appendChild(tagsContainer);
         this.generateTags = (value) => {
             tagsContainer.innerHTML = '';
             for (let i = 0; i < value.length; ++i) {
                 const tagName = value[i];
-                const tag = document.createElement('span');
-                tag.className = 'lextag';
-                tag.innerHTML = tagName;
+                const tag = LX.makeElement('span', 'lextag bg-primary px-2 py-1 rounded-xl min-w-2 justify-center text-primary-foreground gap-1 text-sm select-none', tagName);
                 const removeButton = LX.makeIcon('X', { svgClass: 'sm' });
                 tag.appendChild(removeButton);
                 removeButton.addEventListener('click', (e) => {
@@ -7230,13 +7269,12 @@ class TextArea extends BaseComponent {
         container.className = 'lextextarea';
         container.style.display = 'flex';
         this.root.appendChild(container);
-        let wValue = document.createElement('textarea');
+        let wValue = LX.makeElement('textarea', options.inputClass ?? '');
         wValue.value = value ?? '';
-        wValue.className = options.inputClass ?? '';
         wValue.style.textAlign = options.float ?? '';
         Object.assign(wValue.style, options.style ?? {});
         if (options.fitHeight ?? false) {
-            wValue.classList.add('size-content');
+            wValue.classList.add('field-sizing-content');
         }
         if (!(options.resize ?? true)) {
             wValue.classList.add('resize-none');
@@ -7287,7 +7325,8 @@ class Title extends BaseComponent {
         console.assert(name.length !== 0, "Can't create Title Component without text!");
         // Note: Titles are not registered in Panel.components by now
         super(ComponentType.TITLE, null, null, options);
-        this.root.className = `lextitle ${this.root.className}`;
+        const cn = 'lextitle !w-fit bg-muted text-foreground text-sm font-semibold leading-normal m-3 flex content-center rounded-xl select-none';
+        this.root.className = LX.mergeClass(cn, options.className);
         if (options.icon) {
             let icon = LX.makeIcon(options.icon, { iconClass: 'mr-2' });
             icon.querySelector('svg').style.color = options.iconColor || '';
@@ -7296,16 +7335,14 @@ class Title extends BaseComponent {
         let text = document.createElement('span');
         text.innerText = name;
         this.root.appendChild(text);
-        Object.assign(this.root.style, options.style ?? {});
         if (options.link != undefined) {
-            let linkDom = document.createElement('a');
-            linkDom.innerText = name;
+            let linkDom = LX.makeElement('a', `${cn} link`, name);
             linkDom.href = options.link;
             linkDom.target = options.target ?? '';
-            linkDom.className = 'lextitle link';
-            Object.assign(linkDom.style, options.style ?? {});
             this.root.replaceWith(linkDom);
+            this.root = linkDom;
         }
+        Object.assign(this.root.style, options.style ?? {});
     }
 }
 LX.Title = Title;
@@ -7340,25 +7377,23 @@ class Toggle extends BaseComponent {
             container.style.width = options.inputWidth ?? `calc( 100% - ${realNameWidth})`;
         };
         var container = document.createElement('div');
-        container.className = 'lextogglecont';
+        container.className = 'flex flex-row gap-2 items-center';
         this.root.appendChild(container);
-        let toggle = document.createElement('input');
+        let toggle = LX.makeElement('input', LX.mergeClass('lextoggle relative inline-grid place-content-center cursor-pointer shrink-0 select-none', options.className));
         toggle.type = 'checkbox';
-        toggle.className = 'lextoggle ' + (options.className ?? '');
         toggle.checked = value;
         toggle.iValue = value;
         toggle.disabled = options.disabled ?? false;
         container.appendChild(toggle);
         let valueName = document.createElement('span');
-        valueName.className = 'toggletext';
+        valueName.className = 'font-medium w-full overflow-hidden truncate';
         valueName.innerHTML = options.label ?? 'On';
         container.appendChild(valueName);
         toggle.addEventListener('change', (e) => {
             this.set(toggle.checked, false, e);
         });
         if (options.suboptions) {
-            let suboptions = document.createElement('div');
-            suboptions.className = 'lextogglesubmenu';
+            let suboptions = LX.makeElement('div', 'lextogglesubmenu w-full p-2');
             suboptions.toggleAttribute('hidden', !toggle.checked);
             const suboptionsPanel = new LX.Panel();
             suboptionsPanel.queue(suboptions);
@@ -7377,6 +7412,7 @@ LX.Toggle = Toggle;
  * @description Vector Component
  */
 class Vector extends BaseComponent {
+    locked = false;
     setLimits;
     constructor(numComponents, name, value, callback, options = {}) {
         numComponents = LX.clamp(numComponents, 2, 4);
@@ -7412,7 +7448,7 @@ class Vector extends BaseComponent {
         this.setLimits = (newMin, newMax, newStep) => { };
         const vectorInputs = [];
         var container = document.createElement('div');
-        container.className = 'lexvector';
+        container.className = 'lexvector flex';
         this.root.appendChild(container);
         this.disabled = options.disabled ?? false;
         const that = this;
@@ -7451,7 +7487,7 @@ class Vector extends BaseComponent {
                     mult = 10;
                 else if (e.altKey)
                     mult = 0.1;
-                if (lockerButton.locked) {
+                if (that.locked) {
                     for (let v of vectorInputs) {
                         v.value = LX.round(+v.valueAsNumber - mult * (e.deltaY > 0 ? 1 : -1), options.precision);
                         BaseComponent._dispatchEvent(v, 'change');
@@ -7468,7 +7504,7 @@ class Vector extends BaseComponent {
                 }
                 let val = LX.clamp(e.target.value, +vecinput.min, +vecinput.max);
                 val = LX.round(val, options.precision);
-                if (lockerButton.locked) {
+                if (this.locked) {
                     for (let v of vectorInputs) {
                         v.value = val;
                         value[v.idx] = val;
@@ -7507,7 +7543,7 @@ class Vector extends BaseComponent {
                         mult = 10;
                     else if (e.altKey)
                         mult = 0.1;
-                    if (lockerButton.locked) {
+                    if (that.locked) {
                         for (let v of vectorInputs) {
                             v.value = LX.round(+v.valueAsNumber + mult * dt, options.precision);
                             BaseComponent._dispatchEvent(v, 'change');
@@ -7548,10 +7584,12 @@ class Vector extends BaseComponent {
                 this.set(value, true);
             };
         }
-        const lockerButton = new Button(null, '', (swapValue) => {
-            lockerButton.locked = swapValue;
-        }, { title: 'Lock', icon: 'LockOpen', swap: 'Lock', buttonClass: 'no-h bg-none p-0' });
-        container.appendChild(lockerButton.root);
+        if (!options.skipLock) {
+            const lockerButton = new Button(null, '', (swapValue) => {
+                this.locked = swapValue;
+            }, { title: 'Lock', icon: 'LockOpen', swap: 'Lock', buttonClass: 'h-auto bg-none p-0' });
+            container.appendChild(lockerButton.root);
+        }
         LX.doAsync(this.onResize.bind(this));
     }
 }
@@ -7574,22 +7612,17 @@ class Branch {
     constructor(name, options = {}) {
         this.name = name;
         var root = document.createElement('div');
-        root.className = 'lexbranch';
         if (options.id) {
             root.id = options.id;
         }
-        if (options.className) {
-            root.className += ' ' + options.className;
-        }
-        root.style.margin = '0 auto';
+        root.className = LX.mergeClass('lexbranch w-full rounded-lg my-0 mx-auto', options.className);
         var that = this;
         this.closed = options.closed ?? false;
         this.root = root;
         this.components = [];
         this.panel = null;
         // Create element
-        const title = document.createElement('div');
-        title.className = 'lexbranchtitle';
+        const title = LX.makeElement('div', 'lexbranchtitle flex cursor-pointer select-none pad-lg bg-card text-card-foreground text-lg', '', root);
         if (options.icon) {
             const branchIcon = LX.makeIcon(options.icon, { iconClass: 'mr-2' });
             title.appendChild(branchIcon);
@@ -7597,11 +7630,8 @@ class Branch {
         title.innerHTML += name || 'Branch';
         const collapseIcon = LX.makeIcon('Right', { iconClass: 'switch-branch-button', svgClass: 'sm' });
         title.appendChild(collapseIcon);
-        root.appendChild(title);
-        var branchContent = document.createElement('div');
+        var branchContent = LX.makeElement('div', 'lexbranchcontent pad-xs bg-card', '', root);
         branchContent.id = name.replace(/\s/g, '');
-        branchContent.className = 'lexbranchcontent';
-        root.appendChild(branchContent);
         this.content = branchContent;
         this._addBranchSeparator();
         if (this.closed) {
@@ -7756,13 +7786,9 @@ class Panel {
      * style: CSS Style object to be applied to the panel
      */
     constructor(options = {}) {
-        var root = document.createElement('div');
-        root.className = 'lexpanel';
+        const root = LX.makeElement('div', LX.mergeClass('lexpanel m-0 pad-md overflow-hidden overflow-y-scroll text-foreground scrollbar-hidden', options.className));
         if (options.id) {
             root.id = options.id;
-        }
-        if (options.className) {
-            root.className += ' ' + options.className;
         }
         root.style.width = options.width || '100%';
         root.style.height = options.height || '100%';
@@ -7817,8 +7843,7 @@ class Panel {
                 const signal = this.components[w].options.signal;
                 for (let i = 0; i < LX.signals[signal].length; i++) {
                     if (LX.signals[signal][i] == this.components[w]) {
-                        LX.signals[signal] = [...LX.signals[signal].slice(0, i),
-                            ...LX.signals[signal].slice(i + 1)];
+                        LX.signals[signal] = [...LX.signals[signal].slice(0, i), ...LX.signals[signal].slice(i + 1)];
                     }
                 }
             }
@@ -7829,8 +7854,7 @@ class Panel {
                 let signal = c.options.signal;
                 for (let i = 0; i < LX.signals[signal].length; i++) {
                     if (LX.signals[signal][i] == c) {
-                        LX.signals[signal] = [...LX.signals[signal].slice(0, i),
-                            ...LX.signals[signal].slice(i + 1)];
+                        LX.signals[signal] = [...LX.signals[signal].slice(0, i), ...LX.signals[signal].slice(i + 1)];
                     }
                 }
             }
@@ -8163,7 +8187,7 @@ class Panel {
      */
     addLabel(value, options = {}) {
         options.disabled = true;
-        options.inputClass = (options.inputClass ?? '') + ' bg-none';
+        options.inputClass = LX.mergeClass('bg-none', options.inputClass);
         const component = this.addText(null, value, null, options);
         component.type = ComponentType.LABEL;
         return component;
@@ -8225,7 +8249,7 @@ class Panel {
      * @param {Function} callback Callback function on submit form
      * @param {Object} options:
      * primaryActionName: Text to be shown in the primary action button ['Submit']
-     * primaryButtonClass: Button class for primary action button ['contrast']
+     * primaryButtonClass: Button class for primary action button ['primary']
      * secondaryActionName: Text to be shown in the secondary action button ['Cancel']
      * secondaryActionCallback: Callback function on press secondary button
      * secondaryButtonClass: Button class for secondary action button ['primary']
@@ -8700,11 +8724,10 @@ class AreaOverlayButtons {
         this._buildButtons(buttonsArray, options);
     }
     _buildButtons(buttonsArray, options = {}) {
-        options.className = 'lexoverlaybuttons';
+        options.className = 'lexoverlaybuttons flex justify-start gap-2 bg-card m-2 p-1 rounded-2xl border-color';
         let overlayPanel = this.area.addPanel(options);
         let overlayGroup = null;
-        const container = document.createElement('div');
-        container.className = 'lexoverlaybuttonscontainer';
+        const container = LX.makeElement('div', 'lexoverlaybuttonscontainer absolute flex top-0 w-full pointer-events-none');
         container.appendChild(overlayPanel.root);
         this.area.attach(container);
         const float = options.float;
@@ -8746,6 +8769,7 @@ class AreaOverlayButtons {
                 icon: b.icon,
                 img: b.img,
                 className: b.class ?? '',
+                buttonClass: b.buttonClass ?? 'x', // Avoid using default outline
                 title: b.name,
                 overflowContainerX: overlayPanel.root,
                 swap: b.swap
@@ -8753,7 +8777,7 @@ class AreaOverlayButtons {
             if (group) {
                 if (!overlayGroup) {
                     overlayGroup = document.createElement('div');
-                    overlayGroup.className = 'lexoverlaygroup';
+                    overlayGroup.className = 'lexoverlaygroup flex flex-none bg-secondary rounded-xl';
                     overlayPanel.queuedContainer = overlayGroup;
                 }
                 _options.parent = overlayGroup;
@@ -8862,13 +8886,10 @@ class Area {
     _root;
     constructor(options = {}) {
         var root = document.createElement('div');
-        root.className = 'lexarea';
         if (options.id) {
             root.id = options.id;
         }
-        if (options.className) {
-            root.className += ' ' + options.className;
-        }
+        root.className = LX.mergeClass('lexarea m-0 bg-background text-foreground', options.className);
         var width = options.width || '100%';
         var height = options.height || '100%';
         // This has default options..
@@ -9032,8 +9053,7 @@ class Area {
             const type = layout.type ?? 'horizontal';
             const resize = layout.resize ?? true;
             const minimizable = layout.minimizable ?? false;
-            const [splitA, splitB] = area.split({ type, resize, minimizable,
-                sizes: [layout.splits[0].size, layout.splits[1].size] });
+            const [splitA, splitB] = area.split({ type, resize, minimizable, sizes: [layout.splits[0].size, layout.splits[1].size] });
             _splitArea(splitA, layout.splits[0]);
             _splitArea(splitB, layout.splits[1]);
         };
@@ -9133,8 +9153,7 @@ class Area {
         // Create areas
         let area1 = new Area({ width: primarySize[0], height: primarySize[1], skipAppend: true,
             className: 'split' + (options.menubar || options.sidebar ? '' : ' origin') });
-        let area2 = new Area({ width: secondarySize[0], height: secondarySize[1], skipAppend: true,
-            className: 'split' });
+        let area2 = new Area({ width: secondarySize[0], height: secondarySize[1], skipAppend: true, className: 'split' });
         /*
             If the parent area is not in the DOM, we need to wait for the resize event to get the its correct size
             and set the sizes of the split areas accordingly.
@@ -9406,16 +9425,15 @@ class Area {
     addMenubar(items, options = {}) {
         let menubar = new Menubar(items, options);
         LX.menubars.push(menubar);
-        const [bar, content] = this.split({ type: 'vertical', sizes: ['48px', null], resize: false,
-            menubar: true });
+        const [bar, content] = this.split({ type: 'vertical', sizes: ['48px', null], resize: false, menubar: true });
         menubar.siblingArea = content;
         bar.attach(menubar);
         bar.isMenubar = true;
         if (options.sticky ?? true) {
-            bar.root.className += ' sticky top-0 z-1000';
+            bar.root.className += ' sticky top-0 z-100';
         }
         if (options.parentClass) {
-            bar.root.className += ` ${options.parentClass}`;
+            bar.root.className = LX.mergeClass(bar.root.className, options.parentClass);
         }
         return menubar;
     }
@@ -9445,7 +9463,7 @@ class Area {
         bar.attach(sidebar);
         bar.isSidebar = true;
         if (options.parentClass) {
-            bar.root.className += ` ${options.parentClass}`;
+            bar.root.className = LX.mergeClass(bar.root.className, options.parentClass);
         }
         return sidebar;
     }
@@ -9574,6 +9592,17 @@ class Area {
 LX.Area = Area;
 
 // Utils.ts @jxarco
+// @ts-ignore
+/* Add Tailwind merge utility to LX namespace EXTENDED with new LX class groups*/
+LX.twMerge = extendTailwindMerge({
+    extend: {
+        classGroups: {
+            pad: [
+                { pad: ['xs', 'sm', 'md', 'lg', 'xl', '2xl'] }
+            ]
+        }
+    }
+});
 function clamp(num, min, max) {
     return Math.min(Math.max(num, min), max);
 }
@@ -9664,7 +9693,7 @@ function getSupportedDOMName(text) {
     console.assert(typeof text == 'string', 'getSupportedDOMName: Text is not a string!');
     let name = text.trim();
     // Replace specific known symbols
-    name = name.replace(/@/g, '_at_').replace(/\+/g, '_plus_').replace(/\./g, '_dot_');
+    name = name.replace(/\//g, '_slash_').replace(/@/g, '_at_').replace(/\+/g, '_plus_').replace(/\./g, '_dot_');
     name = name.replace(/[^a-zA-Z0-9_-]/g, '_');
     // prefix with an underscore if needed
     if (/^[0-9]/.test(name)) {
@@ -9798,45 +9827,57 @@ function concatTypedArray(arrays, ArrayType) {
 }
 LX.concatTypedArray = concatTypedArray;
 /**
- * @method setTheme
- * @description Set dark or light theme
+ * @method setThemeColor
+ * @description Set colored theme
+ * @param {String} colorThemeName Name of the color
+ */
+function setThemeColor(colorThemeName) {
+    document.documentElement.className = `theme-${colorThemeName}`;
+    const colorScheme = LX.getMode();
+    document.documentElement.classList.toggle('dark', colorScheme == 'dark');
+}
+LX.setThemeColor = setThemeColor;
+/**
+ * @method setMode
+ * @description Set dark or light scheme mode
  * @param {String} colorScheme Name of the scheme
  * @param {Boolean} storeLocal Store in localStorage
  */
-function setTheme(colorScheme, storeLocal = true) {
+function setMode(colorScheme, storeLocal = true) {
     colorScheme = (colorScheme == 'light') ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', colorScheme);
+    document.documentElement.setAttribute('data-mode', colorScheme);
+    document.documentElement.classList.toggle('dark', colorScheme == 'dark');
     if (storeLocal)
         localStorage.setItem('lxColorScheme', colorScheme);
     LX.emitSignal('@on_new_color_scheme', colorScheme);
 }
-LX.setTheme = setTheme;
+LX.setMode = setMode;
 /**
- * @method getTheme
+ * @method getMode
  * @description Gets either "dark" or "light" theme value
  */
-function getTheme() {
-    return document.documentElement.getAttribute('data-theme') ?? 'dark';
+function getMode() {
+    return document.documentElement.getAttribute('data-mode') ?? 'dark';
 }
-LX.getTheme = getTheme;
+LX.getMode = getMode;
 /**
- * @method switchTheme
+ * @method switchMode
  * @description Toggles between "dark" and "light" themes
  */
-function switchTheme() {
-    const currentTheme = getTheme();
-    setTheme(currentTheme == 'dark' ? 'light' : 'dark');
+function switchMode() {
+    const currentTheme = getMode();
+    setMode(currentTheme == 'dark' ? 'light' : 'dark');
 }
-LX.switchTheme = switchTheme;
+LX.switchMode = switchMode;
 /**
- * @method setSystemTheme
+ * @method setSystemMode
  * @description Sets back the system theme
  */
-function setSystemTheme() {
+function setSystemMode() {
     const currentTheme = (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches)
         ? 'light'
         : 'dark';
-    setTheme(currentTheme);
+    setMode(currentTheme);
     localStorage.removeItem('lxColorScheme');
     // Reapply listener
     if (LX._mqlPrefersDarkScheme) {
@@ -9844,39 +9885,55 @@ function setSystemTheme() {
         LX._mqlPrefersDarkScheme.addEventListener('change', LX._onChangeSystemTheme);
     }
 }
-LX.setSystemTheme = setSystemTheme;
+LX.setSystemMode = setSystemMode;
 /**
- * @method setThemeColor
- * @description Sets a new value for one of the main theme variables
- * @param {String} colorName Name of the theme variable
- * @param {String} color Color in rgba/hex
+ * @method setCSSVariable
+ * @description Sets a new value for one of the CSS root variables
+ * @param {String} varName Name of the CSS variable
+ * @param {String} value
  */
-function setThemeColor(colorName, color) {
+function setCSSVariable(varName, value) {
     const r = document.querySelector(':root');
-    r.style.setProperty('--' + colorName, color);
+    r.style.setProperty('--' + varName, value);
 }
-LX.setThemeColor = setThemeColor;
+LX.setCSSVariable = setCSSVariable;
 /**
- * @method getThemeColor
- * @description Get the value for one of the main theme variables
- * @param {String} colorName Name of the theme variable
+ * @method getCSSVariable
+ * @description Get the value for one of the CSS root variables
+ * @param {String} varName Name of the CSS variable
  */
-function getThemeColor(colorName) {
+function getCSSVariable(varName) {
+    const [name, opacity] = varName.split('/');
     const r = document.querySelector(':root');
     const s = getComputedStyle(r);
-    const value = s.getPropertyValue('--' + colorName);
+    let value = s.getPropertyValue('--' + name);
+    if (!value)
+        return '';
     if (value.includes('light-dark')) {
         const currentScheme = s.getPropertyValue('color-scheme');
         if (currentScheme == 'light') {
-            return value.substring(value.indexOf('(') + 1, value.indexOf(',')).replace(/\s/g, '');
+            value = value.substring(value.indexOf('(') + 1, value.indexOf(',')).replace(/\s/g, '');
         }
         else {
-            return value.substring(value.indexOf(',') + 1, value.indexOf(')')).replace(/\s/g, '');
+            value = value.substring(value.indexOf(',') + 1, value.indexOf(')')).replace(/\s/g, '');
+        }
+    }
+    if (opacity) {
+        if (value.includes('/'))
+            return value;
+        if (value.startsWith('rgb(') || value.startsWith('hsl(') || value.startsWith('oklch(')
+            || value.startsWith('lab(') || value.startsWith('lch(')) {
+            return value.replace(/\)$/, ` / ${parseFloat(opacity) / 100.0})`);
+        }
+        // Hex fallback
+        if (value.startsWith('#')) {
+            const rgba = LX.hexToRgb(value, opacity);
+            return LX.rgbToHex(rgba);
         }
     }
     return value;
 }
-LX.getThemeColor = getThemeColor;
+LX.getCSSVariable = getCSSVariable;
 /**
  * @method switchSpacing
  * @description Toggles between "default" and "compact" spacing layouts
@@ -9906,8 +9963,9 @@ LX.getBase64Image = getBase64Image;
  * @method hexToRgb
  * @description Convert a hexadecimal string to a valid RGB color
  * @param {String} hex Hexadecimal color
+ * @param {Number} hex Opacity alpha value
  */
-function hexToRgb(hex) {
+function hexToRgb(hex, alpha) {
     const hexPattern = /^#(?:[A-Fa-f0-9]{3,4}|[A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})$/;
     if (!hexPattern.test(hex)) {
         throw (`Invalid Hex Color: ${hex}`);
@@ -9923,7 +9981,7 @@ function hexToRgb(hex) {
     const b = ((bigint >> (hex.length === 8 ? 8 : 0)) & 255) / 255;
     const a = (hex.length === 8 ? (bigint & 255) : (hex.length === 4 ? parseInt(hex.slice(-2), 16) : 255))
         / 255;
-    return { r, g, b, a };
+    return { r, g, b, a: (alpha ? alpha / 100 : a) };
 }
 LX.hexToRgb = hexToRgb;
 /**
@@ -9948,12 +10006,48 @@ function rgbToHex(rgb, scale = 255) {
         rgbArray.push(rgb.a);
     return ('#'
         + rgbArray.map((c) => {
-            c = Math.floor(c * scale);
+            c = Math.floor(LX.clamp(c * scale, 0.0, scale));
             const hex = c.toString(16);
             return hex.length === 1 ? ('0' + hex) : hex;
         }).join(''));
 }
 LX.rgbToHex = rgbToHex;
+/**
+ * @method oklchToHex
+ * @description Convert a oklch color to a hexadecimal string
+ * @param {String} oklch String containing oklch color
+ */
+function oklchToHex(oklch) {
+    const match = oklch.match(/oklch\(\s*([\d.]+)%\s+([\d.]+)\s+([\d.]+)\s*\)/);
+    if (!match) {
+        console.error('Invalid OKLCH format');
+        return '#000';
+    }
+    let [, Lp, C, h] = match;
+    const L = parseFloat(Lp) / 100;
+    const H = (parseFloat(h) * Math.PI) / 180;
+    // OKLCH -> OKLab
+    const a = parseFloat(C) * Math.cos(H);
+    const b = parseFloat(C) * Math.sin(H);
+    // OKLab -> LMS
+    const l_ = L + 0.3963377774 * a + 0.2158037573 * b;
+    const m_ = L - 0.1055613458 * a - 0.0638541728 * b;
+    const s_ = L - 0.0894841775 * a - 1.2914855480 * b;
+    const l = l_ ** 3;
+    const m = m_ ** 3;
+    const s = s_ ** 3;
+    // LMS -> linear RGB
+    let r = 4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s;
+    let g = -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s;
+    let b2 = -0.0041960863 * l - 0.7034186147 * m + 1.7076147010 * s;
+    // linear RGB -> sRGB
+    const toSRGB = (x) => x <= 0.0031308 ? 12.92 * x : 1.055 * Math.pow(x, 1 / 2.4) - 0.055;
+    r = toSRGB(r);
+    g = toSRGB(g);
+    b2 = toSRGB(b2);
+    return LX.rgbToHex({ r, g, b: b2 });
+}
+LX.oklchToHex = oklchToHex;
 /**
  * @method rgbToCss
  * @description Convert a RGB color (0..1) to a CSS color format
@@ -10193,10 +10287,8 @@ function makeDraggable(domEl, options = {}) {
         const fixedOffset = isFixed ? new vec2(parentRect.x, parentRect.y) : new vec2();
         left = left ?? e.clientX - offsetX - parentRect.x;
         top = top ?? e.clientY - offsetY - parentRect.y;
-        domEl.style.left =
-            LX.clamp(left, dragMargin + fixedOffset.x, fixedOffset.x + parentRect.width - domEl.offsetWidth - dragMargin) + 'px';
-        domEl.style.top =
-            LX.clamp(top, dragMargin + fixedOffset.y, fixedOffset.y + parentRect.height - domEl.offsetHeight - dragMargin) + 'px';
+        domEl.style.left = LX.clamp(left, dragMargin + fixedOffset.x, fixedOffset.x + parentRect.width - domEl.offsetWidth - dragMargin) + 'px';
+        domEl.style.top = LX.clamp(top, dragMargin + fixedOffset.y, fixedOffset.y + parentRect.height - domEl.offsetHeight - dragMargin) + 'px';
         domEl.style.translate = 'none'; // Force remove translation
     };
     // Initial adjustment
@@ -10322,7 +10414,7 @@ function makeCodeSnippet(code, size, options = {}) {
         return;
     }
     const snippet = document.createElement('div');
-    snippet.className = 'lexcodesnippet ' + (options.className ?? '');
+    snippet.className = LX.mergeClass('lexcodesnippet relative rounded-xl overflow-hidden', options.className);
     snippet.style.width = size ? size[0] : 'auto';
     snippet.style.height = size ? size[1] : 'auto';
     const area = new Area({ xskipAppend: true });
@@ -10331,7 +10423,7 @@ function makeCodeSnippet(code, size, options = {}) {
         disableEdition: true,
         allowAddScripts: false,
         name: options.tabName,
-        callback: (instance) => {
+        onReady: (instance) => {
             instance.setText(code, options.language ?? 'Plain Text');
             if (options.linesAdded) {
                 const code = instance.root.querySelector('.code');
@@ -10407,9 +10499,10 @@ function makeKbd(keys, useSpecialKeys = true, extraClass = '') {
         'ArrowRight': '→',
         'Space': '␣'
     };
-    const kbd = LX.makeContainer(['auto', 'auto'], 'flex flex-row ml-auto');
+    const kbd = LX.makeContainer(['auto', 'auto'], `text-muted-foreground font-sans text-xs inline-flex
+        ml-auto pointer-events-none select-none items-center justify-center gap-1`);
     for (const k of keys) {
-        LX.makeContainer(['auto', 'auto'], 'self-center text-xs fg-secondary select-none ' + extraClass, useSpecialKeys ? specialKeys[k] ?? k : k, kbd);
+        LX.makeContainer(['auto', 'auto'], 'bg-muted px-1 rounded-sm ' + extraClass, useSpecialKeys ? specialKeys[k] ?? k : k, kbd);
     }
     return kbd;
 }
@@ -10429,38 +10522,38 @@ function makeBreadcrumb(items, options = {}) {
     const eraseNum = items.length - maxItems;
     if (eraseNum > 0) {
         const erased = items.splice(1, eraseNum + 1);
-        const ellipsisItem = { title: '...', ellipsis: erased.map((v) => v.title).join('/') };
+        const ellipsisItem = { name: '...', ellipsis: erased.map((v) => v.name).join('/') };
         items.splice(1, 0, ellipsisItem);
     }
     for (let i = 0; i < items.length; ++i) {
         const item = items[i];
-        console.assert(item.title, 'Breadcrumb item must have a title!');
+        console.assert(item.name, 'Breadcrumb item must have a name!');
         if (i != 0) {
-            const icon = LX.makeIcon(separatorIcon, { svgClass: 'sm fg-secondary separator' });
+            const icon = LX.makeIcon(separatorIcon, { svgClass: 'sm text-foreground separator' });
             breadcrumb.appendChild(icon);
         }
-        const lastElement = i == items.length - 1;
-        const breadcrumbItem = LX.makeContainer(['auto', 'auto'], `p-1 flex flex-row gap-1 items-center ${lastElement ? '' : 'fg-secondary'}`);
+        const lastElement = i == (items.length - 1);
+        const breadcrumbItem = LX.makeContainer(['auto', 'auto'], `p-1 flex flex-row gap-1 items-center ${lastElement ? 'text-foreground' : 'text-muted-foreground'}`);
         breadcrumb.appendChild(breadcrumbItem);
-        let itemTitle = LX.makeElement('p', '', item.title);
+        let itemName = LX.makeElement('p', '', item.name);
         if (item.icon) {
             breadcrumbItem.appendChild(LX.makeIcon(item.icon, { svgClass: 'sm' }));
         }
         if (item.items !== undefined) {
-            const bDropdownTrigger = LX.makeContainer(['auto', 'auto'], `${lastElement ? '' : 'fg-secondary'}`);
+            const bDropdownTrigger = LX.makeContainer(['auto', 'auto'], `${lastElement ? 'text-foreground' : 'text-muted-foreground'}`);
             LX.listen(bDropdownTrigger, 'click', (e) => {
                 LX.addDropdownMenu(e.target, item.items, { side: 'bottom', align: 'start' });
             });
-            bDropdownTrigger.append(itemTitle);
+            bDropdownTrigger.append(itemName);
             breadcrumbItem.appendChild(bDropdownTrigger);
         }
         else if (item.url !== undefined) {
-            let itemUrl = LX.makeElement('a', `decoration-none fg-${lastElement ? 'primary' : 'secondary'}`, '', breadcrumbItem);
+            let itemUrl = LX.makeElement('a', `decoration-none hover:underline underline-offset-4 ${lastElement ? 'text-foreground' : 'text-muted-foreground'}`, '', breadcrumbItem);
             itemUrl.href = item.url;
-            itemUrl.appendChild(itemTitle);
+            itemUrl.appendChild(itemName);
         }
         else {
-            breadcrumbItem.appendChild(itemTitle);
+            breadcrumbItem.appendChild(itemName);
         }
         if (item.ellipsis) {
             LX.asTooltip(breadcrumbItem, item.ellipsis, { side: 'bottom', offset: 4 });
@@ -10482,13 +10575,15 @@ LX.makeBreadcrumb = makeBreadcrumb;
  */
 function makeIcon(iconName, options = {}) {
     let svg = null;
-    const _createIconFromSVG = (svg) => {
-        if (options.svgClass && options.svgClass.length) {
-            options.svgClass.split(' ').forEach((c) => svg.classList.add(c));
+    const _createIconFromSVG = function (svg) {
+        const cn = options.svgClass;
+        if (cn && cn.length) {
+            const mergedCn = LX.twMerge(...svg.classList, ...cn.split(' '));
+            svg.classList.remove(...svg.classList);
+            mergedCn.split(' ').forEach((c) => svg.classList.add(c));
         }
-        const icon = document.createElement('a');
+        const icon = LX.makeElement('a', LX.mergeClass('lexicon', options.iconClass));
         icon.title = options.title ?? '';
-        icon.className = 'lexicon ' + (options.iconClass ?? '');
         icon.appendChild(svg);
         svg.dataset['name'] = iconName;
         return icon;
@@ -10513,6 +10608,7 @@ function makeIcon(iconName, options = {}) {
         // Create internal icon if variant is the same as requested, there's no lucide/fallback data or if variant is "regular" (default)
         if ((requestedVariant == variant) || !lucideData || variant == 'regular') {
             svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.classList.add('text-inherit');
             svg.setAttribute('viewBox', `0 0 ${data[0]} ${data[1]}`);
             if (data[5]) {
                 const classes = data[5].svgClass;
@@ -10526,6 +10622,7 @@ function makeIcon(iconName, options = {}) {
                 });
             }
             const path = document.createElement('path');
+            path.classList.add('text-inherit');
             path.setAttribute('fill', 'currentColor');
             path.setAttribute('d', data[4]);
             svg.appendChild(path);
@@ -10652,7 +10749,6 @@ function popup(text, title, options = {}) {
         throw ('No message to show');
     }
     options.size = options.size ?? ['max-content', 'auto'];
-    options.class = 'lexpopup';
     const time = options.timeout || 3000;
     const dialog = new LX.Dialog(title, (p) => {
         p.addTextArea(null, text, null, { disabled: true, fitHeight: true });
@@ -10726,9 +10822,7 @@ function toast(title, description, options = {}) {
     }
     const nots = LX.notifications;
     console.assert(nots);
-    const toast = document.createElement('li');
-    toast.className = 'lextoast';
-    nots.prepend(toast);
+    const toast = LX.makeElement('li', 'lextoast flex flex-row relative w-full border-color overflow-hidden select-none pointer-events-auto touch-none rounded-lg p-3', '', nots);
     const [positionVertical, positionHorizontal] = options.position
         ? options.position.split('-')
         : ['bottom', 'right'];
@@ -10757,6 +10851,7 @@ function toast(title, description, options = {}) {
             break;
         case 'center':
             nots.style.placeSelf = 'center';
+            nots.style.justifySelf = 'anchor-center';
             break;
         case 'right':
             nots.style.right = '1rem';
@@ -10771,18 +10866,10 @@ function toast(title, description, options = {}) {
         }
         toast.dataset['open'] = true;
     }, 10);
-    const content = document.createElement('div');
-    content.className = 'lextoastcontent';
-    toast.appendChild(content);
-    const titleContent = document.createElement('div');
-    titleContent.className = 'title';
-    titleContent.innerHTML = title;
-    content.appendChild(titleContent);
+    const content = LX.makeElement('div', 'grid h-fit max-w-lg gap-1 items-center mr-6 [&_div]:truncate [&_svg]:shrink-0', '', toast);
+    LX.makeElement('div', 'flex flex-row gap-2 text-sm text-foreground items-center min-w-0', title, content);
     if (description) {
-        const desc = document.createElement('div');
-        desc.className = 'desc';
-        desc.innerHTML = description;
-        content.appendChild(desc);
+        LX.makeElement('div', 'text-secondary-foreground text-xs', description, content);
     }
     if (options.action) {
         const panel = new Panel();
@@ -10790,7 +10877,7 @@ function toast(title, description, options = {}) {
             width: 'auto',
             maxWidth: '150px',
             className: 'right',
-            buttonClass: 'border'
+            buttonClass: 'outline sm'
         });
         toast.appendChild(panel.root.childNodes[0]);
     }
@@ -10805,7 +10892,7 @@ function toast(title, description, options = {}) {
         }, 500);
     };
     if (options.closable ?? true) {
-        const closeIcon = LX.makeIcon('X', { iconClass: 'closer' });
+        const closeIcon = LX.makeIcon('X', { iconClass: 'absolute top-2 right-2 text-sm' });
         closeIcon.addEventListener('click', () => {
             toast.close();
         });
@@ -10830,13 +10917,12 @@ LX.toast = toast;
 function badge(text, className, options = {}) {
     const container = document.createElement('div');
     container.innerHTML = text;
-    container.className = 'lexbadge ' + (className ?? '');
-    if (options.chip) {
-        container.classList.add('chip');
-    }
+    const cn = ['lexbadge', 'inline-flex', 'items-center', 'justify-center', 'rounded-full', 'border', 'px-2', 'py-0.5', 'text-xs', 'font-medium',
+        'w-fit', 'whitespace-nowrap', 'shrink-0', 'overflow-hidden', 'border-transparent', 'gap-1', 'min-w-5', 'bg-card text-foreground'];
+    container.className = className ? LX.twMerge(...cn, ...className.split(' ')) : cn.join(' ');
     Object.assign(container.style, options.style ?? {});
     if (options.callback) {
-        const arrowIcon = LX.makeIcon('ArrowUpRight', { svgClass: 'xs fg-contrast' });
+        const arrowIcon = LX.makeIcon('ArrowUpRight', { svgClass: 'xs' });
         arrowIcon.querySelector('svg').style.marginLeft = '-0.25rem';
         container.innerHTML += arrowIcon.innerHTML;
         container.addEventListener('click', (e) => {
@@ -10915,9 +11001,7 @@ function asTooltip(trigger, content, options = {}) {
         if (trigger.dataset['disableTooltip'] == 'true') {
             return;
         }
-        tooltipDom = document.createElement('div');
-        tooltipDom.className = 'lextooltip';
-        tooltipDom.innerHTML = trigger.dataset['tooltipContent'] ?? content;
+        tooltipDom = LX.makeElement('div', 'lextooltip fixed bg-secondary-foreground text-secondary text-xs px-2 py-1 rounded-lg pointer-events-none data-closed:opacity-0', trigger.dataset['tooltipContent'] ?? content);
         const nestedDialog = trigger.closest('dialog');
         const tooltipParent = nestedDialog ?? LX.root;
         // Remove other first
@@ -11018,13 +11102,17 @@ function hasClass(el, list) {
 }
 LX.hasClass = hasClass;
 function addClass(el, className) {
-    if (className)
-        el.classList.add(className);
+    if (!className)
+        return;
+    const cn = className.split(' ');
+    el.classList.add(...cn);
 }
 LX.addClass = addClass;
 function removeClass(el, className) {
-    if (className)
-        el.classList.remove(className);
+    if (!className)
+        return;
+    const cn = className.split(' ');
+    el.classList.remove(...cn);
 }
 LX.removeClass = removeClass;
 function toggleClass(el, className, force) {
@@ -11032,6 +11120,12 @@ function toggleClass(el, className, force) {
         el.classList.toggle(className, force);
 }
 LX.toggleClass = toggleClass;
+function mergeClass(className, classNameOverride) {
+    if (classNameOverride)
+        className = [className, classNameOverride].join(' ');
+    return LX.twMerge(...className.split(' '));
+}
+LX.mergeClass = mergeClass;
 function lastChar(str) {
     return str[str.length - 1];
 }
@@ -11350,6 +11444,32 @@ function drawSpline(ctx, pts, t) {
 }
 LX.drawSpline = drawSpline;
 
+// Avatar.ts @jxarco
+class Avatar {
+    root;
+    imageElement = undefined;
+    fallbackElement = undefined;
+    constructor(desc) {
+        let rootCn = 'lexavatar bg-card items-center flex flex-row relative size-8 shrink-0 overflow-hidden rounded-full';
+        this.root = LX.makeElement('div');
+        if (desc.imgSource) {
+            const cn = 'aspect-square size-full object-cover';
+            const img = LX.makeElement('img', desc.imgClass ? LX.twMerge(...cn.split(' '), ...desc.imgClass.split(' ')) : cn, '', this.root);
+            img.src = desc.imgSource;
+            img.alt = desc.imgAlt;
+            this.imageElement = img;
+        }
+        else if (desc.fallback) {
+            const cn = 'size-full text-sm font-semibold place-self-center text-center content-center';
+            const span = LX.makeElement('span', desc.fallbackClass ? LX.twMerge(...cn.split(' '), ...desc.fallbackClass.split(' ')) : cn, desc.fallback, this.root);
+            this.fallbackElement = span;
+            rootCn += ' border-color';
+        }
+        this.root.className = desc.className ? LX.twMerge(...rootCn.split(' '), ...desc.className.split(' ')) : rootCn;
+    }
+}
+LX.Avatar = Avatar;
+
 // Spinner.ts @jxarco
 /**
  * @class Spinner
@@ -11359,8 +11479,8 @@ class Spinner {
     constructor(options = {}) {
         const icon = options.icon ?? 'LoaderCircle';
         const size = options.size ?? 'md';
-        const iconClass = `flex ${options.iconClass ?? ''}`.trim();
-        const svgClass = `animate-spin ${size} ${options.svgClass ?? ''}`.trim();
+        const iconClass = LX.mergeClass('flex', options.iconClass);
+        const svgClass = LX.mergeClass(`animate-spin ${size}`, options.svgClass);
         this.root = LX.makeIcon(icon, { iconClass, svgClass });
     }
     html() {
@@ -11394,7 +11514,7 @@ class Dialog {
         this.id = LX.guidGenerator();
         const size = options.size ?? [], position = options.position ?? [], draggable = options.draggable ?? true, dockable = options.dockable ?? false, modal = options.modal ?? false;
         let root = document.createElement('dialog');
-        root.className = 'lexdialog ' + (options.className ?? '');
+        root.className = LX.mergeClass('lexdialog absolute outline-none border-color m-0 p-0 min-w-3xs min-h-max overflow-hidden rounded-xl bg-background', options.className);
         root.id = options.id ?? 'dialog' + Dialog._last_id++;
         root.dataset['modal'] = modal;
         LX.root.appendChild(root);
@@ -11404,7 +11524,8 @@ class Dialog {
         let that = this;
         const titleDiv = document.createElement('div');
         if (title) {
-            titleDiv.className = 'lexdialogtitle';
+            titleDiv.className =
+                'lexdialogtitle flex w-full outline-none items-center justify-between font-semibold text-xl text-secondary-foreground pad-xl select-none';
             titleDiv.innerHTML = title;
             titleDiv.setAttribute('draggable', 'false');
             root.appendChild(titleDiv);
@@ -11425,7 +11546,8 @@ class Dialog {
                     options.onclose(this.root);
                 }
             };
-            const closeButton = LX.makeIcon('X', { title: 'Close', iconClass: 'lexdialogcloser' });
+            const closeButton = LX.makeIcon('X', { title: 'Close',
+                iconClass: 'lexdialogcloser text-lg text-secondary-foreground cursor-pointer z-1 select-none' });
             closeButton.addEventListener('click', this.close);
             const dockButton = LX.makeIcon('Minus', { title: 'Dock', iconClass: 'ml-auto mr-2' });
             dockButton.addEventListener('click', () => {
@@ -11452,8 +11574,7 @@ class Dialog {
                 root.appendChild(closeButton);
             }
         }
-        const panel = new LX.Panel();
-        panel.root.classList.add('lexdialogcontent');
+        const panel = new LX.Panel({ className: 'lexdialogcontent w-full p-1 text-secondary-foreground text-sm ml-0 break-all' });
         if (!title) {
             panel.root.classList.add('notitle');
         }
@@ -11517,19 +11638,18 @@ class AlertDialog extends Dialog {
         options.draggable = false;
         options.modal = true;
         super(undefined, (p) => {
-            p.root.classList.add('p-4', 'flex', 'flex-col', 'gap-2');
-            LX.makeContainer(['100%', '100%'], 'text-xl font-medium', title, p);
-            p.addTextArea(null, message, null, { disabled: true, fitHeight: true,
-                inputClass: 'bg-none fg-tertiary' });
+            p.root.className = LX.mergeClass(p.root.className, 'pad-2xl flex flex-col gap-2');
+            LX.makeContainer(['100%', '100%'], 'text-lg font-medium text-foreground', title, p);
+            p.addTextArea(null, message, null, { disabled: true, fitHeight: true, inputClass: 'bg-none text-sm text-muted-foreground' });
             p.sameLine(2, 'justify-end');
             p.addButton(null, options.cancelText ?? 'Cancel', () => this.destroy(), {
-                buttonClass: 'border bg-primary'
+                buttonClass: 'outline'
             });
             p.addButton(null, options.continueText ?? 'Continue', () => {
                 this.destroy();
                 if (callback)
                     callback();
-            }, { buttonClass: 'contrast' });
+            }, { buttonClass: 'primary' });
         }, options);
     }
 }
@@ -11911,8 +12031,9 @@ class DropdownMenu {
             return;
         }
         const menuItem = document.createElement('div');
-        menuItem.className = 'lexdropdownmenuitem' + ((item.name || item.options) ? '' : ' label')
-            + (item.disabled ?? false ? ' disabled' : '') + (` ${item.className ?? ''}`);
+        menuItem.className = LX.mergeClass('lexdropdownmenuitem flex flex-row pad-md rounded-lg gap-2 truncate cursor-pointer select-none'
+            + ((item.name || item.options) ? '' : ' label')
+            + (item.disabled ?? false ? ' disabled' : ''), item.className);
         menuItem.dataset['id'] = pKey;
         menuItem.innerHTML = `<span class="ellipsis-overflow">${key}</span>`;
         menuItem.tabIndex = '1';
@@ -11943,14 +12064,14 @@ class DropdownMenu {
         const disabled = item.disabled ?? false;
         if (this._radioGroup !== undefined) {
             if (item.name === this._radioGroup.selected) {
-                const icon = LX.makeIcon('Circle', { svgClass: 'xxs fill-current' });
+                const icon = LX.makeIcon('Circle', { svgClass: '2xs fill-current' });
                 menuItem.prepend(icon);
             }
             menuItem.setAttribute('data-radioname', this._radioGroup.name);
         }
         else if (item.icon) {
             const icon = item.icon.constructor === String
-                ? LX.makeIcon(item.icon, { svgClass: disabled ? 'fg-tertiary' : item.svgClass ?? item.className })
+                ? LX.makeIcon(item.icon, { svgClass: disabled ? 'text-muted-foreground' : item.svgClass ?? item.className })
                 : item.icon;
             menuItem.prepend(icon);
         }
@@ -11967,7 +12088,7 @@ class DropdownMenu {
                 if (f) {
                     f.call(this, key, v, menuItem);
                 }
-            }, { className: 'accent' });
+            }, { className: 'primary' });
             const input = checkbox.root.querySelector('input');
             input.classList.add('ml-auto');
             menuItem.appendChild(input);
@@ -12130,16 +12251,14 @@ class Footer {
     root;
     constructor(options = {}) {
         const root = document.createElement('footer');
-        root.className = 'lexfooter' + ` ${options.className ?? ''}`;
+        root.className = LX.mergeClass('lexfooter bg-background p-2 w-full leading-6 [&_p]:text-xs', options.className);
         const wrapper = document.createElement('div');
         wrapper.style.minHeight = '48px';
         wrapper.className = 'w-full';
         root.appendChild(wrapper);
-        // const hr = document.createElement( "hr" );
-        // wrapper.appendChild( hr );
         if (options.columns && options.columns.constructor == Array) {
             const cols = document.createElement('div');
-            cols.className = 'columns';
+            cols.className = 'grid text-center';
             cols.style.gridTemplateColumns = '1fr '.repeat(options.columns.length);
             wrapper.appendChild(cols);
             for (let col of options.columns) {
@@ -12304,7 +12423,7 @@ class Sheet {
         this.root.dataset['side'] = this.side;
         this.root.tabIndex = '1';
         this.root.role = 'dialog';
-        this.root.className = 'lexsheet fixed z-1000 bg-primary';
+        this.root.className = 'lexsheet fixed z-1000 bg-primary overflow-hidden';
         document.body.appendChild(this.root);
         this.root.addEventListener('keydown', (e) => {
             if (e.key == 'Escape') {
@@ -12431,13 +12550,13 @@ class Sidebar {
     constructor(options = {}) {
         const mobile = navigator && /Android|iPhone/i.test(navigator.userAgent);
         this.root = document.createElement('div');
-        this.root.className = 'lexsidebar flex flex-col ' + (options.className ?? '');
+        this.root.className = LX.mergeClass('lexsidebar flex flex-col pad-xl size-full scrollbar-hidden', options.className);
         this.callback = options.callback ?? null;
-        this._displaySelected = options.displaySelected ?? false;
         this.side = options.side ?? 'left';
         this.collapsable = options.collapsable ?? true;
-        this._collapseWidth = (options.collapseToIcons ?? true) ? '58px' : '0px';
         this.collapsed = options.collapsed ?? mobile;
+        this._displaySelected = options.displaySelected ?? false;
+        this._collapseWidth = (options.collapseToIcons ?? true) ? '58px' : '0px';
         this.filterString = '';
         LX.doAsync(() => {
             this.root.parentElement.ogWidth = this.root.parentElement.style.width;
@@ -12464,11 +12583,10 @@ class Sidebar {
         if (!(options.skipHeader ?? false)) {
             this.header = options.header ?? this._generateDefaultHeader(options);
             console.assert(this.header.constructor === HTMLDivElement, 'Use an HTMLDivElement to build your custom header');
-            this.header.className = 'lexsidebarheader flex-auto';
+            this.header.className = 'lexsidebarheader w-full h-[48px] flex rounded-lg p-2 mb-2 text-sm cursor-pointer items-center select-none';
             this.root.appendChild(this.header);
             if (this.collapsable) {
-                const icon = LX.makeIcon(this.side == 'left' ? 'PanelLeft' : 'PanelRight', { title: 'Toggle Sidebar',
-                    iconClass: 'toggler' });
+                const icon = LX.makeIcon(this.side == 'left' ? 'PanelLeft' : 'PanelRight', { title: 'Toggle Sidebar', iconClass: 'toggler' });
                 this.header.appendChild(icon);
                 if (mobile) {
                     // create an area and append a sidebar:
@@ -12504,14 +12622,14 @@ class Sidebar {
         // Content
         {
             this.content = document.createElement('div');
-            this.content.className = 'lexsidebarcontent flex-auto-fill';
+            this.content.className = 'lexsidebarcontent overflow-mask flex flex-col overflow-x-hidden overflow-y-scroll flex-auto-fill w-full';
             this.root.appendChild(this.content);
         }
         // Footer
         if (!(options.skipFooter ?? false)) {
             this.footer = options.footer ?? this._generateDefaultFooter(options);
             console.assert(this.footer.constructor === HTMLDivElement, 'Use an HTMLDivElement to build your custom footer');
-            this.footer.className = 'lexsidebarfooter flex-auto';
+            this.footer.className = 'lexsidebarfooter w-full h-[48px] flex rounded-lg p-2 mt-2 text-sm cursor-pointer items-center select-none';
             this.root.appendChild(this.footer);
         }
     }
@@ -12527,27 +12645,21 @@ class Sidebar {
                 options.onHeaderPressed(e);
             }
         });
-        const avatar = document.createElement('span');
-        avatar.className = 'lexavatar';
-        header.appendChild(avatar);
-        if (options.headerImage) {
-            const avatarImg = document.createElement('img');
-            avatarImg.src = options.headerImage;
-            avatar.appendChild(avatarImg);
-        }
-        else if (options.headerIcon) {
-            const avatarIcon = LX.makeIcon(options.headerIcon);
-            avatar.appendChild(avatarIcon);
-        }
+        const avatar = new LX.Avatar({
+            imgSource: options.headerImage,
+            fallback: options.headerIcon ? LX.makeIcon(options.headerIcon, { svgClass: 'xl' }).innerHTML : undefined,
+            className: 'rounded-lg'
+        });
+        header.appendChild(avatar.root);
         // Info
         {
             const info = document.createElement('div');
             info.className = 'infodefault';
             header.appendChild(info);
-            const infoText = document.createElement('span');
+            const infoText = LX.makeElement('span', 'truncate text-sm font-semibold');
             infoText.innerHTML = options.headerTitle ?? '';
             info.appendChild(infoText);
-            const infoSubtext = document.createElement('span');
+            const infoSubtext = LX.makeElement('span', 'truncate text-xs');
             infoSubtext.innerHTML = options.headerSubtitle ?? '';
             info.appendChild(infoSubtext);
         }
@@ -12565,27 +12677,21 @@ class Sidebar {
                 options.onFooterPressed(e, footer);
             }
         });
-        const avatar = document.createElement('span');
-        avatar.className = 'lexavatar';
-        footer.appendChild(avatar);
-        if (options.footerImage) {
-            const avatarImg = document.createElement('img');
-            avatarImg.src = options.footerImage;
-            avatar.appendChild(avatarImg);
-        }
-        else if (options.footerIcon) {
-            const avatarIcon = LX.makeIcon(options.footerIcon);
-            avatar.appendChild(avatarIcon);
-        }
+        const avatar = new LX.Avatar({
+            imgSource: options.footerImage,
+            fallback: options.footerIcon ? LX.makeIcon(options.footerIcon, { svgClass: 'xl' }).innerHTML : undefined,
+            className: 'rounded-lg'
+        });
+        footer.appendChild(avatar.root);
         // Info
         {
             const info = document.createElement('div');
             info.className = 'infodefault';
             footer.appendChild(info);
-            const infoText = document.createElement('span');
+            const infoText = LX.makeElement('span', 'truncate text-sm font-semibold');
             infoText.innerHTML = options.footerTitle ?? '';
             info.appendChild(infoText);
-            const infoSubtext = document.createElement('span');
+            const infoSubtext = LX.makeElement('span', 'truncate text-xs');
             infoSubtext.innerHTML = options.footerSubtitle ?? '';
             info.appendChild(infoSubtext);
         }
@@ -12720,9 +12826,8 @@ class Sidebar {
             }
             let pKey = LX.getSupportedDOMName(key);
             let currentGroup = null;
-            let entry = document.createElement('div');
+            let entry = LX.makeElement('div', LX.mergeClass('lexsidebarentry w-full rounded-lg cursor-pointer select-none', options.className));
             entry.id = pKey;
-            entry.className = 'lexsidebarentry ' + (options.className ?? '');
             if (this.displaySelected && options.selected) {
                 entry.classList.add('selected');
             }
@@ -12730,16 +12835,13 @@ class Sidebar {
                 const pGroupKey = item.group.replace(/\s/g, '').replaceAll('.', '');
                 currentGroup = this.content.querySelector('#' + pGroupKey);
                 if (!currentGroup) {
-                    currentGroup = document.createElement('div');
+                    currentGroup = LX.makeElement('div', 'lexsidebargroup flex flex-col gap-0.5');
                     currentGroup.id = pGroupKey;
-                    currentGroup.className = 'lexsidebargroup';
                     this.content.appendChild(currentGroup);
-                    let groupEntry = document.createElement('div');
-                    groupEntry.className = 'lexsidebargrouptitle';
+                    let groupEntry = LX.makeElement('div', 'lexsidebargrouptitle');
                     currentGroup.appendChild(groupEntry);
-                    let groupLabel = document.createElement('div');
-                    groupLabel.innerHTML = item.group;
-                    groupEntry.appendChild(groupLabel);
+                    // Group label
+                    LX.makeElement('div', '', item.group, groupEntry);
                     if (this.groups[item.group] != null) {
                         const groupActionIcon = LX.makeIcon(this.groups[item.group].icon, { svgClass: 'sm' });
                         groupEntry.appendChild(groupActionIcon);
@@ -12787,7 +12889,7 @@ class Sidebar {
                     item.value = value;
                     if (f)
                         f.call(this, key, value, event);
-                }, { className: 'accent', label: key, signal: ('@checkbox_' + key) });
+                }, { className: 'primary', label: key, signal: ('@checkbox_' + key) });
                 itemDom.appendChild(panel.root.childNodes[0]);
             }
             else {
@@ -12864,8 +12966,7 @@ class Sidebar {
             if (!item[key].length) {
                 continue;
             }
-            let subentryContainer = document.createElement('div');
-            subentryContainer.className = 'lexsidebarsubentrycontainer';
+            let subentryContainer = LX.makeElement('div', 'lexsidebarsubentrycontainer flex flex-col self-center w-full ml-4 px-4 select-none');
             if (isCollapsable) {
                 this.collapseContainer.appendChild(subentryContainer);
                 delete this.collapseContainer;
@@ -12899,7 +13000,7 @@ class Sidebar {
                             f.call(this, subkey, e);
                     });
                 }
-                subentry.className = 'lexsidebarentry';
+                subentry.className = 'lexsidebarentry w-full rounded-lg cursor-pointer select-none';
                 subentry.id = subkey;
                 if (suboptions.content) {
                     const parentContainer = LX.makeElement('div');
@@ -13035,7 +13136,7 @@ class Tour {
     // using a fullscreen SVG with "rect" elements
     _generateMask(reference) {
         this.tourContainer.innerHTML = ''; // Clear previous content
-        this.tourMask = LX.makeContainer(['100%', '100%'], 'tour-mask');
+        this.tourMask = LX.makeContainer(['100%', '100%'], 'tour-mask absolute inset-0');
         this.tourContainer.appendChild(this.tourMask);
         const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         svg.style.width = '100%';
@@ -13096,7 +13197,7 @@ class Tour {
             clipPath.appendChild(rect);
         }
         // Reference Highlight
-        const refContainer = LX.makeContainer(['0', '0'], 'tour-ref-mask');
+        const refContainer = LX.makeContainer(['0', '0'], 'tour-ref-mask absolute');
         refContainer.style.left = `${boundingX - hOffset - 1}px`;
         refContainer.style.top = `${boundingY - vOffset - 1}px`;
         refContainer.style.width = `${boundingWidth + hOffset * 2 + 2}px`;
@@ -13127,7 +13228,7 @@ class Tour {
         const popoverContainer = LX.makeContainer(['auto', 'auto'], 'tour-step-container');
         {
             const header = LX.makeContainer(['100%', 'auto'], 'flex flex-row', '', popoverContainer);
-            LX.makeContainer(['70%', 'auto'], 'p-2 font-medium', step.title, header);
+            LX.makeContainer(['70%', 'auto'], 'p-2 font-medium text-base', step.title, header);
             const closer = LX.makeContainer(['30%', 'auto'], 'flex flex-row p-2 justify-end', '', header);
             const closeIcon = LX.makeIcon('X');
             closer.appendChild(closeIcon);
@@ -13135,22 +13236,22 @@ class Tour {
                 this.stop();
             });
         }
-        LX.makeContainer(['100%', 'auto'], 'p-2 text-md', step.content, popoverContainer, {
+        LX.makeContainer(['100%', 'auto'], 'p-2 text-sm', step.content, popoverContainer, {
             maxWidth: '400px'
         });
-        const footer = LX.makeContainer(['100%', 'auto'], 'flex flex-row text-md', '', popoverContainer);
+        const footer = LX.makeContainer(['100%', 'auto'], 'flex flex-row', '', popoverContainer);
         {
-            const footerSteps = LX.makeContainer(['50%', 'auto'], 'p-2 gap-1 self-center flex flex-row text-md', '', footer);
+            const footerSteps = LX.makeContainer(['50%', 'auto'], 'p-2 gap-1 place-self-center flex flex-row', '', footer);
             for (let i = 0; i < this.steps.length; i++) {
-                const stepIndicator = document.createElement('span');
-                stepIndicator.className = 'tour-step-indicator';
+                const stepIndicator = LX.makeElement('span');
+                stepIndicator.className = 'size-3 rounded-full bg-accent inline-flex data-active:bg-primary';
                 if (i === this.currentStep) {
-                    stepIndicator.classList.add('active');
+                    stepIndicator.dataset['active'] = 'true';
                 }
                 footerSteps.appendChild(stepIndicator);
             }
         }
-        const footerButtons = LX.makeContainer(['50%', 'auto'], 'text-md', '', footer);
+        const footerButtons = LX.makeContainer(['50%', 'auto'], 'text-base', '', footer);
         const footerPanel = new Panel();
         let numButtons = 1;
         if (previousStep) {
@@ -13162,7 +13263,7 @@ class Tour {
         if (previousStep) {
             footerPanel.addButton(null, 'Previous', () => {
                 this._showStep(-1);
-            }, { buttonClass: 'contrast' });
+            }, { buttonClass: 'ghost' });
         }
         if (nextStep) {
             footerPanel.addButton(null, 'Next', () => {
@@ -13172,11 +13273,10 @@ class Tour {
         else {
             footerPanel.addButton(null, 'Finish', () => {
                 this.stop();
-            });
+            }, { buttonClass: 'primary' });
         }
         footerButtons.appendChild(footerPanel.root);
-        const sideOffset = (step.side === 'left' || step.side === 'right' ? this.horizontalOffset : this.verticalOffset)
-            ?? this.offset;
+        const sideOffset = (step.side === 'left' || step.side === 'right' ? this.horizontalOffset : this.verticalOffset) ?? this.offset;
         const alignOffset = step.align === 'start' || step.align === 'end' ? sideOffset : 0;
         this._popover?.destroy();
         this._popover = new Popover(null, [popoverContainer], {
@@ -13210,19 +13310,20 @@ LX.init = async function (options = {}) {
     await LX.loadScriptSync('https://unpkg.com/lucide@latest');
     // LexGUI root
     console.log(`LexGUI v${this.version}`);
-    var root = document.createElement('div');
+    const root = LX.makeElement('div', LX.mergeClass('lexcontainer', options.rootClass));
     root.id = 'lexroot';
-    root.className = 'lexcontainer';
     root.tabIndex = -1;
-    if (options.rootClass) {
-        root.className += ` ${options.rootClass}`;
-    }
-    this.modal = document.createElement('div');
+    this.modal = LX.makeElement('div', 'inset-0 hidden-opacity bg-black/50 fixed z-100 transition-opacity duration-100 ease-in');
     this.modal.id = 'modal';
-    this.modal.classList.add('hidden-opacity');
     this.modal.toggle = function (force) {
         this.classList.toggle('hidden-opacity', force);
     };
+    function blockScroll(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    this.modal.addEventListener('wheel', blockScroll, { passive: false });
+    this.modal.addEventListener('touchmove', blockScroll, { passive: false });
     this.root = root;
     this.container = document.body;
     if (options.container) {
@@ -13247,7 +13348,7 @@ LX.init = async function (options = {}) {
         const notifSection = document.createElement('section');
         notifSection.className = 'notifications';
         this.notifications = document.createElement('ol');
-        this.notifications.className = '';
+        this.notifications.className = 'fixed flex flex-col-reverse m-0 p-0 gap-1 z-1000';
         this.notifications.iWidth = 0;
         notifSection.appendChild(this.notifications);
         document.body.appendChild(notifSection);
@@ -13290,87 +13391,92 @@ LX.init = async function (options = {}) {
         const storedcolorScheme = localStorage.getItem('lxColorScheme');
         if (storedcolorScheme)
             return;
-        LX.setTheme(event.matches ? 'dark' : 'light', false);
+        LX.setMode(event.matches ? 'dark' : 'light', false);
     };
     this._mqlPrefersDarkScheme = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
     const storedcolorScheme = localStorage.getItem('lxColorScheme');
     if (storedcolorScheme) {
-        LX.setTheme(storedcolorScheme);
+        LX.setMode(storedcolorScheme);
     }
     else if (this._mqlPrefersDarkScheme && (options.autoTheme ?? true)) {
         if (window.matchMedia('(prefers-color-scheme: light)').matches) {
-            LX.setTheme('light', false);
+            LX.setMode('light', false);
         }
         this._mqlPrefersDarkScheme.addEventListener('change', this._onChangeSystemTheme);
     }
+    // LX.setThemeColor( 'rose' );
     return this.mainArea;
-}, /**
+};
+/**
  * @method setSpacingMode
  * @param {String} mode: "default" | "compact"
  */
-    LX.setSpacingMode = function (mode) {
-        this.spacingMode = mode;
-        document.documentElement.setAttribute('data-spacing', this.spacingMode);
-    }, /**
+LX.setSpacingMode = function (mode) {
+    this.spacingMode = mode;
+    document.documentElement.setAttribute('data-spacing', this.spacingMode);
+};
+/**
  * @method setLayoutMode
  * @param {String} mode: "app" | "document"
  */
-    LX.setLayoutMode = function (mode) {
-        this.layoutMode = mode;
-        document.documentElement.setAttribute('data-layout', this.layoutMode);
-    }, /**
+LX.setLayoutMode = function (mode) {
+    this.layoutMode = mode;
+    document.documentElement.setAttribute('data-layout', this.layoutMode);
+};
+/**
  * @method addSignal
  * @param {String} name
  * @param {Object} obj
  * @param {Function} callback
  */
-    LX.addSignal = function (name, obj, callback) {
-        obj[name] = callback;
-        if (!LX.signals[name]) {
-            LX.signals[name] = [];
-        }
-        if (LX.signals[name].indexOf(obj) > -1) {
-            return;
-        }
-        LX.signals[name].push(obj);
-    }, /**
+LX.addSignal = function (name, obj, callback) {
+    obj[name] = callback;
+    if (!LX.signals[name]) {
+        LX.signals[name] = [];
+    }
+    if (LX.signals[name].indexOf(obj) > -1) {
+        return;
+    }
+    LX.signals[name].push(obj);
+};
+/**
  * @method emitSignal
  * @param {String} name
  * @param {*} value
  * @param {Object} options
  */
-    LX.emitSignal = function (name, value, options = {}) {
-        const data = LX.signals[name];
-        if (!data) {
-            return;
+LX.emitSignal = function (name, value, options = {}) {
+    const data = LX.signals[name];
+    if (!data) {
+        return;
+    }
+    const target = options.target;
+    if (target) {
+        if (target[name]) {
+            target[name].call(target, value);
         }
-        const target = options.target;
-        if (target) {
-            if (target[name]) {
-                target[name].call(target, value);
-            }
-            return;
+        return;
+    }
+    for (let obj of data) {
+        if (obj instanceof BaseComponent) {
+            obj.set(value, options.skipCallback ?? true);
         }
-        for (let obj of data) {
-            if (obj instanceof BaseComponent) {
-                obj.set(value, options.skipCallback ?? true);
-            }
-            else if (obj.constructor === Function) {
-                const fn = obj;
-                fn(null, value);
-            }
-            else {
-                // This is an element
-                const fn = obj[name];
-                console.assert(fn, `No callback registered with _${name}_ signal`);
-                fn.bind(obj)(value);
-            }
+        else if (obj.constructor === Function) {
+            const fn = obj;
+            fn(null, value);
         }
-    };
+        else {
+            // This is an element
+            const fn = obj[name];
+            console.assert(fn, `No callback registered with _${name}_ signal`);
+            fn.bind(obj)(value);
+        }
+    }
+};
 // Command bar creation
 LX._createCommandbar = function (root) {
     let commandbar = document.createElement('dialog');
-    commandbar.className = 'commandbar';
+    commandbar.className = 'commandbar absolute border-color rounded-lg m-0';
     commandbar.tabIndex = -1;
     root.appendChild(commandbar);
     let allItems = [];
@@ -13419,7 +13525,7 @@ LX._createCommandbar = function (root) {
         }
         e.stopPropagation();
         e.stopImmediatePropagation();
-        commandbar.close();
+        LX.setCommandbarState(false);
         _resetBar(true);
     });
     root.addEventListener('keydown', (e) => {
@@ -13459,8 +13565,7 @@ LX._createCommandbar = function (root) {
         cbTabs.add('All', document.createElement('div'), { selected: true, onSelect: _onSelectTab });
         // cbTabs.add( "Main", document.createElement('div'), { onSelect: _onSelectTab } );
     }
-    const itemContainer = document.createElement('div');
-    itemContainer.className = 'searchitembox';
+    const itemContainer = LX.makeElement('div', 'searchitembox overflow-y-scroll basis-full scrollbar-hidden');
     let refPrevious = null;
     const _resetBar = (resetInput) => {
         itemContainer.innerHTML = '';
@@ -13469,6 +13574,53 @@ LX._createCommandbar = function (root) {
         if (resetInput) {
             filter.set('', true);
         }
+    };
+    const _filterEntry = function (entryName, filter) {
+        if (!filter?.length)
+            return false;
+        const cleanName = LX.stripTags(entryName).toLowerCase();
+        return cleanName.includes(filter.toLowerCase());
+    };
+    const _getEntries = function (filter) {
+        const entries = [];
+        for (let m of LX.menubars) {
+            for (let i of m.items) {
+                if (_filterEntry(i.name, filter))
+                    entries.push(i);
+            }
+        }
+        for (let m of LX.sidebars) {
+            for (let i of m.items) {
+                if (_filterEntry(i.name, filter))
+                    entries.push(i);
+            }
+        }
+        for (let entry of LX.extraCommandbarEntries) {
+            if (_filterEntry(entry.name, filter))
+                entries.push(entry);
+        }
+        if (LX.has('CodeEditor')) {
+            const instances = LX.CodeEditor.getInstances();
+            if (!instances.length || !instances[0].area.root.offsetHeight)
+                return entries;
+            const languages = LX.CodeEditor.languages;
+            for (let l of Object.keys(languages)) {
+                const key = 'Language: ' + l;
+                const icon = instances[0]._getFileIcon(null, languages[l].ext);
+                const classes = icon.split(' ');
+                let value = LX.makeIcon(classes[0], { svgClass: `${classes.slice(0).join(' ')}` }).innerHTML;
+                value += key + " <span class='lang-ext'>(" + languages[l].ext + ')</span>';
+                if (!_filterEntry(key, filter)) {
+                    continue;
+                }
+                entries.push({ name: value, callback: () => {
+                        for (let i of instances) {
+                            i._changeLanguage(l);
+                        }
+                    } });
+            }
+        }
+        return entries;
     };
     const _addElement = (t, c, p, i) => {
         if (!t.length) {
@@ -13507,70 +13659,78 @@ LX._createCommandbar = function (root) {
         itemContainer.appendChild(searchItem);
         refPrevious = searchItem;
     };
-    const _propagateAdd = (item, filter, path, skipPropagation) => {
+    const _propagateAdd = (item, path, skipPropagation) => {
         if (!item || (item.constructor != Object)) {
             return;
         }
-        let name = item.name;
-        if (name.toLowerCase().includes(filter)) {
-            if (item.callback) {
-                _addElement(name, item.callback, path, item);
-            }
+        if (item.callback) {
+            _addElement(item.name, item.callback, path, item);
         }
-        const submenu = item.submenu ?? item[name];
+        const submenu = item.submenu ?? item[item.name];
         if (!submenu) {
             return;
         }
-        const icon = LX.makeIcon('ChevronRight', { svgClass: 'sm fg-secondary separator' });
-        path += name + icon.innerHTML;
+        const icon = LX.makeIcon('ChevronRight', { svgClass: 'sm text-muted-foreground separator' });
+        path += item.name + icon.innerHTML;
         for (let c of submenu) {
-            _propagateAdd(c, filter, path);
+            _propagateAdd(c, path);
         }
     };
     commandbar._addElements = (filter) => {
         _resetBar();
-        for (let m of LX.menubars) {
-            for (let i of m.items) {
-                _propagateAdd(i, filter, '');
-            }
+        let entries = _getEntries(filter);
+        // Order...
+        function scoreEntry(s, prefix) {
+            if (s.startsWith(prefix))
+                return 0; // best option
+            if (s.includes(prefix))
+                return 1;
+            return 2; // worst
         }
-        for (let m of LX.sidebars) {
-            for (let i of m.items) {
-                _propagateAdd(i, filter, '');
-            }
-        }
-        for (let entry of LX.extraCommandbarEntries) {
-            const name = entry.name;
-            if (!name.toLowerCase().includes(filter)) {
-                continue;
-            }
-            _addElement(name, entry.callback, '', {});
-        }
-        if (LX.has('CodeEditor')) {
-            const instances = LX.CodeEditor.getInstances();
-            if (!instances.length || !instances[0].area.root.offsetHeight)
-                return;
-            const languages = LX.CodeEditor.languages;
-            for (let l of Object.keys(languages)) {
-                const key = 'Language: ' + l;
-                const icon = instances[0]._getFileIcon(null, languages[l].ext);
-                const classes = icon.split(' ');
-                let value = LX.makeIcon(classes[0], { svgClass: `${classes.slice(0).join(' ')}` }).innerHTML;
-                value += key + " <span class='lang-ext'>(" + languages[l].ext + ')</span>';
-                if (key.toLowerCase().includes(filter)) {
-                    _addElement(value, () => {
-                        for (let i of instances) {
-                            i._changeLanguage(l);
-                        }
-                    }, '', {});
-                }
-            }
+        entries = entries.sort((a, b) => {
+            const nameA = LX.stripTags(a.name), nameB = LX.stripTags(b.name);
+            return (scoreEntry(nameA, filter) - scoreEntry(nameB, filter)) || nameA.localeCompare(nameB);
+        });
+        entries = entries.slice(0, 48); // Get 48 ocurrences max
+        for (let entry of entries) {
+            _propagateAdd(entry, '');
         }
     };
     commandbar.appendChild(header);
     commandbar.appendChild(tabArea.root);
     commandbar.appendChild(itemContainer);
     return commandbar;
+};
+LX._registerIconsAndColors = function (colorsRootPath = './') {
+    LX.requestJSON(colorsRootPath + 'registry/colors.json', (colors) => {
+        // loop through each color
+        for (const key in colors) {
+            const value = colors[key];
+            if (!Array.isArray(value)) {
+                continue;
+            }
+            value.forEach((entry) => {
+                const color = `${key}-${entry.scale}`;
+                const val = `<span class="flex bg-${color} w-3 h-3 rounded-full mr-2"></span>${color}`;
+                LX.registerCommandbarEntry(val, () => {
+                    navigator.clipboard.writeText(color);
+                    LX.toast(`${LX.makeIcon('CircleCheck').innerHTML} Copied ${color} to clipboard.`, null, { position: 'top-center',
+                        timeout: 3000 });
+                });
+            });
+        }
+    });
+    const lucide = window.lucide;
+    const allIcons = { ...LX.ICONS, ...lucide.icons };
+    for (const iconName in allIcons) {
+        const variant = 'regular';
+        const icon = LX.makeIcon(iconName, { svgClass: 'mr-2 pointer-events-none', variant });
+        const val = `${icon.innerHTML}${iconName}`;
+        LX.registerCommandbarEntry(val, () => {
+            navigator.clipboard.writeText(iconName);
+            LX.toast(`${LX.makeIcon('CircleCheck').innerHTML} Copied ${iconName} to clipboard.`, null, { position: 'top-center', timeout: 3000 });
+        });
+    }
 };
 /**
  * @method setCommandbarState
@@ -13579,12 +13739,16 @@ LX._createCommandbar = function (root) {
  */
 LX.setCommandbarState = function (value, resetEntries = true) {
     const cb = this.commandbar;
+    LX.modal.toggle(!value);
     if (value) {
+        // Get current position based on main scroll
+        cb.style.top = `calc(15% + ${document.scrollingElement?.scrollTop ?? 0}px)`;
         cb.show();
         cb.querySelector('input').focus();
         if (resetEntries) {
             cb._addElements(undefined);
         }
+        LX.modal.toggle(false);
     }
     else {
         cb.close();
@@ -13630,7 +13794,7 @@ LX.REGISTER_COMPONENT = function (customComponentName, options = {}) {
             const customIcon = LX.makeIcon(options.icon ?? 'Box');
             const menuIcon = LX.makeIcon('Menu');
             let buttonName = customComponentName + (!instance ? ' [empty]' : '');
-            let buttonEl = this.addButton(null, buttonName, (value, event) => {
+            let button = this.addButton(null, buttonName, (value, event) => {
                 if (instance) {
                     element.querySelector('.lexcustomitems').toggleAttribute('hidden');
                     element.dataset['opened'] = !element.querySelector('.lexcustomitems').hasAttribute('hidden');
@@ -13645,11 +13809,11 @@ LX.REGISTER_COMPONENT = function (customComponentName, options = {}) {
                         });
                     });
                 }
-            }, { buttonClass: 'custom' });
-            const buttonSpan = buttonEl.root.querySelector('span');
-            buttonSpan.prepend(customIcon);
-            buttonSpan.appendChild(menuIcon);
-            container.appendChild(buttonEl.root);
+            }, { buttonClass: 'outline custom' });
+            const buttonDom = button.root.querySelector('button');
+            buttonDom.prepend(customIcon);
+            buttonDom.appendChild(menuIcon);
+            container.appendChild(button.root);
             if (instance) {
                 menuIcon.addEventListener('click', (e) => {
                     e.stopImmediatePropagation();
@@ -13729,5 +13893,5 @@ LX.REGISTER_COMPONENT = function (customComponentName, options = {}) {
     };
 };
 
-export { AlertDialog, Area, AreaOverlayButtons, ArrayInput, BaseComponent, Branch, Button, Checkbox, ColorInput, ComboButtons, ComponentType, ContextMenu, Counter, Curve, DatePicker, Dial, Dialog, DropdownMenu, FileInput, Footer, Form, IEvent, LX, Layers, List, Map2D, NodeTree, NumberInput, OTPInput, Pad, Pagination, Panel, PocketDialog, Popover, Progress, RadioGroup, RangeInput, Rate, Select, Sheet, Sidebar, SizeInput, Skeleton, Spinner, TabSections, Table, Tabs, Tags, TextArea, TextInput, Title, Toggle, Tour, Tree, TreeEvent, Vector, addDropdownMenu, vec2 };
+export { AlertDialog, Area, AreaOverlayButtons, ArrayInput, Avatar, BaseComponent, Branch, Button, Checkbox, ColorInput, ComboButtons, ComponentType, ContextMenu, Counter, Curve, DatePicker, Dial, Dialog, DropdownMenu, FileInput, Footer, Form, IEvent, LX, Layers, List, Map2D, NodeTree, NumberInput, OTPInput, Pad, Pagination, Panel, PocketDialog, Popover, Progress, RadioGroup, RangeInput, Rate, Select, Sheet, Sidebar, SizeInput, Skeleton, Spinner, TabSections, Table, Tabs, Tags, TextArea, TextInput, Title, Toggle, Tour, Tree, Vector, addDropdownMenu, vec2 };
 //# sourceMappingURL=lexgui.module.js.map

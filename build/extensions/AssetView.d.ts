@@ -2,7 +2,8 @@ import { LX } from '../core/Namespace';
 declare const Area: any;
 declare const Panel: any;
 declare const NodeTree: any;
-export type AssetViewAction = 'select' | 'dbl_click' | 'check' | 'clone' | 'move' | 'delete' | 'rename' | 'enter_folder' | 'create-folder';
+declare const Tree: any;
+export type AssetViewAction = 'select' | 'dbl_click' | 'check' | 'clone' | 'move' | 'delete' | 'rename' | 'enter_folder' | 'create-folder' | 'refresh-content' | 'node-drag';
 export interface AssetViewItem {
     id: string;
     type: string;
@@ -23,6 +24,7 @@ interface AssetViewEvent {
     where?: AssetViewItem;
     oldName?: string;
     newName?: string;
+    search?: any[];
     userInitiated: boolean;
 }
 /**
@@ -70,9 +72,7 @@ export declare class AssetView {
     allowMultipleSelection: boolean;
     previewActions: any[];
     contextMenu: any[];
-    onRefreshContent: any;
     itemContextMenuOptions: any;
-    onItemDragged: any;
     private _assetsPerPage;
     get assetsPerPage(): any;
     set assetsPerPage(v: any);
@@ -107,10 +107,11 @@ export declare class AssetView {
     _updatePath(): void;
     _createNavigationBar(panel: typeof Panel): void;
     _createTreePanel(area: typeof Area): void;
+    _subscribeTreeEvents(tree: typeof Tree): void;
     _setContentLayout(layoutMode: number): void;
     _createContentPanel(area: typeof Area): void;
     _makeNameFilterFn(searchValue: string): (name: string) => boolean;
-    _refreshContent(searchValue?: string, filter?: string): void;
+    _refreshContent(searchValue?: string, filter?: string, userInitiated?: boolean): void;
     _previewAsset(file: AssetViewItem): void;
     _processDrop(e: DragEvent): void;
     _sortData(sortBy?: string, sortMode?: number): void;
@@ -124,8 +125,8 @@ export declare class AssetView {
     _requestCloneItem(item: AssetViewItem): false | undefined;
     _cloneItem(item: AssetViewItem): AssetViewItem;
     _getClonedName(originalName: string, siblings: any[]): string;
-    _requestRenameItem(item: AssetViewItem, newName: string): void;
-    _renameItem(item: AssetViewItem, newName: string): void;
+    _requestRenameItem(item: AssetViewItem, newName: string, treeEvent?: boolean): void;
+    _renameItem(item: AssetViewItem, newName: string, data?: AssetViewItem[]): void;
     _renameItemPopover(item: AssetViewItem): void;
     _requestCreateFolder(folder?: AssetViewItem): void;
     _createFolder(folder?: AssetViewItem): AssetViewItem;

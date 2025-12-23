@@ -2,6 +2,8 @@
 
 ## dev
 
+## 8.2 (master)
+
 Use Tailwind (finally) to create and compile CSS.
 Removed custom utility classes, refactored theme colors and every theme variable used in LX.
 Cleaned main CSS, move generic component styling to classes.
@@ -41,7 +43,7 @@ Other API Changes:
 - ComboButtons Component `options.float` now accepts `start, center, end` instead of `left, center, right`.
 - Breadcrumb items `title` renamed to `name`.
 
-## 8.1.2 (master)
+## 8.1.2
 
 Removed legacy code `CurvesTimeline` from `editor.html` example.
 

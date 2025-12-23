@@ -11,7 +11,6 @@ LX.registerIcon('TimelineLockOpen', '<svg xmlns="http://www.w3.org/2000/svg" wid
 const Area = LX.Area;
 const Panel = LX.Panel;
 const Dialog = LX.Dialog;
-LX.TreeEvent;
 /**
  * @class Timeline
  * @description Agnostic timeline, do not impose any timeline content. Renders to a canvas
@@ -20,8 +19,7 @@ class Timeline {
     static BACKGROUND_COLOR;
     static TRACK_COLOR_PRIMARY;
     static TRACK_COLOR_SECONDARY;
-    static TRACK_COLOR_TERCIARY;
-    static TRACK_COLOR_QUATERNARY;
+    static TRACK_COLOR_TERTIARY;
     static TRACK_SELECTED;
     static TRACK_SELECTED_LIGHT;
     static FONT;
@@ -181,20 +179,19 @@ class Timeline {
          * updates theme ( light - dark ) based on LX's current theme
          */
         function updateTheme() {
-            Timeline.BACKGROUND_COLOR = LX.getThemeColor('global-blur-background');
-            Timeline.TRACK_COLOR_PRIMARY = LX.getThemeColor('global-color-primary');
-            Timeline.TRACK_COLOR_SECONDARY = LX.getThemeColor('global-color-secondary');
-            Timeline.TRACK_COLOR_TERCIARY = LX.getThemeColor('global-color-terciary');
-            Timeline.TRACK_COLOR_QUATERNARY = LX.getThemeColor('global-color-quaternary');
-            Timeline.FONT = LX.getThemeColor('global-font');
-            Timeline.FONT_COLOR_PRIMARY = LX.getThemeColor('global-text-primary');
-            Timeline.FONT_COLOR_TERTIARY = LX.getThemeColor('global-text-tertiary');
-            Timeline.FONT_COLOR_QUATERNARY = LX.getThemeColor('global-text-quaternary');
-            Timeline.KEYFRAME_COLOR = LX.getThemeColor('lxTimeline-keyframe');
-            Timeline.KEYFRAME_COLOR_SELECTED = Timeline.KEYFRAME_COLOR_HOVERED = LX.getThemeColor('lxTimeline-keyframe-selected');
-            Timeline.KEYFRAME_COLOR_LOCK = LX.getThemeColor('lxTimeline-keyframe-locked');
-            Timeline.KEYFRAME_COLOR_EDITED = LX.getThemeColor('lxTimeline-keyframe-edited');
-            Timeline.KEYFRAME_COLOR_INACTIVE = LX.getThemeColor('lxTimeline-keyframe-inactive');
+            Timeline.BACKGROUND_COLOR = LX.getCSSVariable('background-blur');
+            Timeline.TRACK_COLOR_PRIMARY = LX.getCSSVariable('card');
+            Timeline.TRACK_COLOR_SECONDARY = LX.getCSSVariable('secondary');
+            Timeline.TRACK_COLOR_TERTIARY = LX.getCSSVariable('accent');
+            Timeline.FONT = LX.getCSSVariable('global-font');
+            Timeline.FONT_COLOR_PRIMARY = LX.getCSSVariable('foreground');
+            Timeline.FONT_COLOR_TERTIARY = LX.getCSSVariable('primary');
+            Timeline.FONT_COLOR_QUATERNARY = LX.getCSSVariable('muted-foreground');
+            Timeline.KEYFRAME_COLOR = LX.getCSSVariable('lxTimeline-keyframe');
+            Timeline.KEYFRAME_COLOR_SELECTED = Timeline.KEYFRAME_COLOR_HOVERED = LX.getCSSVariable('lxTimeline-keyframe-selected');
+            Timeline.KEYFRAME_COLOR_LOCK = LX.getCSSVariable('lxTimeline-keyframe-locked');
+            Timeline.KEYFRAME_COLOR_EDITED = LX.getCSSVariable('lxTimeline-keyframe-edited');
+            Timeline.KEYFRAME_COLOR_INACTIVE = LX.getCSSVariable('lxTimeline-keyframe-inactive');
         }
         this.updateTheme = updateTheme.bind(this);
         LX.addSignal('@on_new_color_scheme', this.updateTheme);
@@ -243,7 +240,7 @@ class Timeline {
         }, { buttonClass: 'accept', title: 'Stop', hideName: true, icon: 'Stop@solid' });
         header.addButton('loopBtn', '', (value, event) => {
             this.setLoopMode(!this.loop);
-        }, { selectable: true, selected: this.loop, title: 'Loop', hideName: true, icon: 'RefreshCw' });
+        }, { selectable: true, selected: this.loop, title: 'Loop', hideName: true, icon: 'RefreshCw', buttonClass: 'h-8' });
         if (this.onCreateControlsButtons) {
             this.onCreateControlsButtons(header);
         }
@@ -319,8 +316,7 @@ class Timeline {
         this.leftPanel.clear();
         const panel = this.leftPanel;
         panel.sameLine();
-        let titleComponent = panel.addTitle('Tracks', { style: { background: 'none' },
-            className: 'fg-secondary text-lg px-4' });
+        let titleComponent = panel.addTitle('Tracks', { style: { background: 'none' }, className: 'text-lg px-4' });
         let title = titleComponent.root;
         if (!this.disableNewTracks) {
             panel.addButton('addTrackBtn', '', (value, event) => {
@@ -341,28 +337,28 @@ class Timeline {
         if (this.animationClip && this.selectedItems.length) {
             treeTracks = this.generateSelectedItemsTreeData();
         }
-        this.trackTreesComponent = p.addTree(null, treeTracks, { filter: false, rename: false, draggable: false,
-            onevent: (e) => {
-                switch (e.type) {
-                    case LX.TreeEvent.NODE_SELECTED:
-                        if (!e.event.shiftKey) {
-                            this.deselectAllTracks(false); // no need to update left panel
-                        }
-                        if (e.node.trackData) {
-                            const flag = e.event.shiftKey ? !e.node.trackData.isSelected : true;
-                            this.setTrackSelection(e.node.trackData.trackIdx, flag, false, false); // do callback, do not update left panel
-                        }
-                        break;
-                    case LX.TreeEvent.NODE_VISIBILITY:
-                        if (e.node.trackData) {
-                            this.setTrackState(e.node.trackData.trackIdx, e.value, false, false); // do not update left panel
-                        }
-                        break;
-                }
-                if (this.onTrackTreeEvent) {
-                    this.onTrackTreeEvent(e);
-                }
-            } });
+        this.trackTreesComponent = p.addTree(null, treeTracks, { filter: false, rename: false, draggable: false });
+        this.trackTreesComponent.on("select", (event, resolve) => {
+            const node = event.items[0];
+            if (!event.domEvent.shiftKey) {
+                this.deselectAllTracks(false); // no need to update left panel
+            }
+            if (node.trackData) {
+                const flag = event.domEvent.shiftKey ? !node.trackData.isSelected : true;
+                this.setTrackSelection(node.trackData.trackIdx, flag, false, false); // do callback, do not update left panel
+            }
+        });
+        this.trackTreesComponent.on("visibleChanged", (event, resolve) => {
+            const node = event.items[0];
+            if (node.trackData) {
+                this.setTrackState(node.trackData.trackIdx, node.visible, false, false); // do not update left panel
+            }
+        });
+        // Not used!
+        // if ( this.onTrackTreeEvent )
+        // {
+        //     this.onTrackTreeEvent( e );
+        // }
         const that = this;
         this.trackTreesComponent.innerTree._refresh = this.trackTreesComponent.innerTree.refresh;
         this.trackTreesComponent.innerTree.refresh = function (newData, selectedId) {
@@ -546,7 +542,7 @@ class Timeline {
             ctx.fillRect(0, treeOffset - rectsOffset + i * line_height, w, line_height);
         }
         // bg lines
-        ctx.strokeStyle = Timeline.TRACK_COLOR_TERCIARY;
+        ctx.strokeStyle = Timeline.TRACK_COLOR_TERTIARY;
         ctx.beginPath();
         let pos = this.timeToX(0);
         if (pos < 0)
@@ -1220,8 +1216,8 @@ class Timeline {
         const treeTracks = [];
         for (let i = 0; i < this.selectedItems.length; i++) {
             const track = this.selectedItems[i];
-            treeTracks.push({ trackData: track, id: track.id, skipVisibility: this.skipVisibility,
-                visible: track.active, children: [], actions: this.skipLock ? null : [{
+            treeTracks.push({ trackData: track, id: track.id, skipVisibility: this.skipVisibility, visible: track.active, children: [],
+                actions: this.skipLock ? null : [{
                         'name': 'Lock edition',
                         'icon': (track.locked ? 'TimelineLock' : 'TimelineLockOpen'),
                         'swap': (track.locked ? 'TimelineLockOpen' : 'TimelineLock'),
@@ -1263,30 +1259,29 @@ class Timeline {
         return animationClip;
     }
 }
-Timeline.BACKGROUND_COLOR = LX.getThemeColor('global-blur-background');
-Timeline.TRACK_COLOR_PRIMARY = LX.getThemeColor('global-color-primary');
-Timeline.TRACK_COLOR_SECONDARY = LX.getThemeColor('global-color-secondary');
-Timeline.TRACK_COLOR_TERCIARY = LX.getThemeColor('global-color-terciary');
-Timeline.TRACK_COLOR_QUATERNARY = LX.getThemeColor('global-color-quaternary');
-Timeline.TRACK_SELECTED = LX.getThemeColor('global-color-accent');
-Timeline.TRACK_SELECTED_LIGHT = LX.getThemeColor('global-color-accent-light');
-Timeline.FONT = LX.getThemeColor('global-font');
-Timeline.FONT_COLOR_PRIMARY = LX.getThemeColor('global-text-primary');
-Timeline.FONT_COLOR_TERTIARY = LX.getThemeColor('global-text-tertiary');
-Timeline.FONT_COLOR_QUATERNARY = LX.getThemeColor('global-text-quaternary');
-Timeline.TIME_MARKER_COLOR = LX.getThemeColor('global-color-accent');
+Timeline.BACKGROUND_COLOR = LX.getCSSVariable('background-blur');
+Timeline.TRACK_COLOR_PRIMARY = LX.getCSSVariable('card');
+Timeline.TRACK_COLOR_SECONDARY = LX.getCSSVariable('secondary');
+Timeline.TRACK_COLOR_TERTIARY = LX.getCSSVariable('accent');
+Timeline.TRACK_SELECTED = LX.getCSSVariable('color-blue-600');
+Timeline.TRACK_SELECTED_LIGHT = LX.getCSSVariable('color-blue-400');
+Timeline.FONT = LX.getCSSVariable('global-font');
+Timeline.FONT_COLOR_PRIMARY = LX.getCSSVariable('foreground');
+Timeline.FONT_COLOR_TERTIARY = LX.getCSSVariable('primary');
+Timeline.FONT_COLOR_QUATERNARY = LX.getCSSVariable('muted-foreground');
+Timeline.TIME_MARKER_COLOR = LX.getCSSVariable('color-blue-600');
 Timeline.TIME_MARKER_COLOR_TEXT = '#ffffff';
-LX.setThemeColor('lxTimeline-keyframe', 'light-dark(#2d69da,#2d69da )');
-LX.setThemeColor('lxTimeline-keyframe-selected', 'light-dark(#f5c700,#fafa14)');
-LX.setThemeColor('lxTimeline-keyframe-hovered', 'light-dark(#f5c700,#fafa14)');
-LX.setThemeColor('lxTimeline-keyframe-locked', 'light-dark(#c62e2e,#ff7d7d )');
-LX.setThemeColor('lxTimeline-keyframe-edited', 'light-dark(#00d000,#00d000 )');
-LX.setThemeColor('lxTimeline-keyframe-inactive', 'light-dark(#706b6b,#706b6b)');
-Timeline.KEYFRAME_COLOR = LX.getThemeColor('lxTimeline-keyframe');
-Timeline.KEYFRAME_COLOR_SELECTED = Timeline.KEYFRAME_COLOR_HOVERED = LX.getThemeColor('lxTimeline-keyframe-selected');
-Timeline.KEYFRAME_COLOR_LOCK = LX.getThemeColor('lxTimeline-keyframe-locked');
-Timeline.KEYFRAME_COLOR_EDITED = LX.getThemeColor('lxTimeline-keyframe-edited');
-Timeline.KEYFRAME_COLOR_INACTIVE = LX.getThemeColor('lxTimeline-keyframe-inactive');
+LX.setCSSVariable('lxTimeline-keyframe', 'light-dark(#2d69da,#2d69da )');
+LX.setCSSVariable('lxTimeline-keyframe-selected', 'light-dark(#f5c700,#fafa14)');
+LX.setCSSVariable('lxTimeline-keyframe-hovered', 'light-dark(#f5c700,#fafa14)');
+LX.setCSSVariable('lxTimeline-keyframe-locked', 'light-dark(#c62e2e,#ff7d7d )');
+LX.setCSSVariable('lxTimeline-keyframe-edited', 'light-dark(#00d000,#00d000 )');
+LX.setCSSVariable('lxTimeline-keyframe-inactive', 'light-dark(#706b6b,#706b6b)');
+Timeline.KEYFRAME_COLOR = LX.getCSSVariable('lxTimeline-keyframe');
+Timeline.KEYFRAME_COLOR_SELECTED = Timeline.KEYFRAME_COLOR_HOVERED = LX.getCSSVariable('lxTimeline-keyframe-selected');
+Timeline.KEYFRAME_COLOR_LOCK = LX.getCSSVariable('lxTimeline-keyframe-locked');
+Timeline.KEYFRAME_COLOR_EDITED = LX.getCSSVariable('lxTimeline-keyframe-edited');
+Timeline.KEYFRAME_COLOR_INACTIVE = LX.getCSSVariable('lxTimeline-keyframe-inactive');
 Timeline.BOX_SELECTION_COLOR = '#AAA';
 LX.Timeline = Timeline;
 /**
@@ -1428,8 +1423,8 @@ class KeyFramesTimeline extends Timeline {
             const nodes = [];
             for (let j = 0; j < itemTracks.length; j++) {
                 const track = itemTracks[j];
-                nodes.push({ 'trackData': track, 'id': track.id, 'skipVisibility': this.skipVisibility,
-                    visible: track.active, 'children': [], actions: this.skipLock ? null : [{
+                nodes.push({ 'trackData': track, 'id': track.id, 'skipVisibility': this.skipVisibility, visible: track.active, 'children': [],
+                    actions: this.skipLock ? null : [{
                             'name': 'Lock edition',
                             'icon': (track.locked ? 'TimelineLock' : 'TimelineLockOpen'),
                             'swap': (track.locked ? 'TimelineLockOpen' : 'TimelineLock'),
@@ -2001,17 +1996,15 @@ class KeyFramesTimeline extends Timeline {
         if (keyframes.length > 1) {
             let startPosX = this.timeToX(keyframes[0]);
             let startValue = values[0];
-            startValue =
-                LX.clamp((startValue - valueRange[0]) / (valueRange[1] - valueRange[0]), 0, 1) * (-displayRange)
-                    + (trackHeight - defaultPointSize); // normalize and offset
+            startValue = LX.clamp((startValue - valueRange[0]) / (valueRange[1] - valueRange[0]), 0, 1) * (-displayRange)
+                + (trackHeight - defaultPointSize); // normalize and offset
             ctx.moveTo(startPosX, startValue);
             for (let j = 1; j < keyframes.length; ++j) {
                 let time = keyframes[j];
                 let keyframePosX = this.timeToX(time);
                 let value = values[j];
-                value =
-                    LX.clamp((value - valueRange[0]) / (valueRange[1] - valueRange[0]), 0, 1) * (-displayRange)
-                        + (trackHeight - defaultPointSize); // normalize and offset
+                value = LX.clamp((value - valueRange[0]) / (valueRange[1] - valueRange[0]), 0, 1) * (-displayRange)
+                    + (trackHeight - defaultPointSize); // normalize and offset
                 if (time < startTime) {
                     ctx.moveTo(keyframePosX, value);
                     continue;
@@ -2911,7 +2904,7 @@ class ClipsTimeline extends Timeline {
             duration: options.duration ?? 1,
             fadein: options.fadein ?? undefined,
             fadeout: options.fadeout ?? undefined,
-            clipColor: options.clipColor ?? LX.getThemeColor('global-color-accent'),
+            clipColor: options.clipColor ?? LX.getCSSVariable('color-blue-600'),
             fadeColor: options.fadeColor ?? null,
             active: options.active ?? true,
             trackIdx: -1 // filled by addClip
@@ -3390,8 +3383,7 @@ class ClipsTimeline extends Timeline {
                 }
                 if (clip.fadeout != undefined) {
                     const fadeoutX = this.pixelsPerSecond * (clip.start + clip.duration - (clip.fadeout));
-                    drawRoundRect(ctx, x + w - fadeoutX, y + offset, fadeoutX, trackHeight, { tl: 0, bl: 0, tr: 5,
-                        br: 5 }, true);
+                    drawRoundRect(ctx, x + w - fadeoutX, y + offset, fadeoutX, trackHeight, { tl: 0, bl: 0, tr: 5, br: 5 }, true);
                 }
             }
             ctx.fillStyle = Timeline.TRACK_COLOR_PRIMARY;

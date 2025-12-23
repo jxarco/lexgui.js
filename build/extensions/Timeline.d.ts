@@ -1,7 +1,6 @@
 declare const Area: any;
 declare const Panel: any;
 declare const Dialog: any;
-declare const TreeEvent: any;
 type Nullable<T> = T | null | undefined;
 /**
  * @class Timeline
@@ -12,8 +11,7 @@ export declare abstract class Timeline {
     static BACKGROUND_COLOR: string;
     static TRACK_COLOR_PRIMARY: string;
     static TRACK_COLOR_SECONDARY: string;
-    static TRACK_COLOR_TERCIARY: string;
-    static TRACK_COLOR_QUATERNARY: string;
+    static TRACK_COLOR_TERTIARY: string;
     static TRACK_SELECTED: string;
     static TRACK_SELECTED_LIGHT: string;
     static FONT: string;
@@ -92,7 +90,7 @@ export declare abstract class Timeline {
     onShowContextMenu: Nullable<(event: any) => void>;
     onAddNewTrackButton: Nullable<() => void>;
     onAddNewTrack: Nullable<(track: any, options: any) => void>;
-    onTrackTreeEvent: Nullable<(event: typeof TreeEvent) => void>;
+    onTrackTreeEvent: Nullable<(event: any) => void>;
     onBeforeDrawContent: Nullable<(ctx: CanvasRenderingContext2D) => void>;
     onStateStop: Nullable<() => void>;
     onStateChange: Nullable<(s: boolean) => void>;

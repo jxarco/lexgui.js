@@ -6,16 +6,19 @@ if (!LX) {
     throw ('Missing LX namespace!');
 }
 LX.extensions.push('DocMaker');
-const CPP_KEY_WORDS = ['int', 'float', 'double', 'bool', 'char', 'wchar_t', 'const', 'static_cast', 'dynamic_cast',
-    'new', 'delete', 'void', 'true', 'false', 'auto', 'struct', 'typedef', 'nullptr', 'NULL', 'unsigned', 'namespace',
-    'auto'];
+const CPP_KEY_WORDS = ['int', 'float', 'double', 'bool', 'char', 'wchar_t', 'const', 'static_cast', 'dynamic_cast', 'new', 'delete', 'void', 'true',
+    'false', 'auto', 'struct', 'typedef', 'nullptr', 'NULL', 'unsigned', 'namespace', 'auto'];
 const CLASS_WORDS = ['uint32_t', 'uint64_t', 'uint8_t'];
-const STATEMENT_WORDS = ['for', 'if', 'else', 'return', 'continue', 'break', 'case', 'switch', 'while', 'import',
-    'from', 'await'];
-const JS_KEY_WORDS = ['var', 'let', 'const', 'static', 'function', 'null', 'undefined', 'new', 'delete', 'true',
-    'false', 'NaN', 'this'];
+const STATEMENT_WORDS = ['for', 'if', 'else', 'return', 'continue', 'break', 'case', 'switch', 'while', 'import', 'from', 'await'];
+const JS_KEY_WORDS = ['var', 'let', 'const', 'static', 'function', 'null', 'undefined', 'new', 'delete', 'true', 'false', 'NaN', 'this'];
 const HTML_ATTRIBUTES = ['html', 'charset', 'rel', 'src', 'href', 'crossorigin', 'type', 'lang'];
-const HTML_TAGS = ['html', 'DOCTYPE', 'head', 'meta', 'title', 'link', 'script', 'body', 'style'];
+const HTML_TAGS = ['DOCTYPE', 'html', 'head', 'body', 'title', 'base', 'link', 'meta', 'style', 'main', 'section', 'nav', 'article', 'aside',
+    'header', 'footer', 'address', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'hr', 'pre', 'blockquote', 'ol', 'ul', 'li', 'dl', 'dt', 'dd', 'figure',
+    'figcaption', 'div', 'a', 'abbr', 'b', 'bdi', 'bdo', 'br', 'cite', 'code', 'data', 'dfn', 'em', 'i', 'kbd', 'mark', 'q', 'rp', 'rt', 'ruby', 's',
+    'samp', 'small', 'span', 'strong', 'sub', 'sup', 'time', 'u', 'var', 'wbr', 'img', 'audio', 'video', 'source', 'track', 'picture', 'map', 'area',
+    'canvas', 'iframe', 'embed', 'object', 'param', 'form', 'label', 'input', 'button', 'select', 'datalist', 'optgroup', 'option', 'textarea',
+    'output', 'progress', 'meter', 'fieldset', 'legend', 'table', 'caption', 'colgroup', 'col', 'tbody', 'thead', 'tfoot', 'tr', 'td', 'th',
+    'details', 'summary', 'dialog', 'script', 'noscript', 'template'];
 class DocMaker {
     root;
     _listQueued = undefined;
@@ -246,9 +249,9 @@ class DocMaker {
     }
     note(text, warning = false, title, icon) {
         console.assert(text !== undefined);
-        const note = LX.makeContainer([], 'border rounded-lg overflow-hidden text-md fg-secondary my-6', '', this.root);
+        const note = LX.makeContainer([], 'border-color rounded-xl overflow-hidden text-sm text-secondary-foreground my-6', '', this.root);
         let header = document.createElement('div');
-        header.className = 'flex bg-tertiary font-semibold px-3 py-2 gap-2 fg-secondary';
+        header.className = 'flex bg-muted font-semibold px-3 py-2 gap-2 text-secondary-foreground';
         header.appendChild(LX.makeIcon(icon ?? (warning ? 'MessageSquareWarning' : 'NotepadText')));
         header.innerHTML += title ?? (warning ? 'Important' : 'Note');
         note.appendChild(header);
@@ -291,7 +294,7 @@ class DocMaker {
     }
     iLink(text, href) {
         console.assert(text !== undefined && href !== undefined);
-        return `<a href="${href}">${text}</a>`;
+        return `<a class="font-semibold underline-offset-4 hover:underline" href="${href}">${text}</a>`;
     }
     iPage(text, page) {
         console.assert(text !== undefined && page !== undefined);

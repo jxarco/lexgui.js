@@ -606,7 +606,7 @@ class GraphEditor {
         if (hasInputs) {
             const nodeInputs = document.createElement('div');
             nodeInputs.classList.add('lexgraphnodeinputs');
-            nodeInputs.style.width = hasOutputs ? '50%' : '100%';
+            // nodeInputs.style.width = hasOutputs ? '50%' : '100%';
             nodeIO.appendChild(nodeInputs);
             for (let i of node.inputs) {
                 if (!i.type) {
@@ -626,10 +626,7 @@ class GraphEditor {
                 typeDesc.innerHTML = i.type;
                 input.appendChild(typeDesc);
                 if (i.name) {
-                    var name = document.createElement('span');
-                    name.classList.add('io__name');
-                    name.innerText = i.name;
-                    input.appendChild(name);
+                    LX.makeElement('span', 'io__name', i.name, input);
                 }
                 nodeInputs.appendChild(input);
             }
@@ -638,7 +635,7 @@ class GraphEditor {
         if (hasOutputs) {
             const nodeOutputs = document.createElement('div');
             nodeOutputs.classList.add('lexgraphnodeoutputs');
-            nodeOutputs.style.width = hasInputs ? '50%' : '100%';
+            // nodeOutputs.style.width = hasInputs ? '50%' : '100%';
             nodeIO.appendChild(nodeOutputs);
             for (let o of node.outputs) {
                 if (!o.type) {
@@ -2354,8 +2351,7 @@ LX.GraphFunction = GraphFunction;
 class NodeFuncInput extends GraphNode {
     onCreate() {
         this.addOutput(null, 'float');
-        this.addProperty('Outputs', 'array', ['float'], ['float', 'int', 'bool', 'vec2', 'vec3', 'vec4',
-            'mat44']);
+        this.addProperty('Outputs', 'array', ['float'], ['float', 'int', 'bool', 'vec2', 'vec3', 'vec4', 'mat44']);
     }
     onExecute() {
         // var a = this.getInput( 0 ) ?? this.properties[ 0 ].value;
@@ -2587,8 +2583,7 @@ class NodeCompare extends GraphNode {
         this.addInput('B', 'any');
         this.addInput('True', 'any');
         this.addInput('False', 'any');
-        this.addProperty('Condition', 'select', 'Equal', ['Equal', 'Not Equal', 'Less', 'Less Equal', 'Greater',
-            'Greater Equal']);
+        this.addProperty('Condition', 'select', 'Equal', ['Equal', 'Not Equal', 'Less', 'Less Equal', 'Greater', 'Greater Equal']);
         this.addOutput(null, 'any');
     }
     onExecute() {
@@ -2621,8 +2616,7 @@ class NodeCompare extends GraphNode {
         this.setOutput(0, output);
     }
 }
-NodeCompare.description =
-    'Compare A to B given the selected operator. If true, return value of True else return value of False.';
+NodeCompare.description = 'Compare A to B given the selected operator. If true, return value of True else return value of False.';
 GraphEditor.registerCustomNode('logic/Compare', NodeCompare);
 /*
     Event nodes

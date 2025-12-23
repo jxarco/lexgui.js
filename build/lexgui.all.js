@@ -1,9 +1,9 @@
 // This is a generated file. Do not edit.
 (function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
-    typeof define === 'function' && define.amd ? define(['exports'], factory) :
-    (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.lexgui = {}));
-})(this, (function (exports) { 'use strict';
+    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('https://cdn.jsdelivr.net/npm/tailwind-merge@3.4.0/+esm')) :
+    typeof define === 'function' && define.amd ? define(['exports', 'https://cdn.jsdelivr.net/npm/tailwind-merge@3.4.0/+esm'], factory) :
+    (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.lexgui = {}, global.twMerge));
+})(this, (function (exports, _esm) { 'use strict';
 
     // Namespace.ts @jxarco
     /**
@@ -16,7 +16,7 @@
     exports.LX = g$2.LX;
     if (!exports.LX) {
         exports.LX = {
-            version: '8.1.2',
+            version: '8.2',
             ready: false,
             extensions: [], // Store extensions used
             extraCommandbarEntries: [], // User specific entries for command bar
@@ -127,8 +127,7 @@
             'M432 48L208 48c-17.7 0-32 14.3-32 32l0 16-48 0 0-16c0-44.2 35.8-80 80-80L432 0c44.2 0 80 35.8 80 80l0 224c0 44.2-35.8 80-80 80l-16 0 0-48 16 0c17.7 0 32-14.3 32-32l0-224c0-17.7-14.3-32-32-32zM48 448c0 8.8 7.2 16 16 16l256 0c8.8 0 16-7.2 16-16l0-192L48 256l0 192zM64 128l256 0c35.3 0 64 28.7 64 64l0 256c0 35.3-28.7 64-64 64L64 512c-35.3 0-64-28.7-64-64L0 192c0-35.3 28.7-64 64-64z'],
         'WindowMaximize': [512, 512, [], 'solid',
             'M.3 89.5C.1 91.6 0 93.8 0 96L0 224 0 416c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-192 0-128c0-35.3-28.7-64-64-64L64 32c-2.2 0-4.4 .1-6.5 .3c-9.2 .9-17.8 3.8-25.5 8.2C21.8 46.5 13.4 55.1 7.7 65.5c-3.9 7.3-6.5 15.4-7.4 24zM48 224l416 0 0 192c0 8.8-7.2 16-16 16L64 432c-8.8 0-16-7.2-16-16l0-192z'],
-        'WindowMinimize': [512, 512, [], 'solid',
-            'M24 432c-13.3 0-24 10.7-24 24s10.7 24 24 24l464 0c13.3 0 24-10.7 24-24s-10.7-24-24-24L24 432z'],
+        'WindowMinimize': [512, 512, [], 'solid', 'M24 432c-13.3 0-24 10.7-24 24s10.7 24 24 24l464 0c13.3 0 24-10.7 24-24s-10.7-24-24-24L24 432z'],
         'VrCardboard': [640, 512, ['VR'], 'solid',
             'M576 64L64 64C28.7 64 0 92.7 0 128L0 384c0 35.3 28.7 64 64 64l120.4 0c24.2 0 46.4-13.7 57.2-35.4l32-64c8.8-17.5 26.7-28.6 46.3-28.6s37.5 11.1 46.3 28.6l32 64c10.8 21.7 33 35.4 57.2 35.4L576 448c35.3 0 64-28.7 64-64l0-256c0-35.3-28.7-64-64-64zM96 240a64 64 0 1 1 128 0A64 64 0 1 1 96 240zm384-64a64 64 0 1 1 0 128 64 64 0 1 1 0-128z'],
         'C': [32, 32, [], 'solid',
@@ -174,8 +173,7 @@
             'M0 256C0 114.6 114.6 0 256 0S512 114.6 512 256s-114.6 256-256 256L37.1 512c-13.7 0-20.5-16.5-10.9-26.2L75 437C28.7 390.7 0 326.7 0 256zM349.6 153.6c23.6 0 42.7-19.1 42.7-42.7s-19.1-42.7-42.7-42.7c-20.6 0-37.8 14.6-41.8 34c-34.5 3.7-61.4 33-61.4 68.4l0 .2c-37.5 1.6-71.8 12.3-99 29.1c-10.1-7.8-22.8-12.5-36.5-12.5c-33 0-59.8 26.8-59.8 59.8c0 24 14.1 44.6 34.4 54.1c2 69.4 77.6 125.2 170.6 125.2s168.7-55.9 170.6-125.3c20.2-9.6 34.1-30.2 34.1-54c0-33-26.8-59.8-59.8-59.8c-13.7 0-26.3 4.6-36.4 12.4c-27.4-17-62.1-27.7-100-29.1l0-.2c0-25.4 18.9-46.5 43.4-49.9l0 0c4.4 18.8 21.3 32.8 41.5 32.8zM177.1 246.9c16.7 0 29.5 17.6 28.5 39.3s-13.5 29.6-30.3 29.6s-31.4-8.8-30.4-30.5s15.4-38.3 32.1-38.3zm190.1 38.3c1 21.7-13.7 30.5-30.4 30.5s-29.3-7.9-30.3-29.6c-1-21.7 11.8-39.3 28.5-39.3s31.2 16.6 32.1 38.3zm-48.1 56.7c-10.3 24.6-34.6 41.9-63 41.9s-52.7-17.3-63-41.9c-1.2-2.9 .8-6.2 3.9-6.5c18.4-1.9 38.3-2.9 59.1-2.9s40.7 1 59.1 2.9c3.1 .3 5.1 3.6 3.9 6.5z'],
         'Rust': [512, 512, [], 'solid',
             'M508.52,249.75,486.7,236.24c-.17-2-.34-3.93-.55-5.88l18.72-17.5a7.35,7.35,0,0,0-2.44-12.25l-24-9c-.54-1.88-1.08-3.78-1.67-5.64l15-20.83a7.35,7.35,0,0,0-4.79-11.54l-25.42-4.15c-.9-1.73-1.79-3.45-2.73-5.15l10.68-23.42a7.35,7.35,0,0,0-6.95-10.39l-25.82.91q-1.79-2.22-3.61-4.4L439,81.84A7.36,7.36,0,0,0,430.16,73L405,78.93q-2.17-1.83-4.4-3.61l.91-25.82a7.35,7.35,0,0,0-10.39-7L367.7,53.23c-1.7-.94-3.43-1.84-5.15-2.73L358.4,25.08a7.35,7.35,0,0,0-11.54-4.79L326,35.26c-1.86-.59-3.75-1.13-5.64-1.67l-9-24a7.35,7.35,0,0,0-12.25-2.44l-17.5,18.72c-1.95-.21-3.91-.38-5.88-.55L262.25,3.48a7.35,7.35,0,0,0-12.5,0L236.24,25.3c-2,.17-3.93.34-5.88.55L212.86,7.13a7.35,7.35,0,0,0-12.25,2.44l-9,24c-1.89.55-3.79,1.08-5.66,1.68l-20.82-15a7.35,7.35,0,0,0-11.54,4.79l-4.15,25.41c-1.73.9-3.45,1.79-5.16,2.73L120.88,42.55a7.35,7.35,0,0,0-10.39,7l.92,25.81c-1.49,1.19-3,2.39-4.42,3.61L81.84,73A7.36,7.36,0,0,0,73,81.84L78.93,107c-1.23,1.45-2.43,2.93-3.62,4.41l-25.81-.91a7.42,7.42,0,0,0-6.37,3.26,7.35,7.35,0,0,0-.57,7.13l10.66,23.41c-.94,1.7-1.83,3.43-2.73,5.16L25.08,153.6a7.35,7.35,0,0,0-4.79,11.54l15,20.82c-.59,1.87-1.13,3.77-1.68,5.66l-24,9a7.35,7.35,0,0,0-2.44,12.25l18.72,17.5c-.21,1.95-.38,3.91-.55,5.88L3.48,249.75a7.35,7.35,0,0,0,0,12.5L25.3,275.76c.17,2,.34,3.92.55,5.87L7.13,299.13a7.35,7.35,0,0,0,2.44,12.25l24,9c.55,1.89,1.08,3.78,1.68,5.65l-15,20.83a7.35,7.35,0,0,0,4.79,11.54l25.42,4.15c.9,1.72,1.79,3.45,2.73,5.14L42.56,391.12a7.35,7.35,0,0,0,.57,7.13,7.13,7.13,0,0,0,6.37,3.26l25.83-.91q1.77,2.22,3.6,4.4L73,430.16A7.36,7.36,0,0,0,81.84,439L107,433.07q2.18,1.83,4.41,3.61l-.92,25.82a7.35,7.35,0,0,0,10.39,6.95l23.43-10.68c1.69.94,3.42,1.83,5.14,2.73l4.15,25.42a7.34,7.34,0,0,0,11.54,4.78l20.83-15c1.86.6,3.76,1.13,5.65,1.68l9,24a7.36,7.36,0,0,0,12.25,2.44l17.5-18.72c1.95.21,3.92.38,5.88.55l13.51,21.82a7.35,7.35,0,0,0,12.5,0l13.51-21.82c2-.17,3.93-.34,5.88-.56l17.5,18.73a7.36,7.36,0,0,0,12.25-2.44l9-24c1.89-.55,3.78-1.08,5.65-1.68l20.82,15a7.34,7.34,0,0,0,11.54-4.78l4.15-25.42c1.72-.9,3.45-1.79,5.15-2.73l23.42,10.68a7.35,7.35,0,0,0,10.39-6.95l-.91-25.82q2.22-1.79,4.4-3.61L430.16,439a7.36,7.36,0,0,0,8.84-8.84L433.07,405q1.83-2.17,3.61-4.4l25.82.91a7.23,7.23,0,0,0,6.37-3.26,7.35,7.35,0,0,0,.58-7.13L458.77,367.7c.94-1.7,1.83-3.43,2.73-5.15l25.42-4.15a7.35,7.35,0,0,0,4.79-11.54l-15-20.83c.59-1.87,1.13-3.76,1.67-5.65l24-9a7.35,7.35,0,0,0,2.44-12.25l-18.72-17.5c.21-1.95.38-3.91.55-5.87l21.82-13.51a7.35,7.35,0,0,0,0-12.5Zm-151,129.08A13.91,13.91,0,0,0,341,389.51l-7.64,35.67A187.51,187.51,0,0,1,177,424.44l-7.64-35.66a13.87,13.87,0,0,0-16.46-10.68l-31.51,6.76a187.38,187.38,0,0,1-16.26-19.21H258.3c1.72,0,2.89-.29,2.89-1.91V309.55c0-1.57-1.17-1.91-2.89-1.91H213.47l.05-34.35H262c4.41,0,23.66,1.28,29.79,25.87,1.91,7.55,6.17,32.14,9.06,40,2.89,8.82,14.6,26.46,27.1,26.46H407a187.3,187.3,0,0,1-17.34,20.09Zm25.77,34.49A15.24,15.24,0,1,1,368,398.08h.44A15.23,15.23,0,0,1,383.24,413.32Zm-225.62-.68a15.24,15.24,0,1,1-15.25-15.25h.45A15.25,15.25,0,0,1,157.62,412.64ZM69.57,234.15l32.83-14.6a13.88,13.88,0,0,0,7.06-18.33L102.69,186h26.56V305.73H75.65A187.65,187.65,0,0,1,69.57,234.15ZM58.31,198.09a15.24,15.24,0,0,1,15.23-15.25H74a15.24,15.24,0,1,1-15.67,15.24Zm155.16,24.49.05-35.32h63.26c3.28,0,23.07,3.77,23.07,18.62,0,12.29-15.19,16.7-27.68,16.7ZM399,306.71c-9.8,1.13-20.63-4.12-22-10.09-5.78-32.49-15.39-39.4-30.57-51.4,18.86-11.95,38.46-29.64,38.46-53.26,0-25.52-17.49-41.59-29.4-49.48-16.76-11-35.28-13.23-40.27-13.23H116.32A187.49,187.49,0,0,1,221.21,70.06l23.47,24.6a13.82,13.82,0,0,0,19.6.44l26.26-25a187.51,187.51,0,0,1,128.37,91.43l-18,40.57A14,14,0,0,0,408,220.43l34.59,15.33a187.12,187.12,0,0,1,.4,32.54H423.71c-1.91,0-2.69,1.27-2.69,3.13v8.82C421,301,409.31,305.58,399,306.71ZM240,60.21A15.24,15.24,0,0,1,255.21,45h.45A15.24,15.24,0,1,1,240,60.21ZM436.84,214a15.24,15.24,0,1,1,0-30.48h.44a15.24,15.24,0,0,1-.44,30.48Z'],
-        'Unity': [16, 16, [], 'solid',
-            'M8 6.5L5 5l2-1V2L2 5v5l2-1V6.5L7 8v4.5L4 11l-2 1l6 3l6-3l-2-1l-3 1.5V8l3-1.5V9l2 1V5L9 2v2l2 1Z'],
+        'Unity': [16, 16, [], 'solid', 'M8 6.5L5 5l2-1V2L2 5v5l2-1V6.5L7 8v4.5L4 11l-2 1l6 3l6-3l-2-1l-3 1.5V8l3-1.5V9l2 1V5L9 2v2l2 1Z'],
         'UnrealEngine': [24, 24, [], 'regular',
             'M12 0a12 12 0 1 0 12 12A12 12 0 0 0 12 0m0 23.52A11.52 11.52 0 1 1 23.52 12A11.52 11.52 0 0 1 12 23.52m7.13-9.791c-.206.997-1.126 3.557-4.06 4.942l-1.179-1.325l-1.988 2a7.34 7.34 0 0 1-5.804-2.978a3 3 0 0 0 .65.123c.326.006.678-.114.678-.66v-5.394a.89.89 0 0 0-1.116-.89c-.92.212-1.656 2.509-1.656 2.509a7.3 7.3 0 0 1 2.528-5.597a7.4 7.4 0 0 1 3.73-1.721c-1.006.573-1.57 1.507-1.57 2.29c0 1.262.76 1.109.984.923v7.28a1.2 1.2 0 0 0 .148.256a1.08 1.08 0 0 0 .88.445c.76 0 1.747-.868 1.747-.868V9.172c0-.6-.452-1.324-.905-1.572c0 0 .838-.149 1.484.346a6 6 0 0 1 .387-.425c1.508-1.48 2.929-1.902 4.112-2.112c0 0-2.151 1.69-2.151 3.96c0 1.687.043 5.801.043 5.801c.799.771 1.986-.342 3.059-1.441Z'],
         'UnrealEngine@solid': [24, 24, [], 'solid',
@@ -262,8 +260,7 @@
             'M448 480L64 480c-35.3 0-64-28.7-64-64L0 192l512 0 0 224c0 35.3-28.7 64-64 64zm64-320L0 160 0 96C0 60.7 28.7 32 64 32l128 0c20.1 0 39.1 9.5 51.2 25.6l19.2 25.6c6 8.1 15.5 12.8 25.6 12.8l160 0c35.3 0 64 28.7 64 64z'],
         'Function': [384, 512, [], 'solid',
             'M314.7 32c-38.8 0-73.7 23.3-88.6 59.1L170.7 224 64 224c-17.7 0-32 14.3-32 32s14.3 32 32 32l80 0L98.9 396.3c-5 11.9-16.6 19.7-29.5 19.7L32 416c-17.7 0-32 14.3-32 32s14.3 32 32 32l37.3 0c38.8 0 73.7-23.3 88.6-59.1L213.3 288 320 288c17.7 0 32-14.3 32-32s-14.3-32-32-32l-80 0 45.1-108.3c5-11.9 16.6-19.7 29.5-19.7L352 96c17.7 0 32-14.3 32-32s-14.3-32-32-32l-37.3 0z'],
-        'Stop': [384, 512, [], 'solid',
-            'M0 128C0 92.7 28.7 64 64 64H320c35.3 0 64 28.7 64 64V384c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V128z'],
+        'Stop': [384, 512, [], 'solid', 'M0 128C0 92.7 28.7 64 64 64H320c35.3 0 64 28.7 64 64V384c0 35.3-28.7 64-64 64H64c-35.3 0-64-28.7-64-64V128z'],
         'Image': [512, 512, [], 'solid',
             'M448 80c8.8 0 16 7.2 16 16l0 319.8-5-6.5-136-176c-4.5-5.9-11.6-9.3-19-9.3s-14.4 3.4-19 9.3L202 340.7l-30.5-42.7C167 291.7 159.8 288 152 288s-15 3.7-19.5 10.1l-80 112L48 416.3l0-.3L48 96c0-8.8 7.2-16 16-16l384 0zM64 32C28.7 32 0 60.7 0 96L0 416c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-320c0-35.3-28.7-64-64-64L64 32zm80 192a48 48 0 1 0 0-96 48 48 0 1 0 0 96z'],
         'Images': [576, 512, [], 'solid',
@@ -394,52 +391,6 @@
         }
     };
     exports.LX.IEvent = IEvent$1;
-    class TreeEvent {
-        static NONE = 0;
-        static NODE_SELECTED = 1;
-        static NODE_DELETED = 2;
-        static NODE_DBLCLICKED = 3;
-        static NODE_CONTEXTMENU = 4;
-        static NODE_DRAGGED = 5;
-        static NODE_RENAMED = 6;
-        static NODE_VISIBILITY = 7;
-        static NODE_CARETCHANGED = 8;
-        type = TreeEvent.NONE;
-        node;
-        value;
-        event;
-        multiple = false; // Multiple selection
-        panel = null;
-        constructor(type, node, value, event) {
-            this.type = type || TreeEvent.NONE;
-            this.node = node;
-            this.value = value;
-            this.event = event;
-        }
-        string() {
-            switch (this.type) {
-                case TreeEvent.NONE:
-                    return 'tree_event_none';
-                case TreeEvent.NODE_SELECTED:
-                    return 'tree_event_selected';
-                case TreeEvent.NODE_DELETED:
-                    return 'tree_event_deleted';
-                case TreeEvent.NODE_DBLCLICKED:
-                    return 'tree_event_dblclick';
-                case TreeEvent.NODE_CONTEXTMENU:
-                    return 'tree_event_contextmenu';
-                case TreeEvent.NODE_DRAGGED:
-                    return 'tree_event_dragged';
-                case TreeEvent.NODE_RENAMED:
-                    return 'tree_event_renamed';
-                case TreeEvent.NODE_VISIBILITY:
-                    return 'tree_event_visibility';
-                case TreeEvent.NODE_CARETCHANGED:
-                    return 'tree_event_caretchanged';
-            }
-        }
-    }
-    exports.LX.TreeEvent = TreeEvent;
 
     // BaseComponent.ts @jxarco
     exports.ComponentType = void 0;
@@ -514,17 +465,13 @@
             this.name = name;
             this.options = options;
             this._initialValue = value;
-            const root = document.createElement('div');
-            root.className = 'lexcomponent';
+            const root = exports.LX.makeElement('div', exports.LX.mergeClass('lexcomponent flex flex-row outline-none items-center text-foreground text-sm overflow-hidden min-h-8 pad-sm', options.className));
             this.onResize = () => { };
             if (options.id) {
                 root.id = options.id;
             }
             if (options.title) {
                 root.title = options.title;
-            }
-            if (options.className) {
-                root.className += ' ' + options.className;
             }
             if (type != exports.ComponentType.TITLE) {
                 if (options.width) {
@@ -543,12 +490,10 @@
             }
             if (name != undefined) {
                 if (!(options.hideName ?? false)) {
-                    let domName = document.createElement('div');
-                    domName.className = 'lexcomponentname';
+                    let domName = exports.LX.makeElement('div', 'lexcomponentname flex text-sm text-secondary-foreground justify-between whitespace-nowrap overflow-hidden', name);
                     if (options.justifyName) {
                         domName.classList.add('float-' + options.justifyName);
                     }
-                    domName.innerHTML = name;
                     domName.title = options.title ?? domName.innerHTML;
                     domName.style.width = options.nameWidth || exports.LX.DEFAULT_NAME_WIDTH;
                     domName.style.minWidth = domName.style.width;
@@ -777,7 +722,7 @@
                     wValue.prepend(img);
                 }
                 else {
-                    wValue.innerHTML = `<span>${(newValue ?? '')}</span>`;
+                    wValue.innerHTML = `${(newValue ?? '')}`;
                 }
             };
             this.onResize = (rect) => {
@@ -804,9 +749,10 @@
                     this._trigger(new IEvent$1(name, swapInput ? swapInput.checked : (this.selectable ? v : value), null), callback);
                 }
             };
-            var wValue = document.createElement('button');
+            var wValue = exports.LX.makeElement('button', exports.LX.mergeClass(['lexbutton', 'inline-flex', 'items-center', 'justify-center', 'whitespace-nowrap', 'transition-all', 'disabled:pointer-events-none',
+                'disabled:opacity-50', '[&_svg]:pointer-events-none', 'shrink-0', '[&_svg]:shrink-0', 'outline-none', 'select-none', 'cursor-pointer',
+                'font-medium', 'text-sm', 'border-1', 'h-9', 'px-2', 'overflow-hidden', 'bg-clip-padding'].join(' '), options.buttonClass ?? 'outline'));
             wValue.title = options.tooltip ? '' : (options.title ?? '');
-            wValue.className = 'lexbutton px-3 ' + (options.buttonClass ?? '');
             this.root.appendChild(wValue);
             if (options.selected) {
                 wValue.classList.add('selected');
@@ -824,19 +770,19 @@
                     wValue.prepend(icon);
                 }
                 else {
-                    wValue.innerHTML = `<span>${(value || '')}</span>`;
+                    wValue.innerHTML = `${(value || '')}`;
                     if (iconPosition == 'start') {
-                        wValue.querySelector('span').prepend(icon);
+                        wValue.prepend(icon);
                     }
                     // "end"
                     else {
-                        wValue.querySelector('span').appendChild(icon);
+                        wValue.appendChild(icon);
                     }
                 }
                 wValue.classList.add('justify-center');
             }
             else {
-                wValue.innerHTML = `<span>${(value || '')}</span>`;
+                wValue.innerHTML = `${(value || '')}`;
             }
             if (options.fileInput) {
                 const fileInput = document.createElement('input');
@@ -961,10 +907,9 @@
         focused = false;
         _currentDropdown;
         constructor(items, options = {}) {
-            this.root = document.createElement('div');
-            this.root.className = 'lexmenubar';
+            this.root = exports.LX.makeElement('div', 'lexmenubar size-full bg-background text-foreground inline-flex gap-1 overflow-hidden text-sm font-medium');
             if (options.float) {
-                this.root.style.justifyContent = options.float;
+                this.root.className = exports.LX.mergeClass(this.root.className, `justify-${options.float}`);
             }
             this.items = items ?? [];
             this.createEntries();
@@ -1002,8 +947,7 @@
                     this._resetMenubar(true);
                     entry.classList.add('selected');
                     entry.dataset['built'] = 'true';
-                    this._currentDropdown = exports.LX.addDropdownMenu(entry, item.submenu ?? [], { side: 'bottom', align: 'start',
-                        onBlur: () => {
+                    this._currentDropdown = exports.LX.addDropdownMenu(entry, item.submenu ?? [], { side: 'bottom', align: 'start', onBlur: () => {
                             this._resetMenubar();
                         } });
                 };
@@ -1178,7 +1122,7 @@
                 const title = data.title;
                 const button = new Button(title, data.label, data.callback, {
                     title,
-                    buttonClass: 'bg-none',
+                    buttonClass: 'ghost',
                     disabled: data.disabled,
                     icon: data.icon,
                     hideName: true,
@@ -1211,7 +1155,7 @@
         constructor(area, options = {}) {
             this.onclose = options.onclose;
             let container = document.createElement('div');
-            container.className = 'lexareatabs ' + (options.fit ? 'fit' : 'row');
+            container.className = 'lexareatabs flex flex-row w-fit ' + (options.fit ? 'fit' : 'row');
             const folding = options.folding ?? false;
             if (folding)
                 container.classList.add('folding');
@@ -1273,16 +1217,15 @@
                 that.tabs[tabDom.dataset['name']] = content;
             });
             area.root.classList.add('lexareatabscontainer');
-            const [tabButtons, content] = area.split({ type: 'vertical', sizes: options.sizes ?? 'auto', resize: false,
-                top: 2 });
+            const [tabButtons, content] = area.split({ type: 'vertical', sizes: options.sizes ?? 'auto', resize: false, top: 2 });
             tabButtons.attach(container);
             if (options.parentClass && container.parentElement) {
-                container.parentElement.className += ` ${options.parentClass}`;
+                container.parentElement.className = exports.LX.mergeClass(container.parentElement.className, options.parentClass);
             }
             this.area = content;
             this.area.root.className += ' lexareatabscontent';
             if (options.contentClass) {
-                this.area.root.className += ` ${options.contentClass}`;
+                this.area.root.className = exports.LX.mergeClass(this.area.root.className, options.contentClass);
             }
             this.selected = null;
             this.root = container;
@@ -1341,8 +1284,7 @@
             if (options.icon) {
                 if (!options.icon.includes('.')) { // Not a file
                     const classes = options.icon.split(' ');
-                    options.icon =
-                        exports.LX.makeIcon(classes[0], { svgClass: 'sm ' + classes.slice(0).join(' ') }).innerHTML;
+                    options.icon = exports.LX.makeIcon(classes[0], { svgClass: 'sm ' + classes.slice(0).join(' ') }).innerHTML;
                 }
                 // an image..
                 else {
@@ -1377,10 +1319,9 @@
                 e.stopPropagation();
                 const scope = tabEl.instance;
                 if (!tabEl.fixed) {
-                    // For folding tabs
                     const lastValue = tabEl.selected;
                     tabEl.parentElement.querySelectorAll('span').forEach((s) => s.selected = false);
-                    tabEl.selected = !lastValue || (tabEl._forceSelect ? true : false);
+                    tabEl.selected = (scope.folding ? !lastValue : true) || (tabEl._forceSelect ? true : false);
                     // Manage selected
                     tabEl.parentElement.querySelectorAll('span').forEach((s) => s.classList.remove('selected'));
                     tabEl.classList.toggle('selected', tabEl.selected);
@@ -1523,9 +1464,7 @@
             var container = document.createElement('div');
             container.className = 'lexnumber';
             this.root.appendChild(container);
-            let box = document.createElement('div');
-            box.className = 'numberbox';
-            container.appendChild(box);
+            let box = exports.LX.makeElement('div', 'numberbox relative flex flex-col w-full bg-secondary rounded-lg scrollbar-hidden overflow-x-hidden', '', container);
             let valueBox = exports.LX.makeContainer(['auto', '100%'], 'relative flex flex-row cursor-text', '', box);
             let vecinput = document.createElement('input');
             vecinput.id = 'number_' + exports.LX.guidGenerator();
@@ -1543,7 +1482,7 @@
             const dragIcon = exports.LX.makeIcon('MoveVertical', { iconClass: 'drag-icon hidden-opacity', svgClass: 'sm' });
             valueBox.appendChild(dragIcon);
             if (options.units) {
-                let unitBox = exports.LX.makeContainer(['auto', 'auto'], 'px-2 bg-secondary content-center', options.units, valueBox, { 'word-break': 'keep-all' });
+                let unitBox = exports.LX.makeContainer(['auto', 'auto'], 'px-2 bg-card content-center break-keep', options.units, valueBox);
                 vecinput.unitBox = unitBox;
             }
             if (options.disabled) {
@@ -1704,8 +1643,7 @@
             this.disabled = (options.disabled || options.warning) ?? (options.url ? true : false);
             let wValue = null;
             if (!this.disabled) {
-                wValue = document.createElement('input');
-                wValue.className = 'lextext ' + (options.inputClass ?? '');
+                wValue = exports.LX.makeElement('input', exports.LX.mergeClass('lextext text-sm', options.inputClass));
                 wValue.type = options.type || '';
                 wValue.value = value || '';
                 wValue.style.textAlign = options.float ?? '';
@@ -1757,10 +1695,10 @@
                 wValue.disabled = true;
                 wValue.value = value;
                 wValue.style.textAlign = options.float ?? '';
-                wValue.className = 'lextext ellipsis-overflow ' + (options.inputClass ?? '');
+                wValue.className = exports.LX.mergeClass('lextext ellipsis-overflow', options.inputClass);
             }
             if (options.fit) {
-                wValue.classList.add('size-content');
+                wValue.classList.add('field-sizing-content');
             }
             Object.assign(wValue.style, options.style ?? {});
             container.appendChild(wValue);
@@ -1784,7 +1722,7 @@
             this.onSetValue = (newValue, skipCallback, event) => {
                 value = newValue;
                 let item = null;
-                const listOptionsNodes = listOptions.childNodes;
+                const listOptionsNodes = list.childNodes;
                 listOptionsNodes.forEach((e) => {
                     e.classList.remove('selected');
                     if (e.getAttribute('value') == newValue) {
@@ -1885,8 +1823,9 @@
                         const parentRect = overflowContainer.getBoundingClientRect();
                         maxX = parentRect.x + parentRect.width;
                     }
-                    const showLeft = (leftPosition + listWidth) > maxX;
-                    if (showLeft) {
+                    // "align" basically forces left-right alignment
+                    const showLeft = (options.align === 'end') || (leftPosition + listWidth) > maxX;
+                    if (showLeft && (options.align ? options.align !== 'start' : true)) {
                         parent.style.left = (leftPosition - (listWidth - rect.width)) + 'px';
                     }
                 }
@@ -1908,17 +1847,17 @@
                 if (filter) {
                     filter.root.querySelector('input').focus();
                 }
-            }, { buttonClass: 'array', skipInlineCount: true, disabled: options.disabled });
+            }, { buttonClass: 'outline [&_a]:ml-auto', skipInlineCount: true, disabled: options.disabled });
             selectedOption.root.style.width = '100%';
-            selectedOption.root.querySelector('span').appendChild(exports.LX.makeIcon('Down', { svgClass: 'sm' }));
+            selectedOption.root.querySelector('button').appendChild(exports.LX.makeIcon('Down', { svgClass: 'sm' }));
             container.appendChild(selectedOption.root);
             selectedOption.refresh = (v) => {
-                const buttonSpan = selectedOption.root.querySelector('span');
-                if (buttonSpan.innerText == '') {
-                    buttonSpan.innerText = v;
+                const button = selectedOption.root.querySelector('button');
+                if (button.innerText == '') {
+                    button.innerText = v;
                 }
                 else {
-                    buttonSpan.innerHTML = buttonSpan.innerHTML.replaceAll(buttonSpan.innerText, v);
+                    button.innerHTML = button.innerHTML.replaceAll(button.innerText, v);
                 }
             };
             // Add select options container
@@ -1969,14 +1908,12 @@
                 });
                 list.appendChild(filter.root);
             }
-            // Create option list to empty it easily..
-            const listOptions = document.createElement('span');
-            listOptions.className = 'lexselectinnerlist';
-            list.appendChild(listOptions);
             // Add select options list
             list.refresh = (currentOptions) => {
                 // Empty list
-                listOptions.innerHTML = '';
+                while (list.childElementCount > (options.filter ?? false ? 1 : 0)) {
+                    list.removeChild(list.lastChild);
+                }
                 if (!currentOptions.length) {
                     let iValue = options.emptyMsg ?? 'No options found.';
                     let option = document.createElement('div');
@@ -1985,7 +1922,7 @@
                     let li = document.createElement('li');
                     li.className = 'lexselectitem empty';
                     li.appendChild(option);
-                    listOptions.appendChild(li);
+                    list.appendChild(li);
                     return;
                 }
                 for (let i = 0; i < currentOptions.length; i++) {
@@ -2003,7 +1940,7 @@
                     if (iValue.constructor != Object) {
                         const asLabel = iValue[0] === '@';
                         if (!asLabel) {
-                            option.innerHTML = `<span>${iValue}</span>`;
+                            option.innerHTML = `<span class="flex flex-row justify-between">${iValue}</span>`;
                             option.appendChild(exports.LX.makeIcon('Check'));
                             option.value = iValue;
                             li.setAttribute('value', iValue);
@@ -2035,14 +1972,13 @@
                             li.classList.add('selected');
                         }
                     }
-                    listOptions.appendChild(li);
+                    list.appendChild(li);
                 }
             };
             list.refresh(values);
             container.appendChild(listDialog);
             // Element suboptions
-            let suboptions = document.createElement('div');
-            suboptions.className = 'lexcustomcontainer w-full';
+            let suboptions = exports.LX.makeElement('div', 'lexcustomcontainer w-full');
             const suboptionsFunc = options[`on_${value}`];
             suboptions.toggleAttribute('hidden', !suboptionsFunc);
             if (suboptionsFunc) {
@@ -2085,7 +2021,7 @@
     class ArrayInput extends BaseComponent$1 {
         _updateItems;
         constructor(name, values = [], callback, options = {}) {
-            options.nameWidth = '100%';
+            options.nameWidth = 'auto';
             super(exports.ComponentType.ARRAY, name, null, options);
             this.onGetValue = () => {
                 return values;
@@ -2099,16 +2035,16 @@
             };
             // Add open array button
             let container = document.createElement('div');
-            container.className = 'lexarray';
-            container.style.width = '100%';
+            container.className = 'lexarray shrink-1 grow-1 ml-4';
+            container.style.width = 'auto';
             this.root.appendChild(container);
             this.root.dataset['opened'] = false;
             let buttonName = `Array (size ${values.length})`;
             const toggleButton = new Button(null, buttonName, () => {
                 this.root.dataset['opened'] = this.root.dataset['opened'] == 'true' ? false : true;
                 this.root.querySelector('.lexarrayitems').toggleAttribute('hidden');
-            }, { buttonClass: 'array' });
-            toggleButton.root.querySelector('span').appendChild(exports.LX.makeIcon('Down', { svgClass: 'sm' }));
+            }, { buttonClass: 'outline [&_a]:ml-auto' });
+            toggleButton.root.querySelector('button').appendChild(exports.LX.makeIcon('Down', { svgClass: 'sm' }));
             container.appendChild(toggleButton.root);
             // Show elements
             let arrayItems = document.createElement('div');
@@ -2117,8 +2053,8 @@
             this.root.appendChild(arrayItems);
             this._updateItems = () => {
                 // Update num items
-                let buttonSpan = this.root.querySelector('.lexbutton.array span');
-                for (let node of buttonSpan.childNodes) {
+                let button = this.root.querySelector('button');
+                for (let node of button.childNodes) {
                     if (node.nodeType === Node.TEXT_NODE) {
                         node.textContent = `Array (size ${values.length})`;
                         break;
@@ -2156,14 +2092,14 @@
                         values.splice(values.indexOf(value), 1);
                         this._updateItems();
                         this._trigger(new IEvent$1(name, values, event), callback);
-                    }, { title: 'Remove item', icon: 'Trash3' });
+                    }, { buttonClass: 'ghost xs p-0', title: 'Remove item', icon: 'Trash2' });
                     component.root.appendChild(removeComponent.root);
                 }
                 const addButton = new Button(null, exports.LX.makeIcon('Plus', { svgClass: 'sm' }).innerHTML + 'Add item', (v, event) => {
                     values.push(options.innerValues ? options.innerValues[0] : '');
                     this._updateItems();
                     this._trigger(new IEvent$1(name, values, event), callback);
-                }, { buttonClass: 'array' });
+                }, { buttonClass: 'ghost' });
                 arrayItems.appendChild(addButton.root);
             };
             this._updateItems();
@@ -2181,22 +2117,22 @@
             options.hideName = true;
             super(exports.ComponentType.CARD, name, null, options);
             this.root.classList.add('place-content-center');
-            const container = exports.LX.makeContainer(['100%', 'auto'], 'lexcard max-w-sm flex flex-col gap-4 bg-primary border rounded-xl py-6', '', this.root);
+            const container = exports.LX.makeContainer(['100%', 'auto'], 'lexcard max-w-sm flex flex-col gap-4 bg-card border-color rounded-xl py-6', '', this.root);
             if (options.header) {
                 const hasAction = options.header.action !== undefined;
                 let header = exports.LX.makeContainer(['100%', 'auto'], `flex ${hasAction ? 'flex-row gap-4' : 'flex-col gap-1'} px-6`, '', container);
                 if (hasAction) {
-                    const actionBtn = new Button(null, options.header.action.name, options.header.action.callback);
+                    const actionBtn = new Button(null, options.header.action.name, options.header.action.callback, { buttonClass: 'secondary' });
                     header.appendChild(actionBtn.root);
                     const titleDescBox = exports.LX.makeContainer(['75%', 'auto'], `flex flex-col gap-1`, '');
                     header.prepend(titleDescBox);
                     header = titleDescBox;
                 }
                 if (options.header.title) {
-                    exports.LX.makeElement('div', 'text-md leading-none font-semibold', options.header.title, header);
+                    exports.LX.makeElement('div', 'text-sm text-foreground leading-none font-semibold', options.header.title, header);
                 }
                 if (options.header.description) {
-                    exports.LX.makeElement('div', 'text-sm fg-tertiary', options.header.description, header);
+                    exports.LX.makeElement('div', 'text-xs text-muted-foreground', options.header.description, header);
                 }
             }
             if (options.content) {
@@ -2254,24 +2190,19 @@
                 container.style.width = options.inputWidth ?? `calc( 100% - ${realNameWidth})`;
             };
             var container = document.createElement('div');
-            container.className = 'lexcheckboxcont';
+            container.className = 'flex items-center gap-2 my-0 mx-auto [&_span]:truncate [&_span]:flex-auto-fill';
             this.root.appendChild(container);
-            let checkbox = document.createElement('input');
+            let checkbox = exports.LX.makeElement('input', exports.LX.mergeClass('lexcheckbox rounded-xl', options.className ?? 'primary'));
             checkbox.type = 'checkbox';
-            checkbox.className = 'lexcheckbox ' + (options.className ?? 'primary');
             checkbox.checked = value;
             checkbox.disabled = options.disabled ?? false;
             container.appendChild(checkbox);
-            let valueName = document.createElement('span');
-            valueName.className = 'checkboxtext';
-            valueName.innerHTML = options.label ?? 'On';
-            container.appendChild(valueName);
+            exports.LX.makeElement('span', 'text-sm', options.label ?? 'On', container);
             checkbox.addEventListener('change', (e) => {
                 this.set(checkbox.checked, false, e);
             });
             if (options.suboptions) {
-                let suboptions = document.createElement('div');
-                suboptions.className = 'lexcheckboxsubmenu';
+                let suboptions = exports.LX.makeElement('div', 'lexcheckboxsubmenu');
                 suboptions.toggleAttribute('hidden', !checkbox.checked);
                 const suboptionsPanel = new exports.LX.Panel();
                 suboptionsPanel.queue(suboptions);
@@ -2382,20 +2313,17 @@
             if (!this.callback) {
                 console.warn('Define a callback in _options.onChange_ to allow getting new Color values!');
             }
-            this.root = document.createElement('div');
-            this.root.className = 'lexcolorpicker';
+            this.root = exports.LX.makeElement('div', 'lexcolorpicker flex flex-col text-sm w-3xs gap-2 p-1');
             this.markerHalfSize = 8;
             this.markerSize = this.markerHalfSize * 2;
             this.currentColor = new Color(hexValue);
             const hueColor = new Color({ h: this.currentColor.hsv.h, s: 1, v: 1 });
+            const colorMarkerClass = 'size-4 rounded-lg bg-transparent absolute pointer-events-none border-3 border-solid border-white';
             // Intensity, Sat
-            this.colorPickerBackground = document.createElement('div');
-            this.colorPickerBackground.className = 'lexcolorpickerbg';
-            this.colorPickerBackground.style.backgroundColor =
-                `rgb(${hueColor.css.r}, ${hueColor.css.g}, ${hueColor.css.b})`;
+            this.colorPickerBackground = exports.LX.makeElement('div', 'lexcolorpickerbg w-full aspect-square relative rounded-md cursor-pointer');
+            this.colorPickerBackground.style.backgroundColor = `rgb(${hueColor.css.r}, ${hueColor.css.g}, ${hueColor.css.b})`;
             this.root.appendChild(this.colorPickerBackground);
-            this.intSatMarker = document.createElement('div');
-            this.intSatMarker.className = 'lexcolormarker';
+            this.intSatMarker = exports.LX.makeElement('div', colorMarkerClass);
             this.intSatMarker.style.backgroundColor = this.currentColor.hex;
             this.colorPickerBackground.appendChild(this.intSatMarker);
             let pickerRect = null;
@@ -2456,11 +2384,9 @@
             }
             const innerHueAlpha = exports.LX.makeContainer(['100%', '100%'], 'flex flex-col gap-2', '', hueAlphaContainer);
             // Hue
-            this.colorPickerTracker = document.createElement('div');
-            this.colorPickerTracker.className = 'lexhuetracker';
+            this.colorPickerTracker = exports.LX.makeElement('div', 'lexhuetracker w-full h-4 rounded-lg relative cursor-pointer');
             innerHueAlpha.appendChild(this.colorPickerTracker);
-            this.hueMarker = document.createElement('div');
-            this.hueMarker.className = 'lexcolormarker';
+            this.hueMarker = exports.LX.makeElement('div', colorMarkerClass);
             this.hueMarker.style.backgroundColor = `rgb(${hueColor.css.r}, ${hueColor.css.g}, ${hueColor.css.b})`;
             this.colorPickerTracker.appendChild(this.hueMarker);
             const _fromHueX = (hueX) => {
@@ -2468,8 +2394,7 @@
                 this.currentColor.hsv.h = exports.LX.remapRange(hueX, 0, this.colorPickerTracker.offsetWidth - this.markerSize, 0, 360);
                 const hueColor = new Color({ h: this.currentColor.hsv.h, s: 1, v: 1 });
                 this.hueMarker.style.backgroundColor = `rgb(${hueColor.css.r}, ${hueColor.css.g}, ${hueColor.css.b})`;
-                this.colorPickerBackground.style.backgroundColor =
-                    `rgb(${hueColor.css.r}, ${hueColor.css.g}, ${hueColor.css.b})`;
+                this.colorPickerBackground.style.backgroundColor = `rgb(${hueColor.css.r}, ${hueColor.css.g}, ${hueColor.css.b})`;
                 this._updateColorValue();
             };
             let hueTrackerRect = null;
@@ -2504,13 +2429,10 @@
             this.colorPickerTracker.addEventListener('mousedown', innerMouseDownHue);
             // Alpha
             if (this.useAlpha) {
-                this.alphaTracker = document.createElement('div');
-                this.alphaTracker.className = 'lexalphatracker';
-                this.alphaTracker.style.color =
-                    `rgb(${this.currentColor.css.r}, ${this.currentColor.css.g}, ${this.currentColor.css.b})`;
+                this.alphaTracker = exports.LX.makeElement('div', 'lexalphatracker w-full h-4 rounded-lg relative cursor-pointer');
+                this.alphaTracker.style.color = `rgb(${this.currentColor.css.r}, ${this.currentColor.css.g}, ${this.currentColor.css.b})`;
                 innerHueAlpha.appendChild(this.alphaTracker);
-                this.alphaMarker = document.createElement('div');
-                this.alphaMarker.className = 'lexcolormarker';
+                this.alphaMarker = exports.LX.makeElement('div', colorMarkerClass);
                 this.alphaMarker.style.backgroundColor =
                     `rgb(${this.currentColor.css.r}, ${this.currentColor.css.g}, ${this.currentColor.css.b},${this.currentColor.css.a})`;
                 this.alphaTracker.appendChild(this.alphaMarker);
@@ -2572,7 +2494,7 @@
                         copyButtonComponent.root.querySelector("input[type='checkbox']").style.pointerEvents = 'auto';
                     }, 3000);
                 }, { swap: 'Check', icon: 'Copy', buttonClass: 'bg-none', className: 'ml-auto', title: 'Copy' });
-                copyButtonComponent.root.querySelector('.swap-on svg').classList.add('fg-success');
+                copyButtonComponent.root.querySelector('.swap-on svg').classList.add('text-success');
                 colorLabel.appendChild(copyButtonComponent.root);
             }
             this._updateColorValue(hexValue, true);
@@ -2604,8 +2526,7 @@
             }
             this.intSatMarker.style.backgroundColor = this.currentColor.hex;
             if (this.useAlpha) {
-                this.alphaTracker.style.color =
-                    `rgb(${this.currentColor.css.r}, ${this.currentColor.css.g}, ${this.currentColor.css.b})`;
+                this.alphaTracker.style.color = `rgb(${this.currentColor.css.r}, ${this.currentColor.css.g}, ${this.currentColor.css.b})`;
             }
             const toFixed = (s, n = 2) => {
                 return s.toFixed(n).replace(/([0-9]+(\.[0-9]+[1-9])?)(\.?0+$)/, '$1');
@@ -2642,9 +2563,8 @@
             this.hueMarker.style.backgroundColor =
                 this.colorPickerBackground.style.backgroundColor =
                     `rgb(${hueColor.css.r}, ${hueColor.css.g}, ${hueColor.css.b})`;
-            this.hueMarker.style.left =
-                exports.LX.remapRange(h, 0, 360, -this.markerHalfSize, this.colorPickerTracker.offsetWidth - this.markerHalfSize)
-                    + 'px';
+            this.hueMarker.style.left = exports.LX.remapRange(h, 0, 360, -this.markerHalfSize, this.colorPickerTracker.offsetWidth - this.markerHalfSize)
+                + 'px';
             this._updateColorValue(hexColor);
         }
     }
@@ -2683,10 +2603,9 @@
             this.alignOffset = options.alignOffset ?? this.alignOffset;
             this.avoidCollisions = options.avoidCollisions ?? true;
             this.reference = options.reference;
-            this.root = document.createElement('div');
+            this.root = exports.LX.makeElement('div', 'lexpopover fixed bg-background rounded-lg border-color p-1 left-0 top-0');
             this.root.dataset['side'] = this.side;
             this.root.tabIndex = '1';
-            this.root.className = 'lexpopover';
             const refElement = trigger ?? this.reference;
             const nestedDialog = refElement.closest('dialog');
             if (nestedDialog && nestedDialog.dataset['modal'] == 'true') {
@@ -2819,11 +2738,11 @@
             const popoverContainer = exports.LX.makeContainer(['auto', 'auto'], 'tour-step-container');
             {
                 const headerDiv = exports.LX.makeContainer(['100%', 'auto'], 'flex flex-row', '', popoverContainer);
-                exports.LX.makeContainer(['100%', 'auto'], 'p-1 font-medium text-md', title, headerDiv);
+                exports.LX.makeContainer(['100%', 'auto'], 'p-1 font-medium text-base', title, headerDiv);
             }
-            exports.LX.makeContainer(['100%', 'auto'], 'p-1 text-md', content, popoverContainer, { maxWidth: '400px' });
-            const footer = exports.LX.makeContainer(['100%', 'auto'], 'flex flex-row text-md', '', popoverContainer);
-            const footerButtons = exports.LX.makeContainer(['100%', 'auto'], 'text-md', '', footer);
+            exports.LX.makeContainer(['100%', 'auto'], 'p-1 text-base', content, popoverContainer, { maxWidth: '400px' });
+            const footer = exports.LX.makeContainer(['100%', 'auto'], 'flex flex-row text-base', '', popoverContainer);
+            const footerButtons = exports.LX.makeContainer(['100%', 'auto'], 'text-base', '', footer);
             const footerPanel = new exports.LX.Panel();
             footerButtons.appendChild(footerPanel.root);
             footerPanel.sameLine(2, 'justify-end');
@@ -2831,7 +2750,7 @@
                 if (onCancel)
                     onCancel();
                 this._popover?.destroy();
-            }, { xbuttonClass: 'contrast' });
+            });
             footerPanel.addButton(null, okText, () => {
                 if (onConfirm)
                     onConfirm();
@@ -2860,12 +2779,15 @@
         _popover = undefined;
         constructor(name, value, callback, options = {}) {
             value = value ?? '#000000';
+            // Force always hex internally
+            if (value.constructor === String && value.includes('oklch')) {
+                value = exports.LX.oklchToHex(value);
+            }
             const useAlpha = options.useAlpha
                 ?? ((value.constructor === Object && 'a' in value)
                     || (value.constructor === String && [5, 9].includes(value.length)));
             const componentColor = new Color(value);
-            // Force always hex internally
-            value = useAlpha ? componentColor.hex : componentColor.hex.substr(0, 7);
+            value = useAlpha ? componentColor.hex : componentColor.hex.substring(0, 7);
             super(exports.ComponentType.COLOR, name, value, options);
             this.onGetValue = () => {
                 const currentColor = new Color(value);
@@ -2873,7 +2795,7 @@
             };
             this.onSetValue = (newValue, skipCallback, event) => {
                 const newColor = new Color(newValue);
-                colorSampleRGB.style.color = value = newColor.hex.substr(0, 7);
+                colorSampleRGB.style.color = value = newColor.hex.substring(0, 7);
                 if (useAlpha) {
                     colorSampleAlpha.style.color = value = newColor.hex;
                 }
@@ -2905,7 +2827,7 @@
                     this.set(color.hex);
                 }
             });
-            let sampleContainer = exports.LX.makeContainer(['18px', '18px'], 'flex flex-row bg-contrast rounded overflow-hidden', '', container);
+            let sampleContainer = exports.LX.makeContainer(['18px', '18px'], 'flex flex-row rounded overflow-hidden', '', container);
             sampleContainer.tabIndex = '1';
             sampleContainer.addEventListener('click', (e) => {
                 if ((options.disabled ?? false)) {
@@ -2952,42 +2874,18 @@
             const shouldSelect = !(options.noSelection ?? false);
             let shouldToggle = shouldSelect && (options.toggle ?? false);
             let container = document.createElement('div');
-            container.className = 'lexcombobuttons ';
+            container.className = 'lexcombobuttons flex justify-center';
             options.skipReset = true;
             if (options.float) {
-                container.className += options.float;
+                container.className = exports.LX.mergeClass(container.className, `justify-${options.float}`);
             }
             let currentValue = [];
-            let buttonsBox = document.createElement('div');
-            buttonsBox.className = 'lexcombobuttonsbox ';
-            container.appendChild(buttonsBox);
+            let buttonsBox = exports.LX.makeElement('div', 'flex w-max bg-secondary pad-sm rounded-lg gap-1', '', container);
             for (let b of values) {
                 if (!b.value) {
                     throw ("Set 'value' for each button!");
                 }
-                let buttonEl = document.createElement('button');
-                buttonEl.className = 'lexbutton combo';
-                buttonEl.title = b.icon ? b.value : '';
-                buttonEl.id = b.id ?? '';
-                buttonEl.dataset['value'] = b.value;
-                if (options.buttonClass) {
-                    buttonEl.classList.add(options.buttonClass);
-                }
-                if (shouldSelect && (b.selected || options.selected?.includes(b.value))) {
-                    buttonEl.classList.add('selected');
-                    currentValue = currentValue.concat([b.value]);
-                }
-                if (b.icon) {
-                    const icon = exports.LX.makeIcon(b.icon);
-                    buttonEl.appendChild(icon);
-                }
-                else {
-                    buttonEl.innerHTML = `<span>${b.value}</span>`;
-                }
-                if (b.disabled) {
-                    buttonEl.setAttribute('disabled', 'true');
-                }
-                buttonEl.addEventListener('click', (e) => {
+                const onClick = (event) => {
                     currentValue = [];
                     if (shouldSelect) {
                         if (shouldToggle) {
@@ -3009,7 +2907,20 @@
                     }
                     currentValue = currentValue[0];
                     this.set(b.value, false, buttonEl.classList.contains('selected'));
+                };
+                const button = new Button(b.name ?? null, b.value, onClick, {
+                    title: b.icon ? b.value : '',
+                    icon: b.icon,
+                    disabled: b.disabled,
+                    buttonClass: exports.LX.mergeClass('combo w-auto', options.buttonClass)
                 });
+                let buttonEl = button.root.querySelector('button');
+                buttonEl.id = b.id ?? '';
+                buttonEl.dataset['value'] = b.value;
+                if (shouldSelect && (b.selected || options.selected?.includes(b.value))) {
+                    buttonEl.classList.add('selected');
+                    currentValue = currentValue.concat([b.value]);
+                }
                 buttonsBox.appendChild(buttonEl);
             }
             if (currentValue.length > 1) {
@@ -3075,9 +2986,9 @@
             const max = options.max ?? 100;
             const step = options.step ?? 1;
             const container = document.createElement('div');
-            container.className = 'flex flex-row border bg-primary rounded-lg shadow';
+            container.className = 'flex flex-row border-color bg-card rounded-lg shadow';
             this.root.appendChild(container);
-            const input = exports.LX.makeElement('input', 'lexcounter w-12 bg-primary px-2 fg-primary', '', container);
+            const input = exports.LX.makeElement('input', 'lexcounter w-12 bg-card px-2 text-foreground', '', container);
             input.type = 'number';
             input.value = value;
             if (options.disabled) {
@@ -3088,9 +2999,8 @@
                 if (e.shiftKey)
                     mult *= 10;
                 this.set(this.count - mult, false, e);
-            }, { disabled: options.disabled,
-                className: `p-0 ${options.disabled ? '' : 'hover:bg-secondary'} border-left border-right`,
-                buttonClass: 'bg-none', icon: 'Minus' });
+            }, { disabled: options.disabled, className: `p-0 ${options.disabled ? '' : 'hover:bg-secondary'} border-l-color border-r-color`,
+                buttonClass: 'px-0 bg-none h-7', icon: 'Minus' });
             container.appendChild(substrButton.root);
             const addButton = new Button(null, '', (value, e) => {
                 let mult = step ?? 1;
@@ -3098,7 +3008,7 @@
                     mult *= 10;
                 this.set(this.count + mult, false, e);
             }, { disabled: options.disabled, className: `p-0 ${options.disabled ? '' : 'hover:bg-secondary'} rounded-r-lg`,
-                buttonClass: 'bg-none', icon: 'Plus' });
+                buttonClass: 'px-0 bg-none h-7', icon: 'Plus' });
             container.appendChild(addButton.root);
         }
     }
@@ -3114,14 +3024,14 @@
         canvas;
         constructor(value, options = {}) {
             let element = document.createElement('div');
-            element.className = 'curve ' + (options.className ? options.className : '');
+            element.className = exports.LX.mergeClass('curve [&_canvas]:rounded', options.className);
             element.style.minHeight = '50px';
             element.style.width = options.width || '100%';
             element.style.minWidth = '50px';
             element.style.minHeight = '20px';
-            element.bgcolor = options.bgColor || exports.LX.getThemeColor('global-background');
-            element.pointscolor = options.pointsColor || exports.LX.getThemeColor('global-color-accent');
-            element.activepointscolor = options.activePointsColor || exports.LX.getThemeColor('global-color-accent-light');
+            element.bgcolor = options.bgColor || exports.LX.getCSSVariable('background');
+            element.pointscolor = options.pointsColor || exports.LX.getCSSVariable('primary');
+            element.activepointscolor = options.activePointsColor || exports.LX.getCSSVariable('primary/50');
             element.linecolor = options.lineColor || '#555';
             element.value = value || [];
             element.xrange = options.xrange || [0, 1]; // min, max
@@ -3135,9 +3045,9 @@
             element.smooth = (options.smooth && typeof (options.smooth) == 'number' ? options.smooth : 0.3) || false;
             element.move_out = options.moveOutAction ?? exports.LX.CURVE_MOVEOUT_DELETE;
             exports.LX.addSignal('@on_new_color_scheme', (el, value) => {
-                element.bgcolor = options.bgColor || exports.LX.getThemeColor('global-background');
-                element.pointscolor = options.pointsColor || exports.LX.getThemeColor('global-color-accent');
-                element.activepointscolor = options.activePointsColor || exports.LX.getThemeColor('global-color-accent-light');
+                element.bgcolor = options.bgColor || exports.LX.getCSSVariable('background');
+                element.pointscolor = options.pointsColor || exports.LX.getCSSVariable('primary');
+                element.activepointscolor = options.activePointsColor || exports.LX.getCSSVariable('primary/50');
                 this.redraw();
             });
             this.element = element;
@@ -3194,8 +3104,7 @@
             }
             // Canvas to value
             function unconvert(v) {
-                return [v[0] * element.xrange[1] / canvas.width + element.xrange[0],
-                    v[1] * element.yrange[1] / canvas.height + element.yrange[0]];
+                return [v[0] * element.xrange[1] / canvas.width + element.xrange[0], v[1] * element.yrange[1] / canvas.height + element.yrange[0]];
             }
             let selected = -1;
             element.redraw = function (o = {}) {
@@ -3472,7 +3381,7 @@
         onPreviousMonth;
         onNextMonth;
         constructor(dateString, options = {}) {
-            this.root = exports.LX.makeContainer(['256px', 'auto'], 'p-1 text-md');
+            this.root = exports.LX.makeContainer(['256px', 'auto'], 'p-1 flex flex-col gap-2 text-sm');
             this.onChange = options.onChange;
             this.onPreviousMonth = options.onPreviousMonth;
             this.onNextMonth = options.onNextMonth;
@@ -3527,8 +3436,8 @@
             {
                 const header = exports.LX.makeContainer(['100%', 'auto'], 'flex flex-row p-1', '', this.root);
                 if (!this.skipPrevMonth) {
-                    const prevMonthIcon = exports.LX.makeIcon('Left', { title: 'Previous Month',
-                        iconClass: 'border p-1 rounded hover:bg-secondary', svgClass: 'sm' });
+                    const prevMonthIcon = exports.LX.makeIcon('Left', { title: 'Previous Month', iconClass: 'border-color p-1 rounded hover:bg-secondary',
+                        svgClass: 'sm' });
                     header.appendChild(prevMonthIcon);
                     prevMonthIcon.addEventListener('click', () => {
                         this._previousMonth();
@@ -3536,8 +3445,8 @@
                 }
                 exports.LX.makeContainer(['100%', 'auto'], 'text-center font-medium select-none', `${this.monthName} ${this.year}`, header);
                 if (!this.skipNextMonth) {
-                    const nextMonthIcon = exports.LX.makeIcon('Right', { title: 'Next Month',
-                        iconClass: 'border p-1 rounded hover:bg-secondary', svgClass: 'sm' });
+                    const nextMonthIcon = exports.LX.makeIcon('Right', { title: 'Next Month', iconClass: 'border-color p-1 rounded hover:bg-secondary',
+                        svgClass: 'sm' });
                     header.appendChild(nextMonthIcon);
                     nextMonthIcon.addEventListener('click', () => {
                         this._nextMonth();
@@ -3556,7 +3465,7 @@
                     const hrow = document.createElement('tr');
                     for (const headData of ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']) {
                         const th = document.createElement('th');
-                        th.className = 'fg-tertiary text-sm font-normal select-none';
+                        th.className = 'text-muted-foreground text-xs font-normal w-10 select-none';
                         th.innerHTML = `<span>${headData}</span>`;
                         hrow.appendChild(th);
                     }
@@ -3573,7 +3482,7 @@
                         const weekDays = this.calendarDays.slice(week * 7, week * 7 + 7);
                         for (const dayData of weekDays) {
                             const th = document.createElement('th');
-                            th.className = 'leading-loose font-normal rounded select-none cursor-pointer';
+                            th.className = 'leading-8 text-xs font-normal rounded select-none cursor-pointer shrink-0 grow-0';
                             const dayDate = new Date(`${this.month}/${dayData.day}/${this.year}`);
                             const date = new Date();
                             // today inclusives
@@ -3597,13 +3506,13 @@
                                 && (this.month == (toRangeDate.getMonth() + 1))
                                 && (this.year == toRangeDate.getFullYear());
                             if ((!this.range && currentDay) || this.range && (currentFromRange || currentToRange)) {
-                                th.className += ` bg-contrast fg-contrast`;
+                                th.className += ` bg-primary text-primary-foreground`;
                             }
                             else if (this.range && selectable && (dayDate > fromRangeDate) && (dayDate < toRangeDate)) {
-                                th.className += ` bg-accent fg-contrast`;
+                                th.className += ` bg-accent text-accent-foreground`;
                             }
                             else {
-                                th.className += ` ${selectable ? 'fg-primary' : 'fg-tertiary'} hover:bg-secondary`;
+                                th.className += ` ${selectable ? 'text-secondary-foreground' : 'text-muted-foreground'} hover:bg-secondary`;
                             }
                             th.innerHTML = `<span>${dayData.day}</span>`;
                             hrow.appendChild(th);
@@ -3847,7 +3756,7 @@
                 const calendarIcon = exports.LX.makeIcon('Calendar');
                 const calendarButton = new Button(null, d0, () => {
                     this._popover = new Popover(calendarButton.root, [this.calendar]);
-                }, { buttonClass: `flex flex-row px-3 ${emptyDate ? '' : 'fg-tertiary'} justify-between` });
+                }, { buttonClass: `outline flex flex-row px-3 ${emptyDate ? '' : 'text-muted-foreground'} justify-between` });
                 calendarButton.root.querySelector('button').appendChild(calendarIcon);
                 calendarButton.root.style.width = '100%';
                 container.appendChild(calendarButton.root);
@@ -3858,7 +3767,7 @@
                     const calendarIcon = exports.LX.makeIcon('Calendar');
                     const calendarButton = new Button(null, d1, () => {
                         this._popover = new Popover(calendarButton.root, [this.calendar]);
-                    }, { buttonClass: `flex flex-row px-3 ${emptyDate ? '' : 'fg-tertiary'} justify-between` });
+                    }, { buttonClass: `outline flex flex-row px-3 ${emptyDate ? '' : 'text-muted-foreground'} justify-between` });
                     calendarButton.root.querySelector('button').appendChild(calendarIcon);
                     calendarButton.root.style.width = '100%';
                     container.appendChild(calendarButton.root);
@@ -3887,11 +3796,11 @@
         canvas;
         constructor(value, options = {}) {
             let element = document.createElement('div');
-            element.className = 'dial ' + (options.className ? options.className : '');
+            element.className = exports.LX.mergeClass('dial', options.className);
             element.style.width = element.style.height = options.size || '100%';
             element.style.minWidth = element.style.minHeight = '50px';
-            element.bgcolor = options.bgColor || exports.LX.getThemeColor('global-background');
-            element.pointscolor = options.pointsColor || exports.LX.getThemeColor('global-color-accent-light');
+            element.bgcolor = options.bgColor || exports.LX.getCSSVariable('background');
+            element.pointscolor = options.pointsColor || exports.LX.getCSSVariable('primary/50');
             element.linecolor = options.lineColor || '#555';
             element.value = value || [];
             element.xrange = options.xrange || [0, 1]; // min, max
@@ -3905,8 +3814,8 @@
             element.smooth = (options.smooth && typeof (options.smooth) == 'number' ? options.smooth : 0.3) || false;
             element.move_out = options.moveOutAction ?? exports.LX.CURVE_MOVEOUT_DELETE;
             exports.LX.addSignal('@on_new_color_scheme', (el, value) => {
-                element.bgcolor = options.bgColor || exports.LX.getThemeColor('global-background');
-                element.pointscolor = options.pointsColor || exports.LX.getThemeColor('global-color-accent-light');
+                element.bgcolor = options.bgColor || exports.LX.getCSSVariable('background');
+                element.pointscolor = options.pointsColor || exports.LX.getCSSVariable('primary/50');
                 this.redraw();
             });
             this.element = element;
@@ -3962,8 +3871,7 @@
             }
             // Canvas to value
             function unconvert(v) {
-                return [v[0] * element.xrange[1] / canvas.width + element.xrange[0],
-                    v[1] * element.yrange[1] / canvas.height + element.yrange[0]];
+                return [v[0] * element.xrange[1] / canvas.width + element.xrange[0], v[1] * element.yrange[1] / canvas.height + element.yrange[0]];
             }
             var selected = -1;
             element.redraw = function (o = {}) {
@@ -4320,7 +4228,7 @@
                 }
             };
             let container = document.createElement('div');
-            container.className = 'lexformdata';
+            container.className = 'flex flex-col gap-1';
             container.style.width = '100%';
             container.formData = {};
             this.root.appendChild(container);
@@ -4336,7 +4244,7 @@
                 entryData.ignoreValidation = true;
                 if (!(options.skipLabels ?? false)) {
                     const label = new TextInput(null, entryData.label ?? entry, null, { disabled: true,
-                        inputClass: 'formlabel bg-none' });
+                        inputClass: 'formlabel text-xs bg-none text-muted-foreground' });
                     container.appendChild(label.root);
                 }
                 entryData.textComponent = new TextInput(null, entryData.constructor == Object ? entryData.value : entryData, (value, event) => {
@@ -4354,7 +4262,7 @@
                     if (options.secondaryActionCallback) {
                         options.secondaryActionCallback(container.formData, event);
                     }
-                }, { width: '100%', minWidth: '0', buttonClass: options.secondaryButtonClass ?? 'primary' });
+                }, { width: '100%', minWidth: '0', buttonClass: options.secondaryButtonClass ?? 'secondary' });
                 buttonContainer.appendChild(secondaryButton.root);
             }
             const primaryButton = new Button(null, options.primaryActionName ?? 'Submit', (value, event) => {
@@ -4374,7 +4282,7 @@
                 if (callback) {
                     callback(container.formData, errors, event);
                 }
-            }, { width: '100%', minWidth: '0', buttonClass: options.primaryButtonClass ?? 'contrast' });
+            }, { width: '100%', minWidth: '0', buttonClass: options.primaryButtonClass ?? 'primary' });
             buttonContainer.appendChild(primaryButton.root);
         }
     }
@@ -4403,9 +4311,7 @@
                 const realNameWidth = this.root.domName?.style.width ?? '0px';
                 container.style.width = `calc( 100% - ${realNameWidth})`;
             };
-            const container = document.createElement('div');
-            container.className = 'lexlayers';
-            this.root.appendChild(container);
+            const container = exports.LX.makeElement('div', 'lexlayers grid', '', this.root);
             const maxBits = options.maxBits ?? 16;
             this.setLayers = (val) => {
                 container.innerHTML = '';
@@ -4417,7 +4323,8 @@
                 }
                 for (let bit = 0; bit < maxBits; ++bit) {
                     let layer = document.createElement('div');
-                    layer.className = 'lexlayer';
+                    layer.className =
+                        'lexlayer size-6 text-secondary-foreground text-center content-center place-self-center cursor-pointer font-semibold text-xs rounded-lg';
                     if (val != undefined) {
                         const valueBit = binary[maxBits - bit - 1];
                         if (valueBit != undefined && valueBit == '1') {
@@ -4505,7 +4412,7 @@
             };
             // Show list
             let listContainer = document.createElement('div');
-            listContainer.className = 'lexlist';
+            listContainer.className = 'bg-background flex flex-col gap-1 rounded-xl border-color p-2';
             this.root.appendChild(listContainer);
             this._updateValues(values);
             exports.LX.doAsync(this.onResize.bind(this));
@@ -4951,7 +4858,7 @@
             const calendarIcon = exports.LX.makeIcon('SquareMousePointer');
             const calendarButton = new Button(null, 'Open Map', () => {
                 this._popover = new Popover(calendarButton.root, [this.map2d]);
-            }, { buttonClass: `flex flex-row px-3 fg-secondary justify-between` });
+            }, { buttonClass: `outline justify-between` });
             calendarButton.root.querySelector('button').appendChild(calendarIcon);
             container.appendChild(calendarButton.root);
             exports.LX.doAsync(this.onResize.bind(this));
@@ -4966,14 +4873,13 @@
     class NodeTree {
         domEl;
         data;
-        onevent;
         options;
         selected = [];
         _forceClose = false;
+        _callbacks = {};
         constructor(domEl, data, options = {}) {
             this.domEl = domEl;
             this.data = data;
-            this.onevent = options.onevent;
             this.options = options;
             if (data.constructor === Object) {
                 this._createItem(null, data);
@@ -5007,8 +4913,8 @@
                 isParent = !!hasFolders;
             }
             let item = document.createElement('li');
-            item.className = 'lextreeitem ' + 'datalevel' + level + (isParent ? ' parent' : '')
-                + (isSelected ? ' selected' : '');
+            item.className =
+                `lextreeitem inline-flex outline-none text-sm items-center h-7 cursor-pointer truncate rounded-lg select-none datalevel${level} ${isParent ? 'parent' : ''} ${isSelected ? ' selected' : ''}`;
             item.id = exports.LX.getSupportedDOMName(node.id);
             item.tabIndex = '0';
             item.treeData = node;
@@ -5018,7 +4924,7 @@
                 icon = node.closed ? 'Right' : 'Down';
             }
             if (icon) {
-                item.appendChild(exports.LX.makeIcon(icon, { iconClass: 'hierarchy', svgClass: 'xs' }));
+                item.appendChild(exports.LX.makeIcon(icon, { iconClass: 'hierarchy', svgClass: 'sm' }));
             }
             // Add display icon
             icon = node.icon;
@@ -5033,13 +4939,15 @@
                 // an image..
                 else {
                     const rootPath = 'https://raw.githubusercontent.com/jxarco/lexgui.js/master/';
-                    item.innerHTML += "<img src='" + (rootPath + node.icon) + "'>";
+                    item.innerHTML += `<img src="${rootPath + node.icon}">`;
                 }
             }
             item.innerHTML += node.rename ? '' : node.id;
-            item.setAttribute('draggable', true);
             item.style.paddingLeft = (3 + (level + 1) * 15) + 'px';
             list.appendChild(item);
+            const isDraggable = parent && (node.metadata?.draggable ?? (this.options.defaultDraggable ?? true));
+            if (isDraggable)
+                item.setAttribute('draggable', 'true');
             // Callbacks
             item.addEventListener('click', (e) => {
                 if (handled) {
@@ -5054,27 +4962,38 @@
                 }
                 // Add or remove
                 const idx = this.selected.indexOf(node);
+                item.classList.toggle('selected', idx == -1);
                 if (idx > -1) {
-                    item.classList.remove('selected');
                     this.selected.splice(idx, 1);
                 }
                 else {
-                    item.classList.add('selected');
                     this.selected.push(node);
                 }
                 // Only Show children...
                 if (isParent && node.id.length > 1 /* Strange case... */) {
                     node.closed = false;
-                    if (that.onevent) {
-                        const event = new TreeEvent(TreeEvent.NODE_CARETCHANGED, node, node.closed, e);
-                        that.onevent(event);
+                    const onCaretChanged = that._callbacks['caretChanged'];
+                    if (onCaretChanged !== undefined) {
+                        const event = {
+                            type: 'caret',
+                            items: [node],
+                            domEvent: e,
+                            userInitiated: true
+                        };
+                        onCaretChanged(event);
                     }
                     that.frefresh(node.id);
                 }
-                if (that.onevent) {
-                    const event = new TreeEvent(TreeEvent.NODE_SELECTED, node, this.selected, e);
-                    event.multiple = e.shiftKey;
-                    that.onevent(event);
+                const onSelect = that._callbacks['select'];
+                if (onSelect !== undefined) {
+                    const event = {
+                        type: 'select',
+                        items: [node],
+                        result: this.selected,
+                        domEvent: e,
+                        userInitiated: true
+                    };
+                    onSelect(event);
                 }
             });
             item.addEventListener('dblclick', function (e) {
@@ -5083,27 +5002,40 @@
                     node.rename = true;
                     that.refresh();
                 }
-                if (that.onevent) {
-                    const event = new TreeEvent(TreeEvent.NODE_DBLCLICKED, node, null, e);
-                    that.onevent(event);
+                const onDblClick = that._callbacks['dblClick'];
+                if (onDblClick !== undefined) {
+                    const event = {
+                        type: 'dbl_click',
+                        items: [node],
+                        domEvent: e,
+                        userInitiated: true
+                    };
+                    onDblClick(event);
                 }
             });
-            item.addEventListener('contextmenu', (e) => {
+            item.addEventListener('contextmenu', async (e) => {
                 e.preventDefault();
-                if (!that.onevent) {
+                const onContextMenu = that._callbacks['contextMenu'];
+                if (!onContextMenu) {
                     return;
                 }
-                const event = new TreeEvent(TreeEvent.NODE_CONTEXTMENU, node, this.selected, e);
-                event.multiple = this.selected.length > 1;
-                exports.LX.addContextMenu(event.multiple ? 'Selected Nodes' : event.node.id, event.event, (m) => {
-                    event.panel = m;
-                });
-                that.onevent(event);
-                if (this.options.addDefault ?? false) {
-                    if (event.panel.items) {
-                        event.panel.add('');
+                const event = {
+                    type: 'context_menu',
+                    items: this.selected,
+                    from: node,
+                    domEvent: e,
+                    userInitiated: true
+                };
+                const r = await onContextMenu(event);
+                const multiple = this.selected.length > 1;
+                exports.LX.addContextMenu(multiple ? 'Selected Nodes' : node.id, e, (m) => {
+                    if (r?.length) {
+                        for (const i of r) {
+                            m.add(i.name, { callback: i.callback });
+                        }
+                        m.add('');
                     }
-                    event.panel.add('Select Children', () => {
+                    m.add('Select Children', () => {
                         const selectChildren = (n) => {
                             if (n.closed) {
                                 return;
@@ -5122,15 +5054,53 @@
                         this.selected.length = 0;
                         // Add childs of the clicked node
                         selectChildren(node);
+                        const onSelect = this._callbacks['select'];
+                        if (onSelect !== undefined) {
+                            const event = {
+                                type: 'select',
+                                items: [node],
+                                result: this.selected,
+                                domEvent: e,
+                                userInitiated: true
+                            };
+                            onSelect(event);
+                        }
                     });
-                    event.panel.add('Delete', { callback: () => {
-                            const ok = that.deleteNode(node);
-                            if (ok && that.onevent) {
-                                const event = new TreeEvent(TreeEvent.NODE_DELETED, node, [node], null);
-                                that.onevent(event);
+                    m.add('Delete', { callback: () => {
+                            const onBeforeDelete = this._callbacks['beforeDelete'];
+                            const onDelete = this._callbacks['delete'];
+                            const resolve = (...args) => {
+                                let deletedNodes = [];
+                                if (this.selected.length) {
+                                    deletedNodes.push(...that.deleteNodes(this.selected));
+                                }
+                                else if (that.deleteNode(node)) {
+                                    deletedNodes.push(node);
+                                }
+                                this.refresh();
+                                const event = {
+                                    type: 'delete',
+                                    items: deletedNodes,
+                                    userInitiated: true
+                                };
+                                if (onDelete)
+                                    onDelete(event, ...args);
+                            };
+                            if (onBeforeDelete) {
+                                const event = {
+                                    type: 'delete',
+                                    items: this.selected.length ? this.selected : [node],
+                                    userInitiated: true
+                                };
+                                onBeforeDelete(event, resolve);
                             }
-                            this.refresh();
+                            else {
+                                resolve();
+                            }
                         } });
+                });
+                if (!(this.options.addDefault ?? false)) {
+                    return;
                 }
             });
             item.addEventListener('keydown', (e) => {
@@ -5139,20 +5109,40 @@
                 }
                 e.preventDefault();
                 if (e.key == 'Delete') {
-                    const nodesDeleted = [];
-                    for (let _node of this.selected) {
-                        if (that.deleteNode(_node)) {
-                            nodesDeleted.push(_node);
+                    const onBeforeDelete = this._callbacks['beforeDelete'];
+                    const onDelete = this._callbacks['delete'];
+                    const resolve = (...args) => {
+                        const nodesDeleted = [];
+                        for (let n of this.selected) {
+                            if (that.deleteNode(n)) {
+                                nodesDeleted.push(n);
+                            }
                         }
+                        this.selected.length = 0;
+                        this.refresh();
+                        if (nodesDeleted.length) {
+                            const event = {
+                                type: 'delete',
+                                items: nodesDeleted,
+                                domEvent: e,
+                                userInitiated: true
+                            };
+                            if (onDelete)
+                                onDelete(event, ...args);
+                        }
+                    };
+                    if (onBeforeDelete) {
+                        const event = {
+                            type: 'delete',
+                            items: this.selected,
+                            domEvent: e,
+                            userInitiated: true
+                        };
+                        onBeforeDelete(event, resolve);
                     }
-                    // Send event now so we have the info in selected array..
-                    if (nodesDeleted.length && that.onevent) {
-                        const event = new TreeEvent(TreeEvent.NODE_DELETED, node, nodesDeleted, e);
-                        event.multiple = nodesDeleted.length > 1;
-                        that.onevent(event);
+                    else {
+                        resolve();
                     }
-                    this.selected.length = 0;
-                    this.refresh();
                 }
                 else if (e.key == 'ArrowUp' || e.key == 'ArrowDown') { // Unique or zero selected
                     var selected = this.selected.length > 1
@@ -5168,7 +5158,7 @@
             // Node rename
             const nameInput = document.createElement('input');
             nameInput.toggleAttribute('hidden', !node.rename);
-            nameInput.className = 'bg-none';
+            nameInput.className = 'text-foreground bg-none text-sm border-none outline-none';
             nameInput.value = node.id;
             item.appendChild(nameInput);
             if (node.rename) {
@@ -5177,15 +5167,38 @@
             }
             nameInput.addEventListener('keyup', function (e) {
                 if (e.key == 'Enter') {
+                    const onBeforeRename = that._callbacks['beforeRename'];
+                    const onRename = that._callbacks['rename'];
+                    const oldName = node.id;
                     this.value = this.value.replace(/\s/g, '_');
-                    if (that.onevent) {
-                        const event = new TreeEvent(TreeEvent.NODE_RENAMED, node, this.value, e);
-                        that.onevent(event);
+                    const resolve = (...args) => {
+                        node.id = exports.LX.getSupportedDOMName(this.value);
+                        delete node.rename;
+                        that.frefresh(node.id);
+                        list.querySelector(`#${node.id}`).classList.add('selected');
+                        const event = {
+                            type: 'rename',
+                            items: [node],
+                            oldName,
+                            newName: this.value,
+                            userInitiated: true
+                        };
+                        if (onRename)
+                            onRename(event, ...args);
+                    };
+                    if (onBeforeRename) {
+                        const event = {
+                            type: 'rename',
+                            items: [node],
+                            oldName,
+                            newName: this.value,
+                            userInitiated: true
+                        };
+                        onBeforeRename(event, resolve);
                     }
-                    node.id = exports.LX.getSupportedDOMName(this.value);
-                    delete node.rename;
-                    that.frefresh(node.id);
-                    list.querySelector('#' + node.id).classList.add('selected');
+                    else {
+                        resolve();
+                    }
                 }
                 else if (e.key == 'Escape') {
                     delete node.rename;
@@ -5196,69 +5209,90 @@
                 delete node.rename;
                 that.refresh();
             });
-            if (this.options.draggable ?? true) {
-                // Drag nodes
-                if (parent) { // Root doesn't move!
-                    item.addEventListener('dragstart', (e) => {
-                        window.__tree_node_dragged = node;
-                    });
+            if (isDraggable) {
+                item.addEventListener('dragstart', (e) => {
+                    window.__tree_node_dragged = node;
+                });
+            }
+            /* Events fired on other node items,
+            by now everyone is a drop target, cancel in the event if necessary */
+            item.addEventListener('dragover', (e) => {
+                e.preventDefault(); // allow drop
+            }, false);
+            item.addEventListener('dragenter', (e) => {
+                e.target.classList.add('draggingover');
+            });
+            item.addEventListener('dragend', (e) => {
+                e.target.classList.remove('draggingover');
+            });
+            item.addEventListener('dragleave', (e) => {
+                e.target.classList.remove('draggingover');
+            });
+            item.addEventListener('drop', (e) => {
+                e.preventDefault(); // Prevent default action (open as link for some elements)
+                let dragged = window.__tree_node_dragged;
+                if (!dragged) {
+                    // Test if we are moving from AssetView extension
+                    dragged = window.__av_item_dragged;
+                    if (dragged) {
+                        dragged._nodeTarget = node;
+                    }
+                    return;
                 }
-                /* Events fired on other node items */
-                item.addEventListener('dragover', (e) => {
-                    e.preventDefault(); // allow drop
-                }, false);
-                item.addEventListener('dragenter', (e) => {
-                    e.target.classList.add('draggingover');
-                });
-                item.addEventListener('dragend', (e) => {
-                    e.target.classList.remove('draggingover');
-                });
-                item.addEventListener('dragleave', (e) => {
-                    e.target.classList.remove('draggingover');
-                });
-                item.addEventListener('drop', (e) => {
-                    e.preventDefault(); // Prevent default action (open as link for some elements)
-                    let dragged = window.__tree_node_dragged;
-                    if (!dragged) {
-                        // Test if we are moving from AssetView extension
-                        dragged = window.__av_item_dragged;
-                        if (dragged) {
-                            dragged._nodeTarget = node;
-                        }
-                        return;
+                const domTarget = e.target;
+                domTarget.classList.remove('draggingover');
+                let target = node;
+                // Can't drop to same node
+                if (dragged.id == target.id) {
+                    console.warn('Cannot parent node to itself!');
+                    return;
+                }
+                // Can't drop to child node
+                const isChild = function (newParent, node) {
+                    var result = false;
+                    for (var c of node.children) {
+                        if (c.id == newParent.id)
+                            return true;
+                        result = result || isChild(newParent, c);
                     }
-                    let target = node;
-                    // Can't drop to same node
-                    if (dragged.id == target.id) {
-                        console.warn('Cannot parent node to itself!');
-                        return;
-                    }
-                    // Can't drop to child node
-                    const isChild = function (newParent, node) {
-                        var result = false;
-                        for (var c of node.children) {
-                            if (c.id == newParent.id)
-                                return true;
-                            result = result || isChild(newParent, c);
-                        }
-                        return result;
-                    };
-                    if (isChild(target, dragged)) {
-                        console.warn('Cannot parent node to a current child!');
-                        return;
-                    }
-                    // Trigger node dragger event
-                    if (that.onevent) {
-                        const event = new TreeEvent(TreeEvent.NODE_DRAGGED, dragged, target, e);
-                        that.onevent(event);
-                    }
+                    return result;
+                };
+                if (isChild(target, dragged)) {
+                    console.warn('Cannot parent node to a current child!');
+                    return;
+                }
+                const onBeforeMove = this._callbacks['beforeMove'];
+                const onMove = this._callbacks['move'];
+                const resolve = (...args) => {
                     const index = dragged.parent.children.findIndex((n) => n.id == dragged.id);
                     const removed = dragged.parent.children.splice(index, 1);
                     target.children.push(removed[0]);
                     that.refresh();
                     delete window.__tree_node_dragged;
-                });
-            }
+                    const event = {
+                        type: 'move',
+                        items: [dragged],
+                        to: target,
+                        domEvent: e,
+                        userInitiated: true
+                    };
+                    if (onMove)
+                        onMove(event, ...args);
+                };
+                if (onBeforeMove) {
+                    const event = {
+                        type: 'move',
+                        items: [dragged],
+                        to: target,
+                        domEvent: e,
+                        userInitiated: true
+                    };
+                    onBeforeMove(event, resolve);
+                }
+                else {
+                    resolve();
+                }
+            });
             let handled = false;
             // Show/hide children
             if (isParent) {
@@ -5278,15 +5312,21 @@
                     else {
                         node.closed = !node.closed;
                     }
-                    if (that.onevent) {
-                        const event = new TreeEvent(TreeEvent.NODE_CARETCHANGED, node, node.closed, e);
-                        that.onevent(event);
+                    const onCaretChanged = that._callbacks['caretChanged'];
+                    if (onCaretChanged !== undefined) {
+                        const event = {
+                            type: 'caret',
+                            items: [node],
+                            domEvent: e,
+                            userInitiated: true
+                        };
+                        onCaretChanged(event);
                     }
                     that.frefresh(node.id);
                 });
             }
             // Add button icons
-            const inputContainer = document.createElement('div');
+            const inputContainer = exports.LX.makeElement('div', 'flex flex-row ml-auto mr-2');
             item.appendChild(inputContainer);
             if (node.actions) {
                 for (let i = 0; i < node.actions.length; ++i) {
@@ -5296,15 +5336,8 @@
                         if (action.callback) {
                             action.callback(node, swapValue, event);
                         }
-                    }, { icon: action.icon, swap: action.swap, title: action.name, hideName: true, className: 'p-0 m-0',
-                        buttonClass: 'p-0 m-0 bg-none no-h' });
-                    actionBtn.root.style.minWidth = 'fit-content';
-                    actionBtn.root.style.margin = '0'; // adding classes does not work
-                    actionBtn.root.style.padding = '0'; // adding classes does not work
-                    const _btn = actionBtn.root.querySelector('button');
-                    _btn.style.minWidth = 'fit-content';
-                    _btn.style.margin = '0'; // adding classes does not work
-                    _btn.style.padding = '0'; // adding classes does not work
+                    }, { icon: action.icon, swap: action.swap, title: action.name, hideName: true, className: 'p-0 min-h-fit',
+                        buttonClass: 'px-0 h-full bg-none' });
                     inputContainer.appendChild(actionBtn.root);
                 }
             }
@@ -5312,13 +5345,18 @@
                 const visibilityBtn = new Button(null, '', (swapValue, e) => {
                     e.stopPropagation();
                     node.visible = node.visible === undefined ? false : !node.visible;
-                    // Trigger visibility event
-                    if (that.onevent) {
-                        const event = new TreeEvent(TreeEvent.NODE_VISIBILITY, node, node.visible, e);
-                        that.onevent(event);
+                    const onVisibleChanged = this._callbacks['visibleChanged'];
+                    if (onVisibleChanged !== undefined) {
+                        const event = {
+                            type: 'visibility',
+                            items: [node],
+                            domEvent: e,
+                            userInitiated: true
+                        };
+                        onVisibleChanged(event);
                     }
-                }, { icon: node.visible ? 'Eye' : 'EyeOff', swap: node.visible ? 'EyeOff' : 'Eye', title: 'Toggle visible',
-                    className: 'p-0 m-0', buttonClass: 'bg-none' });
+                }, { icon: node.visible ? 'Eye' : 'EyeOff', swap: node.visible ? 'EyeOff' : 'Eye', title: 'Toggle visible', className: 'p-0 min-h-fit',
+                    buttonClass: 'px-0 h-full bg-none' });
                 inputContainer.appendChild(visibilityBtn.root);
             }
             const _hasChild = function (node, id) {
@@ -5381,6 +5419,15 @@
             this.selected = [el.treeData];
             el.focus();
         }
+        deleteNodes(nodes) {
+            const nodesDeleted = [];
+            for (const n of nodes) {
+                if (this.deleteNode(n)) {
+                    nodesDeleted.push(n);
+                }
+            }
+            return nodesDeleted;
+        }
         deleteNode(node) {
             const dataAsArray = this.data.constructor === Array;
             // Can be either Array or Object type data
@@ -5413,16 +5460,11 @@
         constructor(name, data, options = {}) {
             options.hideName = true;
             super(exports.ComponentType.TREE, name, null, options);
-            let container = document.createElement('div');
-            container.className = 'lextree';
-            this.root.appendChild(container);
+            let container = exports.LX.makeElement('div', 'lextree p-1 rounded-lg w-full my-0 mx-auto font-medium text-sm min-h-3', '', this.root);
             if (name) {
-                let title = document.createElement('span');
-                title.innerHTML = name;
-                container.appendChild(title);
+                exports.LX.makeElement('span', 'block p-1 select-none text-base font-medium whitespace-nowrap', name, container);
             }
-            let toolsDiv = document.createElement('div');
-            toolsDiv.className = 'lextreetools';
+            let toolsDiv = exports.LX.makeElement('div', 'lextreetools flex items-center bg-secondary px-2 rounded-lg gap-2 my-1');
             if (!name) {
                 toolsDiv.className += ' notitle';
             }
@@ -5453,12 +5495,19 @@
                 container.appendChild(toolsDiv);
             }
             // Tree
-            let list = document.createElement('ul');
+            let list = exports.LX.makeElement('ul', 'flex flex-col gap-1 ps-0');
             list.addEventListener('contextmenu', function (e) {
                 e.preventDefault();
             });
             container.appendChild(list);
             this.innerTree = new NodeTree(container, data, options);
+        }
+        /**
+         * @method on
+         * @description Stores an event callback for the desired action
+         */
+        on(eventName, callback) {
+            this.innerTree._callbacks[eventName] = callback;
         }
     }
     exports.LX.Tree = Tree;
@@ -5484,7 +5533,7 @@
                 value = newValue;
                 _refreshInput(value);
                 if (!skipCallback) {
-                    this._trigger(new IEvent$1(name, +newValue, event), callback);
+                    this._trigger(new IEvent$1(name, newValue, event), callback);
                 }
             };
             this.onResize = (rect) => {
@@ -5505,7 +5554,7 @@
                     for (let j = 0; j < g.length; ++j) {
                         let number = valueString[itemsCount++];
                         number = number == 'x' ? '' : number;
-                        const slotDom = exports.LX.makeContainer(['36px', '30px'], 'lexotpslot border-top border-bottom border-left px-3 cursor-text select-none font-medium outline-none', number, container);
+                        const slotDom = exports.LX.makeContainer(['36px', '30px'], 'lexotpslot border-t-color border-b-color border-l-color px-3 cursor-text select-none font-medium outline-none', number, container);
                         slotDom.tabIndex = '1';
                         if (this.disabled) {
                             slotDom.classList.add('disabled');
@@ -5515,7 +5564,7 @@
                             slotDom.className += ' rounded-l';
                         }
                         else if (j == (g.length - 1)) {
-                            slotDom.className += ' rounded-r border-right';
+                            slotDom.className += ' rounded-r border-r-color';
                         }
                         slotDom.addEventListener('click', () => {
                             if (this.disabled)
@@ -5697,13 +5746,10 @@
                 const realNameWidth = this.root.domName?.style.width ?? '0px';
                 container.style.width = `calc( 100% - ${realNameWidth})`;
             };
-            const container = document.createElement('div');
-            container.className = 'lexprogress';
-            this.root.appendChild(container);
+            const container = exports.LX.makeElement('div', 'flex justify-center items-center gap-2', '', this.root);
             // add slider (0-1 if not specified different )
-            let progress = document.createElement('meter');
+            let progress = exports.LX.makeElement('meter', 'lexprogressbar outline-none rounded-lg select-none');
             progress.id = 'lexprogressbar-' + name;
-            progress.className = 'lexprogressbar';
             progress.step = 'any';
             progress.min = options.min ?? 0;
             progress.max = options.max ?? 1;
@@ -5713,12 +5759,12 @@
             progress.value = value;
             container.appendChild(progress);
             const _updateColor = () => {
-                let backgroundColor = exports.LX.getThemeColor('global-selected');
+                let backgroundColor = exports.LX.getCSSVariable('blue-500');
                 if (progress.low != undefined && progress.value < progress.low) {
-                    backgroundColor = exports.LX.getThemeColor('global-color-error');
+                    backgroundColor = exports.LX.getCSSVariable('destructive');
                 }
                 else if (progress.high != undefined && progress.value < progress.high) {
-                    backgroundColor = exports.LX.getThemeColor('global-color-warning');
+                    backgroundColor = exports.LX.getCSSVariable('warning');
                 }
                 progress.style.background = `color-mix(in srgb, ${backgroundColor} 20%, transparent)`;
             };
@@ -5727,11 +5773,8 @@
                 if (oldSpan) {
                     oldSpan.remove();
                 }
-                let span = document.createElement('span');
+                let span = exports.LX.makeElement('span', 'w-12 flex-auto-keep text-center', value, container);
                 span.id = 'progressvalue-' + name;
-                span.style.padding = '0px 5px';
-                span.innerText = value;
-                container.appendChild(span);
             }
             if (options.editable ?? false) {
                 progress.classList.add('editable');
@@ -5801,14 +5844,13 @@
                 }
             };
             var container = document.createElement('div');
-            container.className = 'lexradiogroup ' + (options.className ?? '');
+            container.className = exports.LX.mergeClass('lexradiogroup flex flex-col', options.className);
             this.root.appendChild(container);
-            let labelSpan = document.createElement('span');
-            labelSpan.innerHTML = label;
-            container.appendChild(labelSpan);
+            // Make label
+            exports.LX.makeElement('span', 'font-medium mb-2', label, container);
             for (let i = 0; i < values.length; ++i) {
                 const optionItem = document.createElement('div');
-                optionItem.className = 'lexradiogroupitem';
+                optionItem.className = 'lexradiogroupitem flex items-center gap-2 px-6 py-1';
                 container.appendChild(optionItem);
                 const optionButton = document.createElement('button');
                 optionButton.className = 'flex p-0 rounded-lg cursor-pointer';
@@ -5916,11 +5958,10 @@
                 }
             };
             const container = document.createElement('div');
-            container.className = 'lexrange relative';
+            container.className = 'lexrange relative py-3';
             this.root.appendChild(container);
             let slider = document.createElement('input');
-            slider.className = 'lexrangeslider ' + (isRangeValue ? 'pointer-events-none ' : '')
-                + (options.className ?? '');
+            slider.className = exports.LX.mergeClass('lexrangeslider' + (isRangeValue ? ' range pointer-events-none' : ''), options.className);
             slider.min = options.min ?? 0;
             slider.max = options.max ?? 100;
             slider.step = options.step ?? 1;
@@ -5974,15 +6015,12 @@
                     const remapped = exports.LX.remapRange(value, options.min, options.max, 0, 1) * 0.5;
                     offsetX = container.offsetWidth * remapped - (container.offsetWidth * 0.5);
                 }
-                exports.LX.asTooltip(container, `${value}${isRangeValue ? `- ${ogValue[1]}` : ``}`, { offsetX,
-                    callback: (tpDom) => {
+                exports.LX.asTooltip(container, `${value}${isRangeValue ? `- ${ogValue[1]}` : ``}`, { offsetX, callback: (tpDom) => {
                         this._labelTooltip = tpDom;
                     } });
             });
-            if (ogValue.constructor == Array) { // Its a range value
-                let maxSlider = document.createElement('input');
-                maxSlider.className = 'lexrangeslider no-fill pointer-events-none overlap absolute top-0 left-0 '
-                    + (options.className ?? '');
+            if (ogValue.constructor == Array) {
+                let maxSlider = exports.LX.makeElement('input', exports.LX.mergeClass('lexrangeslider no-fill pointer-events-none overlap absolute left-0', options.className));
                 maxSlider.min = options.min ?? 0;
                 maxSlider.max = options.max ?? 100;
                 maxSlider.step = options.step ?? 1;
@@ -6047,7 +6085,7 @@
             }, false);
             // Create all layers of stars
             for (let i = 0; i < 5; ++i) {
-                const starIcon = exports.LX.makeIcon('Star', { svgClass: `lg fill-current fg-secondary` });
+                const starIcon = exports.LX.makeIcon('Star', { svgClass: `lg fill-current text-accent` });
                 starIcon.dataset['idx'] = i + 1;
                 starsContainer.appendChild(starIcon);
                 starIcon.addEventListener('click', (e) => {
@@ -6056,9 +6094,9 @@
                     const half = allowHalf && e.offsetX < (rect.width * 0.5);
                     this.set(parseFloat(star.dataset['idx']) - (half ? 0.5 : 0.0));
                 }, false);
-                const filledStarIcon = exports.LX.makeIcon('Star', { svgClass: `lg fill-current fg-yellow-500` });
+                const filledStarIcon = exports.LX.makeIcon('Star', { svgClass: `lg fill-current text-yellow-400` });
                 filledStarsContainer.appendChild(filledStarIcon);
-                const halfStarIcon = exports.LX.makeIcon('StarHalf', { svgClass: `lg fill-current fg-yellow-500` });
+                const halfStarIcon = exports.LX.makeIcon('StarHalf', { svgClass: `lg fill-current text-yellow-400` });
                 halfStarsContainer.appendChild(halfStarIcon);
             }
             const _updateStars = (v) => {
@@ -6107,8 +6145,13 @@
                     this.root.dimensions[i].set(newValue[i], skipCallback);
                 }
             };
+            this.onResize = (rect) => {
+                const realNameWidth = this.root.domName?.style.width ?? '0px';
+                container.style.width = `calc( 100% - ${realNameWidth})`;
+            };
             this.root.aspectRatio = value.length == 2 ? value[0] / value[1] : null;
             this.root.dimensions = [];
+            const container = exports.LX.makeElement('div', 'flex', '', this.root);
             for (let i = 0; i < value.length; ++i) {
                 const p = new exports.LX.Panel();
                 this.root.dimensions[i] = p.addNumber(null, value[i], (v) => {
@@ -6122,18 +6165,15 @@
                     if (callback) {
                         callback(value);
                     }
-                }, { min: 0, disabled: options.disabled, precision: options.precision, className: 'flex-fill' });
-                this.root.appendChild(this.root.dimensions[i].root);
+                }, { min: 0, disabled: options.disabled, precision: options.precision, className: 'flex-auto-fill' });
+                container.appendChild(this.root.dimensions[i].root);
                 if ((i + 1) != value.length) {
-                    const xIcon = exports.LX.makeIcon('X', { svgClass: 'fg-accent font-bold' });
-                    this.root.appendChild(xIcon);
+                    const xIcon = exports.LX.makeIcon('X', { svgClass: 'text-foreground font-bold' });
+                    container.appendChild(xIcon);
                 }
             }
             if (options.units) {
-                let unitSpan = document.createElement('span');
-                unitSpan.className = 'select-none fg-tertiary font-medium';
-                unitSpan.innerText = options.units;
-                this.root.appendChild(unitSpan);
+                exports.LX.makeElement('span', 'text-muted-foreground align-center content-center font-medium flex-auto-keep select-none', options.units, container);
             }
             // Lock aspect ratio
             if (this.root.aspectRatio) {
@@ -6144,9 +6184,10 @@
                         const value = this.value();
                         this.root.aspectRatio = value[0] / value[1];
                     }
-                }, { title: 'Lock Aspect Ratio', icon: 'LockOpen', swap: 'Lock', buttonClass: 'bg-none p-0' });
-                this.root.appendChild(lockerButton.root);
+                }, { title: 'Lock Aspect Ratio', icon: 'LockOpen', swap: 'Lock', className: 'flex-auto-keep', buttonClass: 'h-auto bg-none p-0' });
+                container.appendChild(lockerButton.root);
             }
+            exports.LX.doAsync(this.onResize.bind(this));
         }
     }
     exports.LX.SizeInput = SizeInput;
@@ -6191,7 +6232,7 @@
             if (typeof options.onItemsPerPageChange === 'function') {
                 this.onItemsPerPageChange = options.onItemsPerPageChange;
             }
-            this.root = exports.LX.makeContainer(['auto', 'auto'], 'flex flex-row gap-2 ' + (options.className ?? ''));
+            this.root = exports.LX.makeContainer(['auto', 'auto'], exports.LX.mergeClass('flex flex-row gap-2', options.className));
             if (options.allowChangeItemsPerPage ?? false) {
                 const itemsPerPageSelectContainer = exports.LX.makeContainer(['auto', 'auto'], 'flex flex-row items-center', '', this.root);
                 const itemsPerPageSelect = new Select(null, Pagination.ITEMS_PER_PAGE_VALUES, this._itemsPerPage, (v) => {
@@ -6228,7 +6269,7 @@
         refresh() {
             this.pagesRoot.innerHTML = '';
             // Previous page button
-            this._makeButton(exports.LX.makeIcon('ChevronLeft').innerHTML, this.page === 1, () => this.prev(), `bg-none ${this.page === 1 ? '' : 'hover:bg-tertiary'}`);
+            this._makeButton(exports.LX.makeIcon('ChevronLeft').innerHTML, this.page === 1, () => this.prev(), `bg-none ${this.page === 1 ? '' : 'hover:bg-secondary'}`);
             const pagesContainer = exports.LX.makeContainer(['auto', 'auto'], 'flex flex-row items-center', '', this.pagesRoot);
             const maxButtons = this._maxButtons + 2; // + next and prev
             if (this.pages <= maxButtons) {
@@ -6278,7 +6319,7 @@
                 }
             }
             // Next page button
-            this._makeButton(exports.LX.makeIcon('ChevronRight').innerHTML, this.page === this.pages, () => this.next(), `bg-none ${this.page === this.pages ? '' : 'hover:bg-tertiary'}`);
+            this._makeButton(exports.LX.makeIcon('ChevronRight').innerHTML, this.page === this.pages, () => this.next(), `bg-none ${this.page === this.pages ? '' : 'hover:bg-secondary'}`);
         }
         _emitChange() {
             // Event callback
@@ -6296,7 +6337,7 @@
             return btn.root;
         }
         _makePageButton(container, i) {
-            const buttonClass = i === this.page ? 'bg-secondary border' : 'bg-none';
+            const buttonClass = `h-8 ${i === this.page ? 'primary text-primary-foreground' : 'ghost'}`;
             return this._makeButton(String(i), false, () => this.setPage(i), buttonClass, container);
         }
     }
@@ -6450,10 +6491,10 @@
                 }
                 if (this.customFilters !== null) {
                     const icon = exports.LX.makeIcon('CirclePlus', { svgClass: 'sm' });
-                    const separatorHtml = `<div class="lexcontainer border-right self-center mx-1" style="width: 1px; height: 70%;"></div>`;
+                    const separatorHtml = `<div class="lexcontainer border-r-color place-self-center mx-1" style="width: 1px; height: 70%;"></div>`;
                     for (let f of this.customFilters) {
                         f.component = new Button(null, icon.innerHTML + f.name, (v) => {
-                            const spanName = f.component.root.querySelector('span');
+                            const buttonRoot = f.component.root.querySelector('button');
                             if (f.options) {
                                 const menuOptions = f.options.map((colName, idx) => {
                                     const item = {
@@ -6466,8 +6507,8 @@
                                                 delete this.activeCustomFilters[key];
                                             }
                                             const activeFilters = Object.keys(this.activeCustomFilters).filter((k) => this.activeCustomFilters[k] == f.name);
-                                            const filterBadgesHtml = activeFilters.reduce((acc, key) => acc += exports.LX.badge(key, 'bg-tertiary fg-secondary text-sm border-0'), '');
-                                            spanName.innerHTML = icon.innerHTML + f.name
+                                            const filterBadgesHtml = activeFilters.reduce((acc, key) => acc += exports.LX.badge(key, 'xs secondary'), '');
+                                            buttonRoot.innerHTML = icon.innerHTML + f.name
                                                 + (activeFilters.length ? separatorHtml : '') + filterBadgesHtml;
                                             this.refresh();
                                         }
@@ -6478,9 +6519,9 @@
                             }
                             else if (f.type == 'range') {
                                 console.assert(f.min != undefined && f.max != undefined, 'Range filter needs min and max values!');
-                                const container = exports.LX.makeContainer(['240px', 'auto'], 'text-md');
-                                const panel = new exports.LX.Panel();
-                                exports.LX.makeContainer(['100%', 'auto'], 'px-3 p-2 pb-0 text-md font-medium', f.name, container);
+                                const container = exports.LX.makeContainer(['240px', 'auto'], 'text-base');
+                                const panel = new exports.LX.Panel({ className: 'flex flex-col gap-2' });
+                                exports.LX.makeContainer(['100%', 'auto'], 'px-3 p-2 pb-0 text-base font-medium', f.name, container);
                                 f.start = f.start ?? f.min;
                                 f.end = f.end ?? f.max;
                                 panel.refresh = () => {
@@ -6489,9 +6530,9 @@
                                     panel.addNumber(null, f.start, (v) => {
                                         f.start = v;
                                         const inUse = f.start != f.min || f.end != f.max;
-                                        spanName.innerHTML = icon.innerHTML + f.name + (inUse
+                                        buttonRoot.innerHTML = icon.innerHTML + f.name + (inUse
                                             ? separatorHtml
-                                                + exports.LX.badge(`${f.start} - ${f.end} ${f.units ?? ''}`, 'bg-tertiary fg-secondary text-sm border-0')
+                                                + exports.LX.badge(`${f.start} - ${f.end} ${f.units ?? ''}`, 'xs secondary')
                                             : '');
                                         if (inUse) {
                                             this._resetCustomFiltersBtn?.root.classList.remove('hidden');
@@ -6501,10 +6542,10 @@
                                     panel.addNumber(null, f.end, (v) => {
                                         f.end = v;
                                         const inUse = f.start != f.min || f.end != f.max;
-                                        spanName.innerHTML = icon.innerHTML + f.name
+                                        buttonRoot.innerHTML = icon.innerHTML + f.name
                                             + (inUse
                                                 ? separatorHtml
-                                                    + exports.LX.badge(`${f.start} - ${f.end} ${f.units ?? ''}`, 'bg-tertiary fg-secondary text-sm border-0')
+                                                    + exports.LX.badge(`${f.start} - ${f.end} ${f.units ?? ''}`, 'xs secondary')
                                                 : '');
                                         if (inUse) {
                                             this._resetCustomFiltersBtn?.root.classList.remove('hidden');
@@ -6514,19 +6555,19 @@
                                     panel.addButton(null, 'Reset', () => {
                                         f.start = f.min;
                                         f.end = f.max;
-                                        spanName.innerHTML = icon.innerHTML + f.name;
+                                        buttonRoot.innerHTML = icon.innerHTML + f.name;
                                         panel.refresh();
                                         this.refresh();
-                                    }, { buttonClass: 'contrast' });
+                                    }, { buttonClass: 'ghost' });
                                 };
                                 panel.refresh();
                                 container.appendChild(panel.root);
                                 new Popover(f.component.root, [container], { side: 'bottom' });
                             }
                             else if (f.type == 'date') {
-                                const container = exports.LX.makeContainer(['auto', 'auto'], 'text-md');
+                                const container = exports.LX.makeContainer(['auto', 'auto'], 'text-base');
                                 const panel = new exports.LX.Panel();
-                                exports.LX.makeContainer(['100%', 'auto'], 'px-3 p-2 pb-0 text-md font-medium', f.name, container);
+                                exports.LX.makeContainer(['100%', 'auto'], 'px-3 p-2 pb-0 text-base font-medium', f.name, container);
                                 panel.refresh = () => {
                                     panel.clear();
                                     // Generate default value once the filter is used
@@ -6538,9 +6579,9 @@
                                     const calendar = new CalendarRange(f.value ?? f.default, {
                                         onChange: (dateRange) => {
                                             f.value = dateRange;
-                                            spanName.innerHTML = icon.innerHTML + f.name
+                                            buttonRoot.innerHTML = icon.innerHTML + f.name
                                                 + (separatorHtml
-                                                    + exports.LX.badge(`${calendar.getFullDate()}`, 'bg-tertiary fg-secondary text-sm border-0'));
+                                                    + exports.LX.badge(`${calendar.getFullDate()}`, 'xs secondary'));
                                             this._resetCustomFiltersBtn?.root.classList.remove('hidden');
                                             this.refresh();
                                         }
@@ -6551,14 +6592,14 @@
                                 container.appendChild(panel.root);
                                 new Popover(f.component.root, [container], { side: 'bottom' });
                             }
-                        }, { buttonClass: 'px-2 primary dashed' });
+                        }, { buttonClass: 'sm outline dashed' });
                         headerContainer.appendChild(f.component.root);
                     }
                     this._resetCustomFiltersBtn = new Button(null, 'resetButton', () => {
                         this.activeCustomFilters = {};
                         this._resetCustomFiltersBtn?.root.classList.add('hidden');
                         for (let f of this.customFilters ?? []) {
-                            f.component.root.querySelector('span').innerHTML = icon.innerHTML + f.name;
+                            f.component.root.querySelector('button').innerHTML = icon.innerHTML + f.name;
                             if (f.type == 'range') {
                                 f.start = f.min;
                                 f.end = f.max;
@@ -6568,7 +6609,7 @@
                             }
                         }
                         this.refresh();
-                    }, { title: 'Reset filters', tooltip: true, icon: 'X' });
+                    }, { title: 'Reset filters', tooltip: true, icon: 'X', buttonClass: 'ghost' });
                     headerContainer.appendChild(this._resetCustomFiltersBtn?.root);
                     this._resetCustomFiltersBtn?.root.classList.add('hidden');
                 }
@@ -6592,15 +6633,13 @@
                             return item;
                         });
                         exports.LX.addDropdownMenu(e.target, menuOptions, { side: 'bottom', align: 'end' });
-                    }, { hideName: true });
+                    }, { hideName: true, buttonClass: 'outline' });
                     headerContainer.appendChild(toggleColumnsBtn.root);
                     toggleColumnsBtn.root.style.marginLeft = 'auto';
                 }
                 container.appendChild(headerContainer);
             }
-            const table = document.createElement('table');
-            exports.LX.addClass(table, options.tableClass);
-            container.appendChild(table);
+            const table = exports.LX.makeElement('table', options.tableClass, '', container);
             this.refresh = () => {
                 this._currentFilter = this._currentFilter ?? '';
                 table.innerHTML = '';
@@ -6622,7 +6661,7 @@
                         th.style.width = '0px';
                         const input = document.createElement('input');
                         input.type = 'checkbox';
-                        input.className = 'lexcheckbox accent';
+                        input.className = 'lexcheckbox primary';
                         input.checked = data.checkMap[':root'] ?? false;
                         th.appendChild(input);
                         input.addEventListener('change', function () {
@@ -6657,8 +6696,7 @@
                                     console.warn('Invalid column action (missing name):', action);
                                     continue;
                                 }
-                                menuOptions.push({ name: action.name, icon: action.icon, className: action.className,
-                                    callback: () => {
+                                menuOptions.push({ name: action.name, icon: action.icon, className: action.className, callback: () => {
                                         const colRows = this.data.body.map((row) => [row[idx]]);
                                         const mustRefresh = action.callback(colRows, table);
                                         if (mustRefresh) {
@@ -6889,7 +6927,7 @@
                             const td = document.createElement('td');
                             const input = document.createElement('input');
                             input.type = 'checkbox';
-                            input.className = 'lexcheckbox accent';
+                            input.className = 'lexcheckbox primary';
                             input.checked = data.checkMap[rowId];
                             td.appendChild(input);
                             input.addEventListener('change', function () {
@@ -7001,7 +7039,7 @@
                 const footerContainer = exports.LX.makeContainer(['100%', 'auto'], 'flex flex-row px-3 my-1 align-center', '', container);
                 // Show num selected rows
                 if (showSelected) {
-                    const selectedRowsLabelContainer = exports.LX.makeContainer(['100%', 'auto'], 'flex justify-start items-center fg-secondary', '0 row(s) selected.', footerContainer);
+                    const selectedRowsLabelContainer = exports.LX.makeContainer(['100%', 'auto'], 'flex justify-start items-center', '0 row(s) selected.', footerContainer);
                     exports.LX.addSignal('@rows_selected_changed', (target, n) => {
                         if (!this._showSelectedNumber)
                             return;
@@ -7097,7 +7135,8 @@
                 let tabEl = document.createElement('div');
                 tabEl.className = 'lextab ' + ((tab.selected ?? false) ? 'selected' : '');
                 tabEl.innerHTML = showNames ? tab.name : '';
-                tabEl.appendChild(exports.LX.makeIcon(tab.icon ?? 'Hash', { title: tab.name, iconClass: tab.iconClass, svgClass: tab.svgClass }));
+                tabEl.appendChild(exports.LX.makeIcon(tab.icon ?? 'Hash', { title: tab.name, iconClass: tab.iconClass,
+                    svgClass: `lg${tab.svgClass ? ' ' + tab.svgClass : ''}` }));
                 this.tabDOMs[tab.name] = tabEl;
                 let infoContainer = document.createElement('div');
                 infoContainer.id = tab.name.replace(/\s/g, '');
@@ -7170,15 +7209,13 @@
             };
             // Show tags
             const tagsContainer = document.createElement('div');
-            tagsContainer.className = 'lextags';
+            tagsContainer.className = 'inline-flex flex-wrap gap-1 bg-card/50 rounded-lg pad-xs [&_input]:w-2/3';
             this.root.appendChild(tagsContainer);
             this.generateTags = (value) => {
                 tagsContainer.innerHTML = '';
                 for (let i = 0; i < value.length; ++i) {
                     const tagName = value[i];
-                    const tag = document.createElement('span');
-                    tag.className = 'lextag';
-                    tag.innerHTML = tagName;
+                    const tag = exports.LX.makeElement('span', 'lextag bg-primary px-2 py-1 rounded-xl min-w-2 justify-center text-primary-foreground gap-1 text-sm select-none', tagName);
                     const removeButton = exports.LX.makeIcon('X', { svgClass: 'sm' });
                     tag.appendChild(removeButton);
                     removeButton.addEventListener('click', (e) => {
@@ -7236,13 +7273,12 @@
             container.className = 'lextextarea';
             container.style.display = 'flex';
             this.root.appendChild(container);
-            let wValue = document.createElement('textarea');
+            let wValue = exports.LX.makeElement('textarea', options.inputClass ?? '');
             wValue.value = value ?? '';
-            wValue.className = options.inputClass ?? '';
             wValue.style.textAlign = options.float ?? '';
             Object.assign(wValue.style, options.style ?? {});
             if (options.fitHeight ?? false) {
-                wValue.classList.add('size-content');
+                wValue.classList.add('field-sizing-content');
             }
             if (!(options.resize ?? true)) {
                 wValue.classList.add('resize-none');
@@ -7293,7 +7329,8 @@
             console.assert(name.length !== 0, "Can't create Title Component without text!");
             // Note: Titles are not registered in Panel.components by now
             super(exports.ComponentType.TITLE, null, null, options);
-            this.root.className = `lextitle ${this.root.className}`;
+            const cn = 'lextitle !w-fit bg-muted text-foreground text-sm font-semibold leading-normal m-3 flex content-center rounded-xl select-none';
+            this.root.className = exports.LX.mergeClass(cn, options.className);
             if (options.icon) {
                 let icon = exports.LX.makeIcon(options.icon, { iconClass: 'mr-2' });
                 icon.querySelector('svg').style.color = options.iconColor || '';
@@ -7302,16 +7339,14 @@
             let text = document.createElement('span');
             text.innerText = name;
             this.root.appendChild(text);
-            Object.assign(this.root.style, options.style ?? {});
             if (options.link != undefined) {
-                let linkDom = document.createElement('a');
-                linkDom.innerText = name;
+                let linkDom = exports.LX.makeElement('a', `${cn} link`, name);
                 linkDom.href = options.link;
                 linkDom.target = options.target ?? '';
-                linkDom.className = 'lextitle link';
-                Object.assign(linkDom.style, options.style ?? {});
                 this.root.replaceWith(linkDom);
+                this.root = linkDom;
             }
+            Object.assign(this.root.style, options.style ?? {});
         }
     }
     exports.LX.Title = Title;
@@ -7346,25 +7381,23 @@
                 container.style.width = options.inputWidth ?? `calc( 100% - ${realNameWidth})`;
             };
             var container = document.createElement('div');
-            container.className = 'lextogglecont';
+            container.className = 'flex flex-row gap-2 items-center';
             this.root.appendChild(container);
-            let toggle = document.createElement('input');
+            let toggle = exports.LX.makeElement('input', exports.LX.mergeClass('lextoggle relative inline-grid place-content-center cursor-pointer shrink-0 select-none', options.className));
             toggle.type = 'checkbox';
-            toggle.className = 'lextoggle ' + (options.className ?? '');
             toggle.checked = value;
             toggle.iValue = value;
             toggle.disabled = options.disabled ?? false;
             container.appendChild(toggle);
             let valueName = document.createElement('span');
-            valueName.className = 'toggletext';
+            valueName.className = 'font-medium w-full overflow-hidden truncate';
             valueName.innerHTML = options.label ?? 'On';
             container.appendChild(valueName);
             toggle.addEventListener('change', (e) => {
                 this.set(toggle.checked, false, e);
             });
             if (options.suboptions) {
-                let suboptions = document.createElement('div');
-                suboptions.className = 'lextogglesubmenu';
+                let suboptions = exports.LX.makeElement('div', 'lextogglesubmenu w-full p-2');
                 suboptions.toggleAttribute('hidden', !toggle.checked);
                 const suboptionsPanel = new exports.LX.Panel();
                 suboptionsPanel.queue(suboptions);
@@ -7383,6 +7416,7 @@
      * @description Vector Component
      */
     class Vector extends BaseComponent$1 {
+        locked = false;
         setLimits;
         constructor(numComponents, name, value, callback, options = {}) {
             numComponents = exports.LX.clamp(numComponents, 2, 4);
@@ -7418,7 +7452,7 @@
             this.setLimits = (newMin, newMax, newStep) => { };
             const vectorInputs = [];
             var container = document.createElement('div');
-            container.className = 'lexvector';
+            container.className = 'lexvector flex';
             this.root.appendChild(container);
             this.disabled = options.disabled ?? false;
             const that = this;
@@ -7457,7 +7491,7 @@
                         mult = 10;
                     else if (e.altKey)
                         mult = 0.1;
-                    if (lockerButton.locked) {
+                    if (that.locked) {
                         for (let v of vectorInputs) {
                             v.value = exports.LX.round(+v.valueAsNumber - mult * (e.deltaY > 0 ? 1 : -1), options.precision);
                             BaseComponent$1._dispatchEvent(v, 'change');
@@ -7474,7 +7508,7 @@
                     }
                     let val = exports.LX.clamp(e.target.value, +vecinput.min, +vecinput.max);
                     val = exports.LX.round(val, options.precision);
-                    if (lockerButton.locked) {
+                    if (this.locked) {
                         for (let v of vectorInputs) {
                             v.value = val;
                             value[v.idx] = val;
@@ -7513,7 +7547,7 @@
                             mult = 10;
                         else if (e.altKey)
                             mult = 0.1;
-                        if (lockerButton.locked) {
+                        if (that.locked) {
                             for (let v of vectorInputs) {
                                 v.value = exports.LX.round(+v.valueAsNumber + mult * dt, options.precision);
                                 BaseComponent$1._dispatchEvent(v, 'change');
@@ -7554,10 +7588,12 @@
                     this.set(value, true);
                 };
             }
-            const lockerButton = new Button(null, '', (swapValue) => {
-                lockerButton.locked = swapValue;
-            }, { title: 'Lock', icon: 'LockOpen', swap: 'Lock', buttonClass: 'no-h bg-none p-0' });
-            container.appendChild(lockerButton.root);
+            if (!options.skipLock) {
+                const lockerButton = new Button(null, '', (swapValue) => {
+                    this.locked = swapValue;
+                }, { title: 'Lock', icon: 'LockOpen', swap: 'Lock', buttonClass: 'h-auto bg-none p-0' });
+                container.appendChild(lockerButton.root);
+            }
             exports.LX.doAsync(this.onResize.bind(this));
         }
     }
@@ -7580,22 +7616,17 @@
         constructor(name, options = {}) {
             this.name = name;
             var root = document.createElement('div');
-            root.className = 'lexbranch';
             if (options.id) {
                 root.id = options.id;
             }
-            if (options.className) {
-                root.className += ' ' + options.className;
-            }
-            root.style.margin = '0 auto';
+            root.className = exports.LX.mergeClass('lexbranch w-full rounded-lg my-0 mx-auto', options.className);
             var that = this;
             this.closed = options.closed ?? false;
             this.root = root;
             this.components = [];
             this.panel = null;
             // Create element
-            const title = document.createElement('div');
-            title.className = 'lexbranchtitle';
+            const title = exports.LX.makeElement('div', 'lexbranchtitle flex cursor-pointer select-none pad-lg bg-card text-card-foreground text-lg', '', root);
             if (options.icon) {
                 const branchIcon = exports.LX.makeIcon(options.icon, { iconClass: 'mr-2' });
                 title.appendChild(branchIcon);
@@ -7603,11 +7634,8 @@
             title.innerHTML += name || 'Branch';
             const collapseIcon = exports.LX.makeIcon('Right', { iconClass: 'switch-branch-button', svgClass: 'sm' });
             title.appendChild(collapseIcon);
-            root.appendChild(title);
-            var branchContent = document.createElement('div');
+            var branchContent = exports.LX.makeElement('div', 'lexbranchcontent pad-xs bg-card', '', root);
             branchContent.id = name.replace(/\s/g, '');
-            branchContent.className = 'lexbranchcontent';
-            root.appendChild(branchContent);
             this.content = branchContent;
             this._addBranchSeparator();
             if (this.closed) {
@@ -7762,13 +7790,9 @@
          * style: CSS Style object to be applied to the panel
          */
         constructor(options = {}) {
-            var root = document.createElement('div');
-            root.className = 'lexpanel';
+            const root = exports.LX.makeElement('div', exports.LX.mergeClass('lexpanel m-0 pad-md overflow-hidden overflow-y-scroll text-foreground scrollbar-hidden', options.className));
             if (options.id) {
                 root.id = options.id;
-            }
-            if (options.className) {
-                root.className += ' ' + options.className;
             }
             root.style.width = options.width || '100%';
             root.style.height = options.height || '100%';
@@ -7823,8 +7847,7 @@
                     const signal = this.components[w].options.signal;
                     for (let i = 0; i < exports.LX.signals[signal].length; i++) {
                         if (exports.LX.signals[signal][i] == this.components[w]) {
-                            exports.LX.signals[signal] = [...exports.LX.signals[signal].slice(0, i),
-                                ...exports.LX.signals[signal].slice(i + 1)];
+                            exports.LX.signals[signal] = [...exports.LX.signals[signal].slice(0, i), ...exports.LX.signals[signal].slice(i + 1)];
                         }
                     }
                 }
@@ -7835,8 +7858,7 @@
                     let signal = c.options.signal;
                     for (let i = 0; i < exports.LX.signals[signal].length; i++) {
                         if (exports.LX.signals[signal][i] == c) {
-                            exports.LX.signals[signal] = [...exports.LX.signals[signal].slice(0, i),
-                                ...exports.LX.signals[signal].slice(i + 1)];
+                            exports.LX.signals[signal] = [...exports.LX.signals[signal].slice(0, i), ...exports.LX.signals[signal].slice(i + 1)];
                         }
                     }
                 }
@@ -8169,7 +8191,7 @@
          */
         addLabel(value, options = {}) {
             options.disabled = true;
-            options.inputClass = (options.inputClass ?? '') + ' bg-none';
+            options.inputClass = exports.LX.mergeClass('bg-none', options.inputClass);
             const component = this.addText(null, value, null, options);
             component.type = exports.ComponentType.LABEL;
             return component;
@@ -8231,7 +8253,7 @@
          * @param {Function} callback Callback function on submit form
          * @param {Object} options:
          * primaryActionName: Text to be shown in the primary action button ['Submit']
-         * primaryButtonClass: Button class for primary action button ['contrast']
+         * primaryButtonClass: Button class for primary action button ['primary']
          * secondaryActionName: Text to be shown in the secondary action button ['Cancel']
          * secondaryActionCallback: Callback function on press secondary button
          * secondaryButtonClass: Button class for secondary action button ['primary']
@@ -8706,11 +8728,10 @@
             this._buildButtons(buttonsArray, options);
         }
         _buildButtons(buttonsArray, options = {}) {
-            options.className = 'lexoverlaybuttons';
+            options.className = 'lexoverlaybuttons flex justify-start gap-2 bg-card m-2 p-1 rounded-2xl border-color';
             let overlayPanel = this.area.addPanel(options);
             let overlayGroup = null;
-            const container = document.createElement('div');
-            container.className = 'lexoverlaybuttonscontainer';
+            const container = exports.LX.makeElement('div', 'lexoverlaybuttonscontainer absolute flex top-0 w-full pointer-events-none');
             container.appendChild(overlayPanel.root);
             this.area.attach(container);
             const float = options.float;
@@ -8752,6 +8773,7 @@
                     icon: b.icon,
                     img: b.img,
                     className: b.class ?? '',
+                    buttonClass: b.buttonClass ?? 'x', // Avoid using default outline
                     title: b.name,
                     overflowContainerX: overlayPanel.root,
                     swap: b.swap
@@ -8759,7 +8781,7 @@
                 if (group) {
                     if (!overlayGroup) {
                         overlayGroup = document.createElement('div');
-                        overlayGroup.className = 'lexoverlaygroup';
+                        overlayGroup.className = 'lexoverlaygroup flex flex-none bg-secondary rounded-xl';
                         overlayPanel.queuedContainer = overlayGroup;
                     }
                     _options.parent = overlayGroup;
@@ -8868,13 +8890,10 @@
         _root;
         constructor(options = {}) {
             var root = document.createElement('div');
-            root.className = 'lexarea';
             if (options.id) {
                 root.id = options.id;
             }
-            if (options.className) {
-                root.className += ' ' + options.className;
-            }
+            root.className = exports.LX.mergeClass('lexarea m-0 bg-background text-foreground', options.className);
             var width = options.width || '100%';
             var height = options.height || '100%';
             // This has default options..
@@ -9038,8 +9057,7 @@
                 const type = layout.type ?? 'horizontal';
                 const resize = layout.resize ?? true;
                 const minimizable = layout.minimizable ?? false;
-                const [splitA, splitB] = area.split({ type, resize, minimizable,
-                    sizes: [layout.splits[0].size, layout.splits[1].size] });
+                const [splitA, splitB] = area.split({ type, resize, minimizable, sizes: [layout.splits[0].size, layout.splits[1].size] });
                 _splitArea(splitA, layout.splits[0]);
                 _splitArea(splitB, layout.splits[1]);
             };
@@ -9139,8 +9157,7 @@
             // Create areas
             let area1 = new Area({ width: primarySize[0], height: primarySize[1], skipAppend: true,
                 className: 'split' + (options.menubar || options.sidebar ? '' : ' origin') });
-            let area2 = new Area({ width: secondarySize[0], height: secondarySize[1], skipAppend: true,
-                className: 'split' });
+            let area2 = new Area({ width: secondarySize[0], height: secondarySize[1], skipAppend: true, className: 'split' });
             /*
                 If the parent area is not in the DOM, we need to wait for the resize event to get the its correct size
                 and set the sizes of the split areas accordingly.
@@ -9412,16 +9429,15 @@
         addMenubar(items, options = {}) {
             let menubar = new Menubar(items, options);
             exports.LX.menubars.push(menubar);
-            const [bar, content] = this.split({ type: 'vertical', sizes: ['48px', null], resize: false,
-                menubar: true });
+            const [bar, content] = this.split({ type: 'vertical', sizes: ['48px', null], resize: false, menubar: true });
             menubar.siblingArea = content;
             bar.attach(menubar);
             bar.isMenubar = true;
             if (options.sticky ?? true) {
-                bar.root.className += ' sticky top-0 z-1000';
+                bar.root.className += ' sticky top-0 z-100';
             }
             if (options.parentClass) {
-                bar.root.className += ` ${options.parentClass}`;
+                bar.root.className = exports.LX.mergeClass(bar.root.className, options.parentClass);
             }
             return menubar;
         }
@@ -9451,7 +9467,7 @@
             bar.attach(sidebar);
             bar.isSidebar = true;
             if (options.parentClass) {
-                bar.root.className += ` ${options.parentClass}`;
+                bar.root.className = exports.LX.mergeClass(bar.root.className, options.parentClass);
             }
             return sidebar;
         }
@@ -9580,6 +9596,17 @@
     exports.LX.Area = Area$3;
 
     // Utils.ts @jxarco
+    // @ts-ignore
+    /* Add Tailwind merge utility to LX namespace EXTENDED with new LX class groups*/
+    exports.LX.twMerge = _esm.extendTailwindMerge({
+        extend: {
+            classGroups: {
+                pad: [
+                    { pad: ['xs', 'sm', 'md', 'lg', 'xl', '2xl'] }
+                ]
+            }
+        }
+    });
     function clamp(num, min, max) {
         return Math.min(Math.max(num, min), max);
     }
@@ -9670,7 +9697,7 @@
         console.assert(typeof text == 'string', 'getSupportedDOMName: Text is not a string!');
         let name = text.trim();
         // Replace specific known symbols
-        name = name.replace(/@/g, '_at_').replace(/\+/g, '_plus_').replace(/\./g, '_dot_');
+        name = name.replace(/\//g, '_slash_').replace(/@/g, '_at_').replace(/\+/g, '_plus_').replace(/\./g, '_dot_');
         name = name.replace(/[^a-zA-Z0-9_-]/g, '_');
         // prefix with an underscore if needed
         if (/^[0-9]/.test(name)) {
@@ -9804,45 +9831,57 @@
     }
     exports.LX.concatTypedArray = concatTypedArray;
     /**
-     * @method setTheme
-     * @description Set dark or light theme
+     * @method setThemeColor
+     * @description Set colored theme
+     * @param {String} colorThemeName Name of the color
+     */
+    function setThemeColor(colorThemeName) {
+        document.documentElement.className = `theme-${colorThemeName}`;
+        const colorScheme = exports.LX.getMode();
+        document.documentElement.classList.toggle('dark', colorScheme == 'dark');
+    }
+    exports.LX.setThemeColor = setThemeColor;
+    /**
+     * @method setMode
+     * @description Set dark or light scheme mode
      * @param {String} colorScheme Name of the scheme
      * @param {Boolean} storeLocal Store in localStorage
      */
-    function setTheme(colorScheme, storeLocal = true) {
+    function setMode(colorScheme, storeLocal = true) {
         colorScheme = (colorScheme == 'light') ? 'light' : 'dark';
-        document.documentElement.setAttribute('data-theme', colorScheme);
+        document.documentElement.setAttribute('data-mode', colorScheme);
+        document.documentElement.classList.toggle('dark', colorScheme == 'dark');
         if (storeLocal)
             localStorage.setItem('lxColorScheme', colorScheme);
         exports.LX.emitSignal('@on_new_color_scheme', colorScheme);
     }
-    exports.LX.setTheme = setTheme;
+    exports.LX.setMode = setMode;
     /**
-     * @method getTheme
+     * @method getMode
      * @description Gets either "dark" or "light" theme value
      */
-    function getTheme() {
-        return document.documentElement.getAttribute('data-theme') ?? 'dark';
+    function getMode() {
+        return document.documentElement.getAttribute('data-mode') ?? 'dark';
     }
-    exports.LX.getTheme = getTheme;
+    exports.LX.getMode = getMode;
     /**
-     * @method switchTheme
+     * @method switchMode
      * @description Toggles between "dark" and "light" themes
      */
-    function switchTheme() {
-        const currentTheme = getTheme();
-        setTheme(currentTheme == 'dark' ? 'light' : 'dark');
+    function switchMode() {
+        const currentTheme = getMode();
+        setMode(currentTheme == 'dark' ? 'light' : 'dark');
     }
-    exports.LX.switchTheme = switchTheme;
+    exports.LX.switchMode = switchMode;
     /**
-     * @method setSystemTheme
+     * @method setSystemMode
      * @description Sets back the system theme
      */
-    function setSystemTheme() {
+    function setSystemMode() {
         const currentTheme = (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches)
             ? 'light'
             : 'dark';
-        setTheme(currentTheme);
+        setMode(currentTheme);
         localStorage.removeItem('lxColorScheme');
         // Reapply listener
         if (exports.LX._mqlPrefersDarkScheme) {
@@ -9850,39 +9889,55 @@
             exports.LX._mqlPrefersDarkScheme.addEventListener('change', exports.LX._onChangeSystemTheme);
         }
     }
-    exports.LX.setSystemTheme = setSystemTheme;
+    exports.LX.setSystemMode = setSystemMode;
     /**
-     * @method setThemeColor
-     * @description Sets a new value for one of the main theme variables
-     * @param {String} colorName Name of the theme variable
-     * @param {String} color Color in rgba/hex
+     * @method setCSSVariable
+     * @description Sets a new value for one of the CSS root variables
+     * @param {String} varName Name of the CSS variable
+     * @param {String} value
      */
-    function setThemeColor(colorName, color) {
+    function setCSSVariable(varName, value) {
         const r = document.querySelector(':root');
-        r.style.setProperty('--' + colorName, color);
+        r.style.setProperty('--' + varName, value);
     }
-    exports.LX.setThemeColor = setThemeColor;
+    exports.LX.setCSSVariable = setCSSVariable;
     /**
-     * @method getThemeColor
-     * @description Get the value for one of the main theme variables
-     * @param {String} colorName Name of the theme variable
+     * @method getCSSVariable
+     * @description Get the value for one of the CSS root variables
+     * @param {String} varName Name of the CSS variable
      */
-    function getThemeColor(colorName) {
+    function getCSSVariable(varName) {
+        const [name, opacity] = varName.split('/');
         const r = document.querySelector(':root');
         const s = getComputedStyle(r);
-        const value = s.getPropertyValue('--' + colorName);
+        let value = s.getPropertyValue('--' + name);
+        if (!value)
+            return '';
         if (value.includes('light-dark')) {
             const currentScheme = s.getPropertyValue('color-scheme');
             if (currentScheme == 'light') {
-                return value.substring(value.indexOf('(') + 1, value.indexOf(',')).replace(/\s/g, '');
+                value = value.substring(value.indexOf('(') + 1, value.indexOf(',')).replace(/\s/g, '');
             }
             else {
-                return value.substring(value.indexOf(',') + 1, value.indexOf(')')).replace(/\s/g, '');
+                value = value.substring(value.indexOf(',') + 1, value.indexOf(')')).replace(/\s/g, '');
+            }
+        }
+        if (opacity) {
+            if (value.includes('/'))
+                return value;
+            if (value.startsWith('rgb(') || value.startsWith('hsl(') || value.startsWith('oklch(')
+                || value.startsWith('lab(') || value.startsWith('lch(')) {
+                return value.replace(/\)$/, ` / ${parseFloat(opacity) / 100.0})`);
+            }
+            // Hex fallback
+            if (value.startsWith('#')) {
+                const rgba = exports.LX.hexToRgb(value, opacity);
+                return exports.LX.rgbToHex(rgba);
             }
         }
         return value;
     }
-    exports.LX.getThemeColor = getThemeColor;
+    exports.LX.getCSSVariable = getCSSVariable;
     /**
      * @method switchSpacing
      * @description Toggles between "default" and "compact" spacing layouts
@@ -9912,8 +9967,9 @@
      * @method hexToRgb
      * @description Convert a hexadecimal string to a valid RGB color
      * @param {String} hex Hexadecimal color
+     * @param {Number} hex Opacity alpha value
      */
-    function hexToRgb(hex) {
+    function hexToRgb(hex, alpha) {
         const hexPattern = /^#(?:[A-Fa-f0-9]{3,4}|[A-Fa-f0-9]{6}|[A-Fa-f0-9]{8})$/;
         if (!hexPattern.test(hex)) {
             throw (`Invalid Hex Color: ${hex}`);
@@ -9929,7 +9985,7 @@
         const b = ((bigint >> (hex.length === 8 ? 8 : 0)) & 255) / 255;
         const a = (hex.length === 8 ? (bigint & 255) : (hex.length === 4 ? parseInt(hex.slice(-2), 16) : 255))
             / 255;
-        return { r, g, b, a };
+        return { r, g, b, a: (alpha ? alpha / 100 : a) };
     }
     exports.LX.hexToRgb = hexToRgb;
     /**
@@ -9954,12 +10010,48 @@
             rgbArray.push(rgb.a);
         return ('#'
             + rgbArray.map((c) => {
-                c = Math.floor(c * scale);
+                c = Math.floor(exports.LX.clamp(c * scale, 0.0, scale));
                 const hex = c.toString(16);
                 return hex.length === 1 ? ('0' + hex) : hex;
             }).join(''));
     }
     exports.LX.rgbToHex = rgbToHex;
+    /**
+     * @method oklchToHex
+     * @description Convert a oklch color to a hexadecimal string
+     * @param {String} oklch String containing oklch color
+     */
+    function oklchToHex(oklch) {
+        const match = oklch.match(/oklch\(\s*([\d.]+)%\s+([\d.]+)\s+([\d.]+)\s*\)/);
+        if (!match) {
+            console.error('Invalid OKLCH format');
+            return '#000';
+        }
+        let [, Lp, C, h] = match;
+        const L = parseFloat(Lp) / 100;
+        const H = (parseFloat(h) * Math.PI) / 180;
+        // OKLCH -> OKLab
+        const a = parseFloat(C) * Math.cos(H);
+        const b = parseFloat(C) * Math.sin(H);
+        // OKLab -> LMS
+        const l_ = L + 0.3963377774 * a + 0.2158037573 * b;
+        const m_ = L - 0.1055613458 * a - 0.0638541728 * b;
+        const s_ = L - 0.0894841775 * a - 1.2914855480 * b;
+        const l = l_ ** 3;
+        const m = m_ ** 3;
+        const s = s_ ** 3;
+        // LMS -> linear RGB
+        let r = 4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s;
+        let g = -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s;
+        let b2 = -0.0041960863 * l - 0.7034186147 * m + 1.7076147010 * s;
+        // linear RGB -> sRGB
+        const toSRGB = (x) => x <= 0.0031308 ? 12.92 * x : 1.055 * Math.pow(x, 1 / 2.4) - 0.055;
+        r = toSRGB(r);
+        g = toSRGB(g);
+        b2 = toSRGB(b2);
+        return exports.LX.rgbToHex({ r, g, b: b2 });
+    }
+    exports.LX.oklchToHex = oklchToHex;
     /**
      * @method rgbToCss
      * @description Convert a RGB color (0..1) to a CSS color format
@@ -10199,10 +10291,8 @@
             const fixedOffset = isFixed ? new vec2$3(parentRect.x, parentRect.y) : new vec2$3();
             left = left ?? e.clientX - offsetX - parentRect.x;
             top = top ?? e.clientY - offsetY - parentRect.y;
-            domEl.style.left =
-                exports.LX.clamp(left, dragMargin + fixedOffset.x, fixedOffset.x + parentRect.width - domEl.offsetWidth - dragMargin) + 'px';
-            domEl.style.top =
-                exports.LX.clamp(top, dragMargin + fixedOffset.y, fixedOffset.y + parentRect.height - domEl.offsetHeight - dragMargin) + 'px';
+            domEl.style.left = exports.LX.clamp(left, dragMargin + fixedOffset.x, fixedOffset.x + parentRect.width - domEl.offsetWidth - dragMargin) + 'px';
+            domEl.style.top = exports.LX.clamp(top, dragMargin + fixedOffset.y, fixedOffset.y + parentRect.height - domEl.offsetHeight - dragMargin) + 'px';
             domEl.style.translate = 'none'; // Force remove translation
         };
         // Initial adjustment
@@ -10328,7 +10418,7 @@
             return;
         }
         const snippet = document.createElement('div');
-        snippet.className = 'lexcodesnippet ' + (options.className ?? '');
+        snippet.className = exports.LX.mergeClass('lexcodesnippet relative rounded-xl overflow-hidden', options.className);
         snippet.style.width = size ? size[0] : 'auto';
         snippet.style.height = size ? size[1] : 'auto';
         const area = new Area$3({ xskipAppend: true });
@@ -10337,7 +10427,7 @@
             disableEdition: true,
             allowAddScripts: false,
             name: options.tabName,
-            callback: (instance) => {
+            onReady: (instance) => {
                 instance.setText(code, options.language ?? 'Plain Text');
                 if (options.linesAdded) {
                     const code = instance.root.querySelector('.code');
@@ -10413,9 +10503,10 @@
             'ArrowRight': '→',
             'Space': '␣'
         };
-        const kbd = exports.LX.makeContainer(['auto', 'auto'], 'flex flex-row ml-auto');
+        const kbd = exports.LX.makeContainer(['auto', 'auto'], `text-muted-foreground font-sans text-xs inline-flex
+        ml-auto pointer-events-none select-none items-center justify-center gap-1`);
         for (const k of keys) {
-            exports.LX.makeContainer(['auto', 'auto'], 'self-center text-xs fg-secondary select-none ' + extraClass, useSpecialKeys ? specialKeys[k] ?? k : k, kbd);
+            exports.LX.makeContainer(['auto', 'auto'], 'bg-muted px-1 rounded-sm ' + extraClass, useSpecialKeys ? specialKeys[k] ?? k : k, kbd);
         }
         return kbd;
     }
@@ -10435,38 +10526,38 @@
         const eraseNum = items.length - maxItems;
         if (eraseNum > 0) {
             const erased = items.splice(1, eraseNum + 1);
-            const ellipsisItem = { title: '...', ellipsis: erased.map((v) => v.title).join('/') };
+            const ellipsisItem = { name: '...', ellipsis: erased.map((v) => v.name).join('/') };
             items.splice(1, 0, ellipsisItem);
         }
         for (let i = 0; i < items.length; ++i) {
             const item = items[i];
-            console.assert(item.title, 'Breadcrumb item must have a title!');
+            console.assert(item.name, 'Breadcrumb item must have a name!');
             if (i != 0) {
-                const icon = exports.LX.makeIcon(separatorIcon, { svgClass: 'sm fg-secondary separator' });
+                const icon = exports.LX.makeIcon(separatorIcon, { svgClass: 'sm text-foreground separator' });
                 breadcrumb.appendChild(icon);
             }
-            const lastElement = i == items.length - 1;
-            const breadcrumbItem = exports.LX.makeContainer(['auto', 'auto'], `p-1 flex flex-row gap-1 items-center ${lastElement ? '' : 'fg-secondary'}`);
+            const lastElement = i == (items.length - 1);
+            const breadcrumbItem = exports.LX.makeContainer(['auto', 'auto'], `p-1 flex flex-row gap-1 items-center ${lastElement ? 'text-foreground' : 'text-muted-foreground'}`);
             breadcrumb.appendChild(breadcrumbItem);
-            let itemTitle = exports.LX.makeElement('p', '', item.title);
+            let itemName = exports.LX.makeElement('p', '', item.name);
             if (item.icon) {
                 breadcrumbItem.appendChild(exports.LX.makeIcon(item.icon, { svgClass: 'sm' }));
             }
             if (item.items !== undefined) {
-                const bDropdownTrigger = exports.LX.makeContainer(['auto', 'auto'], `${lastElement ? '' : 'fg-secondary'}`);
+                const bDropdownTrigger = exports.LX.makeContainer(['auto', 'auto'], `${lastElement ? 'text-foreground' : 'text-muted-foreground'}`);
                 exports.LX.listen(bDropdownTrigger, 'click', (e) => {
                     exports.LX.addDropdownMenu(e.target, item.items, { side: 'bottom', align: 'start' });
                 });
-                bDropdownTrigger.append(itemTitle);
+                bDropdownTrigger.append(itemName);
                 breadcrumbItem.appendChild(bDropdownTrigger);
             }
             else if (item.url !== undefined) {
-                let itemUrl = exports.LX.makeElement('a', `decoration-none fg-${lastElement ? 'primary' : 'secondary'}`, '', breadcrumbItem);
+                let itemUrl = exports.LX.makeElement('a', `decoration-none hover:underline underline-offset-4 ${lastElement ? 'text-foreground' : 'text-muted-foreground'}`, '', breadcrumbItem);
                 itemUrl.href = item.url;
-                itemUrl.appendChild(itemTitle);
+                itemUrl.appendChild(itemName);
             }
             else {
-                breadcrumbItem.appendChild(itemTitle);
+                breadcrumbItem.appendChild(itemName);
             }
             if (item.ellipsis) {
                 exports.LX.asTooltip(breadcrumbItem, item.ellipsis, { side: 'bottom', offset: 4 });
@@ -10488,13 +10579,15 @@
      */
     function makeIcon(iconName, options = {}) {
         let svg = null;
-        const _createIconFromSVG = (svg) => {
-            if (options.svgClass && options.svgClass.length) {
-                options.svgClass.split(' ').forEach((c) => svg.classList.add(c));
+        const _createIconFromSVG = function (svg) {
+            const cn = options.svgClass;
+            if (cn && cn.length) {
+                const mergedCn = exports.LX.twMerge(...svg.classList, ...cn.split(' '));
+                svg.classList.remove(...svg.classList);
+                mergedCn.split(' ').forEach((c) => svg.classList.add(c));
             }
-            const icon = document.createElement('a');
+            const icon = exports.LX.makeElement('a', exports.LX.mergeClass('lexicon', options.iconClass));
             icon.title = options.title ?? '';
-            icon.className = 'lexicon ' + (options.iconClass ?? '');
             icon.appendChild(svg);
             svg.dataset['name'] = iconName;
             return icon;
@@ -10519,6 +10612,7 @@
             // Create internal icon if variant is the same as requested, there's no lucide/fallback data or if variant is "regular" (default)
             if ((requestedVariant == variant) || !lucideData || variant == 'regular') {
                 svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                svg.classList.add('text-inherit');
                 svg.setAttribute('viewBox', `0 0 ${data[0]} ${data[1]}`);
                 if (data[5]) {
                     const classes = data[5].svgClass;
@@ -10532,6 +10626,7 @@
                     });
                 }
                 const path = document.createElement('path');
+                path.classList.add('text-inherit');
                 path.setAttribute('fill', 'currentColor');
                 path.setAttribute('d', data[4]);
                 svg.appendChild(path);
@@ -10658,7 +10753,6 @@
             throw ('No message to show');
         }
         options.size = options.size ?? ['max-content', 'auto'];
-        options.class = 'lexpopup';
         const time = options.timeout || 3000;
         const dialog = new exports.LX.Dialog(title, (p) => {
             p.addTextArea(null, text, null, { disabled: true, fitHeight: true });
@@ -10732,9 +10826,7 @@
         }
         const nots = exports.LX.notifications;
         console.assert(nots);
-        const toast = document.createElement('li');
-        toast.className = 'lextoast';
-        nots.prepend(toast);
+        const toast = exports.LX.makeElement('li', 'lextoast flex flex-row relative w-full border-color overflow-hidden select-none pointer-events-auto touch-none rounded-lg p-3', '', nots);
         const [positionVertical, positionHorizontal] = options.position
             ? options.position.split('-')
             : ['bottom', 'right'];
@@ -10763,6 +10855,7 @@
                 break;
             case 'center':
                 nots.style.placeSelf = 'center';
+                nots.style.justifySelf = 'anchor-center';
                 break;
             case 'right':
                 nots.style.right = '1rem';
@@ -10777,18 +10870,10 @@
             }
             toast.dataset['open'] = true;
         }, 10);
-        const content = document.createElement('div');
-        content.className = 'lextoastcontent';
-        toast.appendChild(content);
-        const titleContent = document.createElement('div');
-        titleContent.className = 'title';
-        titleContent.innerHTML = title;
-        content.appendChild(titleContent);
+        const content = exports.LX.makeElement('div', 'grid h-fit max-w-lg gap-1 items-center mr-6 [&_div]:truncate [&_svg]:shrink-0', '', toast);
+        exports.LX.makeElement('div', 'flex flex-row gap-2 text-sm text-foreground items-center min-w-0', title, content);
         if (description) {
-            const desc = document.createElement('div');
-            desc.className = 'desc';
-            desc.innerHTML = description;
-            content.appendChild(desc);
+            exports.LX.makeElement('div', 'text-secondary-foreground text-xs', description, content);
         }
         if (options.action) {
             const panel = new Panel$2();
@@ -10796,7 +10881,7 @@
                 width: 'auto',
                 maxWidth: '150px',
                 className: 'right',
-                buttonClass: 'border'
+                buttonClass: 'outline sm'
             });
             toast.appendChild(panel.root.childNodes[0]);
         }
@@ -10811,7 +10896,7 @@
             }, 500);
         };
         if (options.closable ?? true) {
-            const closeIcon = exports.LX.makeIcon('X', { iconClass: 'closer' });
+            const closeIcon = exports.LX.makeIcon('X', { iconClass: 'absolute top-2 right-2 text-sm' });
             closeIcon.addEventListener('click', () => {
                 toast.close();
             });
@@ -10836,13 +10921,12 @@
     function badge(text, className, options = {}) {
         const container = document.createElement('div');
         container.innerHTML = text;
-        container.className = 'lexbadge ' + (className ?? '');
-        if (options.chip) {
-            container.classList.add('chip');
-        }
+        const cn = ['lexbadge', 'inline-flex', 'items-center', 'justify-center', 'rounded-full', 'border', 'px-2', 'py-0.5', 'text-xs', 'font-medium',
+            'w-fit', 'whitespace-nowrap', 'shrink-0', 'overflow-hidden', 'border-transparent', 'gap-1', 'min-w-5', 'bg-card text-foreground'];
+        container.className = className ? exports.LX.twMerge(...cn, ...className.split(' ')) : cn.join(' ');
         Object.assign(container.style, options.style ?? {});
         if (options.callback) {
-            const arrowIcon = exports.LX.makeIcon('ArrowUpRight', { svgClass: 'xs fg-contrast' });
+            const arrowIcon = exports.LX.makeIcon('ArrowUpRight', { svgClass: 'xs' });
             arrowIcon.querySelector('svg').style.marginLeft = '-0.25rem';
             container.innerHTML += arrowIcon.innerHTML;
             container.addEventListener('click', (e) => {
@@ -10921,9 +11005,7 @@
             if (trigger.dataset['disableTooltip'] == 'true') {
                 return;
             }
-            tooltipDom = document.createElement('div');
-            tooltipDom.className = 'lextooltip';
-            tooltipDom.innerHTML = trigger.dataset['tooltipContent'] ?? content;
+            tooltipDom = exports.LX.makeElement('div', 'lextooltip fixed bg-secondary-foreground text-secondary text-xs px-2 py-1 rounded-lg pointer-events-none data-closed:opacity-0', trigger.dataset['tooltipContent'] ?? content);
             const nestedDialog = trigger.closest('dialog');
             const tooltipParent = nestedDialog ?? exports.LX.root;
             // Remove other first
@@ -11024,13 +11106,17 @@
     }
     exports.LX.hasClass = hasClass;
     function addClass(el, className) {
-        if (className)
-            el.classList.add(className);
+        if (!className)
+            return;
+        const cn = className.split(' ');
+        el.classList.add(...cn);
     }
     exports.LX.addClass = addClass;
     function removeClass(el, className) {
-        if (className)
-            el.classList.remove(className);
+        if (!className)
+            return;
+        const cn = className.split(' ');
+        el.classList.remove(...cn);
     }
     exports.LX.removeClass = removeClass;
     function toggleClass(el, className, force) {
@@ -11038,6 +11124,12 @@
             el.classList.toggle(className, force);
     }
     exports.LX.toggleClass = toggleClass;
+    function mergeClass(className, classNameOverride) {
+        if (classNameOverride)
+            className = [className, classNameOverride].join(' ');
+        return exports.LX.twMerge(...className.split(' '));
+    }
+    exports.LX.mergeClass = mergeClass;
     function lastChar(str) {
         return str[str.length - 1];
     }
@@ -11356,6 +11448,32 @@
     }
     exports.LX.drawSpline = drawSpline;
 
+    // Avatar.ts @jxarco
+    class Avatar {
+        root;
+        imageElement = undefined;
+        fallbackElement = undefined;
+        constructor(desc) {
+            let rootCn = 'lexavatar bg-card items-center flex flex-row relative size-8 shrink-0 overflow-hidden rounded-full';
+            this.root = exports.LX.makeElement('div');
+            if (desc.imgSource) {
+                const cn = 'aspect-square size-full object-cover';
+                const img = exports.LX.makeElement('img', desc.imgClass ? exports.LX.twMerge(...cn.split(' '), ...desc.imgClass.split(' ')) : cn, '', this.root);
+                img.src = desc.imgSource;
+                img.alt = desc.imgAlt;
+                this.imageElement = img;
+            }
+            else if (desc.fallback) {
+                const cn = 'size-full text-sm font-semibold place-self-center text-center content-center';
+                const span = exports.LX.makeElement('span', desc.fallbackClass ? exports.LX.twMerge(...cn.split(' '), ...desc.fallbackClass.split(' ')) : cn, desc.fallback, this.root);
+                this.fallbackElement = span;
+                rootCn += ' border-color';
+            }
+            this.root.className = desc.className ? exports.LX.twMerge(...rootCn.split(' '), ...desc.className.split(' ')) : rootCn;
+        }
+    }
+    exports.LX.Avatar = Avatar;
+
     // Spinner.ts @jxarco
     /**
      * @class Spinner
@@ -11365,8 +11483,8 @@
         constructor(options = {}) {
             const icon = options.icon ?? 'LoaderCircle';
             const size = options.size ?? 'md';
-            const iconClass = `flex ${options.iconClass ?? ''}`.trim();
-            const svgClass = `animate-spin ${size} ${options.svgClass ?? ''}`.trim();
+            const iconClass = exports.LX.mergeClass('flex', options.iconClass);
+            const svgClass = exports.LX.mergeClass(`animate-spin ${size}`, options.svgClass);
             this.root = exports.LX.makeIcon(icon, { iconClass, svgClass });
         }
         html() {
@@ -11400,7 +11518,7 @@
             this.id = exports.LX.guidGenerator();
             const size = options.size ?? [], position = options.position ?? [], draggable = options.draggable ?? true, dockable = options.dockable ?? false, modal = options.modal ?? false;
             let root = document.createElement('dialog');
-            root.className = 'lexdialog ' + (options.className ?? '');
+            root.className = exports.LX.mergeClass('lexdialog absolute outline-none border-color m-0 p-0 min-w-3xs min-h-max overflow-hidden rounded-xl bg-background', options.className);
             root.id = options.id ?? 'dialog' + Dialog._last_id++;
             root.dataset['modal'] = modal;
             exports.LX.root.appendChild(root);
@@ -11410,7 +11528,8 @@
             let that = this;
             const titleDiv = document.createElement('div');
             if (title) {
-                titleDiv.className = 'lexdialogtitle';
+                titleDiv.className =
+                    'lexdialogtitle flex w-full outline-none items-center justify-between font-semibold text-xl text-secondary-foreground pad-xl select-none';
                 titleDiv.innerHTML = title;
                 titleDiv.setAttribute('draggable', 'false');
                 root.appendChild(titleDiv);
@@ -11431,7 +11550,8 @@
                         options.onclose(this.root);
                     }
                 };
-                const closeButton = exports.LX.makeIcon('X', { title: 'Close', iconClass: 'lexdialogcloser' });
+                const closeButton = exports.LX.makeIcon('X', { title: 'Close',
+                    iconClass: 'lexdialogcloser text-lg text-secondary-foreground cursor-pointer z-1 select-none' });
                 closeButton.addEventListener('click', this.close);
                 const dockButton = exports.LX.makeIcon('Minus', { title: 'Dock', iconClass: 'ml-auto mr-2' });
                 dockButton.addEventListener('click', () => {
@@ -11458,8 +11578,7 @@
                     root.appendChild(closeButton);
                 }
             }
-            const panel = new exports.LX.Panel();
-            panel.root.classList.add('lexdialogcontent');
+            const panel = new exports.LX.Panel({ className: 'lexdialogcontent w-full p-1 text-secondary-foreground text-sm ml-0 break-all' });
             if (!title) {
                 panel.root.classList.add('notitle');
             }
@@ -11523,19 +11642,18 @@
             options.draggable = false;
             options.modal = true;
             super(undefined, (p) => {
-                p.root.classList.add('p-4', 'flex', 'flex-col', 'gap-2');
-                exports.LX.makeContainer(['100%', '100%'], 'text-xl font-medium', title, p);
-                p.addTextArea(null, message, null, { disabled: true, fitHeight: true,
-                    inputClass: 'bg-none fg-tertiary' });
+                p.root.className = exports.LX.mergeClass(p.root.className, 'pad-2xl flex flex-col gap-2');
+                exports.LX.makeContainer(['100%', '100%'], 'text-lg font-medium text-foreground', title, p);
+                p.addTextArea(null, message, null, { disabled: true, fitHeight: true, inputClass: 'bg-none text-sm text-muted-foreground' });
                 p.sameLine(2, 'justify-end');
                 p.addButton(null, options.cancelText ?? 'Cancel', () => this.destroy(), {
-                    buttonClass: 'border bg-primary'
+                    buttonClass: 'outline'
                 });
                 p.addButton(null, options.continueText ?? 'Continue', () => {
                     this.destroy();
                     if (callback)
                         callback();
-                }, { buttonClass: 'contrast' });
+                }, { buttonClass: 'primary' });
             }, options);
         }
     }
@@ -11917,8 +12035,9 @@
                 return;
             }
             const menuItem = document.createElement('div');
-            menuItem.className = 'lexdropdownmenuitem' + ((item.name || item.options) ? '' : ' label')
-                + (item.disabled ?? false ? ' disabled' : '') + (` ${item.className ?? ''}`);
+            menuItem.className = exports.LX.mergeClass('lexdropdownmenuitem flex flex-row pad-md rounded-lg gap-2 truncate cursor-pointer select-none'
+                + ((item.name || item.options) ? '' : ' label')
+                + (item.disabled ?? false ? ' disabled' : ''), item.className);
             menuItem.dataset['id'] = pKey;
             menuItem.innerHTML = `<span class="ellipsis-overflow">${key}</span>`;
             menuItem.tabIndex = '1';
@@ -11949,14 +12068,14 @@
             const disabled = item.disabled ?? false;
             if (this._radioGroup !== undefined) {
                 if (item.name === this._radioGroup.selected) {
-                    const icon = exports.LX.makeIcon('Circle', { svgClass: 'xxs fill-current' });
+                    const icon = exports.LX.makeIcon('Circle', { svgClass: '2xs fill-current' });
                     menuItem.prepend(icon);
                 }
                 menuItem.setAttribute('data-radioname', this._radioGroup.name);
             }
             else if (item.icon) {
                 const icon = item.icon.constructor === String
-                    ? exports.LX.makeIcon(item.icon, { svgClass: disabled ? 'fg-tertiary' : item.svgClass ?? item.className })
+                    ? exports.LX.makeIcon(item.icon, { svgClass: disabled ? 'text-muted-foreground' : item.svgClass ?? item.className })
                     : item.icon;
                 menuItem.prepend(icon);
             }
@@ -11973,7 +12092,7 @@
                     if (f) {
                         f.call(this, key, v, menuItem);
                     }
-                }, { className: 'accent' });
+                }, { className: 'primary' });
                 const input = checkbox.root.querySelector('input');
                 input.classList.add('ml-auto');
                 menuItem.appendChild(input);
@@ -12136,16 +12255,14 @@
         root;
         constructor(options = {}) {
             const root = document.createElement('footer');
-            root.className = 'lexfooter' + ` ${options.className ?? ''}`;
+            root.className = exports.LX.mergeClass('lexfooter bg-background p-2 w-full leading-6 [&_p]:text-xs', options.className);
             const wrapper = document.createElement('div');
             wrapper.style.minHeight = '48px';
             wrapper.className = 'w-full';
             root.appendChild(wrapper);
-            // const hr = document.createElement( "hr" );
-            // wrapper.appendChild( hr );
             if (options.columns && options.columns.constructor == Array) {
                 const cols = document.createElement('div');
-                cols.className = 'columns';
+                cols.className = 'grid text-center';
                 cols.style.gridTemplateColumns = '1fr '.repeat(options.columns.length);
                 wrapper.appendChild(cols);
                 for (let col of options.columns) {
@@ -12310,7 +12427,7 @@
             this.root.dataset['side'] = this.side;
             this.root.tabIndex = '1';
             this.root.role = 'dialog';
-            this.root.className = 'lexsheet fixed z-1000 bg-primary';
+            this.root.className = 'lexsheet fixed z-1000 bg-primary overflow-hidden';
             document.body.appendChild(this.root);
             this.root.addEventListener('keydown', (e) => {
                 if (e.key == 'Escape') {
@@ -12437,13 +12554,13 @@
         constructor(options = {}) {
             const mobile = navigator && /Android|iPhone/i.test(navigator.userAgent);
             this.root = document.createElement('div');
-            this.root.className = 'lexsidebar flex flex-col ' + (options.className ?? '');
+            this.root.className = exports.LX.mergeClass('lexsidebar flex flex-col pad-xl size-full scrollbar-hidden', options.className);
             this.callback = options.callback ?? null;
-            this._displaySelected = options.displaySelected ?? false;
             this.side = options.side ?? 'left';
             this.collapsable = options.collapsable ?? true;
-            this._collapseWidth = (options.collapseToIcons ?? true) ? '58px' : '0px';
             this.collapsed = options.collapsed ?? mobile;
+            this._displaySelected = options.displaySelected ?? false;
+            this._collapseWidth = (options.collapseToIcons ?? true) ? '58px' : '0px';
             this.filterString = '';
             exports.LX.doAsync(() => {
                 this.root.parentElement.ogWidth = this.root.parentElement.style.width;
@@ -12470,11 +12587,10 @@
             if (!(options.skipHeader ?? false)) {
                 this.header = options.header ?? this._generateDefaultHeader(options);
                 console.assert(this.header.constructor === HTMLDivElement, 'Use an HTMLDivElement to build your custom header');
-                this.header.className = 'lexsidebarheader flex-auto';
+                this.header.className = 'lexsidebarheader w-full h-[48px] flex rounded-lg p-2 mb-2 text-sm cursor-pointer items-center select-none';
                 this.root.appendChild(this.header);
                 if (this.collapsable) {
-                    const icon = exports.LX.makeIcon(this.side == 'left' ? 'PanelLeft' : 'PanelRight', { title: 'Toggle Sidebar',
-                        iconClass: 'toggler' });
+                    const icon = exports.LX.makeIcon(this.side == 'left' ? 'PanelLeft' : 'PanelRight', { title: 'Toggle Sidebar', iconClass: 'toggler' });
                     this.header.appendChild(icon);
                     if (mobile) {
                         // create an area and append a sidebar:
@@ -12510,14 +12626,14 @@
             // Content
             {
                 this.content = document.createElement('div');
-                this.content.className = 'lexsidebarcontent flex-auto-fill';
+                this.content.className = 'lexsidebarcontent overflow-mask flex flex-col overflow-x-hidden overflow-y-scroll flex-auto-fill w-full';
                 this.root.appendChild(this.content);
             }
             // Footer
             if (!(options.skipFooter ?? false)) {
                 this.footer = options.footer ?? this._generateDefaultFooter(options);
                 console.assert(this.footer.constructor === HTMLDivElement, 'Use an HTMLDivElement to build your custom footer');
-                this.footer.className = 'lexsidebarfooter flex-auto';
+                this.footer.className = 'lexsidebarfooter w-full h-[48px] flex rounded-lg p-2 mt-2 text-sm cursor-pointer items-center select-none';
                 this.root.appendChild(this.footer);
             }
         }
@@ -12533,27 +12649,21 @@
                     options.onHeaderPressed(e);
                 }
             });
-            const avatar = document.createElement('span');
-            avatar.className = 'lexavatar';
-            header.appendChild(avatar);
-            if (options.headerImage) {
-                const avatarImg = document.createElement('img');
-                avatarImg.src = options.headerImage;
-                avatar.appendChild(avatarImg);
-            }
-            else if (options.headerIcon) {
-                const avatarIcon = exports.LX.makeIcon(options.headerIcon);
-                avatar.appendChild(avatarIcon);
-            }
+            const avatar = new exports.LX.Avatar({
+                imgSource: options.headerImage,
+                fallback: options.headerIcon ? exports.LX.makeIcon(options.headerIcon, { svgClass: 'xl' }).innerHTML : undefined,
+                className: 'rounded-lg'
+            });
+            header.appendChild(avatar.root);
             // Info
             {
                 const info = document.createElement('div');
                 info.className = 'infodefault';
                 header.appendChild(info);
-                const infoText = document.createElement('span');
+                const infoText = exports.LX.makeElement('span', 'truncate text-sm font-semibold');
                 infoText.innerHTML = options.headerTitle ?? '';
                 info.appendChild(infoText);
-                const infoSubtext = document.createElement('span');
+                const infoSubtext = exports.LX.makeElement('span', 'truncate text-xs');
                 infoSubtext.innerHTML = options.headerSubtitle ?? '';
                 info.appendChild(infoSubtext);
             }
@@ -12571,27 +12681,21 @@
                     options.onFooterPressed(e, footer);
                 }
             });
-            const avatar = document.createElement('span');
-            avatar.className = 'lexavatar';
-            footer.appendChild(avatar);
-            if (options.footerImage) {
-                const avatarImg = document.createElement('img');
-                avatarImg.src = options.footerImage;
-                avatar.appendChild(avatarImg);
-            }
-            else if (options.footerIcon) {
-                const avatarIcon = exports.LX.makeIcon(options.footerIcon);
-                avatar.appendChild(avatarIcon);
-            }
+            const avatar = new exports.LX.Avatar({
+                imgSource: options.footerImage,
+                fallback: options.footerIcon ? exports.LX.makeIcon(options.footerIcon, { svgClass: 'xl' }).innerHTML : undefined,
+                className: 'rounded-lg'
+            });
+            footer.appendChild(avatar.root);
             // Info
             {
                 const info = document.createElement('div');
                 info.className = 'infodefault';
                 footer.appendChild(info);
-                const infoText = document.createElement('span');
+                const infoText = exports.LX.makeElement('span', 'truncate text-sm font-semibold');
                 infoText.innerHTML = options.footerTitle ?? '';
                 info.appendChild(infoText);
-                const infoSubtext = document.createElement('span');
+                const infoSubtext = exports.LX.makeElement('span', 'truncate text-xs');
                 infoSubtext.innerHTML = options.footerSubtitle ?? '';
                 info.appendChild(infoSubtext);
             }
@@ -12726,9 +12830,8 @@
                 }
                 let pKey = exports.LX.getSupportedDOMName(key);
                 let currentGroup = null;
-                let entry = document.createElement('div');
+                let entry = exports.LX.makeElement('div', exports.LX.mergeClass('lexsidebarentry w-full rounded-lg cursor-pointer select-none', options.className));
                 entry.id = pKey;
-                entry.className = 'lexsidebarentry ' + (options.className ?? '');
                 if (this.displaySelected && options.selected) {
                     entry.classList.add('selected');
                 }
@@ -12736,16 +12839,13 @@
                     const pGroupKey = item.group.replace(/\s/g, '').replaceAll('.', '');
                     currentGroup = this.content.querySelector('#' + pGroupKey);
                     if (!currentGroup) {
-                        currentGroup = document.createElement('div');
+                        currentGroup = exports.LX.makeElement('div', 'lexsidebargroup flex flex-col gap-0.5');
                         currentGroup.id = pGroupKey;
-                        currentGroup.className = 'lexsidebargroup';
                         this.content.appendChild(currentGroup);
-                        let groupEntry = document.createElement('div');
-                        groupEntry.className = 'lexsidebargrouptitle';
+                        let groupEntry = exports.LX.makeElement('div', 'lexsidebargrouptitle');
                         currentGroup.appendChild(groupEntry);
-                        let groupLabel = document.createElement('div');
-                        groupLabel.innerHTML = item.group;
-                        groupEntry.appendChild(groupLabel);
+                        // Group label
+                        exports.LX.makeElement('div', '', item.group, groupEntry);
                         if (this.groups[item.group] != null) {
                             const groupActionIcon = exports.LX.makeIcon(this.groups[item.group].icon, { svgClass: 'sm' });
                             groupEntry.appendChild(groupActionIcon);
@@ -12793,7 +12893,7 @@
                         item.value = value;
                         if (f)
                             f.call(this, key, value, event);
-                    }, { className: 'accent', label: key, signal: ('@checkbox_' + key) });
+                    }, { className: 'primary', label: key, signal: ('@checkbox_' + key) });
                     itemDom.appendChild(panel.root.childNodes[0]);
                 }
                 else {
@@ -12870,8 +12970,7 @@
                 if (!item[key].length) {
                     continue;
                 }
-                let subentryContainer = document.createElement('div');
-                subentryContainer.className = 'lexsidebarsubentrycontainer';
+                let subentryContainer = exports.LX.makeElement('div', 'lexsidebarsubentrycontainer flex flex-col self-center w-full ml-4 px-4 select-none');
                 if (isCollapsable) {
                     this.collapseContainer.appendChild(subentryContainer);
                     delete this.collapseContainer;
@@ -12905,7 +13004,7 @@
                                 f.call(this, subkey, e);
                         });
                     }
-                    subentry.className = 'lexsidebarentry';
+                    subentry.className = 'lexsidebarentry w-full rounded-lg cursor-pointer select-none';
                     subentry.id = subkey;
                     if (suboptions.content) {
                         const parentContainer = exports.LX.makeElement('div');
@@ -13041,7 +13140,7 @@
         // using a fullscreen SVG with "rect" elements
         _generateMask(reference) {
             this.tourContainer.innerHTML = ''; // Clear previous content
-            this.tourMask = exports.LX.makeContainer(['100%', '100%'], 'tour-mask');
+            this.tourMask = exports.LX.makeContainer(['100%', '100%'], 'tour-mask absolute inset-0');
             this.tourContainer.appendChild(this.tourMask);
             const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
             svg.style.width = '100%';
@@ -13102,7 +13201,7 @@
                 clipPath.appendChild(rect);
             }
             // Reference Highlight
-            const refContainer = exports.LX.makeContainer(['0', '0'], 'tour-ref-mask');
+            const refContainer = exports.LX.makeContainer(['0', '0'], 'tour-ref-mask absolute');
             refContainer.style.left = `${boundingX - hOffset - 1}px`;
             refContainer.style.top = `${boundingY - vOffset - 1}px`;
             refContainer.style.width = `${boundingWidth + hOffset * 2 + 2}px`;
@@ -13133,7 +13232,7 @@
             const popoverContainer = exports.LX.makeContainer(['auto', 'auto'], 'tour-step-container');
             {
                 const header = exports.LX.makeContainer(['100%', 'auto'], 'flex flex-row', '', popoverContainer);
-                exports.LX.makeContainer(['70%', 'auto'], 'p-2 font-medium', step.title, header);
+                exports.LX.makeContainer(['70%', 'auto'], 'p-2 font-medium text-base', step.title, header);
                 const closer = exports.LX.makeContainer(['30%', 'auto'], 'flex flex-row p-2 justify-end', '', header);
                 const closeIcon = exports.LX.makeIcon('X');
                 closer.appendChild(closeIcon);
@@ -13141,22 +13240,22 @@
                     this.stop();
                 });
             }
-            exports.LX.makeContainer(['100%', 'auto'], 'p-2 text-md', step.content, popoverContainer, {
+            exports.LX.makeContainer(['100%', 'auto'], 'p-2 text-sm', step.content, popoverContainer, {
                 maxWidth: '400px'
             });
-            const footer = exports.LX.makeContainer(['100%', 'auto'], 'flex flex-row text-md', '', popoverContainer);
+            const footer = exports.LX.makeContainer(['100%', 'auto'], 'flex flex-row', '', popoverContainer);
             {
-                const footerSteps = exports.LX.makeContainer(['50%', 'auto'], 'p-2 gap-1 self-center flex flex-row text-md', '', footer);
+                const footerSteps = exports.LX.makeContainer(['50%', 'auto'], 'p-2 gap-1 place-self-center flex flex-row', '', footer);
                 for (let i = 0; i < this.steps.length; i++) {
-                    const stepIndicator = document.createElement('span');
-                    stepIndicator.className = 'tour-step-indicator';
+                    const stepIndicator = exports.LX.makeElement('span');
+                    stepIndicator.className = 'size-3 rounded-full bg-accent inline-flex data-active:bg-primary';
                     if (i === this.currentStep) {
-                        stepIndicator.classList.add('active');
+                        stepIndicator.dataset['active'] = 'true';
                     }
                     footerSteps.appendChild(stepIndicator);
                 }
             }
-            const footerButtons = exports.LX.makeContainer(['50%', 'auto'], 'text-md', '', footer);
+            const footerButtons = exports.LX.makeContainer(['50%', 'auto'], 'text-base', '', footer);
             const footerPanel = new Panel$2();
             let numButtons = 1;
             if (previousStep) {
@@ -13168,7 +13267,7 @@
             if (previousStep) {
                 footerPanel.addButton(null, 'Previous', () => {
                     this._showStep(-1);
-                }, { buttonClass: 'contrast' });
+                }, { buttonClass: 'ghost' });
             }
             if (nextStep) {
                 footerPanel.addButton(null, 'Next', () => {
@@ -13178,11 +13277,10 @@
             else {
                 footerPanel.addButton(null, 'Finish', () => {
                     this.stop();
-                });
+                }, { buttonClass: 'primary' });
             }
             footerButtons.appendChild(footerPanel.root);
-            const sideOffset = (step.side === 'left' || step.side === 'right' ? this.horizontalOffset : this.verticalOffset)
-                ?? this.offset;
+            const sideOffset = (step.side === 'left' || step.side === 'right' ? this.horizontalOffset : this.verticalOffset) ?? this.offset;
             const alignOffset = step.align === 'start' || step.align === 'end' ? sideOffset : 0;
             this._popover?.destroy();
             this._popover = new Popover(null, [popoverContainer], {
@@ -13216,19 +13314,20 @@
         await exports.LX.loadScriptSync('https://unpkg.com/lucide@latest');
         // LexGUI root
         console.log(`LexGUI v${this.version}`);
-        var root = document.createElement('div');
+        const root = exports.LX.makeElement('div', exports.LX.mergeClass('lexcontainer', options.rootClass));
         root.id = 'lexroot';
-        root.className = 'lexcontainer';
         root.tabIndex = -1;
-        if (options.rootClass) {
-            root.className += ` ${options.rootClass}`;
-        }
-        this.modal = document.createElement('div');
+        this.modal = exports.LX.makeElement('div', 'inset-0 hidden-opacity bg-black/50 fixed z-100 transition-opacity duration-100 ease-in');
         this.modal.id = 'modal';
-        this.modal.classList.add('hidden-opacity');
         this.modal.toggle = function (force) {
             this.classList.toggle('hidden-opacity', force);
         };
+        function blockScroll(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        this.modal.addEventListener('wheel', blockScroll, { passive: false });
+        this.modal.addEventListener('touchmove', blockScroll, { passive: false });
         this.root = root;
         this.container = document.body;
         if (options.container) {
@@ -13253,7 +13352,7 @@
             const notifSection = document.createElement('section');
             notifSection.className = 'notifications';
             this.notifications = document.createElement('ol');
-            this.notifications.className = '';
+            this.notifications.className = 'fixed flex flex-col-reverse m-0 p-0 gap-1 z-1000';
             this.notifications.iWidth = 0;
             notifSection.appendChild(this.notifications);
             document.body.appendChild(notifSection);
@@ -13296,87 +13395,92 @@
             const storedcolorScheme = localStorage.getItem('lxColorScheme');
             if (storedcolorScheme)
                 return;
-            exports.LX.setTheme(event.matches ? 'dark' : 'light', false);
+            exports.LX.setMode(event.matches ? 'dark' : 'light', false);
         };
         this._mqlPrefersDarkScheme = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
         const storedcolorScheme = localStorage.getItem('lxColorScheme');
         if (storedcolorScheme) {
-            exports.LX.setTheme(storedcolorScheme);
+            exports.LX.setMode(storedcolorScheme);
         }
         else if (this._mqlPrefersDarkScheme && (options.autoTheme ?? true)) {
             if (window.matchMedia('(prefers-color-scheme: light)').matches) {
-                exports.LX.setTheme('light', false);
+                exports.LX.setMode('light', false);
             }
             this._mqlPrefersDarkScheme.addEventListener('change', this._onChangeSystemTheme);
         }
+        // LX.setThemeColor( 'rose' );
         return this.mainArea;
-    }, /**
+    };
+    /**
      * @method setSpacingMode
      * @param {String} mode: "default" | "compact"
      */
-        exports.LX.setSpacingMode = function (mode) {
-            this.spacingMode = mode;
-            document.documentElement.setAttribute('data-spacing', this.spacingMode);
-        }, /**
+    exports.LX.setSpacingMode = function (mode) {
+        this.spacingMode = mode;
+        document.documentElement.setAttribute('data-spacing', this.spacingMode);
+    };
+    /**
      * @method setLayoutMode
      * @param {String} mode: "app" | "document"
      */
-        exports.LX.setLayoutMode = function (mode) {
-            this.layoutMode = mode;
-            document.documentElement.setAttribute('data-layout', this.layoutMode);
-        }, /**
+    exports.LX.setLayoutMode = function (mode) {
+        this.layoutMode = mode;
+        document.documentElement.setAttribute('data-layout', this.layoutMode);
+    };
+    /**
      * @method addSignal
      * @param {String} name
      * @param {Object} obj
      * @param {Function} callback
      */
-        exports.LX.addSignal = function (name, obj, callback) {
-            obj[name] = callback;
-            if (!exports.LX.signals[name]) {
-                exports.LX.signals[name] = [];
-            }
-            if (exports.LX.signals[name].indexOf(obj) > -1) {
-                return;
-            }
-            exports.LX.signals[name].push(obj);
-        }, /**
+    exports.LX.addSignal = function (name, obj, callback) {
+        obj[name] = callback;
+        if (!exports.LX.signals[name]) {
+            exports.LX.signals[name] = [];
+        }
+        if (exports.LX.signals[name].indexOf(obj) > -1) {
+            return;
+        }
+        exports.LX.signals[name].push(obj);
+    };
+    /**
      * @method emitSignal
      * @param {String} name
      * @param {*} value
      * @param {Object} options
      */
-        exports.LX.emitSignal = function (name, value, options = {}) {
-            const data = exports.LX.signals[name];
-            if (!data) {
-                return;
+    exports.LX.emitSignal = function (name, value, options = {}) {
+        const data = exports.LX.signals[name];
+        if (!data) {
+            return;
+        }
+        const target = options.target;
+        if (target) {
+            if (target[name]) {
+                target[name].call(target, value);
             }
-            const target = options.target;
-            if (target) {
-                if (target[name]) {
-                    target[name].call(target, value);
-                }
-                return;
+            return;
+        }
+        for (let obj of data) {
+            if (obj instanceof BaseComponent$1) {
+                obj.set(value, options.skipCallback ?? true);
             }
-            for (let obj of data) {
-                if (obj instanceof BaseComponent$1) {
-                    obj.set(value, options.skipCallback ?? true);
-                }
-                else if (obj.constructor === Function) {
-                    const fn = obj;
-                    fn(null, value);
-                }
-                else {
-                    // This is an element
-                    const fn = obj[name];
-                    console.assert(fn, `No callback registered with _${name}_ signal`);
-                    fn.bind(obj)(value);
-                }
+            else if (obj.constructor === Function) {
+                const fn = obj;
+                fn(null, value);
             }
-        };
+            else {
+                // This is an element
+                const fn = obj[name];
+                console.assert(fn, `No callback registered with _${name}_ signal`);
+                fn.bind(obj)(value);
+            }
+        }
+    };
     // Command bar creation
     exports.LX._createCommandbar = function (root) {
         let commandbar = document.createElement('dialog');
-        commandbar.className = 'commandbar';
+        commandbar.className = 'commandbar absolute border-color rounded-lg m-0';
         commandbar.tabIndex = -1;
         root.appendChild(commandbar);
         let allItems = [];
@@ -13425,7 +13529,7 @@
             }
             e.stopPropagation();
             e.stopImmediatePropagation();
-            commandbar.close();
+            exports.LX.setCommandbarState(false);
             _resetBar(true);
         });
         root.addEventListener('keydown', (e) => {
@@ -13465,8 +13569,7 @@
             cbTabs.add('All', document.createElement('div'), { selected: true, onSelect: _onSelectTab });
             // cbTabs.add( "Main", document.createElement('div'), { onSelect: _onSelectTab } );
         }
-        const itemContainer = document.createElement('div');
-        itemContainer.className = 'searchitembox';
+        const itemContainer = exports.LX.makeElement('div', 'searchitembox overflow-y-scroll basis-full scrollbar-hidden');
         let refPrevious = null;
         const _resetBar = (resetInput) => {
             itemContainer.innerHTML = '';
@@ -13475,6 +13578,53 @@
             if (resetInput) {
                 filter.set('', true);
             }
+        };
+        const _filterEntry = function (entryName, filter) {
+            if (!filter?.length)
+                return false;
+            const cleanName = exports.LX.stripTags(entryName).toLowerCase();
+            return cleanName.includes(filter.toLowerCase());
+        };
+        const _getEntries = function (filter) {
+            const entries = [];
+            for (let m of exports.LX.menubars) {
+                for (let i of m.items) {
+                    if (_filterEntry(i.name, filter))
+                        entries.push(i);
+                }
+            }
+            for (let m of exports.LX.sidebars) {
+                for (let i of m.items) {
+                    if (_filterEntry(i.name, filter))
+                        entries.push(i);
+                }
+            }
+            for (let entry of exports.LX.extraCommandbarEntries) {
+                if (_filterEntry(entry.name, filter))
+                    entries.push(entry);
+            }
+            if (exports.LX.has('CodeEditor')) {
+                const instances = exports.LX.CodeEditor.getInstances();
+                if (!instances.length || !instances[0].area.root.offsetHeight)
+                    return entries;
+                const languages = exports.LX.CodeEditor.languages;
+                for (let l of Object.keys(languages)) {
+                    const key = 'Language: ' + l;
+                    const icon = instances[0]._getFileIcon(null, languages[l].ext);
+                    const classes = icon.split(' ');
+                    let value = exports.LX.makeIcon(classes[0], { svgClass: `${classes.slice(0).join(' ')}` }).innerHTML;
+                    value += key + " <span class='lang-ext'>(" + languages[l].ext + ')</span>';
+                    if (!_filterEntry(key, filter)) {
+                        continue;
+                    }
+                    entries.push({ name: value, callback: () => {
+                            for (let i of instances) {
+                                i._changeLanguage(l);
+                            }
+                        } });
+                }
+            }
+            return entries;
         };
         const _addElement = (t, c, p, i) => {
             if (!t.length) {
@@ -13513,70 +13663,78 @@
             itemContainer.appendChild(searchItem);
             refPrevious = searchItem;
         };
-        const _propagateAdd = (item, filter, path, skipPropagation) => {
+        const _propagateAdd = (item, path, skipPropagation) => {
             if (!item || (item.constructor != Object)) {
                 return;
             }
-            let name = item.name;
-            if (name.toLowerCase().includes(filter)) {
-                if (item.callback) {
-                    _addElement(name, item.callback, path, item);
-                }
+            if (item.callback) {
+                _addElement(item.name, item.callback, path, item);
             }
-            const submenu = item.submenu ?? item[name];
+            const submenu = item.submenu ?? item[item.name];
             if (!submenu) {
                 return;
             }
-            const icon = exports.LX.makeIcon('ChevronRight', { svgClass: 'sm fg-secondary separator' });
-            path += name + icon.innerHTML;
+            const icon = exports.LX.makeIcon('ChevronRight', { svgClass: 'sm text-muted-foreground separator' });
+            path += item.name + icon.innerHTML;
             for (let c of submenu) {
-                _propagateAdd(c, filter, path);
+                _propagateAdd(c, path);
             }
         };
         commandbar._addElements = (filter) => {
             _resetBar();
-            for (let m of exports.LX.menubars) {
-                for (let i of m.items) {
-                    _propagateAdd(i, filter, '');
-                }
+            let entries = _getEntries(filter);
+            // Order...
+            function scoreEntry(s, prefix) {
+                if (s.startsWith(prefix))
+                    return 0; // best option
+                if (s.includes(prefix))
+                    return 1;
+                return 2; // worst
             }
-            for (let m of exports.LX.sidebars) {
-                for (let i of m.items) {
-                    _propagateAdd(i, filter, '');
-                }
-            }
-            for (let entry of exports.LX.extraCommandbarEntries) {
-                const name = entry.name;
-                if (!name.toLowerCase().includes(filter)) {
-                    continue;
-                }
-                _addElement(name, entry.callback, '', {});
-            }
-            if (exports.LX.has('CodeEditor')) {
-                const instances = exports.LX.CodeEditor.getInstances();
-                if (!instances.length || !instances[0].area.root.offsetHeight)
-                    return;
-                const languages = exports.LX.CodeEditor.languages;
-                for (let l of Object.keys(languages)) {
-                    const key = 'Language: ' + l;
-                    const icon = instances[0]._getFileIcon(null, languages[l].ext);
-                    const classes = icon.split(' ');
-                    let value = exports.LX.makeIcon(classes[0], { svgClass: `${classes.slice(0).join(' ')}` }).innerHTML;
-                    value += key + " <span class='lang-ext'>(" + languages[l].ext + ')</span>';
-                    if (key.toLowerCase().includes(filter)) {
-                        _addElement(value, () => {
-                            for (let i of instances) {
-                                i._changeLanguage(l);
-                            }
-                        }, '', {});
-                    }
-                }
+            entries = entries.sort((a, b) => {
+                const nameA = exports.LX.stripTags(a.name), nameB = exports.LX.stripTags(b.name);
+                return (scoreEntry(nameA, filter) - scoreEntry(nameB, filter)) || nameA.localeCompare(nameB);
+            });
+            entries = entries.slice(0, 48); // Get 48 ocurrences max
+            for (let entry of entries) {
+                _propagateAdd(entry, '');
             }
         };
         commandbar.appendChild(header);
         commandbar.appendChild(tabArea.root);
         commandbar.appendChild(itemContainer);
         return commandbar;
+    };
+    exports.LX._registerIconsAndColors = function (colorsRootPath = './') {
+        exports.LX.requestJSON(colorsRootPath + 'registry/colors.json', (colors) => {
+            // loop through each color
+            for (const key in colors) {
+                const value = colors[key];
+                if (!Array.isArray(value)) {
+                    continue;
+                }
+                value.forEach((entry) => {
+                    const color = `${key}-${entry.scale}`;
+                    const val = `<span class="flex bg-${color} w-3 h-3 rounded-full mr-2"></span>${color}`;
+                    exports.LX.registerCommandbarEntry(val, () => {
+                        navigator.clipboard.writeText(color);
+                        exports.LX.toast(`${exports.LX.makeIcon('CircleCheck').innerHTML} Copied ${color} to clipboard.`, null, { position: 'top-center',
+                            timeout: 3000 });
+                    });
+                });
+            }
+        });
+        const lucide = window.lucide;
+        const allIcons = { ...exports.LX.ICONS, ...lucide.icons };
+        for (const iconName in allIcons) {
+            const variant = 'regular';
+            const icon = exports.LX.makeIcon(iconName, { svgClass: 'mr-2 pointer-events-none', variant });
+            const val = `${icon.innerHTML}${iconName}`;
+            exports.LX.registerCommandbarEntry(val, () => {
+                navigator.clipboard.writeText(iconName);
+                exports.LX.toast(`${exports.LX.makeIcon('CircleCheck').innerHTML} Copied ${iconName} to clipboard.`, null, { position: 'top-center', timeout: 3000 });
+            });
+        }
     };
     /**
      * @method setCommandbarState
@@ -13585,12 +13743,16 @@
      */
     exports.LX.setCommandbarState = function (value, resetEntries = true) {
         const cb = this.commandbar;
+        exports.LX.modal.toggle(!value);
         if (value) {
+            // Get current position based on main scroll
+            cb.style.top = `calc(15% + ${document.scrollingElement?.scrollTop ?? 0}px)`;
             cb.show();
             cb.querySelector('input').focus();
             if (resetEntries) {
                 cb._addElements(undefined);
             }
+            exports.LX.modal.toggle(false);
         }
         else {
             cb.close();
@@ -13636,7 +13798,7 @@
                 const customIcon = exports.LX.makeIcon(options.icon ?? 'Box');
                 const menuIcon = exports.LX.makeIcon('Menu');
                 let buttonName = customComponentName + (!instance ? ' [empty]' : '');
-                let buttonEl = this.addButton(null, buttonName, (value, event) => {
+                let button = this.addButton(null, buttonName, (value, event) => {
                     if (instance) {
                         element.querySelector('.lexcustomitems').toggleAttribute('hidden');
                         element.dataset['opened'] = !element.querySelector('.lexcustomitems').hasAttribute('hidden');
@@ -13651,11 +13813,11 @@
                             });
                         });
                     }
-                }, { buttonClass: 'custom' });
-                const buttonSpan = buttonEl.root.querySelector('span');
-                buttonSpan.prepend(customIcon);
-                buttonSpan.appendChild(menuIcon);
-                container.appendChild(buttonEl.root);
+                }, { buttonClass: 'outline custom' });
+                const buttonDom = button.root.querySelector('button');
+                buttonDom.prepend(customIcon);
+                buttonDom.appendChild(menuIcon);
+                container.appendChild(button.root);
                 if (instance) {
                     menuIcon.addEventListener('click', (e) => {
                         e.stopImmediatePropagation();
@@ -13743,7 +13905,7 @@
     const Area$2 = exports.LX.Area;
     exports.LX.Panel;
     exports.LX.NodeTree;
-    exports.LX.TreeEvent;
+    exports.LX.Tree;
     /**
      * @class AssetView
      * @description Asset container with Tree for file system
@@ -13785,9 +13947,7 @@
         allowMultipleSelection = false;
         previewActions = [];
         contextMenu = [];
-        onRefreshContent = null;
         itemContextMenuOptions = null;
-        onItemDragged = null;
         _assetsPerPage = 24;
         get assetsPerPage() {
             return this._assetsPerPage;
@@ -13826,8 +13986,6 @@
             this.allowMultipleSelection = options.allowMultipleSelection ?? this.allowMultipleSelection;
             this.previewActions = options.previewActions ?? [];
             this.itemContextMenuOptions = options.itemContextMenuOptions;
-            this.onRefreshContent = options.onRefreshContent;
-            this.onItemDragged = options.onItemDragged;
             this.gridScale = options.gridScale ?? this.gridScale;
             if (this.gridScale !== 1.0) {
                 const r = document.querySelector(':root');
@@ -13888,8 +14046,7 @@
             this.currentData = this.data;
             this.path = ['@'];
             if (!this.skipBrowser) {
-                this.tree.refresh({ id: '/', children: this.data, type: 'folder',
-                    metadata: { uid: exports.LX.guidGenerator() } });
+                this.tree.refresh({ id: '/', children: this.data, type: 'folder', metadata: { uid: exports.LX.guidGenerator() } });
             }
             this._refreshContent();
         }
@@ -13973,10 +14130,8 @@
                 });
                 itemEl.appendChild(checkbox);
             }
-            let title = document.createElement('span');
-            title.className = 'lexassettitle';
-            title.innerText = item.id;
-            itemEl.appendChild(title);
+            // Asset title
+            exports.LX.makeElement('span', 'lexassettitle absolute w-full h-8 bottom-0 text-sm bg-card text-card-foreground cursor-pointer text-center content-center block px-3 py-0.5 truncate z-1 pointer-events-none', item.id, itemEl);
             if (!this.skipPreview) {
                 if (item.type === 'video') {
                     const itemVideo = exports.LX.makeElement('video', 'absolute left-0 top-0 w-full border-none pointer-events-none', '', itemEl);
@@ -14064,7 +14219,6 @@
                         userInitiated: true
                     };
                     onDblClick(event);
-                    // event.multiple = !!e.shiftKey;
                 }
                 else if (!isDoubleClick && onSelect !== undefined) {
                     const event = {
@@ -14073,7 +14227,6 @@
                         userInitiated: true
                     };
                     onSelect(event);
-                    // event.multiple = !!e.shiftKey;
                 }
             });
             itemEl.addEventListener('contextmenu', function (e) {
@@ -14084,23 +14237,21 @@
                 const options = [
                     {
                         name: (multiple > 1) ? (multiple + ' selected') : item.id,
-                        icon: exports.LX.makeIcon('CircleSmall', { svgClass: `fill-current fg-${typeColor}` }),
+                        icon: exports.LX.makeIcon('CircleSmall', { svgClass: `fill-current text-${typeColor}` }),
                         className: 'text-sm',
                         disabled: true
                     },
                     null
                 ];
                 if (multiple <= 1) {
-                    options.push({ name: 'Rename', icon: 'TextCursor',
-                        callback: that._renameItemPopover.bind(that, item) });
+                    options.push({ name: 'Rename', icon: 'TextCursor', callback: that._renameItemPopover.bind(that, item) });
                 }
                 if (!isFolder) {
                     options.push({ name: 'Clone', icon: 'Copy', callback: that._requestCloneItem.bind(that, item) });
                 }
                 options.push({ name: 'Move', icon: 'FolderInput', callback: () => that._moveItem(item) });
                 if (type == 'Script' && exports.LX.has('CodeEditor')) {
-                    options.push({ name: 'Open in Editor', icon: 'Code',
-                        callback: that._openScriptInEditor.bind(that, item) });
+                    options.push({ name: 'Open in Editor', icon: 'Code', callback: that._openScriptInEditor.bind(that, item) });
                 }
                 if (that.itemContextMenuOptions) {
                     options.push(null);
@@ -14110,7 +14261,7 @@
                         options.push({ name: o.name, icon: o.icon, callback: o.callback?.bind(that, item) });
                     }
                 }
-                options.push(null, { name: 'Delete', icon: 'Trash2', className: 'fg-error',
+                options.push(null, { name: 'Delete', icon: 'Trash2', className: 'text-destructive',
                     callback: that._requestDeleteItem.bind(that, item) });
                 exports.LX.addClass(that.contentPanel.root, 'pointer-events-none');
                 exports.LX.addDropdownMenu(e.target, options, { side: 'right', align: 'start', event: e, onBlur: () => {
@@ -14264,20 +14415,20 @@
                     return;
                 this.nextData.push(this.currentFolder);
                 this._enterFolder(this.prevData.pop(), false);
-            }, { buttonClass: 'bg-none', title: 'Go Back', tooltip: true, icon: 'ArrowLeft' });
+            }, { buttonClass: 'ghost', title: 'Go Back', tooltip: true, icon: 'ArrowLeft' });
             panel.addButton(null, 'GoForwardButton', () => {
                 if (!this.nextData.length || !this.currentFolder)
                     return;
                 this._enterFolder(this.nextData.pop());
-            }, { buttonClass: 'bg-none', title: 'Go Forward', tooltip: true, icon: 'ArrowRight' });
+            }, { buttonClass: 'ghost', title: 'Go Forward', tooltip: true, icon: 'ArrowRight' });
             panel.addButton(null, 'GoUpButton', () => {
                 const parentFolder = this.currentFolder?.parent;
                 if (parentFolder)
                     this._enterFolder(parentFolder);
-            }, { buttonClass: 'bg-none', title: 'Go Upper Folder', tooltip: true, icon: 'ArrowUp' });
-            panel.addButton(null, 'GoUpButton', () => {
-                this._refreshContent();
-            }, { buttonClass: 'bg-none', title: 'Refresh', tooltip: true, icon: 'Refresh' });
+            }, { buttonClass: 'ghost', title: 'Go Upper Folder', tooltip: true, icon: 'ArrowUp' });
+            panel.addButton(null, 'RefreshButton', () => {
+                this._refreshContent(undefined, undefined, true);
+            }, { buttonClass: 'ghost', title: 'Refresh', tooltip: true, icon: 'Refresh' });
         }
         _createTreePanel(area) {
             if (this.leftPanel) {
@@ -14289,61 +14440,91 @@
             this._createNavigationBar(this.leftPanel);
             const treeData = { id: '/', children: this.data };
             const tree = this.leftPanel.addTree('Content Browser', treeData, {
-                // icons: tree_icons,
                 filter: false,
-                onlyFolders: this.onlyFolders,
-                onevent: (event) => {
-                    let node = event.node;
-                    let value = event.value;
-                    switch (event.type) {
-                        case exports.LX.TreeEvent.NODE_SELECTED:
-                            {
-                                if (event.multiple) {
-                                    return;
-                                }
-                                if (!node.parent) {
-                                    if (this.currentFolder) {
-                                        this.prevData.push(this.currentFolder);
-                                    }
-                                    this.currentFolder = undefined;
-                                    this.currentData = this.data;
-                                    this._refreshContent();
-                                    this._updatePath();
-                                }
-                                else {
-                                    this._enterFolder(node.type === 'folder' ? node : node.parent);
-                                    this._previewAsset(node);
-                                    if (node.type !== 'folder') {
-                                        this.content.querySelectorAll('.lexassetitem').forEach((i) => i.classList.remove('selected'));
-                                        const dom = node.domEl;
-                                        dom?.classList.add('selected');
-                                    }
-                                    this.selectedItem = node;
-                                }
-                                break;
-                            }
-                        case exports.LX.TreeEvent.NODE_DRAGGED:
-                            {
-                                if (node.parent) {
-                                    const idx = node.parent.children.indexOf(node);
-                                    node.parent.children.splice(idx, 1);
-                                }
-                                if (!value.children) {
-                                    value.children = [];
-                                }
-                                value.children.push(node);
-                                node.parent = value;
-                                node.dir = value.children;
-                                if (this.onItemDragged) {
-                                    this.onItemDragged(node, value);
-                                }
-                                this._refreshContent();
-                                break;
-                            }
+                onlyFolders: this.onlyFolders
+            });
+            this._subscribeTreeEvents(tree);
+            this.tree = tree.innerTree;
+        }
+        _subscribeTreeEvents(tree) {
+            // If some of these events we don't have to call "resolve" since the AV itself
+            // will update the data and refresh when necessary
+            tree.on("select", (event, resolve) => {
+                if (event.items.length > 1) // Do nothing if multiple selection
+                 {
+                    return;
+                }
+                const node = event.items[0];
+                if (!node.parent) {
+                    if (this.currentFolder) {
+                        this.prevData.push(this.currentFolder);
                     }
+                    this.currentFolder = undefined;
+                    this.currentData = this.data;
+                    this._refreshContent();
+                    this._updatePath();
+                }
+                else {
+                    this._enterFolder(node.type === 'folder' ? node : node.parent);
+                    this._previewAsset(node);
+                    if (node.type !== 'folder') {
+                        this.content.querySelectorAll('.lexassetitem').forEach((i) => i.classList.remove('selected'));
+                        const dom = node.domEl;
+                        dom?.classList.add('selected');
+                    }
+                    this.selectedItem = node;
                 }
             });
-            this.tree = tree.innerTree;
+            tree.on("beforeMove", (event, resolve) => {
+                const onBeforeNodeDragged = this._callbacks['beforeNodeDragged'];
+                const onNodeDragged = this._callbacks['nodeDragged'];
+                const node = event.items[0];
+                const value = event.to;
+                const av_resolve = (...args) => {
+                    if (node.parent) {
+                        const idx = node.parent.children.indexOf(node);
+                        node.parent.children.splice(idx, 1);
+                    }
+                    if (!value.children) {
+                        value.children = [];
+                    }
+                    value.children.push(node);
+                    node.parent = value;
+                    node.dir = value.children;
+                    // Resolve Tree move event
+                    resolve(...args);
+                    // Fire AV drag event, and not catch the onMove Tree vent
+                    const av_event = {
+                        type: 'node-drag',
+                        items: [node],
+                        to: value,
+                        userInitiated: true
+                    };
+                    if (onNodeDragged)
+                        onNodeDragged(av_event, ...args);
+                    this._refreshContent();
+                };
+                if (onBeforeNodeDragged) {
+                    const av_event = {
+                        type: 'node-drag',
+                        items: [node],
+                        to: value,
+                        userInitiated: true
+                    };
+                    onBeforeNodeDragged(av_event, av_resolve);
+                }
+                else {
+                    av_resolve();
+                }
+            });
+            tree.on("beforeDelete", (event, resolve) => {
+                const node = event.items[0];
+                this._requestDeleteItem(node);
+            });
+            tree.on("beforeRename", (event, resolve) => {
+                const node = event.items[0];
+                this._requestRenameItem(node, event.newName, true);
+            });
         }
         _setContentLayout(layoutMode) {
             this.layout = layoutMode;
@@ -14381,17 +14562,14 @@
                     { name: 'Name', icon: 'ALargeSmall', callback: () => this._sortData('id') },
                     { name: 'Type', icon: 'Type', callback: () => this._sortData('type') },
                     null,
-                    { name: 'Ascending', icon: 'SortAsc',
-                        callback: () => this._sortData(undefined, AssetView.CONTENT_SORT_ASC) },
-                    { name: 'Descending', icon: 'SortDesc',
-                        callback: () => this._sortData(undefined, AssetView.CONTENT_SORT_DESC) }
+                    { name: 'Ascending', icon: 'SortAsc', callback: () => this._sortData(undefined, AssetView.CONTENT_SORT_ASC) },
+                    { name: 'Descending', icon: 'SortDesc', callback: () => this._sortData(undefined, AssetView.CONTENT_SORT_DESC) }
                 ], { side: 'bottom', align: 'start' });
             };
             const _onChangeView = (value, event) => {
                 exports.LX.addDropdownMenu(event.target, [
                     { name: 'Grid', icon: 'LayoutGrid', callback: () => this._setContentLayout(AssetView.LAYOUT_GRID) },
-                    { name: 'Compact', icon: 'LayoutList',
-                        callback: () => this._setContentLayout(AssetView.LAYOUT_COMPACT) },
+                    { name: 'Compact', icon: 'LayoutList', callback: () => this._setContentLayout(AssetView.LAYOUT_COMPACT) },
                     { name: 'List', icon: 'List', callback: () => this._setContentLayout(AssetView.LAYOUT_LIST) }
                 ], { side: 'bottom', align: 'start' });
             };
@@ -14403,8 +14581,8 @@
                     this._createNavigationBar(this.toolsPanel);
                 }
                 this.toolsPanel.sameLine();
-                const sortButton = this.toolsPanel.addButton(null, '', _onSort.bind(this), { title: 'Sort',
-                    tooltip: true, icon: (this.sortMode === AssetView.CONTENT_SORT_ASC) ? 'SortAsc' : 'SortDesc' });
+                const sortButton = this.toolsPanel.addButton(null, '', _onSort.bind(this), { title: 'Sort', tooltip: true,
+                    icon: (this.sortMode === AssetView.CONTENT_SORT_ASC) ? 'SortAsc' : 'SortDesc' });
                 this.toolsPanel.addButton(null, '', _onChangeView.bind(this), { title: 'View', tooltip: true,
                     icon: (this.layout === AssetView.LAYOUT_GRID) ? 'LayoutGrid' : 'LayoutList' });
                 this.toolsPanel.addSelect(null, typeEntries, this.filter ?? typeEntries[0], (v) => {
@@ -14426,7 +14604,7 @@
             this.contentPanel.attach(this.content);
             if (!this.skipBrowser) {
                 this.contentPanel.addText(null, this.path.join('/'), null, {
-                    inputClass: 'bg-none fg-quinary text-end',
+                    inputClass: 'bg-none text-muted-foreground text-sm text-end',
                     disabled: true,
                     signal: '@on_folder_change'
                 });
@@ -14475,48 +14653,68 @@
             // default case, only check include
             return (name) => name.toLowerCase().includes(q.toLowerCase());
         }
-        _refreshContent(searchValue, filter) {
-            const isCompactLayout = this.layout == AssetView.LAYOUT_COMPACT;
-            const isListLayout = this.layout == AssetView.LAYOUT_LIST;
-            this.filter = filter ?? (this.filter ?? 'None');
-            this.searchValue = searchValue ?? (this.searchValue ?? '');
-            this.content.innerHTML = '';
-            this.content.className = `lexassetscontent${isCompactLayout ? ' compact' : (isListLayout ? ' list' : '')}`;
-            if (!this.currentData.length) {
-                return;
-            }
-            const fr = new FileReader();
-            const nameFilterFn = this._makeNameFilterFn(this.searchValue);
-            const filteredData = this.currentData.filter((_i) => {
-                const typeMatch = this.filter !== 'None' ? _i.type.toLowerCase() === this.filter.toLowerCase() : true;
-                const nameMatch = nameFilterFn(_i.id);
-                return typeMatch && nameMatch;
-            });
-            this._paginator?.setPages(Math.max(Math.ceil(filteredData.length / this.assetsPerPage), 1));
-            // Show all data if using filters
-            const start = this._paginator ? (this._paginator.page - 1) * this.assetsPerPage : 0;
-            const end = this._paginator ? Math.min(start + this.assetsPerPage, filteredData.length) : filteredData.length;
-            for (let i = start; i < end; ++i) {
-                let item = filteredData[i];
-                if (item.path) {
-                    exports.LX.request({ url: item.path, dataType: 'blob', success: (f) => {
-                            item.metadata.bytesize = f.size;
-                            fr.readAsDataURL(f);
-                            fr.onload = (e) => {
-                                const target = e.currentTarget;
-                                item.src = target.result; // This is a base64 string...
-                                item.metadata.path = item.path;
-                                delete item.path;
-                                this._refreshContent(searchValue, filter);
-                            };
-                        } });
+        _refreshContent(searchValue, filter, userInitiated = false) {
+            const onBeforeRefreshContent = this._callbacks['beforeRefreshContent'];
+            const onRefreshContent = this._callbacks['refreshContent'];
+            const resolve = (...args) => {
+                const isCompactLayout = this.layout == AssetView.LAYOUT_COMPACT;
+                const isListLayout = this.layout == AssetView.LAYOUT_LIST;
+                this.filter = filter ?? (this.filter ?? 'None');
+                this.searchValue = searchValue ?? (this.searchValue ?? '');
+                this.content.innerHTML = '';
+                this.content.className = `lexassetscontent${isCompactLayout ? ' compact' : (isListLayout ? ' list' : '')}`;
+                if (!this.currentData.length) {
+                    return;
                 }
-                else {
-                    item.domEl = this.addItem(item, undefined, false);
+                const fr = new FileReader();
+                const nameFilterFn = this._makeNameFilterFn(this.searchValue);
+                const filteredData = this.currentData.filter((_i) => {
+                    const typeMatch = this.filter !== 'None' ? _i.type.toLowerCase() === this.filter.toLowerCase() : true;
+                    const nameMatch = nameFilterFn(_i.id);
+                    return typeMatch && nameMatch;
+                });
+                this._paginator?.setPages(Math.max(Math.ceil(filteredData.length / this.assetsPerPage), 1));
+                // Show all data if using filters
+                const start = this._paginator ? (this._paginator.page - 1) * this.assetsPerPage : 0;
+                const end = this._paginator ? Math.min(start + this.assetsPerPage, filteredData.length) : filteredData.length;
+                for (let i = start; i < end; ++i) {
+                    let item = filteredData[i];
+                    if (item.path) {
+                        exports.LX.request({ url: item.path, dataType: 'blob', success: (f) => {
+                                item.metadata.bytesize = f.size;
+                                fr.readAsDataURL(f);
+                                fr.onload = (e) => {
+                                    const target = e.currentTarget;
+                                    item.src = target.result; // This is a base64 string...
+                                    item.metadata.path = item.path;
+                                    delete item.path;
+                                    this._refreshContent(searchValue, filter);
+                                };
+                            } });
+                    }
+                    else {
+                        item.domEl = this.addItem(item, undefined, false);
+                    }
                 }
+                const event = {
+                    type: 'refresh-content',
+                    search: [this.searchValue, this.filter],
+                    items: filteredData.slice(start, end),
+                    userInitiated
+                };
+                if (onRefreshContent)
+                    onRefreshContent(event, ...args);
+            };
+            if (onBeforeRefreshContent) {
+                const event = {
+                    type: 'refresh-content',
+                    search: [this.searchValue, this.filter],
+                    userInitiated
+                };
+                onBeforeRefreshContent(event, resolve);
             }
-            if (this.onRefreshContent) {
-                this.onRefreshContent(searchValue, filter);
+            else {
+                resolve();
             }
         }
         _previewAsset(file) {
@@ -14669,6 +14867,7 @@
             if (mustRefresh) {
                 this._processData(this.data);
                 this._refreshContent();
+                this.tree?.select(this.currentFolder.id);
             }
             this._updatePath();
         }
@@ -14771,6 +14970,7 @@
             this.tree?.refresh();
             this._moveItemDialog?.destroy();
             this._movingItem = undefined;
+            this.previewPanel?.clear();
         }
         _moveItem(item, defaultFolder) {
             if (this._moveItemDialog) {
@@ -14785,16 +14985,16 @@
                 for (let pi of (targetFolder.children ?? targetFolder)) {
                     const row = exports.LX.makeContainer(['100%', 'auto'], 'flex flex-row px-1 items-center', '', container);
                     const isFolder = pi.type === 'folder';
-                    const rowItem = exports.LX.makeContainer(['100%', 'auto'], `move-item flex flex-row gap-1 py-1 px-3 cursor-pointer ${isFolder ? 'fg-primary font-medium' : 'fg-quinary'} rounded-xxl ${isFolder ? 'hover:bg-secondary' : 'hover:bg-primary'}`, `${isFolder ? exports.LX.makeIcon('FolderOpen', { svgClass: '' }).innerHTML : ''}${pi.id}`, row);
+                    const rowItem = exports.LX.makeContainer(['100%', 'auto'], `move-item flex flex-row gap-1 py-1 px-3 cursor-pointer items-center ${isFolder ? 'text-foreground font-medium' : 'text-muted-foreground'} rounded-2xl ${isFolder ? 'hover:bg-accent' : 'hover:bg-muted'}`, `${isFolder ? exports.LX.makeIcon('FolderOpen', { svgClass: '' }).innerHTML : ''}${pi.id}`, row);
                     if (isFolder) {
                         rowItem.addEventListener('click', () => {
-                            container.querySelectorAll('.move-item').forEach((el) => exports.LX.removeClass(el, 'bg-quinary'));
-                            exports.LX.addClass(rowItem, 'bg-quinary');
+                            container.querySelectorAll('.move-item').forEach((el) => exports.LX.removeClass(el, 'bg-primary text-primary-foreground'));
+                            exports.LX.addClass(rowItem, 'bg-primary text-primary-foreground');
                             targetFolder = pi;
                         });
                         const fPathButton = new exports.LX.Button(null, 'FPathButton', () => {
                             _openFolder(pi, container);
-                        }, { icon: 'ChevronRight', className: 'ml-auto h-8', buttonClass: 'bg-none hover:bg-secondary' });
+                        }, { icon: 'ChevronRight', className: 'ml-auto h-8', buttonClass: 'ghost' });
                         row.appendChild(fPathButton.root);
                     }
                 }
@@ -14828,33 +15028,29 @@
                 p.attach(area);
                 const content = exports.LX.makeContainer(['auto', '100%'], 'flex flex-auto-fill flex-col overflow-scroll py-2 gap-1', ``);
                 {
-                    const headerPanel = area.addPanel({ className: 'p-2 border-bottom flex flex-auto', height: 'auto' });
+                    const headerPanel = area.addPanel({ className: 'p-2 border-b-color flex flex-auto-keep', height: 'auto' });
                     headerPanel.sameLine(2, 'w-full');
                     headerPanel.addButton(null, 'BackButton', () => {
                         if (targetFolder && targetFolder.parent)
                             _openFolder(targetFolder.parent, content);
-                    }, { icon: 'ArrowLeft', title: 'Back', tooltip: true, className: 'flex-auto',
-                        buttonClass: 'bg-none hover:bg-secondary' });
+                    }, { icon: 'ArrowLeft', title: 'Back', tooltip: true, className: 'flex-auto-keep', buttonClass: 'ghost' });
                     bcContainer = exports.LX.makeElement('div');
-                    headerPanel.addContent('ITEM_MOVE_PATH', bcContainer, { signal: '@item_move_path',
-                        className: 'flex-auto-fill' });
+                    headerPanel.addContent('ITEM_MOVE_PATH', bcContainer, { signal: '@item_move_path', className: 'flex-auto-fill' });
                 }
                 area.attach(content);
                 _openFolder(defaultFolder ?? this.data, content);
                 {
-                    const footerPanel = area.addPanel({ className: 'p-2 border-top flex flex-auto justify-between',
-                        height: 'auto' });
+                    const footerPanel = area.addPanel({ className: 'p-2 border-t-color flex flex-auto-keep justify-between', height: 'auto' });
                     footerPanel.addButton(null, 'NewFolderButton', () => {
                         this._requestCreateFolder(targetFolder);
-                    }, { width: 'auto', icon: 'FolderPlus', title: 'Create Folder', tooltip: true, className: 'ml-2',
-                        buttonClass: 'bg-none hover:bg-secondary' });
+                    }, { width: 'auto', icon: 'FolderPlus', title: 'Create Folder', tooltip: true, className: 'ml-2', buttonClass: 'ghost' });
                     footerPanel.sameLine(2, 'mr-2');
                     footerPanel.addButton(null, 'Cancel', () => {
                         this._moveItemDialog.close();
-                    }, { buttonClass: 'bg-none fg-error' });
+                    }, { buttonClass: 'ghost text-destructive' });
                     footerPanel.addButton(null, 'Move', () => {
                         this._requestMoveItemToFolder(item, targetFolder);
-                    }, { className: '', buttonClass: 'contrast' });
+                    }, { className: '', buttonClass: 'primary' });
                 }
             }, { modal: true, size: ['616px', '500px'], closable: true, onBeforeClose: () => {
                     delete this._moveItemDialog;
@@ -14952,12 +15148,12 @@
             }
             return maxN === -1 ? originalName : `${base} (${maxN + 1})${ext}`;
         }
-        _requestRenameItem(item, newName) {
+        _requestRenameItem(item, newName, treeEvent = false) {
             const onBeforeRename = this._callbacks['beforeRename'];
             const onRename = this._callbacks['rename'];
             const oldName = item.id;
             const resolve = (...args) => {
-                this._renameItem(item, newName);
+                this._renameItem(item, newName, treeEvent ? item.dir : this.currentData);
                 const event = {
                     type: 'rename',
                     items: [item],
@@ -14982,21 +15178,25 @@
                 resolve();
             }
         }
-        _renameItem(item, newName) {
-            const idx = this.currentData.indexOf(item);
+        _renameItem(item, newName, data) {
+            data = data ?? this.currentData;
+            const idx = data.indexOf(item);
             if (idx < 0) {
                 return;
             }
-            const wasSelected = exports.LX.hasClass(item.domEl, 'selected');
-            const hoverTitle = this.content.querySelector(`#floatingTitle_${item.id.replace(/\s/g, '_').replaceAll('.', '_')}`);
-            if (hoverTitle)
-                hoverTitle.remove();
-            item.domEl?.remove();
-            item.id = newName;
-            item.domEl = this.addItem(item, idx * 2);
-            if (wasSelected) {
-                this._previewAsset(item);
+            // It could be a Tree event, so maybe the elements is not created yet
+            if (item.domEl) {
+                const wasSelected = exports.LX.hasClass(item.domEl, 'selected');
+                const hoverTitle = this.content.querySelector(`#floatingTitle_${item.id.replace(/\s/g, '_').replaceAll('.', '_')}`);
+                if (hoverTitle)
+                    hoverTitle.remove();
+                item.domEl?.remove();
+                item.domEl = this.addItem(item, idx * 2);
+                if (wasSelected) {
+                    this._previewAsset(item);
+                }
             }
+            item.id = newName;
             this.tree?.refresh();
             this._processData(this.data);
         }
@@ -15018,7 +15218,7 @@
             });
             panel.addButton(null, 'Save', () => {
                 onRename(newName);
-            }, { buttonClass: 'contrast' });
+            }, { buttonClass: 'primary' });
             const p = new exports.LX.Popover(item.domEl, [panel], { align: 'center', side: 'bottom', sideOffset: -128 });
         }
         _requestCreateFolder(folder) {
@@ -15056,14 +15256,15 @@
             if (!folder) {
                 throw ('_createFolder: Something went wrong!');
             }
+            const dir = folder.children ?? folder;
             const newFolder = {
-                id: this._getClonedName('New Folder', folder.children),
+                id: this._getClonedName('New Folder', dir),
                 type: 'folder',
                 children: [],
                 parent: this.currentFolder,
                 metadata: {}
             };
-            folder.children.push(newFolder);
+            dir.push(newFolder);
             this._refreshContent();
             this.tree?.refresh();
             if (this._moveItemDialog && this._movingItem) {
@@ -15368,6 +15569,9 @@
         print() {
             console.log(this.line, this.position);
         }
+        destroy() {
+            exports.LX.deleteElement(this.root);
+        }
         isLast() {
             return (this.editor._getLastCursor() == this);
         }
@@ -15515,10 +15719,8 @@
     const HighlightRules = {
         common: [
             { test: (ctx) => ctx.inBlockComment, className: 'cm-com' },
-            { test: (ctx) => ctx.inString,
-                action: (ctx, editor) => editor._appendStringToken(ctx.token), discard: true },
-            { test: (ctx) => ctx.token.substr(0, ctx.singleLineCommentToken.length) == ctx.singleLineCommentToken,
-                className: 'cm-com' },
+            { test: (ctx) => ctx.inString, action: (ctx, editor) => editor._appendStringToken(ctx.token), discard: true },
+            { test: (ctx) => ctx.token.substr(0, ctx.singleLineCommentToken.length) == ctx.singleLineCommentToken, className: 'cm-com' },
             { test: (ctx, editor) => editor._isKeyword(ctx), className: 'cm-kwd' },
             {
                 test: (ctx, editor) => editor._mustHightlightWord(ctx.token, CE.builtIn, ctx.lang) && (ctx.lang.tags ?? false
@@ -15526,12 +15728,9 @@
                     : true),
                 className: 'cm-bln'
             },
-            { test: (ctx, editor) => editor._mustHightlightWord(ctx.token, CE.statements, ctx.lang),
-                className: 'cm-std' },
-            { test: (ctx, editor) => editor._mustHightlightWord(ctx.token, CE.symbols, ctx.lang),
-                className: 'cm-sym' },
-            { test: (ctx, editor) => editor._mustHightlightWord(ctx.token, CE.types, ctx.lang),
-                className: 'cm-typ' },
+            { test: (ctx, editor) => editor._mustHightlightWord(ctx.token, CE.statements, ctx.lang), className: 'cm-std' },
+            { test: (ctx, editor) => editor._mustHightlightWord(ctx.token, CE.symbols, ctx.lang), className: 'cm-sym' },
+            { test: (ctx, editor) => editor._mustHightlightWord(ctx.token, CE.types, ctx.lang), className: 'cm-typ' },
             {
                 test: (ctx, editor) => editor._isNumber(ctx.token) || editor._isNumber(ctx.token.replace(/[px]|[em]|%/g, '')),
                 className: 'cm-dec'
@@ -15586,12 +15785,9 @@
                     || (ctx.token[0] == '#' && ctx.prev != ':')),
                 className: 'cm-kwd'
             },
-            { test: (ctx) => ctx.prev === ':' && (ctx.next === ';' || ctx.next === '!important'),
-                className: 'cm-str' }, // CSS value
-            { test: (ctx) => (ctx.prev === undefined || ctx.prev === '{' || ctx.prev === ';') && ctx.next === ':',
-                className: 'cm-typ' }, // CSS attribute
-            { test: (ctx) => ctx.prev === '(' && ctx.next === ')' && ctx.token.startsWith('--'),
-                className: 'cm-typ' } // CSS vars
+            { test: (ctx) => ctx.prev === ':' && (ctx.next === ';' || ctx.next === '!important'), className: 'cm-str' }, // CSS value
+            { test: (ctx) => (ctx.prev === undefined || ctx.prev === '{' || ctx.prev === ';') && ctx.next === ':', className: 'cm-typ' }, // CSS attribute
+            { test: (ctx) => ctx.prev === '(' && ctx.next === ')' && ctx.token.startsWith('--'), className: 'cm-typ' } // CSS vars
         ],
         batch: [
             { test: (ctx) => ctx.token === '@' || ctx.prev === ':' || ctx.prev === '@', className: 'cm-kwd' }
@@ -15716,17 +15912,29 @@
         newTabOptions;
         customSuggestions = [];
         // Editor callbacks
-        onSave;
-        onRun;
-        onCtrlSpace;
-        onCreateStatusPanel;
         onContextMenu;
-        onNewTab;
-        onSelectTab;
         onCreateFile;
+        onCreateStatusPanel;
+        onCtrlSpace;
+        onNewTab;
+        onSave;
+        onSelectTab;
+        onReady;
+        onRun;
         // Inner functions
         addExplorerItem;
-        // Temp variables
+        // Internal variables
+        _blockCommentCache = [];
+        _buildingBlockComment = undefined;
+        _buildingString = undefined;
+        _currentOcurrences = undefined;
+        _currentLineNumber = undefined;
+        _currentLineString = undefined;
+        _currentTokenPositions = undefined;
+        _discardScroll = false;
+        _displayObserver = null;
+        _fullVerticalOffset = -1;
+        _isReady = false;
         _lastTime = null;
         _lastProcessedLine = -1;
         _lastResult = undefined;
@@ -15736,28 +15944,21 @@
         _lastMouseDown = 0;
         _lastTextFound = '';
         _lastBaseareaWidth = undefined;
-        _blockCommentCache = [];
-        _pendingString = undefined;
-        _skipTabs = undefined;
-        _discardScroll = false;
         _markdownHeader = undefined;
-        _tabStorage = {};
-        _tripleClickSelection = undefined;
-        _currentOcurrences = undefined;
-        _currentLineNumber = undefined;
-        _currentLineString = undefined;
-        _currentTokenPositions = undefined;
-        _buildingBlockComment = undefined;
-        _buildingString = undefined;
-        _verticalTopOffset = -1;
-        _verticalBottomOffset = -1;
-        _fullVerticalOffset = -1;
-        _scopeStack = null;
         _mouseDown = undefined;
+        _nextCursorPositionOffset = undefined;
+        _pendingString = undefined;
+        _preparedAt = undefined;
+        _scopeStack = null;
         _scopesUpdated = undefined;
+        _skipTabs = undefined;
         _stringEnded = false;
         _stringInterpolation = undefined;
         _stringInterpolationOpened = undefined;
+        _tabStorage = {};
+        _tripleClickSelection = undefined;
+        _verticalBottomOffset = -1;
+        _verticalTopOffset = -1;
         constructor(area, options = {}) {
             if (options.filesAsync) {
                 options.files = [...options.filesAsync];
@@ -15795,6 +15996,7 @@
             this.onContextMenu = options.onContextMenu;
             this.onNewTab = options.onNewTab;
             this.onSelectTab = options.onSelectTab;
+            this.onReady = options.onReady;
             // File explorer
             if (this.useFileExplorer) {
                 let [explorerArea, editorArea] = area.split({ sizes: ['15%', '85%'] });
@@ -15806,27 +16008,15 @@
                 this.explorer = panel.addTree(null, sceneData, {
                     filter: false,
                     rename: false,
-                    skipDefaultIcon: true,
-                    onevent: (event) => {
-                        switch (event.type) {
-                            // case LX.TreeEvent.NODE_SELECTED:
-                            //     if( !this.tabs.tabDOMs[ event.node.id ] ) break;
-                            case exports.LX.TreeEvent.NODE_DBLCLICKED:
-                                this.loadTab(event.node.id);
-                                break;
-                            case exports.LX.TreeEvent.NODE_DELETED:
-                                this.closeTab(event.node.id);
-                                break;
-                            // case LX.TreeEvent.NODE_CONTEXTMENU:
-                            //     LX.addContextMenu( event.multiple ? "Selected Nodes" : event.node.id, event.value, m => {
-                            //
-                            //     });
-                            //     break;
-                            // case LX.TreeEvent.NODE_DRAGGED:
-                            //     console.log(event.node.id + " is now child of " + event.value.id);
-                            //     break;
-                        }
-                    }
+                    skipDefaultIcon: true
+                });
+                this.explorer.on("dblClick", (event) => {
+                    const node = event.items[0];
+                    this.loadTab(node.id);
+                });
+                this.explorer.on("delete", (event) => {
+                    const node = event.items[0];
+                    this.closeTab(node.id);
                 });
                 this.addExplorerItem = function (item) {
                     if (!this.explorer.innerTree.data.find((value, index) => value.id === item.id)) {
@@ -15838,13 +16028,13 @@
                 area = editorArea;
             }
             this.baseArea = area;
-            this.area = new exports.LX.Area({ className: 'lexcodeeditor', height: '100%', skipAppend: true });
+            this.area = new exports.LX.Area({ className: 'lexcodeeditor outline-none overflow-hidden size-full select-none bg-inherit', skipAppend: true });
             if (!this.skipTabs) {
                 this.tabs = this.area.addTabs({ onclose: (name) => {
                         delete this.openedTabs[name];
                         if (Object.keys(this.openedTabs).length < 2) {
                             clearInterval(this.blinker);
-                            exports.LX.removeClas(this.cursorsDOM, 'show');
+                            exports.LX.removeClass(this.cursorsDOM, 'show');
                         }
                     } });
                 exports.LX.addClass(this.tabs.root.parentElement, 'rounded-t-lg');
@@ -15861,13 +16051,12 @@
             else {
                 this.codeArea = new exports.LX.Area({ skipAppend: true });
                 this.area.attach(this.codeArea);
-                const loadFileButton = exports.LX.makeElement('button', 'grid absolute self-center z-100 p-3 rounded-full bg-secondary hover:bg-tertiary cursor-pointer border', exports.LX.makeIcon('FolderOpen').innerHTML, this.area, {
+                const loadFileButton = exports.LX.makeElement('button', 'grid absolute place-self-center z-100 p-3 rounded-full bg-secondary hover:bg-accent cursor-pointer border-color', exports.LX.makeIcon('FolderOpen').innerHTML, this.area, {
                     bottom: '8px'
                 });
                 loadFileButton.addEventListener('click', (e) => {
                     const dropdownOptions = [];
-                    for (const [key, value] of [...Object.entries(this.loadedTabs).slice(1),
-                        ...Object.entries(this._tabStorage)]) {
+                    for (const [key, value] of [...Object.entries(this.loadedTabs).slice(1), ...Object.entries(this._tabStorage)]) {
                         const icon = this._getFileIcon(key);
                         const classes = icon ? icon.split(' ') : [];
                         dropdownOptions.push({
@@ -15882,7 +16071,7 @@
                     new exports.LX.DropdownMenu(loadFileButton, dropdownOptions, { side: 'top', align: 'center' });
                 });
             }
-            this.codeArea.root.classList.add('lexcodearea');
+            this.codeArea.root.classList.add('lexcodearea', 'scrollbar-hidden');
             const codeResizeObserver = new ResizeObserver((entries) => {
                 if (!this.code) {
                     return;
@@ -15891,7 +16080,7 @@
             });
             codeResizeObserver.observe(this.codeArea.root);
             // Full editor
-            area.root.classList.add('codebasearea');
+            area.root.className = exports.LX.mergeClass(area.root.className, 'codebasearea flex relative bg-card');
             const observer = new MutationObserver((e) => {
                 if (e[0].attributeName == 'style') {
                     this.resize();
@@ -16020,11 +16209,11 @@
                     box.appendChild(searchPanel.root);
                     searchPanel.sameLine(4);
                     searchPanel.addText(null, '', null, { placeholder: 'Find', inputClass: 'bg-secondary' });
-                    searchPanel.addButton(null, 'up', () => this.search(null, true), { icon: 'ArrowUp',
-                        title: 'Previous Match', tooltip: true });
-                    searchPanel.addButton(null, 'down', () => this.search(), { icon: 'ArrowDown', title: 'Next Match',
+                    searchPanel.addButton(null, 'up', () => this.search(null, true), { icon: 'ArrowUp', buttonClass: 'ghost', title: 'Previous Match',
                         tooltip: true });
-                    searchPanel.addButton(null, 'x', this.hideSearchBox.bind(this), { icon: 'X', title: 'Close',
+                    searchPanel.addButton(null, 'down', () => this.search(), { icon: 'ArrowDown', buttonClass: 'ghost', title: 'Next Match',
+                        tooltip: true });
+                    searchPanel.addButton(null, 'x', this.hideSearchBox.bind(this), { icon: 'X', buttonClass: 'ghost', title: 'Close',
                         tooltip: true });
                     const searchInput = box.querySelector('input');
                     searchInput?.addEventListener('keyup', (e) => {
@@ -16047,7 +16236,7 @@
                         input.value = ':' + value.replaceAll(':', '');
                         this.goToLine(input.value.slice(1));
                     }, { placeholder: 'Go to line', trigger: 'input' });
-                    searchPanel.addButton(null, 'x', this.hideSearchLineBox.bind(this), { icon: 'X', title: 'Close',
+                    searchPanel.addButton(null, 'x', this.hideSearchLineBox.bind(this), { icon: 'X', title: 'Close', buttonClass: 'ghost',
                         tooltip: true });
                     let input = box.querySelector('input');
                     input.addEventListener('keyup', (e) => {
@@ -16112,9 +16301,8 @@
                     CodeEditor.types[lang] = new Set(CodeEditor.types[lang]);
                 for (let lang in CodeEditor.builtIn)
                     CodeEditor.builtIn[lang] = new Set(CodeEditor.builtIn[lang]);
-                for (let lang in CodeEditor.statements) {
+                for (let lang in CodeEditor.statements)
                     CodeEditor.statements[lang] = new Set(CodeEditor.statements[lang]);
-                }
                 for (let lang in CodeEditor.symbols)
                     CodeEditor.symbols[lang] = new Set(CodeEditor.symbols[lang]);
                 CodeEditor._staticReady = true;
@@ -16185,6 +16373,9 @@
                         if (letter) {
                             this.code.lines[ln] = sliceChars(this.code.lines[ln], cursor.position);
                             this.processLine(ln);
+                            // "Delete" removes the char at the right, so cursor position does not change
+                            // but line length does and next cursor position must be updated 1 position to the left
+                            this._nextCursorPositionOffset = -1;
                         }
                         else if (this.code.lines[ln + 1] != undefined) {
                             this.code.lines[ln] += this.code.lines[ln + 1];
@@ -16413,18 +16604,18 @@
                                 this._processSelection(cursor, e, false, CodeEditor.SELECTION_X);
                             }
                             else {
-                                if (!cursor.selection) {
-                                    this.cursorToLeft(letter, cursor);
-                                    if (this.useAutoComplete && this.isAutoCompleteActive) {
-                                        this.showAutoCompleteBox('foo', cursor);
-                                    }
-                                }
-                                else {
+                                if (cursor.selection) {
                                     cursor.selection.invertIfNecessary();
                                     this.resetCursorPos(CodeEditor.CURSOR_LEFT_TOP, cursor);
                                     this.cursorToLine(cursor, cursor.selection.fromY);
                                     this.cursorToPosition(cursor, cursor.selection.fromX, true);
-                                    this.endSelection();
+                                    this.endSelection(cursor);
+                                }
+                                else {
+                                    this.cursorToLeft(letter, cursor);
+                                    if (this.useAutoComplete && this.isAutoCompleteActive) {
+                                        this.showAutoCompleteBox('foo', cursor);
+                                    }
                                 }
                             }
                         }
@@ -16525,39 +16716,7 @@
                 if (this.statusPanel) {
                     area.attach(this.statusPanel);
                 }
-                if (document.fonts.status == 'loading') {
-                    await document.fonts.ready;
-                }
-                // Load any font size from local storage
-                const savedFontSize = window.localStorage.getItem('lexcodeeditor-font-size');
-                if (savedFontSize) {
-                    this._setFontSize(parseInt(savedFontSize));
-                }
-                // Use default size
-                else {
-                    const r = document.querySelector(':root');
-                    const s = getComputedStyle(r);
-                    this.fontSize = parseInt(s.getPropertyValue('--code-editor-font-size'));
-                    this.charWidth = this._measureChar();
-                }
-                exports.LX.emitSignal('@font-size', this.fontSize);
-                // Get final sizes for editor elements based on Tabs and status bar offsets
-                exports.LX.doAsync(() => {
-                    this._verticalTopOffset = this.tabs?.root.getBoundingClientRect().height ?? 0;
-                    this._verticalBottomOffset = this.statusPanel?.root.getBoundingClientRect().height ?? 0;
-                    this._fullVerticalOffset = this._verticalTopOffset + this._verticalBottomOffset;
-                    this.gutter.style.marginTop = `${this._verticalTopOffset}px`;
-                    this.gutter.style.height = `calc(100% - ${this._fullVerticalOffset}px)`;
-                    this.vScrollbar.root.style.marginTop = `${this._verticalTopOffset}px`;
-                    this.vScrollbar.root.style.height = `calc(100% - ${this._fullVerticalOffset}px)`;
-                    this.hScrollbar.root.style.bottom = `${this._verticalBottomOffset}px`;
-                    this.codeArea.root.style.height = `calc(100% - ${this._fullVerticalOffset}px)`;
-                    // Process lines on finish computing final sizes
-                    this.processLines();
-                }, 50);
-                if (options.callback) {
-                    options.callback.call(this, this);
-                }
+                this._setupDisplayObserver();
                 g$1.editor = this;
             };
             if (options.allowAddScripts ?? true) {
@@ -16572,8 +16731,7 @@
                 for (let url of options.files) {
                     const finalUrl = url.constructor === Array ? url[0] : url;
                     const finalFileName = url.constructor === Array ? url[1] : undefined;
-                    await this.loadFile(finalUrl, { filename: finalFileName, async: loadAsync,
-                        callback: (name, text) => {
+                    await this.loadFile(finalUrl, { filename: finalFileName, async: loadAsync, callback: (name, text) => {
                             filesLoaded++;
                             if (filesLoaded == numFiles) {
                                 onLoadAll();
@@ -16592,6 +16750,92 @@
                 }
                 onLoadAll();
             }
+        }
+        _setupDisplayObserver() {
+            if (this._displayObserver)
+                return;
+            this._isReady = false;
+            const root = this.root;
+            const _isVisible = () => {
+                return (root.offsetParent !== null
+                    && root.clientWidth > 0
+                    && root.clientHeight > 0);
+            };
+            const _tryPrepare = async () => {
+                if (this._isReady)
+                    return;
+                if (!_isVisible())
+                    return;
+                this._isReady = true;
+                // Stop observing once prepared
+                intersectionObserver.disconnect();
+                resizeObserver.disconnect();
+                await this._setupEditorWhenVisible();
+            };
+            // IntersectionObserver (for viewport)
+            const intersectionObserver = new IntersectionObserver((entries) => {
+                for (const entry of entries) {
+                    if (entry.isIntersecting) {
+                        _tryPrepare();
+                    }
+                }
+            });
+            intersectionObserver.observe(root);
+            // ResizeObserver (for display property changes)
+            const resizeObserver = new ResizeObserver(() => {
+                _tryPrepare();
+            });
+            resizeObserver.observe(root);
+            // Fallback polling (don't use it for now)
+            // const interval = setInterval( () => {
+            //     if ( this._isReady ) {
+            //         clearInterval( interval );
+            //         return;
+            //     }
+            //     _tryPrepare();
+            // }, 250 );
+            this._displayObserver = {
+                intersectionObserver,
+                resizeObserver
+                // interval,
+            };
+        }
+        async _setupEditorWhenVisible() {
+            if (document.fonts.status == 'loading') {
+                await document.fonts.ready;
+            }
+            // Load any font size from local storage
+            const savedFontSize = window.localStorage.getItem('lexcodeeditor-font-size');
+            if (savedFontSize) {
+                this._setFontSize(parseInt(savedFontSize));
+            }
+            // Use default size
+            else {
+                const r = document.querySelector(':root');
+                const s = getComputedStyle(r);
+                this.fontSize = parseInt(s.getPropertyValue('--code-editor-font-size'));
+                this.charWidth = this._measureChar();
+            }
+            exports.LX.emitSignal('@font-size', this.fontSize);
+            // Get final sizes for editor elements based on Tabs and status bar offsets
+            exports.LX.doAsync(() => {
+                this._verticalTopOffset = this.tabs?.root.getBoundingClientRect().height ?? 0;
+                this._verticalBottomOffset = this.statusPanel?.root.getBoundingClientRect().height ?? 0;
+                this._fullVerticalOffset = this._verticalTopOffset + this._verticalBottomOffset;
+                this.gutter.style.marginTop = `${this._verticalTopOffset}px`;
+                this.gutter.style.height = `calc(100% - ${this._fullVerticalOffset}px)`;
+                this.vScrollbar.root.style.marginTop = `${this._verticalTopOffset}px`;
+                this.vScrollbar.root.style.height = `calc(100% - ${this._fullVerticalOffset}px)`;
+                this.hScrollbar.root.style.bottom = `${this._verticalBottomOffset}px`;
+                this.codeArea.root.style.height = `calc(100% - ${this._fullVerticalOffset}px)`;
+                // Process lines on finish computing final sizes
+                this.processLines();
+            }, 50);
+            if (this.onReady) {
+                this.onReady(this);
+            }
+            this._preparedAt = performance.now();
+            console.log(`[LX.CodeEditor] Ready! (font size: ${this.fontSize}px)`);
         }
         // Clear signals
         clear() {
@@ -16621,7 +16865,7 @@
             return this.code.lines.join(min ? ' ' : '\n');
         }
         // This can be used to empty all text...
-        setText(text = '', langString) {
+        setText(text = '', langString, detectLanguage = false) {
             let newLines = text.split('\n');
             this.code.lines = [].concat(newLines);
             this._removeSecondaryCursors();
@@ -16630,6 +16874,9 @@
             this.cursorToLine(cursor, newLines.length); // Already substracted 1
             this.cursorToPosition(cursor, lastLine?.length ?? 0, true);
             this.mustProcessLines = true;
+            if (detectLanguage) {
+                langString = this._detectLanguage(text);
+            }
             if (langString) {
                 this._changeLanguage(langString);
             }
@@ -16892,25 +17139,22 @@
                 this.onCreateStatusPanel(panel, this);
             }
             let leftStatusPanel = this.leftStatusPanel = new exports.LX.Panel({ id: 'FontSizeZoomStatusComponent',
-                height: 'auto' });
+                className: 'pad-xs content-center items-center flex-auto-keep', width: 'auto', height: 'auto' });
             leftStatusPanel.sameLine();
-            if (this.skipTabs) {
-                leftStatusPanel.addButton(null, 'ZoomOutButton', this._decreaseFontSize.bind(this), { icon: 'ZoomOut',
-                    width: '32px', title: 'Zoom Out', tooltip: true });
-            }
-            leftStatusPanel.addButton(null, 'ZoomOutButton', this._decreaseFontSize.bind(this), { icon: 'ZoomOut',
-                width: '32px', title: 'Zoom Out', tooltip: true });
+            leftStatusPanel.addButton(null, 'ZoomOutButton', this._decreaseFontSize.bind(this), { icon: 'ZoomOut', buttonClass: 'ghost sm',
+                title: 'Zoom Out', tooltip: true });
             leftStatusPanel.addLabel(this.fontSize, { fit: true, signal: '@font-size' });
-            leftStatusPanel.addButton(null, 'ZoomInButton', this._increaseFontSize.bind(this), { icon: 'ZoomIn',
-                width: '32px', title: 'Zoom In', tooltip: true });
+            leftStatusPanel.addButton(null, 'ZoomInButton', this._increaseFontSize.bind(this), { icon: 'ZoomIn', buttonClass: 'ghost sm',
+                title: 'Zoom In', tooltip: true });
             leftStatusPanel.endLine('justify-start');
             panel.attach(leftStatusPanel.root);
-            let rightStatusPanel = this.rightStatusPanel = new exports.LX.Panel({ height: 'auto' });
+            let rightStatusPanel = this.rightStatusPanel = new exports.LX.Panel({ className: 'pad-xs content-center items-center', height: 'auto' });
             rightStatusPanel.sameLine();
-            rightStatusPanel.addLabel(this.code?.title ?? '', { id: 'EditorFilenameStatusComponent', fit: true,
+            rightStatusPanel.addLabel(this.code?.title ?? '', { id: 'EditorFilenameStatusComponent', fit: true, inputClass: 'text-xs',
                 signal: '@tab-name' });
             rightStatusPanel.addButton(null, 'Ln 1, Col 1', this.showSearchLineBox.bind(this), {
                 id: 'EditorSelectionStatusComponent',
+                buttonClass: 'outline xs',
                 fit: true,
                 signal: '@cursor-data'
             });
@@ -16925,7 +17169,7 @@
                         });
                     }
                 });
-            }, { id: 'EditorIndentationStatusComponent', nameWidth: '15%', signal: '@tab-spaces' });
+            }, { id: 'EditorIndentationStatusComponent', buttonClass: 'outline xs', signal: '@tab-spaces' });
             rightStatusPanel.addButton('<b>{ }</b>', this.highlight, (value, event) => {
                 exports.LX.addContextMenu('Language', event, (m) => {
                     for (const lang of Object.keys(CodeEditor.languages)) {
@@ -16935,7 +17179,7 @@
                         });
                     }
                 });
-            }, { id: 'EditorLanguageStatusComponent', nameWidth: '15%', signal: '@highlight' });
+            }, { id: 'EditorLanguageStatusComponent', nameWidth: 'auto', buttonClass: 'outline xs', signal: '@highlight', title: '' });
             rightStatusPanel.endLine('justify-end');
             panel.attach(rightStatusPanel.root);
             const itemVisibilityMap = {
@@ -17007,13 +17251,13 @@
                 }
             }
             if (langString === undefined) {
-                return 'AlignLeft fg-neutral-500';
+                return 'AlignLeft text-neutral-500';
             }
             const iconPlusClasses = CodeEditor.languages[langString]?.icon;
             if (iconPlusClasses) {
                 return iconPlusClasses[extension] ?? iconPlusClasses;
             }
-            return 'AlignLeft fg-neutral-500';
+            return 'AlignLeft text-neutral-500';
         }
         _onNewTab(e) {
             this.processFocus(false);
@@ -17023,8 +17267,7 @@
             }
             const dmOptions = this.newTabOptions ?? [
                 { name: 'Create file', icon: 'FilePlus', callback: this._onCreateNewFile.bind(this) },
-                { name: 'Load file', icon: 'FileUp', disabled: !this.allowLoadingFiles,
-                    callback: this.loadTabFromFile.bind(this) }
+                { name: 'Load file', icon: 'FileUp', disabled: !this.allowLoadingFiles, callback: this.loadTabFromFile.bind(this) }
             ];
             new exports.LX.DropdownMenu(e.target, dmOptions, { side: 'bottom', align: 'start' });
         }
@@ -17037,8 +17280,7 @@
                 }
             }
             const name = options.name ?? 'unnamed.js';
-            this.addTab(name, true, name, { indexOffset: options.indexOffset,
-                language: options.language ?? 'JavaScript' });
+            this.addTab(name, true, name, { indexOffset: options.indexOffset, language: options.language ?? 'JavaScript' });
         }
         _onSelectTab(isNewTabButton, event, name) {
             if (this.disableEdition) {
@@ -17450,8 +17692,7 @@
         processClick(e) {
             var cursor = this.getCurrentCursor();
             var code_rect = this.codeScroller.getBoundingClientRect();
-            var position = [(e.clientX - code_rect.x) + this.getScrollLeft(),
-                (e.clientY - code_rect.y) + this.getScrollTop()];
+            var position = [(e.clientX - code_rect.x) + this.getScrollLeft(), (e.clientY - code_rect.y) + this.getScrollTop()];
             var ln = (position[1] / this.lineHeight) | 0;
             // Check out of range line
             const outOfRange = ln > this.code.lines.length - 1;
@@ -17616,12 +17857,12 @@
         }
         async processKey(e) {
             const numCursors = this.cursors.length;
-            if (!this.code || e.srcElement?.constructor != HTMLDivElement) {
+            if (!this.code || e.target?.constructor != HTMLDivElement) {
                 return;
             }
             const detail = e.detail ?? {};
             const key = e.key ?? detail.key;
-            // Do not propagate "space to scroll" event
+            // Don't propagate "space to scroll" event
             if (key == ' ') {
                 e.preventDefault();
                 e.stopPropagation();
@@ -17638,6 +17879,7 @@
                 return;
             }
             this._lastProcessedCursorIndex = null;
+            this._nextCursorPositionOffset = 0;
             var lastProcessedCursor = null;
             var cursorOffset = new exports.LX.vec2(0, 0);
             for (var i = 0; i < numCursors; i++) {
@@ -17651,18 +17893,35 @@
                     cursor.position += cursorOffset.x;
                     cursor.line += cursorOffset.y;
                     this.relocateCursors();
+                    // Apart from relocation based on offsets, its selection (if any) must be relocated too
+                    if (cursor.selection) {
+                        cursor.selection.fromX += cursorOffset.x;
+                        cursor.selection.toX += cursorOffset.x;
+                        cursor.selection.fromY += cursorOffset.y;
+                        cursor.selection.toY += cursorOffset.y;
+                        this._processSelection(cursor);
+                    }
+                }
+                else if (lastProcessedCursor && lastProcessedCursor.line != cursor.line) {
+                    // Reset offset X in case we changed line
+                    cursorOffset.x = 0;
                 }
                 lastProcessedCursor = this.saveCursor(cursor);
                 this._lastProcessedCursorIndex = i;
                 this._processKeyAtCursor(e, key, cursor);
-                cursorOffset.x += cursor.position - lastProcessedCursor.position;
-                cursorOffset.y += cursor.line - lastProcessedCursor.line;
+                // Apply difference offset between last processed cursor and current positions plus any offset generated
+                // during processing the key pressed
+                const totalCursorOffsetX = (cursor.position - lastProcessedCursor.position) + this._nextCursorPositionOffset;
+                const totalCursorOffsetY = cursor.line - lastProcessedCursor.line;
+                cursorOffset.x += totalCursorOffsetX;
+                cursorOffset.y += totalCursorOffsetY;
                 // Set active line in case it's blurred
                 if (!cursor.selection) {
                     cursor.line = cursor.line;
                 }
             }
             // Clear tmp
+            delete this._nextCursorPositionOffset;
             delete this._lastProcessedCursorIndex;
         }
         async processKeyAtTargetCursor(e, key, targetIdx) {
@@ -17834,8 +18093,9 @@
                 lidx = cursor.line;
             }
             // Append key
+            const nextChar = this.getCharAtPos(cursor); // Only pair keys if no next char or its a space
             const isPairKey = (Object.values(this.pairKeys).indexOf(key) > -1) && !this.wasKeyPaired;
-            const sameKeyNext = isPairKey && (this.code.lines[lidx][cursor.position] === key);
+            const sameKeyNext = isPairKey && (nextChar === key);
             if (!sameKeyNext) {
                 this.code.lines[lidx] = [
                     this.code.lines[lidx].slice(0, cursor.position),
@@ -17845,7 +18105,7 @@
             }
             this.cursorToRight(key, cursor);
             //  Some custom cases for auto key pair (), {}, "", '', ...
-            const keyMustPair = this.pairKeys[key] !== undefined;
+            const keyMustPair = (this.pairKeys[key] !== undefined) && (!nextChar || /\s/.test(nextChar));
             if (keyMustPair && !this.wasKeyPaired) {
                 // Make sure to detect later that the key is paired automatically to avoid loops...
                 this.wasKeyPaired = true;
@@ -18221,8 +18481,7 @@
                 if (blockComments && this._buildingBlockComment != undefined
                     && token.substr(0, blockCommentsTokens[1].length) == blockCommentsTokens[1]) {
                     const [commentLineNumber, tokenPos] = this._buildingBlockComment;
-                    this._blockCommentCache.push([new exports.LX.vec2(commentLineNumber, lineNumber),
-                        new exports.LX.vec2(tokenPos, tokenStartIndex)]);
+                    this._blockCommentCache.push([new exports.LX.vec2(commentLineNumber, lineNumber), new exports.LX.vec2(tokenPos, tokenStartIndex)]);
                     delete this._buildingBlockComment;
                 }
                 if (token !== '{') {
@@ -18483,16 +18742,13 @@
             // Add regexes to detect methods, variables ( including "id : nativeType" )
             {
                 if (nativeTypes) {
-                    topLevelRegexes.push([new RegExp(`^(?:${nativeTypes.join('|')})\\s+([A-Za-z0-9_]+)\s*[\(]+`),
-                        'method']);
+                    topLevelRegexes.push([new RegExp(`^(?:${nativeTypes.join('|')})\\s+([A-Za-z0-9_]+)\s*[\(]+`), 'method']);
                     if (this.highlight === 'WGSL') {
-                        topLevelRegexes.push([new RegExp(`[A-Za-z0-9]+(\\s*)+:(\\s*)+(${nativeTypes.join('|')})`),
-                            'variable', (m) => m[0].split(':')[0].trim()]);
+                        topLevelRegexes.push([new RegExp(`[A-Za-z0-9]+(\\s*)+:(\\s*)+(${nativeTypes.join('|')})`), 'variable', (m) => m[0].split(':')[0].trim()]);
                     }
                 }
                 const declarationKeywords = CodeEditor.declarationKeywords[this.highlight] ?? ['const', 'let', 'var'];
-                topLevelRegexes.push([new RegExp(`^(?:${declarationKeywords.join('|')})\\s+([A-Za-z0-9_]+)`),
-                    'variable']);
+                topLevelRegexes.push([new RegExp(`^(?:${declarationKeywords.join('|')})\\s+([A-Za-z0-9_]+)`), 'variable']);
             }
             for (let [regex, kind, fn] of topLevelRegexes) {
                 const m = text.match(regex);
@@ -18709,8 +18965,7 @@
             return wordCategory[this.highlight] && wordCategory[this.highlight].has(t);
         }
         _getTokenHighlighting(ctx, highlight) {
-            const rules = [...HighlightRules.common, ...(HighlightRules[highlight] || []),
-                ...HighlightRules.post_common];
+            const rules = [...HighlightRules.common, ...(HighlightRules[highlight] || []), ...HighlightRules.post_common];
             for (const rule of rules) {
                 if (!rule.test(ctx, this)) {
                     continue;
@@ -19063,12 +19318,11 @@
         }
         deleteSelection(cursor) {
             // I think it's not necessary but...
-            if (this.disableEdition) {
+            if (this.disableEdition || !cursor.selection) {
                 return;
             }
             // Some selections don't depend on mouse up..
-            if (cursor.selection)
-                cursor.selection.invertIfNecessary();
+            cursor.selection.invertIfNecessary();
             const selection = cursor.selection;
             const separator = '_NEWLINE_';
             let code = this.code.lines.join(separator);
@@ -19256,7 +19510,7 @@
             }
             exports.LX.deleteElement(this.selections[cursor.name]);
             delete this.selections[cursor.name];
-            exports.LX.deleteElement(cursor);
+            cursor.destroy();
         }
         resetCursorPos(flag, cursor, resetScroll = false) {
             cursor = cursor ?? this.getCurrentCursor();
@@ -19595,8 +19849,7 @@
             text.innerText = char;
             var rect = text.getBoundingClientRect();
             exports.LX.deleteElement(parentContainer);
-            const bb = [useFloating ? rect.width : Math.floor(rect.width),
-                useFloating ? rect.height : Math.floor(rect.height)];
+            const bb = [useFloating ? rect.width : Math.floor(rect.width), useFloating ? rect.height : Math.floor(rect.height)];
             return getBB ? bb : bb[0];
         }
         measureString(str) {
@@ -19696,15 +19949,15 @@
                     {
                         case 'variable':
                             iconName = 'Cuboid';
-                            iconClass = 'fg-blue-400';
+                            iconClass = 'text-blue-400';
                             break;
                         case 'method':
                             iconName = 'Box';
-                            iconClass = 'fg-fuchsia-500';
+                            iconClass = 'text-fuchsia-500';
                             break;
                         case 'class':
                             iconName = 'CircleNodes';
-                            iconClass = 'fg-orange-500';
+                            iconClass = 'text-orange-500';
                             break;
                     }
                 }
@@ -19714,7 +19967,7 @@
                     }
                     else if (this._mustHightlightWord(currSuggestion, CodeEditor.types)) {
                         iconName = 'Type';
-                        iconClass = 'fg-blue-400';
+                        iconClass = 'text-blue-400';
                     }
                 }
                 pre.appendChild(exports.LX.makeIcon(iconName, { iconClass: 'mr-1', svgClass: 'sm ' + iconClass }));
@@ -19745,8 +19998,7 @@
             this.autocomplete.classList.toggle('show', true);
             this.autocomplete.classList.toggle('no-scrollbar', !(this.autocomplete.scrollHeight > this.autocomplete.offsetHeight));
             this.autocomplete.style.left = `${Math.min(cursor.left + CodeEditor.LINE_GUTTER_WIDTH - this.getScrollLeft(), maxX)}px`;
-            this.autocomplete.style.top =
-                `${(cursor.top + this._verticalTopOffset + this.lineHeight - this.getScrollTop())}px`;
+            this.autocomplete.style.top = `${(cursor.top + this._verticalTopOffset + this.lineHeight - this.getScrollTop())}px`;
             this.isAutoCompleteActive = true;
         }
         hideAutoCompleteBox() {
@@ -19983,8 +20235,10 @@
                 var newCursor = this._addCursor(ln, col, true);
                 if (newCursor) {
                     this.startSelection(newCursor);
-                    newCursor?.root.selection.selectInline(newCursor, col, ln, this.measureString(text));
-                    this.cursorToString(newCursor, text);
+                    if (newCursor.selection) {
+                        newCursor.selection.selectInline(newCursor, col, ln, this.measureString(text));
+                        this.cursorToString(newCursor, text);
+                    }
                 }
                 this._currentOcurrences[key] = true;
             }, true, false);
@@ -20092,117 +20346,99 @@
     }
     const CE = CodeEditor;
     CE.languages = {
-        'Plain Text': { ext: 'txt', blockComments: false, singleLineComments: false, numbers: false,
-            icon: 'AlignLeft fg-neutral-500' },
-        'JavaScript': { ext: 'js', icon: 'Js fg-yellow-500' },
-        'TypeScript': { ext: 'ts', icon: 'Ts fg-blue-600' },
-        'C': { ext: ['c', 'h'], usePreprocessor: true, icon: { 'c': 'C fg-sky-400', 'h': 'C fg-fuchsia-500' } },
-        'C++': { ext: ['cpp', 'hpp'], usePreprocessor: true,
-            icon: { 'cpp': 'CPlusPlus fg-sky-400', 'hpp': 'CPlusPlus fg-fuchsia-500' } },
-        'CSS': { ext: 'css', icon: 'Hash fg-blue-700' },
+        'Plain Text': { ext: 'txt', blockComments: false, singleLineComments: false, numbers: false, icon: 'AlignLeft text-neutral-500' },
+        'JavaScript': { ext: 'js', icon: 'Js text-yellow-500' },
+        'TypeScript': { ext: 'ts', icon: 'Ts text-blue-600' },
+        'C': { ext: ['c', 'h'], usePreprocessor: true, icon: { 'c': 'C text-sky-400', 'h': 'C text-fuchsia-500' } },
+        'C++': { ext: ['cpp', 'hpp'], usePreprocessor: true, icon: { 'cpp': 'CPlusPlus text-sky-400', 'hpp': 'CPlusPlus text-fuchsia-500' } },
+        'CSS': { ext: 'css', icon: 'Hash text-blue-700' },
         'CMake': { ext: 'cmake', singleLineCommentToken: '#', blockComments: false, ignoreCase: true },
         'GLSL': { ext: 'glsl', usePreprocessor: true },
         'WGSL': { ext: 'wgsl', usePreprocessor: true },
-        'JSON': { ext: 'json', blockComments: false, singleLineComments: false, icon: 'Json fg-yellow-400' },
-        'XML': { ext: 'xml', tags: true, icon: 'Rss fg-orange-500' },
-        'Rust': { ext: 'rs', icon: 'Rust fg-primary' },
-        'Python': { ext: 'py', singleLineCommentToken: '#', icon: 'Python fg-cyan-600' },
-        'HTML': { ext: 'html', tags: true, singleLineComments: false, blockCommentsTokens: ['<!--', '-->'],
-            numbers: false, icon: 'Code fg-orange-500' },
-        'Batch': { ext: 'bat', blockComments: false, singleLineCommentToken: '::', ignoreCase: true,
-            icon: 'Windows fg-blue-400' },
-        'Markdown': { ext: 'md', blockComments: false, singleLineCommentToken: '::', tags: true, numbers: false,
-            icon: 'Markdown fg-primary' },
-        'PHP': { ext: 'php', icon: 'Php fg-purple-700' }
+        'JSON': { ext: 'json', blockComments: false, singleLineComments: false, icon: 'Json text-yellow-400' },
+        'XML': { ext: 'xml', tags: true, icon: 'Rss text-orange-500' },
+        'Rust': { ext: 'rs', icon: 'Rust text-foreground' },
+        'Python': { ext: 'py', singleLineCommentToken: '#', icon: 'Python text-cyan-600' },
+        'HTML': { ext: 'html', tags: true, singleLineComments: false, blockCommentsTokens: ['<!--', '-->'], numbers: false,
+            icon: 'Code text-orange-500' },
+        'Batch': { ext: 'bat', blockComments: false, singleLineCommentToken: '::', ignoreCase: true, icon: 'Windows text-blue-400' },
+        'Markdown': { ext: 'md', blockComments: false, singleLineCommentToken: '::', tags: true, numbers: false, icon: 'Markdown text-foreground' },
+        'PHP': { ext: 'php', icon: 'Php text-purple-700' }
     };
     CE.nativeTypes = {
         'C++': ['int', 'float', 'double', 'bool', 'long', 'short', 'char', 'wchar_t', 'void'],
-        'WGSL': ['bool', 'u32', 'i32', 'f16', 'f32', 'vec2', 'vec3', 'vec4', 'vec2f', 'vec3f', 'vec4f', 'mat2x2f',
-            'mat3x3f', 'mat4x4f', 'array', 'vec2u', 'vec3u', 'vec4u', 'ptr', 'sampler']
+        'WGSL': ['bool', 'u32', 'i32', 'f16', 'f32', 'vec2', 'vec3', 'vec4', 'vec2f', 'vec3f', 'vec4f', 'mat2x2f', 'mat3x3f', 'mat4x4f', 'array',
+            'vec2u', 'vec3u', 'vec4u', 'ptr', 'sampler']
     };
     CE.declarationKeywords = {
         'JavaScript': ['var', 'let', 'const', 'this', 'static', 'class'],
         'C++': [...CE.nativeTypes['C++'], 'const', 'auto', 'class', 'struct', 'namespace', 'enum', 'extern']
     };
     CE.keywords = {
-        'JavaScript': ['var', 'let', 'const', 'this', 'in', 'of', 'true', 'false', 'new', 'function', 'NaN', 'static',
-            'class', 'constructor', 'null', 'typeof', 'debugger', 'abstract', 'arguments', 'extends', 'instanceof',
-            'Infinity', 'get'],
-        'TypeScript': ['var', 'let', 'const', 'this', 'in', 'of', 'true', 'false', 'new', 'function', 'class', 'extends',
-            'instanceof', 'Infinity', 'private', 'public', 'protected', 'interface', 'enum', 'type', 'get'],
-        'C': ['int', 'float', 'double', 'long', 'short', 'char', 'const', 'void', 'true', 'false', 'auto', 'struct',
-            'typedef', 'signed', 'volatile', 'unsigned', 'static', 'extern', 'enum', 'register', 'union'],
-        'C++': [...CE.nativeTypes['C++'], 'const', 'static_cast', 'dynamic_cast', 'new', 'delete', 'true', 'false', 'auto',
-            'class', 'struct', 'typedef', 'nullptr', 'NULL', 'signed', 'unsigned', 'namespace', 'enum', 'extern', 'union',
-            'sizeof', 'static', 'private', 'public'],
-        'CMake': ['cmake_minimum_required', 'set', 'not', 'if', 'endif', 'exists', 'string', 'strequal', 'add_definitions',
-            'macro', 'endmacro', 'file', 'list', 'source_group', 'add_executable', 'target_include_directories',
-            'set_target_properties', 'set_property', 'add_compile_options', 'add_link_options', 'include_directories',
-            'add_library', 'target_link_libraries', 'target_link_options', 'add_subdirectory', 'add_compile_definitions',
-            'project', 'cache'],
+        'JavaScript': ['var', 'let', 'const', 'this', 'in', 'of', 'true', 'false', 'new', 'function', 'NaN', 'static', 'class', 'constructor', 'null',
+            'typeof', 'debugger', 'abstract', 'arguments', 'extends', 'instanceof', 'Infinity', 'get'],
+        'TypeScript': ['var', 'let', 'const', 'this', 'in', 'of', 'true', 'false', 'new', 'function', 'class', 'extends', 'instanceof', 'Infinity',
+            'private', 'public', 'protected', 'interface', 'enum', 'type', 'get'],
+        'C': ['int', 'float', 'double', 'long', 'short', 'char', 'const', 'void', 'true', 'false', 'auto', 'struct', 'typedef', 'signed', 'volatile',
+            'unsigned', 'static', 'extern', 'enum', 'register', 'union'],
+        'C++': [...CE.nativeTypes['C++'], 'const', 'static_cast', 'dynamic_cast', 'new', 'delete', 'true', 'false', 'auto', 'class', 'struct', 'typedef',
+            'nullptr', 'NULL', 'signed', 'unsigned', 'namespace', 'enum', 'extern', 'union', 'sizeof', 'static', 'private', 'public'],
+        'CMake': ['cmake_minimum_required', 'set', 'not', 'if', 'endif', 'exists', 'string', 'strequal', 'add_definitions', 'macro', 'endmacro', 'file',
+            'list', 'source_group', 'add_executable', 'target_include_directories', 'set_target_properties', 'set_property', 'add_compile_options',
+            'add_link_options', 'include_directories', 'add_library', 'target_link_libraries', 'target_link_options', 'add_subdirectory',
+            'add_compile_definitions', 'project', 'cache'],
         'JSON': ['true', 'false'],
-        'GLSL': ['true', 'false', 'function', 'int', 'float', 'vec2', 'vec3', 'vec4', 'mat2x2', 'mat3x3', 'mat4x4',
-            'struct'],
-        'CSS': ['body', 'html', 'canvas', 'div', 'input', 'span', '.', 'table', 'tr', 'td', 'th', 'label', 'video', 'img',
-            'code', 'button', 'select', 'option', 'svg', 'media', 'all', 'i', 'a', 'li', 'h1', 'h2', 'h3', 'h4', 'h5',
-            'last-child', 'tbody', 'pre', 'monospace', 'font-face'],
-        'WGSL': [...CE.nativeTypes['WGSL'], 'var', 'let', 'true', 'false', 'fn', 'atomic', 'struct', 'sampler_comparison',
-            'texture_depth_2d', 'texture_depth_2d_array', 'texture_depth_cube', 'texture_depth_cube_array',
-            'texture_depth_multisampled_2d', 'texture_external', 'texture_1d', 'texture_2d', 'texture_2d_array',
-            'texture_3d', 'texture_cube', 'texture_cube_array', 'texture_storage_1d', 'texture_storage_2d',
+        'GLSL': ['true', 'false', 'function', 'int', 'float', 'vec2', 'vec3', 'vec4', 'mat2x2', 'mat3x3', 'mat4x4', 'struct'],
+        'CSS': ['body', 'html', 'canvas', 'div', 'input', 'span', '.', 'table', 'tr', 'td', 'th', 'label', 'video', 'img', 'code', 'button', 'select',
+            'option', 'svg', 'media', 'all', 'i', 'a', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'last-child', 'tbody', 'pre', 'monospace', 'font-face'],
+        'WGSL': [...CE.nativeTypes['WGSL'], 'var', 'let', 'true', 'false', 'fn', 'atomic', 'struct', 'sampler_comparison', 'texture_depth_2d',
+            'texture_depth_2d_array', 'texture_depth_cube', 'texture_depth_cube_array', 'texture_depth_multisampled_2d', 'texture_external', 'texture_1d',
+            'texture_2d', 'texture_2d_array', 'texture_3d', 'texture_cube', 'texture_cube_array', 'texture_storage_1d', 'texture_storage_2d',
             'texture_storage_2d_array', 'texture_storage_3d'],
-        'Rust': ['as', 'const', 'crate', 'enum', 'extern', 'false', 'fn', 'impl', 'in', 'let', 'mod', 'move', 'mut', 'pub',
-            'ref', 'self', 'Self', 'static', 'struct', 'super', 'trait', 'true', 'type', 'unsafe', 'use', 'where',
-            'abstract', 'become', 'box', 'final', 'macro', 'override', 'priv', 'typeof', 'unsized', 'virtual'],
+        'Rust': ['as', 'const', 'crate', 'enum', 'extern', 'false', 'fn', 'impl', 'in', 'let', 'mod', 'move', 'mut', 'pub', 'ref', 'self', 'Self',
+            'static', 'struct', 'super', 'trait', 'true', 'type', 'unsafe', 'use', 'where', 'abstract', 'become', 'box', 'final', 'macro', 'override',
+            'priv', 'typeof', 'unsized', 'virtual'],
         'Python': ['False', 'def', 'None', 'True', 'in', 'is', 'and', 'lambda', 'nonlocal', 'not', 'or'],
         'Batch': ['set', 'echo', 'off', 'del', 'defined', 'setlocal', 'enabledelayedexpansion', 'driverquery', 'print'],
-        'HTML': ['html', 'meta', 'title', 'link', 'script', 'body', 'DOCTYPE', 'head', 'br', 'i', 'a', 'li', 'img', 'tr',
-            'td', 'h1', 'h2', 'h3', 'h4', 'h5'],
+        'HTML': ['html', 'meta', 'title', 'link', 'script', 'body', 'DOCTYPE', 'head', 'br', 'i', 'a', 'li', 'img', 'tr', 'td', 'h1', 'h2', 'h3', 'h4',
+            'h5'],
         'Markdown': ['br', 'i', 'a', 'li', 'img', 'table', 'title', 'tr', 'td', 'h1', 'h2', 'h3', 'h4', 'h5'],
-        'PHP': ['const', 'function', 'array', 'new', 'int', 'string', '$this', 'public', 'null', 'private', 'protected',
-            'implements', 'class', 'use', 'namespace', 'abstract', 'clone', 'final', 'enum']
+        'PHP': ['const', 'function', 'array', 'new', 'int', 'string', '$this', 'public', 'null', 'private', 'protected', 'implements', 'class', 'use',
+            'namespace', 'abstract', 'clone', 'final', 'enum']
     };
     // These ones don't have hightlight, used as suggestions to autocomplete only...
     CE.utils = {
-        'JavaScript': ['querySelector', 'body', 'addEventListener', 'removeEventListener', 'remove', 'sort', 'keys',
-            'filter', 'isNaN', 'parseFloat', 'parseInt', 'EPSILON', 'isFinite', 'bind', 'prototype', 'length', 'assign',
-            'entries', 'values', 'concat', 'substring', 'substr', 'splice', 'slice', 'buffer', 'appendChild',
-            'createElement', 'prompt', 'alert'],
+        'JavaScript': ['querySelector', 'body', 'addEventListener', 'removeEventListener', 'remove', 'sort', 'keys', 'filter', 'isNaN', 'parseFloat',
+            'parseInt', 'EPSILON', 'isFinite', 'bind', 'prototype', 'length', 'assign', 'entries', 'values', 'concat', 'substring', 'substr', 'splice',
+            'slice', 'buffer', 'appendChild', 'createElement', 'prompt', 'alert'],
         'WGSL': ['textureSample'],
-        'Python': ['abs', 'all', 'any', 'ascii', 'bin', 'bool', 'bytearray', 'bytes', 'callable', 'chr', 'classmethod',
-            'compile', 'complex', 'delattr', 'dict', 'dir', 'divmod', 'enumerate', 'eval', 'exec', 'filter', 'float',
-            'format', 'frozenset', 'getattr', 'globals', 'hasattr', 'hash', 'help', 'hex', 'id', 'input', 'int',
-            'isinstance', 'issubclass', 'iter', 'len', 'list', 'locals', 'map', 'max', 'memoryview', 'min', 'next',
-            'object', 'oct', 'open', 'ord', 'pow', 'print', 'property', 'range', 'repr', 'reversed', 'round', 'set',
-            'setattr', 'slice', 'sorted', 'staticmethod', 'str', 'sum', 'super', 'tuple', 'type', 'vars', 'zip'],
-        'CSS': [...Object.keys(document.body.style).map(exports.LX.toKebabCase), 'block', 'inline', 'inline-block', 'flex',
-            'grid', 'none', 'inherit', 'initial', 'unset', 'revert', 'sticky', 'relative', 'absolute', 'fixed', 'static',
-            'auto', 'visible', 'hidden', 'scroll', 'clip', 'ellipsis', 'nowrap', 'wrap', 'break-word', 'solid', 'dashed',
-            'dotted', 'double', 'groove', 'ridge', 'inset', 'outset', 'left', 'right', 'center', 'top', 'bottom', 'start',
-            'end', 'justify', 'stretch', 'space-between', 'space-around', 'space-evenly', 'baseline', 'middle', 'normal',
-            'bold', 'lighter', 'bolder', 'italic', 'blur', 'uppercase', 'lowercase', 'capitalize', 'transparent',
-            'currentColor', 'pointer', 'default', 'move', 'grab', 'grabbing', 'not-allowed', 'none', 'cover', 'contain',
-            'repeat', 'no-repeat', 'repeat-x', 'repeat-y', 'round', 'space', 'linear-gradient', 'radial-gradient',
-            'conic-gradient', 'url', 'calc', 'min', 'max', 'clamp', 'red', 'blue', 'green', 'black', 'white', 'gray',
-            'silver', 'yellow', 'orange', 'purple', 'pink', 'cyan', 'magenta', 'lime', 'teal', 'navy', 'transparent',
-            'currentcolor', 'inherit', 'initial', 'unset', 'revert', 'none', 'auto', 'fit-content', 'min-content',
-            'max-content']
+        'Python': ['abs', 'all', 'any', 'ascii', 'bin', 'bool', 'bytearray', 'bytes', 'callable', 'chr', 'classmethod', 'compile', 'complex', 'delattr',
+            'dict', 'dir', 'divmod', 'enumerate', 'eval', 'exec', 'filter', 'float', 'format', 'frozenset', 'getattr', 'globals', 'hasattr', 'hash',
+            'help', 'hex', 'id', 'input', 'int', 'isinstance', 'issubclass', 'iter', 'len', 'list', 'locals', 'map', 'max', 'memoryview', 'min', 'next',
+            'object', 'oct', 'open', 'ord', 'pow', 'print', 'property', 'range', 'repr', 'reversed', 'round', 'set', 'setattr', 'slice', 'sorted',
+            'staticmethod', 'str', 'sum', 'super', 'tuple', 'type', 'vars', 'zip'],
+        'CSS': [...Object.keys(document.body.style).map(exports.LX.toKebabCase), 'block', 'inline', 'inline-block', 'flex', 'grid', 'none', 'inherit',
+            'initial', 'unset', 'revert', 'sticky', 'relative', 'absolute', 'fixed', 'static', 'auto', 'visible', 'hidden', 'scroll', 'clip', 'ellipsis',
+            'nowrap', 'wrap', 'break-word', 'solid', 'dashed', 'dotted', 'double', 'groove', 'ridge', 'inset', 'outset', 'left', 'right', 'center', 'top',
+            'bottom', 'start', 'end', 'justify', 'stretch', 'space-between', 'space-around', 'space-evenly', 'baseline', 'middle', 'normal', 'bold',
+            'lighter', 'bolder', 'italic', 'blur', 'uppercase', 'lowercase', 'capitalize', 'transparent', 'currentColor', 'pointer', 'default', 'move',
+            'grab', 'grabbing', 'not-allowed', 'none', 'cover', 'contain', 'repeat', 'no-repeat', 'repeat-x', 'repeat-y', 'round', 'space',
+            'linear-gradient', 'radial-gradient', 'conic-gradient', 'url', 'calc', 'min', 'max', 'clamp', 'red', 'blue', 'green', 'black', 'white',
+            'gray', 'silver', 'yellow', 'orange', 'purple', 'pink', 'cyan', 'magenta', 'lime', 'teal', 'navy', 'transparent', 'currentcolor', 'inherit',
+            'initial', 'unset', 'revert', 'none', 'auto', 'fit-content', 'min-content', 'max-content']
     };
     CE.types = {
-        'JavaScript': ['Object', 'String', 'Function', 'Boolean', 'Symbol', 'Error', 'Number', 'TextEncoder',
-            'TextDecoder', 'Array', 'ArrayBuffer', 'InputEvent', 'MouseEvent', 'Int8Array', 'Int16Array', 'Int32Array',
-            'Float32Array', 'Float64Array', 'Element'],
-        'TypeScript': ['arguments', 'constructor', 'null', 'typeof', 'debugger', 'abstract', 'Object', 'string', 'String',
-            'Function', 'Boolean', 'boolean', 'Error', 'Number', 'number', 'TextEncoder', 'TextDecoder', 'Array',
-            'ArrayBuffer', 'InputEvent', 'MouseEvent', 'Int8Array', 'Int16Array', 'Int32Array', 'Float32Array',
-            'Float64Array', 'Element', 'bigint', 'unknown', 'any', 'Record'],
+        'JavaScript': ['Object', 'String', 'Function', 'Boolean', 'Symbol', 'Error', 'Number', 'TextEncoder', 'TextDecoder', 'Array', 'ArrayBuffer',
+            'InputEvent', 'MouseEvent', 'Int8Array', 'Int16Array', 'Int32Array', 'Float32Array', 'Float64Array', 'Element'],
+        'TypeScript': ['arguments', 'constructor', 'null', 'typeof', 'debugger', 'abstract', 'Object', 'string', 'String', 'Function', 'Boolean',
+            'boolean', 'Error', 'Number', 'number', 'TextEncoder', 'TextDecoder', 'Array', 'ArrayBuffer', 'InputEvent', 'MouseEvent', 'Int8Array',
+            'Int16Array', 'Int32Array', 'Float32Array', 'Float64Array', 'Element', 'bigint', 'unknown', 'any', 'Record'],
         'Rust': ['u128'],
-        'Python': ['int', 'type', 'float', 'map', 'list', 'ArithmeticError', 'AssertionError', 'AttributeError',
-            'Exception', 'EOFError', 'FloatingPointError', 'GeneratorExit', 'ImportError', 'IndentationError', 'IndexError',
-            'KeyError', 'KeyboardInterrupt', 'LookupError', 'MemoryError', 'NameError', 'NotImplementedError', 'OSError',
-            'OverflowError', 'ReferenceError', 'RuntimeError', 'StopIteration', 'SyntaxError', 'TabError', 'SystemError',
-            'SystemExit', 'TypeError', 'UnboundLocalError', 'UnicodeError', 'UnicodeEncodeError', 'UnicodeDecodeError',
-            'UnicodeTranslateError', 'ValueError', 'ZeroDivisionError'],
+        'Python': ['int', 'type', 'float', 'map', 'list', 'ArithmeticError', 'AssertionError', 'AttributeError', 'Exception', 'EOFError',
+            'FloatingPointError', 'GeneratorExit', 'ImportError', 'IndentationError', 'IndexError', 'KeyError', 'KeyboardInterrupt', 'LookupError',
+            'MemoryError', 'NameError', 'NotImplementedError', 'OSError', 'OverflowError', 'ReferenceError', 'RuntimeError', 'StopIteration',
+            'SyntaxError', 'TabError', 'SystemError', 'SystemExit', 'TypeError', 'UnboundLocalError', 'UnicodeError', 'UnicodeEncodeError',
+            'UnicodeDecodeError', 'UnicodeTranslateError', 'ValueError', 'ZeroDivisionError'],
         'C++': ['uint8_t', 'uint16_t', 'uint32_t'],
         'PHP': ['Exception', 'DateTime', 'JsonSerializable']
     };
@@ -20216,25 +20452,22 @@
         'PHP': ['echo', 'print']
     };
     CE.statements = {
-        'JavaScript': ['for', 'if', 'else', 'case', 'switch', 'return', 'while', 'continue', 'break', 'do', 'import',
-            'default', 'export', 'from', 'throw', 'async', 'try', 'catch', 'await', 'as'],
-        'TypeScript': ['for', 'if', 'else', 'case', 'switch', 'return', 'while', 'continue', 'break', 'do', 'import',
-            'default', 'export', 'from', 'throw', 'async', 'try', 'catch', 'await', 'as'],
+        'JavaScript': ['for', 'if', 'else', 'case', 'switch', 'return', 'while', 'continue', 'break', 'do', 'import', 'default', 'export', 'from',
+            'throw', 'async', 'try', 'catch', 'await', 'as'],
+        'TypeScript': ['for', 'if', 'else', 'case', 'switch', 'return', 'while', 'continue', 'break', 'do', 'import', 'default', 'export', 'from',
+            'throw', 'async', 'try', 'catch', 'await', 'as'],
         'CSS': ['@', 'import'],
-        'C': ['for', 'if', 'else', 'return', 'continue', 'break', 'case', 'switch', 'while', 'using', 'default', 'goto',
-            'do'],
-        'C++': ['std', 'for', 'if', 'else', 'return', 'continue', 'break', 'case', 'switch', 'while', 'using', 'glm',
-            'spdlog', 'default'],
+        'C': ['for', 'if', 'else', 'return', 'continue', 'break', 'case', 'switch', 'while', 'using', 'default', 'goto', 'do'],
+        'C++': ['std', 'for', 'if', 'else', 'return', 'continue', 'break', 'case', 'switch', 'while', 'using', 'glm', 'spdlog', 'default'],
         'GLSL': ['for', 'if', 'else', 'return', 'continue', 'break'],
-        'WGSL': ['const', 'for', 'if', 'else', 'return', 'continue', 'break', 'storage', 'read', 'read_write', 'uniform',
-            'function', 'workgroup', 'bitcast'],
+        'WGSL': ['const', 'for', 'if', 'else', 'return', 'continue', 'break', 'storage', 'read', 'read_write', 'uniform', 'function', 'workgroup',
+            'bitcast'],
         'Rust': ['break', 'else', 'continue', 'for', 'if', 'loop', 'match', 'return', 'while', 'do', 'yield'],
-        'Python': ['if', 'raise', 'del', 'import', 'return', 'elif', 'try', 'else', 'while', 'as', 'except', 'with',
-            'assert', 'finally', 'yield', 'break', 'for', 'class', 'continue', 'global', 'pass', 'from'],
+        'Python': ['if', 'raise', 'del', 'import', 'return', 'elif', 'try', 'else', 'while', 'as', 'except', 'with', 'assert', 'finally', 'yield',
+            'break', 'for', 'class', 'continue', 'global', 'pass', 'from'],
         'Batch': ['if', 'IF', 'for', 'FOR', 'in', 'IN', 'do', 'DO', 'call', 'CALL', 'goto', 'GOTO', 'exit', 'EXIT'],
-        'PHP': ['declare', 'enddeclare', 'foreach', 'endforeach', 'if', 'else', 'elseif', 'endif', 'for', 'endfor',
-            'while', 'endwhile', 'switch', 'case', 'default', 'endswitch', 'return', 'break', 'continue', 'try', 'catch',
-            'die', 'do', 'exit', 'finally']
+        'PHP': ['declare', 'enddeclare', 'foreach', 'endforeach', 'if', 'else', 'elseif', 'endif', 'for', 'endfor', 'while', 'endwhile', 'switch',
+            'case', 'default', 'endswitch', 'return', 'break', 'continue', 'try', 'catch', 'die', 'do', 'exit', 'finally']
     };
     CE.symbols = {
         'JavaScript': ['<', '>', '[', ']', '{', '}', '(', ')', ';', '=', '|', '||', '&', '&&', '?', '??'],
@@ -20277,16 +20510,19 @@
         throw ('Missing LX namespace!');
     }
     exports.LX.extensions.push('DocMaker');
-    const CPP_KEY_WORDS = ['int', 'float', 'double', 'bool', 'char', 'wchar_t', 'const', 'static_cast', 'dynamic_cast',
-        'new', 'delete', 'void', 'true', 'false', 'auto', 'struct', 'typedef', 'nullptr', 'NULL', 'unsigned', 'namespace',
-        'auto'];
+    const CPP_KEY_WORDS = ['int', 'float', 'double', 'bool', 'char', 'wchar_t', 'const', 'static_cast', 'dynamic_cast', 'new', 'delete', 'void', 'true',
+        'false', 'auto', 'struct', 'typedef', 'nullptr', 'NULL', 'unsigned', 'namespace', 'auto'];
     const CLASS_WORDS = ['uint32_t', 'uint64_t', 'uint8_t'];
-    const STATEMENT_WORDS = ['for', 'if', 'else', 'return', 'continue', 'break', 'case', 'switch', 'while', 'import',
-        'from', 'await'];
-    const JS_KEY_WORDS = ['var', 'let', 'const', 'static', 'function', 'null', 'undefined', 'new', 'delete', 'true',
-        'false', 'NaN', 'this'];
+    const STATEMENT_WORDS = ['for', 'if', 'else', 'return', 'continue', 'break', 'case', 'switch', 'while', 'import', 'from', 'await'];
+    const JS_KEY_WORDS = ['var', 'let', 'const', 'static', 'function', 'null', 'undefined', 'new', 'delete', 'true', 'false', 'NaN', 'this'];
     const HTML_ATTRIBUTES = ['html', 'charset', 'rel', 'src', 'href', 'crossorigin', 'type', 'lang'];
-    const HTML_TAGS = ['html', 'DOCTYPE', 'head', 'meta', 'title', 'link', 'script', 'body', 'style'];
+    const HTML_TAGS = ['DOCTYPE', 'html', 'head', 'body', 'title', 'base', 'link', 'meta', 'style', 'main', 'section', 'nav', 'article', 'aside',
+        'header', 'footer', 'address', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'hr', 'pre', 'blockquote', 'ol', 'ul', 'li', 'dl', 'dt', 'dd', 'figure',
+        'figcaption', 'div', 'a', 'abbr', 'b', 'bdi', 'bdo', 'br', 'cite', 'code', 'data', 'dfn', 'em', 'i', 'kbd', 'mark', 'q', 'rp', 'rt', 'ruby', 's',
+        'samp', 'small', 'span', 'strong', 'sub', 'sup', 'time', 'u', 'var', 'wbr', 'img', 'audio', 'video', 'source', 'track', 'picture', 'map', 'area',
+        'canvas', 'iframe', 'embed', 'object', 'param', 'form', 'label', 'input', 'button', 'select', 'datalist', 'optgroup', 'option', 'textarea',
+        'output', 'progress', 'meter', 'fieldset', 'legend', 'table', 'caption', 'colgroup', 'col', 'tbody', 'thead', 'tfoot', 'tr', 'td', 'th',
+        'details', 'summary', 'dialog', 'script', 'noscript', 'template'];
     class DocMaker {
         root;
         _listQueued = undefined;
@@ -20517,9 +20753,9 @@
         }
         note(text, warning = false, title, icon) {
             console.assert(text !== undefined);
-            const note = exports.LX.makeContainer([], 'border rounded-lg overflow-hidden text-md fg-secondary my-6', '', this.root);
+            const note = exports.LX.makeContainer([], 'border-color rounded-xl overflow-hidden text-sm text-secondary-foreground my-6', '', this.root);
             let header = document.createElement('div');
-            header.className = 'flex bg-tertiary font-semibold px-3 py-2 gap-2 fg-secondary';
+            header.className = 'flex bg-muted font-semibold px-3 py-2 gap-2 text-secondary-foreground';
             header.appendChild(exports.LX.makeIcon(icon ?? (warning ? 'MessageSquareWarning' : 'NotepadText')));
             header.innerHTML += title ?? (warning ? 'Important' : 'Note');
             note.appendChild(header);
@@ -20562,7 +20798,7 @@
         }
         iLink(text, href) {
             console.assert(text !== undefined && href !== undefined);
-            return `<a href="${href}">${text}</a>`;
+            return `<a class="font-semibold underline-offset-4 hover:underline" href="${href}">${text}</a>`;
         }
         iPage(text, page) {
             console.assert(text !== undefined && page !== undefined);
@@ -21199,7 +21435,7 @@
             if (hasInputs) {
                 const nodeInputs = document.createElement('div');
                 nodeInputs.classList.add('lexgraphnodeinputs');
-                nodeInputs.style.width = hasOutputs ? '50%' : '100%';
+                // nodeInputs.style.width = hasOutputs ? '50%' : '100%';
                 nodeIO.appendChild(nodeInputs);
                 for (let i of node.inputs) {
                     if (!i.type) {
@@ -21219,10 +21455,7 @@
                     typeDesc.innerHTML = i.type;
                     input.appendChild(typeDesc);
                     if (i.name) {
-                        var name = document.createElement('span');
-                        name.classList.add('io__name');
-                        name.innerText = i.name;
-                        input.appendChild(name);
+                        exports.LX.makeElement('span', 'io__name', i.name, input);
                     }
                     nodeInputs.appendChild(input);
                 }
@@ -21231,7 +21464,7 @@
             if (hasOutputs) {
                 const nodeOutputs = document.createElement('div');
                 nodeOutputs.classList.add('lexgraphnodeoutputs');
-                nodeOutputs.style.width = hasInputs ? '50%' : '100%';
+                // nodeOutputs.style.width = hasInputs ? '50%' : '100%';
                 nodeIO.appendChild(nodeOutputs);
                 for (let o of node.outputs) {
                     if (!o.type) {
@@ -22947,8 +23180,7 @@
     class NodeFuncInput extends GraphNode {
         onCreate() {
             this.addOutput(null, 'float');
-            this.addProperty('Outputs', 'array', ['float'], ['float', 'int', 'bool', 'vec2', 'vec3', 'vec4',
-                'mat44']);
+            this.addProperty('Outputs', 'array', ['float'], ['float', 'int', 'bool', 'vec2', 'vec3', 'vec4', 'mat44']);
         }
         onExecute() {
             // var a = this.getInput( 0 ) ?? this.properties[ 0 ].value;
@@ -23180,8 +23412,7 @@
             this.addInput('B', 'any');
             this.addInput('True', 'any');
             this.addInput('False', 'any');
-            this.addProperty('Condition', 'select', 'Equal', ['Equal', 'Not Equal', 'Less', 'Less Equal', 'Greater',
-                'Greater Equal']);
+            this.addProperty('Condition', 'select', 'Equal', ['Equal', 'Not Equal', 'Less', 'Less Equal', 'Greater', 'Greater Equal']);
             this.addOutput(null, 'any');
         }
         onExecute() {
@@ -23214,8 +23445,7 @@
             this.setOutput(0, output);
         }
     }
-    NodeCompare.description =
-        'Compare A to B given the selected operator. If true, return value of True else return value of False.';
+    NodeCompare.description = 'Compare A to B given the selected operator. If true, return value of True else return value of False.';
     GraphEditor.registerCustomNode('logic/Compare', NodeCompare);
     /*
         Event nodes
@@ -23591,7 +23821,6 @@
     const Area = exports.LX.Area;
     const Panel = exports.LX.Panel;
     const Dialog = exports.LX.Dialog;
-    exports.LX.TreeEvent;
     /**
      * @class Timeline
      * @description Agnostic timeline, do not impose any timeline content. Renders to a canvas
@@ -23600,8 +23829,7 @@
         static BACKGROUND_COLOR;
         static TRACK_COLOR_PRIMARY;
         static TRACK_COLOR_SECONDARY;
-        static TRACK_COLOR_TERCIARY;
-        static TRACK_COLOR_QUATERNARY;
+        static TRACK_COLOR_TERTIARY;
         static TRACK_SELECTED;
         static TRACK_SELECTED_LIGHT;
         static FONT;
@@ -23761,20 +23989,19 @@
              * updates theme ( light - dark ) based on LX's current theme
              */
             function updateTheme() {
-                Timeline.BACKGROUND_COLOR = exports.LX.getThemeColor('global-blur-background');
-                Timeline.TRACK_COLOR_PRIMARY = exports.LX.getThemeColor('global-color-primary');
-                Timeline.TRACK_COLOR_SECONDARY = exports.LX.getThemeColor('global-color-secondary');
-                Timeline.TRACK_COLOR_TERCIARY = exports.LX.getThemeColor('global-color-terciary');
-                Timeline.TRACK_COLOR_QUATERNARY = exports.LX.getThemeColor('global-color-quaternary');
-                Timeline.FONT = exports.LX.getThemeColor('global-font');
-                Timeline.FONT_COLOR_PRIMARY = exports.LX.getThemeColor('global-text-primary');
-                Timeline.FONT_COLOR_TERTIARY = exports.LX.getThemeColor('global-text-tertiary');
-                Timeline.FONT_COLOR_QUATERNARY = exports.LX.getThemeColor('global-text-quaternary');
-                Timeline.KEYFRAME_COLOR = exports.LX.getThemeColor('lxTimeline-keyframe');
-                Timeline.KEYFRAME_COLOR_SELECTED = Timeline.KEYFRAME_COLOR_HOVERED = exports.LX.getThemeColor('lxTimeline-keyframe-selected');
-                Timeline.KEYFRAME_COLOR_LOCK = exports.LX.getThemeColor('lxTimeline-keyframe-locked');
-                Timeline.KEYFRAME_COLOR_EDITED = exports.LX.getThemeColor('lxTimeline-keyframe-edited');
-                Timeline.KEYFRAME_COLOR_INACTIVE = exports.LX.getThemeColor('lxTimeline-keyframe-inactive');
+                Timeline.BACKGROUND_COLOR = exports.LX.getCSSVariable('background-blur');
+                Timeline.TRACK_COLOR_PRIMARY = exports.LX.getCSSVariable('card');
+                Timeline.TRACK_COLOR_SECONDARY = exports.LX.getCSSVariable('secondary');
+                Timeline.TRACK_COLOR_TERTIARY = exports.LX.getCSSVariable('accent');
+                Timeline.FONT = exports.LX.getCSSVariable('global-font');
+                Timeline.FONT_COLOR_PRIMARY = exports.LX.getCSSVariable('foreground');
+                Timeline.FONT_COLOR_TERTIARY = exports.LX.getCSSVariable('primary');
+                Timeline.FONT_COLOR_QUATERNARY = exports.LX.getCSSVariable('muted-foreground');
+                Timeline.KEYFRAME_COLOR = exports.LX.getCSSVariable('lxTimeline-keyframe');
+                Timeline.KEYFRAME_COLOR_SELECTED = Timeline.KEYFRAME_COLOR_HOVERED = exports.LX.getCSSVariable('lxTimeline-keyframe-selected');
+                Timeline.KEYFRAME_COLOR_LOCK = exports.LX.getCSSVariable('lxTimeline-keyframe-locked');
+                Timeline.KEYFRAME_COLOR_EDITED = exports.LX.getCSSVariable('lxTimeline-keyframe-edited');
+                Timeline.KEYFRAME_COLOR_INACTIVE = exports.LX.getCSSVariable('lxTimeline-keyframe-inactive');
             }
             this.updateTheme = updateTheme.bind(this);
             exports.LX.addSignal('@on_new_color_scheme', this.updateTheme);
@@ -23823,7 +24050,7 @@
             }, { buttonClass: 'accept', title: 'Stop', hideName: true, icon: 'Stop@solid' });
             header.addButton('loopBtn', '', (value, event) => {
                 this.setLoopMode(!this.loop);
-            }, { selectable: true, selected: this.loop, title: 'Loop', hideName: true, icon: 'RefreshCw' });
+            }, { selectable: true, selected: this.loop, title: 'Loop', hideName: true, icon: 'RefreshCw', buttonClass: 'h-8' });
             if (this.onCreateControlsButtons) {
                 this.onCreateControlsButtons(header);
             }
@@ -23899,8 +24126,7 @@
             this.leftPanel.clear();
             const panel = this.leftPanel;
             panel.sameLine();
-            let titleComponent = panel.addTitle('Tracks', { style: { background: 'none' },
-                className: 'fg-secondary text-lg px-4' });
+            let titleComponent = panel.addTitle('Tracks', { style: { background: 'none' }, className: 'text-lg px-4' });
             let title = titleComponent.root;
             if (!this.disableNewTracks) {
                 panel.addButton('addTrackBtn', '', (value, event) => {
@@ -23921,28 +24147,28 @@
             if (this.animationClip && this.selectedItems.length) {
                 treeTracks = this.generateSelectedItemsTreeData();
             }
-            this.trackTreesComponent = p.addTree(null, treeTracks, { filter: false, rename: false, draggable: false,
-                onevent: (e) => {
-                    switch (e.type) {
-                        case exports.LX.TreeEvent.NODE_SELECTED:
-                            if (!e.event.shiftKey) {
-                                this.deselectAllTracks(false); // no need to update left panel
-                            }
-                            if (e.node.trackData) {
-                                const flag = e.event.shiftKey ? !e.node.trackData.isSelected : true;
-                                this.setTrackSelection(e.node.trackData.trackIdx, flag, false, false); // do callback, do not update left panel
-                            }
-                            break;
-                        case exports.LX.TreeEvent.NODE_VISIBILITY:
-                            if (e.node.trackData) {
-                                this.setTrackState(e.node.trackData.trackIdx, e.value, false, false); // do not update left panel
-                            }
-                            break;
-                    }
-                    if (this.onTrackTreeEvent) {
-                        this.onTrackTreeEvent(e);
-                    }
-                } });
+            this.trackTreesComponent = p.addTree(null, treeTracks, { filter: false, rename: false, draggable: false });
+            this.trackTreesComponent.on("select", (event, resolve) => {
+                const node = event.items[0];
+                if (!event.domEvent.shiftKey) {
+                    this.deselectAllTracks(false); // no need to update left panel
+                }
+                if (node.trackData) {
+                    const flag = event.domEvent.shiftKey ? !node.trackData.isSelected : true;
+                    this.setTrackSelection(node.trackData.trackIdx, flag, false, false); // do callback, do not update left panel
+                }
+            });
+            this.trackTreesComponent.on("visibleChanged", (event, resolve) => {
+                const node = event.items[0];
+                if (node.trackData) {
+                    this.setTrackState(node.trackData.trackIdx, node.visible, false, false); // do not update left panel
+                }
+            });
+            // Not used!
+            // if ( this.onTrackTreeEvent )
+            // {
+            //     this.onTrackTreeEvent( e );
+            // }
             const that = this;
             this.trackTreesComponent.innerTree._refresh = this.trackTreesComponent.innerTree.refresh;
             this.trackTreesComponent.innerTree.refresh = function (newData, selectedId) {
@@ -24126,7 +24352,7 @@
                 ctx.fillRect(0, treeOffset - rectsOffset + i * line_height, w, line_height);
             }
             // bg lines
-            ctx.strokeStyle = Timeline.TRACK_COLOR_TERCIARY;
+            ctx.strokeStyle = Timeline.TRACK_COLOR_TERTIARY;
             ctx.beginPath();
             let pos = this.timeToX(0);
             if (pos < 0)
@@ -24800,8 +25026,8 @@
             const treeTracks = [];
             for (let i = 0; i < this.selectedItems.length; i++) {
                 const track = this.selectedItems[i];
-                treeTracks.push({ trackData: track, id: track.id, skipVisibility: this.skipVisibility,
-                    visible: track.active, children: [], actions: this.skipLock ? null : [{
+                treeTracks.push({ trackData: track, id: track.id, skipVisibility: this.skipVisibility, visible: track.active, children: [],
+                    actions: this.skipLock ? null : [{
                             'name': 'Lock edition',
                             'icon': (track.locked ? 'TimelineLock' : 'TimelineLockOpen'),
                             'swap': (track.locked ? 'TimelineLockOpen' : 'TimelineLock'),
@@ -24843,30 +25069,29 @@
             return animationClip;
         }
     }
-    Timeline.BACKGROUND_COLOR = exports.LX.getThemeColor('global-blur-background');
-    Timeline.TRACK_COLOR_PRIMARY = exports.LX.getThemeColor('global-color-primary');
-    Timeline.TRACK_COLOR_SECONDARY = exports.LX.getThemeColor('global-color-secondary');
-    Timeline.TRACK_COLOR_TERCIARY = exports.LX.getThemeColor('global-color-terciary');
-    Timeline.TRACK_COLOR_QUATERNARY = exports.LX.getThemeColor('global-color-quaternary');
-    Timeline.TRACK_SELECTED = exports.LX.getThemeColor('global-color-accent');
-    Timeline.TRACK_SELECTED_LIGHT = exports.LX.getThemeColor('global-color-accent-light');
-    Timeline.FONT = exports.LX.getThemeColor('global-font');
-    Timeline.FONT_COLOR_PRIMARY = exports.LX.getThemeColor('global-text-primary');
-    Timeline.FONT_COLOR_TERTIARY = exports.LX.getThemeColor('global-text-tertiary');
-    Timeline.FONT_COLOR_QUATERNARY = exports.LX.getThemeColor('global-text-quaternary');
-    Timeline.TIME_MARKER_COLOR = exports.LX.getThemeColor('global-color-accent');
+    Timeline.BACKGROUND_COLOR = exports.LX.getCSSVariable('background-blur');
+    Timeline.TRACK_COLOR_PRIMARY = exports.LX.getCSSVariable('card');
+    Timeline.TRACK_COLOR_SECONDARY = exports.LX.getCSSVariable('secondary');
+    Timeline.TRACK_COLOR_TERTIARY = exports.LX.getCSSVariable('accent');
+    Timeline.TRACK_SELECTED = exports.LX.getCSSVariable('color-blue-600');
+    Timeline.TRACK_SELECTED_LIGHT = exports.LX.getCSSVariable('color-blue-400');
+    Timeline.FONT = exports.LX.getCSSVariable('global-font');
+    Timeline.FONT_COLOR_PRIMARY = exports.LX.getCSSVariable('foreground');
+    Timeline.FONT_COLOR_TERTIARY = exports.LX.getCSSVariable('primary');
+    Timeline.FONT_COLOR_QUATERNARY = exports.LX.getCSSVariable('muted-foreground');
+    Timeline.TIME_MARKER_COLOR = exports.LX.getCSSVariable('color-blue-600');
     Timeline.TIME_MARKER_COLOR_TEXT = '#ffffff';
-    exports.LX.setThemeColor('lxTimeline-keyframe', 'light-dark(#2d69da,#2d69da )');
-    exports.LX.setThemeColor('lxTimeline-keyframe-selected', 'light-dark(#f5c700,#fafa14)');
-    exports.LX.setThemeColor('lxTimeline-keyframe-hovered', 'light-dark(#f5c700,#fafa14)');
-    exports.LX.setThemeColor('lxTimeline-keyframe-locked', 'light-dark(#c62e2e,#ff7d7d )');
-    exports.LX.setThemeColor('lxTimeline-keyframe-edited', 'light-dark(#00d000,#00d000 )');
-    exports.LX.setThemeColor('lxTimeline-keyframe-inactive', 'light-dark(#706b6b,#706b6b)');
-    Timeline.KEYFRAME_COLOR = exports.LX.getThemeColor('lxTimeline-keyframe');
-    Timeline.KEYFRAME_COLOR_SELECTED = Timeline.KEYFRAME_COLOR_HOVERED = exports.LX.getThemeColor('lxTimeline-keyframe-selected');
-    Timeline.KEYFRAME_COLOR_LOCK = exports.LX.getThemeColor('lxTimeline-keyframe-locked');
-    Timeline.KEYFRAME_COLOR_EDITED = exports.LX.getThemeColor('lxTimeline-keyframe-edited');
-    Timeline.KEYFRAME_COLOR_INACTIVE = exports.LX.getThemeColor('lxTimeline-keyframe-inactive');
+    exports.LX.setCSSVariable('lxTimeline-keyframe', 'light-dark(#2d69da,#2d69da )');
+    exports.LX.setCSSVariable('lxTimeline-keyframe-selected', 'light-dark(#f5c700,#fafa14)');
+    exports.LX.setCSSVariable('lxTimeline-keyframe-hovered', 'light-dark(#f5c700,#fafa14)');
+    exports.LX.setCSSVariable('lxTimeline-keyframe-locked', 'light-dark(#c62e2e,#ff7d7d )');
+    exports.LX.setCSSVariable('lxTimeline-keyframe-edited', 'light-dark(#00d000,#00d000 )');
+    exports.LX.setCSSVariable('lxTimeline-keyframe-inactive', 'light-dark(#706b6b,#706b6b)');
+    Timeline.KEYFRAME_COLOR = exports.LX.getCSSVariable('lxTimeline-keyframe');
+    Timeline.KEYFRAME_COLOR_SELECTED = Timeline.KEYFRAME_COLOR_HOVERED = exports.LX.getCSSVariable('lxTimeline-keyframe-selected');
+    Timeline.KEYFRAME_COLOR_LOCK = exports.LX.getCSSVariable('lxTimeline-keyframe-locked');
+    Timeline.KEYFRAME_COLOR_EDITED = exports.LX.getCSSVariable('lxTimeline-keyframe-edited');
+    Timeline.KEYFRAME_COLOR_INACTIVE = exports.LX.getCSSVariable('lxTimeline-keyframe-inactive');
     Timeline.BOX_SELECTION_COLOR = '#AAA';
     exports.LX.Timeline = Timeline;
     /**
@@ -25008,8 +25233,8 @@
                 const nodes = [];
                 for (let j = 0; j < itemTracks.length; j++) {
                     const track = itemTracks[j];
-                    nodes.push({ 'trackData': track, 'id': track.id, 'skipVisibility': this.skipVisibility,
-                        visible: track.active, 'children': [], actions: this.skipLock ? null : [{
+                    nodes.push({ 'trackData': track, 'id': track.id, 'skipVisibility': this.skipVisibility, visible: track.active, 'children': [],
+                        actions: this.skipLock ? null : [{
                                 'name': 'Lock edition',
                                 'icon': (track.locked ? 'TimelineLock' : 'TimelineLockOpen'),
                                 'swap': (track.locked ? 'TimelineLockOpen' : 'TimelineLock'),
@@ -25581,17 +25806,15 @@
             if (keyframes.length > 1) {
                 let startPosX = this.timeToX(keyframes[0]);
                 let startValue = values[0];
-                startValue =
-                    exports.LX.clamp((startValue - valueRange[0]) / (valueRange[1] - valueRange[0]), 0, 1) * (-displayRange)
-                        + (trackHeight - defaultPointSize); // normalize and offset
+                startValue = exports.LX.clamp((startValue - valueRange[0]) / (valueRange[1] - valueRange[0]), 0, 1) * (-displayRange)
+                    + (trackHeight - defaultPointSize); // normalize and offset
                 ctx.moveTo(startPosX, startValue);
                 for (let j = 1; j < keyframes.length; ++j) {
                     let time = keyframes[j];
                     let keyframePosX = this.timeToX(time);
                     let value = values[j];
-                    value =
-                        exports.LX.clamp((value - valueRange[0]) / (valueRange[1] - valueRange[0]), 0, 1) * (-displayRange)
-                            + (trackHeight - defaultPointSize); // normalize and offset
+                    value = exports.LX.clamp((value - valueRange[0]) / (valueRange[1] - valueRange[0]), 0, 1) * (-displayRange)
+                        + (trackHeight - defaultPointSize); // normalize and offset
                     if (time < startTime) {
                         ctx.moveTo(keyframePosX, value);
                         continue;
@@ -26491,7 +26714,7 @@
                 duration: options.duration ?? 1,
                 fadein: options.fadein ?? undefined,
                 fadeout: options.fadeout ?? undefined,
-                clipColor: options.clipColor ?? exports.LX.getThemeColor('global-color-accent'),
+                clipColor: options.clipColor ?? exports.LX.getCSSVariable('color-blue-600'),
                 fadeColor: options.fadeColor ?? null,
                 active: options.active ?? true,
                 trackIdx: -1 // filled by addClip
@@ -26970,8 +27193,7 @@
                     }
                     if (clip.fadeout != undefined) {
                         const fadeoutX = this.pixelsPerSecond * (clip.start + clip.duration - (clip.fadeout));
-                        drawRoundRect(ctx, x + w - fadeoutX, y + offset, fadeoutX, trackHeight, { tl: 0, bl: 0, tr: 5,
-                            br: 5 }, true);
+                        drawRoundRect(ctx, x + w - fadeoutX, y + offset, fadeoutX, trackHeight, { tl: 0, bl: 0, tr: 5, br: 5 }, true);
                     }
                 }
                 ctx.fillStyle = Timeline.TRACK_COLOR_PRIMARY;
@@ -27546,9 +27768,9 @@
     class TimeBar {
         static TIMEBAR_PLAY = 1;
         static TIMEBAR_TRIM = 2;
-        static BACKGROUND_COLOR = exports.LX.getThemeColor('global-branch-darker');
-        static COLOR = exports.LX.getThemeColor('global-button-color');
-        static ACTIVE_COLOR = '#668ee4';
+        static BACKGROUND_COLOR = exports.LX.getCSSVariable('secondary');
+        static COLOR = exports.LX.getCSSVariable('accent');
+        static ACTIVE_COLOR = exports.LX.getCSSVariable('color-blue-400');
         type = TimeBar.TIMEBAR_PLAY;
         duration = 1.0;
         canvas;
@@ -27591,7 +27813,7 @@
             this._draw();
             this.updateTheme();
             exports.LX.addSignal('@on_new_color_scheme', () => {
-                // Retrieve again the color using LX.getThemeColor, which checks the applied theme
+                // Retrieve again the color using LX.getCSSVariable, which checks the applied theme
                 this.updateTheme();
             });
             this.canvas.onmousedown = (e) => this.onMouseDown(e);
@@ -27599,9 +27821,9 @@
             this.canvas.onmouseup = (e) => this.onMouseUp(e);
         }
         updateTheme() {
-            TimeBar.BACKGROUND_COLOR = exports.LX.getThemeColor('global-color-secondary');
-            TimeBar.COLOR = exports.LX.getThemeColor('global-color-quaternary');
-            TimeBar.ACTIVE_COLOR = '#668ee4';
+            TimeBar.BACKGROUND_COLOR = exports.LX.getCSSVariable('secondary');
+            TimeBar.COLOR = exports.LX.getCSSVariable('accent');
+            TimeBar.ACTIVE_COLOR = exports.LX.getCSSVariable('color-blue-400');
         }
         setDuration(duration) {
             this.duration = duration;
@@ -27663,8 +27885,7 @@
             // Min-Max time markers
             this._drawTrimMarker('start', this.startX, { color: null, fillColor: TimeBar.ACTIVE_COLOR || '#5f88c9' });
             this._drawTrimMarker('end', this.endX, { color: null, fillColor: TimeBar.ACTIVE_COLOR || '#5f88c9' });
-            this._drawTimeMarker('current', this.currentX, { color: '#e5e5e5',
-                fillColor: TimeBar.ACTIVE_COLOR || '#5f88c9', width: this.markerWidth });
+            this._drawTimeMarker('current', this.currentX, { color: '#e5e5e5', fillColor: TimeBar.ACTIVE_COLOR || '#5f88c9', width: this.markerWidth });
             if (this.onDraw) {
                 this.onDraw();
             }
@@ -27910,8 +28131,7 @@
                 controlsArea = options.controlsArea;
             }
             else {
-                [videoArea, controlsArea] = area.split({ type: 'vertical', sizes: ['85%', null], minimizable: false,
-                    resize: false });
+                [videoArea, controlsArea] = area.split({ type: 'vertical', sizes: ['85%', null], minimizable: false, resize: false });
             }
             controlsArea.root.classList.add('lexconstrolsarea');
             this.cropArea = document.createElement('div');
@@ -27932,7 +28152,7 @@
             }
             if (options.videoArea) {
                 options.videoArea.root.classList.add('lexvideoeditor');
-                options.videoArea.root.style.position = "relative";
+                options.videoArea.root.style.position = 'relative';
                 options.videoArea.attach(this.cropArea);
                 videoArea.attach(options.videoArea);
             }
@@ -27941,16 +28161,13 @@
                 videoArea.attach(this.cropArea);
                 videoArea.root.classList.add('lexvideoeditor');
             }
-            videoArea.root.style.position = "relative";
+            videoArea.root.style.position = 'relative';
             this.controlsArea = controlsArea;
             // Create playing timeline area and attach panels
-            let [topArea, bottomArea] = controlsArea.split({ type: 'vertical', sizes: ['50%', null],
-                minimizable: false, resize: false });
+            let [topArea, bottomArea] = controlsArea.split({ type: 'vertical', sizes: ['50%', null], minimizable: false, resize: false });
             bottomArea.setSize([bottomArea.size[0], 40]);
-            let [leftArea, controlsRight] = bottomArea.split({ type: 'horizontal', sizes: ['92%', null],
-                minimizable: false, resize: false });
-            let [controlsLeft, timeBarArea] = leftArea.split({ type: 'horizontal', sizes: ['10%', null],
-                minimizable: false, resize: false });
+            let [leftArea, controlsRight] = bottomArea.split({ type: 'horizontal', sizes: ['92%', null], minimizable: false, resize: false });
+            let [controlsLeft, timeBarArea] = leftArea.split({ type: 'horizontal', sizes: ['10%', null], minimizable: false, resize: false });
             topArea.root.classList.add('lexbar');
             bottomArea.root.classList.add('lexbar');
             this.controlsCurrentPanel = new exports.LX.Panel({ className: 'lexcontrolspanel lextime' });
@@ -27969,7 +28186,7 @@
             this.controlsPanelLeft.refresh = () => {
                 this.controlsPanelLeft.clear();
                 this.controlsPanelLeft.sameLine();
-                let playbtn = this.controlsPanelLeft.addButton('Play', '', (v) => {
+                let playbtn = this.controlsPanelLeft.addButton(null, 'PlayButton', (v) => {
                     this.playing = v;
                     if (this.playing) {
                         if (this.video.currentTime + 0.000001 >= this.endTime) {
@@ -27980,10 +28197,9 @@
                     else {
                         this.video.pause();
                     }
-                }, { width: '40px', icon: 'Play@solid', swap: 'Pause@solid', hideName: true,
-                    className: 'justify-center' });
+                }, { icon: 'Play@solid', swap: 'Pause@solid', hideName: true, title: 'Play', tooltip: true, className: 'justify-center' });
                 playbtn.setState(this.playing, true);
-                this.controlsPanelLeft.addButton('', '', (v, e) => {
+                this.controlsPanelLeft.addButton(null, '', (v, e) => {
                     const panel = new exports.LX.Panel();
                     panel.addRange('Speed', this.speed, (v) => {
                         this.speed = v;
@@ -27993,11 +28209,10 @@
                         }
                     }, { min: 0, max: 2.5, step: 0.01, hideName: true });
                     new exports.LX.Popover(e.target, [panel], { align: 'start', side: 'top', sideOffset: 12 });
-                }, { width: '40px', title: 'speed', icon: 'Timer@solid', className: 'justify-center' });
-                this.controlsPanelLeft.addButton('', 'Loop', (v) => {
+                }, { icon: 'Timer@solid', title: 'Speed', tooltip: true, className: 'justify-center' });
+                this.controlsPanelLeft.addButton(null, 'Loop', (v) => {
                     this.loop = v;
-                }, { width: '40px', title: 'loop', icon: ('Repeat@solid'), className: `justify-center`, selectable: true,
-                    selected: this.loop });
+                }, { title: 'Loop', tooltip: true, icon: ('Repeat@solid'), className: `justify-center`, selectable: true, selected: this.loop });
                 this.controlsPanelLeft.addLabel(this.startTimeString, { width: '100px' });
                 this.controlsPanelLeft.endLine();
                 let availableWidth = leftArea.root.clientWidth - controlsLeft.root.clientWidth;
@@ -28432,6 +28647,7 @@
     exports.AreaOverlayButtons = AreaOverlayButtons;
     exports.ArrayInput = ArrayInput;
     exports.AssetView = AssetView;
+    exports.Avatar = Avatar;
     exports.BaseComponent = BaseComponent$1;
     exports.BoundingBox = BoundingBox;
     exports.Branch = Branch;
@@ -28491,7 +28707,6 @@
     exports.Toggle = Toggle;
     exports.Tour = Tour;
     exports.Tree = Tree;
-    exports.TreeEvent = TreeEvent;
     exports.Vector = Vector;
     exports.VideoEditor = VideoEditor;
     exports.addDropdownMenu = addDropdownMenu;
