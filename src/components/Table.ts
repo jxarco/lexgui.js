@@ -922,8 +922,8 @@ export class Table extends BaseComponent
             // Show num selected rows
             if ( showSelected )
             {
-                const selectedRowsLabelContainer = LX.makeContainer( [ '100%', 'auto' ], 'flex justify-start items-center',
-                    '0 row(s) selected.', footerContainer );
+                const selectedRowsLabelContainer = LX.makeContainer( [ '100%', 'auto' ], 'flex justify-start items-center', '0 row(s) selected.',
+                    footerContainer );
                 LX.addSignal( '@rows_selected_changed', ( target: HTMLElement, n: number ) => {
                     if ( !this._showSelectedNumber ) return;
                     selectedRowsLabelContainer.innerHTML = n === 0 ? '' : `${n ?? 0} row(s) selected.`;

@@ -1224,7 +1224,8 @@ function makeBreadcrumb( items: any[], options: any = {} )
         }
 
         const lastElement = i == ( items.length - 1 );
-        const breadcrumbItem = LX.makeContainer( [ 'auto', 'auto' ], `p-1 flex flex-row gap-1 items-center ${lastElement ? 'text-foreground' : 'text-muted-foreground'}` );
+        const breadcrumbItem = LX.makeContainer( [ 'auto', 'auto' ],
+            `p-1 flex flex-row gap-1 items-center ${lastElement ? 'text-foreground' : 'text-muted-foreground'}` );
         breadcrumb.appendChild( breadcrumbItem );
 
         let itemName = LX.makeElement( 'p', '', item.name );
@@ -1244,7 +1245,9 @@ function makeBreadcrumb( items: any[], options: any = {} )
         }
         else if ( item.url !== undefined )
         {
-            let itemUrl = LX.makeElement( 'a', `decoration-none hover:underline underline-offset-4 ${lastElement ? 'text-foreground' : 'text-muted-foreground'}`, '', breadcrumbItem );
+            let itemUrl = LX.makeElement( 'a',
+                `decoration-none hover:underline underline-offset-4 ${lastElement ? 'text-foreground' : 'text-muted-foreground'}`, '',
+                breadcrumbItem );
             itemUrl.href = item.url;
             itemUrl.appendChild( itemName );
         }

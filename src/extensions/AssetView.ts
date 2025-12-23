@@ -12,7 +12,7 @@ LX.extensions.push( 'AssetView' );
 const Area = LX.Area;
 const Panel = LX.Panel;
 const NodeTree = LX.NodeTree;
-const TreeEvent = LX.TreeEvent;
+const Tree = LX.Tree;
 
 export type AssetViewAction = 'select' | 'dbl_click' | 'check' | 'clone' | 'move' | 'delete' | 'rename' | 'enter_folder' | 'create-folder'
     | 'refresh-content' | 'node-drag';
@@ -470,7 +470,6 @@ export class AssetView
                 };
 
                 onDblClick( event );
-                // event.multiple = !!e.shiftKey;
             }
             else if ( !isDoubleClick && onSelect !== undefined )
             {
@@ -481,7 +480,6 @@ export class AssetView
                 };
 
                 onSelect( event );
-                // event.multiple = !!e.shiftKey;
             }
         } );
 
@@ -765,106 +763,123 @@ export class AssetView
         const treeData = { id: '/', children: this.data };
         const tree = this.leftPanel.addTree( 'Content Browser', treeData, {
             filter: false,
-            onlyFolders: this.onlyFolders,
-            onevent: this._processTreeEvents.bind( this )
+            onlyFolders: this.onlyFolders
         } );
+
+        this._subscribeTreeEvents( tree );
 
         this.tree = tree.innerTree;
     }
 
-    _processTreeEvents( event: typeof TreeEvent )
+    _subscribeTreeEvents( tree: typeof Tree )
     {
-        let node = event.node;
-        let value = event.value;
+        // If some of these events we don't have to call "resolve" since the AV itself
+        // will update the data and refresh when necessary
 
-        switch ( event.type )
-        {
-            case LX.TreeEvent.NODE_SELECTED:
+        tree.on( "select", ( event: any, resolve: any ) => {
+            if ( event.items.length > 1 ) // Do nothing if multiple selection
             {
-                if ( event.multiple )
-                {
-                    return;
-                }
-                if ( !node.parent )
-                {
-                    if ( this.currentFolder )
-                    {
-                        this.prevData.push( this.currentFolder );
-                    }
-
-                    this.currentFolder = undefined;
-                    this.currentData = this.data;
-                    this._refreshContent();
-                    this._updatePath();
-                }
-                else
-                {
-                    this._enterFolder( node.type === 'folder' ? node : node.parent );
-
-                    this._previewAsset( node );
-
-                    if ( node.type !== 'folder' )
-                    {
-                        this.content.querySelectorAll( '.lexassetitem' ).forEach( ( i ) => i.classList.remove( 'selected' ) );
-                        const dom = node.domEl;
-                        dom?.classList.add( 'selected' );
-                    }
-
-                    this.selectedItem = node;
-                }
-                break;
+                return;
             }
-            case LX.TreeEvent.NODE_DRAGGED:
+
+            const node = event.items[ 0 ];
+
+            if ( !node.parent )
             {
-                const onBeforeNodeDragged = this._callbacks['beforeNodeDragged'];
-                const onNodeDragged = this._callbacks['nodeDragged'];
+                if ( this.currentFolder )
+                {
+                    this.prevData.push( this.currentFolder );
+                }
 
-                const resolve = ( ...args: any[] ) => {
-                    if ( node.parent )
-                    {
-                        const idx = node.parent.children.indexOf( node );
-                        node.parent.children.splice( idx, 1 );
-                    }
+                this.currentFolder = undefined;
+                this.currentData = this.data;
+                this._refreshContent();
+                this._updatePath();
+            }
+            else
+            {
+                this._enterFolder( node.type === 'folder' ? node : node.parent );
 
-                    if ( !value.children )
-                    {
-                        value.children = [];
-                    }
+                this._previewAsset( node );
 
-                    value.children.push( node );
+                if ( node.type !== 'folder' )
+                {
+                    this.content.querySelectorAll( '.lexassetitem' ).forEach( ( i ) => i.classList.remove( 'selected' ) );
+                    const dom = node.domEl;
+                    dom?.classList.add( 'selected' );
+                }
 
-                    node.parent = value;
-                    node.dir = value.children;
+                this.selectedItem = node;
+            }
+        } );
 
-                    const event: AssetViewEvent = {
-                        type: 'node-drag',
-                        items: [ node ],
-                        to: value,
-                        userInitiated: true
-                    };
-                    if ( onNodeDragged ) onNodeDragged( event, ...args );
+        tree.on( "beforeMove", ( event: any, resolve: any ) => {
+            
+            const onBeforeNodeDragged = this._callbacks['beforeNodeDragged'];
+            const onNodeDragged = this._callbacks['nodeDragged'];
+
+            const node = event.items[ 0 ];
+            const value = event.to;
+
+            const av_resolve = ( ...args: any[] ) => {
+                if ( node.parent )
+                {
+                    const idx = node.parent.children.indexOf( node );
+                    node.parent.children.splice( idx, 1 );
+                }
+
+                if ( !value.children )
+                {
+                    value.children = [];
+                }
+
+                value.children.push( node );
+
+                node.parent = value;
+                node.dir = value.children;
+
+                // Resolve Tree move event
+                resolve( ...args );
+
+                // Fire AV drag event, and not catch the onMove Tree vent
+                const av_event: AssetViewEvent = {
+                    type: 'node-drag',
+                    items: [ node ],
+                    to: value,
+                    userInitiated: true
                 };
-
-                if ( onBeforeNodeDragged )
-                {
-                    const event: AssetViewEvent = {
-                        type: 'node-drag',
-                        items: [ node ],
-                        to: value,
-                        userInitiated: true
-                    };
-
-                    onBeforeNodeDragged( event, resolve );
-                }
-                else
-                {
-                    resolve();
-                }
+                if ( onNodeDragged ) onNodeDragged( av_event, ...args );
 
                 this._refreshContent();
-                break;
+            };
+
+            if ( onBeforeNodeDragged )
+            {
+                const av_event: AssetViewEvent = {
+                    type: 'node-drag',
+                    items: [ node ],
+                    to: value,
+                    userInitiated: true
+                };
+
+                onBeforeNodeDragged( av_event, av_resolve );
             }
-        }
+            else
+            {
+                av_resolve();
+            }
+
+        } );
+
+        tree.on( "beforeDelete", ( event: any, resolve: any ) => {
+            const node = event.items[ 0 ];
+            this._requestDeleteItem( node );
+        } );
+
+        tree.on( "beforeRename", ( event: any, resolve: any ) => {
+            const node = event.items[ 0 ];
+            this._requestRenameItem( node, event.newName, true );
+        } );
     }
 
     _setContentLayout( layoutMode: number )
@@ -1378,7 +1393,6 @@ export class AssetView
                 items: [ item ],
                 userInitiated: true
             };
-
             onBeforeDelete( event, resolve );
         }
         else
@@ -1427,7 +1441,6 @@ export class AssetView
                 to: folder,
                 userInitiated: true
             };
-
             onBeforeMove( event, resolve );
         }
         else
@@ -1701,14 +1714,14 @@ export class AssetView
         return maxN === -1 ? originalName : `${base} (${maxN + 1})${ext}`;
     }
 
-    _requestRenameItem( item: AssetViewItem, newName: string )
+    _requestRenameItem( item: AssetViewItem, newName: string, treeEvent: boolean = false )
     {
         const onBeforeRename = this._callbacks['beforeRename'];
         const onRename = this._callbacks['rename'];
         const oldName = item.id;
 
         const resolve = ( ...args: any[] ) => {
-            this._renameItem( item, newName );
+            this._renameItem( item, newName, treeEvent ? item.dir : this.currentData );
             const event: AssetViewEvent = {
                 type: 'rename',
                 items: [ item ],
@@ -1737,28 +1750,34 @@ export class AssetView
         }
     }
 
-    _renameItem( item: AssetViewItem, newName: string )
+    _renameItem( item: AssetViewItem, newName: string, data?: AssetViewItem[] )
     {
-        const idx = this.currentData.indexOf( item );
+        data = data ?? this.currentData;
+        const idx = data.indexOf( item );
         if ( idx < 0 )
         {
             return;
         }
 
-        const wasSelected = LX.hasClass( item.domEl, 'selected' );
-        const hoverTitle: HTMLElement | null = this.content.querySelector(
-            `#floatingTitle_${item.id.replace( /\s/g, '_' ).replaceAll( '.', '_' )}`
-        );
-        if ( hoverTitle ) hoverTitle.remove();
-
-        item.domEl?.remove();
-        item.id = newName;
-        item.domEl = this.addItem( item, idx * 2 );
-
-        if ( wasSelected )
+        // It could be a Tree event, so maybe the elements is not created yet
+        if( item.domEl )
         {
-            this._previewAsset( item );
+            const wasSelected = LX.hasClass( item.domEl, 'selected' );
+            const hoverTitle: HTMLElement | null = this.content.querySelector(
+                `#floatingTitle_${item.id.replace( /\s/g, '_' ).replaceAll( '.', '_' )}`
+            );
+            if ( hoverTitle ) hoverTitle.remove();
+
+            item.domEl?.remove();
+            item.domEl = this.addItem( item, idx * 2 );
+
+            if ( wasSelected )
+            {
+                this._previewAsset( item );
+            }
         }
+
+        item.id = newName;
 
         this.tree?.refresh();
 

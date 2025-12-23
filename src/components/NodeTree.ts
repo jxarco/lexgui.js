@@ -1,10 +1,45 @@
 // NodeTree.ts @jxarco
 
-import { TreeEvent } from './../core/Event';
 import { LX } from './../core/Namespace';
 import { BaseComponent, ComponentType } from './BaseComponent';
 import { Button } from './Button';
 import { ContextMenu } from './ContextMenu';
+
+export type NodeTreeAction = 'select' | 'dbl_click' | 'move' | 'delete' | 'rename' | 'visibility' | 'caret' | 'context_menu';
+
+// export interface NodeTreeItem
+// {
+//     id: string;
+//     type: string;
+//     children: NodeTreeItem[];
+//     parent?: NodeTreeItem;
+//     path?: string;
+//     src?: string;
+//     dir?: NodeTreeItem[];
+//     domEl?: HTMLElement;
+//     metadata: any; // optional user data
+// }
+
+export interface NodeTreeEvent
+{
+    type: NodeTreeAction;
+    domEvent?: Event;
+    items?: any[];
+    result?: any[];
+    from?: any;
+    to?: any;
+    where?: any;
+    oldName?: string;
+    newName?: string;
+    search?: any[]; // 0: search value, 1: filter applied
+    userInitiated: boolean; // clicked by user vs programmatically
+}
+
+/**
+ * Signature for cancelable events.
+ * `resolve()` MUST be called by the user to perform the UI action
+ */
+export type NodeTreeEventCallback = ( event: NodeTreeEvent, resolve?: ( ...args: any[] ) => void ) => boolean | void | Promise<void>;
 
 /**
  * @class NodeTree
@@ -14,17 +49,16 @@ export class NodeTree
 {
     domEl: any;
     data: any;
-    onevent: any;
     options: any;
     selected: any[] = [];
 
     _forceClose: boolean = false;
+    _callbacks: Record<string, NodeTreeEventCallback> = {};
 
     constructor( domEl: any, data: any, options: any = {} )
     {
         this.domEl = domEl;
         this.data = data;
-        this.onevent = options.onevent;
         this.options = options;
 
         if ( data.constructor === Object )
@@ -154,19 +188,34 @@ export class NodeTree
             if ( isParent && node.id.length > 1 /* Strange case... */ )
             {
                 node.closed = false;
-                if ( that.onevent )
+
+                const onCaretChanged = that._callbacks['caretChanged'];
+                if ( onCaretChanged !== undefined )
                 {
-                    const event = new TreeEvent( TreeEvent.NODE_CARETCHANGED, node, node.closed, e );
-                    that.onevent( event );
+                    const event: NodeTreeEvent = {
+                        type: 'caret',
+                        items: [ node ],
+                        domEvent: e,
+                        userInitiated: true
+                    };
+                    onCaretChanged( event );
                 }
+
                 that.frefresh( node.id );
             }
 
-            if ( that.onevent )
+            const onSelect = that._callbacks['select'];
+            if ( onSelect !== undefined )
             {
-                const event = new TreeEvent( TreeEvent.NODE_SELECTED, node, this.selected, e );
-                event.multiple = e.shiftKey;
-                that.onevent( event );
+                const event: NodeTreeEvent = {
+                    type: 'select',
+                    items: [ node ],
+                    result: this.selected,
+                    domEvent: e,
+                    userInitiated: true
+                };
+
+                onSelect( event );
             }
         } );
 
@@ -179,38 +228,53 @@ export class NodeTree
                 that.refresh();
             }
 
-            if ( that.onevent )
+            const onDblClick = that._callbacks['dblClick'];
+            if ( onDblClick !== undefined )
             {
-                const event = new TreeEvent( TreeEvent.NODE_DBLCLICKED, node, null, e );
-                that.onevent( event );
+                const event: NodeTreeEvent = {
+                    type: 'dbl_click',
+                    items: [ node ],
+                    domEvent: e,
+                    userInitiated: true
+                };
+
+                onDblClick( event );
             }
         } );
 
-        item.addEventListener( 'contextmenu', ( e: any ) => {
+        item.addEventListener( 'contextmenu', async ( e: any ) => {
             e.preventDefault();
 
-            if ( !that.onevent )
+            const onContextMenu = that._callbacks['contextMenu'];
+            if ( !onContextMenu )
             {
                 return;
             }
 
-            const event: any = new TreeEvent( TreeEvent.NODE_CONTEXTMENU, node, this.selected, e );
-            event.multiple = this.selected.length > 1;
+            const event: NodeTreeEvent = {
+                type: 'context_menu',
+                items: this.selected,
+                from: node,
+                domEvent: e,
+                userInitiated: true
+            };
 
-            LX.addContextMenu( event.multiple ? 'Selected Nodes' : event.node.id, event.event, ( m: ContextMenu ) => {
-                event.panel = m;
-            } );
+            const r: any = await onContextMenu( event );
 
-            that.onevent( event );
+            const multiple = this.selected.length > 1;
 
-            if ( this.options.addDefault ?? false )
-            {
-                if ( event.panel.items )
+            LX.addContextMenu( multiple ? 'Selected Nodes' : node.id, e, ( m: ContextMenu ) => {
+                if ( r?.length )
                 {
-                    event.panel.add( '' );
+                    for ( const i of r )
+                    {
+                        m.add( i.name, { callback: i.callback } );
+                    }
+
+                    m.add( '' );
                 }
 
-                event.panel.add( 'Select Children', () => {
+                m.add( 'Select Children', () => {
                     const selectChildren = ( n: any ) => {
                         if ( n.closed )
                         {
@@ -236,19 +300,68 @@ export class NodeTree
 
                     // Add childs of the clicked node
                     selectChildren( node );
+
+                    const onSelect = this._callbacks['select'];
+                    if ( onSelect !== undefined )
+                    {
+                        const event: NodeTreeEvent = {
+                            type: 'select',
+                            items: [ node ],
+                            result: this.selected,
+                            domEvent: e,
+                            userInitiated: true
+                        };
+
+                        onSelect( event );
+                    }
                 } );
 
-                event.panel.add( 'Delete', { callback: () => {
-                    const ok = that.deleteNode( node );
+                m.add( 'Delete', { callback: () => {
+                    const onBeforeDelete = this._callbacks['beforeDelete'];
+                    const onDelete = this._callbacks['delete'];
 
-                    if ( ok && that.onevent )
+                    const resolve = ( ...args: any[] ) => {
+
+                        let deletedNodes = [];
+
+                        if( this.selected.length )
+                        {
+                            deletedNodes.push( ...that.deleteNodes( this.selected ) );
+                        }
+                        else if( that.deleteNode( node ) )
+                        {
+                            deletedNodes.push( node );
+                        }
+
+                        this.refresh();
+
+                        const event: NodeTreeEvent = {
+                            type: 'delete',
+                            items: deletedNodes,
+                            userInitiated: true
+                        };
+                        if ( onDelete ) onDelete( event, ...args );
+                    };
+
+                    if ( onBeforeDelete )
                     {
-                        const event = new TreeEvent( TreeEvent.NODE_DELETED, node, [ node ], null );
-                        that.onevent( event );
+                        const event: NodeTreeEvent = {
+                            type: 'delete',
+                            items: this.selected.length ? this.selected : [ node ],
+                            userInitiated: true
+                        };
+                        onBeforeDelete( event, resolve );
                     }
-
-                    this.refresh();
+                    else
+                    {
+                        resolve();
+                    }
                 } } );
+            } );
+
+            if ( !( this.options.addDefault ?? false ) )
+            {
+                return;
             }
         } );
 
@@ -262,27 +375,50 @@ export class NodeTree
 
             if ( e.key == 'Delete' )
             {
-                const nodesDeleted = [];
+                const onBeforeDelete = this._callbacks['beforeDelete'];
+                const onDelete = this._callbacks['delete'];
 
-                for ( let _node of this.selected )
-                {
-                    if ( that.deleteNode( _node ) )
+                const resolve = ( ...args: any[] ) => {
+                    const nodesDeleted = [];
+
+                    for ( let n of this.selected )
                     {
-                        nodesDeleted.push( _node );
+                        if ( that.deleteNode( n ) )
+                        {
+                            nodesDeleted.push( n );
+                        }
                     }
-                }
 
-                // Send event now so we have the info in selected array..
-                if ( nodesDeleted.length && that.onevent )
+                    this.selected.length = 0;
+
+                    this.refresh();
+
+                    if( nodesDeleted.length )
+                    {
+                        const event: NodeTreeEvent = {
+                            type: 'delete',
+                            items: nodesDeleted,
+                            domEvent: e,
+                            userInitiated: true
+                        };
+                        if ( onDelete ) onDelete( event, ...args );
+                    }
+                };
+
+                if ( onBeforeDelete )
                 {
-                    const event = new TreeEvent( TreeEvent.NODE_DELETED, node, nodesDeleted, e );
-                    event.multiple = nodesDeleted.length > 1;
-                    that.onevent( event );
+                    const event: NodeTreeEvent = {
+                        type: 'delete',
+                        items: this.selected,
+                        domEvent: e,
+                        userInitiated: true
+                    };
+                    onBeforeDelete( event, resolve );
                 }
-
-                this.selected.length = 0;
-
-                this.refresh();
+                else
+                {
+                    resolve();
+                }
             }
             else if ( e.key == 'ArrowUp' || e.key == 'ArrowDown' )
             { // Unique or zero selected
@@ -316,18 +452,44 @@ export class NodeTree
         {
             if ( e.key == 'Enter' )
             {
+                const onBeforeRename = that._callbacks['beforeRename'];
+                const onRename = that._callbacks['rename'];
+                const oldName = node.id;
+
                 this.value = this.value.replace( /\s/g, '_' );
 
-                if ( that.onevent )
-                {
-                    const event = new TreeEvent( TreeEvent.NODE_RENAMED, node, this.value, e );
-                    that.onevent( event );
-                }
+                const resolve = ( ...args: any[] ) => {
+                    node.id = LX.getSupportedDOMName( this.value );
+                    delete node.rename;
+                    that.frefresh( node.id );
+                    list.querySelector( `#${node.id}` ).classList.add( 'selected' );
 
-                node.id = LX.getSupportedDOMName( this.value );
-                delete node.rename;
-                that.frefresh( node.id );
-                list.querySelector( '#' + node.id ).classList.add( 'selected' );
+                    const event: NodeTreeEvent = {
+                        type: 'rename',
+                        items: [ node ],
+                        oldName,
+                        newName: this.value,
+                        userInitiated: true
+                    };
+                    if ( onRename ) onRename( event, ...args );
+                };
+
+                if ( onBeforeRename )
+                {
+                    const event: NodeTreeEvent = {
+                        type: 'rename',
+                        items: [ node ],
+                        oldName,
+                        newName: this.value,
+                        userInitiated: true
+                    };
+
+                    onBeforeRename( event, resolve );
+                }
+                else
+                {
+                    resolve();
+                }
             }
             else if ( e.key == 'Escape' )
             {
@@ -379,6 +541,9 @@ export class NodeTree
                 return;
             }
 
+            const domTarget: any = e.target;
+            domTarget.classList.remove( 'draggingover' );
+
             let target = node;
             // Can't drop to same node
             if ( dragged.id == target.id )
@@ -405,18 +570,41 @@ export class NodeTree
                 return;
             }
 
-            // Trigger node dragger event
-            if ( that.onevent )
-            {
-                const event = new TreeEvent( TreeEvent.NODE_DRAGGED, dragged, target, e );
-                that.onevent( event );
-            }
+            const onBeforeMove = this._callbacks['beforeMove'];
+            const onMove = this._callbacks['move'];
 
-            const index = dragged.parent.children.findIndex( ( n: any ) => n.id == dragged.id );
-            const removed = dragged.parent.children.splice( index, 1 );
-            target.children.push( removed[0] );
-            that.refresh();
-            delete ( window as any ).__tree_node_dragged;
+            const resolve = ( ...args: any[] ) => {
+                const index = dragged.parent.children.findIndex( ( n: any ) => n.id == dragged.id );
+                const removed = dragged.parent.children.splice( index, 1 );
+                target.children.push( removed[0] );
+                that.refresh();
+                delete ( window as any ).__tree_node_dragged;
+
+                const event: NodeTreeEvent = {
+                    type: 'move',
+                    items: [ dragged ],
+                    to: target,
+                    domEvent: e,
+                    userInitiated: true
+                };
+                if ( onMove ) onMove( event, ...args );
+            };
+
+            if ( onBeforeMove )
+            {
+                const event: NodeTreeEvent = {
+                    type: 'move',
+                    items: [ dragged ],
+                    to: target,
+                    domEvent: e,
+                    userInitiated: true
+                };
+                onBeforeMove( event, resolve );
+            }
+            else
+            {
+                resolve();
+            }
         } );
 
         let handled = false;
@@ -447,11 +635,18 @@ export class NodeTree
                     node.closed = !node.closed;
                 }
 
-                if ( that.onevent )
+                const onCaretChanged = that._callbacks['caretChanged'];
+                if ( onCaretChanged !== undefined )
                 {
-                    const event = new TreeEvent( TreeEvent.NODE_CARETCHANGED, node, node.closed, e );
-                    that.onevent( event );
+                    const event: NodeTreeEvent = {
+                        type: 'caret',
+                        items: [ node ],
+                        domEvent: e,
+                        userInitiated: true
+                    };
+                    onCaretChanged( event );
                 }
+
                 that.frefresh( node.id );
             } );
         }
@@ -483,11 +678,18 @@ export class NodeTree
             const visibilityBtn = new Button( null, '', ( swapValue: boolean, e: any ) => {
                 e.stopPropagation();
                 node.visible = node.visible === undefined ? false : !node.visible;
-                // Trigger visibility event
-                if ( that.onevent )
+
+                const onVisibleChanged = this._callbacks['visibleChanged'];
+                if ( onVisibleChanged !== undefined )
                 {
-                    const event = new TreeEvent( TreeEvent.NODE_VISIBILITY, node, node.visible, e );
-                    that.onevent( event );
+                    const event: NodeTreeEvent = {
+                        type: 'visibility',
+                        items: [ node ],
+                        domEvent: e,
+                        userInitiated: true
+                    };
+
+                    onVisibleChanged( event );
                 }
             }, { icon: node.visible ? 'Eye' : 'EyeOff', swap: node.visible ? 'EyeOff' : 'Eye', title: 'Toggle visible', className: 'p-0 min-h-fit',
                 buttonClass: 'px-0 h-full bg-none' } );
@@ -580,6 +782,21 @@ export class NodeTree
         el.classList.add( 'selected' );
         this.selected = [ el.treeData ];
         el.focus();
+    }
+
+    deleteNodes( nodes: any[] )
+    {
+        const nodesDeleted = [];
+
+        for( const n of nodes  )
+        {
+            if ( this.deleteNode( n ) )
+            {
+                nodesDeleted.push( n );
+            }
+        }
+
+        return nodesDeleted;
     }
 
     deleteNode( node: any ): boolean
@@ -689,6 +906,15 @@ export class Tree extends BaseComponent
         container.appendChild( list );
 
         this.innerTree = new NodeTree( container, data, options );
+    }
+
+    /**
+     * @method on
+     * @description Stores an event callback for the desired action
+     */
+    on( eventName: string, callback: NodeTreeEventCallback )
+    {
+        this.innerTree._callbacks[eventName] = callback;
     }
 }
 

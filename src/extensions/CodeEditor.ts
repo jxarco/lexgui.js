@@ -2248,8 +2248,8 @@ export class CodeEditor
             this.onCreateStatusPanel( panel, this );
         }
 
-        let leftStatusPanel = this.leftStatusPanel = new LX.Panel( { id: 'FontSizeZoomStatusComponent', className: 'pad-xs content-center items-center flex-auto-keep', width: 'auto',
-            height: 'auto' } );
+        let leftStatusPanel = this.leftStatusPanel = new LX.Panel( { id: 'FontSizeZoomStatusComponent',
+            className: 'pad-xs content-center items-center flex-auto-keep', width: 'auto', height: 'auto' } );
         leftStatusPanel.sameLine();
 
         leftStatusPanel.addButton( null, 'ZoomOutButton', this._decreaseFontSize.bind( this ), { icon: 'ZoomOut', buttonClass: 'ghost sm',

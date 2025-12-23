@@ -24,7 +24,8 @@ export class Menubar
 
     constructor( items: any[], options: any = {} )
     {
-        this.root = LX.makeElement( 'div', 'lexmenubar size-full bg-background text-foreground inline-flex gap-1 overflow-hidden text-sm font-medium' );
+        this.root = LX.makeElement( 'div',
+            'lexmenubar size-full bg-background text-foreground inline-flex gap-1 overflow-hidden text-sm font-medium' );
 
         if ( options.float )
         {

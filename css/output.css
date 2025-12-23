@@ -2711,6 +2711,9 @@ html, body {
 *, *::before, *::after {
   box-sizing: border-box;
 }
+* {
+  outline-color: var(--ring);
+}
 .no-transition, .no-transition * {
   transition: none !important;
 }

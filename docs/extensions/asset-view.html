@@ -63,7 +63,7 @@
     docMaker.header("Usage", "h2");
 
     docMaker.paragraph( `Load your data using ${ docMaker.iCode( "LX.AssetView.load( data )" ) }.
-        Use ${ docMaker.iCode( "LX.on( eventName: string, callback: AssetViewEventCallback )" ) } to add an AssetViewEventCallback for the following UI action events, where AssetViewEventCallback has the following
+        Use ${ docMaker.iCode( "LX.AssetView.on( eventName: string, callback: AssetViewEventCallback )" ) } to add an AssetViewEventCallback for the following UI action events, where AssetViewEventCallback has the following
         parameters: ${ docMaker.iCode("event") } (AssetViewEvent) and ${ docMaker.iCode("resolve") } (Function). Users must call resolve to perform the action for cancellable events. ` );
 
     docMaker.note( `The ${ docMaker.iCode("event") } in the AssetViewEventCallback function contains common parameters as ${ docMaker.iCode("type") } and ${ docMaker.iCode("userInitiated") } and can contains more information

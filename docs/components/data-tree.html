@@ -51,6 +51,59 @@
     docMaker.header("Usage", "h2");
     docMaker.paragraph( `Call ${docMaker.iCode("Panel.addTree(name, data, options)")} to add a ${ componentName } Component to your panel or
     create it anywhere using ${docMaker.iCode(`new LX.${ componentName.replace( /\s/g, '' ) }`)} to append its root to any container.` );
+    docMaker.lineBreak();
+    docMaker.paragraph( `Subscribe to events using ${ docMaker.iCode( "LX.Tree,on( eventName: string, callback: NodeTreeEventCallback )" ) } to add an NodeTreeEventCallback for the following UI action events, where NodeTreeEventCallback has the following
+        parameters: ${ docMaker.iCode("event") } (NodeTreeEvent) and ${ docMaker.iCode("resolve") } (Function). Users must call resolve to perform the action for cancellable events. ` );
+
+    docMaker.note( `The ${ docMaker.iCode("event") } in the NodeTreeEventCallback function contains common parameters as ${ docMaker.iCode("type") } and ${ docMaker.iCode("userInitiated") } and can contains more information
+    depending on the event.` );
+
+    docMaker.classMethod( "select", `Asset has been selected.`, [
+        [ "event", "{ type, userInitiated, items }" ]
+    ] );
+
+    docMaker.classMethod( "delete", `Asset has been deleted.`, [
+        [ "event", "{ type, userInitiated, items }" ]
+    ] );
+
+    docMaker.classMethod( "rename", `Asset has been renamed.`, [
+        [ "event", "{ type, userInitiated, items, oldName, newName }" ]
+    ] );
+
+    docMaker.classMethod( "dblClick", `Asset has been double clicked.`, [
+        [ "event", "{ type, userInitiated, items }" ]
+    ] );
+
+    docMaker.classMethod( "move", `Asset has been moved.`, [
+        [ "event", "{ type, userInitiated, items, from, to }" ]
+    ] );
+
+    docMaker.classMethod( "visibleChanged", `Asset visibility has changed.`, [
+        [ "event", "{ type, userInitiated, items }" ]
+    ] );
+
+    docMaker.classMethod( "caretChanged", `Asset has been opened or closed.`, [
+        [ "event", "{ type, userInitiated, items }" ]
+    ] );
+
+    docMaker.classMethod( "contextMenu", `Asset context menu has been opened (return Array with options).`, [
+        [ "event", "{ type, userInitiated, items, from }" ]
+    ] );
+
+    docMaker.classMethod( "beforeDelete", `Called before deleting assets.`, [
+        [ "event", "{ type, userInitiated, items }" ],
+        [ "resolve", "Function" ]
+    ] );
+
+    docMaker.classMethod( "beforeRename", `Called before renaming assets.`, [
+        [ "event", "{ type, userInitiated, items, oldName, newName }" ],
+        [ "resolve", "Function" ]
+    ] );
+
+    docMaker.classMethod( "beforeMove", `Called before moving assets.`, [
+        [ "event", "{ type, userInitiated, items, from, to }" ],
+        [ "resolve", "Function" ]
+    ] );
 
     docMaker.header("API Reference", "h2");
 
@@ -76,8 +129,7 @@
                 ["icons", "Array", "Array of objects with button information {name, icon, callback}", "—"],
                 ["filter", "Boolean", "Adds a filter bar", "true"],
                 ["rename", "Boolean", "Allow item rename", "true"],
-                ["onlyFolders", "Boolean", "Only show items with 'folder' type", "false"],
-                ["onevent", "Function", "Function to catch the different types of Tree events", "—"],
+                ["onlyFolders", "Boolean", "Only show items with 'folder' type", "false"]
             ].map( v => {
                 return [ docMaker.iCode( v[ 0 ], "table" ), docMaker.iCode( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? docMaker.iCode( v[ 3 ], "table desc" ) : v[ 3 ] ];
             } )

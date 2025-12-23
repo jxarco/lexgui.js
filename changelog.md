@@ -17,6 +17,9 @@ Fixed modal scroll bleed.
 Fixed Commandbar position when page has vertical scroll.
 Minor fixes Area Tabs' and Sidebar's CSS.
 
+NodeTree:
+- Refactored Event system to be compatible with AssetView events, using also cancellable events.
+
 AssetView:
 - Removed `options.onRefreshContent`.
 - Added new `refreshContent`, `beforeRefreshContent` events.

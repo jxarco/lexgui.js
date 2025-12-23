@@ -297,17 +297,68 @@ LX._registerIconsAndColors( "./" );
 
             window.tree = panel.addTree("Scene Tree", sceneData, {
                 icons: treeIcons,
-                addDefault: true,
-                onevent: (event) => {
-                    switch(event.type) {
-                        case LX.TreeEvent.NODE_CONTEXTMENU:
-                            const m = event.panel;
-                            m.add( "Components/Transform");
-                            m.add( "Components/MeshRenderer");
-                            break;
-                    }
-                }
+                addDefault: true
             });
+
+            // Tree events
+            {
+                window.tree.on( 'contextMenu', ( event ) => {
+                    return [
+                        { name: "Components/Transform" },
+                        { name: "Components/MeshRenderer" }
+                    ]
+                } );
+    
+                // Click events
+                {
+                    window.tree.on( "select", ( event, resolve ) => {
+                        console.log(`${ event.items[ 0 ].id } selected` );
+                    } );
+
+                    window.tree.on( "dblClick", ( event ) => {
+                        console.log(`${ event.items[ 0 ].id } dbl clicked` );
+                    } );
+                }
+
+                // Rename events
+                {
+                    window.tree.on( "beforeRename", ( event, resolve ) => {
+                        LX.prompt("Perform Rename Action?", "Server Message", () => {
+                            resolve();
+                        })
+                    } );
+        
+                    window.tree.on( "rename", ( event ) => {
+                        console.log(`${ event.oldName } renamed to ${ event.newName }`);
+                    } );
+                }
+
+                // Delete events
+                {
+                    window.tree.on( "beforeDelete", ( event, resolve ) => {
+                        LX.prompt("Perform Delete Action?", "Server Message", () => {
+                            resolve();
+                        })
+                    } );
+
+                    window.tree.on( "delete", ( event ) => {
+                        console.log(event.items[ 0 ].id + " deleted");
+                    } );
+                }
+
+                // Move events
+                {
+                    window.tree.on( "beforeMove", ( event, resolve ) => {
+                        LX.prompt("Perform Move Action?", "Server Message", () => {
+                            resolve();
+                        })
+                    } );
+
+                    window.tree.on( "move", ( event ) => {
+                        console.log(`${ event.items[ 0 ].id } moved to ${ event.to.id }` );
+                    } );
+                }
+            }
 
             // add components to panel branch
             panel.branch("Canvas", { icon: "Palette", filter: true });
