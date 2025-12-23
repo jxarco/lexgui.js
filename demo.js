@@ -122,7 +122,7 @@ LX._registerIconsAndColors( "./" );
         const tabsParent = tabs.root.parentElement;
         tabsParent.className = LX.mergeClass( tabsParent.className, 'flex flex-row justify-between' );
 
-        const themeSelect = new LX.Select( null, themes, 'Neutral', (v) => LX.setColorTheme( v.toLowerCase() ), { overflowContainerY: null } );
+        const themeSelect = new LX.Select( null, themes, 'Neutral', (v) => LX.setColorTheme( v.toLowerCase() ), { overflowContainerY: null, align: "end" } );
         tabsParent.appendChild( themeSelect.root );
 
         const editorContainer = LX.makeContainer( [ null, "800px" ], "flex flex-col border-color rounded-lg overflow-hidden" );

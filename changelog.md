@@ -11,6 +11,7 @@ Added new Avatar Component (see docs).
 Avatar Component in now used in Sidebar header and footer.
 Added support for `oklch` format in ColorInput, new utils `LX.oklchToHex`.
 ComboButtons Component `options.float` now accepts `start, center, end` instead of `left, center, right`.
+Added Select `options.side` to force dropdown list alignment.
 Breadcrumb items `title` renamed to `name`.
 Fixed modal scroll bleed.
 Fixed Commandbar position when page has vertical scroll.

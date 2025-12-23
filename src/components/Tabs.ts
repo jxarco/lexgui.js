@@ -28,7 +28,7 @@ export class Tabs
         this.onclose = options.onclose;
 
         let container = document.createElement( 'div' );
-        container.className = 'lexareatabs ' + ( options.fit ? 'fit' : 'row' );
+        container.className = 'lexareatabs flex flex-row w-fit ' + ( options.fit ? 'fit' : 'row' );
 
         const folding = options.folding ?? false;
         if ( folding ) container.classList.add( 'folding' );

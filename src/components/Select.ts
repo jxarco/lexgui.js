@@ -164,8 +164,9 @@ export class Select extends BaseComponent
                     maxX = parentRect.x + parentRect.width;
                 }
 
-                const showLeft = ( leftPosition + listWidth ) > maxX;
-                if ( showLeft )
+                // "align" basically forces left-right alignment
+                const showLeft = ( options.align === 'end' ) || ( leftPosition + listWidth ) > maxX;
+                if ( showLeft && ( options.align ? options.align !== 'start' : true ) )
                 {
                     parent.style.left = ( leftPosition - ( listWidth - rect.width ) ) + 'px';
                 }

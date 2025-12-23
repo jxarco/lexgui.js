@@ -56,10 +56,11 @@
         panel.addTable( null, {
             head: [ "Option", "Type", "Description", "Default" ],
             body: [
+                ["align", `<span class='cursor-pointer' title='"start" | "end"'>Enum</span>`, "Force dropdown options horizontal alignment", "—"],
                 ["disabled", "Boolean", "Make the component disabled", "false"],
+                ["emptyMsg", "String", "Custom message to show when no filtered results", "—"],
                 ["filter", "Boolean", "Specify if search bar is needed", "false"],
                 ["placeholder", "String", "Placeholder for the filter input", "—"],
-                ["emptyMsg", "String", "Custom message to show when no filtered results", "—"]
             ].map( v => {
                 return [ docMaker.iCode( v[ 0 ], "table" ), docMaker.iCode( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? docMaker.iCode( v[ 3 ], "table desc" ) : v[ 3 ] ];
             } )

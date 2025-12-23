@@ -2507,6 +2507,8 @@
   --warning: light-dark(#dfc622, #ffe864);
   --info: light-dark(#1d4ed8, #60a5fa);
   --info-foreground: light-dark(#fcf3f3, #1d4ed8);
+  --selection: light-dark(#0a0a0a, #e5e5e5);
+  --selection-foreground: light-dark(#fff, #171717);
   --global-chart-color-1: oklch(0.488 0.243 264.376);
   --global-chart-color-2: oklch(0.696 0.17 162.48);
   --global-chart-color-3: oklch(0.769 0.188 70.08);
@@ -2646,6 +2648,10 @@
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #aaaaaa;
+}
+::selection {
+  background-color: var(--selection);
+  color: var(--selection-foreground);
 }
 html, body {
   width: 100%;
@@ -3973,7 +3979,7 @@ dialog .lexselect .lexselectoptions {
   border-width: 1px;
   border-style: solid;
   border-color: var(--border) !important;
-  border-radius: 0.25rem !important;
+  border-radius: 0.35rem !important;
   text-align: center;
   -webkit-appearance: none;
   -moz-appearance: none;
@@ -4240,7 +4246,7 @@ dialog .lexselect .lexselectoptions {
   position: relative;
   width: 100%;
   flex: 1 0 0%;
-  border-radius: 4px;
+  border-radius: 0.5rem;
   border: 2px solid transparent;
   margin-right: 2px;
   background-color: var(--secondary);
@@ -5237,12 +5243,6 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
   height: 1px;
   margin-left: -0.25em;
 }
-.lexareatabs {
-  display: flex;
-  flex-direction: row;
-  width: fit-content;
-  width: -moz-fit-content;
-}
 .lexareatabs .lexareatab {
   font-size: var(--text-sm);
   font-weight: 600;
@@ -5268,7 +5268,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 .lexareatabs.row {
   background-color: var(--secondary);
   border: 1px solid var(--border);
-  border-radius: 0.5rem;
+  border-radius: 0.75rem;
   padding: 0.2rem;
   gap: 0.125em;
 }
@@ -5276,7 +5276,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
   padding: var(--pad-lg) 1.25em;
   transition: 0.1s;
   background: none;
-  border-radius: 6px;
+  border-radius: 0.5rem;
 }
 .lexareatabs.fit {
   width: 100%;
