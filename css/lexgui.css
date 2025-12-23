@@ -2882,12 +2882,13 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexsidebar .lexsidebarentry:hover {
-    background-color: var(--secondary);
+    background-color: var(--accent);
+    color: var(--accent-foreground);
 }
 
 .lexsidebar .lexsidebarentry.selected {
-    background-color: var(--accent);
-    color: var(--foreground);
+    background-color: var(--primary);
+    color: var(--primary-foreground);
 }
 
 .lexsidebar .lexsidebarentry:active {
@@ -2927,7 +2928,6 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexsidebar .lexsidebarentry > * {
-    color: var(--foreground);
     font-size: var(--text-sm);
 }
 
@@ -2985,7 +2985,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexsidebar.collapsing .lexsidebarheader {
-    background-color: color-mix(in oklab, var(--primary) 30%, transparent);
+    background-color: color-mix(in oklab, var(--primary) 50%, transparent);
 }
 
 .lexsidebar.collapsing .lexsidebarheader svg path {

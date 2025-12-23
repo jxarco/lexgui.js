@@ -382,7 +382,7 @@ LX._registerIconsAndColors( "./" );
 
             panel.branch("Node", { icon: "Box" });
             panel.addText("Name", "node_1");
-            panel.addCheckbox("Visibility", true, null, { className: "accent" });
+            panel.addCheckbox("Visibility", true, null);
             panel.addLayers("Layers", 10, null);
 
             const map2Dpoints = [
