@@ -19,7 +19,7 @@
 }`;
 
         window.__addInteractiveCodeExample( content, componentName, panel => {
-            const area = new LX.Area( { className: "flex flex-col p-2 gap-1", skipAppend: true, height: "auto" } );
+            const area = new LX.Area( { className: "flex flex-col p-8 gap-1 items-center", skipAppend: true, height: "auto" } );
             panel.attach( area );
 
             const snippet = LX.makeCodeSnippet(code, ["780px", "auto"], {
@@ -32,10 +32,8 @@
             });
 
             area.attach( snippet );
-
         });
     }
-
 
     docMaker.header("API Reference", "h2");
     docMaker.classCtor("function LX.makeCodeSnippet", [ [ "code", "String" ], [ "size", "Array" ], [ "options", "Object = {}" ] ]);

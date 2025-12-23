@@ -2,6 +2,9 @@
 
 ## dev
 
+CodeEditor:
+- Fixed `options.onReady` being called before processing lines.
+
 ## 8.2 (master)
 
 Use Tailwind (finally) to create and compile CSS.

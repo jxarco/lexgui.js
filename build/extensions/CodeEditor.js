@@ -1375,12 +1375,12 @@ class CodeEditor {
             this.codeArea.root.style.height = `calc(100% - ${this._fullVerticalOffset}px)`;
             // Process lines on finish computing final sizes
             this.processLines();
+            this._preparedAt = performance.now();
+            if (this.onReady) {
+                this.onReady(this);
+            }
+            console.log(`[LX.CodeEditor] Ready! (font size: ${this.fontSize}px)`);
         }, 50);
-        if (this.onReady) {
-            this.onReady(this);
-        }
-        this._preparedAt = performance.now();
-        console.log(`[LX.CodeEditor] Ready! (font size: ${this.fontSize}px)`);
     }
     // Clear signals
     clear() {
