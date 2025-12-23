@@ -5,15 +5,14 @@
 Use Tailwind (finally) to create and compile CSS.
 Removed custom utility classes, refactored theme colors and every theme variable used in LX.
 Cleaned main CSS, move generic component styling to classes.
-Added `LX.twMerge` and `LX.mergeClass` to merge elements class names to allow overrides.
-`LX.getThemeColor` now allows to get colors with applied alpha using `color/{alpha}`.
+Added `LX.twMerge` and `LX.mergeClass` to merge elements class names and allow overrides.
+`LX.getCSSVariable` (old `LX.getThemeColor`) now allows to get colors with applied alpha using `color/{alpha}`.
 Added new Avatar Component (see docs).
+Added support for primary color theming using `LX.setThemeColor`.
 Avatar Component in now used in Sidebar header and footer.
 Added support for `oklch` format in ColorInput, new utils `LX.oklchToHex`.
-ComboButtons Component `options.float` now accepts `start, center, end` instead of `left, center, right`.
 Added Select `options.side` to force dropdown list alignment.
 Added Vector `options.skipLock` to skip the lock button.
-Breadcrumb items `title` renamed to `name`.
 Fixed modal scroll bleed.
 Fixed Commandbar position when page has vertical scroll.
 Minor fixes Area Tabs' and Sidebar's CSS.
@@ -34,6 +33,13 @@ CodeEditor:
 - `options.callback` renamed to `options.onReady`, which is now called once the Editor is ready and visible.
 - Pair keys `(), {}, "", ...` now only pair if no next char (or space).
 - Added 3rd parameter to `setText(text, langString, _detectLanguage_)` to allow forcing language detection.
+
+Other API Changes:
+- `LX.getThemeColor` and `LX.setThemeColor` renamed to `LX.getCSSVariable` and `LX.setCSSVariable`.
+- `LX.setSystemTheme` renamed to `LX.setSystemMode`.
+- `LX.getTheme`, `LX.setTheme`, and `LX.switchTheme` renamed to `LX.getMode`, `LX.setMode`, and `LX.switchMode`.
+- ComboButtons Component `options.float` now accepts `start, center, end` instead of `left, center, right`.
+- Breadcrumb items `title` renamed to `name`.
 
 ## 8.1.2 (master)
 

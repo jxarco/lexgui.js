@@ -223,13 +223,13 @@
         let menubar = null, sheetArea = null;
 
         const localHost = window.location.protocol !== "https:";
-        const starterTheme = LX.getTheme();
+        const starterTheme = LX.getMode();
         const menubarButtons = [
             {
                 title: "Change Theme",
                 icon: starterTheme == "dark" ? "Moon" : "Sun",
                 swap: starterTheme == "dark" ? "Sun" : "Moon",
-                callback:  (value, event) => { LX.switchTheme() }
+                callback:  (value, event) => { LX.switchMode() }
             }
         ];
         const sidebarOptions = {

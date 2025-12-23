@@ -48,7 +48,7 @@
     canvas.width = video.clientWidth;
     canvas.height = video.clientHeight;
     const ctx = canvas.getContext("2d");
-    ctx.fillStyle = LX.getThemeColor("color-blue-400");
+    ctx.fillStyle = LX.getCSSVariable("color-blue-400");
     ctx.font = "40px Arial";
     ctx.fillText("I'm a canvas above the video!", canvas.width / 2, 100);
 
@@ -60,7 +60,7 @@
         canvas.width = video.clientWidth;
         canvas.height = video.clientHeight;
         const ctx = canvas.getContext("2d");
-        ctx.fillStyle = LX.getThemeColor("color-blue-400");
+        ctx.fillStyle = LX.getCSSVariable("color-blue-400");
         ctx.font = "40px Arial";
         ctx.fillText("I'm a canvas above the video!", canvas.width / 2, 100);
         //videoEditor.timebar.resize(size)

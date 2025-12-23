@@ -29,11 +29,11 @@
 
     docMaker.header( "Color Schemes", "h3" );
    
-    docMaker.paragraph( `LexGUI uses a dark theme by default. You can change the theme by overriding your device or browser color scheme but the easiest way is to use ${docMaker.iCode("LX.setTheme")}
-     where you can use "light" or "dark". If any of your content depends on the selected theme (usually JavaScript code, not CSS), make sure you are listening to the ${docMaker.iCode("@on_new_color_scheme")} signal being emited when the theme changes.` );
+    docMaker.paragraph( `LexGUI uses dark mode by default. You can change it by overriding your device or browser color scheme but the easiest way is to use ${docMaker.iCode("LX.setMode")}
+     where you can use "light" or "dark". If any of your content depends on the selected theme (usually JavaScript code, not CSS), make sure you are listening to the ${docMaker.iCode("@on_new_color_scheme")} signal being emited when the mode changes.` );
     docMaker.code( `LX.@[mtd]addSignal@( @"|@on_new_color_scheme"@, (el, value) => {
-    @[com]// Retrieve again the color using LX.getThemeColor, which checks the applied theme@
-    @const@ bgColor = LX.@[mtd]getThemeColor@( @"primary"@ );
+    @[com]// Retrieve again the color using LX.getCSSVariable, which checks the applied theme@
+    @const@ bgColor = LX.@[mtd]getCSSVariable@( @"primary"@ );
     @this@.redraw( bgColor );
 } );
 ` );

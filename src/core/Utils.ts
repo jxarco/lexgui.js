@@ -322,70 +322,69 @@ function concatTypedArray( arrays: any[], ArrayType: any )
 LX.concatTypedArray = concatTypedArray;
 
 /**
- * @method setColorTheme
+ * @method setThemeColor
  * @description Set colored theme
- * @param {String} colorScheme Name of the scheme
- * @param {Boolean} storeLocal Store in localStorage
+ * @param {String} colorThemeName Name of the color
  */
-function setColorTheme( colorThemeName: string )
+function setThemeColor( colorThemeName: string )
 {
     document.documentElement.className = `theme-${colorThemeName}`;
-    const colorScheme = LX.getTheme();
+    const colorScheme = LX.getMode();
     document.documentElement.classList.toggle( 'dark', colorScheme == 'dark' );
 }
 
-LX.setColorTheme = setColorTheme;
+LX.setThemeColor = setThemeColor;
 
 /**
- * @method setTheme
- * @description Set dark or light theme
+ * @method setMode
+ * @description Set dark or light scheme mode
  * @param {String} colorScheme Name of the scheme
  * @param {Boolean} storeLocal Store in localStorage
  */
-function setTheme( colorScheme: string, storeLocal: boolean = true )
+function setMode( colorScheme: string, storeLocal: boolean = true )
 {
     colorScheme = ( colorScheme == 'light' ) ? 'light' : 'dark';
-    document.documentElement.setAttribute( 'data-theme', colorScheme );
+    document.documentElement.setAttribute( 'data-mode', colorScheme );
     document.documentElement.classList.toggle( 'dark', colorScheme == 'dark' );
     if ( storeLocal ) localStorage.setItem( 'lxColorScheme', colorScheme );
     LX.emitSignal( '@on_new_color_scheme', colorScheme );
 }
 
-LX.setTheme = setTheme;
+LX.setMode = setMode;
 
 /**
- * @method getTheme
+ * @method getMode
  * @description Gets either "dark" or "light" theme value
  */
-function getTheme()
+function getMode()
 {
-    return document.documentElement.getAttribute( 'data-theme' ) ?? 'dark';
+    return document.documentElement.getAttribute( 'data-mode' ) ?? 'dark';
 }
 
-LX.getTheme = getTheme;
+LX.getMode = getMode;
 
 /**
- * @method switchTheme
+ * @method switchMode
  * @description Toggles between "dark" and "light" themes
  */
-function switchTheme()
+function switchMode()
 {
-    const currentTheme = getTheme();
-    setTheme( currentTheme == 'dark' ? 'light' : 'dark' );
+    const currentTheme = getMode();
+    setMode( currentTheme == 'dark' ? 'light' : 'dark' );
 }
 
-LX.switchTheme = switchTheme;
+LX.switchMode = switchMode;
 
 /**
- * @method setSystemTheme
+ * @method setSystemMode
  * @description Sets back the system theme
  */
-function setSystemTheme()
+function setSystemMode()
 {
     const currentTheme = ( window.matchMedia && window.matchMedia( '(prefers-color-scheme: light)' ).matches )
         ? 'light'
         : 'dark';
-    setTheme( currentTheme );
+    setMode( currentTheme );
     localStorage.removeItem( 'lxColorScheme' );
 
     // Reapply listener
@@ -396,30 +395,30 @@ function setSystemTheme()
     }
 }
 
-LX.setSystemTheme = setSystemTheme;
+LX.setSystemMode = setSystemMode;
 
 /**
- * @method setThemeColor
- * @description Sets a new value for one of the main theme variables
- * @param {String} colorName Name of the theme variable
- * @param {String} color Color in rgba/hex
+ * @method setCSSVariable
+ * @description Sets a new value for one of the CSS root variables
+ * @param {String} varName Name of the CSS variable
+ * @param {String} value 
  */
-function setThemeColor( colorName: string, color: string )
+function setCSSVariable( varName: string, value: string )
 {
     const r: any = document.querySelector( ':root' );
-    r.style.setProperty( '--' + colorName, color );
+    r.style.setProperty( '--' + varName, value );
 }
 
-LX.setThemeColor = setThemeColor;
+LX.setCSSVariable = setCSSVariable;
 
 /**
- * @method getThemeColor
- * @description Get the value for one of the main theme variables
- * @param {String} colorName Name of the theme variable
+ * @method getCSSVariable
+ * @description Get the value for one of the CSS root variables
+ * @param {String} varName Name of the CSS variable
  */
-function getThemeColor( colorName: string ): string
+function getCSSVariable( varName: string ): string
 {
-    const [ name, opacity ] = colorName.split( '/' );
+    const [ name, opacity ] = varName.split( '/' );
 
     const r: any = document.querySelector( ':root' );
     const s = getComputedStyle( r );
@@ -461,7 +460,7 @@ function getThemeColor( colorName: string ): string
     return value;
 }
 
-LX.getThemeColor = getThemeColor;
+LX.getCSSVariable = getCSSVariable;
 
 /**
  * @method switchSpacing

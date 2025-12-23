@@ -94,7 +94,7 @@
                         
             if(mode == types.KEYFRAMES) {                
                 let ctx = canvas.getContext("2d");
-                ctx.fillStyle = LX.getThemeColor("color-blue-500");
+                ctx.fillStyle = LX.getCSSVariable("color-blue-500");
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 ctx.font = panel.getValue('Font Size') + "px Monospace";
                 ctx.fillStyle = panel.getValue('Font Color');
@@ -115,7 +115,7 @@
         function fillPanel( panel ) {
             panel.clear();
             panel.branch("Canvas", {icon: "Palette", filter: true});
-            panel.addColor("Background", LX.getThemeColor("color-blue-500"));
+            panel.addColor("Background", LX.getCSSVariable("color-blue-500"));
             panel.addText("Track", trackName, (value, event) =>{
                 const visibleItems = activeTimeline.getVisibleItems();
                 for ( let i = 0; i < visibleItems.length; ++i ) {

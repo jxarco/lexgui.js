@@ -131,7 +131,7 @@
     --pad-2xl: 0.75rem;
 }
 
-:root[data-theme="light"] { color-scheme: light }
+:root[data-mode="light"] { color-scheme: light }
 
 /* themes */
 
@@ -816,11 +816,11 @@ a svg, svg path {
 
 /* Pop up dialog */
 
-:root[data-theme="light"] .lexdialog {
+:root[data-mode="light"] .lexdialog {
     box-shadow: 0px 2px 6px #30303083;
 }
 
-:root[data-theme="light"] .lexdialogtitle {
+:root[data-mode="light"] .lexdialogtitle {
     text-shadow: 0px 2px 2px #8d8d8d34;
 }
 
@@ -1172,13 +1172,13 @@ a svg, svg path {
     transform: rotate(0deg);
 }
 
-:root[data-theme="light"] .lexbranchtitle {
+:root[data-mode="light"] .lexbranchtitle {
     color: var(--secondary-foreground);
     background-color: var(--secondary);
     text-shadow: 0px 2px 2px #e0e0e03a;
 }
 
-:root[data-theme="light"] .lexbranch.closed .lexbranchtitle {
+:root[data-mode="light"] .lexbranch.closed .lexbranchtitle {
     background-color: inherit;
 }
 
@@ -1246,7 +1246,7 @@ a svg, svg path {
     margin: 5px 0 5px 4px;
 }
 
-:root[data-theme="light"] .lexbranch .lexseparator {
+:root[data-mode="light"] .lexbranch .lexseparator {
     border-top: 1px solid #e7e7e7;
     border-bottom: 1px solid #c1c1c1;
 }
@@ -1497,17 +1497,17 @@ a svg, svg path {
 /* Success Button */
 .lexbutton.success { --button-color: color-mix(in oklab, var(--success) 10%, transparent); color: var(--success); }
 .lexbutton.success:hover { --button-color: color-mix(in oklab, var(--success) 30%, transparent); }
-:root[data-theme="light"] .lexbutton.success:hover { --button-color: color-mix(in oklab, var(--success)20%, transparent); }
+:root[data-mode="light"] .lexbutton.success:hover { --button-color: color-mix(in oklab, var(--success)20%, transparent); }
 
 /* Warning Button */
 .lexbutton.warning { --button-color: color-mix(in oklab, var(--warning) 10%, transparent); color: var(--warning); }
 .lexbutton.warning:hover { --button-color: color-mix(in oklab, var(--warning) 30%, transparent); }
-:root[data-theme="light"] .lexbutton.warning:hover { --button-color: color-mix(in oklab, var(--warning)20%, transparent); }
+:root[data-mode="light"] .lexbutton.warning:hover { --button-color: color-mix(in oklab, var(--warning)20%, transparent); }
 
 /* Destructive Button */
 .lexbutton.destructive { --button-color: color-mix(in oklab, var(--destructive) 10%, transparent); color: var(--destructive); }
 .lexbutton.destructive:hover {  --button-color: color-mix(in oklab, var(--destructive) 30%, transparent); }
-:root[data-theme="light"] .lexbutton.destructive:hover { --button-color: color-mix(in oklab, var(--destructive)20%, transparent); }
+:root[data-mode="light"] .lexbutton.destructive:hover { --button-color: color-mix(in oklab, var(--destructive)20%, transparent); }
 
 /* Outline Button */
 .lexbutton.outline {
@@ -1516,15 +1516,15 @@ a svg, svg path {
     --tw-shadow: 0 1px 2px 0 var(--tw-shadow-color, #0000000d);
     box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow)
 }
-:root[data-theme="light"] .lexbutton.outline { --button-color: var(--background); }
+:root[data-mode="light"] .lexbutton.outline { --button-color: var(--background); }
 .lexbutton.outline:hover { --button-color: color-mix(in oklab, var(--input)50%, transparent); }
-:root[data-theme="light"] .lexbutton.outline:hover { --button-color: var(--muted); color: var(--foreground) }
+:root[data-mode="light"] .lexbutton.outline:hover { --button-color: var(--muted); color: var(--foreground) }
 
 .lexbutton.dashed { border-width: 1px; border-style: dashed; border-color: var(--input); }
 
 /* Ghost Button */
 .lexbutton.ghost:hover { background-color:color-mix(in oklab, var(--muted)50%, transparent); }
-:root[data-theme="light"] .lexbutton.ghost:hover { background-color: var(--muted); color: var(--foreground); }
+:root[data-mode="light"] .lexbutton.ghost:hover { background-color: var(--muted); color: var(--foreground); }
 
 /* Link Button */
 .lexbutton.link { color: var(--primary); text-underline-offset: 4px }
@@ -2191,7 +2191,7 @@ input[type=number] {
     box-shadow: 0px 0px 2px 1px var(--secondary);
 }
 
-:root[data-theme="light"] .lexinputslider::-webkit-slider-thumb {
+:root[data-mode="light"] .lexinputslider::-webkit-slider-thumb {
     box-shadow: none;
     border: 1px solid var(--primary);
 }
@@ -2206,7 +2206,7 @@ input[type=number] {
     box-shadow: 0px 0px 2px 1px var(--secondary);
 }
 
-:root[data-theme="light"] .lexinputslider::-moz-range-thumb {
+:root[data-mode="light"] .lexinputslider::-moz-range-thumb {
     box-shadow: none;
     border: 1px solid var(--primary);
 }
@@ -2567,7 +2567,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 .lexbadge.warning { background-color: var(--warning); color: #793205; }
 .lexbadge.destructive { background-color: color-mix(in oklab, var(--destructive) 60%, transparent); color: white; }
 
-:root[data-theme="light"] .lexbadge.destructive {
+:root[data-mode="light"] .lexbadge.destructive {
     background-color: var(--destructive);
 }
 
@@ -2650,11 +2650,11 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     min-width: 0rem;
 }
 
-.lexmenubuttons .lexbutton:hover, :root[data-theme="light"] .lexmenubuttons .lexbutton:hover {
+.lexmenubuttons .lexbutton:hover, :root[data-mode="light"] .lexmenubuttons .lexbutton:hover {
     background-color: transparent !important;
 }
 
-.lexmenubuttons .lexbutton:active, :root[data-theme="light"] .lexmenubuttons .lexbutton:active {
+.lexmenubuttons .lexbutton:active, :root[data-mode="light"] .lexmenubuttons .lexbutton:active {
     background-color: transparent !important;
 }
 
@@ -3513,7 +3513,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     padding: 0.2rem;
 }
 
-:root[data-theme="light"] .lextable table {
+:root[data-mode="light"] .lextable table {
     box-shadow: none;
 }
 
@@ -3649,13 +3649,13 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     margin-top: 8px;
 }
 
-:root[data-theme="light"] .lexknob .knobcircle {
+:root[data-mode="light"] .lexknob .knobcircle {
     background: rgb(182, 182, 182);
     background: linear-gradient(180deg, rgba(200, 200, 200, 1) 0%, rgba(160, 160, 160, 1) 100%);
     box-shadow: 0px 0px 8px 2px #a3a3a379;
 }
 
-:root[data-theme="light"] .lexknob .innerknobcircle {
+:root[data-mode="light"] .lexknob .innerknobcircle {
     background-color: rgb(182, 182, 182);
 }
 
@@ -4667,90 +4667,90 @@ ul.lexassetscontent {
 .cm-bln.php { color: #ddce80; }  /* builtin */
 .cm-var.php { color: #88bde9; }  /* variable */
 
-:root[data-theme="light"] .lexcodeeditor pre.active-line {
+:root[data-mode="light"] .lexcodeeditor pre.active-line {
     background-color: #e4e0e0ab;
 }
 
-:root[data-theme="light"] .lexcodeeditor.disabled pre.active-line {
+:root[data-mode="light"] .lexcodeeditor.disabled pre.active-line {
     background: none;
 }
 
-:root[data-theme="light"] .lexcodescrollbar div {
+:root[data-mode="light"] .lexcodescrollbar div {
     /* thumb */
     background-color: #8383839d !important;
 }
 
-:root[data-theme="light"] .lexcodescrollbar div:hover {
+:root[data-mode="light"] .lexcodescrollbar div:hover {
     /* thumb */
     background-color: #5e5e5ea9 !important;
 }
 
-:root[data-theme="light"] .cm-str { color: #a15e3e; }   /* string */
-:root[data-theme="light"] .cm-std { color: #a753c0; }   /* statements & declarations */
-:root[data-theme="light"] .cm-kwd { color: #1967d2; }   /* keyword */
-:root[data-theme="light"] .cm-com { color: #188038; }   /* comment */
+:root[data-mode="light"] .cm-str { color: #a15e3e; }   /* string */
+:root[data-mode="light"] .cm-std { color: #a753c0; }   /* statements & declarations */
+:root[data-mode="light"] .cm-kwd { color: #1967d2; }   /* keyword */
+:root[data-mode="light"] .cm-com { color: #188038; }   /* comment */
 
-:root[data-theme="light"] .cm-typ.javascript { color: #0b9484; }  /* type */
-:root[data-theme="light"] .cm-dec.javascript { color: #c5221f; }  /* decimal */
-:root[data-theme="light"] .cm-sym.javascript { color: #333333; }  /* symbol */
-:root[data-theme="light"] .cm-mtd.javascript { color: #539ac7 }   /* method */
+:root[data-mode="light"] .cm-typ.javascript { color: #0b9484; }  /* type */
+:root[data-mode="light"] .cm-dec.javascript { color: #c5221f; }  /* decimal */
+:root[data-mode="light"] .cm-sym.javascript { color: #333333; }  /* symbol */
+:root[data-mode="light"] .cm-mtd.javascript { color: #539ac7 }   /* method */
 
-:root[data-theme="light"] .cm-typ.c { color: #0b9484; }   /* type */
-:root[data-theme="light"] .cm-bln.c { color: #333333; }   /* builtin */
-:root[data-theme="light"] .cm-dec.c { color: #c5221f; }   /* decimal */
-:root[data-theme="light"] .cm-sym.c { color: #333333; }   /* symbol */
-:root[data-theme="light"] .cm-mtd.c { color: #539ac7 }    /* method */
-:root[data-theme="light"] .cm-ppc.c { color: #626262 }    /* preprocessor */
+:root[data-mode="light"] .cm-typ.c { color: #0b9484; }   /* type */
+:root[data-mode="light"] .cm-bln.c { color: #333333; }   /* builtin */
+:root[data-mode="light"] .cm-dec.c { color: #c5221f; }   /* decimal */
+:root[data-mode="light"] .cm-sym.c { color: #333333; }   /* symbol */
+:root[data-mode="light"] .cm-mtd.c { color: #539ac7 }    /* method */
+:root[data-mode="light"] .cm-ppc.c { color: #626262 }    /* preprocessor */
 
-:root[data-theme="light"] .cm-typ.cpp { color: #0b9484; }   /* type */
-:root[data-theme="light"] .cm-bln.cpp { color: #333333; }   /* builtin */
-:root[data-theme="light"] .cm-dec.cpp { color: #c5221f; }   /* decimal */
-:root[data-theme="light"] .cm-sym.cpp { color: #333333; }   /* symbol */
-:root[data-theme="light"] .cm-mtd.cpp { color: #539ac7 }    /* method */
-:root[data-theme="light"] .cm-ppc.cpp { color: #626262 }    /* preprocessor */
+:root[data-mode="light"] .cm-typ.cpp { color: #0b9484; }   /* type */
+:root[data-mode="light"] .cm-bln.cpp { color: #333333; }   /* builtin */
+:root[data-mode="light"] .cm-dec.cpp { color: #c5221f; }   /* decimal */
+:root[data-mode="light"] .cm-sym.cpp { color: #333333; }   /* symbol */
+:root[data-mode="light"] .cm-mtd.cpp { color: #539ac7 }    /* method */
+:root[data-mode="light"] .cm-ppc.cpp { color: #626262 }    /* preprocessor */
 
-:root[data-theme="light"] .cm-sym.cmake { color: #a753c0; }  /* symbol */
+:root[data-mode="light"] .cm-sym.cmake { color: #a753c0; }  /* symbol */
 
-:root[data-theme="light"] .cm-kwd.css { color: #c49319; }   /* keyword */
-:root[data-theme="light"] .cm-typ.css { color: #539ac7; }   /* type */
-:root[data-theme="light"] .cm-bln.css { color: #2194ce; }   /* builtin */
-:root[data-theme="light"] .cm-dec.css { color: #c5221f; }   /* decimal */
-:root[data-theme="light"] .cm-sym.css { color: #a753c0; }   /* symbol */
+:root[data-mode="light"] .cm-kwd.css { color: #c49319; }   /* keyword */
+:root[data-mode="light"] .cm-typ.css { color: #539ac7; }   /* type */
+:root[data-mode="light"] .cm-bln.css { color: #2194ce; }   /* builtin */
+:root[data-mode="light"] .cm-dec.css { color: #c5221f; }   /* decimal */
+:root[data-mode="light"] .cm-sym.css { color: #a753c0; }   /* symbol */
 
-:root[data-theme="light"] .cm-dec.json { color: #c5221f; }  /* decimal */
-:root[data-theme="light"] .cm-sym.json { color: #a753c0; }  /* symbol */
+:root[data-mode="light"] .cm-dec.json { color: #c5221f; }  /* decimal */
+:root[data-mode="light"] .cm-sym.json { color: #a753c0; }  /* symbol */
 
-:root[data-theme="light"] .cm-typ.glsl { color: #0b9484; }  /* type */
-:root[data-theme="light"] .cm-dec.glsl { color: #c5221f; }  /* decimal */
-:root[data-theme="light"] .cm-mtd.glsl { color: #539ac7; }  /* method */
-:root[data-theme="light"] .cm-sym.glsl { color: #a753c0; }  /* symbol */
+:root[data-mode="light"] .cm-typ.glsl { color: #0b9484; }  /* type */
+:root[data-mode="light"] .cm-dec.glsl { color: #c5221f; }  /* decimal */
+:root[data-mode="light"] .cm-mtd.glsl { color: #539ac7; }  /* method */
+:root[data-mode="light"] .cm-sym.glsl { color: #a753c0; }  /* symbol */
 
-:root[data-theme="light"] .cm-typ.wgsl { color: #0b9484; }  /* type */
-:root[data-theme="light"] .cm-dec.wgsl { color: #c5221f; }  /* decimal */
-:root[data-theme="light"] .cm-mtd.wgsl { color: #539ac7; }  /* method */
-:root[data-theme="light"] .cm-sym.wgsl { color: #a753c0; }  /* symbol */
-:root[data-theme="light"] .cm-ppc.wgsl { color: #626262; }  /* preprocessor */
+:root[data-mode="light"] .cm-typ.wgsl { color: #0b9484; }  /* type */
+:root[data-mode="light"] .cm-dec.wgsl { color: #c5221f; }  /* decimal */
+:root[data-mode="light"] .cm-mtd.wgsl { color: #539ac7; }  /* method */
+:root[data-mode="light"] .cm-sym.wgsl { color: #a753c0; }  /* symbol */
+:root[data-mode="light"] .cm-ppc.wgsl { color: #626262; }  /* preprocessor */
 
-:root[data-theme="light"] .cm-typ.rust { color: #0b9484; }  /* type */
-:root[data-theme="light"] .cm-dec.rust { color: #c5221f; }  /* decimal */
-:root[data-theme="light"] .cm-sym.rust { color: #333333; }  /* symbol */
-:root[data-theme="light"] .cm-mtd.rust { color: #539ac7 }   /* method */
+:root[data-mode="light"] .cm-typ.rust { color: #0b9484; }  /* type */
+:root[data-mode="light"] .cm-dec.rust { color: #c5221f; }  /* decimal */
+:root[data-mode="light"] .cm-sym.rust { color: #333333; }  /* symbol */
+:root[data-mode="light"] .cm-mtd.rust { color: #539ac7 }   /* method */
 
-:root[data-theme="light"] .cm-typ.python { color: #0b9484; }  /* type */
-:root[data-theme="light"] .cm-dec.python { color: #c5221f; }  /* decimal */
-:root[data-theme="light"] .cm-sym.python { color: #333333; }  /* symbol */
-:root[data-theme="light"] .cm-mtd.python { color: #539ac7 }   /* method */
+:root[data-mode="light"] .cm-typ.python { color: #0b9484; }  /* type */
+:root[data-mode="light"] .cm-dec.python { color: #c5221f; }  /* decimal */
+:root[data-mode="light"] .cm-sym.python { color: #333333; }  /* symbol */
+:root[data-mode="light"] .cm-mtd.python { color: #539ac7 }   /* method */
 
-:root[data-theme="light"] .cm-dec.batch { color: #c5221f; }   /* decimal */
-:root[data-theme="light"] .cm-sym.batch { color: #a753c0; }   /* symbol */
+:root[data-mode="light"] .cm-dec.batch { color: #c5221f; }   /* decimal */
+:root[data-mode="light"] .cm-sym.batch { color: #a753c0; }   /* symbol */
 
-:root[data-theme="light"] .cm-bln.html { color: #539ac7; }    /* builtin */
-:root[data-theme="light"] .cm-sym.html { color: #696969; }    /* symbol */
+:root[data-mode="light"] .cm-bln.html { color: #539ac7; }    /* builtin */
+:root[data-mode="light"] .cm-sym.html { color: #696969; }    /* symbol */
 
-:root[data-theme="light"] .cm-bln.xml { color: #a1d2f0; }    /* builtin */
-:root[data-theme="light"] .cm-sym.xml { color: #929292; }    /* symbol */
+:root[data-mode="light"] .cm-bln.xml { color: #a1d2f0; }    /* builtin */
+:root[data-mode="light"] .cm-sym.xml { color: #929292; }    /* symbol */
 
-:root[data-theme="light"] .cm-bln.markdown { color: #a1d2f0; }  /* builtin */
+:root[data-mode="light"] .cm-bln.markdown { color: #a1d2f0; }  /* builtin */
 
 /* Node Graph */
 

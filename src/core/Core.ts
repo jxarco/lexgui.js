@@ -154,7 +154,7 @@ LX.init = async function( options: any = {} )
     {
         const storedcolorScheme = localStorage.getItem( 'lxColorScheme' );
         if ( storedcolorScheme ) return;
-        LX.setTheme( event.matches ? 'dark' : 'light', false );
+        LX.setMode( event.matches ? 'dark' : 'light', false );
     };
 
     this._mqlPrefersDarkScheme = window.matchMedia ? window.matchMedia( '(prefers-color-scheme: dark)' ) : null;
@@ -162,19 +162,19 @@ LX.init = async function( options: any = {} )
     const storedcolorScheme = localStorage.getItem( 'lxColorScheme' );
     if ( storedcolorScheme )
     {
-        LX.setTheme( storedcolorScheme );
+        LX.setMode( storedcolorScheme );
     }
     else if ( this._mqlPrefersDarkScheme && ( options.autoTheme ?? true ) )
     {
         if ( window.matchMedia( '(prefers-color-scheme: light)' ).matches )
         {
-            LX.setTheme( 'light', false );
+            LX.setMode( 'light', false );
         }
 
         this._mqlPrefersDarkScheme.addEventListener( 'change', this._onChangeSystemTheme );
     }
 
-    // LX.setColorTheme( 'rose' );
+    // LX.setThemeColor( 'rose' );
 
     return this.mainArea;
 };

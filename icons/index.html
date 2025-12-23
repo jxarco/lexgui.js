@@ -32,7 +32,7 @@
     window.LX = LX;
 
     const area = await LX.init({ layoutMode: "document", rootClass: "wrapper" });
-    const starterTheme = LX.getTheme();
+    const starterTheme = LX.getMode();
     const localHost = window.location.protocol !== "https:";
     const docMaker = new DocMaker();
     const mobile = navigator && /Android|iPhone/i.test( navigator.userAgent );
@@ -99,7 +99,7 @@
             title: "Switch Theme",
             icon: starterTheme == "dark" ? "Moon" : "Sun",
             swap: starterTheme == "dark" ? "Sun" : "Moon",
-            callback: (value, event) => { LX.switchTheme() }
+            callback: (value, event) => { LX.switchMode() }
         },
         {
             title: "Switch Spacing",

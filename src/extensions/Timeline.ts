@@ -235,21 +235,21 @@ export abstract class Timeline
          */
         function updateTheme()
         {
-            Timeline.BACKGROUND_COLOR = LX.getThemeColor( 'background-blur' );
-            Timeline.TRACK_COLOR_PRIMARY = LX.getThemeColor( 'card' );
-            Timeline.TRACK_COLOR_SECONDARY = LX.getThemeColor( 'secondary' );
-            Timeline.TRACK_COLOR_TERTIARY = LX.getThemeColor( 'accent' );
-            Timeline.FONT = LX.getThemeColor( 'global-font' );
-            Timeline.FONT_COLOR_PRIMARY = LX.getThemeColor( 'foreground' );
-            Timeline.FONT_COLOR_TERTIARY = LX.getThemeColor( 'primary' );
-            Timeline.FONT_COLOR_QUATERNARY = LX.getThemeColor( 'muted-foreground' );
-            Timeline.KEYFRAME_COLOR = LX.getThemeColor( 'lxTimeline-keyframe' );
-            Timeline.KEYFRAME_COLOR_SELECTED = Timeline.KEYFRAME_COLOR_HOVERED = LX.getThemeColor(
+            Timeline.BACKGROUND_COLOR = LX.getCSSVariable( 'background-blur' );
+            Timeline.TRACK_COLOR_PRIMARY = LX.getCSSVariable( 'card' );
+            Timeline.TRACK_COLOR_SECONDARY = LX.getCSSVariable( 'secondary' );
+            Timeline.TRACK_COLOR_TERTIARY = LX.getCSSVariable( 'accent' );
+            Timeline.FONT = LX.getCSSVariable( 'global-font' );
+            Timeline.FONT_COLOR_PRIMARY = LX.getCSSVariable( 'foreground' );
+            Timeline.FONT_COLOR_TERTIARY = LX.getCSSVariable( 'primary' );
+            Timeline.FONT_COLOR_QUATERNARY = LX.getCSSVariable( 'muted-foreground' );
+            Timeline.KEYFRAME_COLOR = LX.getCSSVariable( 'lxTimeline-keyframe' );
+            Timeline.KEYFRAME_COLOR_SELECTED = Timeline.KEYFRAME_COLOR_HOVERED = LX.getCSSVariable(
                 'lxTimeline-keyframe-selected'
             );
-            Timeline.KEYFRAME_COLOR_LOCK = LX.getThemeColor( 'lxTimeline-keyframe-locked' );
-            Timeline.KEYFRAME_COLOR_EDITED = LX.getThemeColor( 'lxTimeline-keyframe-edited' );
-            Timeline.KEYFRAME_COLOR_INACTIVE = LX.getThemeColor( 'lxTimeline-keyframe-inactive' );
+            Timeline.KEYFRAME_COLOR_LOCK = LX.getCSSVariable( 'lxTimeline-keyframe-locked' );
+            Timeline.KEYFRAME_COLOR_EDITED = LX.getCSSVariable( 'lxTimeline-keyframe-edited' );
+            Timeline.KEYFRAME_COLOR_INACTIVE = LX.getCSSVariable( 'lxTimeline-keyframe-inactive' );
         }
 
         this.updateTheme = updateTheme.bind( this );
@@ -1694,31 +1694,31 @@ export abstract class Timeline
     // ----- END OF BASE FUNCTIONS -----
 }
 
-Timeline.BACKGROUND_COLOR = LX.getThemeColor( 'background-blur' );
-Timeline.TRACK_COLOR_PRIMARY = LX.getThemeColor( 'card' );
-Timeline.TRACK_COLOR_SECONDARY = LX.getThemeColor( 'secondary' );
-Timeline.TRACK_COLOR_TERTIARY = LX.getThemeColor( 'accent' );
-Timeline.TRACK_SELECTED = LX.getThemeColor( 'color-blue-600' );
-Timeline.TRACK_SELECTED_LIGHT = LX.getThemeColor( 'color-blue-400' );
-Timeline.FONT = LX.getThemeColor( 'global-font' );
-Timeline.FONT_COLOR_PRIMARY = LX.getThemeColor( 'foreground' );
-Timeline.FONT_COLOR_TERTIARY = LX.getThemeColor( 'primary' );
-Timeline.FONT_COLOR_QUATERNARY = LX.getThemeColor( 'muted-foreground' );
-Timeline.TIME_MARKER_COLOR = LX.getThemeColor( 'color-blue-600' );
+Timeline.BACKGROUND_COLOR = LX.getCSSVariable( 'background-blur' );
+Timeline.TRACK_COLOR_PRIMARY = LX.getCSSVariable( 'card' );
+Timeline.TRACK_COLOR_SECONDARY = LX.getCSSVariable( 'secondary' );
+Timeline.TRACK_COLOR_TERTIARY = LX.getCSSVariable( 'accent' );
+Timeline.TRACK_SELECTED = LX.getCSSVariable( 'color-blue-600' );
+Timeline.TRACK_SELECTED_LIGHT = LX.getCSSVariable( 'color-blue-400' );
+Timeline.FONT = LX.getCSSVariable( 'global-font' );
+Timeline.FONT_COLOR_PRIMARY = LX.getCSSVariable( 'foreground' );
+Timeline.FONT_COLOR_TERTIARY = LX.getCSSVariable( 'primary' );
+Timeline.FONT_COLOR_QUATERNARY = LX.getCSSVariable( 'muted-foreground' );
+Timeline.TIME_MARKER_COLOR = LX.getCSSVariable( 'color-blue-600' );
 Timeline.TIME_MARKER_COLOR_TEXT = '#ffffff';
 
-LX.setThemeColor( 'lxTimeline-keyframe', 'light-dark(#2d69da,#2d69da )' );
-LX.setThemeColor( 'lxTimeline-keyframe-selected', 'light-dark(#f5c700,#fafa14)' );
-LX.setThemeColor( 'lxTimeline-keyframe-hovered', 'light-dark(#f5c700,#fafa14)' );
-LX.setThemeColor( 'lxTimeline-keyframe-locked', 'light-dark(#c62e2e,#ff7d7d )' );
-LX.setThemeColor( 'lxTimeline-keyframe-edited', 'light-dark(#00d000,#00d000 )' );
-LX.setThemeColor( 'lxTimeline-keyframe-inactive', 'light-dark(#706b6b,#706b6b)' );
+LX.setCSSVariable( 'lxTimeline-keyframe', 'light-dark(#2d69da,#2d69da )' );
+LX.setCSSVariable( 'lxTimeline-keyframe-selected', 'light-dark(#f5c700,#fafa14)' );
+LX.setCSSVariable( 'lxTimeline-keyframe-hovered', 'light-dark(#f5c700,#fafa14)' );
+LX.setCSSVariable( 'lxTimeline-keyframe-locked', 'light-dark(#c62e2e,#ff7d7d )' );
+LX.setCSSVariable( 'lxTimeline-keyframe-edited', 'light-dark(#00d000,#00d000 )' );
+LX.setCSSVariable( 'lxTimeline-keyframe-inactive', 'light-dark(#706b6b,#706b6b)' );
 
-Timeline.KEYFRAME_COLOR = LX.getThemeColor( 'lxTimeline-keyframe' );
-Timeline.KEYFRAME_COLOR_SELECTED = Timeline.KEYFRAME_COLOR_HOVERED = LX.getThemeColor( 'lxTimeline-keyframe-selected' );
-Timeline.KEYFRAME_COLOR_LOCK = LX.getThemeColor( 'lxTimeline-keyframe-locked' );
-Timeline.KEYFRAME_COLOR_EDITED = LX.getThemeColor( 'lxTimeline-keyframe-edited' );
-Timeline.KEYFRAME_COLOR_INACTIVE = LX.getThemeColor( 'lxTimeline-keyframe-inactive' );
+Timeline.KEYFRAME_COLOR = LX.getCSSVariable( 'lxTimeline-keyframe' );
+Timeline.KEYFRAME_COLOR_SELECTED = Timeline.KEYFRAME_COLOR_HOVERED = LX.getCSSVariable( 'lxTimeline-keyframe-selected' );
+Timeline.KEYFRAME_COLOR_LOCK = LX.getCSSVariable( 'lxTimeline-keyframe-locked' );
+Timeline.KEYFRAME_COLOR_EDITED = LX.getCSSVariable( 'lxTimeline-keyframe-edited' );
+Timeline.KEYFRAME_COLOR_INACTIVE = LX.getCSSVariable( 'lxTimeline-keyframe-inactive' );
 Timeline.BOX_SELECTION_COLOR = '#AAA';
 
 LX.Timeline = Timeline;
@@ -3968,7 +3968,7 @@ export class ClipsTimeline extends Timeline
             fadein: options.fadein ?? undefined,
             fadeout: options.fadeout ?? undefined,
 
-            clipColor: options.clipColor ?? LX.getThemeColor( 'color-blue-600' ),
+            clipColor: options.clipColor ?? LX.getCSSVariable( 'color-blue-600' ),
             fadeColor: options.fadeColor ?? null,
             active: options.active ?? true,
             trackIdx: -1 // filled by addClip

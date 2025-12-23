@@ -4,7 +4,7 @@ import { CodeEditor } from 'lexgui/extensions/CodeEditor.js';
 window.LX = LX;
 
 const area = await LX.init( { layoutMode: "document", rootClass: "wrapper" } );
-const starterTheme = LX.getTheme();
+const starterTheme = LX.getMode();
 const mobile = navigator && /Android|iPhone/i.test( navigator.userAgent );
 const localHost = window.location.protocol !== "https:";
 const themes = [
@@ -73,7 +73,7 @@ menubar.addButtons( [
         title: "Switch Theme",
         icon: starterTheme == "dark" ? "Moon" : "Sun",
         swap: starterTheme == "dark" ? "Sun" : "Moon",
-        callback:  (value, event) => { LX.switchTheme() }
+        callback:  (value, event) => { LX.switchMode() }
     },
     {
         title: "Switch Spacing",
@@ -122,7 +122,7 @@ LX._registerIconsAndColors( "./" );
         const tabsParent = tabs.root.parentElement;
         tabsParent.className = LX.mergeClass( tabsParent.className, 'flex flex-row justify-between' );
 
-        const themeSelect = new LX.Select( null, themes, 'Neutral', (v) => LX.setColorTheme( v.toLowerCase() ), { overflowContainerY: null, align: "end" } );
+        const themeSelect = new LX.Select( null, themes, 'Neutral', (v) => LX.setThemeColor( v.toLowerCase() ), { overflowContainerY: null, align: "end" } );
         tabsParent.appendChild( themeSelect.root );
 
         const editorContainer = LX.makeContainer( [ null, "800px" ], "flex flex-col border-color rounded-lg overflow-hidden" );

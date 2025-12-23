@@ -278,51 +278,51 @@ code:has(.constructor) {
 	padding-inline: 8px;
 }
 
-:root[data-theme="light"] #content {
+:root[data-mode="light"] #content {
 	color: #202124;
 }
 
-:root[data-theme="light"] code {
+:root[data-mode="light"] code {
 	background-color: #ededed;
 }
 
-:root[data-theme="light"] code button {
+:root[data-mode="light"] code button {
 	color: #434e53;
 }
 
-:root[data-theme="light"] code button:hover {
+:root[data-mode="light"] code button:hover {
 	color: #879094;
 }
 
-:root[data-theme="light"] pre .str, :root[data-theme="light"] code .str { color: #188038; }
-:root[data-theme="light"] pre .kwd, :root[data-theme="light"] code .kwd { color: #1967d2; }
-:root[data-theme="light"] pre .com, :root[data-theme="light"] code .com { color: #b80672; }
-:root[data-theme="light"] pre .cls, :root[data-theme="light"] code .cls { color: #0b9484; }
-:root[data-theme="light"] pre .dec, :root[data-theme="light"] code .dec { color: #c5221f; }
-:root[data-theme="light"] pre .mtd, :root[data-theme="light"] code .mtd { color: #636362; }
-:root[data-theme="light"] pre .lit, :root[data-theme="light"] code .lit { color: #1967d2; }
-:root[data-theme="light"] pre .var, :root[data-theme="light"] code .var { color: #222222; }
-:root[data-theme="light"] pre .enu, :root[data-theme="light"] code .enu { color: #505fe2; }
-:root[data-theme="light"] pre .tag, :root[data-theme="light"] code .tag { color: #2183b4; }
-:root[data-theme="light"] pre .atn, :root[data-theme="light"] code .atn { color: #a753c0; }
+:root[data-mode="light"] pre .str, :root[data-mode="light"] code .str { color: #188038; }
+:root[data-mode="light"] pre .kwd, :root[data-mode="light"] code .kwd { color: #1967d2; }
+:root[data-mode="light"] pre .com, :root[data-mode="light"] code .com { color: #b80672; }
+:root[data-mode="light"] pre .cls, :root[data-mode="light"] code .cls { color: #0b9484; }
+:root[data-mode="light"] pre .dec, :root[data-mode="light"] code .dec { color: #c5221f; }
+:root[data-mode="light"] pre .mtd, :root[data-mode="light"] code .mtd { color: #636362; }
+:root[data-mode="light"] pre .lit, :root[data-mode="light"] code .lit { color: #1967d2; }
+:root[data-mode="light"] pre .var, :root[data-mode="light"] code .var { color: #222222; }
+:root[data-mode="light"] pre .enu, :root[data-mode="light"] code .enu { color: #505fe2; }
+:root[data-mode="light"] pre .tag, :root[data-mode="light"] code .tag { color: #2183b4; }
+:root[data-mode="light"] pre .atn, :root[data-mode="light"] code .atn { color: #a753c0; }
 
-:root[data-theme="light"] .desc {
+:root[data-mode="light"] .desc {
 	color: #70777a;
 }
 
-:root[data-theme="light"] .param {
+:root[data-mode="light"] .param {
 	color: #37474f;
 }
 
-:root[data-theme="light"] .prop, :root[data-theme="light"] .method {
+:root[data-mode="light"] .prop, :root[data-mode="light"] .method {
 	color: #37474f;
 }
 
-:root[data-theme="light"] #goUpButton {
+:root[data-mode="light"] #goUpButton {
 	color: #37474f;
 }
 
-:root[data-theme="light"] #goUpButton:hover {
+:root[data-mode="light"] #goUpButton:hover {
 	color: #879094;
 }
 

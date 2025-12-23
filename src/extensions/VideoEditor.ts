@@ -23,9 +23,9 @@ export class TimeBar
     static TIMEBAR_PLAY = 1;
     static TIMEBAR_TRIM = 2;
 
-    static BACKGROUND_COLOR = LX.getThemeColor( 'secondary' );
-    static COLOR = LX.getThemeColor( 'accent' );
-    static ACTIVE_COLOR = LX.getThemeColor( 'color-blue-400' );
+    static BACKGROUND_COLOR = LX.getCSSVariable( 'secondary' );
+    static COLOR = LX.getCSSVariable( 'accent' );
+    static ACTIVE_COLOR = LX.getCSSVariable( 'color-blue-400' );
 
     type: number = TimeBar.TIMEBAR_PLAY;
     duration: number = 1.0;
@@ -80,7 +80,7 @@ export class TimeBar
 
         this.updateTheme();
         LX.addSignal( '@on_new_color_scheme', () => {
-            // Retrieve again the color using LX.getThemeColor, which checks the applied theme
+            // Retrieve again the color using LX.getCSSVariable, which checks the applied theme
             this.updateTheme();
         } );
 
@@ -91,9 +91,9 @@ export class TimeBar
 
     updateTheme()
     {
-        TimeBar.BACKGROUND_COLOR = LX.getThemeColor( 'secondary' );
-        TimeBar.COLOR = LX.getThemeColor( 'accent' );
-        TimeBar.ACTIVE_COLOR = LX.getThemeColor( 'color-blue-400' );
+        TimeBar.BACKGROUND_COLOR = LX.getCSSVariable( 'secondary' );
+        TimeBar.COLOR = LX.getCSSVariable( 'accent' );
+        TimeBar.ACTIVE_COLOR = LX.getCSSVariable( 'color-blue-400' );
     }
 
     setDuration( duration: number )

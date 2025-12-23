@@ -32,7 +32,7 @@
     let area = await LX.init();
 
     const mobile = navigator && /Android|iPhone/i.test( navigator.userAgent );
-    const starterTheme = LX.getTheme();
+    const starterTheme = LX.getMode();
     const menubar = area.addMenubar( [], { sticky: false } );
     menubar.addButtons([
         {
@@ -44,7 +44,7 @@
             title: "Change Theme",
             icon: "Moon",
             swap: "Sun",
-            callback: (swapValue) => { LX.setTheme(swapValue ? "light" : "dark") }
+            callback: (swapValue) => { LX.setMode(swapValue ? "light" : "dark") }
         },
         {
             title: "Switch Spacing",
