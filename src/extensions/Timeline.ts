@@ -17,7 +17,6 @@ LX.registerIcon( 'TimelineLockOpen',
 const Area = LX.Area;
 const Panel = LX.Panel;
 const Dialog = LX.Dialog;
-const TreeEvent = LX.TreeEvent;
 
 type Nullable<T> = T | null | undefined;
 
@@ -123,7 +122,7 @@ export abstract class Timeline
     onShowContextMenu: Nullable<( event: any ) => void> = null;
     onAddNewTrackButton: Nullable<() => void> = null; // overrides button "add track" behaviour
     onAddNewTrack: Nullable<( track: any, options: any ) => void> = null;
-    onTrackTreeEvent: Nullable<( event: typeof TreeEvent ) => void> = null;
+    onTrackTreeEvent: Nullable<( event: any ) => void> = null;
     onBeforeDrawContent: Nullable<( ctx: CanvasRenderingContext2D ) => void> = null;
     onStateStop: Nullable<() => void> = null;
     onStateChange: Nullable<( s: boolean ) => void> = null;
@@ -453,34 +452,34 @@ export abstract class Timeline
             treeTracks = this.generateSelectedItemsTreeData();
         }
 
-        this.trackTreesComponent = p.addTree( null, treeTracks, { filter: false, rename: false, draggable: false,
-            onevent: ( e: typeof TreeEvent ) => {
-                switch ( e.type )
-                {
-                    case LX.TreeEvent.NODE_SELECTED:
-                        if ( !e.event.shiftKey )
-                        {
-                            this.deselectAllTracks( false ); // no need to update left panel
-                        }
-                        if ( e.node.trackData )
-                        {
-                            const flag = e.event.shiftKey ? !e.node.trackData.isSelected : true;
-                            this.setTrackSelection( e.node.trackData.trackIdx, flag, false, false ); // do callback, do not update left panel
-                        }
-                        break;
-                    case LX.TreeEvent.NODE_VISIBILITY:
-                        if ( e.node.trackData )
-                        {
-                            this.setTrackState( e.node.trackData.trackIdx, e.value, false, false ); // do not update left panel
-                        }
-                        break;
-                }
+        this.trackTreesComponent = p.addTree( null, treeTracks, { filter: false, rename: false, draggable: false } );
 
-                if ( this.onTrackTreeEvent )
-                {
-                    this.onTrackTreeEvent( e );
-                }
-            } } );
+        this.trackTreesComponent.on( "select", ( event: any, resolve: any ) => {
+            const node = event.items[0];
+            if ( !event.domEvent.shiftKey )
+            {
+                this.deselectAllTracks( false ); // no need to update left panel
+            }
+            if ( node.trackData )
+            {
+                const flag = event.domEvent.shiftKey ? !node.trackData.isSelected : true;
+                this.setTrackSelection( node.trackData.trackIdx, flag, false, false ); // do callback, do not update left panel
+            }
+        } );
+
+        this.trackTreesComponent.on( "visibleChanged", ( event: any, resolve: any ) => {
+            const node = event.items[0];
+            if ( node.trackData )
+            {
+                this.setTrackState( node.trackData.trackIdx, node.visible, false, false ); // do not update left panel
+            }
+        } );
+
+        // Not used!
+        // if ( this.onTrackTreeEvent )
+        // {
+        //     this.onTrackTreeEvent( e );
+        // }
 
         const that = this;
         this.trackTreesComponent.innerTree._refresh = this.trackTreesComponent.innerTree.refresh;

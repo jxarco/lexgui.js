@@ -376,16 +376,7 @@
 
             panelC.addTree(null, sceneData, {
                 icons: treeIcons,
-                addDefault: true,
-                onevent: (event) => {
-                    switch (event.type) {
-                        case LX.TreeEvent.NODE_CONTEXTMENU:
-                            const m = event.panel;
-                            m.add("Components/Transform");
-                            m.add("Components/MeshRenderer");
-                            break;
-                    }
-                }
+                addDefault: true
             });
         }
 

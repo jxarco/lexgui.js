@@ -703,28 +703,17 @@ export class CodeEditor
             this.explorer = panel.addTree( null, sceneData, {
                 filter: false,
                 rename: false,
-                skipDefaultIcon: true,
-                onevent: ( event: typeof LX.TreeEvent ) => {
-                    switch ( event.type )
-                    {
-                        // case LX.TreeEvent.NODE_SELECTED:
-                        //     if( !this.tabs.tabDOMs[ event.node.id ] ) break;
-                        case LX.TreeEvent.NODE_DBLCLICKED:
-                            this.loadTab( event.node.id );
-                            break;
-                        case LX.TreeEvent.NODE_DELETED:
-                            this.closeTab( event.node.id );
-                            break;
-                            // case LX.TreeEvent.NODE_CONTEXTMENU:
-                            //     LX.addContextMenu( event.multiple ? "Selected Nodes" : event.node.id, event.value, m => {
-                            //
-                            //     });
-                            //     break;
-                            // case LX.TreeEvent.NODE_DRAGGED:
-                            //     console.log(event.node.id + " is now child of " + event.value.id);
-                            //     break;
-                    }
-                }
+                skipDefaultIcon: true
+            } );
+
+            this.explorer.on( "dblClick", ( event: any ) => {
+                const node = event.items[0];
+                this.loadTab( node.id );
+            } );
+
+            this.explorer.on( "delete", ( event: any ) => {
+                const node = event.items[0];
+                this.closeTab( node.id );
             } );
 
             this.addExplorerItem = function( item: any )

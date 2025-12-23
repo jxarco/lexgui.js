@@ -579,42 +579,7 @@
         window.tree = panel.addTree("Scene Tree", sceneData, {
             icons: treeIcons,
             // filter: false,
-            addDefault: true,
-            onevent: (event) => {
-                console.log(event.string());
-
-                switch (event.type) {
-                    case LX.TreeEvent.NODE_SELECTED:
-                        if (event.multiple)
-                            console.log("Selected: ", event.value);
-                        else
-                            console.log(event.node.id + " selected");
-                        break;
-                    case LX.TreeEvent.NODE_DELETED:
-                        if (event.multiple)
-                            console.log("Deleted: ", event.value);
-                        else
-                            console.log(event.node.id + " deleted");
-                        break;
-                    case LX.TreeEvent.NODE_DBLCLICKED:
-                        console.log(event.node.id + " dbl clicked");
-                        break;
-                    case LX.TreeEvent.NODE_CONTEXTMENU:
-                        const m = event.panel;
-                        m.add("Components/Transform");
-                        m.add("Components/MeshRenderer");
-                        break;
-                    case LX.TreeEvent.NODE_DRAGGED:
-                        console.log(event.node.id + " is now child of " + event.value.id);
-                        break;
-                    case LX.TreeEvent.NODE_RENAMED:
-                        console.log(event.node.id + " is now called " + event.value);
-                        break;
-                    case LX.TreeEvent.NODE_VISIBILITY:
-                        console.log(event.node.id + " visibility: " + event.value);
-                        break;
-                }
-            }
+            addDefault: true
         });
 
         // add components to panel branch

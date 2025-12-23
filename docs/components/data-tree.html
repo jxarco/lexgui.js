@@ -33,17 +33,7 @@
 
             panel.addTree("Scene Tree", sceneData, {
                 icons: dataTreeIcons,
-                rename: true,
-                onevent: (event) => {
-                    switch (event.type) {
-                        case LX.TreeEvent.NODE_SELECTED:
-                            console.log("Selected:", event.node.id);
-                            break;
-                        case LX.TreeEvent.NODE_DBLCLICKED:
-                            console.log("Double click!")
-                            break;
-                    }
-                }
+                rename: true
             });
         });
     }
