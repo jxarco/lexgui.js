@@ -12,6 +12,8 @@ import { Button } from './Button';
 
 export class Vector extends BaseComponent
 {
+    locked: boolean = false;
+
     setLimits: ( newMin: number | null, newMax: number | null, newStep: number | null ) => void;
 
     constructor( numComponents: number, name: string, value: number[], callback: any, options: any = {} )
@@ -113,7 +115,7 @@ export class Vector extends BaseComponent
                 if ( e.shiftKey ) mult = 10;
                 else if ( e.altKey ) mult = 0.1;
 
-                if ( lockerButton.locked )
+                if ( that.locked )
                 {
                     for ( let v of vectorInputs )
                     {
@@ -137,7 +139,7 @@ export class Vector extends BaseComponent
                 let val = LX.clamp( e.target.value, +vecinput.min, +vecinput.max );
                 val = LX.round( val, options.precision );
 
-                if ( lockerButton.locked )
+                if ( this.locked )
                 {
                     for ( let v of vectorInputs )
                     {
@@ -192,7 +194,7 @@ export class Vector extends BaseComponent
                     if ( e.shiftKey ) mult = 10;
                     else if ( e.altKey ) mult = 0.1;
 
-                    if ( lockerButton.locked )
+                    if ( that.locked )
                     {
                         for ( let v of vectorInputs )
                         {
@@ -249,10 +251,13 @@ export class Vector extends BaseComponent
             };
         }
 
-        const lockerButton: any = new Button( null, '', ( swapValue: boolean ) => {
-            lockerButton.locked = swapValue;
-        }, { title: 'Lock', icon: 'LockOpen', swap: 'Lock', buttonClass: 'h-auto bg-none p-0' } );
-        container.appendChild( lockerButton.root );
+        if( !options.skipLock )
+        {
+            const lockerButton: any = new Button( null, '', ( swapValue: boolean ) => {
+                this.locked = swapValue;
+            }, { title: 'Lock', icon: 'LockOpen', swap: 'Lock', buttonClass: 'h-auto bg-none p-0' } );
+            container.appendChild( lockerButton.root );
+        }
 
         LX.doAsync( this.onResize.bind( this ) );
     }
