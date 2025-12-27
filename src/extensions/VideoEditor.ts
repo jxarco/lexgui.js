@@ -761,7 +761,7 @@ export class VideoEditor
 
         // start trimming text
         this.controlsComponents.trimStartText = new LX.TextInput( null, this.timeToString( this.startTime ), null, { width: '100px', disabled: true, inputClass: 'bg-none' } );
-        this.controlsComponents.trimEndText = new LX.TextInput( null, this.timeToString( this.endTime ), null, { width: 100, disabled: true, inputClass: 'bg-none' } );
+        this.controlsComponents.trimEndText = new LX.TextInput( null, this.timeToString( this.endTime ), null, { width: '100px', disabled: true, inputClass: 'bg-none' } );
         this.controlsComponents.curTimeText = new LX.TextInput( null, this.video.currentTime, null, { float: 'center', disabled: true, inputClass: 'bg-none' } );
 
         // reset crop area
@@ -769,7 +769,7 @@ export class VideoEditor
             this.moveCropArea( 0, 0, true );
             this.resizeCropArea( 1, 1, true );
         }, { width: '40px', icon: 'Crop@solid', title: "Reset Crop Area", hideName: true,
-            className: 'justify-center' } );
+            className: 'justify-center' + ( this.crop ? '' : ' hidden' ) } );
 
         // play button
         this.controlsComponents.playBtn = new LX.Button( 'Play', '', ( v: boolean ) => {
@@ -889,7 +889,7 @@ export class VideoEditor
         this.controlsComponents.resetCropBtn.root.classList.add( "pr-0" );
         
         // timebar
-        timeBarArea.root.classList.add( "p-4", "pb-0" );
+        timeBarArea.root.classList.add( "p-4", "pt-1", "pb-0" );
 
         this.resizeControls = () => {
             const style = getComputedStyle( timeBarArea.root );
