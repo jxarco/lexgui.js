@@ -226,6 +226,37 @@ LX.addSignal = function( name: string, obj: any, callback: ( value: any ) => voi
 };
 
 /**
+ * @method removeSignal
+ * @param {String} name
+ * @param {Object} targetObj
+ */
+
+LX.removeSignal = function( name: string, targetObj: any )
+{
+    const data = LX.signals[name];
+
+    if ( !data )
+    {
+        return;
+    }
+
+    if ( !targetObj )
+    {
+        delete LX.signals[name];
+        return;
+    }
+
+    for ( let i = 0; i < data.length; ++i )
+    {
+        if ( data[i] == targetObj )
+        {
+            data.splice( i, 1 );
+            break;
+        }
+    }
+};
+
+/**
  * @method emitSignal
  * @param {String} name
  * @param {*} value
