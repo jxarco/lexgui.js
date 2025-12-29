@@ -519,9 +519,11 @@ export class VideoEditor
     onKeyUp: any;
     onSetTime: any;
     onVideoLoaded: any;
-    onCropArea: any;
     onResize: any;
+    onCropArea: any;
     onChangeSpeed: any;
+    onChangeState: any;
+    onChangeLoop: any;
 
     _updateTime: boolean = true;
     _onCropMouseUp: ( e: MouseEvent ) => void;
@@ -749,9 +751,10 @@ export class VideoEditor
         this.onChangeEnd = null;
     }
 
-    createControls( options : any = {} )
+    createControls( options : any = null )
     {
         const controlsArea = this.controlsArea;
+        options = options ?? this.options;
 
         // clear area. Signals are not cleared !!! (not a problem if there are no signals)
         while( controlsArea.root.children.length ){
@@ -760,15 +763,19 @@ export class VideoEditor
         controlsArea.sections.length = 0;
 
         // start trimming text
-        this.controlsComponents.trimStartText = new LX.TextInput( null, this.timeToString( this.startTime ), null, { width: '100px', disabled: true, inputClass: 'bg-none' } );
-        this.controlsComponents.trimEndText = new LX.TextInput( null, this.timeToString( this.endTime ), null, { width: '100px', disabled: true, inputClass: 'bg-none' } );
-        this.controlsComponents.curTimeText = new LX.TextInput( null, this.video.currentTime, null, { float: 'center', disabled: true, inputClass: 'bg-none' } );
+        this.controlsComponents.trimStartText = new LX.TextInput( null, this.timeToString( this.startTime ), null, { width: '100px', title: 'Trimmed Start Time', disabled: true, inputClass: 'bg-none' } );
+        this.controlsComponents.trimEndText = new LX.TextInput( null, this.timeToString( this.endTime ), null, { width: '100px', title: 'Trimmed End Time', disabled: true, inputClass: 'bg-none' } );
+        this.controlsComponents.curTimeText = new LX.TextInput( null, this.video.currentTime, null, { title: 'Current Time', float: 'center', disabled: true, inputClass: 'bg-none' } );
 
         // reset crop area
         this.controlsComponents.resetCropBtn = new LX.Button( "ResetCrop", null, ( v: any ) => {
             this.moveCropArea( 0, 0, true );
             this.resizeCropArea( 1, 1, true );
-        }, { width: '40px', icon: 'Crop@solid', title: "Reset Crop Area", hideName: true,
+            if ( this.onCropArea )
+            {
+                this.onCropArea( this.getCroppedArea() );
+            }
+        }, { width: '40px', title: "Reset Crop Area", icon: 'Crop@solid', hideName: true,
             className: 'justify-center' + ( this.crop ? '' : ' hidden' ) } );
 
         // play button
@@ -786,7 +793,12 @@ export class VideoEditor
             {
                 this.video.pause();
             }
-        }, { width: '40px', icon: 'Play@solid', swap: 'Pause@solid', hideName: true,
+
+            if ( this.onChangeState )
+            {
+                this.onChangeState( v );
+            }
+        }, { width: '40px', title: 'Play/Pause', icon: 'Play@solid', swap: 'Pause@solid', hideName: true,
             className: 'justify-center' } );
         this.controlsComponents.playBtn.setState( this.playing, true );
         
@@ -803,12 +815,16 @@ export class VideoEditor
             }, { min: 0, max: 2.5, step: 0.01, hideName: true } );
 
             new LX.Popover( e.target, [ panel ], { align: 'start', side: 'top', sideOffset: 12 } );
-        }, { width: '40px', title: 'speed', hideName: true, icon: 'Timer@solid', className: 'justify-center' } );
+        }, { width: '40px', title: 'Speed', hideName: true, icon: 'Timer@solid', className: 'justify-center' } );
 
         // loop button
         this.controlsComponents.loopBtn = new LX.Button( '', 'Loop', ( v: boolean ) => {
             this.loop = v;
-        }, { width: '40px', hideName: true, title: 'loop', icon: 'Repeat@solid', className: `justify-center`, selectable: true,
+            if ( this.onChangeLoop )
+            {
+                this.onChangeLoop( v );
+            }
+        }, { width: '40px', hideName: true, title: 'Loop', icon: 'Repeat@solid', className: `justify-center`, selectable: true,
             selected: this.loop } );
 
         
@@ -889,7 +905,7 @@ export class VideoEditor
         this.controlsComponents.resetCropBtn.root.classList.add( "pr-0" );
         
         // timebar
-        timeBarArea.root.classList.add( "p-4", "pt-1", "pb-0" );
+        timeBarArea.root.classList.add( "p-4", "pb-0" );
 
         this.resizeControls = () => {
             const style = getComputedStyle( timeBarArea.root );

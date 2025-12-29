@@ -49,10 +49,16 @@ editor.@[mtd]onCropArea@ = (rect) => {
     docMaker.header("Statics", "h4");
     
     docMaker.codeBulletList([
-      ["CROP_HANDLE_L", `${docMaker.iCode(`setCropAreaHandles`)}, enables the left resize handle.`],
-      ["CROP_HANDLE_R", `${docMaker.iCode(`setCropAreaHandles`)}, enables the right resize handle.`],
-      ["CROP_HANDLE_T", `${docMaker.iCode(`setCropAreaHandles`)}, enables the top resize handle.`],
-      ["CROP_HANDLE_B", `${docMaker.iCode(`setCropAreaHandles`)}, enables the bottom resize handle.`],
+      ["CROP_HANDLE_L", `Enables the left resize handle in ${docMaker.iCode(`setCropAreaHandles`)},.`],
+      ["CROP_HANDLE_R", `Enables the right resize handle in ${docMaker.iCode(`setCropAreaHandles`)},.`],
+      ["CROP_HANDLE_T", `Enables the top resize handle in ${docMaker.iCode(`setCropAreaHandles`)},.`],
+      ["CROP_HANDLE_B", `Enables the bottom resize handle in ${docMaker.iCode(`setCropAreaHandles`)},.`],
+    ]);
+
+    docMaker.header("Properties", "h4");
+
+    docMaker.codeBulletList([
+      ["controlsComponents", `${docMaker.iCode("Read Only")}. Object that stores the ui buttons and timebar to easily fetch them. See ${docMaker.iCode("createControls")}`],
     ]);
 
     docMaker.header("Methods", "h4");
@@ -61,7 +67,14 @@ editor.@[mtd]onCropArea@ = (rect) => {
         ["showCropArea()", "Displays the crop overlay and masks the underlying video."],
         ["hideCropArea()", "Hides the crop overlay and clears masking."],
         ["showControls() / hideControls()", "Toggle the visibility of the playback/trimming controls."],
+        ["createControls(options: object)", `Generates all buttons and timebar, and displays them following a layout. ${docMaker.iCode("options")} may have:`],
+        [
+          ["null", `If ${docMaker.iCode("options")} is not provided, the VideoEditor constructor's options will be used.`],
+          ["controlsLayout", `fn or integer[0,1]`, `A number will create a predefined layout. When a function, it must create the areas where the buttons and timebar (see ${docMaker.iCode("controlsComponents")}) will be and attach them. The function must also implement the ${docMaker.iCode("resizeControls")} function.`],
+        ],
         ["resize()", "Triggered when parent area resizes. Call this functions to force a resize."],
+        ["resizeVideo()", "Triggered in resize. Call this functions to force a resize."],
+        ["resizeControls()", `Triggered in resize. Call this functions to force a resize. See ${docMaker.iCode("createControls")}.`],
         ["resizeCropArea(sx: number, sy: number, isNormalized: boolean = true)", "Adjusts crop size based on pixel or normalized sizes. Sizes are restricted by the video size and current crop area position."],
         ["moveCropArea(x: number, y: number, isNormalized: boolean = true)", "Adjusts crop location based on pixel or normalized coordinates. The position is restricted by the video size and current crop area size."],
         ["setCropAreaHandles(flags: number)", `Sets which resize handles to display based on flags. Use the ${docMaker.iCode(`|`)} operator to enable multiple handles (e.g. ${docMaker.iCode(`CROP_HANDLE_L | CROP_HANDLE_B`)})`],
@@ -80,7 +93,9 @@ editor.@[mtd]onCropArea@ = (rect) => {
         ["onChangeStart", "Triggered when trim start marker moves."],
         ["onChangeEnd", "Triggered when trim end marker moves."],
         ["onSetTime", "Called when the actual video time is set (after conversion)."],
-        ["onChangeSpeed", "Triggered when changing speed the gui."],
+        ["onChangeSpeed", "Triggered when changing speed from the gui."],
+        ["onChangeLoop", "Triggered when changing the video looping from the gui."],
+        ["onChangeState", "Triggered when changing the video state (play/pause) from the gui."],
         ["onVideoLoaded", "Fired once the video is fully loaded and initialized."],
         ["onCropArea", "Called when cropping region changes after dragging/resizing."],
         ["onResize", "Called when parent area resizes."],
