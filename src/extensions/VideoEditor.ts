@@ -57,11 +57,12 @@ export class TimeBar
     constructor( area: typeof Area, type?: number, options: any = {} )
     {
         this.type = type ?? TimeBar.TIMEBAR_PLAY;
-        this.options = options ?? {}; 
+        this.options = options ?? {};
         this.duration = options.duration ?? this.duration;
 
         // Create canvas
         this.canvas = document.createElement( 'canvas' );
+        this.canvas.style.borderRadius = '6px';
         this.canvas.width = area.size[0];
         this.canvas.height = area.size[1];
         area.attach( this.canvas );
@@ -71,7 +72,7 @@ export class TimeBar
         this.markerWidth = options.markerWidth ?? this.markerWidth;
         this.markerHeight = ( options.markerHeight ?? 0.5 ) * this.canvas.height;
         const defaultOffset = this.markerWidth * 0.5 + 5;
-        if ( typeof( options.offset ) == 'number' )
+        if ( typeof ( options.offset ) == 'number' )
         {
             this.offset = new vec2( options.offset, options.offset );
         }
@@ -106,15 +107,15 @@ export class TimeBar
         this._onMouseMoveListener = this.onMouseMove.bind( this );
         this.canvas.onmousedown = ( e: MouseEvent ) => this.onMouseDown( e );
         this.canvas.onmousemove = ( e: MouseEvent ) => {
-            if( this.dragging ) return; // already handled by _onMouseMoveListener
-            this.onMouseMove(e);
-        }
+            if ( this.dragging ) return; // already handled by _onMouseMoveListener
+            this.onMouseMove( e );
+        };
     }
 
     unbind()
     {
-        removeEventListener( "mousemove", this._onMouseMoveListener );
-        removeEventListener( "mouseup", this._onMouseUpListener );
+        removeEventListener( 'mousemove', this._onMouseMoveListener );
+        removeEventListener( 'mouseup', this._onMouseUpListener );
     }
 
     updateTheme()
@@ -350,16 +351,16 @@ export class TimeBar
         }
 
         this._mouseDownCanvasRect = canvas.getBoundingClientRect(); // cache this to avoid stalls during mousemove
-        window.addEventListener( "mousemove", this._onMouseMoveListener );
-        window.addEventListener( "mouseup", this._onMouseUpListener );
+        window.addEventListener( 'mousemove', this._onMouseMoveListener );
+        window.addEventListener( 'mouseup', this._onMouseUpListener );
 
         this._draw();
     }
 
     onMouseUp( e: MouseEvent )
     {
-        window.removeEventListener( "mousemove", this._onMouseMoveListener );
-        window.removeEventListener( "mouseup", this._onMouseUpListener );
+        window.removeEventListener( 'mousemove', this._onMouseMoveListener );
+        window.removeEventListener( 'mouseup', this._onMouseUpListener );
 
         if ( this.onMouse )
         {
@@ -494,7 +495,6 @@ export class VideoEditor
     playing: boolean = false;
     videoReady: boolean = false;
     controls: boolean = true;
-    endTimeString: string = '0:0';
     speed: number = 1.0;
     startTime: number = 0.0;
     endTime: number = 0.0;
@@ -601,12 +601,12 @@ export class VideoEditor
             trimStartText: null,
             trimEndText: null,
             curTimeText: null,
-            resetCropBtn: null,
+            resetCropBtn: null
         };
 
         this.createControls();
 
-        this.resizeVideo = ()=>{
+        this.resizeVideo = () => {
             this.moveCropArea( this.cropArea.normCoords.x, this.cropArea.normCoords.y, true );
             this.resizeCropArea( this.cropArea.normCoords.w, this.cropArea.normCoords.h, true );
 
@@ -614,12 +614,12 @@ export class VideoEditor
             {
                 this.onResize( [ videoArea.root.clientWidth, videoArea.root.clientHeight ] );
             }
-        }
+        };
 
-        this.resize = () =>{
+        this.resize = () => {
             this.resizeVideo();
             this.resizeControls();
-        }
+        };
 
         area.onresize = this.resize.bind( this );
         window.addEventListener( 'resize', area.onresize );
@@ -637,19 +637,7 @@ export class VideoEditor
 
         window.addEventListener( 'keyup', this.onKeyUp );
 
-        const parent = controlsArea.parentElement ? controlsArea.parentElement : controlsArea.root.parentElement;
-
-        // Add canvas event listeneres
-        parent.addEventListener( 'mousedown', ( e: MouseEvent ) => {
-            // if( this.controls) {
-            //     this.timebar.onMouseDown(e);
-            // }
-        } );
-
         this._onCropMouseUp = ( event: MouseEvent ) => {
-            // if(this.controls) {
-            //     this.timebar.onMouseUp(event);
-            // }
             event.preventDefault();
             event.stopPropagation();
             if ( ( this.isDragging || this.isResizing ) && this.onCropArea )
@@ -664,9 +652,6 @@ export class VideoEditor
         };
 
         this._onCropMouseMove = ( event: MouseEvent ) => {
-            // if(this.controls) {
-            //     this.timebar.onMouseMove(event);
-            // }
             window.getSelection()?.removeAllRanges();
             event.preventDefault();
             event.stopPropagation();
@@ -751,31 +736,35 @@ export class VideoEditor
         this.onChangeEnd = null;
     }
 
-    createControls( options : any = null )
+    createControls( options: any = null )
     {
         const controlsArea = this.controlsArea;
         options = options ?? this.options;
 
         // clear area. Signals are not cleared !!! (not a problem if there are no signals)
-        while( controlsArea.root.children.length ){
+        while ( controlsArea.root.children.length )
+        {
             controlsArea.root.children[0].remove();
         }
         controlsArea.sections.length = 0;
 
         // start trimming text
-        this.controlsComponents.trimStartText = new LX.TextInput( null, this.timeToString( this.startTime ), null, { width: '100px', title: 'Trimmed Start Time', disabled: true, inputClass: 'bg-none' } );
-        this.controlsComponents.trimEndText = new LX.TextInput( null, this.timeToString( this.endTime ), null, { width: '100px', title: 'Trimmed End Time', disabled: true, inputClass: 'bg-none' } );
-        this.controlsComponents.curTimeText = new LX.TextInput( null, this.video.currentTime, null, { title: 'Current Time', float: 'center', disabled: true, inputClass: 'bg-none' } );
+        this.controlsComponents.trimStartText = new LX.TextInput( null, this.timeToString( this.startTime ), null, { width: '100px',
+            title: 'Trimmed Start Time', disabled: true, inputClass: 'bg-none' } );
+        this.controlsComponents.trimEndText = new LX.TextInput( null, this.timeToString( this.endTime ), null, { width: '100px',
+            title: 'Trimmed End Time', disabled: true, inputClass: 'bg-none' } );
+        this.controlsComponents.curTimeText = new LX.TextInput( null, this.video.currentTime, null, { title: 'Current Time', float: 'center',
+            disabled: true, inputClass: 'bg-none' } );
 
         // reset crop area
-        this.controlsComponents.resetCropBtn = new LX.Button( "ResetCrop", null, ( v: any ) => {
+        this.controlsComponents.resetCropBtn = new LX.Button( 'ResetCrop', null, ( v: any ) => {
             this.moveCropArea( 0, 0, true );
             this.resizeCropArea( 1, 1, true );
             if ( this.onCropArea )
             {
                 this.onCropArea( this.getCroppedArea() );
             }
-        }, { width: '40px', title: "Reset Crop Area", icon: 'Crop@solid', hideName: true,
+        }, { width: '40px', title: 'Reset Crop Area', icon: 'Crop@solid', hideName: true,
             className: 'justify-center' + ( this.crop ? '' : ' hidden' ) } );
 
         // play button
@@ -798,10 +787,9 @@ export class VideoEditor
             {
                 this.onChangeState( v );
             }
-        }, { width: '40px', title: 'Play/Pause', icon: 'Play@solid', swap: 'Pause@solid', hideName: true,
-            className: 'justify-center' } );
+        }, { width: '40px', title: 'Play/Pause', icon: 'Play@solid', swap: 'Pause@solid', hideName: true, className: 'justify-center' } );
         this.controlsComponents.playBtn.setState( this.playing, true );
-        
+
         // speed button
         this.controlsComponents.speedBtn = new LX.Button( 'Speed', '', ( v: any, e: MouseEvent ) => {
             const panel = new LX.Panel();
@@ -827,9 +815,8 @@ export class VideoEditor
         }, { width: '40px', hideName: true, title: 'Loop', icon: 'Repeat@solid', className: `justify-center`, selectable: true,
             selected: this.loop } );
 
-        
         let timeBarArea = null;
-        if ( typeof( options.controlsLayout ) == 'function' )
+        if ( typeof ( options.controlsLayout ) == 'function' )
         {
             timeBarArea = options.controlsLayout;
         }
@@ -842,7 +829,8 @@ export class VideoEditor
             timeBarArea = this._createControlsLayout_0();
         }
 
-        if ( this.timebar ){
+        if ( this.timebar )
+        {
             this.timebar.unbind();
         }
         this.timebar = this.controlsComponents.timebar = new TimeBar( timeBarArea, TimeBar.TIMEBAR_TRIM, { offset: [ 12, null ] } );
@@ -856,56 +844,57 @@ export class VideoEditor
             duration = this.video.duration;
         }
         this.timebar.setDuration( duration );
-        this.timebar.setEndTime( this.endTime ); 
+        this.timebar.setEndTime( this.endTime );
         this.timebar.setStartTime( this.startTime );
         this.timebar.setCurrentTime( this.startTime );
         this.resizeControls();
     }
 
     /**
-     * Creates the areas where components will be. 
+     * Creates the areas where components will be.
      * Attaches all (desired) components of controlsComponents except the timebar
      * @returns {Area} for the timebar
      * Layout:
      * |--------------------------timebar--------------------------|
      * play speed loop resetCrop     curTime     trimStart / trimEnd
      */
-    _createControlsLayout_1( )
+    _createControlsLayout_1()
     {
         const controlsArea = this.controlsArea;
 
         // Create playing timeline area and attach panels
-        let [ timeBarArea, bottomArea ] = controlsArea.split( { type: 'vertical', sizes: [ '50%', null ],
-            minimizable: false, resize: false } );
-        
-        bottomArea.root.classList.add( "relative" );
-        
-        let separator = document.createElement("p");
-        separator.style.alignContent = "center";
-        separator.innerText = "/";
-        let trimDiv = LX.makeContainer( ["fit-content", "100%"], "relative flex flex-row pb-2", null, bottomArea, { float: "right" } );
+        let [ timeBarArea, bottomArea ] = controlsArea.split( { type: 'vertical', sizes: [ '50%', null ], minimizable: false, resize: false } );
+
+        bottomArea.root.classList.add( 'relative' );
+
+        let separator = document.createElement( 'p' );
+        separator.style.alignContent = 'center';
+        separator.innerText = '/';
+        let trimDiv = LX.makeContainer( [ 'fit-content', '100%' ], 'relative flex flex-row pb-2', null, bottomArea, { float: 'right' } );
         trimDiv.appendChild( this.controlsComponents.trimStartText.root );
-        trimDiv.appendChild(separator);
+        trimDiv.appendChild( separator );
         trimDiv.appendChild( this.controlsComponents.trimEndText.root );
-        this.controlsComponents.trimStartText.root.classList.add( "top-0", "bottom-0" );
-        this.controlsComponents.trimEndText.root.classList.add( "top-0", "bottom-0" );
-        this.controlsComponents.trimStartText.root.querySelector( "input" ).classList.add( "text-end" );
+        this.controlsComponents.trimStartText.root.querySelector( 'input' ).classList.add( 'text-end' );
+        this.controlsComponents.trimStartText.root.classList.add( 'top-0', 'bottom-0' );
+        this.controlsComponents.trimEndText.root.classList.add( 'top-0', 'bottom-0' );
 
         // current time
-        let curTimeDiv = LX.makeContainer( ["100%", "100%"], "absolute top-0 left-0 flex flex-row justify-center align-items-center pb-2", null, bottomArea, {} );
+        let curTimeDiv = LX.makeContainer( [ '100%', '100%' ], 'absolute top-0 left-0 flex flex-row justify-center items-center pb-2', null,
+            bottomArea, {} );
         curTimeDiv.appendChild( this.controlsComponents.curTimeText.root );
 
         // Buttons
-        const buttonsPanel = bottomArea.addPanel( { className: "absolute top-0 left-0 flex flex-row pl-4 pr-4 pt-1 pb-2" } );
+        const buttonsPanel = bottomArea.addPanel( { className: 'absolute top-0 left-0 flex flex-row pl-4 pr-4 pt-1 pb-2' } );
+        buttonsPanel.root.classList.remove( 'pad-md' );
         buttonsPanel._attachComponent( this.controlsComponents.playBtn );
         buttonsPanel._attachComponent( this.controlsComponents.speedBtn );
         buttonsPanel._attachComponent( this.controlsComponents.loopBtn );
         buttonsPanel._attachComponent( this.controlsComponents.resetCropBtn );
-        this.controlsComponents.playBtn.root.classList.add( "pl-0" );
-        this.controlsComponents.resetCropBtn.root.classList.add( "pr-0" );
-        
+        this.controlsComponents.playBtn.root.classList.add( 'pl-0' );
+        this.controlsComponents.resetCropBtn.root.classList.add( 'pr-0' );
+
         // timebar
-        timeBarArea.root.classList.add( "p-4", "pb-0" );
+        timeBarArea.root.classList.add( 'p-4', 'pb-0' );
 
         this.resizeControls = () => {
             const style = getComputedStyle( timeBarArea.root );
@@ -915,38 +904,36 @@ export class VideoEditor
             let pbot = parseFloat( style.paddingBottom );
             // assuming timeBarArea will not overflow
             this.timebar.resize( [ timeBarArea.root.clientWidth - pleft - pright, timeBarArea.root.clientHeight - ptop - pbot ] );
-        }
+        };
 
         return timeBarArea;
     }
 
     /**
-     * Creates the areas where components will be. 
+     * Creates the areas where components will be.
      * Attaches all (desired) components of controlsComponents except the timebar
      * @returns {Area} for the timebar
      * Layout:
      *                              curTime
      * play speed loop trimStart |---timebar---| trimend
      */
-    _createControlsLayout_0( )
+    _createControlsLayout_0()
     {
         const controlsArea = this.controlsArea;
 
         // Create playing timeline area and attach panels
-        let [ topArea, bottomArea ] = controlsArea.split( { type: 'vertical', sizes: [ '50%', null ],
-            minimizable: false, resize: false } );
+        let [ topArea, bottomArea ] = controlsArea.split( { type: 'vertical', sizes: [ '50%', null ], minimizable: false, resize: false } );
         bottomArea.setSize( [ bottomArea.size[0], 40 ] );
-        let [ leftArea, controlsRight ] = bottomArea.split( { type: 'horizontal', sizes: [ '92%', null ],
-            minimizable: false, resize: false } );
-        let [ controlsLeft, timeBarArea ] = leftArea.split( { type: 'horizontal', sizes: [ '10%', null ],
-            minimizable: false, resize: false } );
+        let [ leftArea, controlsRight ] = bottomArea.split( { type: 'horizontal', sizes: [ '92%', null ], minimizable: false, resize: false } );
+        let [ controlsLeft, timeBarArea ] = leftArea.split( { type: 'horizontal', sizes: [ '10%', null ], minimizable: false, resize: false } );
 
         const controlsCurrentPanel = topArea.addPanel( { className: 'flex' } );
         controlsCurrentPanel._attachComponent( this.controlsComponents.curTimeText );
 
         // Create controls panel (play/pause button and start time)
-        controlsLeft.root.style.minWidth = 'fit-content';
-        const controlsPanelLeft = controlsLeft.addPanel( { className: 'lexcontrolspanel  p-0 pl-2' } );
+        controlsLeft.root.classList.add( 'min-w-fit' );
+        const controlsPanelLeft = controlsLeft.addPanel( { className: 'lexcontrolspanel p-0 pl-2' } );
+        controlsPanelLeft.root.classList.remove( 'pad-md' );
         controlsPanelLeft.sameLine();
         controlsPanelLeft._attachComponent( this.controlsComponents.playBtn );
         controlsPanelLeft._attachComponent( this.controlsComponents.speedBtn );
@@ -955,10 +942,11 @@ export class VideoEditor
         controlsPanelLeft.endLine();
 
         // Create right controls panel (end time)
-        controlsRight.root.style.minWidth = 'fit-content';
+        controlsRight.root.classList.add( 'min-w-fit' );
         const controlsPanelRight = controlsRight.addPanel( { className: 'lexcontrolspanel p-0' } );
+        controlsPanelRight.root.classList.remove( 'pad-md' );
         controlsPanelRight._attachComponent( this.controlsComponents.trimEndText );
-        
+
         this.resizeControls = () => {
             bottomArea.setSize( [ this.controlsArea.root.clientWidth, 40 ] );
             let availableWidth = this.controlsArea.root.clientWidth - controlsLeft.root.clientWidth
