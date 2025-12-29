@@ -152,10 +152,12 @@
             let code = onPanel.toString();
             let lines = code.split( '\n' ).slice( 1, -1 );
             code = lines.map( line => line.substr( 12 ) ).join( '\n' );
-            const heightByLines = Math.min( 5 + lines.length * 1.25, 32 );
+            const heightByLines = Math.min( lines.length * 1.25, 32 );
 
-            const codeArea = new LX.Area({ className: "overflow-hidden border-t-color py-8", skipAppend: true, height: `${ heightByLines }rem` });
-            container.appendChild( codeArea.root );
+            const tmpContainer = LX.makeContainer( ["100%", "auto"], "bg-card border-t-color py-8", "", container );
+
+            const codeArea = new LX.Area({ className: "overflow-hidden", skipAppend: true, height: `${ heightByLines }rem` });
+            tmpContainer.appendChild( codeArea.root );
             const codeEditor = new CodeEditor( codeArea, {
                 name: `${componentName.toLowerCase().replace( /\s/g, '_' )}.js`,
                 onrun: runCode,
