@@ -454,7 +454,7 @@ export abstract class Timeline
 
         this.trackTreesComponent = p.addTree( null, treeTracks, { filter: false, rename: false, draggable: false } );
 
-        this.trackTreesComponent.on( "select", ( event: any, resolve: any ) => {
+        this.trackTreesComponent.on( 'select', ( event: any, resolve: any ) => {
             const node = event.items[0];
             if ( !event.domEvent.shiftKey )
             {
@@ -467,7 +467,7 @@ export abstract class Timeline
             }
         } );
 
-        this.trackTreesComponent.on( "visibleChanged", ( event: any, resolve: any ) => {
+        this.trackTreesComponent.on( 'visibleChanged', ( event: any, resolve: any ) => {
             const node = event.items[0];
             if ( node.trackData )
             {
