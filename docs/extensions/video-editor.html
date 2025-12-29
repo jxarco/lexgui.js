@@ -11,7 +11,11 @@
             const area = new LX.Area( { skipAppend: true, height: "700px" } );
             panel.attach( area.root );
 
-            const editor = new LX.VideoEditor(area, {
+            // detach all events and resources from the previous VE
+            if( window.videoEditor ) {
+                window.videoEditor.unbind(); 
+            }
+            const editor = window.videoEditor = new LX.VideoEditor(area, {
                 src: "../data/video.mp4",
                 crop: true,
                 controls: true
