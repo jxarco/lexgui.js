@@ -22,7 +22,18 @@
     import { LX } from 'lexgui';
 
     // Init library and get main area
-    let area = await LX.init({ skipDefaultArea: true });
+    let area = await LX.init();
+
+    const starterTheme = LX.getMode();
+    const menubar = area.addMenubar( [], { sticky: false } );
+    menubar.addButtons([
+        {
+            title: "Change Theme",
+            icon: starterTheme == "dark" ? "Moon" : "Sun",
+            swap: starterTheme == "dark" ? "Sun" : "Moon",
+            callback: () => LX.switchMode()
+        }
+    ]);
 
     LX.popup("Hello! I'm a popup dialog :)", null, { position: ["45%", "20%"] })
 
@@ -91,7 +102,7 @@
     canvas.height = window.innerHeight
     canvas.style.width = "100%";
     canvas.style.height = "100%";
-    document.body.appendChild(canvas);
+    area.attach( canvas );
 
     function loop(dt) {
 

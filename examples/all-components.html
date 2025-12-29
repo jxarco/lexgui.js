@@ -42,9 +42,9 @@
         },
         {
             title: "Change Theme",
-            icon: "Moon",
-            swap: "Sun",
-            callback: (swapValue) => { LX.setMode(swapValue ? "light" : "dark") }
+            icon: starterTheme == "dark" ? "Moon" : "Sun",
+            swap: starterTheme == "dark" ? "Sun" : "Moon",
+            callback: () => LX.switchMode()
         },
         {
             title: "Switch Spacing",
@@ -167,7 +167,6 @@
             buttonsRightPanel.addButton(null, "Warning Outline", null, { buttonClass: "warning outline" });
             buttonsRightPanel.addButton(null, "Destructive Outline", null, { buttonClass: "destructive outline" });
             buttonsRightPanel.branch("Dashed Buttons", { closed: closedDefault });
-            buttonsRightPanel.addButton(null, "Primary Dashed", null, { buttonClass: "primary dashed" });
             buttonsRightPanel.addButton(null, "Secondary Dashed", null, { buttonClass: "secondary dashed" });
             buttonsRightPanel.addButton(null, "Muted Dashed", null, { buttonClass: "muted dashed" });
             buttonsRightPanel.addButton(null, "Success Dashed", null, { buttonClass: "success dashed" });
