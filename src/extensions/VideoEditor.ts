@@ -47,6 +47,7 @@ export class TimeBar
     _onMouseUpListener: ( e: MouseEvent ) => void;
     _onMouseMoveListener: ( e: MouseEvent ) => void;
     _mouseDownCanvasRect: any = null;
+    updateTheme: ( ) => void;
 
     onChangeCurrent: any;
     onChangeStart: any;
@@ -95,11 +96,16 @@ export class TimeBar
 
         this._draw();
 
-        this.updateTheme();
-        LX.addSignal( '@on_new_color_scheme', () => {
-            // Retrieve again the color using LX.getThemeColor, which checks the applied theme
-            this.updateTheme();
-        } );
+        function updateTheme () {
+            TimeBar.BACKGROUND_COLOR = LX.getThemeColor( 'global-color-secondary' );
+            TimeBar.COLOR = LX.getThemeColor( 'global-color-quaternary' );
+            TimeBar.ACTIVE_COLOR = '#668ee4';
+        }
+
+        this.updateTheme = updateTheme.bind( this );
+        // Retrieve again the color using LX.getThemeColor, which checks the applied theme
+        LX.addSignal( '@on_new_color_scheme', this.updateTheme );
+        this.updateTheme( );
 
         // prepare event listeners' functions
         this._onMouseUpListener = this.onMouseUp.bind( this );
@@ -115,13 +121,6 @@ export class TimeBar
     {
         removeEventListener( "mousemove", this._onMouseMoveListener );
         removeEventListener( "mouseup", this._onMouseUpListener );
-    }
-
-    updateTheme()
-    {
-        TimeBar.BACKGROUND_COLOR = LX.getThemeColor( 'global-color-secondary' );
-        TimeBar.COLOR = LX.getThemeColor( 'global-color-quaternary' );
-        TimeBar.ACTIVE_COLOR = '#668ee4';
     }
 
     setDuration( duration: number )
