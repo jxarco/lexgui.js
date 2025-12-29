@@ -46,6 +46,7 @@ export class TimeBar
     dragging: string | undefined;
     _onMouseUpListener: ( e: MouseEvent ) => void;
     _onMouseMoveListener: ( e: MouseEvent ) => void;
+    _mouseDownCanvasRect: any = null;
 
     onChangeCurrent: any;
     onChangeStart: any;
@@ -349,6 +350,7 @@ export class TimeBar
             this.onSetCurrentValue( this.currentX );
         }
 
+        this._mouseDownCanvasRect = canvas.getBoundingClientRect(); // cache this to avoid stalls during mousemove
         window.addEventListener( "mousemove", this._onMouseMoveListener );
         window.addEventListener( "mouseup", this._onMouseUpListener );
 
@@ -396,8 +398,8 @@ export class TimeBar
         const canvas = this.canvas;
 
         // Process mouse
-        const x = e.target == canvas ? e.offsetX : e.clientX - canvas.offsetLeft;
-        const y = e.target == canvas ? e.offsetY : e.clientY - canvas.offsetTop;
+        const x = e.target == canvas ? e.offsetX : ( e.clientX - this._mouseDownCanvasRect.left );
+        const y = e.target == canvas ? e.offsetY : ( e.clientY - this._mouseDownCanvasRect.top );
 
         if ( this.dragging )
         {
