@@ -21,6 +21,7 @@ VideoEditor TimeBar:
 - Added `unbind` function to remove document events.
 - Fixed marker grabbing when both overlapped.
 
+Added `LX.removeSignal`.
 Expose DocMaker extension in LX.
 Minor CSS fixes.
 
