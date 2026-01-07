@@ -553,9 +553,8 @@ class AssetView {
     _subscribeTreeEvents(tree) {
         // If some of these events we don't have to call "resolve" since the AV itself
         // will update the data and refresh when necessary
-        tree.on("select", (event, resolve) => {
-            if (event.items.length > 1) // Do nothing if multiple selection
-             {
+        tree.on('select', (event, resolve) => {
+            if (event.items.length > 1) { // Do nothing if multiple selection
                 return;
             }
             const node = event.items[0];
@@ -579,7 +578,7 @@ class AssetView {
                 this.selectedItem = node;
             }
         });
-        tree.on("beforeMove", (event, resolve) => {
+        tree.on('beforeMove', (event, resolve) => {
             const onBeforeNodeDragged = this._callbacks['beforeNodeDragged'];
             const onNodeDragged = this._callbacks['nodeDragged'];
             const node = event.items[0];
@@ -621,11 +620,11 @@ class AssetView {
                 av_resolve();
             }
         });
-        tree.on("beforeDelete", (event, resolve) => {
+        tree.on('beforeDelete', (event, resolve) => {
             const node = event.items[0];
             this._requestDeleteItem(node);
         });
-        tree.on("beforeRename", (event, resolve) => {
+        tree.on('beforeRename', (event, resolve) => {
             const node = event.items[0];
             this._requestRenameItem(node, event.newName, true);
         });

@@ -16,7 +16,7 @@
     exports.LX = g.LX;
     if (!exports.LX) {
         exports.LX = {
-            version: '8.2',
+            version: '8.2.1',
             ready: false,
             extensions: [], // Store extensions used
             extraCommandbarEntries: [], // User specific entries for command bar
@@ -7619,14 +7619,14 @@
             if (options.id) {
                 root.id = options.id;
             }
-            root.className = exports.LX.mergeClass('lexbranch w-full rounded-lg my-0 mx-auto', options.className);
+            root.className = exports.LX.mergeClass('lexbranch bg-secondary/50 dark:bg-card text-secondary-foreground dark:text-card-foreground w-full rounded-lg my-0 mx-auto', options.className);
             var that = this;
             this.closed = options.closed ?? false;
             this.root = root;
             this.components = [];
             this.panel = null;
             // Create element
-            const title = exports.LX.makeElement('div', 'lexbranchtitle flex cursor-pointer select-none pad-lg bg-card text-card-foreground text-lg', '', root);
+            const title = exports.LX.makeElement('div', 'lexbranchtitle flex cursor-pointer select-none pad-lg text-lg', '', root);
             if (options.icon) {
                 const branchIcon = exports.LX.makeIcon(options.icon, { iconClass: 'mr-2' });
                 title.appendChild(branchIcon);
@@ -7634,7 +7634,7 @@
             title.innerHTML += name || 'Branch';
             const collapseIcon = exports.LX.makeIcon('Right', { iconClass: 'switch-branch-button', svgClass: 'sm' });
             title.appendChild(collapseIcon);
-            var branchContent = exports.LX.makeElement('div', 'lexbranchcontent pad-xs bg-card', '', root);
+            var branchContent = exports.LX.makeElement('div', 'lexbranchcontent pad-xs', '', root);
             branchContent.id = name.replace(/\s/g, '');
             this.content = branchContent;
             this._addBranchSeparator();
@@ -13442,6 +13442,27 @@
             return;
         }
         exports.LX.signals[name].push(obj);
+    };
+    /**
+     * @method removeSignal
+     * @param {String} name
+     * @param {Object} targetObj
+     */
+    exports.LX.removeSignal = function (name, targetObj) {
+        const data = exports.LX.signals[name];
+        if (!data) {
+            return;
+        }
+        if (!targetObj) {
+            delete exports.LX.signals[name];
+            return;
+        }
+        for (let i = 0; i < data.length; ++i) {
+            if (data[i] == targetObj) {
+                data.splice(i, 1);
+                break;
+            }
+        }
     };
     /**
      * @method emitSignal

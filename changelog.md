@@ -2,12 +2,29 @@
 
 ## dev
 
+## 8.2.1 (master)
+
 CodeEditor:
 - Fixed `options.onReady` being called before processing lines.
 
+VideoEditor:
+- Added `resizeVideo` and `resizeControls` to update area sizes. They are automatically called by resize.
+- Added `controlsComponents` object that holds all buttons and timebar that will be displayed in the ui.
+- Added a `createControls` function to create different button layouts. It creates all buttons and then calls a layout creator.
+- Added `createControlsLayout_0` and `createControlsLayout_1` with default button layouts.
+- Added `controlsLayout` option to specify which default layout to use or a custom function.
+- Added `onChangeState` and `onChangeLoop` user callbacks.
+- Added `resetCropBtn`. Only displayed in layout 1.
+
+VideoEditor TimeBar:
+- `mousemove` and `mouseup` events now attach to document instead of canvas, for a better user experience.
+- Added `unbind` function to remove document events.
+- Fixed marker grabbing when both overlapped.
+
+Expose DocMaker extension in LX.
 Minor CSS fixes.
 
-## 8.2 (master)
+## 8.2
 
 Use Tailwind (finally) to create and compile CSS.
 Removed custom utility classes, refactored theme colors and every theme variable used in LX.

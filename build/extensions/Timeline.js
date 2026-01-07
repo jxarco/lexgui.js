@@ -338,7 +338,7 @@ class Timeline {
             treeTracks = this.generateSelectedItemsTreeData();
         }
         this.trackTreesComponent = p.addTree(null, treeTracks, { filter: false, rename: false, draggable: false });
-        this.trackTreesComponent.on("select", (event, resolve) => {
+        this.trackTreesComponent.on('select', (event, resolve) => {
             const node = event.items[0];
             if (!event.domEvent.shiftKey) {
                 this.deselectAllTracks(false); // no need to update left panel
@@ -348,7 +348,7 @@ class Timeline {
                 this.setTrackSelection(node.trackData.trackIdx, flag, false, false); // do callback, do not update left panel
             }
         });
-        this.trackTreesComponent.on("visibleChanged", (event, resolve) => {
+        this.trackTreesComponent.on('visibleChanged', (event, resolve) => {
             const node = event.items[0];
             if (node.trackData) {
                 this.setTrackState(node.trackData.trackIdx, node.visible, false, false); // do not update left panel

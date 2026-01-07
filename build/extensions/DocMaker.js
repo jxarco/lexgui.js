@@ -325,6 +325,7 @@ class DocMaker {
         console.log('Copied!');
     }
 }
+LX.DocMaker = DocMaker;
 
 export { DocMaker };
 //# sourceMappingURL=DocMaker.js.map

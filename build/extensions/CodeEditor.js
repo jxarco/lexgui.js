@@ -555,11 +555,11 @@ class CodeEditor {
                 rename: false,
                 skipDefaultIcon: true
             });
-            this.explorer.on("dblClick", (event) => {
+            this.explorer.on('dblClick', (event) => {
                 const node = event.items[0];
                 this.loadTab(node.id);
             });
-            this.explorer.on("delete", (event) => {
+            this.explorer.on('delete', (event) => {
                 const node = event.items[0];
                 this.closeTab(node.id);
             });

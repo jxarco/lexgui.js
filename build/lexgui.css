@@ -833,6 +833,9 @@
   .min-w-5 {
     min-width: calc(var(--spacing) * 5);
   }
+  .min-w-fit {
+    min-width: fit-content;
+  }
   .flex-auto {
     flex: auto;
   }
@@ -1575,6 +1578,12 @@
   .bg-secondary-foreground {
     background-color: var(--color-secondary-foreground);
   }
+  .bg-secondary\/50 {
+    background-color: var(--color-secondary);
+    @supports (color: color-mix(in lab, red, red)) {
+      background-color: color-mix(in oklab, var(--color-secondary) 50%, transparent);
+    }
+  }
   .bg-sky-50 {
     background-color: var(--color-sky-50);
   }
@@ -1911,14 +1920,35 @@
   .pt-0 {
     padding-top: calc(var(--spacing) * 0);
   }
+  .pt-1 {
+    padding-top: calc(var(--spacing) * 1);
+  }
   .pt-8 {
     padding-top: calc(var(--spacing) * 8);
+  }
+  .pr-0 {
+    padding-right: calc(var(--spacing) * 0);
+  }
+  .pr-4 {
+    padding-right: calc(var(--spacing) * 4);
   }
   .pb-0 {
     padding-bottom: calc(var(--spacing) * 0);
   }
+  .pb-2 {
+    padding-bottom: calc(var(--spacing) * 2);
+  }
   .pb-4 {
     padding-bottom: calc(var(--spacing) * 4);
+  }
+  .pl-0 {
+    padding-left: calc(var(--spacing) * 0);
+  }
+  .pl-2 {
+    padding-left: calc(var(--spacing) * 2);
+  }
+  .pl-4 {
+    padding-left: calc(var(--spacing) * 4);
   }
   .pl-8 {
     padding-left: calc(var(--spacing) * 8);
@@ -2278,9 +2308,19 @@
       background-color: var(--color-blue-600);
     }
   }
+  .dark\:bg-card {
+    &:where(.dark, .dark *) {
+      background-color: var(--color-card);
+    }
+  }
   .dark\:bg-white {
     &:where(.dark, .dark *) {
       background-color: var(--color-white);
+    }
+  }
+  .dark\:text-card-foreground {
+    &:where(.dark, .dark *) {
+      color: var(--color-card-foreground);
     }
   }
   .\[\&_\.lexavatar\]\:ring-3 {
@@ -2484,7 +2524,7 @@
   --background: light-dark(#fafafa, #0a0a0a);
   --background-blur: light-dark(#f7f7f7d8, #1f1f1fe7);
   --foreground: light-dark(#0a0a0a, #fafafa);
-  --card: light-dark(#ffffff, #171717);
+  --card: light-dark(#fafafa, #171717);
   --card-foreground: light-dark(#0a0a0a, #fafafa);
   --primary: light-dark(#171717, #fafafa);
   --primary-foreground: light-dark(#fafafa, #171717);
@@ -3014,7 +3054,7 @@ a svg, svg path {
   }
 }
 .lexdialog {
-  box-shadow: 0 2px 6px #101010bb;
+  box-shadow: 0 2px 4px #10101059;
   z-index: 101;
   &:has(.lexselect) {
     overflow: visible;
@@ -3022,7 +3062,7 @@ a svg, svg path {
 }
 .lexdialogtitle {
   font-family: var(--global-title-font);
-  text-shadow: 0px 1px 6px #22222283;
+  text-shadow: 0px 1px 4px var(--border);
   border-top-left-radius: 0.5rem;
   border-top-right-radius: 0.5rem;
 }
@@ -3081,12 +3121,6 @@ a svg, svg path {
   padding: 0px;
   opacity: 0;
   transition: max-height 0.2s, opacity 0.2s, padding 0.2s;
-}
-:root[data-mode="light"] .lexdialog {
-  box-shadow: 0px 2px 6px #30303083;
-}
-:root[data-mode="light"] .lexdialogtitle {
-  text-shadow: 0px 2px 2px #8d8d8d34;
 }
 .lexcontainer.wrapper {
   margin-left: auto;
@@ -3343,7 +3377,7 @@ a svg, svg path {
 .lexbranchtitle {
   font-family: var(--global-title-font);
   font-weight: 500;
-  text-shadow: 0px 1px 6px #42424260;
+  text-shadow: 0px 1px 4px var(--border);
   letter-spacing: calc(var(--text-lg) * 0.025);
   border-top-left-radius: 0.5rem;
   border-top-right-radius: 0.5rem;
@@ -3351,14 +3385,13 @@ a svg, svg path {
 }
 .lexbranch.closed .lexbranchtitle {
   background-color: inherit;
+  border-bottom-left-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
 }
 .lexbranch .branchicon {
   font-size: var(--text-sm);
   margin-right: 12px;
   align-content: center;
-}
-.lexbranch.last.closed .lexbranchtitle {
-  margin-bottom: 6px;
 }
 .lexbranch .switch-branch-button {
   font-size: var(--text-sm);
@@ -3370,14 +3403,6 @@ a svg, svg path {
 }
 .lexbranch.closed .switch-branch-button {
   transform: rotate(0deg);
-}
-:root[data-mode="light"] .lexbranchtitle {
-  color: var(--secondary-foreground);
-  background-color: var(--secondary);
-  text-shadow: 0px 2px 2px #e0e0e03a;
-}
-:root[data-mode="light"] .lexbranch.closed .lexbranchtitle {
-  background-color: inherit;
 }
 .lexcomponent {
   transition: background-color 0.1s linear;
@@ -3671,12 +3696,6 @@ a svg, svg path {
     --button-color: color-mix(in oklab, var(--success) 30%, transparent);
   }
 }
-:root[data-mode="light"] .lexbutton.success:hover {
-  --button-color: var(--success);
-  @supports (color: color-mix(in lab, red, red)) {
-    --button-color: color-mix(in oklab, var(--success)20%, transparent);
-  }
-}
 .lexbutton.warning {
   --button-color: var(--warning);
   @supports (color: color-mix(in lab, red, red)) {
@@ -3688,12 +3707,6 @@ a svg, svg path {
   --button-color: var(--warning);
   @supports (color: color-mix(in lab, red, red)) {
     --button-color: color-mix(in oklab, var(--warning) 30%, transparent);
-  }
-}
-:root[data-mode="light"] .lexbutton.warning:hover {
-  --button-color: var(--warning);
-  @supports (color: color-mix(in lab, red, red)) {
-    --button-color: color-mix(in oklab, var(--warning)20%, transparent);
   }
 }
 .lexbutton.destructive {
@@ -3709,13 +3722,7 @@ a svg, svg path {
     --button-color: color-mix(in oklab, var(--destructive) 30%, transparent);
   }
 }
-:root[data-mode="light"] .lexbutton.destructive:hover {
-  --button-color: var(--destructive);
-  @supports (color: color-mix(in lab, red, red)) {
-    --button-color: color-mix(in oklab, var(--destructive)20%, transparent);
-  }
-}
-.lexbutton.outline {
+.lexbutton.outline, .lexbutton.dashed {
   border-color: var(--input);
   --button-color: var(--input);
   @supports (color: color-mix(in lab, red, red)) {
@@ -3724,33 +3731,21 @@ a svg, svg path {
   --tw-shadow: 0 1px 2px 0 var(--tw-shadow-color, #0000000d);
   box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
 }
-:root[data-mode="light"] .lexbutton.outline {
-  --button-color: var(--background);
-}
-.lexbutton.outline:hover {
-  --button-color: var(--input);
-  @supports (color: color-mix(in lab, red, red)) {
-    --button-color: color-mix(in oklab, var(--input)50%, transparent);
-  }
-}
-:root[data-mode="light"] .lexbutton.outline:hover {
-  --button-color: var(--muted);
-  color: var(--foreground);
-}
 .lexbutton.dashed {
   border-width: 1px;
   border-style: dashed;
-  border-color: var(--input);
+}
+.lexbutton.outline:hover, .lexbutton.dashed:hover {
+  --button-color: var(--input);
+  @supports (color: color-mix(in lab, red, red)) {
+    --button-color: color-mix(in oklab, var(--input) 60%, transparent);
+  }
 }
 .lexbutton.ghost:hover {
   background-color: var(--muted);
   @supports (color: color-mix(in lab, red, red)) {
-    background-color: color-mix(in oklab, var(--muted)50%, transparent);
+    background-color: color-mix(in oklab, var(--muted) 50%, transparent);
   }
-}
-:root[data-mode="light"] .lexbutton.ghost:hover {
-  background-color: var(--muted);
-  color: var(--foreground);
 }
 .lexbutton.link {
   color: var(--primary);
@@ -6586,161 +6581,166 @@ ul.lexassetscontent {
 :root[data-mode="light"] .lexcodescrollbar div:hover {
   background-color: #5e5e5ea9 !important;
 }
-:root[data-mode="light"] .cm-str {
-  color: #a15e3e;
-}
-:root[data-mode="light"] .cm-std {
-  color: #a753c0;
-}
-:root[data-mode="light"] .cm-kwd {
-  color: #1967d2;
-}
-:root[data-mode="light"] .cm-com {
-  color: #188038;
-}
-:root[data-mode="light"] .cm-typ.javascript {
-  color: #0b9484;
-}
-:root[data-mode="light"] .cm-dec.javascript {
-  color: #c5221f;
-}
-:root[data-mode="light"] .cm-sym.javascript {
-  color: #333333;
-}
-:root[data-mode="light"] .cm-mtd.javascript {
-  color: #539ac7;
-}
-:root[data-mode="light"] .cm-typ.c {
-  color: #0b9484;
-}
-:root[data-mode="light"] .cm-bln.c {
-  color: #333333;
-}
-:root[data-mode="light"] .cm-dec.c {
-  color: #c5221f;
-}
-:root[data-mode="light"] .cm-sym.c {
-  color: #333333;
-}
-:root[data-mode="light"] .cm-mtd.c {
-  color: #539ac7;
-}
-:root[data-mode="light"] .cm-ppc.c {
-  color: #626262;
-}
-:root[data-mode="light"] .cm-typ.cpp {
-  color: #0b9484;
-}
-:root[data-mode="light"] .cm-bln.cpp {
-  color: #333333;
-}
-:root[data-mode="light"] .cm-dec.cpp {
-  color: #c5221f;
-}
-:root[data-mode="light"] .cm-sym.cpp {
-  color: #333333;
-}
-:root[data-mode="light"] .cm-mtd.cpp {
-  color: #539ac7;
-}
-:root[data-mode="light"] .cm-ppc.cpp {
-  color: #626262;
-}
-:root[data-mode="light"] .cm-sym.cmake {
-  color: #a753c0;
-}
-:root[data-mode="light"] .cm-kwd.css {
-  color: #c49319;
-}
-:root[data-mode="light"] .cm-typ.css {
-  color: #539ac7;
-}
-:root[data-mode="light"] .cm-bln.css {
-  color: #2194ce;
-}
-:root[data-mode="light"] .cm-dec.css {
-  color: #c5221f;
-}
-:root[data-mode="light"] .cm-sym.css {
-  color: #a753c0;
-}
-:root[data-mode="light"] .cm-dec.json {
-  color: #c5221f;
-}
-:root[data-mode="light"] .cm-sym.json {
-  color: #a753c0;
-}
-:root[data-mode="light"] .cm-typ.glsl {
-  color: #0b9484;
-}
-:root[data-mode="light"] .cm-dec.glsl {
-  color: #c5221f;
-}
-:root[data-mode="light"] .cm-mtd.glsl {
-  color: #539ac7;
-}
-:root[data-mode="light"] .cm-sym.glsl {
-  color: #a753c0;
-}
-:root[data-mode="light"] .cm-typ.wgsl {
-  color: #0b9484;
-}
-:root[data-mode="light"] .cm-dec.wgsl {
-  color: #c5221f;
-}
-:root[data-mode="light"] .cm-mtd.wgsl {
-  color: #539ac7;
-}
-:root[data-mode="light"] .cm-sym.wgsl {
-  color: #a753c0;
-}
-:root[data-mode="light"] .cm-ppc.wgsl {
-  color: #626262;
-}
-:root[data-mode="light"] .cm-typ.rust {
-  color: #0b9484;
-}
-:root[data-mode="light"] .cm-dec.rust {
-  color: #c5221f;
-}
-:root[data-mode="light"] .cm-sym.rust {
-  color: #333333;
-}
-:root[data-mode="light"] .cm-mtd.rust {
-  color: #539ac7;
-}
-:root[data-mode="light"] .cm-typ.python {
-  color: #0b9484;
-}
-:root[data-mode="light"] .cm-dec.python {
-  color: #c5221f;
-}
-:root[data-mode="light"] .cm-sym.python {
-  color: #333333;
-}
-:root[data-mode="light"] .cm-mtd.python {
-  color: #539ac7;
-}
-:root[data-mode="light"] .cm-dec.batch {
-  color: #c5221f;
-}
-:root[data-mode="light"] .cm-sym.batch {
-  color: #a753c0;
-}
-:root[data-mode="light"] .cm-bln.html {
-  color: #539ac7;
-}
-:root[data-mode="light"] .cm-sym.html {
-  color: #696969;
-}
-:root[data-mode="light"] .cm-bln.xml {
-  color: #a1d2f0;
-}
-:root[data-mode="light"] .cm-sym.xml {
-  color: #929292;
-}
-:root[data-mode="light"] .cm-bln.markdown {
-  color: #a1d2f0;
+:root[data-mode="light"] {
+  & .cm-str {
+    color: #c3470c;
+  }
+  & .cm-std {
+    color: #a753c0;
+  }
+  & .cm-kwd {
+    color: #006cff;
+  }
+  & .cm-com {
+    color: #188038;
+  }
+  & .cm-typ.javascript {
+    color: #0b9484;
+  }
+  & .cm-dec.javascript {
+    color: #c5221f;
+  }
+  & .cm-sym.javascript {
+    color: #333333;
+  }
+  & .cm-mtd.javascript {
+    color: #1a54a7;
+  }
+  & .cm-bln.javascript {
+    color: #510000;
+  }
+  & .cm-typ.c {
+    color: #0b9484;
+  }
+  & .cm-bln.c {
+    color: #333333;
+  }
+  & .cm-dec.c {
+    color: #c5221f;
+  }
+  & .cm-sym.c {
+    color: #333333;
+  }
+  & .cm-mtd.c {
+    color: #1a54a7;
+  }
+  & .cm-ppc.c {
+    color: #626262;
+  }
+  & .cm-typ.cpp {
+    color: #0b9484;
+  }
+  & .cm-bln.cpp {
+    color: #333333;
+  }
+  & .cm-dec.cpp {
+    color: #c5221f;
+  }
+  & .cm-sym.cpp {
+    color: #333333;
+  }
+  & .cm-mtd.cpp {
+    color: #1a54a7;
+  }
+  & .cm-ppc.cpp {
+    color: #626262;
+  }
+  & .cm-sym.cmake {
+    color: #a753c0;
+  }
+  & .cm-kwd.css {
+    color: #c49319;
+  }
+  & .cm-typ.css {
+    color: #1a54a7;
+  }
+  & .cm-bln.css {
+    color: #2194ce;
+  }
+  & .cm-dec.css {
+    color: #c5221f;
+  }
+  & .cm-sym.css {
+    color: #a753c0;
+  }
+  & .cm-dec.json {
+    color: #c5221f;
+  }
+  & .cm-sym.json {
+    color: #a753c0;
+  }
+  & .cm-typ.glsl {
+    color: #0b9484;
+  }
+  & .cm-dec.glsl {
+    color: #c5221f;
+  }
+  & .cm-mtd.glsl {
+    color: #1a54a7;
+  }
+  & .cm-sym.glsl {
+    color: #a753c0;
+  }
+  & .cm-typ.wgsl {
+    color: #0b9484;
+  }
+  & .cm-dec.wgsl {
+    color: #c5221f;
+  }
+  & .cm-mtd.wgsl {
+    color: #1a54a7;
+  }
+  & .cm-sym.wgsl {
+    color: #a753c0;
+  }
+  & .cm-ppc.wgsl {
+    color: #626262;
+  }
+  & .cm-typ.rust {
+    color: #0b9484;
+  }
+  & .cm-dec.rust {
+    color: #c5221f;
+  }
+  & .cm-sym.rust {
+    color: #333333;
+  }
+  & .cm-mtd.rust {
+    color: #1a54a7;
+  }
+  & .cm-typ.python {
+    color: #0b9484;
+  }
+  & .cm-dec.python {
+    color: #c5221f;
+  }
+  & .cm-sym.python {
+    color: #333333;
+  }
+  & .cm-mtd.python {
+    color: #1a54a7;
+  }
+  & .cm-dec.batch {
+    color: #c5221f;
+  }
+  & .cm-sym.batch {
+    color: #a753c0;
+  }
+  & .cm-bln.html {
+    color: #1a54a7;
+  }
+  & .cm-sym.html {
+    color: #696969;
+  }
+  & .cm-bln.xml {
+    color: #a1d2f0;
+  }
+  & .cm-sym.xml {
+    color: #929292;
+  }
+  & .cm-bln.markdown {
+    color: #a1d2f0;
+  }
 }
 .lexgraph {
   overflow: hidden;
