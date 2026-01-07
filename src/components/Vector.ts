@@ -251,7 +251,7 @@ export class Vector extends BaseComponent
             };
         }
 
-        if( !options.skipLock )
+        if ( !options.skipLock )
         {
             const lockerButton: any = new Button( null, '', ( swapValue: boolean ) => {
                 this.locked = swapValue;

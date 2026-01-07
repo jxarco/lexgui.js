@@ -321,14 +321,13 @@ export class NodeTree
                     const onDelete = this._callbacks['delete'];
 
                     const resolve = ( ...args: any[] ) => {
-
                         let deletedNodes = [];
 
-                        if( this.selected.length )
+                        if ( this.selected.length )
                         {
                             deletedNodes.push( ...that.deleteNodes( this.selected ) );
                         }
-                        else if( that.deleteNode( node ) )
+                        else if ( that.deleteNode( node ) )
                         {
                             deletedNodes.push( node );
                         }
@@ -393,7 +392,7 @@ export class NodeTree
 
                     this.refresh();
 
-                    if( nodesDeleted.length )
+                    if ( nodesDeleted.length )
                     {
                         const event: NodeTreeEvent = {
                             type: 'delete',
@@ -788,7 +787,7 @@ export class NodeTree
     {
         const nodesDeleted = [];
 
-        for( const n of nodes  )
+        for ( const n of nodes )
         {
             if ( this.deleteNode( n ) )
             {

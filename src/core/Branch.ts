@@ -33,7 +33,10 @@ export class Branch
             root.id = options.id;
         }
 
-        root.className = LX.mergeClass( 'lexbranch bg-secondary/50 dark:bg-card text-secondary-foreground dark:text-card-foreground w-full rounded-lg my-0 mx-auto', options.className );
+        root.className = LX.mergeClass(
+            'lexbranch bg-secondary/50 dark:bg-card text-secondary-foreground dark:text-card-foreground w-full rounded-lg my-0 mx-auto',
+            options.className
+        );
 
         var that = this;
 
@@ -43,8 +46,7 @@ export class Branch
         this.panel = null;
 
         // Create element
-        const title: any = LX.makeElement( 'div', 'lexbranchtitle flex cursor-pointer select-none pad-lg text-lg', '',
-            root );
+        const title: any = LX.makeElement( 'div', 'lexbranchtitle flex cursor-pointer select-none pad-lg text-lg', '', root );
 
         if ( options.icon )
         {

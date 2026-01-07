@@ -401,7 +401,7 @@ LX.setSystemMode = setSystemMode;
  * @method setCSSVariable
  * @description Sets a new value for one of the CSS root variables
  * @param {String} varName Name of the CSS variable
- * @param {String} value 
+ * @param {String} value
  */
 function setCSSVariable( varName: string, value: string )
 {

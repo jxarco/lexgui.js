@@ -776,13 +776,13 @@ export class AssetView
         // If some of these events we don't have to call "resolve" since the AV itself
         // will update the data and refresh when necessary
 
-        tree.on( "select", ( event: any, resolve: any ) => {
-            if ( event.items.length > 1 ) // Do nothing if multiple selection
-            {
+        tree.on( 'select', ( event: any, resolve: any ) => {
+            if ( event.items.length > 1 )
+            { // Do nothing if multiple selection
                 return;
             }
 
-            const node = event.items[ 0 ];
+            const node = event.items[0];
 
             if ( !node.parent )
             {
@@ -813,12 +813,11 @@ export class AssetView
             }
         } );
 
-        tree.on( "beforeMove", ( event: any, resolve: any ) => {
-            
+        tree.on( 'beforeMove', ( event: any, resolve: any ) => {
             const onBeforeNodeDragged = this._callbacks['beforeNodeDragged'];
             const onNodeDragged = this._callbacks['nodeDragged'];
 
-            const node = event.items[ 0 ];
+            const node = event.items[0];
             const value = event.to;
 
             const av_resolve = ( ...args: any[] ) => {
@@ -868,16 +867,15 @@ export class AssetView
             {
                 av_resolve();
             }
-
         } );
 
-        tree.on( "beforeDelete", ( event: any, resolve: any ) => {
-            const node = event.items[ 0 ];
+        tree.on( 'beforeDelete', ( event: any, resolve: any ) => {
+            const node = event.items[0];
             this._requestDeleteItem( node );
         } );
 
-        tree.on( "beforeRename", ( event: any, resolve: any ) => {
-            const node = event.items[ 0 ];
+        tree.on( 'beforeRename', ( event: any, resolve: any ) => {
+            const node = event.items[0];
             this._requestRenameItem( node, event.newName, true );
         } );
     }
@@ -1760,7 +1758,7 @@ export class AssetView
         }
 
         // It could be a Tree event, so maybe the elements is not created yet
-        if( item.domEl )
+        if ( item.domEl )
         {
             const wasSelected = LX.hasClass( item.domEl, 'selected' );
             const hoverTitle: HTMLElement | null = this.content.querySelector(

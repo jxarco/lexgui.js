@@ -442,3 +442,5 @@ export class DocMaker
         console.log( 'Copied!' );
     }
 }
+
+LX.DocMaker = DocMaker;

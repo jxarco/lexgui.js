@@ -706,12 +706,12 @@ export class CodeEditor
                 skipDefaultIcon: true
             } );
 
-            this.explorer.on( "dblClick", ( event: any ) => {
+            this.explorer.on( 'dblClick', ( event: any ) => {
                 const node = event.items[0];
                 this.loadTab( node.id );
             } );
 
-            this.explorer.on( "delete", ( event: any ) => {
+            this.explorer.on( 'delete', ( event: any ) => {
                 const node = event.items[0];
                 this.closeTab( node.id );
             } );
