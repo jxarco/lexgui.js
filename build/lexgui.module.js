@@ -12,7 +12,7 @@ const g = globalThis;
 let LX = g.LX;
 if (!LX) {
     LX = {
-        version: '8.2.1',
+        version: '8.2.2',
         ready: false,
         extensions: [], // Store extensions used
         extraCommandbarEntries: [], // User specific entries for command bar
@@ -5409,7 +5409,7 @@ class NodeTree {
             return;
         }
         // Element should exist, since tree was refreshed to show it
-        const el = this.domEl.querySelector('#' + id);
+        const el = this.domEl.querySelector('#' + LX.getSupportedDOMName(id));
         console.assert(el, "NodeTree: Can't select node " + id);
         el.classList.add('selected');
         this.selected = [el.treeData];

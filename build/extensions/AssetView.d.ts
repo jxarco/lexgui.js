@@ -129,7 +129,7 @@ export declare class AssetView {
     _renameItem(item: AssetViewItem, newName: string, data?: AssetViewItem[]): void;
     _renameItemPopover(item: AssetViewItem): void;
     _requestCreateFolder(folder?: AssetViewItem): void;
-    _createFolder(folder?: AssetViewItem): AssetViewItem;
+    _createFolder(folder?: AssetViewItem, newFolderName?: string): AssetViewItem;
     _openScriptInEditor(script: any): void;
     _setAssetsPerPage(n: number): void;
     _lastModifiedToStringDate(lm: number): string;

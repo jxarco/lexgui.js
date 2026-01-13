@@ -16,7 +16,7 @@
     exports.LX = g$2.LX;
     if (!exports.LX) {
         exports.LX = {
-            version: '8.2.1',
+            version: '8.2.2',
             ready: false,
             extensions: [], // Store extensions used
             extraCommandbarEntries: [], // User specific entries for command bar
@@ -5413,7 +5413,7 @@
                 return;
             }
             // Element should exist, since tree was refreshed to show it
-            const el = this.domEl.querySelector('#' + id);
+            const el = this.domEl.querySelector('#' + exports.LX.getSupportedDOMName(id));
             console.assert(el, "NodeTree: Can't select node " + id);
             el.classList.add('selected');
             this.selected = [el.treeData];
@@ -15249,7 +15249,7 @@
             const onBeforeCreateFolder = this._callbacks['beforeCreateFolder'];
             const onCreateFolder = this._callbacks['createFolder'];
             const resolve = (...args) => {
-                const newFolder = this._createFolder(folder);
+                const newFolder = this._createFolder(folder, ...args);
                 const event = {
                     type: 'create-folder',
                     result: [newFolder],
@@ -15271,14 +15271,14 @@
                 resolve();
             }
         }
-        _createFolder(folder) {
+        _createFolder(folder, newFolderName) {
             folder = folder ?? this.currentFolder;
             if (!folder) {
                 throw ('_createFolder: Something went wrong!');
             }
             const dir = folder.children ?? folder;
             const newFolder = {
-                id: this._getClonedName('New Folder', dir),
+                id: this._getClonedName(newFolderName ?? 'New Folder', dir),
                 type: 'folder',
                 children: [],
                 parent: this.currentFolder,
@@ -15290,7 +15290,7 @@
             if (this._moveItemDialog && this._movingItem) {
                 this._moveItem(this._movingItem, folder);
             }
-            return folder;
+            return newFolder;
         }
         _openScriptInEditor(script) {
             if (this._scriptCodeDialog) {

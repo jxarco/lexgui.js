@@ -2883,7 +2883,7 @@ svg {
   height: 1rem;
   stroke: currentColor;
   display: block;
-  & path {
+  & * {
     stroke: inherit;
   }
 }
@@ -2901,8 +2901,8 @@ a svg, svg path {
   pointer-events: auto;
 }
 .lextoast {
-  background-color: light-dark(var(--primary), var(--secondary));
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+  background-color: light-dark(var(--muted), var(--secondary));
+  box-shadow: 0 0px 6px 2px rgba(0, 0, 0, 0.15);
   z-index: 3000;
   transition: all 0.5s cubic-bezier(.42,.97,.52,1.19);
   --element-offset: 0.5rem;
@@ -5097,13 +5097,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
   background-color: var(--secondary);
 }
 .lexsidebar.collapsing .lexsidebarheader {
-  background-color: var(--primary);
-  @supports (color: color-mix(in lab, red, red)) {
-    background-color: color-mix(in oklab, var(--primary) 50%, transparent);
-  }
-}
-.lexsidebar.collapsing .lexsidebarheader svg path {
-  color: #f4f4f4;
+  background-color: var(--accent);
 }
 .lexsidebar .lexsidebarfooter:active, .lexsidebar .lexsidebarheader:active {
   transform: scale(0.99);
@@ -5658,6 +5652,15 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
   display: inline-grid;
   position: relative;
   pointer-events: none;
+}
+.lexsidebarentrycontent.swap {
+  place-self: start;
+  & input {
+    position: absolute;
+  }
+  & .swap-on {
+    position: absolute;
+  }
 }
 .swap input {
   pointer-events: auto;

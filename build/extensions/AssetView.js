@@ -1332,7 +1332,7 @@ class AssetView {
         const onBeforeCreateFolder = this._callbacks['beforeCreateFolder'];
         const onCreateFolder = this._callbacks['createFolder'];
         const resolve = (...args) => {
-            const newFolder = this._createFolder(folder);
+            const newFolder = this._createFolder(folder, ...args);
             const event = {
                 type: 'create-folder',
                 result: [newFolder],
@@ -1354,14 +1354,14 @@ class AssetView {
             resolve();
         }
     }
-    _createFolder(folder) {
+    _createFolder(folder, newFolderName) {
         folder = folder ?? this.currentFolder;
         if (!folder) {
             throw ('_createFolder: Something went wrong!');
         }
         const dir = folder.children ?? folder;
         const newFolder = {
-            id: this._getClonedName('New Folder', dir),
+            id: this._getClonedName(newFolderName ?? 'New Folder', dir),
             type: 'folder',
             children: [],
             parent: this.currentFolder,
@@ -1373,7 +1373,7 @@ class AssetView {
         if (this._moveItemDialog && this._movingItem) {
             this._moveItem(this._movingItem, folder);
         }
-        return folder;
+        return newFolder;
     }
     _openScriptInEditor(script) {
         if (this._scriptCodeDialog) {
