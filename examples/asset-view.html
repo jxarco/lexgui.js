@@ -269,7 +269,7 @@
 
         assetView.on( "beforeCreateFolder", ( event, resolve ) => {
             LX.prompt("Perform CreateFolder Action?", "Server Message", () => {
-                resolve();
+                resolve("My New Folder With Custom Name");
             })
         } );
 

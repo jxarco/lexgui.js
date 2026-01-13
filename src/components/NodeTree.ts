@@ -775,7 +775,7 @@ export class NodeTree
         }
 
         // Element should exist, since tree was refreshed to show it
-        const el = this.domEl.querySelector( '#' + id );
+        const el = this.domEl.querySelector( '#' + LX.getSupportedDOMName( id ) );
         console.assert( el, "NodeTree: Can't select node " + id );
 
         el.classList.add( 'selected' );

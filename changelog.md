@@ -2,6 +2,10 @@
 
 ## dev
 
+AssetView:
+- Added suppord for custom folder names in `onBeforeCreateFolder` using 1st resolve param.
+- Fixed explorer NodeTree bug selecting items with spaces in the id.
+
 Fixed toast css in light mode.
 Minor fixes Sidebar CSS.
 

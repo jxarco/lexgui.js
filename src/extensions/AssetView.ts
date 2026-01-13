@@ -1821,7 +1821,7 @@ export class AssetView
         const onCreateFolder = this._callbacks['createFolder'];
 
         const resolve = ( ...args: any[] ) => {
-            const newFolder = this._createFolder( folder );
+            const newFolder = this._createFolder( folder, ...args );
             const event: AssetViewEvent = {
                 type: 'create-folder',
                 result: [ newFolder ],
@@ -1847,7 +1847,7 @@ export class AssetView
         }
     }
 
-    _createFolder( folder?: AssetViewItem ): AssetViewItem
+    _createFolder( folder?: AssetViewItem, newFolderName?: string ): AssetViewItem
     {
         folder = folder ?? this.currentFolder;
 
@@ -1858,7 +1858,7 @@ export class AssetView
 
         const dir = folder.children ?? folder;
         const newFolder = {
-            id: this._getClonedName( 'New Folder', dir ),
+            id: this._getClonedName( newFolderName ?? 'New Folder', dir ),
             type: 'folder',
             children: [],
             parent: this.currentFolder,
@@ -1875,7 +1875,7 @@ export class AssetView
             this._moveItem( this._movingItem, folder );
         }
 
-        return folder;
+        return newFolder;
     }
 
     _openScriptInEditor( script: any )
