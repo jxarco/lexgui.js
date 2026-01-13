@@ -533,8 +533,8 @@ a svg, svg path {
 }
 
 .lextoast {
-    background-color: light-dark(var(--primary), var(--secondary));
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+    background-color: light-dark(var(--muted), var(--secondary));
+    box-shadow: 0 0px 6px 2px rgba(0, 0, 0, 0.15);
     z-index: 3000;
     transition: all 0.5s cubic-bezier(.42,.97,.52,1.19);
     --element-offset: 0.5rem;

@@ -2,6 +2,8 @@
 
 ## dev
 
+Fixed toast css in light mode.
+
 ## 8.2.1 (master)
 
 CodeEditor:
