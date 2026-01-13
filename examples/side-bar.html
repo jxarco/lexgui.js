@@ -57,6 +57,8 @@
         m.add("Accessibility ", { icon: "Box", callback: logParams });
         m.add("Fast Refresh", { icon: "Code", callback: logParams });
         m.add("Supported Browsers", { icon: "Search", callback: logParams });
+        m.group("Settings");
+        m.add("Mode ", { icon: "Sun", swap: "Moon", callback: logParams });
         m.separator();
         m.add("Calendar ", { collapsable: 3 });
         m.add("Personal ", { callback: logParams, type: "checkbox" });

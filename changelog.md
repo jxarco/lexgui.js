@@ -3,6 +3,7 @@
 ## dev
 
 Fixed toast css in light mode.
+Minor fixes Sidebar CSS.
 
 ## 8.2.1 (master)
 

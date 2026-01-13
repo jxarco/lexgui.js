@@ -509,7 +509,7 @@ svg {
     stroke: currentColor;
     display: block;
 
-    & path {
+    & * {
         stroke: inherit;
     }
 }
@@ -2950,11 +2950,7 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 }
 
 .lexsidebar.collapsing .lexsidebarheader {
-    background-color: color-mix(in oklab, var(--primary) 50%, transparent);
-}
-
-.lexsidebar.collapsing .lexsidebarheader svg path {
-    color: #f4f4f4;
+    background-color: var(--accent);
 }
 
 .lexsidebar .lexsidebarfooter:active, .lexsidebar .lexsidebarheader:active {
@@ -3643,6 +3639,18 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     display: inline-grid;
     position: relative;
     pointer-events: none;
+}
+
+.lexsidebarentrycontent.swap {
+    place-self: start;
+
+    & input {
+        position: absolute;
+    }
+
+    & .swap-on {
+        position: absolute;
+    }
 }
 
 .swap input {
