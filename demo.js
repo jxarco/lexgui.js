@@ -710,7 +710,7 @@ LX._registerIconsAndColors( "./" );
                     { name: "Make a copy" },
                     { name: "Favourite" },
                     null,
-                    { name: "Delete", icon: "Trash2", className: "text-destructive" },
+                    { name: "Delete", icon: "Trash2", className: "destructive" },
                 ]
             }
         });

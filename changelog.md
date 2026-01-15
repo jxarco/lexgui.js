@@ -5,6 +5,7 @@
 Fixed TextInput not updating on browser autofill.
 Allow support to disable: Array, DatePicker, Layers, List, Pad, Rate, and Tags components.
 Add `options.mapIcon` to change Map2D opener button icon.
+Added `destructive` class support for Dropdown items.
 
 Form Component:
 - Enter key now submits the form as native behaviour.

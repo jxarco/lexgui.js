@@ -1071,6 +1071,9 @@ a svg, svg path {
     }
 }
 
+.lexdropdownmenuitem.destructive { color: var(--destructive); }
+.lexdropdownmenuitem.destructive:hover {  background-color: color-mix(in oklab, var(--destructive) 15%, transparent); }
+
 .lexdropdownmenu .separator {
     width: calc(100% + 0.4rem);
     translate: -0.2rem 0;
