@@ -429,6 +429,12 @@ dialog::backdrop {
     }
 }
 
+@keyframes lx-autofill { from {} to { } }
+
+input:autofill, input:-webkit-autofill {
+    transition: background-color 50000s ease-in-out 0s;
+}
+
 body.nocursor * {
     cursor: none !important;
 }

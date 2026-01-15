@@ -13,6 +13,8 @@ export class TextInput extends BaseComponent
 {
     valid: ( s: string, m?: string ) => boolean;
 
+    input: HTMLInputElement | HTMLAnchorElement;
+
     _triggerEvent: Event | undefined;
     _lastValueTriggered?: any;
 
@@ -74,8 +76,6 @@ export class TextInput extends BaseComponent
         {
             wValue = LX.makeElement( 'input', LX.mergeClass( 'lextext text-sm', options.inputClass ) );
             wValue.type = options.type || '';
-            wValue.value = value || '';
-            wValue.style.textAlign = options.float ?? '';
 
             wValue.setAttribute( 'placeholder', options.placeholder ?? '' );
 
@@ -139,8 +139,6 @@ export class TextInput extends BaseComponent
         {
             wValue = document.createElement( 'input' );
             wValue.disabled = true;
-            wValue.value = value;
-            wValue.style.textAlign = options.float ?? '';
             wValue.className = LX.mergeClass( 'lextext ellipsis-overflow', options.inputClass );
         }
 
@@ -149,10 +147,55 @@ export class TextInput extends BaseComponent
             wValue.classList.add( 'field-sizing-content' );
         }
 
+        if ( wValue instanceof HTMLInputElement )
+        {
+            wValue.name = options.name;
+            wValue.value = value ?? '';
+            
+            if ( options.autocomplete )
+            {
+                wValue.autocomplete = options.autocomplete;
+            }
+            else if ( wValue.type === 'password' )
+            {
+                // allow password managers by default
+                wValue.autocomplete = 'current-password';
+            }
+            else if ( options.name === 'username' || options.name === 'email' )
+            {
+                wValue.autocomplete = options.name;
+            }
+            else
+            {
+                // neutral default, don't break browser heuristics
+                wValue.autocomplete = 'on';
+            }
+            
+            wValue.style.textAlign = options.float ?? '';
+
+            wValue.addEventListener('transitionstart', ( e: TransitionEvent ) => {
+                if ( e.propertyName === 'background-color' && 
+                    wValue.matches( ':-webkit-autofill' ) ) {
+                    this.syncFromDOM();
+                }
+            });
+        }
+
         Object.assign( wValue.style, options.style ?? {} );
+
         container.appendChild( wValue );
 
+        this.input = wValue;
+
         LX.doAsync( this.onResize.bind( this ) );
+    }
+
+    syncFromDOM( skipCallback: boolean = true )
+    {
+        if ( this.input instanceof HTMLInputElement )
+        {
+            this.set( this.input.value, skipCallback );
+        }
     }
 }
 

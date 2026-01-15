@@ -48,7 +48,8 @@
                 ["secondaryActionName", "String", "Text to be shown in the secondary action button", `"Cancel"`],
                 ["secondaryActionCallback", "Function", "Function called on execute secondary action", "—"],
                 ["secondaryButtonClass", "String", "Button class for secondary action button", `"primary"`],
-                ["skipLabels", "Boolean", "Do not show input field labels", "false"]
+                ["skipEnterSubmit", "Boolean", "Disable native behavior for Enter key submitting the form.", "false"],
+                ["skipLabels", "Boolean", "Do not show input field labels", "false"],
             ].map( v => {
                 return [ docMaker.iCode( v[ 0 ], "table" ), docMaker.iCode( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? docMaker.iCode( v[ 3 ], "table desc" ) : v[ 3 ] ];
             } )
@@ -61,10 +62,13 @@
         panel.addTable( null, {
             head: [ "Option", "Type", "Description", "Default" ],
             body: [
-                ["value", "String", "Value of the form entry", "—"],
                 ["label", "String", "Label of the form entry (used as the placeholder if it is not defined)", "—"],
+                ["type", "String", "Type of the form entry", `"text"`],
+                ["icon", "String", "Icon name to show in the form entry", "—"],
+                ["name", "String", "Name of the form entry", "—"],
                 ["pattern", "Object", "Pattern options to validate the text entry value", "—"],
                 ["submit", "Boolean", "Pressing Enter key submits the form", "false"],
+                ["value", "String", "Value of the form entry", "—"],
             ].map( v => {
                 return [ docMaker.iCode( v[ 0 ], "table" ), docMaker.iCode( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? docMaker.iCode( v[ 3 ], "table desc" ) : v[ 3 ] ];
             } )

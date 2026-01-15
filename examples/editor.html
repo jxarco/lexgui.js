@@ -965,17 +965,19 @@
         let dialog = new LX.Dialog('Login', panel => {
 
             const formData = {
-                Username: {
+                username: {
                     value: "",
-                    placeholder: "Enter username",
+                    label: "Username",
                     icon: "User",
+                    name: "username",
                     pattern: { minLength: 3 }
                 },
-                Password: {
+                password: {
                     value: "",
+                    label: "Password",
                     type: "password",
-                    placeholder: "Enter password",
                     icon: "KeyRound",
+                    name: "password",
                     pattern: { lowercase: true, uppercase: true, digit: true, minLength: 6 },
                     submit: true
                 }
@@ -985,7 +987,7 @@
                 if( !errors.length )
                 {
                     dialog.close();
-                    LX.toast( "Logged in!", `Welcome ${ value.Username } :)`);
+                    LX.toast( "Logged in!", `Welcome ${ value.username } :)`);
                 }
                 else
                 {

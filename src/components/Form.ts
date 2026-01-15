@@ -12,6 +12,10 @@ import { TextInput } from './TextInput';
 
 export class Form extends BaseComponent
 {
+    data: any;
+    formData: any = {};
+    primaryButton: Button | undefined;
+
     constructor( name: string, data: any, callback: any, options: any = {} )
     {
         if ( data.constructor != Object )
@@ -26,11 +30,11 @@ export class Form extends BaseComponent
         super( ComponentType.FORM, name, null, options );
 
         this.onGetValue = () => {
-            return container.formData;
+            return this.formData;
         };
 
         this.onSetValue = ( newValue, skipCallback, event ) => {
-            container.formData = newValue;
+            this.formData = newValue;
             const entries = container.querySelectorAll( '.lexcomponent' );
             for ( let i = 0; i < entries.length; ++i )
             {
@@ -49,7 +53,6 @@ export class Form extends BaseComponent
         let container: any = document.createElement( 'div' );
         container.className = 'flex flex-col gap-1';
         container.style.width = '100%';
-        container.formData = {};
         this.root.appendChild( container );
 
         for ( let entry in data )
@@ -76,15 +79,15 @@ export class Form extends BaseComponent
 
             entryData.textComponent = new TextInput( null, entryData.constructor == Object ? entryData.value : entryData,
                 ( value: string, event: any ) => {
-                    container.formData[entry] = value;
-                    if ( entryData.submit && event.constructor === KeyboardEvent )
+                    this.formData[entry] = value;
+                    if ( entryData.submit && event?.constructor === KeyboardEvent )
                     {
-                        primaryButton?.click();
+                        this.submit();
                     }
                 }, entryData );
             container.appendChild( entryData.textComponent.root );
 
-            container.formData[entry] = entryData.constructor == Object ? entryData.value : entryData;
+            this.formData[entry] = entryData.constructor == Object ? entryData.value : entryData;
         }
 
         const buttonContainer = LX.makeContainer( [ '100%', 'auto' ], 'flex flex-row mt-2', '', container );
@@ -94,14 +97,15 @@ export class Form extends BaseComponent
             const secondaryButton = new Button( null, options.secondaryActionName ?? 'Cancel', ( value: any, event: MouseEvent ) => {
                 if ( options.secondaryActionCallback )
                 {
-                    options.secondaryActionCallback( container.formData, event );
+                    options.secondaryActionCallback( this.formData, event );
                 }
             }, { width: '100%', minWidth: '0', buttonClass: options.secondaryButtonClass ?? 'secondary' } );
 
             buttonContainer.appendChild( secondaryButton.root );
         }
 
-        const primaryButton = new Button( null, options.primaryActionName ?? 'Submit', ( value: any, event: MouseEvent ) => {
+        // This is basically the "submit" button
+        this.primaryButton = new Button( null, options.primaryActionName ?? 'Submit', ( value: any, event: MouseEvent ) => {
             const errors = [];
 
             for ( let entry in data )
@@ -109,7 +113,7 @@ export class Form extends BaseComponent
                 let entryData = data[entry];
 
                 const pattern = entryData.pattern;
-                const matchField = pattern?.fieldMatchName ? container.formData[pattern.fieldMatchName] : undefined;
+                const matchField = pattern?.fieldMatchName ? this.formData[pattern.fieldMatchName] : undefined;
 
                 if ( !entryData.textComponent.valid( undefined, matchField ) )
                 {
@@ -117,7 +121,7 @@ export class Form extends BaseComponent
                     if ( pattern )
                     {
                         err.messages = LX.validateValueAtPattern(
-                            container.formData[entry],
+                            this.formData[entry],
                             pattern,
                             matchField
                         );
@@ -129,11 +133,47 @@ export class Form extends BaseComponent
 
             if ( callback )
             {
-                callback( container.formData, errors, event );
+                callback( this.formData, errors, event );
             }
         }, { width: '100%', minWidth: '0', buttonClass: options.primaryButtonClass ?? 'primary' } );
 
-        buttonContainer.appendChild( primaryButton.root );
+        buttonContainer.appendChild( this.primaryButton.root );
+
+        if( !( options.skipEnterSubmit ?? false ) )
+        {
+            this.root.addEventListener( 'keydown', ( e: KeyboardEvent ) => {
+                if ( e.key !== 'Enter' || e.shiftKey ) return;
+
+                const target = e.target as HTMLElement;
+                if ( target.tagName === 'TEXTAREA' ) return;
+
+                e.preventDefault();
+
+                this.submit();
+            });
+        }
+
+        this.data = data;
+    }
+
+    submit()
+    {
+        this.syncInputs();
+
+        this.primaryButton?.click();
+    }
+
+    syncInputs()
+    {
+        for ( const entry in this.data )
+        {
+            const component = this.data[ entry ].textComponent;
+            if ( component instanceof TextInput )
+            {
+                component.syncFromDOM();
+                this.formData[ entry ] = component.value();
+            }
+        }
     }
 }
 

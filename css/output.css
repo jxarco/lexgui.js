@@ -2798,6 +2798,9 @@ dialog::backdrop {
     transform: translate3d(0, -8px, 0) scale3d(0.92, 0.92, 0.92) rotate(0);
   }
 }
+input:autofill, input:-webkit-autofill {
+  transition: background-color 50000s ease-in-out 0s;
+}
 body.nocursor * {
   cursor: none !important;
 }

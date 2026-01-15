@@ -2,6 +2,14 @@
 
 ## dev
 
+Fixed TextInput not updating on browser autofill.
+
+Form Component:
+- Enter key now submits the form as native behaviour.
+- Added `options.skipEnterSubmit` to disable the Enter submission.
+- Per entry data `entry.submit` overrides the general form options.
+- Docs updated.
+
 ## 8.2.2 (master)
 
 AssetView:
