@@ -52,9 +52,10 @@ export class Layers extends BaseComponent
 
             for ( let bit = 0; bit < maxBits; ++bit )
             {
-                let layer: any = document.createElement( 'div' );
-                layer.className =
-                    'lexlayer size-6 text-secondary-foreground text-center content-center place-self-center cursor-pointer font-semibold text-xs rounded-lg';
+                let layer: any = document.createElement( 'button' );
+                layer.className = `lexlayer size-6 text-secondary-foreground text-center content-center place-self-center cursor-pointer font-semibold text-xs rounded-lg select-none 
+                    disabled:pointer-events-none disabled:opacity-50`;
+                layer.disabled = this.disabled;
 
                 if ( val != undefined )
                 {

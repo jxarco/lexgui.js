@@ -197,7 +197,7 @@ export class Select extends BaseComponent
             {
                 filter.root.querySelector( 'input' ).focus();
             }
-        }, { buttonClass: 'outline [&_a]:ml-auto', skipInlineCount: true, disabled: options.disabled } );
+        }, { buttonClass: 'outline [&_a]:ml-auto', skipInlineCount: true, disabled: this.disabled } );
 
         selectedOption.root.style.width = '100%';
         selectedOption.root.querySelector( 'button' ).appendChild( LX.makeIcon( 'Down', { svgClass: 'sm' } ) );

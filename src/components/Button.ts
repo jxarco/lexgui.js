@@ -101,6 +101,7 @@ export class Button extends BaseComponent
             options.buttonClass ?? 'outline'
         ) );
 
+        wValue.disabled = this.disabled;
         wValue.title = options.tooltip ? '' : ( options.title ?? '' );
 
         this.root.appendChild( wValue );
@@ -171,12 +172,6 @@ export class Button extends BaseComponent
                     callback.call( this, e.target?.result, files[0] );
                 };
             } );
-        }
-
-        if ( options.disabled )
-        {
-            this.disabled = true;
-            wValue.setAttribute( 'disabled', true );
         }
 
         let trigger = wValue;

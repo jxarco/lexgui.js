@@ -58,7 +58,7 @@ export class RadioGroup extends BaseComponent
 
             const optionButton = document.createElement( 'button' );
             optionButton.className = 'flex p-0 rounded-lg cursor-pointer';
-            optionButton.disabled = options.disabled ?? false;
+            optionButton.disabled = this.disabled;
             optionItem.appendChild( optionButton );
 
             optionButton.addEventListener( 'click', ( e ) => {

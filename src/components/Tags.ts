@@ -54,16 +54,25 @@ export class Tags extends BaseComponent
                 const tagName = value[i];
                 const tag = LX.makeElement( 'span',
                     'lextag bg-primary px-2 py-1 rounded-xl min-w-2 justify-center text-primary-foreground gap-1 text-sm select-none', tagName );
-                const removeButton = LX.makeIcon( 'X', { svgClass: 'sm' } );
-                tag.appendChild( removeButton );
 
-                removeButton.addEventListener( 'click', ( e: MouseEvent ) => {
-                    tag.remove();
-                    value.splice( value.indexOf( tagName ), 1 );
-                    this.set( value, false, e );
-                } );
+                if ( !this.disabled )
+                {
+                    const removeButton = LX.makeIcon( 'X', { svgClass: 'sm' } );
+                    tag.appendChild( removeButton );
+    
+                    removeButton.addEventListener( 'click', ( e: MouseEvent ) => {
+                        tag.remove();
+                        value.splice( value.indexOf( tagName ), 1 );
+                        this.set( value, false, e );
+                    } );
+                }
 
                 tagsContainer.appendChild( tag );
+            }
+
+            if ( this.disabled )
+            {
+                return;
             }
 
             let tagInput = document.createElement( 'input' );

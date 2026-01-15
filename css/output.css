@@ -2270,6 +2270,16 @@
       opacity: 0%;
     }
   }
+  .data-\[disabled\=true\]\:pointer-events-none {
+    &[data-disabled="true"] {
+      pointer-events: none;
+    }
+  }
+  .data-\[disabled\=true\]\:opacity-50 {
+    &[data-disabled="true"] {
+      opacity: 50%;
+    }
+  }
   .sm\:w-full {
     @media (width >= 40rem) {
       width: 100%;
@@ -4544,14 +4554,14 @@ input[type=number] {
   place-items: center;
 }
 .lexcomponent .lexpad .lexinnerpad {
-  border-radius: 4px;
+  border-radius: 0.5rem;
   background-color: light-dark(var(--secondary), var(--card));
 }
 .lexcomponent .lexpad .lexinnerpad .lexpadthumb {
   background-color: var(--primary);
   width: 10%;
   height: 10%;
-  border-radius: 2px;
+  border-radius: 0.25rem;
   transform: translate(0px, 0px);
 }
 .lexcomponent .lexpad .lexinnerpad .lexpadthumb.active {

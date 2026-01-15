@@ -204,6 +204,7 @@
             checkLeftPanel.addCheckbox(null, true, null, { className: "success", label: "Success" });
             checkLeftPanel.addCheckbox(null, true, null, { className: "warning", label: "Warning" });
             checkLeftPanel.addCheckbox(null, true, null, { className: "destructive", label: "Destructive" });
+            checkLeftPanel.addCheckbox(null, true, null, { label: "Disabled", disabled: true });
         }
 
         // Radiogroup
@@ -266,6 +267,7 @@
             panelB.addOTP("Disabled OTP", "965114", null, { disabled: true });
             panelB.branch("Map2D Inputs", { closed: closedDefault });
             panelB.addMap2D("Map2D", map2Dpoints, null, { size: [ 300, 300 ] });
+            panelB.addMap2D("Disabled Map2D", map2Dpoints, null, { size: [ 300, 300 ], disabled: true });
             panelB.branch("Color Inputs", { closed: closedDefault });
             panelB.addColor("From Hex Color", "#b7a9b1");
             panelB.addColor("From RGB Color", { r: 1, g: 0.1, b: 0.6 });
@@ -287,6 +289,7 @@
                 p.addButton("Unity Button", "Click me!", null, { buttonClass: "primary" });
             } });
             panelB.addSelect("With Labels", selectValuesWithLabels, "Unity", null);
+            panelB.addSelect("Disabled", selectValuesWithLabels, "Unity", null, { disabled: true });
             panelB.addSelect("With Filter", selectValuesWithLabels, "Godot", null, { filter: true, placeholder: "Search tools..." });
             panelB.addSelect("Custom Empty Msg", selectValuesWithLabels, "Unreal Engine", null, { filter: true, emptyMsg: "No tools found.", placeholder: "Search tools..." });
             panelB.addSelect("With Images", [{ value: "Godot", src: "https://godotengine.org/assets/press/logo_vertical_color_light.png" }, { value: "Unity", src: "https://logos-world.net/wp-content/uploads/2023/01/Unity-Logo.png" }, { value: "Unreal Engine", src: "https://cdn2.unrealengine.com/ue-logo-stacked-unreal-engine-w-677x545-fac11de0943f.png" }], "Godot", null);
@@ -294,6 +297,9 @@
             panelB.branch("File Inputs", { closed: closedDefault });
             panelB.addFile("Classic");
             panelB.addFile("Disabled", null, { disabled: true });
+            panelB.branch("Pad Inputs", { closed: closedDefault });
+            panelB.addPad("2D Pad", [0.5, 0.5], null, { padSize: "100px", min: -1, max: 2 });
+            panelB.addPad("Disabled 2D Pad", [0.5, 0.5], null, { disabled: true, padSize: "100px", min: -1, max: 2 });
         }
 
         // Rate
@@ -301,6 +307,7 @@
             panelC.branch("Rate", { closed: closedDefault });
             panelC.addRate("Basic Rate", 2, null);
             panelC.addRate("Rate With Halfs", 4.5, null, { allowHalf: true });
+            panelC.addRate("Disabled Rate", 2, null, { disabled: true });
         }
 
         // DatePicker
@@ -312,6 +319,7 @@
             panelC.addDate("Using Today's Date", null, null, { today: true });
             panelC.addDate("Allow Until Today", null, null, { untilToday: true });
             panelC.addDate("Allow From Today", null, null, { fromToday: true });
+            panelC.addDate("Disabled Date", "15/04/2025", null, { disabled: true });
         }
 
         // Tree
@@ -384,6 +392,7 @@
             panelC.branch("List", { closed: closedDefault });
             panelC.addList("Number List", [ 1, 2, 3, 4 ] );
             panelC.addList("String List", [ 'GPTeam', 'Blat Bunny', 'Blat Panthers' ], 'Blat Panthers');
+            panelC.addList("Disabled List", [ 'GPTeam', 'Blat Bunny', 'Blat Panthers' ], 'Blat Panthers', null, { disabled: true } );
             panelC.addList("String List with Icons", [['GPTeam', 'Gpu'], ['Blat Bunny', 'Bone'], ['Blat Panthers', 'PawPrint']], 'Blat Panthers');
         }
 
@@ -393,6 +402,9 @@
             panelC.addArray("Array", ['GPTeam', 'Blat Panthers', 'Blat Bunny'], (value, event) => {
                 console.log(value);
             });
+            panelC.addArray("Disabled Array", ['GPTeam', 'Blat Panthers', 'Blat Bunny'], (value, event) => {
+                console.log(value);
+            }, { disabled: true } );
         }
 
         // Table
@@ -438,13 +450,15 @@
         // Tags
         {
             panelC.branch("Tags", { closed: closedDefault });
-            panelC.addTags("Game Tags", "2d, karate, ai, engine, ps5, console");
+            panelC.addTags("Classic Tags", "2d, karate, ai, engine, ps5, console");
+            panelC.addTags("Disabled Tags", "2d, karate, ai, engine, ps5, console", null, { disabled: true } );
         }
 
         // Layers
         {
             panelC.branch("Layers", { closed: closedDefault });
             panelC.addLayers("Layers", 10);
+            panelC.addLayers("Disabled Layers", 10, null, { disabled: true });
         }
 
         // Progress

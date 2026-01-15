@@ -34,19 +34,20 @@ export class Pad extends BaseComponent
             container.style.width = `calc( 100% - ${realNameWidth})`;
         };
 
-        var container = document.createElement( 'div' );
+        let container = document.createElement( 'div' );
         container.className = 'lexpad';
         this.root.appendChild( container );
 
         let pad: any = document.createElement( 'div' );
         pad.id = 'lexpad-' + name;
-        pad.className = 'lexinnerpad';
+        pad.className = 'lexinnerpad data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 border-color';
         pad.style.width = options.padSize ?? '96px';
         pad.style.height = options.padSize ?? '96px';
+        pad.dataset['disabled'] = this.disabled.toString();
         container.appendChild( pad );
 
         let thumb: any = document.createElement( 'div' );
-        thumb.className = 'lexpadthumb';
+        thumb.className = 'lexpadthumb opacity-inherit';
         thumb.value = new vec2( value[0], value[1] );
         thumb.min = options.min ?? 0;
         thumb.max = options.max ?? 1;

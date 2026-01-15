@@ -55,7 +55,7 @@ export class Toggle extends BaseComponent
         toggle.type = 'checkbox';
         toggle.checked = value;
         toggle.iValue = value;
-        toggle.disabled = options.disabled ?? false;
+        toggle.disabled = this.disabled;
         container.appendChild( toggle );
 
         let valueName = document.createElement( 'span' );

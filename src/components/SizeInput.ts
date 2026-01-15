@@ -59,7 +59,7 @@ export class SizeInput extends BaseComponent
                 {
                     callback( value );
                 }
-            }, { min: 0, disabled: options.disabled, precision: options.precision, className: 'flex-auto-fill' } );
+            }, { min: 0, disabled: this.disabled, precision: options.precision, className: 'flex-auto-fill' } );
 
             container.appendChild( this.root.dimensions[i].root );
 

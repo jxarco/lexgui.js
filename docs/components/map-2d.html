@@ -52,8 +52,9 @@
             head: [ "Option", "Type", "Description", "Default" ],
             body: [
                 ["circular", "Boolean", "Render the map as a circle instead of a square", "false"],
+                ["mapIcon", "String", "Icon to use for the map button", `"SquareMousePointer"`],
                 ["showNames", "Boolean", "Render sample point names", `true`],
-                ["size", "Array", "Size of the map canvas", "[200, 200]"],
+                ["size", "Array", "Size of the map canvas", "[200, 200]"]
             ].map( v => {
                 return [ docMaker.iCode( v[ 0 ], "table" ), docMaker.iCode( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? docMaker.iCode( v[ 3 ], "table desc" ) : v[ 3 ] ];
             } )

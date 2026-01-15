@@ -44,8 +44,6 @@ export class OTPInput extends BaseComponent
             container.style.width = `calc( 100% - ${realNameWidth})`;
         };
 
-        this.disabled = options.disabled ?? false;
-
         const container = document.createElement( 'div' );
         container.className = 'lexotp flex flex-row items-center';
         this.root.appendChild( container );

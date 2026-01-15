@@ -91,7 +91,7 @@ export class Knob extends BaseComponent
         const angle = LX.remapRange( value, min, max, -135.0, 135.0 );
         innerKnobCircle.style.rotate = angle + 'deg';
 
-        if ( options.disabled )
+        if ( this.disabled )
         {
             LX.addClass( container, 'disabled' );
         }
@@ -133,7 +133,7 @@ export class Knob extends BaseComponent
 
         function innerMouseDown( e: MouseEvent )
         {
-            if ( document.activeElement == innerKnobCircle || options.disabled )
+            if ( document.activeElement == innerKnobCircle || that.disabled )
             {
                 return;
             }

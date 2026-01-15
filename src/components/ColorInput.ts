@@ -98,7 +98,7 @@ export class ColorInput extends BaseComponent
         let sampleContainer = LX.makeContainer( [ '18px', '18px' ], 'flex flex-row rounded overflow-hidden', '', container );
         sampleContainer.tabIndex = '1';
         sampleContainer.addEventListener( 'click', ( e: MouseEvent ) => {
-            if ( ( options.disabled ?? false ) )
+            if ( this.disabled )
             {
                 return;
             }
@@ -130,7 +130,7 @@ export class ColorInput extends BaseComponent
             this.set( v );
             delete this._skipTextUpdate;
             this.picker.fromHexColor( v );
-        }, { width: 'calc( 100% - 24px )', disabled: options.disabled } );
+        }, { width: 'calc( 100% - 24px )', disabled: this.disabled } );
 
         textComponent.root.style.marginLeft = '6px';
         container.appendChild( textComponent.root );

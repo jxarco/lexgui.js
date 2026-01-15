@@ -41,6 +41,7 @@ export class TextArea extends BaseComponent
         let wValue: HTMLTextAreaElement = LX.makeElement( 'textarea', options.inputClass ?? '' );
         wValue.value = value ?? '';
         wValue.style.textAlign = options.float ?? '';
+        wValue.disabled = this.disabled;
         Object.assign( wValue.style, options.style ?? {} );
 
         if ( options.fitHeight ?? false )
@@ -54,12 +55,6 @@ export class TextArea extends BaseComponent
         }
 
         container.appendChild( wValue );
-
-        if ( options.disabled ?? false )
-        {
-            this.disabled = true;
-            wValue.setAttribute( 'disabled', 'true' );
-        }
 
         if ( options.placeholder )
         {

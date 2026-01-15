@@ -29,7 +29,7 @@ export class FileInput extends BaseComponent
         let input = document.createElement( 'input' );
         input.className = 'lexfileinput';
         input.type = 'file';
-        input.disabled = options.disabled ?? false;
+        input.disabled = this.disabled;
         this.root.appendChild( input );
 
         if ( options.placeholder )
@@ -91,7 +91,7 @@ export class FileInput extends BaseComponent
                     root.remove();
                     settingsDialog = null;
                 } } );
-            }, { skipInlineCount: true, title: 'Settings', disabled: options.disabled, icon: 'Settings' } );
+            }, { skipInlineCount: true, title: 'Settings', disabled: this.disabled, icon: 'Settings' } );
 
             this.root.appendChild( settingButton.root );
         }

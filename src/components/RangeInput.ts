@@ -128,7 +128,7 @@ export class RangeInput extends BaseComponent
         slider.max = options.max ?? 100;
         slider.step = options.step ?? 1;
         slider.type = 'range';
-        slider.disabled = options.disabled ?? false;
+        slider.disabled = this.disabled;
 
         if ( value.constructor == Number )
         {
@@ -214,7 +214,7 @@ export class RangeInput extends BaseComponent
             maxSlider.max = options.max ?? 100;
             maxSlider.step = options.step ?? 1;
             maxSlider.type = 'range';
-            maxSlider.disabled = options.disabled ?? false;
+            maxSlider.disabled = this.disabled;
             this._maxSlider = maxSlider;
 
             let maxRangeValue = ogValue[1];

@@ -69,7 +69,8 @@ export class TextInput extends BaseComponent
         container.style.position = 'relative';
         this.root.appendChild( container );
 
-        this.disabled = ( options.disabled || options.warning ) ?? ( options.url ? true : false );
+        // override disabled (default is options.disable)
+        this.disabled = ( this.disabled || options.warning ) ?? ( options.url ? true : false );
         let wValue: any = null;
 
         if ( !this.disabled )

@@ -88,21 +88,21 @@ export class ArrayInput extends BaseComponent
                         {
                             values[i] = value;
                             callback( values );
-                        }, { nameWidth: '12px', className: 'p-0', skipReset: true } );
+                        }, { nameWidth: '12px', className: 'p-0', disabled: this.disabled, skipReset: true } );
                         break;
                     case Number:
                         component = new NumberInput( i + '', value, function( value: number )
                         {
                             values[i] = value;
                             callback( values );
-                        }, { nameWidth: '12px', className: 'p-0', skipReset: true } );
+                        }, { nameWidth: '12px', className: 'p-0', disabled: this.disabled, skipReset: true } );
                         break;
                     case 'select':
                         component = new Select( i + '', options.innerValues, value, function( value: any )
                         {
                             values[i] = value;
                             callback( values );
-                        }, { nameWidth: '12px', className: 'p-0', skipReset: true } );
+                        }, { nameWidth: '12px', className: 'p-0', disabled: this.disabled, skipReset: true } );
                         break;
                 }
 
@@ -110,22 +110,27 @@ export class ArrayInput extends BaseComponent
 
                 arrayItems.appendChild( component.root );
 
-                const removeComponent = new Button( null, '', ( v: any, event: MouseEvent ) => {
-                    values.splice( values.indexOf( value ), 1 );
-                    this._updateItems();
-                    this._trigger( new IEvent( name, values, event ), callback );
-                }, { buttonClass: 'ghost xs p-0', title: 'Remove item', icon: 'Trash2' } );
-
-                component.root.appendChild( removeComponent.root );
+                if ( !this.disabled )
+                {
+                    const removeComponent = new Button( null, '', ( v: any, event: MouseEvent ) => {
+                        values.splice( values.indexOf( value ), 1 );
+                        this._updateItems();
+                        this._trigger( new IEvent( name, values, event ), callback );
+                    }, { buttonClass: 'ghost sm p-0', title: 'Remove item', icon: 'Trash2' } );
+                    component.root.appendChild( removeComponent.root );
+                }
             }
 
-            const addButton = new Button( null, LX.makeIcon( 'Plus', { svgClass: 'sm' } ).innerHTML + 'Add item', ( v: any, event: MouseEvent ) => {
-                values.push( options.innerValues ? options.innerValues[0] : '' );
-                this._updateItems();
-                this._trigger( new IEvent( name, values, event ), callback );
-            }, { buttonClass: 'ghost' } );
-
-            arrayItems.appendChild( addButton.root );
+            if( !this.disabled )
+            {
+                const addButton = new Button( null, LX.makeIcon( 'Plus', { svgClass: 'sm' } ).innerHTML + 'Add item', ( v: any, event: MouseEvent ) => {
+                    values.push( options.innerValues ? options.innerValues[0] : '' );
+                    this._updateItems();
+                    this._trigger( new IEvent( name, values, event ), callback );
+                }, { buttonClass: 'ghost' } );
+    
+                arrayItems.appendChild( addButton.root );
+            }
         };
 
         this._updateItems();

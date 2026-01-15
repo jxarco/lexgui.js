@@ -70,8 +70,9 @@ export class List extends BaseComponent
                     itemValue = itemValue[0];
                 }
 
-                let listElement = document.createElement( 'div' );
-                listElement.className = 'lexlistitem' + ( value == itemValue ? ' selected' : '' );
+                let listElement = document.createElement( 'button' );
+                listElement.className = `lexlistitem disabled:pointer-events-none disabled:opacity-50 ${ ( value == itemValue ) ? 'selected' : '' }`;
+                listElement.disabled = this.disabled;
 
                 if ( icon )
                 {

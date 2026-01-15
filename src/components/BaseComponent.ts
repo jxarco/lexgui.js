@@ -68,6 +68,7 @@ export class BaseComponent
     onGetValue?: () => any;
     onAllowPaste?: ( b: boolean ) => boolean;
     onResize: ( r?: any ) => void;
+    onSetDisabled?: ( disabled?: boolean ) => void;
 
     _initialValue: any;
 
@@ -173,6 +174,7 @@ export class BaseComponent
 
         this.root = root;
         this.root.jsInstance = this;
+        this.disabled = options.disabled ?? false;
         this.options = options;
     }
 
@@ -370,6 +372,16 @@ export class BaseComponent
         }
 
         console.error( `Unknown Component type: ${this.type}` );
+    }
+
+    setDisabled( disabled: boolean )
+    {
+        this.disabled = disabled;
+
+        if( this.onSetDisabled )
+        {
+            this.onSetDisabled( disabled );
+        }
     }
 
     refresh( value?: any )

@@ -65,6 +65,7 @@ export class NumberInput extends BaseComponent
         vecinput.max = options.max ?? 1e24;
         vecinput.step = options.step ?? 'any';
         vecinput.type = 'number';
+        vecinput.disabled = this.disabled;
 
         if ( value.constructor == Number )
         {
@@ -82,11 +83,6 @@ export class NumberInput extends BaseComponent
         {
             let unitBox = LX.makeContainer( [ 'auto', 'auto' ], 'px-2 bg-card content-center break-keep', options.units, valueBox );
             vecinput.unitBox = unitBox;
-        }
-
-        if ( options.disabled )
-        {
-            this.disabled = vecinput.disabled = true;
         }
 
         // Add slider below

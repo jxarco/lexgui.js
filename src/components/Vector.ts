@@ -67,7 +67,6 @@ export class Vector extends BaseComponent
         container.className = 'lexvector flex';
         this.root.appendChild( container );
 
-        this.disabled = options.disabled ?? false;
         const that = this;
 
         for ( let i = 0; i < numComponents; ++i )
@@ -84,6 +83,7 @@ export class Vector extends BaseComponent
             vecinput.type = 'number';
             vecinput.id = 'vec' + numComponents + '_' + LX.guidGenerator();
             vecinput.idx = i;
+            vecinput.disabled = this.disabled;
             vectorInputs[i] = vecinput;
             box.appendChild( vecinput );
 
@@ -97,11 +97,6 @@ export class Vector extends BaseComponent
 
             const dragIcon = LX.makeIcon( 'MoveVertical', { iconClass: 'drag-icon hidden-opacity', svgClass: 'sm' } );
             box.appendChild( dragIcon );
-
-            if ( this.disabled )
-            {
-                vecinput.disabled = true;
-            }
 
             // Add wheel input
             vecinput.addEventListener( 'wheel', function( e: WheelEvent )

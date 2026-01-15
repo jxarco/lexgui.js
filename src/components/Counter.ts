@@ -44,17 +44,13 @@ export class Counter extends BaseComponent
         const input = LX.makeElement( 'input', 'lexcounter w-12 bg-card px-2 text-foreground', '', container );
         input.type = 'number';
         input.value = value;
-
-        if ( options.disabled )
-        {
-            input.setAttribute( 'disabled', 'true' );
-        }
+        input.disabled = this.disabled;
 
         const substrButton = new Button( null, '', ( value: any, e: MouseEvent ) => {
             let mult = step ?? 1;
             if ( e.shiftKey ) mult *= 10;
             this.set( this.count - mult, false, e );
-        }, { disabled: options.disabled, className: `p-0 ${options.disabled ? '' : 'hover:bg-secondary'} border-l-color border-r-color`,
+        }, { disabled: this.disabled, className: `p-0 ${this.disabled ? '' : 'hover:bg-secondary'} border-l-color border-r-color`,
             buttonClass: 'px-0 bg-none h-7', icon: 'Minus' } );
         container.appendChild( substrButton.root );
 
@@ -62,7 +58,7 @@ export class Counter extends BaseComponent
             let mult = step ?? 1;
             if ( e.shiftKey ) mult *= 10;
             this.set( this.count + mult, false, e );
-        }, { disabled: options.disabled, className: `p-0 ${options.disabled ? '' : 'hover:bg-secondary'} rounded-r-lg`,
+        }, { disabled: this.disabled, className: `p-0 ${this.disabled ? '' : 'hover:bg-secondary'} rounded-r-lg`,
             buttonClass: 'px-0 bg-none h-7', icon: 'Plus' } );
         container.appendChild( addButton.root );
     }

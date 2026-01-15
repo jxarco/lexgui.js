@@ -53,7 +53,7 @@ export class Checkbox extends BaseComponent
         let checkbox: HTMLInputElement = LX.makeElement( 'input', LX.mergeClass( 'lexcheckbox rounded-xl', options.className ?? 'primary' ) );
         checkbox.type = 'checkbox';
         checkbox.checked = value;
-        checkbox.disabled = options.disabled ?? false;
+        checkbox.disabled = this.disabled;
         container.appendChild( checkbox );
 
         let valueName = LX.makeElement( 'span', 'text-sm', options.label ?? 'On', container );

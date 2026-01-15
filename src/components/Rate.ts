@@ -43,7 +43,8 @@ export class Rate extends BaseComponent
         };
 
         const container = document.createElement( 'div' );
-        container.className = 'lexrate relative';
+        container.className = 'lexrate relative data-[disabled=true]:pointer-events-none';
+        container.dataset['disabled'] = this.disabled.toString();
         this.root.appendChild( container );
 
         const starsContainer = LX.makeContainer( [ 'fit-content', 'auto' ], 'flex flex-row gap-1', '', container );

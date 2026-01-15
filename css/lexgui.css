@@ -2322,7 +2322,7 @@ input[type=number] {
 }
 
 .lexcomponent .lexpad .lexinnerpad {
-    border-radius: 4px;
+    border-radius: 0.5rem;
     background-color: light-dark(var(--secondary), var(--card));
 }
 
@@ -2330,7 +2330,7 @@ input[type=number] {
     background-color: var(--primary);
     width: 10%;
     height: 10%;
-    border-radius: 2px;
+    border-radius: 0.25rem;
     transform: translate(0px, 0px);
 }
 
