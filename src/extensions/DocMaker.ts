@@ -52,6 +52,7 @@ export class DocMaker
         header.innerHTML = string;
         if ( id ) header.id = id;
         this.root.appendChild( header );
+        return header;
     }
 
     paragraph( string: string, sup: boolean = false, className?: string )
@@ -61,6 +62,7 @@ export class DocMaker
         paragraph.className = 'leading-relaxed ' + ( className ?? '' );
         paragraph.innerHTML = string;
         this.root.appendChild( paragraph );
+        return paragraph;
     }
 
     code( text: string, language: string = 'js' )
@@ -196,6 +198,7 @@ export class DocMaker
         pre.appendChild( code );
         container.appendChild( pre );
         this.root.appendChild( container );
+        return container;
     }
 
     list( list: any[], type: string, target?: Element )
@@ -218,22 +221,24 @@ export class DocMaker
             li.innerHTML = el;
             ul.appendChild( li );
         }
+        return ul;
     }
 
     bulletList( list: any[] )
     {
-        this.list( list, 'bullet' );
+        return this.list( list, 'bullet' );
     }
 
     numberedList( list: any[] )
     {
-        this.list( list, 'numbered' );
+        return this.list( list, 'numbered' );
     }
 
     startCodeBulletList()
     {
         let ul = document.createElement( 'ul' );
         this._listQueued = ul;
+        return ul;
     }
 
     endCodeBulletList()
@@ -280,6 +285,7 @@ export class DocMaker
         {
             this.root.appendChild( ul );
         }
+        return ul;
     }
 
     image( src: string, caption: string = '', parent?: Element )
@@ -290,33 +296,30 @@ export class DocMaker
         img.className = 'my-1';
         parent = parent ?? this.root;
         parent.appendChild( img );
+        return img;
     }
 
     images( sources: string[], captions: string[] = [], width?: string, height?: string )
     {
         const mobile = navigator && /Android|iPhone/i.test( navigator.userAgent );
+        const div: HTMLElement = document.createElement( 'div' );
+        
 
         if ( !mobile )
         {
-            let div: HTMLElement = document.createElement( 'div' );
             div.style.width = width ?? 'auto';
             div.style.height = height ?? '256px';
             div.className = 'flex flex-row justify-center';
-
-            for ( let i = 0; i < sources.length; ++i )
-            {
-                this.image( sources[i], captions[i], div );
-            }
-
-            this.root.appendChild( div );
         }
-        else
+
+        for ( let i = 0; i < sources.length; ++i )
         {
-            for ( let i = 0; i < sources.length; ++i )
-            {
-                this.image( sources[i], captions[i] );
-            }
+            this.image( sources[i], captions[i], div );
         }
+
+        this.root.appendChild( div );
+
+        return div;
     }
 
     video( src: string, caption: string = '', controls: boolean = true, autoplay: boolean = false )
@@ -332,6 +335,7 @@ export class DocMaker
         video.loop = true;
         video.alt = caption;
         this.root.appendChild( video );
+        return video;
     }
 
     note( text: string, warning: boolean = false, title?: string, icon?: string )
@@ -347,7 +351,7 @@ export class DocMaker
         note.appendChild( header );
 
         // Node body
-        LX.makeContainer( [], 'leading-6 p-3', text, note );
+        return LX.makeContainer( [], 'leading-6 p-3', text, note );
     }
 
     classCtor( name: string, params: any[], language: string = 'js' )
@@ -371,6 +375,7 @@ export class DocMaker
         let pr = document.createElement( 'p' );
         pr.innerHTML = this.iCode( "<span class='constructor'>" + name + '(' + paramsHTML + ')' + '</span>' );
         this.root.appendChild( pr );
+        return pr;
     }
 
     classMethod( name: string, desc: string, params: any[], ret?: string ): HTMLElement | null
