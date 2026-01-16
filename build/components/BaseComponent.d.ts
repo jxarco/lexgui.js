@@ -56,6 +56,7 @@ export declare class BaseComponent {
     onGetValue?: () => any;
     onAllowPaste?: (b: boolean) => boolean;
     onResize: (r?: any) => void;
+    onSetDisabled?: (disabled?: boolean) => void;
     _initialValue: any;
     static NO_CONTEXT_TYPES: ComponentType[];
     constructor(type: ComponentType, name?: string | null | undefined, value?: any, options?: any);
@@ -69,5 +70,6 @@ export declare class BaseComponent {
     copy(): void;
     paste(): void;
     typeName(): string | undefined;
+    setDisabled(disabled: boolean): void;
     refresh(value?: any): void;
 }

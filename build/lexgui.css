@@ -2270,6 +2270,16 @@
       opacity: 0%;
     }
   }
+  .data-\[disabled\=true\]\:pointer-events-none {
+    &[data-disabled="true"] {
+      pointer-events: none;
+    }
+  }
+  .data-\[disabled\=true\]\:opacity-50 {
+    &[data-disabled="true"] {
+      opacity: 50%;
+    }
+  }
   .sm\:w-full {
     @media (width >= 40rem) {
       width: 100%;
@@ -2797,6 +2807,9 @@ dialog::backdrop {
     opacity: 0;
     transform: translate3d(0, -8px, 0) scale3d(0.92, 0.92, 0.92) rotate(0);
   }
+}
+input:autofill, input:-webkit-autofill {
+  transition: background-color 50000s ease-in-out 0s;
 }
 body.nocursor * {
   cursor: none !important;
@@ -3329,6 +3342,15 @@ a svg, svg path {
   }
   & a:first-child {
     margin: 0;
+  }
+}
+.lexdropdownmenuitem.destructive {
+  color: var(--destructive);
+}
+.lexdropdownmenuitem.destructive:hover {
+  background-color: var(--destructive);
+  @supports (color: color-mix(in lab, red, red)) {
+    background-color: color-mix(in oklab, var(--destructive) 15%, transparent);
   }
 }
 .lexdropdownmenu .separator {
@@ -4541,14 +4563,14 @@ input[type=number] {
   place-items: center;
 }
 .lexcomponent .lexpad .lexinnerpad {
-  border-radius: 4px;
+  border-radius: 0.5rem;
   background-color: light-dark(var(--secondary), var(--card));
 }
 .lexcomponent .lexpad .lexinnerpad .lexpadthumb {
   background-color: var(--primary);
   width: 10%;
   height: 10%;
-  border-radius: 2px;
+  border-radius: 0.25rem;
   transform: translate(0px, 0px);
 }
 .lexcomponent .lexpad .lexinnerpad .lexpadthumb.active {
@@ -7454,22 +7476,21 @@ ul.lexassetscontent {
 /* lexguidocs.css @jxarco */
 
 :root {
-	--border-style: 1px solid #444;
 	--panel-width: 300px;
 	--page-padding: 24px;
 	--max-width: 80%;
-	--icon-size: 20px;
 	--stylish-color: light-dark(#e01291, #e2c886);
 }
 
-#content {
-	font-family: "GeistSans", sans-serif;
+.lexdocs-content {
+	font-family: var(--global-font);
 	tab-size: 4;
 	max-width: var(--max-width);
 	width: 95%;
 	height: auto;
 	margin: 0 auto;
 	padding: var(--page-padding);
+	padding-bottom: 4rem;
 	word-break: break-word;
 	text-align: justify;
 	border-radius: 12px;
@@ -7479,11 +7500,19 @@ ul.lexassetscontent {
 		margin-block: 1rem;
 	}
 
+	& :where(h1, h2, h3, h4) {
+		letter-spacing: -1px;
+	}
+
+	& p, & li {
+		color: var(--secondary-foreground);
+	}
+
 	& h1 {
-		font-size: 32px;
+		font-size: 2rem;
 		line-height: 48px;
 		margin-left: -2px;
-		margin-block: 0.5em;
+    	margin-block: 1rem;
 		font-optical-sizing: auto;
 		font-weight: 600;
 		font-style: normal;
@@ -7491,28 +7520,28 @@ ul.lexassetscontent {
 	}
 
 	& h2 {
-		font-size: 28px;
+		font-size: 1.6rem;
 		line-height: 36px;
-		font-weight: normal;
+		font-weight: 600;
 		margin-left: -1px;
 		margin-block: 0.75em;
 	}
 
 	& h3 {
-		font-size: 20px;
+		font-size: 1.25rem;
 		line-height: 28px;
-		font-weight: normal;
+		font-weight: 600;
 		margin-block: 0.75em;
 	}
 }
 
-#content .lexarea.docs {
+.lexdocs-content .lexarea.docs {
 	margin-block: 1.5em;
 	width: 90% !important;
 	justify-self: center;
 }
 
-#content::-webkit-scrollbar {
+.lexdocs-content::-webkit-scrollbar {
     display: none;
 }
 
@@ -7544,7 +7573,7 @@ button.copied svg {
 	color: #42d065;
 }
 
-#content .lexpanel a, #content .lexarea a {
+.lexdocs-content .lexpanel a, .lexdocs-content .lexarea a {
 	color: unset;
 }
 
@@ -7594,17 +7623,17 @@ code.inline.desc {
 	font-size: 12px;
 }
 
-#content strong {
+.lexdocs-content strong {
 	font-weight: 700;
 }
 
-#content a.permalink {
+.lexdocs-content a.permalink {
 	float: right;
 	margin-left: 5px;
 	display: none;
 }
 
-#content > img {
+.lexdocs-content > img {
 	width: 100%;
 	/* margin: 16px calc(-1 * var(--page-padding)) ; */
 	border-radius: 4px;	
@@ -7616,28 +7645,11 @@ code.inline.desc {
 		--panel-width: 360px;
 		--line-height: 28px;
 		--page-padding: 28px;
-		--icon-size: 24px;
 	}
 
-	#content {
+	.lexdocs-content {
 		width: 100%;
 	}
-
-	#content h1 {
-		font-size: 42px;
-		line-height: 50px;
-	}
-
-	#content h2 {
-		font-size: 32px;
-		line-height: 40px;
-	}
-
-	#content h3 {
-		font-size: 24px;
-		line-height: 32px;
-	}
-
 }
 
 /* mobile */
@@ -7646,27 +7658,26 @@ code.inline.desc {
 
 	:root {
 		--page-padding: 16px;
-		--icon-size: 20px;
 	}
 
-	#content {
+	.lexdocs-content {
 		padding: var(--page-padding);
 	}
 
-	#content h1 {
+	.lexdocs-content h1 {
 		font-size: 28px;
 		line-height: 36px;
 		padding-right: 20px;
 		margin-top: 0;
 	}
 
-	#content h2 {
+	.lexdocs-content h2 {
 		font-size: 24px;
 		line-height: 32px;
 		margin-top: 24px;
 	}
 
-	#content h3 {
+	.lexdocs-content h3 {
 		font-size: 20px;
 		line-height: 28px;
 	}
@@ -7719,19 +7730,19 @@ code:has(.constructor) {
 	font-size: 21px;
 }
 
-#content span.solid {
+.lexdocs-content span.solid {
 	border-radius: 8px;
 	padding: 2px;
 	padding-inline: 8px;
 }
 
-#content span.outline {
+.lexdocs-content span.outline {
 	border-radius: 8px;
 	padding: 2px;
 	padding-inline: 8px;
 }
 
-:root[data-mode="light"] #content {
+:root[data-mode="light"] .lexdocs-content {
 	color: #202124;
 }
 

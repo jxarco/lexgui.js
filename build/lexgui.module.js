@@ -12,7 +12,7 @@ const g = globalThis;
 let LX = g.LX;
 if (!LX) {
     LX = {
-        version: '8.2.2',
+        version: '8.2.3',
         ready: false,
         extensions: [], // Store extensions used
         extraCommandbarEntries: [], // User specific entries for command bar
@@ -449,6 +449,7 @@ class BaseComponent {
     onGetValue;
     onAllowPaste;
     onResize;
+    onSetDisabled;
     _initialValue;
     static NO_CONTEXT_TYPES = [
         ComponentType.BUTTON,
@@ -517,6 +518,7 @@ class BaseComponent {
         }
         this.root = root;
         this.root.jsInstance = this;
+        this.disabled = options.disabled ?? false;
         this.options = options;
     }
     static _dispatchEvent(element, type, data, bubbles, cancelable) {
@@ -677,6 +679,12 @@ class BaseComponent {
         }
         console.error(`Unknown Component type: ${this.type}`);
     }
+    setDisabled(disabled) {
+        this.disabled = disabled;
+        if (this.onSetDisabled) {
+            this.onSetDisabled(disabled);
+        }
+    }
     refresh(value) {
     }
 }
@@ -748,6 +756,7 @@ class Button extends BaseComponent {
         var wValue = LX.makeElement('button', LX.mergeClass(['lexbutton', 'inline-flex', 'items-center', 'justify-center', 'whitespace-nowrap', 'transition-all', 'disabled:pointer-events-none',
             'disabled:opacity-50', '[&_svg]:pointer-events-none', 'shrink-0', '[&_svg]:shrink-0', 'outline-none', 'select-none', 'cursor-pointer',
             'font-medium', 'text-sm', 'border-1', 'h-9', 'px-2', 'overflow-hidden', 'bg-clip-padding'].join(' '), options.buttonClass ?? 'outline'));
+        wValue.disabled = this.disabled;
         wValue.title = options.tooltip ? '' : (options.title ?? '');
         this.root.appendChild(wValue);
         if (options.selected) {
@@ -805,10 +814,6 @@ class Button extends BaseComponent {
                     callback.call(this, e.target?.result, files[0]);
                 };
             });
-        }
-        if (options.disabled) {
-            this.disabled = true;
-            wValue.setAttribute('disabled', true);
         }
         let trigger = wValue;
         if (options.swap) {
@@ -1469,6 +1474,7 @@ class NumberInput extends BaseComponent {
         vecinput.max = options.max ?? 1e24;
         vecinput.step = options.step ?? 'any';
         vecinput.type = 'number';
+        vecinput.disabled = this.disabled;
         if (value.constructor == Number) {
             value = LX.clamp(value, +vecinput.min, +vecinput.max);
             value = LX.round(value, options.precision);
@@ -1480,9 +1486,6 @@ class NumberInput extends BaseComponent {
         if (options.units) {
             let unitBox = LX.makeContainer(['auto', 'auto'], 'px-2 bg-card content-center break-keep', options.units, valueBox);
             vecinput.unitBox = unitBox;
-        }
-        if (options.disabled) {
-            this.disabled = vecinput.disabled = true;
         }
         // Add slider below
         if (!options.skipSlider && options.min !== undefined && options.max !== undefined) {
@@ -1598,6 +1601,7 @@ LX.NumberInput = NumberInput;
  */
 class TextInput extends BaseComponent {
     valid;
+    input;
     _triggerEvent;
     _lastValueTriggered;
     constructor(name, value, callback, options = {}) {
@@ -1636,13 +1640,12 @@ class TextInput extends BaseComponent {
         container.style.display = 'flex';
         container.style.position = 'relative';
         this.root.appendChild(container);
-        this.disabled = (options.disabled || options.warning) ?? (options.url ? true : false);
+        // override disabled (default is options.disable)
+        this.disabled = (this.disabled || options.warning) ?? (options.url ? true : false);
         let wValue = null;
         if (!this.disabled) {
             wValue = LX.makeElement('input', LX.mergeClass('lextext text-sm', options.inputClass));
             wValue.type = options.type || '';
-            wValue.value = value || '';
-            wValue.style.textAlign = options.float ?? '';
             wValue.setAttribute('placeholder', options.placeholder ?? '');
             if (options.required) {
                 wValue.setAttribute('required', options.required);
@@ -1689,16 +1692,45 @@ class TextInput extends BaseComponent {
         else {
             wValue = document.createElement('input');
             wValue.disabled = true;
-            wValue.value = value;
-            wValue.style.textAlign = options.float ?? '';
             wValue.className = LX.mergeClass('lextext ellipsis-overflow', options.inputClass);
         }
         if (options.fit) {
             wValue.classList.add('field-sizing-content');
         }
+        if (wValue instanceof HTMLInputElement) {
+            wValue.name = options.name;
+            wValue.value = value ?? '';
+            if (options.autocomplete) {
+                wValue.autocomplete = options.autocomplete;
+            }
+            else if (wValue.type === 'password') {
+                // allow password managers by default
+                wValue.autocomplete = 'current-password';
+            }
+            else if (options.name === 'username' || options.name === 'email') {
+                wValue.autocomplete = options.name;
+            }
+            else {
+                // neutral default, don't break browser heuristics
+                wValue.autocomplete = 'on';
+            }
+            wValue.style.textAlign = options.float ?? '';
+            wValue.addEventListener('transitionstart', (e) => {
+                if (e.propertyName === 'background-color' &&
+                    wValue.matches(':-webkit-autofill')) {
+                    this.syncFromDOM();
+                }
+            });
+        }
         Object.assign(wValue.style, options.style ?? {});
         container.appendChild(wValue);
+        this.input = wValue;
         LX.doAsync(this.onResize.bind(this));
+    }
+    syncFromDOM(skipCallback = true) {
+        if (this.input instanceof HTMLInputElement) {
+            this.set(this.input.value, skipCallback);
+        }
     }
 }
 LX.TextInput = TextInput;
@@ -1843,7 +1875,7 @@ class Select extends BaseComponent {
             if (filter) {
                 filter.root.querySelector('input').focus();
             }
-        }, { buttonClass: 'outline [&_a]:ml-auto', skipInlineCount: true, disabled: options.disabled });
+        }, { buttonClass: 'outline [&_a]:ml-auto', skipInlineCount: true, disabled: this.disabled });
         selectedOption.root.style.width = '100%';
         selectedOption.root.querySelector('button').appendChild(LX.makeIcon('Down', { svgClass: 'sm' }));
         container.appendChild(selectedOption.root);
@@ -2067,36 +2099,40 @@ class ArrayInput extends BaseComponent {
                         component = new TextInput(i + '', value, function (value) {
                             values[i] = value;
                             callback(values);
-                        }, { nameWidth: '12px', className: 'p-0', skipReset: true });
+                        }, { nameWidth: '12px', className: 'p-0', disabled: this.disabled, skipReset: true });
                         break;
                     case Number:
                         component = new NumberInput(i + '', value, function (value) {
                             values[i] = value;
                             callback(values);
-                        }, { nameWidth: '12px', className: 'p-0', skipReset: true });
+                        }, { nameWidth: '12px', className: 'p-0', disabled: this.disabled, skipReset: true });
                         break;
                     case 'select':
                         component = new Select(i + '', options.innerValues, value, function (value) {
                             values[i] = value;
                             callback(values);
-                        }, { nameWidth: '12px', className: 'p-0', skipReset: true });
+                        }, { nameWidth: '12px', className: 'p-0', disabled: this.disabled, skipReset: true });
                         break;
                 }
                 console.assert(component, `Value of type ${baseclass} cannot be modified in ArrayInput`);
                 arrayItems.appendChild(component.root);
-                const removeComponent = new Button(null, '', (v, event) => {
-                    values.splice(values.indexOf(value), 1);
+                if (!this.disabled) {
+                    const removeComponent = new Button(null, '', (v, event) => {
+                        values.splice(values.indexOf(value), 1);
+                        this._updateItems();
+                        this._trigger(new IEvent(name, values, event), callback);
+                    }, { buttonClass: 'ghost sm p-0', title: 'Remove item', icon: 'Trash2' });
+                    component.root.appendChild(removeComponent.root);
+                }
+            }
+            if (!this.disabled) {
+                const addButton = new Button(null, LX.makeIcon('Plus', { svgClass: 'sm' }).innerHTML + 'Add item', (v, event) => {
+                    values.push(options.innerValues ? options.innerValues[0] : '');
                     this._updateItems();
                     this._trigger(new IEvent(name, values, event), callback);
-                }, { buttonClass: 'ghost xs p-0', title: 'Remove item', icon: 'Trash2' });
-                component.root.appendChild(removeComponent.root);
+                }, { buttonClass: 'ghost' });
+                arrayItems.appendChild(addButton.root);
             }
-            const addButton = new Button(null, LX.makeIcon('Plus', { svgClass: 'sm' }).innerHTML + 'Add item', (v, event) => {
-                values.push(options.innerValues ? options.innerValues[0] : '');
-                this._updateItems();
-                this._trigger(new IEvent(name, values, event), callback);
-            }, { buttonClass: 'ghost' });
-            arrayItems.appendChild(addButton.root);
         };
         this._updateItems();
     }
@@ -2191,7 +2227,7 @@ class Checkbox extends BaseComponent {
         let checkbox = LX.makeElement('input', LX.mergeClass('lexcheckbox rounded-xl', options.className ?? 'primary'));
         checkbox.type = 'checkbox';
         checkbox.checked = value;
-        checkbox.disabled = options.disabled ?? false;
+        checkbox.disabled = this.disabled;
         container.appendChild(checkbox);
         LX.makeElement('span', 'text-sm', options.label ?? 'On', container);
         checkbox.addEventListener('change', (e) => {
@@ -2826,7 +2862,7 @@ class ColorInput extends BaseComponent {
         let sampleContainer = LX.makeContainer(['18px', '18px'], 'flex flex-row rounded overflow-hidden', '', container);
         sampleContainer.tabIndex = '1';
         sampleContainer.addEventListener('click', (e) => {
-            if ((options.disabled ?? false)) {
+            if (this.disabled) {
                 return;
             }
             this._popover = new Popover(sampleContainer, [this.picker]);
@@ -2850,7 +2886,7 @@ class ColorInput extends BaseComponent {
             this.set(v);
             delete this._skipTextUpdate;
             this.picker.fromHexColor(v);
-        }, { width: 'calc( 100% - 24px )', disabled: options.disabled });
+        }, { width: 'calc( 100% - 24px )', disabled: this.disabled });
         textComponent.root.style.marginLeft = '6px';
         container.appendChild(textComponent.root);
         LX.doAsync(this.onResize.bind(this));
@@ -2987,15 +3023,13 @@ class Counter extends BaseComponent {
         const input = LX.makeElement('input', 'lexcounter w-12 bg-card px-2 text-foreground', '', container);
         input.type = 'number';
         input.value = value;
-        if (options.disabled) {
-            input.setAttribute('disabled', 'true');
-        }
+        input.disabled = this.disabled;
         const substrButton = new Button(null, '', (value, e) => {
             let mult = step ?? 1;
             if (e.shiftKey)
                 mult *= 10;
             this.set(this.count - mult, false, e);
-        }, { disabled: options.disabled, className: `p-0 ${options.disabled ? '' : 'hover:bg-secondary'} border-l-color border-r-color`,
+        }, { disabled: this.disabled, className: `p-0 ${this.disabled ? '' : 'hover:bg-secondary'} border-l-color border-r-color`,
             buttonClass: 'px-0 bg-none h-7', icon: 'Minus' });
         container.appendChild(substrButton.root);
         const addButton = new Button(null, '', (value, e) => {
@@ -3003,7 +3037,7 @@ class Counter extends BaseComponent {
             if (e.shiftKey)
                 mult *= 10;
             this.set(this.count + mult, false, e);
-        }, { disabled: options.disabled, className: `p-0 ${options.disabled ? '' : 'hover:bg-secondary'} rounded-r-lg`,
+        }, { disabled: this.disabled, className: `p-0 ${this.disabled ? '' : 'hover:bg-secondary'} rounded-r-lg`,
             buttonClass: 'px-0 bg-none h-7', icon: 'Plus' });
         container.appendChild(addButton.root);
     }
@@ -3752,7 +3786,7 @@ class DatePicker extends BaseComponent {
             const calendarIcon = LX.makeIcon('Calendar');
             const calendarButton = new Button(null, d0, () => {
                 this._popover = new Popover(calendarButton.root, [this.calendar]);
-            }, { buttonClass: `outline flex flex-row px-3 ${emptyDate ? '' : 'text-muted-foreground'} justify-between` });
+            }, { disabled: this.disabled, buttonClass: `outline flex flex-row px-3 ${emptyDate ? '' : 'text-muted-foreground'} justify-between` });
             calendarButton.root.querySelector('button').appendChild(calendarIcon);
             calendarButton.root.style.width = '100%';
             container.appendChild(calendarButton.root);
@@ -3763,7 +3797,7 @@ class DatePicker extends BaseComponent {
                 const calendarIcon = LX.makeIcon('Calendar');
                 const calendarButton = new Button(null, d1, () => {
                     this._popover = new Popover(calendarButton.root, [this.calendar]);
-                }, { buttonClass: `outline flex flex-row px-3 ${emptyDate ? '' : 'text-muted-foreground'} justify-between` });
+                }, { disabled: this.disabled, buttonClass: `outline flex flex-row px-3 ${emptyDate ? '' : 'text-muted-foreground'} justify-between` });
                 calendarButton.root.querySelector('button').appendChild(calendarIcon);
                 calendarButton.root.style.width = '100%';
                 container.appendChild(calendarButton.root);
@@ -4134,7 +4168,7 @@ class FileInput extends BaseComponent {
         let input = document.createElement('input');
         input.className = 'lexfileinput';
         input.type = 'file';
-        input.disabled = options.disabled ?? false;
+        input.disabled = this.disabled;
         this.root.appendChild(input);
         if (options.placeholder) {
             input.placeholder = options.placeholder;
@@ -4184,7 +4218,7 @@ class FileInput extends BaseComponent {
                         root.remove();
                         settingsDialog = null;
                     } });
-            }, { skipInlineCount: true, title: 'Settings', disabled: options.disabled, icon: 'Settings' });
+            }, { skipInlineCount: true, title: 'Settings', disabled: this.disabled, icon: 'Settings' });
             this.root.appendChild(settingButton.root);
         }
         LX.doAsync(this.onResize.bind(this));
@@ -4198,6 +4232,9 @@ LX.FileInput = FileInput;
  * @description Form Component
  */
 class Form extends BaseComponent {
+    data;
+    formData = {};
+    primaryButton;
     constructor(name, data, callback, options = {}) {
         if (data.constructor != Object) {
             console.error('Form data must be an Object');
@@ -4207,10 +4244,10 @@ class Form extends BaseComponent {
         options.hideName = true;
         super(ComponentType.FORM, name, null, options);
         this.onGetValue = () => {
-            return container.formData;
+            return this.formData;
         };
         this.onSetValue = (newValue, skipCallback, event) => {
-            container.formData = newValue;
+            this.formData = newValue;
             const entries = container.querySelectorAll('.lexcomponent');
             for (let i = 0; i < entries.length; ++i) {
                 const entry = entries[i];
@@ -4226,7 +4263,6 @@ class Form extends BaseComponent {
         let container = document.createElement('div');
         container.className = 'flex flex-col gap-1';
         container.style.width = '100%';
-        container.formData = {};
         this.root.appendChild(container);
         for (let entry in data) {
             let entryData = data[entry];
@@ -4244,42 +4280,68 @@ class Form extends BaseComponent {
                 container.appendChild(label.root);
             }
             entryData.textComponent = new TextInput(null, entryData.constructor == Object ? entryData.value : entryData, (value, event) => {
-                container.formData[entry] = value;
-                if (entryData.submit && event.constructor === KeyboardEvent) {
-                    primaryButton?.click();
+                this.formData[entry] = value;
+                if (entryData.submit && event?.constructor === KeyboardEvent) {
+                    this.submit();
                 }
             }, entryData);
             container.appendChild(entryData.textComponent.root);
-            container.formData[entry] = entryData.constructor == Object ? entryData.value : entryData;
+            this.formData[entry] = entryData.constructor == Object ? entryData.value : entryData;
         }
         const buttonContainer = LX.makeContainer(['100%', 'auto'], 'flex flex-row mt-2', '', container);
         if (options.secondaryActionName || options.secondaryActionCallback) {
             const secondaryButton = new Button(null, options.secondaryActionName ?? 'Cancel', (value, event) => {
                 if (options.secondaryActionCallback) {
-                    options.secondaryActionCallback(container.formData, event);
+                    options.secondaryActionCallback(this.formData, event);
                 }
             }, { width: '100%', minWidth: '0', buttonClass: options.secondaryButtonClass ?? 'secondary' });
             buttonContainer.appendChild(secondaryButton.root);
         }
-        const primaryButton = new Button(null, options.primaryActionName ?? 'Submit', (value, event) => {
+        // This is basically the "submit" button
+        this.primaryButton = new Button(null, options.primaryActionName ?? 'Submit', (value, event) => {
             const errors = [];
             for (let entry in data) {
                 let entryData = data[entry];
                 const pattern = entryData.pattern;
-                const matchField = pattern?.fieldMatchName ? container.formData[pattern.fieldMatchName] : undefined;
+                const matchField = pattern?.fieldMatchName ? this.formData[pattern.fieldMatchName] : undefined;
                 if (!entryData.textComponent.valid(undefined, matchField)) {
                     const err = { entry, type: 'input_not_valid', messages: [] };
                     if (pattern) {
-                        err.messages = LX.validateValueAtPattern(container.formData[entry], pattern, matchField);
+                        err.messages = LX.validateValueAtPattern(this.formData[entry], pattern, matchField);
                     }
                     errors.push(err);
                 }
             }
             if (callback) {
-                callback(container.formData, errors, event);
+                callback(this.formData, errors, event);
             }
         }, { width: '100%', minWidth: '0', buttonClass: options.primaryButtonClass ?? 'primary' });
-        buttonContainer.appendChild(primaryButton.root);
+        buttonContainer.appendChild(this.primaryButton.root);
+        if (!(options.skipEnterSubmit ?? false)) {
+            this.root.addEventListener('keydown', (e) => {
+                if (e.key !== 'Enter' || e.shiftKey)
+                    return;
+                const target = e.target;
+                if (target.tagName === 'TEXTAREA')
+                    return;
+                e.preventDefault();
+                this.submit();
+            });
+        }
+        this.data = data;
+    }
+    submit() {
+        this.syncInputs();
+        this.primaryButton?.click();
+    }
+    syncInputs() {
+        for (const entry in this.data) {
+            const component = this.data[entry].textComponent;
+            if (component instanceof TextInput) {
+                component.syncFromDOM();
+                this.formData[entry] = component.value();
+            }
+        }
     }
 }
 LX.Form = Form;
@@ -4318,9 +4380,10 @@ class Layers extends BaseComponent {
                 binary = '0' + binary;
             }
             for (let bit = 0; bit < maxBits; ++bit) {
-                let layer = document.createElement('div');
-                layer.className =
-                    'lexlayer size-6 text-secondary-foreground text-center content-center place-self-center cursor-pointer font-semibold text-xs rounded-lg';
+                let layer = document.createElement('button');
+                layer.className = `lexlayer size-6 text-secondary-foreground text-center content-center place-self-center cursor-pointer font-semibold text-xs rounded-lg select-none 
+                    disabled:pointer-events-none disabled:opacity-50`;
+                layer.disabled = this.disabled;
                 if (val != undefined) {
                     const valueBit = binary[maxBits - bit - 1];
                     if (valueBit != undefined && valueBit == '1') {
@@ -4391,8 +4454,9 @@ class List extends BaseComponent {
                     icon = itemValue[1];
                     itemValue = itemValue[0];
                 }
-                let listElement = document.createElement('div');
-                listElement.className = 'lexlistitem' + (value == itemValue ? ' selected' : '');
+                let listElement = document.createElement('button');
+                listElement.className = `lexlistitem disabled:pointer-events-none disabled:opacity-50 ${(value == itemValue) ? 'selected' : ''}`;
+                listElement.disabled = this.disabled;
                 if (icon) {
                     listElement.appendChild(LX.makeIcon(icon));
                 }
@@ -4851,10 +4915,10 @@ class Map2D extends BaseComponent {
         container.className = 'lexmap2d';
         this.root.appendChild(container);
         this.map2d = new CanvasMap2D(points, callback, options);
-        const calendarIcon = LX.makeIcon('SquareMousePointer');
+        const calendarIcon = LX.makeIcon(options.mapIcon ?? 'SquareMousePointer');
         const calendarButton = new Button(null, 'Open Map', () => {
             this._popover = new Popover(calendarButton.root, [this.map2d]);
-        }, { buttonClass: `outline justify-between` });
+        }, { buttonClass: `outline justify-between`, disabled: this.disabled });
         calendarButton.root.querySelector('button').appendChild(calendarIcon);
         container.appendChild(calendarButton.root);
         LX.doAsync(this.onResize.bind(this));
@@ -5536,7 +5600,6 @@ class OTPInput extends BaseComponent {
             const realNameWidth = this.root.domName?.style.width ?? '0px';
             container.style.width = `calc( 100% - ${realNameWidth})`;
         };
-        this.disabled = options.disabled ?? false;
         const container = document.createElement('div');
         container.className = 'lexotp flex flex-row items-center';
         this.root.appendChild(container);
@@ -5647,17 +5710,18 @@ class Pad extends BaseComponent {
             const realNameWidth = this.root.domName?.style.width ?? '0px';
             container.style.width = `calc( 100% - ${realNameWidth})`;
         };
-        var container = document.createElement('div');
+        let container = document.createElement('div');
         container.className = 'lexpad';
         this.root.appendChild(container);
         let pad = document.createElement('div');
         pad.id = 'lexpad-' + name;
-        pad.className = 'lexinnerpad';
+        pad.className = 'lexinnerpad data-[disabled=true]:pointer-events-none data-[disabled=true]:opacity-50 border-color';
         pad.style.width = options.padSize ?? '96px';
         pad.style.height = options.padSize ?? '96px';
+        pad.dataset['disabled'] = this.disabled.toString();
         container.appendChild(pad);
         let thumb = document.createElement('div');
-        thumb.className = 'lexpadthumb';
+        thumb.className = 'lexpadthumb opacity-inherit';
         thumb.value = new vec2(value[0], value[1]);
         thumb.min = options.min ?? 0;
         thumb.max = options.max ?? 1;
@@ -5850,7 +5914,7 @@ class RadioGroup extends BaseComponent {
             container.appendChild(optionItem);
             const optionButton = document.createElement('button');
             optionButton.className = 'flex p-0 rounded-lg cursor-pointer';
-            optionButton.disabled = options.disabled ?? false;
+            optionButton.disabled = this.disabled;
             optionItem.appendChild(optionButton);
             optionButton.addEventListener('click', (e) => {
                 this.set(i, false, e);
@@ -5962,7 +6026,7 @@ class RangeInput extends BaseComponent {
         slider.max = options.max ?? 100;
         slider.step = options.step ?? 1;
         slider.type = 'range';
-        slider.disabled = options.disabled ?? false;
+        slider.disabled = this.disabled;
         if (value.constructor == Number) {
             value = LX.clamp(value, +slider.min, +slider.max);
         }
@@ -6021,7 +6085,7 @@ class RangeInput extends BaseComponent {
             maxSlider.max = options.max ?? 100;
             maxSlider.step = options.step ?? 1;
             maxSlider.type = 'range';
-            maxSlider.disabled = options.disabled ?? false;
+            maxSlider.disabled = this.disabled;
             this._maxSlider = maxSlider;
             let maxRangeValue = ogValue[1];
             maxSlider.value = maxRangeValue = LX.clamp(maxRangeValue, +maxSlider.min, +maxSlider.max);
@@ -6062,7 +6126,8 @@ class Rate extends BaseComponent {
             container.style.width = `calc( 100% - ${realNameWidth})`;
         };
         const container = document.createElement('div');
-        container.className = 'lexrate relative';
+        container.className = 'lexrate relative data-[disabled=true]:pointer-events-none';
+        container.dataset['disabled'] = this.disabled.toString();
         this.root.appendChild(container);
         const starsContainer = LX.makeContainer(['fit-content', 'auto'], 'flex flex-row gap-1', '', container);
         const filledStarsContainer = LX.makeContainer(['fit-content', 'auto'], 'absolute top-0 flex flex-row gap-1 pointer-events-none', '', container);
@@ -6161,7 +6226,7 @@ class SizeInput extends BaseComponent {
                 if (callback) {
                     callback(value);
                 }
-            }, { min: 0, disabled: options.disabled, precision: options.precision, className: 'flex-auto-fill' });
+            }, { min: 0, disabled: this.disabled, precision: options.precision, className: 'flex-auto-fill' });
             container.appendChild(this.root.dimensions[i].root);
             if ((i + 1) != value.length) {
                 const xIcon = LX.makeIcon('X', { svgClass: 'text-foreground font-bold' });
@@ -7212,14 +7277,19 @@ class Tags extends BaseComponent {
             for (let i = 0; i < value.length; ++i) {
                 const tagName = value[i];
                 const tag = LX.makeElement('span', 'lextag bg-primary px-2 py-1 rounded-xl min-w-2 justify-center text-primary-foreground gap-1 text-sm select-none', tagName);
-                const removeButton = LX.makeIcon('X', { svgClass: 'sm' });
-                tag.appendChild(removeButton);
-                removeButton.addEventListener('click', (e) => {
-                    tag.remove();
-                    value.splice(value.indexOf(tagName), 1);
-                    this.set(value, false, e);
-                });
+                if (!this.disabled) {
+                    const removeButton = LX.makeIcon('X', { svgClass: 'sm' });
+                    tag.appendChild(removeButton);
+                    removeButton.addEventListener('click', (e) => {
+                        tag.remove();
+                        value.splice(value.indexOf(tagName), 1);
+                        this.set(value, false, e);
+                    });
+                }
                 tagsContainer.appendChild(tag);
+            }
+            if (this.disabled) {
+                return;
             }
             let tagInput = document.createElement('input');
             tagInput.value = '';
@@ -7272,6 +7342,7 @@ class TextArea extends BaseComponent {
         let wValue = LX.makeElement('textarea', options.inputClass ?? '');
         wValue.value = value ?? '';
         wValue.style.textAlign = options.float ?? '';
+        wValue.disabled = this.disabled;
         Object.assign(wValue.style, options.style ?? {});
         if (options.fitHeight ?? false) {
             wValue.classList.add('field-sizing-content');
@@ -7280,10 +7351,6 @@ class TextArea extends BaseComponent {
             wValue.classList.add('resize-none');
         }
         container.appendChild(wValue);
-        if (options.disabled ?? false) {
-            this.disabled = true;
-            wValue.setAttribute('disabled', 'true');
-        }
         if (options.placeholder) {
             wValue.setAttribute('placeholder', options.placeholder);
         }
@@ -7383,7 +7450,7 @@ class Toggle extends BaseComponent {
         toggle.type = 'checkbox';
         toggle.checked = value;
         toggle.iValue = value;
-        toggle.disabled = options.disabled ?? false;
+        toggle.disabled = this.disabled;
         container.appendChild(toggle);
         let valueName = document.createElement('span');
         valueName.className = 'font-medium w-full overflow-hidden truncate';
@@ -7450,7 +7517,6 @@ class Vector extends BaseComponent {
         var container = document.createElement('div');
         container.className = 'lexvector flex';
         this.root.appendChild(container);
-        this.disabled = options.disabled ?? false;
         const that = this;
         for (let i = 0; i < numComponents; ++i) {
             let box = document.createElement('div');
@@ -7464,6 +7530,7 @@ class Vector extends BaseComponent {
             vecinput.type = 'number';
             vecinput.id = 'vec' + numComponents + '_' + LX.guidGenerator();
             vecinput.idx = i;
+            vecinput.disabled = this.disabled;
             vectorInputs[i] = vecinput;
             box.appendChild(vecinput);
             if (value[i].constructor == Number) {
@@ -7473,9 +7540,6 @@ class Vector extends BaseComponent {
             vecinput.value = vecinput.iValue = value[i];
             const dragIcon = LX.makeIcon('MoveVertical', { iconClass: 'drag-icon hidden-opacity', svgClass: 'sm' });
             box.appendChild(dragIcon);
-            if (this.disabled) {
-                vecinput.disabled = true;
-            }
             // Add wheel input
             vecinput.addEventListener('wheel', function (e) {
                 e.preventDefault();
@@ -10372,8 +10436,10 @@ function makeCollapsible(domEl, content, parent, options = {}) {
     const collapsed = options.collapsed ?? true;
     const actionIcon = LX.makeIcon('Right');
     actionIcon.classList.add('collapser');
-    if (collapsed)
-        actionIcon.dataset['collapsed'] = `${collapsed}`;
+    if (collapsed) {
+        actionIcon.dataset['collapsed'] = `true`;
+        content.style.display = 'none';
+    }
     actionIcon.style.marginLeft = 'auto';
     actionIcon.style.marginRight = '0.2rem';
     actionIcon.addEventListener('click', function (e) {

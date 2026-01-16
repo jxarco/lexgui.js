@@ -67,7 +67,7 @@ class Knob extends BaseComponent {
         };
         const angle = LX.remapRange(value, min, max, -135, 135.0);
         innerKnobCircle.style.rotate = angle + 'deg';
-        if (options.disabled) {
+        if (this.disabled) {
             LX.addClass(container, 'disabled');
         }
         innerKnobCircle.addEventListener('change', (e) => {
@@ -94,7 +94,7 @@ class Knob extends BaseComponent {
         innerKnobCircle.addEventListener('mousedown', innerMouseDown);
         var that = this;
         function innerMouseDown(e) {
-            if (document.activeElement == innerKnobCircle || options.disabled) {
+            if (document.activeElement == innerKnobCircle || that.disabled) {
                 return;
             }
             var doc = that.root.ownerDocument;

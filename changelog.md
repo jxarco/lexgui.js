@@ -2,6 +2,8 @@
 
 ## dev
 
+## 8.2.3 (master)
+
 Fixed TextInput not updating on browser autofill.
 Allow support to disable: Array, DatePicker, Layers, List, Pad, Rate, and Tags components.
 Add `options.mapIcon` to change Map2D opener button icon.
@@ -18,7 +20,7 @@ DocMaker:
 - Added `className` support for some docs utilities.
 - Changed `#content` docs selector to `.lexdocs-content`.
 
-## 8.2.2 (master)
+## 8.2.2
 
 AssetView:
 - Added suppord for custom folder names in `onBeforeCreateFolder` using 1st resolve param.

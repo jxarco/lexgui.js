@@ -22,6 +22,7 @@ const HTML_TAGS = ['DOCTYPE', 'html', 'head', 'body', 'title', 'base', 'link', '
 class DocMaker {
     root;
     _listQueued = undefined;
+    _lastDomTarget = undefined;
     constructor(element) {
         this.root = element ?? document.body;
     }
@@ -32,20 +33,37 @@ class DocMaker {
         target = target ?? this.root;
         target.appendChild(document.createElement('br'));
     }
-    header(string, type, id) {
+    header(string, type, id, options = {}) {
         console.assert(string !== undefined && type !== undefined);
-        let header = document.createElement(type);
+        if (options.collapsable) {
+            const collapsible = LX.makeElement('div', LX.mergeClass('my-4 px-6 cursor-pointer', options.className), `<${type} id="${id ?? ''}">${string}</${type}>`, this.root);
+            const collapsibleContent = LX.makeContainer(['100%', 'auto'], 'px-4', '', this.root);
+            LX.listen(collapsible, "click", () => collapsible.querySelector('a.collapser').click());
+            this._lastDomTarget = this.root;
+            this.setDomTarget(collapsibleContent);
+            if (options.collapsableContentCallback) {
+                options.collapsableContentCallback();
+            }
+            LX.makeCollapsible(collapsible, collapsibleContent, null, { collapsed: options.collapsed ?? false });
+            this.setDomTarget(this._lastDomTarget);
+            delete this._lastDomTarget;
+            return collapsible;
+        }
+        const header = document.createElement(type);
+        header.className = options.className ?? '';
         header.innerHTML = string;
         if (id)
             header.id = id;
         this.root.appendChild(header);
+        return header;
     }
-    paragraph(string, sup = false, className) {
+    paragraph(string, sup = false, className = '') {
         console.assert(string !== undefined);
         let paragraph = document.createElement(sup ? 'sup' : 'p');
-        paragraph.className = 'leading-relaxed ' + (className ?? '');
+        paragraph.className = LX.mergeClass('leading-relaxed', className);
         paragraph.innerHTML = string;
         this.root.appendChild(paragraph);
+        return paragraph;
     }
     code(text, language = 'js') {
         console.assert(text !== undefined);
@@ -58,11 +76,11 @@ class DocMaker {
         };
         for (let i = 0; i < text.length; ++i) {
             const char = text[i];
-            const string = text.substr(i);
+            const string = text.substring(i);
             const endLineIdx = string.indexOf('\n');
             const line = string.substring(0, endLineIdx > -1 ? endLineIdx : undefined);
             if (char == '@') {
-                const str = line.substr(1);
+                const str = line.substring(1);
                 if (!(str.indexOf('@') > -1) && !(str.indexOf('[') > -1)) {
                     continue;
                 }
@@ -71,7 +89,7 @@ class DocMaker {
                 const skipTag = str[tagIndex - 1] == '|';
                 // Highlight is specified
                 if (text[i + 1] == '[') {
-                    highlight = str.substr(1, 3);
+                    highlight = str.substring(1, 4);
                     content = str.substring(5, tagIndex);
                     if (skipTag) {
                         const newString = str.substring(6 + content.length);
@@ -144,12 +162,14 @@ class DocMaker {
         pre.appendChild(code);
         container.appendChild(pre);
         this.root.appendChild(container);
+        return container;
     }
-    list(list, type, target) {
+    list(list, type, target, className = '') {
         const validTypes = ['bullet', 'numbered'];
         console.assert(list && list.length > 0 && validTypes.includes(type), 'Invalid list type or empty list' + type);
         const typeString = type == 'bullet' ? 'ul' : 'ol';
         let ul = document.createElement(typeString);
+        ul.className = className;
         target = target ?? this.root;
         target.appendChild(ul);
         for (var el of list) {
@@ -162,16 +182,18 @@ class DocMaker {
             li.innerHTML = el;
             ul.appendChild(li);
         }
+        return ul;
     }
     bulletList(list) {
-        this.list(list, 'bullet');
+        return this.list(list, 'bullet');
     }
     numberedList(list) {
-        this.list(list, 'numbered');
+        return this.list(list, 'numbered');
     }
     startCodeBulletList() {
         let ul = document.createElement('ul');
         this._listQueued = ul;
+        return ul;
     }
     endCodeBulletList() {
         if (this._listQueued === undefined)
@@ -208,35 +230,34 @@ class DocMaker {
         else {
             this.root.appendChild(ul);
         }
+        return ul;
     }
-    image(src, caption = '', parent) {
+    image(src, caption = '', parent, className = '') {
         let img = document.createElement('img');
         img.src = src;
         img.alt = caption;
-        img.className = 'my-1';
+        img.className = LX.mergeClass('my-1', className);
         parent = parent ?? this.root;
         parent.appendChild(img);
+        return img;
     }
     images(sources, captions = [], width, height) {
         const mobile = navigator && /Android|iPhone/i.test(navigator.userAgent);
+        const div = document.createElement('div');
         if (!mobile) {
-            let div = document.createElement('div');
             div.style.width = width ?? 'auto';
             div.style.height = height ?? '256px';
             div.className = 'flex flex-row justify-center';
-            for (let i = 0; i < sources.length; ++i) {
-                this.image(sources[i], captions[i], div);
-            }
-            this.root.appendChild(div);
         }
-        else {
-            for (let i = 0; i < sources.length; ++i) {
-                this.image(sources[i], captions[i]);
-            }
+        for (let i = 0; i < sources.length; ++i) {
+            this.image(sources[i], captions[i], div);
         }
+        this.root.appendChild(div);
+        return div;
     }
-    video(src, caption = '', controls = true, autoplay = false) {
+    video(src, caption = '', controls = true, autoplay = false, className = '') {
         let video = document.createElement('video');
+        video.className = className;
         video.src = src;
         video.controls = controls;
         video.autoplay = autoplay;
@@ -246,17 +267,18 @@ class DocMaker {
         video.loop = true;
         video.alt = caption;
         this.root.appendChild(video);
+        return video;
     }
-    note(text, warning = false, title, icon) {
+    note(text, warning = false, title, icon, className = '') {
         console.assert(text !== undefined);
-        const note = LX.makeContainer([], 'border-color rounded-xl overflow-hidden text-sm text-secondary-foreground my-6', '', this.root);
-        let header = document.createElement('div');
+        const note = LX.makeContainer([], LX.mergeClass('border-color rounded-xl overflow-hidden text-sm text-secondary-foreground my-6', className), '', this.root);
+        const header = document.createElement('div');
         header.className = 'flex bg-muted font-semibold px-3 py-2 gap-2 text-secondary-foreground';
         header.appendChild(LX.makeIcon(icon ?? (warning ? 'MessageSquareWarning' : 'NotepadText')));
         header.innerHTML += title ?? (warning ? 'Important' : 'Note');
         note.appendChild(header);
         // Node body
-        LX.makeContainer([], 'leading-6 p-3', text, note);
+        return LX.makeContainer([], 'leading-6 p-3', text, note);
     }
     classCtor(name, params, language = 'js') {
         let paramsHTML = '';
@@ -275,6 +297,7 @@ class DocMaker {
         let pr = document.createElement('p');
         pr.innerHTML = this.iCode("<span class='constructor'>" + name + '(' + paramsHTML + ')' + '</span>');
         this.root.appendChild(pr);
+        return pr;
     }
     classMethod(name, desc, params, ret) {
         this.startCodeBulletList();
