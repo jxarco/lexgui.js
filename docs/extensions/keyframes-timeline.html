@@ -6,7 +6,7 @@
 
     {
         const keyframestimeline = new KeyFramesTimeline( "KeyframesId", { title: "Keyframes Timeline" } );
-        const content = document.getElementById( 'content' );
+        const content = document.querySelector( '.lexdocs-content' );
         const area = new LX.Area( { skipAppend: true, height: "350px" } );
         area.attach(keyframestimeline);
         content.appendChild( area.root );
@@ -312,7 +312,6 @@ panel.@[mtd]attach@(kfTimeline.root);` );
     );
     docMaker.codeBulletList( keyControls );
 
-    docMaker.lineBreak();
-    docMaker.lineBreak();
+    
 
 </script>

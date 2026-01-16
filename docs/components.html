@@ -8,7 +8,7 @@
     docMaker.lineBreak();
 
     {
-        const content = document.getElementById('content');
+        const content = document.querySelector( '.lexdocs-content' );
         const area = new LX.Area( { skipAppend: true, height: "auto" } );
         const allComponentsContainer = LX.makeContainer( ["100%", "auto"], "grid mb-8 gap-6", "", area );
         allComponentsContainer.style.gridTemplateColumns = "repeat(auto-fit, minmax(333px, 1fr))";

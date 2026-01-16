@@ -1,6 +1,6 @@
 <script type="module">
 
-    const content = document.getElementById('content');
+    const content = document.querySelector( '.lexdocs-content' );
     const componentName = "Dropdown Menus";
 
     docMaker.header(componentName + ".", "h1", componentName.toLowerCase());
@@ -144,7 +144,6 @@ button[@"View mode"@] = @"TV"@;
 
     docMaker.paragraph( `As options, you can set ${ docMaker.iCode("side") } and ${ docMaker.iCode("align") } options to place the menu relative to its trigger.` );
 
-    docMaker.lineBreak();
-    docMaker.lineBreak();
+    
 
 </script>

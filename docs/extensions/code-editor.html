@@ -1,6 +1,6 @@
 <script type="module">
 
-    const content = document.getElementById('content');
+    const content = document.querySelector( '.lexdocs-content' );
     const componentName = "Code Editor";
     docMaker.header(componentName + ".", "h1", componentName.toLowerCase());
     docMaker.paragraph( `Provides an embedded editing tool with syntax highlighting, line numbers, and editing conveniences like autocomplete and undo/redo.`, false, "text-muted-foreground");
@@ -166,7 +166,6 @@
         }, {});
     }
 
-    docMaker.lineBreak();
-    docMaker.lineBreak();
+    
 
 </script>

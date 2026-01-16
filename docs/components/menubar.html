@@ -1,7 +1,7 @@
 <script type="module">
     import { LX } from 'lexgui';
 
-    const content = document.getElementById('content');
+    const content = document.querySelector( '.lexdocs-content' );
     const componentName = "Menubar";
     docMaker.header(componentName + ".", "h1", componentName.toLowerCase());
     docMaker.paragraph( `A visually persistent menu common in desktop applications that provides quick access to a consistent set of commands.`, false, "text-muted-foreground");
@@ -183,7 +183,6 @@
         ["options", "Object"]
     ] );
 
-    docMaker.lineBreak();
-    docMaker.lineBreak();
+    
 
 </script>

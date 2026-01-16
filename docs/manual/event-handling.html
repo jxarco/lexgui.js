@@ -4,11 +4,11 @@
 
     docMaker.paragraph( `LexGUI relies almost entirely on callbacks when creating each of its components, usually being triggered from one single place.` );
 
-    docMaker.header( "Signals", "h2" );
+    docMaker.header( "Signals.", "h2" );
     docMaker.paragraph( `For those cases where there is no trivial connection between the callbacks and the element that triggers it, LexGUI allows
 to create <strong>Signals</strong>. E.g. We could make a component to be updated when it receives a signal from any location in the application.` );
 
-    docMaker.header( "Connect a Signal", "h3" );
+    docMaker.header( "Connect a Signal.", "h3" );
     docMaker.paragraph( `The following code is creating a component bound to a signal. That implies that it will be updated when
     it receives the corresponding signal:` );
     docMaker.code( `panel.@[mtd]addNumber@(@"Font Size"@, @36@, (value, event) =&gt; {
@@ -20,7 +20,7 @@ to create <strong>Signals</strong>. E.g. We could make a component to be updated
 } );` );
     docMaker.note( `Signals are callbacks that execute in the element’s own scope when a specific event is triggered.` );
 
-    docMaker.header( "Emit a Signal", "h3" );
+    docMaker.header( "Emit a Signal.", "h3" );
     docMaker.paragraph( `To emit a signal you will have to call ${docMaker.iCode("LX.emitSignal(signalName, value, options)")} in any of the cases, where ${docMaker.iCode("options")}
     is optional could have the following attributes:` );
 
@@ -28,8 +28,5 @@ to create <strong>Signals</strong>. E.g. We could make a component to be updated
         ["target", "DOM element", "If defined, the callback will be called only to that object."],
         ["skipCallback", "Boolean", "Decide to call the specified component callback."],
     ] );
-
-    docMaker.lineBreak();
-    docMaker.lineBreak();
 
 </script>

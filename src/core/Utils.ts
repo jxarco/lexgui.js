@@ -1016,7 +1016,11 @@ function makeCollapsible( domEl: any, content: any, parent: any, options: any = 
     const collapsed = options.collapsed ?? true;
     const actionIcon: HTMLElement = LX.makeIcon( 'Right' );
     actionIcon.classList.add( 'collapser' );
-    if ( collapsed ) actionIcon.dataset['collapsed'] = `${collapsed}`;
+    if ( collapsed )
+    {
+        actionIcon.dataset['collapsed'] = `true`;
+        content.style.display = 'none';
+    }
     actionIcon.style.marginLeft = 'auto';
     actionIcon.style.marginRight = '0.2rem';
 

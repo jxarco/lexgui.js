@@ -122,12 +122,12 @@
 
     const header = LX.makeContainer([null, "auto"], "flex flex-col gap-4 pt-8 pb-4 items-center", `
     <a class="text-sm">Get started with LexGUI.js <span class="text-sm text-secondary-foreground">${LX.version}</span></a>
-    <p class="text-secondary-foreground font-semibold tracking-tight leading-none text-center text-balance text-4xl xl:text-5xl max-w-4xl">Lucide Icons and More</p>
+    <p class="text-foreground font-semibold tracking-tight leading-none text-center text-balance text-4xl xl:text-5xl max-w-4xl">Lucide Icons and More</p>
     <p class="text-secondary-foreground font-light text-base sm:text-lg text-center text-balance leading-normal max-w-3xl">Built on Lucide icons, extended with additional packs, and fully customizable with your own SVGs.</p>`, area);
 
     {
         const params = new URLSearchParams( document.location.search );
-        const content = document.getElementById('content');
+        const content = document.querySelector( '.lexdocs-content' );
         const container = LX.makeElement( "div", `sm:w-full xl:w-2/3 place-self-center ${ mobile ? "p-4" : "p-8" } flex flex-col gap-4`, "", area );
 
         let showMoreButton = null;

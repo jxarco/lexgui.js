@@ -13,6 +13,11 @@ Form Component:
 - Per entry data `entry.submit` overrides the general form options.
 - Docs updated.
 
+DocMaker:
+- Support collapsable header.
+- Added `className` support for some docs utilities.
+- Changed `#content` docs selector to `.lexdocs-content`.
+
 ## 8.2.2 (master)
 
 AssetView:

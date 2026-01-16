@@ -4,7 +4,7 @@
 
     docMaker.header( `Installation.`, "h1", "installation" );
 
-    docMaker.header( "Project structure", "h2", "project-structure" );
+    docMaker.header( "Project structure.", "h2", "project-structure" );
 
     docMaker.paragraph( `Each <b>LexGUI</b> project must include at least one HTML file for webpage definition and the JavaScript and CSS build files to execute your lexgui code.
     While the specific structure and naming conventions mentioned below are not obligatory, they will be consistently referenced throughout this guide.` );
@@ -42,7 +42,7 @@
 @[com]// Your code...@` );
 
 
-    docMaker.header( "Building components", "h2", "components" );
+    docMaker.header( "Building components.", "h2", "components" );
     docMaker.paragraph( `By default, LexGUI provides the core elements for creating web interfaces. Other composite components, such as the code editor or timelines are located in the ${ docMaker.iCode( "extensions/" ) } directory.
     These ones are not required to be installed individually, but they <span class='font-semibold'>do need to be imported separately</span>:` );
     docMaker.code( `@import@ { @[cls]LX@ } @from@ @'lexgui'@;
@@ -57,7 +57,6 @@
 
 @const@ @[var]editor@ = @new@ @[cls]LX@.@[cls]CodeEditor@();` );
 
-    docMaker.lineBreak();
-    docMaker.lineBreak();
+    
 
 </script>

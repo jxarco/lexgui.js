@@ -1,7 +1,7 @@
 <script type="module">
     import { LX } from 'lexgui';
 
-    const content = document.getElementById('content');
+    const content = document.querySelector( '.lexdocs-content' );
     const componentName = "Sheet";
 
     docMaker.header(componentName + ".", "h1", componentName.toLowerCase());
@@ -57,7 +57,6 @@
     docMaker.classMethod( ".destroy", `Closes the Sheet, removes it from the DOM, and restores any modal lock state. Also removes the global event listeners for outside click and focus.`, [
     ] );
 
-    docMaker.lineBreak();
-    docMaker.lineBreak();
+    
 
 </script>

@@ -17,7 +17,7 @@ docMaker.codeBulletList( [
     ["spacingMode", "String", `Sets page layout spacing mode (default | compact)`],
 ] );
 
-docMaker.header( "Namespace Globals", "h2", "namespace-globals" );
+docMaker.header( "Namespace Globals.", "h2", "namespace-globals" );
 
 docMaker.paragraph( `You can modify global namespace (${docMaker.iCode("LX")}) variables before you start creating UI elements. For now, the customizable vars are the following:` );
 docMaker.codeBulletList( [
@@ -25,8 +25,5 @@ docMaker.codeBulletList( [
     [`LX.DEFAULT_SPLITBAR_SIZE`, `Number`, `Width (in pixels) of the area resize bar created on split (Default ${docMaker.iCode("4")})`],
     [`LX.OPEN_CONTEXTMENU_ENTRY`, `String`, `Specify how the subentries of a Context Menu will be opened, '<em>mouseover</em>' or '<em>click</em>' (Default ${docMaker.iCode("click")})`]
 ] );
-
-docMaker.lineBreak();
-docMaker.lineBreak();
 
 </script>

@@ -1,7 +1,7 @@
 <script type="module">
     import { LX } from 'lexgui';
 
-    const content = document.getElementById('content');
+    const content = document.querySelector( '.lexdocs-content' );
     const componentName = "Tabs";
     docMaker.header(componentName + ".", "h1", componentName.toLowerCase());
     docMaker.paragraph(`A set of layered sections of content, created within areas, that are displayed one at a time.`, false, "text-muted-foreground");
@@ -70,7 +70,6 @@
         ["name", "String"]
     ] );
 
-    docMaker.lineBreak();
-    docMaker.lineBreak();
+    
 
 </script>

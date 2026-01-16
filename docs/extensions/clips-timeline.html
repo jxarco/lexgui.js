@@ -6,7 +6,7 @@
 
     {
         const clipstimeline = new ClipsTimeline( "ClipsId", { title: "Clips Timeline" } );
-        const content = document.getElementById( 'content' );
+        const content = document.querySelector( '.lexdocs-content' );
         const area = new LX.Area( { skipAppend: true, height: "350px" } );
         area.attach(clipstimeline);
         content.appendChild( area.root );
@@ -277,7 +277,6 @@ panel.@[mtd]attach@(clipTimeline.root);` );
     docMaker.codeBulletList( clipControls );
 
 
-    docMaker.lineBreak();
-    docMaker.lineBreak();
+    
 
 </script>

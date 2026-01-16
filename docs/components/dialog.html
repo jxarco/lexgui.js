@@ -1,6 +1,6 @@
 <script type="module">
 
-    const content = document.getElementById('content');
+    const content = document.querySelector( '.lexdocs-content' );
     const componentName = "Dialogs";
     docMaker.header(componentName + ".", "h1", componentName.toLowerCase());
 
@@ -9,8 +9,7 @@
 
     docMaker.lineBreak();
     docMaker.image(`../examples/previews/dialogs.png`, "dialogs" );
-    docMaker.lineBreak();
-    docMaker.lineBreak();
+    
 
     docMaker.codeBulletList( [
         ["Classic", "General pop-up to display any kind of information or errors"],
@@ -79,7 +78,6 @@
         ["timeout", "Number", "Time before the dialog fade out (ms). Default: [3000]"]
     ] );
 
-    docMaker.lineBreak();
-    docMaker.lineBreak();
+    
 
 </script>

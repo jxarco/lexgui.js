@@ -1,7 +1,7 @@
 <script type="module">
     import { LX } from 'lexgui';
 
-    const content = document.getElementById('content');
+    const content = document.querySelector( '.lexdocs-content' );
     const componentName = "Sidebar";
     docMaker.header(componentName + ".", "h1", componentName.toLowerCase());
     docMaker.paragraph( `A composable, themeable and customizable sidebar component.`, false, "text-muted-foreground");
@@ -185,7 +185,6 @@
 
     docMaker.classMethod( ".update", `Builds the sidebar elements using current items.`, [] );
 
-    docMaker.lineBreak();
-    docMaker.lineBreak();
+    
 
 </script>

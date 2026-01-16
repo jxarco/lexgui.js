@@ -1,6 +1,6 @@
 <script type="module">
 
-    const content = document.getElementById('content');
+    const content = document.querySelector( '.lexdocs-content' );
     const componentName = "Tour";
 
     docMaker.header(componentName + ".", "h1", componentName.toLowerCase());
@@ -82,7 +82,6 @@
     docMaker.classMethod( ".begin", `Starts the tour from the first step.`, [] );
     docMaker.classMethod( ".stop", `Stops and clears the tour.`, [] );
 
-    docMaker.lineBreak();
-    docMaker.lineBreak();
+    
 
 </script>

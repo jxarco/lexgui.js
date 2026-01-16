@@ -16,7 +16,7 @@
     </script>
 </head>
     <body>
-        <div id="content"></div>
+        <div class="lexdocs-content"></div>
     <script type="module">
 
         import { LX } from 'lexgui';
@@ -30,7 +30,7 @@
 
         globalThis.docMaker = new DocMaker();
         const mobile = navigator && /Android|iPhone/i.test( navigator.userAgent );
-        const content = document.getElementById('content');
+        const content = document.querySelector( '.lexdocs-content' );
         const oldScripts = [];
         let path = null;
 

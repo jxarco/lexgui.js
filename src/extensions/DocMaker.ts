@@ -28,6 +28,7 @@ export class DocMaker
 {
     root: Element;
     _listQueued: Element | undefined = undefined;
+    _lastDomTarget: Element | undefined = undefined;
 
     constructor( element?: Element )
     {
@@ -45,11 +46,31 @@ export class DocMaker
         target.appendChild( document.createElement( 'br' ) );
     }
 
-    header( string: string, type: string, id: string, className: string = '' )
+    header( string: string, type: string, id: string, options: any = {} )
     {
         console.assert( string !== undefined && type !== undefined );
-        let header = document.createElement( type );
-        header.className = className;
+
+        if( options.collapsable )
+        {
+            const collapsible = LX.makeElement( 'div', LX.mergeClass( 'my-4 px-6 cursor-pointer', options.className ), `<${type} id="${id ?? ''}">${string}</${type}>`, this.root );
+            const collapsibleContent = LX.makeContainer( ['100%', 'auto'], 'px-4', '', this.root );
+            LX.listen( collapsible, "click", () => collapsible.querySelector( 'a.collapser' ).click() );
+            this._lastDomTarget = this.root;
+            this.setDomTarget( collapsibleContent );
+
+            if( options.collapsableContentCallback )
+            {
+                options.collapsableContentCallback();
+            }
+
+            LX.makeCollapsible( collapsible, collapsibleContent, null, { collapsed: options.collapsed ?? false } );
+            this.setDomTarget( this._lastDomTarget );
+            delete this._lastDomTarget;
+            return collapsible;
+        }
+        
+        const header = document.createElement( type );
+        header.className = options.className ?? '';
         header.innerHTML = string;
         if ( id ) header.id = id;
         this.root.appendChild( header );

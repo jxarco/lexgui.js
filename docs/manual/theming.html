@@ -4,30 +4,30 @@
 
     docMaker.paragraph( `Even though LexGUI has a pretty locked appearance, you can still customize it using CSS Variables and color utilities:` );
 
-    docMaker.header( "CSS Variables", "h3" );
+    docMaker.header( "CSS Variables.", "h3" );
 
     docMaker.paragraph( `Use LexGUI CSS theme variables:` );
     docMaker.code( `&lt;@div@ @[atn]class@=@"bg-background text-foreground"@ /&gt;` );
 
-    docMaker.header( "Utility Classes", "h3" );
+    docMaker.header( "Utility Classes.", "h3" );
 
     docMaker.paragraph( `You can also use Tailwind color palette using its utility classes (Check the ${ docMaker.iLink( "Colors", "https://jxarco.github.io/lexgui.js/colors/" ) } page in the LexGUI main page (or the ${docMaker.iLink("Tailwind official site", "https://tailwindcss.com/docs/colors")}) to see all possible colors):` );
     docMaker.code( `&lt;@div@ @[atn]class@=@"bg-white text-neutral-900"@ /&gt;` );
 
 
-    docMaker.header( "Convention", "h3" );
+    docMaker.header( "Convention.", "h3" );
 
     docMaker.paragraph( `We use a simple ${docMaker.iCode("background")} and ${docMaker.iCode("foreground")} convention for colors. The background variable is used for the background color of the component and the foreground variable is used for the text color.` );
     
     docMaker.note( `The ${docMaker.iCode("background")} suffix is omitted when the variable is used for the background color of the component.` );
 
-    docMaker.header( "Sizes", "h3" );
+    docMaker.header( "Sizes.", "h3" );
 
     docMaker.bulletList( [
         "xs", "sm", "md (default)", "lg", "xl", "2xl", "3xl", "..."
     ] );
 
-    docMaker.header( "Color Schemes", "h3" );
+    docMaker.header( "Color Schemes.", "h3" );
    
     docMaker.paragraph( `LexGUI uses dark mode by default. You can change it by overriding your device or browser color scheme but the easiest way is to use ${docMaker.iCode("LX.setMode")}
      where you can use "light" or "dark". If any of your content depends on the selected theme (usually JavaScript code, not CSS), make sure you are listening to the ${docMaker.iCode("@on_new_color_scheme")} signal being emited when the mode changes.` );

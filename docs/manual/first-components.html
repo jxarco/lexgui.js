@@ -19,7 +19,7 @@
 yourContainer.@[mtd]appendChild@( buttonComponent.root );
 ` );
 
-    docMaker.header( "Getter and Setters", "h2", "getter-and-setters" );
+    docMaker.header( "Getter and Setters.", "h2", "getter-and-setters" );
 
     docMaker.paragraph( `LexGUI supports retrieving and modifying values for any component that has been added.
     This functionality provides developers with a way to interact with and manipulate the UI elements within their applications. For a component to be accesible
@@ -33,22 +33,19 @@ panel.@[mtd]setValue@(@'Font Color'@, color);
     docMaker.note( `You must ensure that the new value provided is compatible with the component data type and constraints.
     Incorrect data types or out-of-range values may result in unexpected behavior or errors.`, true );
 
-    docMaker.header( "Reset Value", "h2", "reset-value" );
+    docMaker.header( "Reset Value.", "h2", "reset-value" );
 
     docMaker.paragraph( `In most cases where you set a Component Name, you will have the option to reset the component value to its default value by pressing a <em>reset
          button</em> what will appear on changing the initial state of the component. To avoid using it, add ${docMaker.iCode("skipReset: true")} to your component options.` );
 
-    docMaker.header( "Copy/Paste Value", "h2", "copy-paste-value" );
+    docMaker.header( "Copy/Paste Value.", "h2", "copy-paste-value" );
 
     docMaker.paragraph( `With mouse right click you will open a ${docMaker.iLink("Context Menu", "context_menu.html")} that will allow you to copy and paste component values to other components of the <strong>same type</strong>.` );
 
-    docMaker.header( "Inline Components", "h2", "inline-components" );
+    docMaker.header( "Inline Components.", "h2", "inline-components" );
 
     docMaker.paragraph( `You can also add multiple components in the same panel row to create well-organized and visually optimized user interface layouts by calling ${docMaker.iCode("panel.sameLine(number)")},
     where ${docMaker.iCode("number")} is the number of components to be inlined. In case of adding a dynamic number of components, you might want to use <span class="str">null</span> as the number and call ${docMaker.iCode("panel.endLine(className)")} after
      all the components have been added. Use ${docMaker.iCode("className")} to customize the inline components parent container.` );
-
-    docMaker.lineBreak();
-    docMaker.lineBreak();
 
 </script>
