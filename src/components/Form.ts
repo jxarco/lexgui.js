@@ -106,6 +106,10 @@ export class Form extends BaseComponent
 
         // This is basically the "submit" button
         this.primaryButton = new Button( null, options.primaryActionName ?? 'Submit', ( value: any, event: MouseEvent ) => {
+
+            // Force sync before testing text patterns
+            this.syncInputs();
+
             const errors = [];
 
             for ( let entry in data )

@@ -2,6 +2,8 @@
 
 ## dev
 
+- Fixed Form not automatically syncing inputs when pressing primary action button.
+
 ## 8.2.3 (master)
 
 Fixed TextInput not updating on browser autofill.
