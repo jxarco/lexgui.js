@@ -45,21 +45,22 @@ export class DocMaker
         target.appendChild( document.createElement( 'br' ) );
     }
 
-    header( string: string, type: string, id: string )
+    header( string: string, type: string, id: string, className: string = '' )
     {
         console.assert( string !== undefined && type !== undefined );
         let header = document.createElement( type );
+        header.className = className;
         header.innerHTML = string;
         if ( id ) header.id = id;
         this.root.appendChild( header );
         return header;
     }
 
-    paragraph( string: string, sup: boolean = false, className?: string )
+    paragraph( string: string, sup: boolean = false, className: string = '' )
     {
         console.assert( string !== undefined );
         let paragraph = document.createElement( sup ? 'sup' : 'p' );
-        paragraph.className = 'leading-relaxed ' + ( className ?? '' );
+        paragraph.className = LX.mergeClass( 'leading-relaxed', className );
         paragraph.innerHTML = string;
         this.root.appendChild( paragraph );
         return paragraph;
@@ -82,14 +83,14 @@ export class DocMaker
         for ( let i = 0; i < text.length; ++i )
         {
             const char = text[i];
-            const string = text.substr( i );
+            const string = text.substring( i );
 
             const endLineIdx = string.indexOf( '\n' );
             const line = string.substring( 0, endLineIdx > -1 ? endLineIdx : undefined );
 
             if ( char == '@' )
             {
-                const str = line.substr( 1 );
+                const str = line.substring( 1 );
 
                 if ( !( str.indexOf( '@' ) > -1 ) && !( str.indexOf( '[' ) > -1 ) )
                 {
@@ -104,7 +105,7 @@ export class DocMaker
                 // Highlight is specified
                 if ( text[i + 1] == '[' )
                 {
-                    highlight = str.substr( 1, 3 );
+                    highlight = str.substring( 1, 4 );
                     content = str.substring( 5, tagIndex );
 
                     if ( skipTag )
@@ -201,12 +202,13 @@ export class DocMaker
         return container;
     }
 
-    list( list: any[], type: string, target?: Element )
+    list( list: any[], type: string, target?: Element, className: string = '' )
     {
         const validTypes = [ 'bullet', 'numbered' ];
         console.assert( list && list.length > 0 && validTypes.includes( type ), 'Invalid list type or empty list' + type );
         const typeString = type == 'bullet' ? 'ul' : 'ol';
         let ul = document.createElement( typeString );
+        ul.className = className;
         target = target ?? this.root;
         target.appendChild( ul );
         for ( var el of list )
@@ -288,12 +290,12 @@ export class DocMaker
         return ul;
     }
 
-    image( src: string, caption: string = '', parent?: Element )
+    image( src: string, caption: string = '', parent?: Element, className: string = '' )
     {
         let img = document.createElement( 'img' );
         img.src = src;
         img.alt = caption;
-        img.className = 'my-1';
+        img.className = LX.mergeClass( 'my-1', className );
         parent = parent ?? this.root;
         parent.appendChild( img );
         return img;
@@ -322,9 +324,10 @@ export class DocMaker
         return div;
     }
 
-    video( src: string, caption: string = '', controls: boolean = true, autoplay: boolean = false )
+    video( src: string, caption: string = '', controls: boolean = true, autoplay: boolean = false, className: string = '' )
     {
         let video: any = document.createElement( 'video' );
+        video.className = className;
         video.src = src;
         video.controls = controls;
         video.autoplay = autoplay;
@@ -338,13 +341,12 @@ export class DocMaker
         return video;
     }
 
-    note( text: string, warning: boolean = false, title?: string, icon?: string )
+    note( text: string, warning: boolean = false, title?: string, icon?: string, className: string = '' )
     {
         console.assert( text !== undefined );
 
-        const note = LX.makeContainer( [], 'border-color rounded-xl overflow-hidden text-sm text-secondary-foreground my-6', '', this.root );
-
-        let header = document.createElement( 'div' );
+        const note = LX.makeContainer( [], LX.mergeClass( 'border-color rounded-xl overflow-hidden text-sm text-secondary-foreground my-6', className ), '', this.root );
+        const header = document.createElement( 'div' );
         header.className = 'flex bg-muted font-semibold px-3 py-2 gap-2 text-secondary-foreground';
         header.appendChild( LX.makeIcon( icon ?? ( warning ? 'MessageSquareWarning' : 'NotepadText' ) ) );
         header.innerHTML += title ?? ( warning ? 'Important' : 'Note' );
