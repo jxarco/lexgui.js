@@ -52,8 +52,8 @@ export class Tags extends BaseComponent
             for ( let i = 0; i < value.length; ++i )
             {
                 const tagName = value[i];
-                const tag = LX.makeElement( 'span',
-                    'lextag bg-primary px-2 py-1 rounded-xl min-w-2 justify-center text-primary-foreground gap-1 text-sm select-none', tagName );
+                const tagClass = LX.mergeClass( 'lextag bg-primary px-2 py-1 rounded-xl min-w-2 justify-center text-primary-foreground gap-1 text-sm select-none', options.tagClass );
+                const tag = LX.makeElement( 'span', tagClass, tagName );
 
                 if ( !this.disabled )
                 {
