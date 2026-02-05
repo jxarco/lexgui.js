@@ -94,7 +94,13 @@
         },
         xonCreateFile: ( instance ) => {
             return { name: "new_shader.wgsl", language: "WGSL" }
-        }
+        },
+        onContextMenu: ( editor, content, event ) => {
+            if( !content ) return;
+            return [
+                { path: "Custom Action", callback: () => console.log( content ) }
+            ];
+        },
     });
 
     // editor.loadFile("../data/animation.bml", { language: "JSON" });

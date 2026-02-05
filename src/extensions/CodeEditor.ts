@@ -2937,7 +2937,7 @@ export class CodeEditor
                 }
 
                 const options = this.onContextMenu( this, content, e );
-                if ( options.length )
+                if ( options?.length )
                 {
                     m.add( '' );
 

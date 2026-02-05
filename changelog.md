@@ -4,6 +4,10 @@
 
 Fixed Form not automatically syncing inputs when pressing primary action button.
 Added support for Tags `options.tagClass`.
+Minor CSS tweaks.
+
+CodeEditor:
+- Fixed `onContextMenu` issue on no selected content.
 
 ## 8.2.3 (master)
 
