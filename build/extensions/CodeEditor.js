@@ -2199,7 +2199,7 @@ class CodeEditor {
                     content = text.split(separator).join('\n');
                 }
                 const options = this.onContextMenu(this, content, e);
-                if (options.length) {
+                if (options?.length) {
                     m.add('');
                     for (const o of options) {
                         m.add(o.path, { disabled: o.disabled, callback: o.callback });
@@ -3003,7 +3003,7 @@ class CodeEditor {
             const tokenIndex = i;
             const tokenStartIndex = this._currentTokenPositions[tokenIndex];
             if (blockComments) {
-                if (token.substr(0, blockCommentsTokens[0].length) == blockCommentsTokens[0]) {
+                if (token.substring(0, blockCommentsTokens[0].length) == blockCommentsTokens[0]) {
                     this._buildingBlockComment = [lineNumber, tokenStartIndex];
                 }
             }
@@ -3412,18 +3412,19 @@ class CodeEditor {
             lineString = ogLine.substring(0, hasCommentIdx);
         }
         let tokensToEvaluate = []; // store in a temp array so we know prev and next tokens...
-        let charCounterList = [];
         let charCounter = 0;
         const pushToken = function (t) {
             if ((skipNonWords && (t.includes('"') || t.length < 3))) {
                 return;
             }
-            tokensToEvaluate.push(t);
-            charCounterList.push(charCounter);
+            tokensToEvaluate.push({
+                text: t,
+                pos: charCounter
+            });
             // Update positions
             charCounter += t.length;
         };
-        let iter = lineString.matchAll(/(<!--|-->|\*\/|\/\*|::|[\[\](){}<>.,;:*"'`%@$!/= ])/g);
+        let iter = lineString.matchAll(/(<!--|-->|\*\/|\/\*|::|[\[\](){}<>.,;:*"'`%@$!/=+\- ])/g);
         let subtokens = iter.next();
         if (subtokens.value) {
             let idx = 0;
@@ -3446,8 +3447,40 @@ class CodeEditor {
         if (hasCommentIdx != undefined) {
             pushToken(ogLine.substring(hasCommentIdx));
         }
-        this._currentTokenPositions = charCounterList;
-        return this._processTokens(tokensToEvaluate);
+        // Apply step to merge numeric tokens, since they might be separated by '.'
+        const mergedTokens = this._mergeNumericTokens(tokensToEvaluate);
+        this._currentTokenPositions = mergedTokens.map((t) => t.pos);
+        return this._processTokens(mergedTokens.map((t) => t.text));
+    }
+    _mergeNumericTokens(tokens) {
+        const result = [];
+        for (let i = 0; i < tokens.length; i++) {
+            const t = tokens[i];
+            const prev = result[result.length - 1];
+            const next = tokens[i + 1];
+            // number . number
+            if (prev && t.text === '.' && /^\d+$/.test(prev.text) && next && /^\d+$/.test(next.text)) {
+                prev.text += '.' + next.text;
+                i++;
+                continue;
+            }
+            // . number
+            if (t.text === '.' && next && /^\d+$/.test(next.text)) {
+                result.push({
+                    text: '.' + next.text,
+                    pos: t.pos
+                });
+                i++;
+                continue;
+            }
+            // number .
+            if (prev && t.text === '.' && /^\d+$/.test(prev.text)) {
+                prev.text += '.';
+                continue;
+            }
+            result.push({ ...t });
+        }
+        return result;
     }
     _processTokens(tokens, offset = 0) {
         if (this.highlight == 'C++' || this.highlight == 'CSS') {

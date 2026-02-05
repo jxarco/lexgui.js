@@ -16,7 +16,7 @@
     exports.LX = g.LX;
     if (!exports.LX) {
         exports.LX = {
-            version: '8.2.3',
+            version: '8.2.4',
             ready: false,
             extensions: [], // Store extensions used
             extraCommandbarEntries: [], // User specific entries for command bar
@@ -1720,8 +1720,8 @@
                 }
                 wValue.style.textAlign = options.float ?? '';
                 wValue.addEventListener('transitionstart', (e) => {
-                    if (e.propertyName === 'background-color' &&
-                        wValue.matches(':-webkit-autofill')) {
+                    if (e.propertyName === 'background-color'
+                        && wValue.matches(':-webkit-autofill')) {
                         this.syncFromDOM();
                     }
                 });
@@ -2225,10 +2225,10 @@
                 const realNameWidth = this.root.domName?.style.width ?? '0px';
                 container.style.width = options.inputWidth ?? `calc( 100% - ${realNameWidth})`;
             };
-            var container = document.createElement('div');
+            let container = document.createElement('div');
             container.className = 'flex items-center gap-2 my-0 mx-auto [&_span]:truncate [&_span]:flex-auto-fill';
             this.root.appendChild(container);
-            let checkbox = exports.LX.makeElement('input', exports.LX.mergeClass('lexcheckbox rounded-xl', options.className ?? 'primary'));
+            let checkbox = exports.LX.makeElement('input', exports.LX.mergeClass('lexcheckbox rounded-xl disabled:pointer-events-none disabled:opacity-50', options.className ?? 'primary'));
             checkbox.type = 'checkbox';
             checkbox.checked = value;
             checkbox.disabled = this.disabled;
@@ -3041,8 +3041,8 @@
                 if (e.shiftKey)
                     mult *= 10;
                 this.set(this.count + mult, false, e);
-            }, { disabled: this.disabled, className: `p-0 ${this.disabled ? '' : 'hover:bg-secondary'} rounded-r-lg`,
-                buttonClass: 'px-0 bg-none h-7', icon: 'Plus' });
+            }, { disabled: this.disabled, className: `p-0 ${this.disabled ? '' : 'hover:bg-secondary'} rounded-r-lg`, buttonClass: 'px-0 bg-none h-7',
+                icon: 'Plus' });
             container.appendChild(addButton.root);
         }
     }
@@ -3801,7 +3801,8 @@
                     const calendarIcon = exports.LX.makeIcon('Calendar');
                     const calendarButton = new Button(null, d1, () => {
                         this._popover = new Popover(calendarButton.root, [this.calendar]);
-                    }, { disabled: this.disabled, buttonClass: `outline flex flex-row px-3 ${emptyDate ? '' : 'text-muted-foreground'} justify-between` });
+                    }, { disabled: this.disabled,
+                        buttonClass: `outline flex flex-row px-3 ${emptyDate ? '' : 'text-muted-foreground'} justify-between` });
                     calendarButton.root.querySelector('button').appendChild(calendarIcon);
                     calendarButton.root.style.width = '100%';
                     container.appendChild(calendarButton.root);
@@ -4303,6 +4304,8 @@
             }
             // This is basically the "submit" button
             this.primaryButton = new Button(null, options.primaryActionName ?? 'Submit', (value, event) => {
+                // Force sync before testing text patterns
+                this.syncInputs();
                 const errors = [];
                 for (let entry in data) {
                     let entryData = data[entry];
@@ -4385,7 +4388,8 @@
                 }
                 for (let bit = 0; bit < maxBits; ++bit) {
                     let layer = document.createElement('button');
-                    layer.className = `lexlayer size-6 text-secondary-foreground text-center content-center place-self-center cursor-pointer font-semibold text-xs rounded-lg select-none 
+                    layer.className =
+                        `lexlayer size-6 text-secondary-foreground text-center content-center place-self-center cursor-pointer font-semibold text-xs rounded-lg select-none 
                     disabled:pointer-events-none disabled:opacity-50`;
                     layer.disabled = this.disabled;
                     if (val != undefined) {
@@ -7280,7 +7284,8 @@
                 tagsContainer.innerHTML = '';
                 for (let i = 0; i < value.length; ++i) {
                     const tagName = value[i];
-                    const tag = exports.LX.makeElement('span', 'lextag bg-primary px-2 py-1 rounded-xl min-w-2 justify-center text-primary-foreground gap-1 text-sm select-none', tagName);
+                    const tagClass = exports.LX.mergeClass('lextag bg-primary px-2 py-1 rounded-xl min-w-2 justify-center text-primary-foreground gap-1 text-sm select-none', options.tagClass);
+                    const tag = exports.LX.makeElement('span', tagClass, tagName);
                     if (!this.disabled) {
                         const removeButton = exports.LX.makeIcon('X', { svgClass: 'sm' });
                         tag.appendChild(removeButton);
@@ -7343,7 +7348,7 @@
             container.className = 'lextextarea';
             container.style.display = 'flex';
             this.root.appendChild(container);
-            let wValue = exports.LX.makeElement('textarea', options.inputClass ?? '');
+            let wValue = exports.LX.makeElement('textarea', exports.LX.mergeClass('w-full text-sm text-foreground bg-card border-color disabled:pointer-events-none disabled:opacity-50 rounded-lg outline-none pad-md', options.inputClass ?? ''));
             wValue.value = value ?? '';
             wValue.style.textAlign = options.float ?? '';
             wValue.disabled = this.disabled;
@@ -7359,9 +7364,18 @@
                 wValue.setAttribute('placeholder', options.placeholder);
             }
             const trigger = options.trigger ?? 'default';
+            const submitOnEnterKey = options.submitOnEnterKey ?? true;
             if (trigger == 'default') {
+                wValue.addEventListener('keydown', function (e) {
+                    if (submitOnEnterKey && e.key == 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        return false;
+                    }
+                });
                 wValue.addEventListener('keyup', function (e) {
-                    if (e.key == 'Enter') {
+                    if ((submitOnEnterKey && e.key == 'Enter' && !e.shiftKey)
+                        || e.key == 'Escape') {
+                        e.preventDefault();
                         wValue.blur();
                     }
                 });
@@ -7450,7 +7464,7 @@
             var container = document.createElement('div');
             container.className = 'flex flex-row gap-2 items-center';
             this.root.appendChild(container);
-            let toggle = exports.LX.makeElement('input', exports.LX.mergeClass('lextoggle relative inline-grid place-content-center cursor-pointer shrink-0 select-none', options.className));
+            let toggle = exports.LX.makeElement('input', exports.LX.mergeClass('lextoggle relative inline-grid place-content-center cursor-pointer shrink-0 select-none disabled:pointer-events-none disabled:opacity-50', options.className));
             toggle.type = 'checkbox';
             toggle.checked = value;
             toggle.iValue = value;
@@ -10845,29 +10859,37 @@
         options.modal = true;
         options.className = 'prompt';
         let value = '';
+        const _submitFn = () => {
+            if (options.required && value === '') {
+                text += text.includes('You must fill the input text.') ? '' : '\nYou must fill the input text.';
+                dialog.close();
+                prompt(text, title, callback, options);
+            }
+            else {
+                if (callback)
+                    callback.call(exports.LX, value);
+                dialog.close();
+            }
+        };
         const dialog = new exports.LX.Dialog(title, (p) => {
-            p.addTextArea(null, text, null, { disabled: true, fitHeight: true });
+            exports.LX.makeElement('p', 'max-h-64 p-2 break-word overflow-scroll', text, p);
             if (options.input ?? true) {
-                p.addText(null, options.input || value, (v) => value = v, { placeholder: '...' });
+                p.addText(null, options.input || value, (v, e) => {
+                    value = v;
+                    if (e?.constructor === KeyboardEvent) {
+                        _submitFn();
+                    }
+                }, { placeholder: '...' });
             }
             p.sameLine(2);
             p.addButton(null, 'Cancel', () => {
                 if (options.on_cancel)
                     options.on_cancel();
                 dialog.close();
-            });
+            }, { width: '50%', buttonClass: 'destructive' });
             p.addButton(null, options.accept || 'Continue', () => {
-                if (options.required && value === '') {
-                    text += text.includes('You must fill the input text.') ? '' : '\nYou must fill the input text.';
-                    dialog.close();
-                    prompt(text, title, callback, options);
-                }
-                else {
-                    if (callback)
-                        callback.call(exports.LX, value);
-                    dialog.close();
-                }
-            }, { buttonClass: 'primary' });
+                _submitFn();
+            }, { width: '50%', buttonClass: 'primary' });
         }, options);
         // Focus text prompt
         if (options.input ?? true) {
@@ -11709,7 +11731,7 @@
             options.modal = true;
             super(undefined, (p) => {
                 p.root.className = exports.LX.mergeClass(p.root.className, 'pad-2xl flex flex-col gap-2');
-                exports.LX.makeContainer(['100%', '100%'], 'text-lg font-medium text-foreground', title, p);
+                exports.LX.makeContainer(['100%', '100%'], 'text-lg font-medium text-foreground px-2', title, p);
                 p.addTextArea(null, message, null, { disabled: true, fitHeight: true, inputClass: 'bg-none text-sm text-muted-foreground' });
                 p.sameLine(2, 'justify-end');
                 p.addButton(null, options.cancelText ?? 'Cancel', () => this.destroy(), {

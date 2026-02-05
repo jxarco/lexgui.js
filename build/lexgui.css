@@ -761,6 +761,9 @@
   .h-full {
     height: 100%;
   }
+  .max-h-64 {
+    max-height: calc(var(--spacing) * 64);
+  }
   .min-h-3 {
     min-height: calc(var(--spacing) * 3);
   }
@@ -3507,7 +3510,7 @@ a svg, svg path {
   border: none;
   margin-left: -4px;
 }
-.lexcomponent input:disabled:not(.lextoggle) {
+.lexcomponent input:disabled:not(.lextoggle, .lexcheckbox) {
   outline: none;
   border: none;
   color: var(--muted-foreground);
@@ -3564,16 +3567,8 @@ a svg, svg path {
   margin-right: 16px;
 }
 .lexcomponent textarea {
-  width: 100%;
   word-break: break-word;
   font-family: var(--global-font);
-  font-size: var(--text-sm);
-  background: none;
-  padding: var(--pad-md);
-  color: var(--foreground);
-  outline: none;
-  border-radius: 6px;
-  border: 1px solid transparent;
   transition: 0.1s linear;
 }
 .lexcomponent textarea.outline {
@@ -4195,10 +4190,6 @@ dialog .lexselect .lexselectoptions {
 }
 .lextoggle:indeterminate {
   grid-template-columns: 0.5fr 1fr 0.5fr;
-}
-.lextoggle:disabled {
-  border: 1px solid var(--muted-foreground);
-  cursor: default;
 }
 .lextoggle:disabled:before {
   background-color: var(--muted-foreground);

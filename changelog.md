@@ -2,6 +2,8 @@
 
 ## dev
 
+## 8.2.4 (master)
+
 Fixed Form not automatically syncing inputs when pressing primary action button.
 Added support for Tags `options.tagClass`.
 Added support for TextArea `options.submitOnEnterKey` (def. true).
@@ -14,7 +16,7 @@ CodeEditor:
 - Fixed `onContextMenu` issue on no selected content.
 - Fixed tokenizer edge case with number decimals.
 
-## 8.2.3 (master)
+## 8.2.3
 
 Fixed TextInput not updating on browser autofill.
 Allow support to disable: Array, DatePicker, Layers, List, Pad, Rate, and Tags components.

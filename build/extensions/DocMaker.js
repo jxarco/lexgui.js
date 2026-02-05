@@ -38,7 +38,7 @@ class DocMaker {
         if (options.collapsable) {
             const collapsible = LX.makeElement('div', LX.mergeClass('my-4 px-6 cursor-pointer', options.className), `<${type} id="${id ?? ''}">${string}</${type}>`, this.root);
             const collapsibleContent = LX.makeContainer(['100%', 'auto'], 'px-4', '', this.root);
-            LX.listen(collapsible, "click", () => collapsible.querySelector('a.collapser').click());
+            LX.listen(collapsible, 'click', () => collapsible.querySelector('a.collapser').click());
             this._lastDomTarget = this.root;
             this.setDomTarget(collapsibleContent);
             if (options.collapsableContentCallback) {

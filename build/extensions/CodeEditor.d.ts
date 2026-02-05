@@ -3,6 +3,10 @@ declare const Area: any;
 declare const Panel: any;
 declare const Tree: any;
 declare const Tabs: any;
+type Token = {
+    text: string;
+    pos: number;
+};
 declare class Cursor {
     root: any;
     name: string;
@@ -273,6 +277,7 @@ export declare class CodeEditor {
     _updateLineSymbols(lineNumber: number, newSymbols: any[]): any;
     _lineHasComment(lineString: string): number | undefined;
     _getTokensFromLine(lineString: string, skipNonWords?: boolean): string[];
+    _mergeNumericTokens(tokens: Token[]): Token[];
     _processTokens(tokens: string[], offset?: number): string[];
     _mustHightlightWord(token: string, wordCategory: any, lang?: any): boolean;
     _getTokenHighlighting(ctx: any, highlight: string): any;
