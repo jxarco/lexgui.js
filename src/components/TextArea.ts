@@ -39,7 +39,7 @@ export class TextArea extends BaseComponent
         this.root.appendChild( container );
 
         let wValue: HTMLTextAreaElement = LX.makeElement( 'textarea', 
-            LX.mergeClass( 'w-full text-sm text-foreground bg-card border-color rounded-lg outline-none pad-md', options.inputClass ?? '' ) );
+            LX.mergeClass( 'w-full text-sm text-foreground bg-card border-color disabled:pointer-events-none disabled:opacity-50 rounded-lg outline-none pad-md', options.inputClass ?? '' ) );
         wValue.value = value ?? '';
         wValue.style.textAlign = options.float ?? '';
         wValue.disabled = this.disabled;

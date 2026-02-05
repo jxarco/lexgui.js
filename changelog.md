@@ -7,6 +7,7 @@ Added support for Tags `options.tagClass`.
 Added support for TextArea `options.submitOnEnterKey` (def. true).
 Fixed bug TextArea adding line break on submit using Enter key.
 Fixed Checkbox, Toggle disabled CSS.
+LX.prompt now submits on Enter key. Improved Prompt content html.
 Minor CSS tweaks.
 
 CodeEditor:

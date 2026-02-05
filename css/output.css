@@ -761,6 +761,9 @@
   .h-full {
     height: 100%;
   }
+  .max-h-64 {
+    max-height: calc(var(--spacing) * 64);
+  }
   .min-h-3 {
     min-height: calc(var(--spacing) * 3);
   }

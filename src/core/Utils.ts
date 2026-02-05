@@ -1548,12 +1548,33 @@ function prompt( text: string, title: string, callback: ( value: any ) => void, 
 
     let value = '';
 
+    const _submitFn = () => {
+        if ( options.required && value === '' )
+        {
+            text += text.includes( 'You must fill the input text.' ) ? '' : '\nYou must fill the input text.';
+            dialog.close();
+            prompt( text, title, callback, options );
+        }
+        else
+        {
+            if ( callback ) callback.call( LX, value );
+            dialog.close();
+        }
+    };
+
     const dialog = new LX.Dialog( title, ( p: Panel ) => {
-        p.addTextArea( null, text, null, { disabled: true, fitHeight: true } );
+
+        LX.makeElement( 'p', 'max-h-64 p-2 break-word overflow-scroll', text, p );
 
         if ( options.input ?? true )
         {
-            p.addText( null, options.input || value, ( v: string ) => value = v, { placeholder: '...' } );
+            p.addText( null, options.input || value, ( v: string, e: Event ) => {
+                value = v;
+                if ( e?.constructor === KeyboardEvent )
+                {
+                    _submitFn();
+                }
+            }, { placeholder: '...' } );
         }
 
         p.sameLine( 2 );
@@ -1561,21 +1582,11 @@ function prompt( text: string, title: string, callback: ( value: any ) => void, 
         p.addButton( null, 'Cancel', () => {
             if ( options.on_cancel ) options.on_cancel();
             dialog.close();
-        } );
+        }, { width: "50%", buttonClass: 'destructive' } );
 
         p.addButton( null, options.accept || 'Continue', () => {
-            if ( options.required && value === '' )
-            {
-                text += text.includes( 'You must fill the input text.' ) ? '' : '\nYou must fill the input text.';
-                dialog.close();
-                prompt( text, title, callback, options );
-            }
-            else
-            {
-                if ( callback ) callback.call( LX, value );
-                dialog.close();
-            }
-        }, { buttonClass: 'primary' } );
+            _submitFn();
+        }, { width: "50%", buttonClass: 'primary' } );
     }, options );
 
     // Focus text prompt
