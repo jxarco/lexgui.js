@@ -50,15 +50,16 @@ export class DocMaker
     {
         console.assert( string !== undefined && type !== undefined );
 
-        if( options.collapsable )
+        if ( options.collapsable )
         {
-            const collapsible = LX.makeElement( 'div', LX.mergeClass( 'my-4 px-6 cursor-pointer', options.className ), `<${type} id="${id ?? ''}">${string}</${type}>`, this.root );
-            const collapsibleContent = LX.makeContainer( ['100%', 'auto'], 'px-4', '', this.root );
-            LX.listen( collapsible, "click", () => collapsible.querySelector( 'a.collapser' ).click() );
+            const collapsible = LX.makeElement( 'div', LX.mergeClass( 'my-4 px-6 cursor-pointer', options.className ),
+                `<${type} id="${id ?? ''}">${string}</${type}>`, this.root );
+            const collapsibleContent = LX.makeContainer( [ '100%', 'auto' ], 'px-4', '', this.root );
+            LX.listen( collapsible, 'click', () => collapsible.querySelector( 'a.collapser' ).click() );
             this._lastDomTarget = this.root;
             this.setDomTarget( collapsibleContent );
 
-            if( options.collapsableContentCallback )
+            if ( options.collapsableContentCallback )
             {
                 options.collapsableContentCallback();
             }
@@ -68,7 +69,7 @@ export class DocMaker
             delete this._lastDomTarget;
             return collapsible;
         }
-        
+
         const header = document.createElement( type );
         header.className = options.className ?? '';
         header.innerHTML = string;
@@ -326,7 +327,6 @@ export class DocMaker
     {
         const mobile = navigator && /Android|iPhone/i.test( navigator.userAgent );
         const div: HTMLElement = document.createElement( 'div' );
-        
 
         if ( !mobile )
         {
@@ -366,7 +366,8 @@ export class DocMaker
     {
         console.assert( text !== undefined );
 
-        const note = LX.makeContainer( [], LX.mergeClass( 'border-color rounded-xl overflow-hidden text-sm text-secondary-foreground my-6', className ), '', this.root );
+        const note = LX.makeContainer( [],
+            LX.mergeClass( 'border-color rounded-xl overflow-hidden text-sm text-secondary-foreground my-6', className ), '', this.root );
         const header = document.createElement( 'div' );
         header.className = 'flex bg-muted font-semibold px-3 py-2 gap-2 text-secondary-foreground';
         header.appendChild( LX.makeIcon( icon ?? ( warning ? 'MessageSquareWarning' : 'NotepadText' ) ) );

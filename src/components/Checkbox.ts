@@ -50,7 +50,8 @@ export class Checkbox extends BaseComponent
         container.className = 'flex items-center gap-2 my-0 mx-auto [&_span]:truncate [&_span]:flex-auto-fill';
         this.root.appendChild( container );
 
-        let checkbox: HTMLInputElement = LX.makeElement( 'input', LX.mergeClass( 'lexcheckbox rounded-xl disabled:pointer-events-none disabled:opacity-50', options.className ?? 'primary' ) );
+        let checkbox: HTMLInputElement = LX.makeElement( 'input',
+            LX.mergeClass( 'lexcheckbox rounded-xl disabled:pointer-events-none disabled:opacity-50', options.className ?? 'primary' ) );
         checkbox.type = 'checkbox';
         checkbox.checked = value;
         checkbox.disabled = this.disabled;

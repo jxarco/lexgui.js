@@ -1563,7 +1563,6 @@ function prompt( text: string, title: string, callback: ( value: any ) => void, 
     };
 
     const dialog = new LX.Dialog( title, ( p: Panel ) => {
-
         LX.makeElement( 'p', 'max-h-64 p-2 break-word overflow-scroll', text, p );
 
         if ( options.input ?? true )
@@ -1582,11 +1581,11 @@ function prompt( text: string, title: string, callback: ( value: any ) => void, 
         p.addButton( null, 'Cancel', () => {
             if ( options.on_cancel ) options.on_cancel();
             dialog.close();
-        }, { width: "50%", buttonClass: 'destructive' } );
+        }, { width: '50%', buttonClass: 'destructive' } );
 
         p.addButton( null, options.accept || 'Continue', () => {
             _submitFn();
-        }, { width: "50%", buttonClass: 'primary' } );
+        }, { width: '50%', buttonClass: 'primary' } );
     }, options );
 
     // Focus text prompt

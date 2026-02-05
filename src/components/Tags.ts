@@ -52,14 +52,17 @@ export class Tags extends BaseComponent
             for ( let i = 0; i < value.length; ++i )
             {
                 const tagName = value[i];
-                const tagClass = LX.mergeClass( 'lextag bg-primary px-2 py-1 rounded-xl min-w-2 justify-center text-primary-foreground gap-1 text-sm select-none', options.tagClass );
+                const tagClass = LX.mergeClass(
+                    'lextag bg-primary px-2 py-1 rounded-xl min-w-2 justify-center text-primary-foreground gap-1 text-sm select-none',
+                    options.tagClass
+                );
                 const tag = LX.makeElement( 'span', tagClass, tagName );
 
                 if ( !this.disabled )
                 {
                     const removeButton = LX.makeIcon( 'X', { svgClass: 'sm' } );
                     tag.appendChild( removeButton );
-    
+
                     removeButton.addEventListener( 'click', ( e: MouseEvent ) => {
                         tag.remove();
                         value.splice( value.indexOf( tagName ), 1 );

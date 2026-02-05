@@ -152,7 +152,7 @@ export class TextInput extends BaseComponent
         {
             wValue.name = options.name;
             wValue.value = value ?? '';
-            
+
             if ( options.autocomplete )
             {
                 wValue.autocomplete = options.autocomplete;
@@ -171,15 +171,16 @@ export class TextInput extends BaseComponent
                 // neutral default, don't break browser heuristics
                 wValue.autocomplete = 'on';
             }
-            
+
             wValue.style.textAlign = options.float ?? '';
 
-            wValue.addEventListener('transitionstart', ( e: TransitionEvent ) => {
-                if ( e.propertyName === 'background-color' && 
-                    wValue.matches( ':-webkit-autofill' ) ) {
+            wValue.addEventListener( 'transitionstart', ( e: TransitionEvent ) => {
+                if ( e.propertyName === 'background-color'
+                    && wValue.matches( ':-webkit-autofill' ) )
+                {
                     this.syncFromDOM();
                 }
-            });
+            } );
         }
 
         Object.assign( wValue.style, options.style ?? {} );

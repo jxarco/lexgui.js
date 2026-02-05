@@ -121,14 +121,15 @@ export class ArrayInput extends BaseComponent
                 }
             }
 
-            if( !this.disabled )
+            if ( !this.disabled )
             {
-                const addButton = new Button( null, LX.makeIcon( 'Plus', { svgClass: 'sm' } ).innerHTML + 'Add item', ( v: any, event: MouseEvent ) => {
-                    values.push( options.innerValues ? options.innerValues[0] : '' );
-                    this._updateItems();
-                    this._trigger( new IEvent( name, values, event ), callback );
-                }, { buttonClass: 'ghost' } );
-    
+                const addButton = new Button( null, LX.makeIcon( 'Plus', { svgClass: 'sm' } ).innerHTML + 'Add item',
+                    ( v: any, event: MouseEvent ) => {
+                        values.push( options.innerValues ? options.innerValues[0] : '' );
+                        this._updateItems();
+                        this._trigger( new IEvent( name, values, event ), callback );
+                    }, { buttonClass: 'ghost' } );
+
                 arrayItems.appendChild( addButton.root );
             }
         };

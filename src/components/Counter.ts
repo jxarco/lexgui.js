@@ -58,8 +58,8 @@ export class Counter extends BaseComponent
             let mult = step ?? 1;
             if ( e.shiftKey ) mult *= 10;
             this.set( this.count + mult, false, e );
-        }, { disabled: this.disabled, className: `p-0 ${this.disabled ? '' : 'hover:bg-secondary'} rounded-r-lg`,
-            buttonClass: 'px-0 bg-none h-7', icon: 'Plus' } );
+        }, { disabled: this.disabled, className: `p-0 ${this.disabled ? '' : 'hover:bg-secondary'} rounded-r-lg`, buttonClass: 'px-0 bg-none h-7',
+            icon: 'Plus' } );
         container.appendChild( addButton.root );
     }
 }

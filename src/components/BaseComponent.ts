@@ -378,7 +378,7 @@ export class BaseComponent
     {
         this.disabled = disabled;
 
-        if( this.onSetDisabled )
+        if ( this.onSetDisabled )
         {
             this.onSetDisabled( disabled );
         }

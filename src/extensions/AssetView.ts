@@ -529,8 +529,7 @@ export class AssetView
                 }
             }
 
-            options.push( null, { name: 'Delete', icon: 'Trash2', className: 'destructive',
-                callback: that._requestDeleteItem.bind( that, item ) } );
+            options.push( null, { name: 'Delete', icon: 'Trash2', className: 'destructive', callback: that._requestDeleteItem.bind( that, item ) } );
 
             LX.addClass( that.contentPanel.root, 'pointer-events-none' );
 

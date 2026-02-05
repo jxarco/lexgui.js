@@ -106,7 +106,6 @@ export class Form extends BaseComponent
 
         // This is basically the "submit" button
         this.primaryButton = new Button( null, options.primaryActionName ?? 'Submit', ( value: any, event: MouseEvent ) => {
-
             // Force sync before testing text patterns
             this.syncInputs();
 
@@ -143,7 +142,7 @@ export class Form extends BaseComponent
 
         buttonContainer.appendChild( this.primaryButton.root );
 
-        if( !( options.skipEnterSubmit ?? false ) )
+        if ( !( options.skipEnterSubmit ?? false ) )
         {
             this.root.addEventListener( 'keydown', ( e: KeyboardEvent ) => {
                 if ( e.key !== 'Enter' || e.shiftKey ) return;
@@ -154,7 +153,7 @@ export class Form extends BaseComponent
                 e.preventDefault();
 
                 this.submit();
-            });
+            } );
         }
 
         this.data = data;
@@ -171,11 +170,11 @@ export class Form extends BaseComponent
     {
         for ( const entry in this.data )
         {
-            const component = this.data[ entry ].textComponent;
+            const component = this.data[entry].textComponent;
             if ( component instanceof TextInput )
             {
                 component.syncFromDOM();
-                this.formData[ entry ] = component.value();
+                this.formData[entry] = component.value();
             }
         }
     }

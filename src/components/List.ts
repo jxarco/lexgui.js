@@ -71,7 +71,7 @@ export class List extends BaseComponent
                 }
 
                 let listElement = document.createElement( 'button' );
-                listElement.className = `lexlistitem disabled:pointer-events-none disabled:opacity-50 ${ ( value == itemValue ) ? 'selected' : '' }`;
+                listElement.className = `lexlistitem disabled:pointer-events-none disabled:opacity-50 ${( value == itemValue ) ? 'selected' : ''}`;
                 listElement.disabled = this.disabled;
 
                 if ( icon )

@@ -38,8 +38,10 @@ export class TextArea extends BaseComponent
         container.style.display = 'flex';
         this.root.appendChild( container );
 
-        let wValue: HTMLTextAreaElement = LX.makeElement( 'textarea', 
-            LX.mergeClass( 'w-full text-sm text-foreground bg-card border-color disabled:pointer-events-none disabled:opacity-50 rounded-lg outline-none pad-md', options.inputClass ?? '' ) );
+        let wValue: HTMLTextAreaElement = LX.makeElement( 'textarea', LX.mergeClass(
+            'w-full text-sm text-foreground bg-card border-color disabled:pointer-events-none disabled:opacity-50 rounded-lg outline-none pad-md',
+            options.inputClass ?? ''
+        ) );
         wValue.value = value ?? '';
         wValue.style.textAlign = options.float ?? '';
         wValue.disabled = this.disabled;
@@ -63,7 +65,7 @@ export class TextArea extends BaseComponent
         }
 
         const trigger: String = options.trigger ?? 'default';
-        const submitOnEnterKey: boolean = ( options.submitOnEnterKey ?? true );
+        const submitOnEnterKey: boolean = options.submitOnEnterKey ?? true;
 
         if ( trigger == 'default' )
         {
@@ -78,8 +80,8 @@ export class TextArea extends BaseComponent
 
             wValue.addEventListener( 'keyup', function( e: KeyboardEvent )
             {
-                if ( ( submitOnEnterKey && e.key == 'Enter' && !e.shiftKey ) || 
-                    e.key == 'Escape' )
+                if ( ( submitOnEnterKey && e.key == 'Enter' && !e.shiftKey )
+                    || e.key == 'Escape' )
                 {
                     e.preventDefault();
                     wValue.blur();
