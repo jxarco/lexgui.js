@@ -12,6 +12,7 @@ Minor CSS tweaks.
 
 CodeEditor:
 - Fixed `onContextMenu` issue on no selected content.
+- Fixed tokenizer edge case with number decimals.
 
 ## 8.2.3 (master)
 
