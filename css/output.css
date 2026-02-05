@@ -3507,7 +3507,7 @@ a svg, svg path {
   border: none;
   margin-left: -4px;
 }
-.lexcomponent input:disabled:not(.lextoggle) {
+.lexcomponent input:disabled:not(.lextoggle, .lexcheckbox) {
   outline: none;
   border: none;
   color: var(--muted-foreground);
@@ -4195,10 +4195,6 @@ dialog .lexselect .lexselectoptions {
 }
 .lextoggle:indeterminate {
   grid-template-columns: 0.5fr 1fr 0.5fr;
-}
-.lextoggle:disabled {
-  border: 1px solid var(--muted-foreground);
-  cursor: default;
 }
 .lextoggle:disabled:before {
   background-color: var(--muted-foreground);

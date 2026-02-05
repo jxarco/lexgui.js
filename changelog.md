@@ -4,6 +4,7 @@
 
 Fixed Form not automatically syncing inputs when pressing primary action button.
 Added support for Tags `options.tagClass`.
+Fixed Checkbox, Toggle disabled CSS.
 Minor CSS tweaks.
 
 CodeEditor:

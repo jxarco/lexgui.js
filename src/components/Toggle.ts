@@ -51,7 +51,7 @@ export class Toggle extends BaseComponent
         this.root.appendChild( container );
 
         let toggle: any = LX.makeElement( 'input',
-            LX.mergeClass( 'lextoggle relative inline-grid place-content-center cursor-pointer shrink-0 select-none', options.className ) );
+            LX.mergeClass( 'lextoggle relative inline-grid place-content-center cursor-pointer shrink-0 select-none disabled:pointer-events-none disabled:opacity-50', options.className ) );
         toggle.type = 'checkbox';
         toggle.checked = value;
         toggle.iValue = value;

@@ -382,7 +382,7 @@ LX._registerIconsAndColors( "./" );
 
             panel.branch("Node", { icon: "Box" });
             panel.addText("Name", "node_1");
-            panel.addCheckbox("Visibility", true, null);
+            panel.addCheckbox("Visibility", true, null, {disabled: true});
             panel.addLayers("Layers", 10, null);
 
             const map2Dpoints = [
@@ -401,6 +401,9 @@ LX._registerIconsAndColors( "./" );
             panel.addVector3( "Position", [0.0, 0.0, 0.0] );
             panel.addVector4( "Rotation", [0.0, 0.0, 0.0, 1.0] );
             panel.addVector3( "Scale", [1.0, 1.0, 1.0] );
+            
+            panel.addSeparator();
+            panel.addToggle("JSON", true, null, {className: "primary", disabled: true});
             panel.addButton(null, "Export", () =>  { console.log("Exported!") }, { buttonClass: "primary", xmustConfirm: true,
                 // confirmSide: "left",
                 // confirmAlign: "start",
