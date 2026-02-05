@@ -4,6 +4,8 @@
 
 Fixed Form not automatically syncing inputs when pressing primary action button.
 Added support for Tags `options.tagClass`.
+Added support for TextArea `options.submitOnEnterKey` (def. true).
+Fixed bug TextArea adding line break on submit using Enter key.
 Fixed Checkbox, Toggle disabled CSS.
 Minor CSS tweaks.
 

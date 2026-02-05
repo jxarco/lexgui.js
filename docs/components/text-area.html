@@ -43,7 +43,8 @@
             head: [ "Option", "Type", "Description", "Default" ],
             body: [
                 ["fitHeight", "Boolean", "Make text height adapt to its content", "false"],
-                ["resize", "Boolean", "Allow resize", "true"]
+                ["resize", "Boolean", "Allow resize", "true"],
+                ["submitOnEnterKey", "Boolean", "Trigger callback on press Enter key", "true"]
             ].map( v => {
                 return [ docMaker.iCode( v[ 0 ], "table" ), docMaker.iCode( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? docMaker.iCode( v[ 3 ], "table desc" ) : v[ 3 ] ];
             } )

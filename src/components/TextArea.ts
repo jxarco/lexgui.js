@@ -38,7 +38,8 @@ export class TextArea extends BaseComponent
         container.style.display = 'flex';
         this.root.appendChild( container );
 
-        let wValue: HTMLTextAreaElement = LX.makeElement( 'textarea', options.inputClass ?? '' );
+        let wValue: HTMLTextAreaElement = LX.makeElement( 'textarea', 
+            LX.mergeClass( 'w-full text-sm text-foreground bg-card border-color rounded-lg outline-none pad-md', options.inputClass ?? '' ) );
         wValue.value = value ?? '';
         wValue.style.textAlign = options.float ?? '';
         wValue.disabled = this.disabled;
@@ -61,14 +62,26 @@ export class TextArea extends BaseComponent
             wValue.setAttribute( 'placeholder', options.placeholder );
         }
 
-        const trigger = options.trigger ?? 'default';
+        const trigger: String = options.trigger ?? 'default';
+        const submitOnEnterKey: boolean = ( options.submitOnEnterKey ?? true );
 
         if ( trigger == 'default' )
         {
-            wValue.addEventListener( 'keyup', function( e )
+            wValue.addEventListener( 'keydown', function( e: KeyboardEvent )
             {
-                if ( e.key == 'Enter' )
+                if ( submitOnEnterKey && e.key == 'Enter' && !e.shiftKey )
                 {
+                    e.preventDefault();
+                    return false;
+                }
+            } );
+
+            wValue.addEventListener( 'keyup', function( e: KeyboardEvent )
+            {
+                if ( ( submitOnEnterKey && e.key == 'Enter' && !e.shiftKey ) || 
+                    e.key == 'Escape' )
+                {
+                    e.preventDefault();
                     wValue.blur();
                 }
             } );

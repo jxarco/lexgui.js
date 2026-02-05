@@ -1331,16 +1331,8 @@ a svg, svg path {
 /* TextArea Component */
 
 .lexcomponent textarea {
-    width: 100%;
     word-break: break-word;
     font-family: var(--global-font);
-    font-size: var(--text-sm);
-    background: none;
-    padding: var(--pad-md);
-    color: var(--foreground);
-    outline: none;
-    border-radius: 6px;
-    border: 1px solid transparent;
     transition: 0.1s linear;
 }
 
