@@ -1138,6 +1138,9 @@ export class CodeEditor
     private _lastClickTime: number = 0;
     private _lastClickLine: number = -1;
 
+    private static readonly PAIR_KEYS: Record<string, string> = { '"': '"', "'": "'", '`': '`', '(': ')', '{': '}', '[': ']' };
+    private static readonly CLOSE_KEYS: Set<string> = new Set( Object.values( CodeEditor.PAIR_KEYS ) );
+
     constructor( area: typeof Area, options: CodeEditorOptions = {} )
     {
         g.editor = this;
@@ -1657,25 +1660,42 @@ export class CodeEditor
         }
     }
 
-    private static readonly ENCLOSABLE_KEYS: Record<string, string> = { '"': '"', "'": "'", '`': '`', '(': ')', '{': '}', '[': ']' };
-
     private _doInsertChar( char: string ): void
     {
         // Enclose selection if applicable
-        if ( char in CodeEditor.ENCLOSABLE_KEYS && this.cursorSet.hasSelection() )
+        if ( char in CodeEditor.PAIR_KEYS && this.cursorSet.hasSelection() )
         {
-            this._encloseSelection( char, CodeEditor.ENCLOSABLE_KEYS[ char ] );
+            this._encloseSelection( char, CodeEditor.PAIR_KEYS[ char ] );
             return;
         }
 
         this._deleteSelectionIfAny();
 
         const cursor = this.cursorSet.getPrimary();
-        const op = this.doc.insert( cursor.head.line, cursor.head.col, char );
+        const { line, col } = cursor.head;
+        const nextChar = this.doc.getCharAt( line, col );
+
+        // If typing a closing pair char and the next char it's its closing, just skip over it
+        if ( CodeEditor.CLOSE_KEYS.has( char ) && nextChar === CodeEditor.PAIR_KEYS[char] )
+        {
+            this.cursorSet.set( line, col + 1 );
+            this._afterCursorMove();
+            return;
+        }
+
+        // Insert the character
+        const op = this.doc.insert( line, col, char );
         this.undoManager.record( op, this.cursorSet.getCursorPositions() );
 
-        this.cursorSet.set( cursor.head.line, cursor.head.col + 1 );
-        this._updateLine( cursor.head.line );
+        // Auto-pair here if next char is whitespace or end of line
+        if ( char in CodeEditor.PAIR_KEYS && ( !nextChar || /\s/.test( nextChar ) ) )
+        {
+            const closeOp = this.doc.insert( line, col + 1, CodeEditor.PAIR_KEYS[ char ] );
+            this.undoManager.record( closeOp, this.cursorSet.getCursorPositions() );
+        }
+
+        this.cursorSet.set( line, col + 1 );
+        this._updateLine( line );
         this._afterCursorMove();
     }
 
