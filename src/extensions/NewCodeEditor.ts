@@ -34,6 +34,7 @@ interface LanguageDef
     name: string;
     extensions: string[];
     states: Record<string, TokenRule[]>;
+    lineComment?: string;
     icon?: string | Record<string, string>;
 }
 
@@ -323,6 +324,7 @@ const jsBuiltins = [
 Tokenizer.registerLanguage( {
     name: 'JavaScript',
     extensions: [ 'js', 'mjs', 'cjs' ],
+    lineComment: '//',
     states: {
         root: [
             { match: /\/\*/, type: 'comment', next: 'blockComment' },
@@ -361,6 +363,7 @@ const tsTypes = [
 Tokenizer.registerLanguage( {
     name: 'TypeScript',
     extensions: [ 'ts', 'tsx' ],
+    lineComment: '//',
     states: {
         root: [
             { match: /\/\*/, type: 'comment', next: 'blockComment' },
@@ -1127,6 +1130,7 @@ export class CodeEditor
     private _lineElements: HTMLElement[] = [];      // <pre> element per line
     private _focused: boolean = false;
     private _composing: boolean = false;
+    private _keyChain: string | null = null;
     private _blinkerInterval: ReturnType<typeof setInterval> | null = null;
     private _cursorVisible: boolean = true;
     private _cursorBlinkRate: number = 550;
@@ -1525,6 +1529,23 @@ export class CodeEditor
         const shift = e.shiftKey;
         const alt = e.altKey;
 
+        if ( this._keyChain )
+        {
+            const chain = this._keyChain;
+            this._keyChain = null;
+            e.preventDefault();
+
+            if ( ctrl && chain === 'k' )
+            {
+                switch ( e.key.toLowerCase() )
+                {
+                    case 'c': this._commentLines(); return;
+                    case 'u': this._uncommentLines(); return;
+                }
+            }
+            return; // Unknown chord, just consume it
+        }
+
         if ( ctrl )
         {
             switch ( e.key.toLowerCase() )
@@ -1533,6 +1554,10 @@ export class CodeEditor
                     e.preventDefault();
                     this.cursorSet.selectAll( this.doc );
                     this._afterCursorMove();
+                    return;
+                case 'k':
+                    e.preventDefault();
+                    this._keyChain = 'k';
                     return;
                 case 'z':
                     e.preventDefault();
@@ -1651,6 +1676,76 @@ export class CodeEditor
 
         this.cursorSet.set( cursor.head.line, cursor.head.col + 1 );
         this._updateLine( cursor.head.line );
+        this._afterCursorMove();
+    }
+
+    private _getAffectedLines(): [ number, number ]
+    {
+        const cursor = this.cursorSet.getPrimary();
+        const a = cursor.anchor.line;
+        const h = cursor.head.line;
+        return a <= h ? [ a, h ] : [ h, a ];
+    }
+
+    private _commentLines(): void
+    {
+        const token = this.language.lineComment;
+        if ( !token ) return;
+
+        const [ fromLine, toLine ] = this._getAffectedLines();
+        const comment = token + ' ';
+
+        // Find minimum indentation across affected lines (skip empty lines)
+        let minIndent = Infinity;
+        for ( let i = fromLine; i <= toLine; i++ )
+        {
+            const line = this.doc.getLine( i );
+            if ( line.trim().length === 0 ) continue;
+            minIndent = Math.min( minIndent, this.doc.getIndent( i ) );
+        }
+        if ( minIndent === Infinity ) minIndent = 0;
+
+        this.undoManager.flush();
+        for ( let i = fromLine; i <= toLine; i++ )
+        {
+            const line = this.doc.getLine( i );
+            if ( line.trim().length === 0 ) continue;
+            const op = this.doc.insert( i, minIndent, comment );
+            this.undoManager.record( op, this.cursorSet.getCursorPositions() );
+            this._updateLine( i );
+        }
+
+        this._afterCursorMove();
+    }
+
+    private _uncommentLines(): void
+    {
+        const token = this.language.lineComment;
+        if ( !token ) return;
+
+        const [ fromLine, toLine ] = this._getAffectedLines();
+
+        this.undoManager.flush();
+        for ( let i = fromLine; i <= toLine; i++ )
+        {
+            const line = this.doc.getLine( i );
+            const indent = this.doc.getIndent( i );
+            const rest = line.substring( indent );
+
+            // Check for "// " or "//"
+            if ( rest.startsWith( token + ' ' ) )
+            {
+                const op = this.doc.delete( i, indent, token.length + 1 );
+                this.undoManager.record( op, this.cursorSet.getCursorPositions() );
+            }
+            else if ( rest.startsWith( token ) )
+            {
+                const op = this.doc.delete( i, indent, token.length );
+                this.undoManager.record( op, this.cursorSet.getCursorPositions() );
+            }
+        }
+
+        this._rebuildLines();
         this._afterCursorMove();
     }
 
