@@ -9,7 +9,11 @@ if ( !LX )
 
 LX.extensions.push( 'CodeEditor' );
 
-// ─── Types ──────────────────────────────────────────────────────────
+//  _____                 
+// |_   _|_ _ ___ ___ ___ 
+//   | | | | | . | -_|_ -|
+//   |_| |_  |  _|___|___|
+//       |___|_|
 
 interface Token
 {
@@ -44,7 +48,10 @@ interface TokenizeResult
     state: TokenizerState;
 }
 
-// ─── Utilities ──────────────────────────────────────────────────────
+//  _____ _   _ _ _ _   _         
+// |  |  | |_|_| |_| |_|_|___ ___ 
+// |  |  |  _| | | |  _| | -_|_ -|
+// |_____|_| |_|_|_|_| |_|___|___|
 
 function firstNonspaceIndex( str: string ): number
 {
@@ -52,7 +59,10 @@ function firstNonspaceIndex( str: string ): number
     return index < str.length ? index : -1;
 }
 
-// ─── Tokenizer ──────────────────────────────────────────────────────
+//  _____     _           _             
+// |_   _|___| |_ ___ ___|_|___ ___ ___ 
+//   | | | . | '_| -_|   | |- _| -_|  _|
+//   |_| |___|_,_|___|_|_|_|___|___|_|
 
 class Tokenizer
 {
@@ -107,7 +117,7 @@ class Tokenizer
 
             if ( !rules )
             {
-                // No rules for this state — emit rest as text
+                // No rules for this state, so emit rest as text
                 tokens.push( { type: 'text', value: line.slice( pos ) } );
                 pos = line.length;
                 break;
@@ -126,7 +136,7 @@ class Tokenizer
                 {
                     if ( m[0].length === 0 )
                     {
-                        // Zero-length match — skip to avoid infinite loop
+                        // Zero-length match, skipping to avoid infinite loop...
                         continue;
                     }
 
@@ -153,7 +163,7 @@ class Tokenizer
 
             if ( !matched )
             {
-                // No rule matched — consume one character as text
+                // No rule matched, consume one character as text either merged or as a new token
                 const lastToken = tokens[ tokens.length - 1 ];
                 if ( lastToken && lastToken.type === 'text' )
                 {
@@ -167,7 +177,6 @@ class Tokenizer
             }
         }
 
-        // Merge consecutive tokens of the same type
         const merged = Tokenizer._mergeTokens( tokens );
 
         return { tokens: merged, state: { stack } };
@@ -199,10 +208,14 @@ class Tokenizer
     }
 }
 
-// ─── Language Helpers ────────────────────────────────────────────────
+//  __                                   _____     _                 
+// |  |   ___ ___ ___ _ _ ___ ___ ___   |  |  |___| |___ ___ ___ ___ 
+// |  |__| .'|   | . | | | .'| . | -_|  |     | -_| | . | -_|  _|_ -|
+// |_____|__,|_|_|_  |___|__,|_  |___|  |__|__|___|_|  _|___|_| |___|
+//               |___|       |___|                  |_|
 
 /**
- * Build a word-boundary regex from a list of words.
+ * Build a word-boundary regex from a list of words to use as a language rule "match".
  * e.g. words(['const', 'let', 'var']) → /\b(?:const|let|var)\b/
  */
 function words( list: string[] ): RegExp
@@ -271,7 +284,11 @@ function templateStringStates( exprKeywords: string[] ): Record<string, TokenRul
     };
 }
 
-// ─── Language Definitions ───────────────────────────────────────────
+//  __                                   ____      ___ _     _ _   _             
+// |  |   ___ ___ ___ _ _ ___ ___ ___   |    \ ___|  _|_|___|_| |_|_|___ ___ ___ 
+// |  |__| .'|   | . | | | .'| . | -_|  |  |  | -_|  _| |   | |  _| | . |   |_ -|
+// |_____|__,|_|_|_  |___|__,|_  |___|  |____/|___|_| |_|_|_|_|_| |_|___|_|_|___|
+//               |___|       |___|
 
 Tokenizer.registerLanguage( {
     name: 'Plain Text',
@@ -284,7 +301,7 @@ Tokenizer.registerLanguage( {
     icon: 'AlignLeft text-neutral-500'
 } );
 
-// ── JavaScript ──
+// JavaScript
 
 const jsKeywords = [
     'var', 'let', 'const', 'this', 'in', 'of', 'true', 'false', 'null', 'undefined',
@@ -325,7 +342,7 @@ Tokenizer.registerLanguage( {
     icon: 'Js text-yellow-500'
 } );
 
-// ── TypeScript ──
+// TypeScript
 
 const tsKeywords = [
     ...jsKeywords,
@@ -364,7 +381,10 @@ Tokenizer.registerLanguage( {
     icon: 'Ts text-blue-600'
 } );
 
-// ─── Document ───────────────────────────────────────────────────────
+//  ____                            _   
+// |    \ ___ ___ _ _ _____ ___ ___| |_ 
+// |  |  | . |  _| | |     | -_|   |  _|
+// |____/|___|___|___|_|_|_|___|_|_|_|
 
 class CodeDocument
 {
@@ -403,7 +423,6 @@ class CodeDocument
 
     /**
      * Get the word at a given position. Returns [word, startCol, endCol].
-     * A "word" is a contiguous run of word characters (\w).
      */
     getWordAt( line: number, col: number ): [ string, number, number ]
     {
@@ -436,10 +455,10 @@ class CodeDocument
         return idx === -1 ? ( this._lines[ line ]?.length ?? 0 ) : idx;
     }
 
-    // ── Mutations (return EditOperations for undo) ──
+    // Mutations (return EditOperations for undo):
 
     /**
-     * Insert text at a position. Handles newlines in the inserted text.
+     * Insert text at a position (handles newlines in the inserted text).
      */
     insert( line: number, col: number, text: string ): EditOperation
     {
@@ -466,8 +485,7 @@ class CodeDocument
     }
 
     /**
-     * Delete `length` characters forward from a position.
-     * Handles crossing line boundaries.
+     * Delete `length` characters forward from a position (handles crossing line boundaries).
      */
     delete( line: number, col: number, length: number ): EditOperation
     {
@@ -504,7 +522,7 @@ class CodeDocument
     }
 
     /**
-     * Insert a new line after `afterLine`. If afterLine is -1, inserts at the beginning.
+     * Insert a new line after 'afterLine'. If afterLine is -1, inserts at the beginning.
      */
     insertLine( afterLine: number, text: string = '' ): EditOperation
     {
@@ -535,18 +553,20 @@ class CodeDocument
     {
         if ( op.type === 'insert' )
         {
-            // Inverse of insert is delete
             return this.delete( op.line, op.col, op.text.length );
         }
         else
         {
-            // Inverse of delete is insert
             return this.insert( op.line, op.col, op.text );
         }
     }
 }
 
-// ─── Edit Operations & Undo Manager ─────────────────────────────────
+//  _____   _ _ _      _____                 _   _                _| |_    _____       _        _____                         
+// |   __|_| |_| |_   |     |___ ___ ___ ___| |_|_|___ ___ ___   |   __|  |  |  |___ _| |___   |     |___ ___ ___ ___ ___ ___ 
+// |   __| . | |  _|  |  |  | . | -_|  _| .'|  _| | . |   |_ -|  |   __|  |  |  |   | . | . |  | | | | .'|   | .'| . | -_|  _|
+// |_____|___|_|_|    |_____|  _|___|_| |__,|_| |_|___|_|_|___|  |_   _|  |_____|_|_|___|___|  |_|_|_|__,|_|_|__,|_  |___|_|  
+//                          |_|                                    |_|                                           |___|
 
 interface EditOperation
 {
@@ -605,8 +625,7 @@ class UndoManager
     }
 
     /**
-     * Force-flush pending operations into an undo step.
-     * Call this before undo, or before non-typing operations (Enter, paste, etc.)
+     * Force-flush pending operations into a final undo step.
      */
     flush(): void
     {
@@ -694,7 +713,11 @@ class UndoManager
     }
 }
 
-// ─── Cursor & Selection ─────────────────────────────────────────────
+//  _____                        _| |_    _____     _         _   _         
+// |     |_ _ ___ ___ ___ ___   |   __|  |   __|___| |___ ___| |_|_|___ ___ 
+// |   --| | |  _|_ -| . |  _|  |   __|  |__   | -_| | -_|  _|  _| | . |   |
+// |_____|___|_| |___|___|_|    |_   _|  |_____|___|_|___|___|_| |_|___|_|_|
+//                                |_|
 
 interface CursorPosition
 {
@@ -749,14 +772,14 @@ class CursorSet
     }
 
     /**
-     * Set a single cursor position, clearing all secondary cursors and selections.
+     * Set a single cursor position. Clears all secondary cursors and selections.
      */
     set( line: number, col: number ): void
     {
         this.cursors = [ { anchor: { line, col }, head: { line, col } } ];
     }
 
-    // ── Movement ──
+    // Movement:
 
     moveLeft( doc: CodeDocument, selecting: boolean = false ): void
     {
@@ -892,7 +915,7 @@ class CursorSet
         } ];
     }
 
-    // ── Multi-cursor ──
+    // Multi-cursor:
 
     addCursor( line: number, col: number ): void
     {
@@ -905,7 +928,7 @@ class CursorSet
         this.cursors = [ this.cursors[0] ];
     }
 
-    // ── Queries ──
+    // Queries:
 
     hasSelection( index: number = 0 ): boolean
     {
@@ -940,8 +963,6 @@ class CursorSet
     {
         return this.cursors.map( s => ( { ...s.head } ) );
     }
-
-    // ── Private ──
 
     private _moveHead( sel: Selection, doc: CodeDocument, dx: number, _dy: number, selecting: boolean ): void
     {
@@ -1029,7 +1050,887 @@ class CursorSet
     }
 }
 
-// ─── Exports ────────────────────────────────────────────────────────
+//  _____       _     _____   _ _ _              ____  _____ _____ 
+// |     |___ _| |___|   __|_| |_| |_ ___ ___   |    \|     |     |
+// |   --| . | . | -_|   __| . | |  _| . |  _|  |  |  |  |  | | | |
+// |_____|___|___|___|_____|___|_|_| |___|_|    |____/|_____|_|_|_|
 
-export { Tokenizer, CodeDocument, UndoManager, CursorSet };
-export type { Token, TokenRule, TokenizerState, TokenizeResult, LanguageDef, EditOperation, CursorPosition, Selection };
+const g = globalThis as any;
+const TOKEN_CLASS_MAP: Record<string, string> = {
+    'keyword':      'cm-kwd',
+    'statement':    'cm-std',
+    'type':         'cm-typ',
+    'builtin':      'cm-bln',
+    'string':       'cm-str',
+    'comment':      'cm-com',
+    'number':       'cm-dec',
+    'method':       'cm-mtd',
+    'symbol':       'cm-sym',
+    'enum':         'cm-enu',
+    'preprocessor': 'cm-ppc',
+    'variable':     'cm-var',
+};
+
+const Area = LX.Area;
+
+interface CodeEditorOptions
+{
+    highlight?: string;
+}
+
+/**
+ * @class CodeEditor
+ * The main editor class. Wires Document, Tokenizer, CursorSet, UndoManager
+ * together with the DOM.
+ */
+export class CodeEditor
+{
+    static __instances: CodeEditor[] = [];
+
+    doc: CodeDocument;
+    cursorSet: CursorSet;
+    undoManager: UndoManager;
+    language: LanguageDef;
+
+    // DOM:
+    area: typeof Area;
+    baseArea: typeof Area;
+    codeArea: typeof Area;
+    root: HTMLElement;
+    codeScroller: HTMLElement;
+    codeSizer: HTMLElement;
+    codeContainer: HTMLElement;
+    cursorsLayer: HTMLElement;
+    selectionsLayer: HTMLElement;
+
+    // Measurements:
+    charWidth: number = 0;
+    lineHeight: number = 0;
+    xPadding: number = 0;  // left padding in pixels
+
+    // State:
+    private _lineStates: TokenizerState[] = [];   // tokenizer state at end of each line
+    private _lineElements: HTMLElement[] = [];      // <pre> element per line
+    private _focused: boolean = false;
+    private _blinkerInterval: ReturnType<typeof setInterval> | null = null;
+    private _cursorVisible: boolean = true;
+    private _cursorBlinkRate: number = 550;
+
+    constructor( area: typeof Area, options: CodeEditorOptions = {} )
+    {
+        g.editor = this;
+
+        CodeEditor.__instances.push( this );
+
+        this.doc = new CodeDocument();
+        this.cursorSet = new CursorSet();
+        this.undoManager = new UndoManager();
+
+        const langName = options.highlight ?? 'Plain Text';
+        this.language = Tokenizer.getLanguage( langName ) ?? Tokenizer.getLanguage( 'Plain Text' )!;
+
+        // Full editor
+        area.root.className = LX.mergeClass( area.root.className, 'codebasearea flex relative bg-card' );
+
+        this.baseArea = area;
+        this.area = new LX.Area( { className: 'lexcodeeditor outline-none overflow-hidden size-full select-none bg-inherit', skipAppend: true } );
+        this.codeArea = new LX.Area( { className: 'lexcodearea scrollbar-hidden', skipAppend: true } );
+        this.area.attach( this.codeArea );
+
+        this.root = this.area.root;
+        this.root.tabIndex = -1;
+        area.attach( this.root );
+
+        // Add code-sizer, which will have the code elements
+        this.codeScroller = this.codeArea.root;
+        this.codeSizer = LX.makeElement( 'div', 'code-sizer pseudoparent-tabs', null, this.codeScroller );
+
+        // Cursors and selections
+        this.cursorsLayer = LX.makeElement( 'div', 'cursors', null, this.codeSizer );
+        this.selectionsLayer = LX.makeElement( 'div', 'selections', null, this.codeSizer );
+
+        // Starter code container
+        this.codeContainer = document.createElement( 'div' );
+        this.codeSizer.appendChild( this.codeContainer );
+
+        this._measureChar();
+
+        // Events:
+        this.root.addEventListener( 'keydown', this._onKeyDown.bind( this ) );
+        this.root.addEventListener( 'mousedown', this._onMouseDown.bind( this ) );
+        this.root.addEventListener( 'focus', () => this._setFocused( true ) );
+        this.root.addEventListener( 'focusout', () => this._setFocused( false ) );
+
+        // Initial render
+        this._renderAllLines();
+        this._renderCursors();
+    }
+
+    setText( text: string ): void
+    {
+        this.doc.setText( text );
+        this.cursorSet.set( 0, 0 );
+        this.undoManager.clear();
+        this._lineStates = [];
+        this._renderAllLines();
+        this._renderCursors();
+        this._renderSelections();
+    }
+
+    getText(): string
+    {
+        return this.doc.getText();
+    }
+
+    setLanguage( name: string ): void
+    {
+        const lang = Tokenizer.getLanguage( name );
+        if ( lang )
+        {
+            this.language = lang;
+            this._lineStates = [];
+            this._renderAllLines();
+        }
+    }
+
+    focus(): void
+    {
+        this.root.focus();
+    }
+
+    private _measureChar(): void
+    {
+        const parentContainer = LX.makeContainer( null, 'lexcodeeditor', '', document.body );
+        const container = LX.makeContainer( null, 'code', '', parentContainer );
+        const line = document.createElement( 'pre' );
+        container.appendChild( line );
+        const measurer = document.createElement( 'span' );
+        measurer.className = 'codechar';
+        measurer.style.visibility = 'hidden';
+        measurer.textContent = 'M';
+        line.appendChild( measurer );
+
+        // Use requestAnimationFrame to ensure the element is rendered
+        requestAnimationFrame( () =>
+        {
+            const rect = measurer.getBoundingClientRect();
+            this.charWidth = rect.width || 7;
+            this.lineHeight = parseFloat( getComputedStyle( this.root ).getPropertyValue( '--code-editor-row-height' ) ) || 20;
+            LX.deleteElement( parentContainer );
+
+            // Re-render cursors with correct measurements
+            this._renderCursors();
+            this._renderSelections();
+        } );
+    }
+
+    /**
+     * Tokenize a line and return its innerHTML with syntax highlighting spans.
+     */
+    private _tokenizeLine( lineIndex: number ): { html: string; endState: TokenizerState }
+    {
+        const prevState = lineIndex > 0
+            ? ( this._lineStates[ lineIndex - 1 ] ?? Tokenizer.initialState() )
+            : Tokenizer.initialState();
+
+        const lineText = this.doc.getLine( lineIndex );
+        const result = Tokenizer.tokenizeLine( lineText, this.language, prevState );
+
+        // Build HTML
+        const langClass = this.language.name.toLowerCase().replace( /[^a-z]/g, '' );
+        let html = '';
+        for ( const token of result.tokens )
+        {
+            const cls = TOKEN_CLASS_MAP[ token.type ];
+            const escaped = token.value
+                .replace( /&/g, '&amp;' )
+                .replace( /</g, '&lt;' )
+                .replace( />/g, '&gt;' );
+            if ( cls )
+            {
+                html += `<span class="${cls} ${langClass}">${escaped}</span>`;
+            }
+            else
+            {
+                html += escaped;
+            }
+        }
+
+        return { html: html || '&nbsp;', endState: result.state };
+    }
+
+    /**
+     * Render all lines from scratch.
+     */
+    private _renderAllLines(): void
+    {
+        this.codeContainer.innerHTML = '';
+        this._lineElements = [];
+        this._lineStates = [];
+
+        for ( let i = 0; i < this.doc.lineCount; i++ )
+        {
+            this._appendLineElement( i );
+        }
+    }
+
+    /**
+     * Create and append a <pre> element for a line.
+     */
+    private _appendLineElement( lineIndex: number ): void
+    {
+        const { html, endState } = this._tokenizeLine( lineIndex );
+        this._lineStates[ lineIndex ] = endState;
+
+        const pre = document.createElement( 'pre' );
+        pre.innerHTML = html;
+        this.codeContainer.appendChild( pre );
+        this._lineElements[ lineIndex ] = pre;
+    }
+
+    /**
+     * Re-render a single line's content (after editing).
+     */
+    private _updateLine( lineIndex: number ): void
+    {
+        const { html, endState } = this._tokenizeLine( lineIndex );
+        const oldState = this._lineStates[ lineIndex ];
+        this._lineStates[ lineIndex ] = endState;
+
+        if ( this._lineElements[ lineIndex ] )
+        {
+            this._lineElements[ lineIndex ].innerHTML = html;
+        }
+
+        // If the tokenizer state changed (e.g. opened/closed a block comment),
+        // re-render subsequent lines until states stabilize
+        if ( !this._statesEqual( oldState, endState ) )
+        {
+            for ( let i = lineIndex + 1; i < this.doc.lineCount; i++ )
+            {
+                const { html: nextHtml, endState: nextEnd } = this._tokenizeLine( i );
+                const nextOld = this._lineStates[ i ];
+                this._lineStates[ i ] = nextEnd;
+                if ( this._lineElements[ i ] )
+                {
+                    this._lineElements[ i ].innerHTML = nextHtml;
+                }
+                if ( this._statesEqual( nextOld, nextEnd ) ) break;
+            }
+        }
+    }
+
+    /**
+     * Rebuild line elements after structural changes (insert/delete lines).
+     */
+    private _rebuildLines(): void
+    {
+        // Diff: if count matches, just update content; otherwise full rebuild.
+        if ( this._lineElements.length === this.doc.lineCount )
+        {
+            for ( let i = 0; i < this.doc.lineCount; i++ )
+            {
+                this._updateLine( i );
+            }
+        }
+        else
+        {
+            this._renderAllLines();
+        }
+    }
+
+    private _statesEqual( a: TokenizerState | undefined, b: TokenizerState ): boolean
+    {
+        if ( !a ) return false;
+        if ( a.stack.length !== b.stack.length ) return false;
+        for ( let i = 0; i < a.stack.length; i++ )
+        {
+            if ( a.stack[i] !== b.stack[i] ) return false;
+        }
+        return true;
+    }
+
+    private _updateActiveLine(): void
+    {
+        const hasSelection = this.cursorSet.hasSelection();
+        const activeLine = this.cursorSet.getPrimary().head.line;
+        for ( let i = 0; i < this._lineElements.length; i++ )
+        {
+            this._lineElements[i].classList.toggle( 'active-line', !hasSelection && i === activeLine );
+        }
+    }
+
+    private _renderCursors(): void
+    {
+        this.cursorsLayer.innerHTML = '';
+
+        for ( const sel of this.cursorSet.cursors )
+        {
+            const el = document.createElement( 'div' );
+            el.className = 'cursor';
+            el.innerHTML = '&nbsp;';
+            el.style.left = ( sel.head.col * this.charWidth + this.xPadding ) + 'px';
+            el.style.top = ( sel.head.line * this.lineHeight ) + 'px';
+            this.cursorsLayer.appendChild( el );
+        }
+
+        this._updateActiveLine();
+    }
+
+    private _renderSelections(): void
+    {
+        this.selectionsLayer.innerHTML = '';
+
+        for ( const sel of this.cursorSet.cursors )
+        {
+            if ( selectionIsEmpty( sel ) ) continue;
+
+            const start = selectionStart( sel );
+            const end = selectionEnd( sel );
+
+            for ( let line = start.line; line <= end.line; line++ )
+            {
+                const lineText = this.doc.getLine( line );
+                const fromCol = line === start.line ? start.col : 0;
+                const toCol = line === end.line ? end.col : lineText.length;
+
+                if ( fromCol === toCol ) continue;
+
+                const div = document.createElement( 'div' );
+                div.className = 'lexcodeselection';
+                div.style.top = ( line * this.lineHeight ) + 'px';
+                div.style.left = ( fromCol * this.charWidth + this.xPadding ) + 'px';
+                div.style.width = ( ( toCol - fromCol ) * this.charWidth ) + 'px';
+                this.selectionsLayer.appendChild( div );
+            }
+        }
+    }
+
+    private _setFocused( focused: boolean ): void
+    {
+        this._focused = focused;
+
+        if ( focused )
+        {
+            this.cursorsLayer.classList.add( 'show' );
+            this.selectionsLayer.classList.add( 'show' );
+            this._startBlinker();
+        }
+        else
+        {
+            this.cursorsLayer.classList.remove( 'show' );
+            this.selectionsLayer.classList.remove( 'show' );
+            this._stopBlinker();
+        }
+    }
+
+    private _startBlinker(): void
+    {
+        this._stopBlinker();
+        this._cursorVisible = true;
+        this._setCursorVisibility( true );
+
+        this._blinkerInterval = setInterval( () =>
+        {
+            this._cursorVisible = !this._cursorVisible;
+            this._setCursorVisibility( this._cursorVisible );
+        }, this._cursorBlinkRate );
+    }
+
+    private _stopBlinker(): void
+    {
+        if ( this._blinkerInterval !== null )
+        {
+            clearInterval( this._blinkerInterval );
+            this._blinkerInterval = null;
+        }
+    }
+
+    private _resetBlinker(): void
+    {
+        if ( this._focused )
+        {
+            this._startBlinker();
+        }
+    }
+
+    private _setCursorVisibility( visible: boolean ): void
+    {
+        const cursors = this.cursorsLayer.querySelectorAll( '.cursor' );
+        for ( const c of cursors )
+        {
+            ( c as HTMLElement ).style.opacity = visible ? '0.6' : '0';
+        }
+    }
+
+    // Keyboard input events:
+
+    private _onKeyDown( e: KeyboardEvent ): void
+    {
+        // Ignore modifier-only presses
+        if ( [ 'Control', 'Shift', 'Alt', 'Meta' ].includes( e.key ) ) return;
+
+        const ctrl = e.ctrlKey || e.metaKey;
+        const shift = e.shiftKey;
+
+        if ( ctrl )
+        {
+            switch ( e.key.toLowerCase() )
+            {
+                case 'a':
+                    e.preventDefault();
+                    this.cursorSet.selectAll( this.doc );
+                    this._afterCursorMove();
+                    return;
+                case 'z':
+                    e.preventDefault();
+                    this._doUndo();
+                    return;
+                case 'y':
+                    e.preventDefault();
+                    this._doRedo();
+                    return;
+                case 'c':
+                    e.preventDefault();
+                    this._doCopy();
+                    return;
+                case 'x':
+                    e.preventDefault();
+                    this._doCut();
+                    return;
+                case 'v':
+                    e.preventDefault();
+                    this._doPaste();
+                    return;
+            }
+        }
+
+        switch ( e.key )
+        {
+            case 'ArrowLeft':
+                e.preventDefault();
+                if ( ctrl ) this.cursorSet.moveWordLeft( this.doc, shift );
+                else this.cursorSet.moveLeft( this.doc, shift );
+                this._afterCursorMove();
+                return;
+            case 'ArrowRight':
+                e.preventDefault();
+                if ( ctrl ) this.cursorSet.moveWordRight( this.doc, shift );
+                else this.cursorSet.moveRight( this.doc, shift );
+                this._afterCursorMove();
+                return;
+            case 'ArrowUp':
+                e.preventDefault();
+                this.cursorSet.moveUp( this.doc, shift );
+                this._afterCursorMove();
+                return;
+            case 'ArrowDown':
+                e.preventDefault();
+                this.cursorSet.moveDown( this.doc, shift );
+                this._afterCursorMove();
+                return;
+            case 'Home':
+                e.preventDefault();
+                this.cursorSet.moveToLineStart( this.doc, shift );
+                this._afterCursorMove();
+                return;
+            case 'End':
+                e.preventDefault();
+                this.cursorSet.moveToLineEnd( this.doc, shift );
+                this._afterCursorMove();
+                return;
+            case 'Escape':
+                e.preventDefault();
+                this.cursorSet.removeSecondaryCursors();
+                // Collapse selection
+                const h = this.cursorSet.getPrimary().head;
+                this.cursorSet.set( h.line, h.col );
+                this._afterCursorMove();
+                return;
+        }
+
+        switch ( e.key )
+        {
+            case 'Backspace':
+                e.preventDefault();
+                this._doBackspace( ctrl );
+                return;
+            case 'Delete':
+                e.preventDefault();
+                this._doDelete( ctrl );
+                return;
+            case 'Enter':
+                e.preventDefault();
+                this._doEnter();
+                return;
+            case 'Tab':
+                e.preventDefault();
+                this._doTab( shift );
+                return;
+        }
+
+        if ( e.key.length === 1 && !ctrl )
+        {
+            e.preventDefault();
+            this._doInsertChar( e.key );
+        }
+    }
+
+    private _doInsertChar( char: string ): void
+    {
+        this._deleteSelectionIfAny();
+
+        const cursor = this.cursorSet.getPrimary();
+        const op = this.doc.insert( cursor.head.line, cursor.head.col, char );
+        this.undoManager.record( op, this.cursorSet.getCursorPositions() );
+
+        this.cursorSet.set( cursor.head.line, cursor.head.col + 1 );
+        this._updateLine( cursor.head.line );
+        this._afterCursorMove();
+    }
+
+    private _doBackspace( ctrlKey: boolean ): void
+    {
+        // If there's a selection, delete it
+        if ( this.cursorSet.hasSelection() )
+        {
+            this._deleteSelectionIfAny();
+            this._rebuildLines();
+            this._afterCursorMove();
+            return;
+        }
+
+        const cursor = this.cursorSet.getPrimary();
+        const { line, col } = cursor.head;
+
+        if ( line === 0 && col === 0 ) return;
+
+        this.undoManager.flush();
+
+        if ( col === 0 )
+        {
+            // Merge with previous line
+            const prevLineLen = this.doc.getLine( line - 1 ).length;
+            const op = this.doc.delete( line - 1, prevLineLen, 1 ); // delete the newline
+            this.undoManager.record( op, this.cursorSet.getCursorPositions() );
+            this.cursorSet.set( line - 1, prevLineLen );
+            this._rebuildLines();
+        }
+        else if ( ctrlKey )
+        {
+            // Delete word left
+            const [ word, from ] = this.doc.getWordAt( line, col - 1 );
+            const deleteFrom = word.length > 0 ? from : col - 1;
+            const deleteLen = col - deleteFrom;
+            const op = this.doc.delete( line, deleteFrom, deleteLen );
+            this.undoManager.record( op, this.cursorSet.getCursorPositions() );
+            this.cursorSet.set( line, deleteFrom );
+            this._updateLine( line );
+        }
+        else
+        {
+            const op = this.doc.delete( line, col - 1, 1 );
+            this.undoManager.record( op, this.cursorSet.getCursorPositions() );
+            this.cursorSet.set( line, col - 1 );
+            this._updateLine( line );
+        }
+
+        this._afterCursorMove();
+    }
+
+    private _doDelete( ctrlKey: boolean ): void
+    {
+        if ( this.cursorSet.hasSelection() )
+        {
+            this._deleteSelectionIfAny();
+            this._rebuildLines();
+            this._afterCursorMove();
+            return;
+        }
+
+        const cursor = this.cursorSet.getPrimary();
+        const { line, col } = cursor.head;
+        const lineText = this.doc.getLine( line );
+
+        if ( col >= lineText.length && line >= this.doc.lineCount - 1 ) return;
+
+        this.undoManager.flush();
+
+        if ( col >= lineText.length )
+        {
+            // Merge with next line
+            const op = this.doc.delete( line, col, 1 ); // delete the newline
+            this.undoManager.record( op, this.cursorSet.getCursorPositions() );
+            this._rebuildLines();
+        }
+        else if ( ctrlKey )
+        {
+            // Delete word right
+            const [ word, , end ] = this.doc.getWordAt( line, col );
+            const deleteLen = word.length > 0 ? end - col : 1;
+            const op = this.doc.delete( line, col, deleteLen );
+            this.undoManager.record( op, this.cursorSet.getCursorPositions() );
+            this._updateLine( line );
+        }
+        else
+        {
+            const op = this.doc.delete( line, col, 1 );
+            this.undoManager.record( op, this.cursorSet.getCursorPositions() );
+            this._updateLine( line );
+        }
+
+        this._afterCursorMove();
+    }
+
+    private _doEnter(): void
+    {
+        this._deleteSelectionIfAny();
+        this.undoManager.flush();
+
+        const cursor = this.cursorSet.getPrimary();
+        const { line, col } = cursor.head;
+
+        // Get current line's indentation
+        const indent = this.doc.getIndent( line );
+        const spaces = ' '.repeat( indent );
+
+        // Split line at cursor
+        const op = this.doc.insert( line, col, '\n' + spaces );
+        this.undoManager.record( op, this.cursorSet.getCursorPositions() );
+
+        this.cursorSet.set( line + 1, indent );
+        this._rebuildLines();
+        this._afterCursorMove();
+    }
+
+    private _doTab( shift: boolean ): void
+    {
+        this.undoManager.flush();
+
+        const cursor = this.cursorSet.getPrimary();
+        const { line, col } = cursor.head;
+
+        if ( shift )
+        {
+            // Dedent: remove up to tabSpaces spaces from start
+            const lineText = this.doc.getLine( line );
+            let spacesToRemove = 0;
+            const tabSpaces = 4;
+            while ( spacesToRemove < tabSpaces && spacesToRemove < lineText.length && lineText[spacesToRemove] === ' ' )
+            {
+                spacesToRemove++;
+            }
+            if ( spacesToRemove > 0 )
+            {
+                const op = this.doc.delete( line, 0, spacesToRemove );
+                this.undoManager.record( op, this.cursorSet.getCursorPositions() );
+                this.cursorSet.set( line, Math.max( 0, col - spacesToRemove ) );
+                this._updateLine( line );
+            }
+        }
+        else
+        {
+            const tabSpaces = 4;
+            const spacesToAdd = tabSpaces - ( col % tabSpaces );
+            const spaces = ' '.repeat( spacesToAdd );
+            const op = this.doc.insert( line, col, spaces );
+            this.undoManager.record( op, this.cursorSet.getCursorPositions() );
+            this.cursorSet.set( line, col + spacesToAdd );
+            this._updateLine( line );
+        }
+
+        this._afterCursorMove();
+    }
+
+    private _deleteSelectionIfAny(): void
+    {
+        if ( !this.cursorSet.hasSelection() ) return;
+
+        const sel = this.cursorSet.getPrimary();
+        const start = selectionStart( sel );
+
+        this.undoManager.flush();
+
+        // Calculate total text length to delete
+        const selectedText = this.cursorSet.getSelectedText( this.doc );
+        const op = this.doc.delete( start.line, start.col, selectedText.length );
+        this.undoManager.record( op, this.cursorSet.getCursorPositions() );
+
+        this.cursorSet.set( start.line, start.col );
+        this._rebuildLines();
+    }
+
+    // Clipboard helpers:
+
+    private _doCopy(): void
+    {
+        const text = this.cursorSet.getSelectedText( this.doc );
+        if ( text )
+        {
+            navigator.clipboard.writeText( text );
+        }
+    }
+
+    private _doCut(): void
+    {
+        const text = this.cursorSet.getSelectedText( this.doc );
+        if ( text )
+        {
+            navigator.clipboard.writeText( text );
+            this._deleteSelectionIfAny();
+            this._rebuildLines();
+            this._afterCursorMove();
+        }
+    }
+
+    private async _doPaste(): Promise<void>
+    {
+        const text = await navigator.clipboard.readText();
+        if ( !text ) return;
+
+        this._deleteSelectionIfAny();
+
+        const cursor = this.cursorSet.getPrimary();
+        this.undoManager.flush();
+        const op = this.doc.insert( cursor.head.line, cursor.head.col, text );
+        this.undoManager.record( op, this.cursorSet.getCursorPositions() );
+
+        // Calculate new cursor position after paste
+        const lines = text.split( '\n' );
+        if ( lines.length === 1 )
+        {
+            this.cursorSet.set( cursor.head.line, cursor.head.col + text.length );
+        }
+        else
+        {
+            this.cursorSet.set(
+                cursor.head.line + lines.length - 1,
+                lines[ lines.length - 1 ].length
+            );
+        }
+
+        this._rebuildLines();
+        this._afterCursorMove();
+    }
+
+    // Undo/Redo:
+
+    private _doUndo(): void
+    {
+        const result = this.undoManager.undo( this.doc );
+        if ( result )
+        {
+            if ( result.cursors.length > 0 )
+            {
+                const c = result.cursors[0];
+                this.cursorSet.set( c.line, c.col );
+            }
+            this._rebuildLines();
+            this._afterCursorMove();
+        }
+    }
+
+    private _doRedo(): void
+    {
+        const result = this.undoManager.redo( this.doc );
+        if ( result )
+        {
+            if ( result.cursors.length > 0 )
+            {
+                const c = result.cursors[0];
+                this.cursorSet.set( c.line, c.col );
+            }
+            this._rebuildLines();
+            this._afterCursorMove();
+        }
+    }
+
+    // Mouse input events:
+
+    private _onMouseDown( e: MouseEvent ): void
+    {
+        if ( e.button !== 0 ) return;
+
+        // Calculate line and column from click position
+        const rect = this.codeContainer.getBoundingClientRect();
+        const x = e.clientX - rect.left - this.xPadding;
+        const y = e.clientY - rect.top;
+
+        const line = Math.max( 0, Math.min( Math.floor( y / this.lineHeight ), this.doc.lineCount - 1 ) );
+        const col = Math.max( 0, Math.min( Math.round( x / this.charWidth ), this.doc.getLine( line ).length ) );
+
+        if ( e.shiftKey )
+        {
+            // Extend selection
+            const sel = this.cursorSet.getPrimary();
+            sel.head = { line, col };
+        }
+        else
+        {
+            this.cursorSet.set( line, col );
+        }
+
+        this._afterCursorMove();
+        this.root.focus();
+
+        // Track mouse for drag selection
+        const onMouseMove = ( me: MouseEvent ) =>
+        {
+            const mx = me.clientX - rect.left - this.xPadding;
+            const my = me.clientY - rect.top;
+            const ml = Math.max( 0, Math.min( Math.floor( my / this.lineHeight ), this.doc.lineCount - 1 ) );
+            const mc = Math.max( 0, Math.min( Math.round( mx / this.charWidth ), this.doc.getLine( ml ).length ) );
+
+            const sel = this.cursorSet.getPrimary();
+            sel.head = { line: ml, col: mc };
+            this._renderCursors();
+            this._renderSelections();
+        };
+
+        const onMouseUp = () =>
+        {
+            document.removeEventListener( 'mousemove', onMouseMove );
+            document.removeEventListener( 'mouseup', onMouseUp );
+        };
+
+        document.addEventListener( 'mousemove', onMouseMove );
+        document.addEventListener( 'mouseup', onMouseUp );
+    }
+
+    private _afterCursorMove(): void
+    {
+        this._renderCursors();
+        this._renderSelections();
+        this._resetBlinker();
+        this._scrollCursorIntoView();
+    }
+
+    private _scrollCursorIntoView(): void
+    {
+        const cursor = this.cursorSet.getPrimary().head;
+        const top = cursor.line * this.lineHeight;
+        const left = cursor.col * this.charWidth + this.xPadding;
+
+        // Vertical scroll
+        if ( top < this.codeArea.scrollTop )
+        {
+            this.codeArea.scrollTop = top;
+        }
+        else if ( top + this.lineHeight > this.codeArea.scrollTop + this.codeArea.clientHeight )
+        {
+            this.codeArea.scrollTop = top + this.lineHeight - this.codeArea.clientHeight;
+        }
+
+        // Horizontal scroll
+        if ( left < this.codeArea.scrollLeft )
+        {
+            this.codeArea.scrollLeft = left;
+        }
+        else if ( left > this.codeArea.scrollLeft + this.codeArea.clientWidth - 20 )
+        {
+            this.codeArea.scrollLeft = left - this.codeArea.clientWidth + 40;
+        }
+    }
+}
+
+( LX as any ).CodeEditor = CodeEditor;
