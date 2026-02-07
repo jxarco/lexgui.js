@@ -546,6 +546,13 @@ class CodeDocument
         return { type: 'delete', line: Math.max( line - 1, 0 ), col: line > 0 ? ( this._lines[ line - 1 ]?.length ?? 0 ) : 0, text: '\n' + text };
     }
 
+    replaceLine( line: number, newText: string ): EditOperation
+    {
+        const oldText = this._lines[ line ];
+        this._lines[ line ] = newText;
+        return { type: 'replaceLine', line, col: 0, text: newText, oldText };
+    }
+
     /**
      * Apply an edit operation (used by undo/redo).
      */
@@ -554,6 +561,10 @@ class CodeDocument
         if ( op.type === 'insert' )
         {
             return this.delete( op.line, op.col, op.text.length );
+        }
+        else if ( op.type === 'replaceLine' )
+        {
+            return this.replaceLine( op.line, op.oldText! );
         }
         else
         {
@@ -570,10 +581,11 @@ class CodeDocument
 
 interface EditOperation
 {
-    type: 'insert' | 'delete';
+    type: 'insert' | 'delete' | 'replaceLine';
     line: number;
     col: number;
     text: string;
+    oldText?: string; // used by replaceLine to store previous content
 }
 
 interface UndoEntry
@@ -817,14 +829,14 @@ class CursorSet
         this._merge();
     }
 
-    moveToLineStart( doc: CodeDocument, selecting: boolean = false ): void
+    moveToLineStart( doc: CodeDocument, selecting: boolean = false, noIndent: boolean = false ): void
     {
         for ( const sel of this.cursors )
         {
             const line = sel.head.line;
             const indent = doc.getIndent( line );
             // Toggle between indent and column 0
-            const targetCol = sel.head.col === indent ? 0 : indent;
+            const targetCol = ( sel.head.col === indent || noIndent ) ? 0 : indent;
             sel.head = { line, col: targetCol };
             if ( !selecting ) sel.anchor = { ...sel.head };
         }
@@ -1102,11 +1114,12 @@ export class CodeEditor
     codeContainer: HTMLElement;
     cursorsLayer: HTMLElement;
     selectionsLayer: HTMLElement;
+    lineGutter: HTMLElement;
 
     // Measurements:
     charWidth: number = 0;
     lineHeight: number = 0;
-    xPadding: number = 0;  // left padding in pixels
+    xPadding: number = 48;  // left padding in pixels
 
     // State:
     private _lineStates: TokenizerState[] = [];   // tokenizer state at end of each line
@@ -1134,24 +1147,25 @@ export class CodeEditor
 
         this.baseArea = area;
         this.area = new LX.Area( { className: 'lexcodeeditor outline-none overflow-hidden size-full select-none bg-inherit', skipAppend: true } );
-        this.codeArea = new LX.Area( { className: 'lexcodearea scrollbar-hidden', skipAppend: true } );
+        this.codeArea = new LX.Area( { className: 'lexcodearea scrollbar-hidden flex flex-row', skipAppend: true } );
         this.area.attach( this.codeArea );
 
         this.root = this.area.root;
         this.root.tabIndex = -1;
         area.attach( this.root );
 
-        // Add code-sizer, which will have the code elements
         this.codeScroller = this.codeArea.root;
-        this.codeSizer = LX.makeElement( 'div', 'code-sizer pseudoparent-tabs', null, this.codeScroller );
+        // Add Line numbers gutter, only the container, line numbers are in the same line div
+        this.lineGutter = LX.makeElement( 'div', 'lexcodegutter', null, this.codeScroller );
+        // Add code sizer, which will have the code elements
+        this.codeSizer = LX.makeElement( 'div', 'w-full', null, this.codeScroller );
 
         // Cursors and selections
         this.cursorsLayer = LX.makeElement( 'div', 'cursors', null, this.codeSizer );
         this.selectionsLayer = LX.makeElement( 'div', 'selections', null, this.codeSizer );
 
         // Starter code container
-        this.codeContainer = document.createElement( 'div' );
-        this.codeSizer.appendChild( this.codeContainer );
+        this.codeContainer = LX.makeElement( 'div', 'code', null, this.codeSizer );
 
         this._measureChar();
 
@@ -1275,6 +1289,14 @@ export class CodeEditor
     }
 
     /**
+     * Gets the html for the line gutter.
+     */
+    private _getGutterHtml( lineIndex: number ): string
+    {
+        return `<span class="line-gutter">${lineIndex + 1}</span>`;
+    }
+
+    /**
      * Create and append a <pre> element for a line.
      */
     private _appendLineElement( lineIndex: number ): void
@@ -1283,7 +1305,7 @@ export class CodeEditor
         this._lineStates[ lineIndex ] = endState;
 
         const pre = document.createElement( 'pre' );
-        pre.innerHTML = html;
+        pre.innerHTML = this._getGutterHtml( lineIndex ) + html;
         this.codeContainer.appendChild( pre );
         this._lineElements[ lineIndex ] = pre;
     }
@@ -1299,7 +1321,7 @@ export class CodeEditor
 
         if ( this._lineElements[ lineIndex ] )
         {
-            this._lineElements[ lineIndex ].innerHTML = html;
+            this._lineElements[ lineIndex ].innerHTML = this._getGutterHtml( lineIndex ) + html;
         }
 
         // If the tokenizer state changed (e.g. opened/closed a block comment),
@@ -1472,6 +1494,7 @@ export class CodeEditor
 
         const ctrl = e.ctrlKey || e.metaKey;
         const shift = e.shiftKey;
+        const alt = e.altKey;
 
         if ( ctrl )
         {
@@ -1521,11 +1544,15 @@ export class CodeEditor
                 return;
             case 'ArrowUp':
                 e.preventDefault();
+                if ( alt && shift ) { this._duplicateLine( -1 ); return; }
+                if ( alt ) { this._swapLine( -1 ); return; }
                 this.cursorSet.moveUp( this.doc, shift );
                 this._afterCursorMove();
                 return;
             case 'ArrowDown':
                 e.preventDefault();
+                if ( alt && shift ) { this._duplicateLine( 1 ); return; }
+                if ( alt ) { this._swapLine( 1 ); return; }
                 this.cursorSet.moveDown( this.doc, shift );
                 this._afterCursorMove();
                 return;
@@ -1778,9 +1805,70 @@ export class CodeEditor
         {
             navigator.clipboard.writeText( text );
             this._deleteSelectionIfAny();
-            this._rebuildLines();
-            this._afterCursorMove();
         }
+        else
+        {
+            const cursor = this.cursorSet.getPrimary();
+            const line = cursor.head.line;
+            const lineText = this.doc.getLine( line );
+            const isLastLine = line === this.doc.lineCount - 1;
+
+            navigator.clipboard.writeText( lineText + ( isLastLine ? '' : '\n' ) );
+
+            this.undoManager.flush();
+            const op = this.doc.removeLine( line );
+            this.undoManager.record( op, this.cursorSet.getCursorPositions() );
+
+            // Place cursor at col 0 of the resulting line
+            const newLine = Math.min( line, this.doc.lineCount - 1 );
+            cursor.head = { line: newLine, col: 0 };
+            cursor.anchor = { ...cursor.head };
+        }
+
+        this._rebuildLines();
+        this._afterCursorMove();
+    }
+
+    private _swapLine( dir: -1 | 1 ): void
+    {
+        const cursor = this.cursorSet.getPrimary();
+        const line = cursor.head.line;
+        const targetLine = line + dir;
+
+        if ( targetLine < 0 || targetLine >= this.doc.lineCount ) return;
+
+        const currentText = this.doc.getLine( line );
+        const targetText = this.doc.getLine( targetLine );
+
+        this.undoManager.flush();
+        const op1 = this.doc.replaceLine( line, targetText );
+        this.undoManager.record( op1, this.cursorSet.getCursorPositions() );
+        const op2 = this.doc.replaceLine( targetLine, currentText );
+        this.undoManager.record( op2, this.cursorSet.getCursorPositions() );
+
+        cursor.head = { line: targetLine, col: cursor.head.col };
+        cursor.anchor = { ...cursor.head };
+
+        this._rebuildLines();
+        this._afterCursorMove();
+    }
+
+    private _duplicateLine( dir: -1 | 1 ): void
+    {
+        const cursor = this.cursorSet.getPrimary();
+        const line = cursor.head.line;
+        const text = this.doc.getLine( line );
+
+        this.undoManager.flush();
+        const op = this.doc.insertLine( line, text );
+        this.undoManager.record( op, this.cursorSet.getCursorPositions() );
+
+        const newLine = dir === 1 ? line + 1 : line;
+        cursor.head = { line: newLine, col: cursor.head.col };
+        cursor.anchor = { ...cursor.head };
+
+        this._rebuildLines();
+        this._afterCursorMove();
     }
 
     private async _doPaste(): Promise<void>
@@ -1912,23 +2000,23 @@ export class CodeEditor
         const left = cursor.col * this.charWidth + this.xPadding;
 
         // Vertical scroll
-        if ( top < this.codeArea.scrollTop )
+        if ( top < this.codeScroller.scrollTop )
         {
-            this.codeArea.scrollTop = top;
+            this.codeScroller.scrollTop = top;
         }
-        else if ( top + this.lineHeight > this.codeArea.scrollTop + this.codeArea.clientHeight )
+        else if ( top + this.lineHeight > this.codeScroller.scrollTop + this.codeScroller.clientHeight )
         {
-            this.codeArea.scrollTop = top + this.lineHeight - this.codeArea.clientHeight;
+            this.codeScroller.scrollTop = top + this.lineHeight - this.codeScroller.clientHeight;
         }
 
         // Horizontal scroll
-        if ( left < this.codeArea.scrollLeft )
+        if ( left < this.codeScroller.scrollLeft )
         {
-            this.codeArea.scrollLeft = left;
+            this.codeScroller.scrollLeft = left;
         }
-        else if ( left > this.codeArea.scrollLeft + this.codeArea.clientWidth - 20 )
+        else if ( left > this.codeScroller.scrollLeft + this.codeScroller.clientWidth - 20 )
         {
-            this.codeArea.scrollLeft = left - this.codeArea.clientWidth + 40;
+            this.codeScroller.scrollLeft = left - this.codeScroller.clientWidth + 40;
         }
     }
 }

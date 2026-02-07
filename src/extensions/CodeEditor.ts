@@ -2083,8 +2083,6 @@ export class CodeEditor
         // Extract info from the last code state
         const step = this.code.undoSteps.pop();
 
-        debugger;
-
         // Set old state lines
         this.code.lines = step.lines;
         this.processLines();

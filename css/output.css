@@ -6159,6 +6159,8 @@ ul.lexassetscontent {
   background-color: var(--secondary);
 }
 .lexcodeeditor .code {
+  width: max-content;
+  min-width: 100%;
   cursor: text;
   font-family: var(--global-code-font);
   font-feature-settings: "ss02", 'ss19', "ss20";
@@ -6233,10 +6235,9 @@ ul.lexassetscontent {
 .lexcodeeditor pre .line-gutter {
   width: 48px;
   height: var(--code-editor-row-height);
-  font-size: var(--code-editor-font-size);
-  font-weight: 400;
-  color: var(--muted-foreground);
   line-height: var(--code-editor-row-height);
+  font-size: calc(var(--code-editor-font-size) - 0.1rem);
+  color: var(--muted-foreground);
   text-align: center;
   -webkit-user-select: none;
   -moz-user-select: none;
