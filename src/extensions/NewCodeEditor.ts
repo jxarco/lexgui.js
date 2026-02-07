@@ -1130,6 +1130,9 @@ export class CodeEditor
     private _blinkerInterval: ReturnType<typeof setInterval> | null = null;
     private _cursorVisible: boolean = true;
     private _cursorBlinkRate: number = 550;
+    private _clickCount: number = 0;
+    private _lastClickTime: number = 0;
+    private _lastClickLine: number = -1;
 
     constructor( area: typeof Area, options: CodeEditorOptions = {} )
     {
@@ -2015,7 +2018,35 @@ export class CodeEditor
         const line = Math.max( 0, Math.min( Math.floor( y / this.lineHeight ), this.doc.lineCount - 1 ) );
         const col = Math.max( 0, Math.min( Math.round( x / this.charWidth ), this.doc.getLine( line ).length ) );
 
-        if ( e.shiftKey )
+        const now = Date.now();
+        if ( now - this._lastClickTime < 400 && line === this._lastClickLine )
+        {
+            this._clickCount = Math.min( this._clickCount + 1, 3 );
+        }
+        else
+        {
+            this._clickCount = 1;
+        }
+
+        this._lastClickTime = now;
+        this._lastClickLine = line;
+
+        // Triple click: select entire line
+        if ( this._clickCount === 3 )
+        {
+            const sel = this.cursorSet.getPrimary();
+            sel.anchor = { line, col: 0 };
+            sel.head = { line, col: this.doc.getLine( line ).length };
+        }
+        // Double click: select word
+        else if ( this._clickCount === 2 )
+        {
+            const [ , start, end ] = this.doc.getWordAt( line, col );
+            const sel = this.cursorSet.getPrimary();
+            sel.anchor = { line, col: start };
+            sel.head = { line, col: end };
+        }
+        else if ( e.shiftKey )
         {
             // Extend selection
             const sel = this.cursorSet.getPrimary();
