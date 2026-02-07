@@ -1115,6 +1115,7 @@ export class CodeEditor
     cursorsLayer: HTMLElement;
     selectionsLayer: HTMLElement;
     lineGutter: HTMLElement;
+    private _inputArea!: HTMLTextAreaElement;
 
     // Measurements:
     charWidth: number = 0;
@@ -1125,6 +1126,7 @@ export class CodeEditor
     private _lineStates: TokenizerState[] = [];   // tokenizer state at end of each line
     private _lineElements: HTMLElement[] = [];      // <pre> element per line
     private _focused: boolean = false;
+    private _composing: boolean = false;
     private _blinkerInterval: ReturnType<typeof setInterval> | null = null;
     private _cursorVisible: boolean = true;
     private _cursorBlinkRate: number = 550;
@@ -1151,7 +1153,6 @@ export class CodeEditor
         this.area.attach( this.codeArea );
 
         this.root = this.area.root;
-        this.root.tabIndex = -1;
         area.attach( this.root );
 
         this.codeScroller = this.codeArea.root;
@@ -1169,11 +1170,33 @@ export class CodeEditor
 
         this._measureChar();
 
+        // Hidden textarea for capturing keyboard input (dead keys, IME, etc.)
+        this._inputArea = LX.makeElement( 'textarea', 'absolute opacity-0 w-[1px] h-[1px] top-0 left-0 overflow-hidden resize-none', '', this.root );
+        this._inputArea.setAttribute( 'autocorrect', 'off' );
+        this._inputArea.setAttribute( 'autocapitalize', 'off' );
+        this._inputArea.setAttribute( 'spellcheck', 'false' );
+        this._inputArea.tabIndex = 0;
+
         // Events:
-        this.root.addEventListener( 'keydown', this._onKeyDown.bind( this ) );
+        this._inputArea.addEventListener( 'keydown', this._onKeyDown.bind( this ) );
+        this._inputArea.addEventListener( 'compositionstart', () => this._composing = true );
+        this._inputArea.addEventListener( 'compositionend', ( e: CompositionEvent ) => {
+            this._composing = false;
+            this._inputArea.value = '';
+            if ( e.data ) this._doInsertChar( e.data );
+        } );
+        this._inputArea.addEventListener( 'input', () => {
+            if ( this._composing ) return;
+            const val = this._inputArea.value;
+            if ( val )
+            {
+                this._inputArea.value = '';
+                this._doInsertChar( val );
+            }
+        } );
+        this._inputArea.addEventListener( 'focus', () => this._setFocused( true ) );
+        this._inputArea.addEventListener( 'blur', () => this._setFocused( false ) );
         this.root.addEventListener( 'mousedown', this._onMouseDown.bind( this ) );
-        this.root.addEventListener( 'focus', () => this._setFocused( true ) );
-        this.root.addEventListener( 'focusout', () => this._setFocused( false ) );
 
         // Initial render
         this._renderAllLines();
@@ -1209,7 +1232,7 @@ export class CodeEditor
 
     focus(): void
     {
-        this.root.focus();
+        this._inputArea.focus();
     }
 
     private _measureChar(): void
@@ -1335,7 +1358,7 @@ export class CodeEditor
                 this._lineStates[ i ] = nextEnd;
                 if ( this._lineElements[ i ] )
                 {
-                    this._lineElements[ i ].innerHTML = nextHtml;
+                    this._lineElements[ i ].innerHTML = this._getGutterHtml( lineIndex ) + nextHtml;
                 }
                 if ( this._statesEqual( nextOld, nextEnd ) ) break;
             }
@@ -1489,6 +1512,9 @@ export class CodeEditor
 
     private _onKeyDown( e: KeyboardEvent ): void
     {
+        // Ignore events during IME / dead key composition
+        if ( this._composing || e.key === 'Dead' ) return;
+
         // Ignore modifier-only presses
         if ( [ 'Control', 'Shift', 'Alt', 'Meta' ].includes( e.key ) ) return;
 
@@ -1603,8 +1629,17 @@ export class CodeEditor
         }
     }
 
+    private static readonly ENCLOSABLE_KEYS: Record<string, string> = { '"': '"', "'": "'", '`': '`', '(': ')', '{': '}', '[': ']' };
+
     private _doInsertChar( char: string ): void
     {
+        // Enclose selection if applicable
+        if ( char in CodeEditor.ENCLOSABLE_KEYS && this.cursorSet.hasSelection() )
+        {
+            this._encloseSelection( char, CodeEditor.ENCLOSABLE_KEYS[ char ] );
+            return;
+        }
+
         this._deleteSelectionIfAny();
 
         const cursor = this.cursorSet.getPrimary();
@@ -1613,6 +1648,38 @@ export class CodeEditor
 
         this.cursorSet.set( cursor.head.line, cursor.head.col + 1 );
         this._updateLine( cursor.head.line );
+        this._afterCursorMove();
+    }
+
+    private _encloseSelection( open: string, close: string ): void
+    {
+        const cursor = this.cursorSet.getPrimary();
+        const sel = cursor.anchor;
+        const head = cursor.head;
+
+        // Normalize selection (old invertIfNecessary)
+        const fromLine = sel.line < head.line || ( sel.line === head.line && sel.col < head.col ) ? sel : head;
+        const toLine = fromLine === sel ? head : sel;
+
+        // Only single-line selections for now
+        if ( fromLine.line !== toLine.line ) return;
+
+        const line = fromLine.line;
+        const from = fromLine.col;
+        const to = toLine.col;
+
+        this.undoManager.flush();
+
+        const op1 = this.doc.insert( line, from, open );
+        this.undoManager.record( op1, this.cursorSet.getCursorPositions() );
+        const op2 = this.doc.insert( line, to + 1, close );
+        this.undoManager.record( op2, this.cursorSet.getCursorPositions() );
+
+        // Keep selection on the enclosed word (shifted by 1)
+        cursor.anchor = { line, col: from + 1 };
+        cursor.head = { line, col: to + 1 };
+
+        this._updateLine( line );
         this._afterCursorMove();
     }
 
@@ -1938,6 +2005,7 @@ export class CodeEditor
     private _onMouseDown( e: MouseEvent ): void
     {
         if ( e.button !== 0 ) return;
+        e.preventDefault(); // Prevent browser from stealing focus from _inputArea
 
         // Calculate line and column from click position
         const rect = this.codeContainer.getBoundingClientRect();
@@ -1959,7 +2027,7 @@ export class CodeEditor
         }
 
         this._afterCursorMove();
-        this.root.focus();
+        this._inputArea.focus();
 
         // Track mouse for drag selection
         const onMouseMove = ( me: MouseEvent ) =>
