@@ -458,6 +458,32 @@ class CodeDocument
         return idx === -1 ? ( this._lines[ line ]?.length ?? 0 ) : idx;
     }
 
+    /**
+     * Find the next occurrence of 'text' starting after (line, col). Returns null if no match.
+     */
+    findNext( text: string, startLine: number, startCol: number ): { line: number, col: number } | null
+    {
+        if ( !text ) return null;
+
+        // Search from startLine:startCol forward
+        for ( let i = startLine; i < this._lines.length; i++ )
+        {
+            const searchFrom = i === startLine ? startCol : 0;
+            const idx = this._lines[i].indexOf( text, searchFrom );
+            if ( idx !== -1 ) return { line: i, col: idx };
+        }
+
+        // Wrap around from beginning
+        for ( let i = 0; i <= startLine; i++ )
+        {
+            const searchUntil = i === startLine ? startCol : this._lines[i].length;
+            const idx = this._lines[i].indexOf( text );
+            if ( idx !== -1 && idx < searchUntil ) return { line: i, col: idx };
+        }
+
+        return null;
+    }
+
     // Mutations (return EditOperations for undo):
 
     /**
@@ -951,6 +977,56 @@ class CursorSet
     removeSecondaryCursors(): void
     {
         this.cursors = [ this.cursors[0] ];
+    }
+
+    /**
+     * Returns cursor indices sorted by head position, bottom-to-top (last in doc first)
+     * to ensure earlier cursors' positions stay valid.
+     */
+    sortedIndicesBottomUp(): number[]
+    {
+        return this.cursors
+            .map( ( _, i ) => i )
+            .sort( ( a, b ) =>
+            {
+                const ah = this.cursors[a].head;
+                const bh = this.cursors[b].head;
+                return bh.line !== ah.line ? bh.line - ah.line : bh.col - ah.col;
+            } );
+    }
+
+    /**
+     * After editing at (line, col), shift all other cursors on the same line
+     * that are at or after `afterCol` by `colDelta`. Also handles line shifts
+     * for multi-line inserts/deletes via `lineDelta`.
+     */
+    adjustOthers( skipIdx: number, line: number, afterCol: number, colDelta: number, lineDelta: number = 0 ): void
+    {
+        for ( let i = 0; i < this.cursors.length; i++ )
+        {
+            if ( i === skipIdx ) continue;
+            const c = this.cursors[i];
+
+            // Adjust head
+            if ( lineDelta !== 0 && c.head.line > line )
+            {
+                c.head = { line: c.head.line + lineDelta, col: c.head.col };
+            }
+            else if ( c.head.line === line && c.head.col >= afterCol )
+            {
+                c.head = { line: c.head.line + lineDelta, col: c.head.col + colDelta };
+            }
+
+            // Adjust anchor
+            if ( lineDelta !== 0 && c.anchor.line > line )
+            {
+                c.anchor = { line: c.anchor.line + lineDelta, col: c.anchor.col };
+            }
+            else if ( c.anchor.line === line && c.anchor.col >= afterCol )
+            {
+                c.anchor = { line: c.anchor.line + lineDelta, col: c.anchor.col + colDelta };
+            }
+        }
     }
 
     // Queries:
@@ -1845,6 +1921,10 @@ export class CodeEditor
                     this.cursorSet.selectAll( this.doc );
                     this._afterCursorMove();
                     return;
+                case 'd':
+                    e.preventDefault();
+                    this._doFindNextOcurrence();
+                    return;
                 case 'k':
                     e.preventDefault();
                     this._keyChain = 'k';
@@ -1977,41 +2057,49 @@ export class CodeEditor
             return;
         }
 
-        this._deleteSelectionIfAny();
-
-        const cursor = this.cursorSet.getPrimary();
-        const { line, col } = cursor.head;
-        const nextChar = this.doc.getCharAt( line, col );
-
-        // If we just auto-paired and the next char is the same closing char, skip over it
-        if ( this._wasPaired && nextChar === char )
-        {
-            this._wasPaired = false;
-            this.cursorSet.set( line, col + 1 );
-            this._afterCursorMove();
-            return;
-        }
-
         this._flushIfActionChanged( 'insert' );
 
-        // Insert the character
-        const op = this.doc.insert( line, col, char );
-        this.undoManager.record( op, this.cursorSet.getCursorPositions() );
+        this._deleteSelectionIfAny();
 
-        // Auto-pair: insert closing char if next char is whitespace or end of line
-        if ( char in CodeEditor.PAIR_KEYS && ( !nextChar || /\s/.test( nextChar ) ) )
+        const changedLines = new Set<number>();
+        let paired = false;
+
+        for ( const idx of this.cursorSet.sortedIndicesBottomUp() )
         {
-            const closeOp = this.doc.insert( line, col + 1, CodeEditor.PAIR_KEYS[ char ] );
-            this.undoManager.record( closeOp, this.cursorSet.getCursorPositions() );
-            this._wasPaired = true;
-        }
-        else
-        {
-            this._wasPaired = false;
+            const cursor = this.cursorSet.cursors[idx];
+            const { line, col } = cursor.head;
+            const nextChar = this.doc.getCharAt( line, col );
+
+            // If we just auto-paired and the next char is the same closing char, skip over it
+            if ( this._wasPaired && nextChar === char )
+            {
+                cursor.head = { line, col: col + 1 };
+                cursor.anchor = { ...cursor.head };
+                continue;
+            }
+
+            const op = this.doc.insert( line, col, char );
+            this.undoManager.record( op, this.cursorSet.getCursorPositions() );
+
+            const pairInserted = char in CodeEditor.PAIR_KEYS && ( !nextChar || /\s/.test( nextChar ) );
+            const charsInserted = pairInserted ? 2 : 1;
+
+            // Auto-pair: insert closing char if next char is whitespace or end of line
+            if ( pairInserted )
+            {
+                const closeOp = this.doc.insert( line, col + 1, CodeEditor.PAIR_KEYS[ char ] );
+                this.undoManager.record( closeOp, this.cursorSet.getCursorPositions() );
+                paired = true;
+            }
+
+            cursor.head = { line, col: col + 1 };
+            cursor.anchor = { ...cursor.head };
+            this.cursorSet.adjustOthers( idx, line, col, charsInserted );
+            changedLines.add( line );
         }
 
-        this.cursorSet.set( line, col + 1 );
-        this._updateLine( line );
+        this._wasPaired = paired;
+        for ( const line of changedLines ) this._updateLine( line );
         this._afterCursorMove();
     }
 
@@ -2085,6 +2173,51 @@ export class CodeEditor
         this._afterCursorMove();
     }
 
+    private _doFindNextOcurrence(): void
+    {
+        const primary = this.cursorSet.getPrimary();
+
+        // Get the search text: selection or word under cursor
+        let searchText = this.cursorSet.getSelectedText( this.doc );
+        if ( !searchText )
+        {
+            const { line, col } = primary.head;
+            const [ word, start, end ] = this.doc.getWordAt( line, col );
+            if ( !word ) return;
+
+            // Select the word under cursor first (first Ctrl+D)
+            primary.anchor = { line, col: start };
+            primary.head = { line, col: end };
+            this._renderCursors();
+            this._renderSelections();
+            return;
+        }
+
+        const lastCursor = this.cursorSet.cursors[ this.cursorSet.cursors.length - 1 ];
+        const lastEnd = posBefore( lastCursor.anchor, lastCursor.head ) ? lastCursor.head : lastCursor.anchor;
+
+        const match = this.doc.findNext( searchText, lastEnd.line, lastEnd.col );
+        if ( !match ) return;
+
+        // Check if this occurrence is already selected by any cursor
+        const alreadySelected = this.cursorSet.cursors.some( sel =>
+        {
+            const start = posBefore( sel.anchor, sel.head ) ? sel.anchor : sel.head;
+            return start.line === match.line && start.col === match.col;
+        } );
+
+        if ( alreadySelected ) return;
+
+        this.cursorSet.cursors.push( {
+            anchor: { line: match.line, col: match.col },
+            head: { line: match.line, col: match.col + searchText.length }
+        } );
+
+        this._renderCursors();
+        this._renderSelections();
+        this._scrollCursorIntoView();
+    }
+
     private _encloseSelection( open: string, close: string ): void
     {
         const cursor = this.cursorSet.getPrimary();
@@ -2119,7 +2252,9 @@ export class CodeEditor
 
     private _doBackspace( ctrlKey: boolean ): void
     {
-        // If there's a selection, delete it
+        this._flushIfActionChanged( 'backspace' );
+
+        // If any cursor has a selection, delete selections
         if ( this.cursorSet.hasSelection() )
         {
             this._deleteSelectionIfAny();
@@ -2128,41 +2263,46 @@ export class CodeEditor
             return;
         }
 
-        const cursor = this.cursorSet.getPrimary();
-        const { line, col } = cursor.head;
-
-        if ( line === 0 && col === 0 ) return;
-
-        this._flushIfActionChanged( 'backspace' );
-
-        if ( col === 0 )
+        for ( const idx of this.cursorSet.sortedIndicesBottomUp() )
         {
-            // Merge with previous line
-            const prevLineLen = this.doc.getLine( line - 1 ).length;
-            const op = this.doc.delete( line - 1, prevLineLen, 1 ); // delete the newline
-            this.undoManager.record( op, this.cursorSet.getCursorPositions() );
-            this.cursorSet.set( line - 1, prevLineLen );
-            this._rebuildLines();
-        }
-        else if ( ctrlKey )
-        {
-            // Delete word left
-            const [ word, from ] = this.doc.getWordAt( line, col - 1 );
-            const deleteFrom = word.length > 0 ? from : col - 1;
-            const deleteLen = col - deleteFrom;
-            const op = this.doc.delete( line, deleteFrom, deleteLen );
-            this.undoManager.record( op, this.cursorSet.getCursorPositions() );
-            this.cursorSet.set( line, deleteFrom );
-            this._updateLine( line );
-        }
-        else
-        {
-            const op = this.doc.delete( line, col - 1, 1 );
-            this.undoManager.record( op, this.cursorSet.getCursorPositions() );
-            this.cursorSet.set( line, col - 1 );
-            this._updateLine( line );
+            const cursor = this.cursorSet.cursors[idx];
+            const { line, col } = cursor.head;
+
+            if ( line === 0 && col === 0 ) continue;
+
+            if ( col === 0 )
+            {
+                // Merge with previous line
+                const prevLineLen = this.doc.getLine( line - 1 ).length;
+                const op = this.doc.delete( line - 1, prevLineLen, 1 );
+                this.undoManager.record( op, this.cursorSet.getCursorPositions() );
+                cursor.head = { line: line - 1, col: prevLineLen };
+                cursor.anchor = { ...cursor.head };
+                this.cursorSet.adjustOthers( idx, line, 0, prevLineLen, -1 );
+            }
+            else if ( ctrlKey )
+            {
+                // Delete word left
+                const [ word, from ] = this.doc.getWordAt( line, col - 1 );
+                const deleteFrom = word.length > 0 ? from : col - 1;
+                const deleteLen = col - deleteFrom;
+                const op = this.doc.delete( line, deleteFrom, deleteLen );
+                this.undoManager.record( op, this.cursorSet.getCursorPositions() );
+                cursor.head = { line, col: deleteFrom };
+                cursor.anchor = { ...cursor.head };
+                this.cursorSet.adjustOthers( idx, line, col, -deleteLen );
+            }
+            else
+            {
+                const op = this.doc.delete( line, col - 1, 1 );
+                this.undoManager.record( op, this.cursorSet.getCursorPositions() );
+                cursor.head = { line, col: col - 1 };
+                cursor.anchor = { ...cursor.head };
+                this.cursorSet.adjustOthers( idx, line, col, -1 );
+            }
         }
 
+        this._rebuildLines();
         this._afterCursorMove();
     }
 
@@ -2176,37 +2316,41 @@ export class CodeEditor
             return;
         }
 
-        const cursor = this.cursorSet.getPrimary();
-        const { line, col } = cursor.head;
-        const lineText = this.doc.getLine( line );
-
-        if ( col >= lineText.length && line >= this.doc.lineCount - 1 ) return;
-
         this._flushIfActionChanged( 'delete' );
 
-        if ( col >= lineText.length )
+        for ( const idx of this.cursorSet.sortedIndicesBottomUp() )
         {
-            // Merge with next line
-            const op = this.doc.delete( line, col, 1 ); // delete the newline
-            this.undoManager.record( op, this.cursorSet.getCursorPositions() );
-            this._rebuildLines();
-        }
-        else if ( ctrlKey )
-        {
-            // Delete word right
-            const [ word, , end ] = this.doc.getWordAt( line, col );
-            const deleteLen = word.length > 0 ? end - col : 1;
-            const op = this.doc.delete( line, col, deleteLen );
-            this.undoManager.record( op, this.cursorSet.getCursorPositions() );
-            this._updateLine( line );
-        }
-        else
-        {
-            const op = this.doc.delete( line, col, 1 );
-            this.undoManager.record( op, this.cursorSet.getCursorPositions() );
-            this._updateLine( line );
+            const cursor = this.cursorSet.cursors[idx];
+            const { line, col } = cursor.head;
+            const lineText = this.doc.getLine( line );
+
+            if ( col >= lineText.length && line >= this.doc.lineCount - 1 ) continue;
+
+            if ( col >= lineText.length )
+            {
+                // Merge with next line
+                const op = this.doc.delete( line, col, 1 );
+                this.undoManager.record( op, this.cursorSet.getCursorPositions() );
+                this.cursorSet.adjustOthers( idx, line, col, 0, -1 );
+            }
+            else if ( ctrlKey )
+            {
+                // Delete word right
+                const [ word, , end ] = this.doc.getWordAt( line, col );
+                const deleteLen = word.length > 0 ? end - col : 1;
+                const op = this.doc.delete( line, col, deleteLen );
+                this.undoManager.record( op, this.cursorSet.getCursorPositions() );
+                this.cursorSet.adjustOthers( idx, line, col, -deleteLen );
+            }
+            else
+            {
+                const op = this.doc.delete( line, col, 1 );
+                this.undoManager.record( op, this.cursorSet.getCursorPositions() );
+                this.cursorSet.adjustOthers( idx, line, col, -1 );
+            }
         }
 
+        this._rebuildLines();
         this._afterCursorMove();
     }
 
@@ -2215,18 +2359,22 @@ export class CodeEditor
         this._deleteSelectionIfAny();
         this._flushAction();
 
-        const cursor = this.cursorSet.getPrimary();
-        const { line, col } = cursor.head;
+        for ( const idx of this.cursorSet.sortedIndicesBottomUp() )
+        {
+            const cursor = this.cursorSet.cursors[idx];
+            const { line, col } = cursor.head;
 
-        // Get current line's indentation
-        const indent = this.doc.getIndent( line );
-        const spaces = ' '.repeat( indent );
+            const indent = this.doc.getIndent( line );
+            const spaces = ' '.repeat( indent );
 
-        // Split line at cursor
-        const op = this.doc.insert( line, col, '\n' + spaces );
-        this.undoManager.record( op, this.cursorSet.getCursorPositions() );
+            const op = this.doc.insert( line, col, '\n' + spaces );
+            this.undoManager.record( op, this.cursorSet.getCursorPositions() );
 
-        this.cursorSet.set( line + 1, indent );
+            cursor.head = { line: line + 1, col: indent };
+            cursor.anchor = { ...cursor.head };
+            this.cursorSet.adjustOthers( idx, line, col, 0, 1 );
+        }
+
         this._rebuildLines();
         this._afterCursorMove();
     }
@@ -2235,55 +2383,73 @@ export class CodeEditor
     {
         this._flushAction();
 
-        const cursor = this.cursorSet.getPrimary();
-        const { line, col } = cursor.head;
-
-        if ( shift )
+        for ( const idx of this.cursorSet.sortedIndicesBottomUp() )
         {
-            // Dedent: remove up to tabSize spaces from start
-            const lineText = this.doc.getLine( line );
-            let spacesToRemove = 0;
-            while ( spacesToRemove < this.tabSize && spacesToRemove < lineText.length && lineText[spacesToRemove] === ' ' )
+            const cursor = this.cursorSet.cursors[idx];
+            const { line, col } = cursor.head;
+
+            if ( shift )
             {
-                spacesToRemove++;
+                // Dedent: remove up to tabSize spaces from start
+                const lineText = this.doc.getLine( line );
+                let spacesToRemove = 0;
+                while ( spacesToRemove < this.tabSize && spacesToRemove < lineText.length && lineText[spacesToRemove] === ' ' )
+                {
+                    spacesToRemove++;
+                }
+                if ( spacesToRemove > 0 )
+                {
+                    const op = this.doc.delete( line, 0, spacesToRemove );
+                    this.undoManager.record( op, this.cursorSet.getCursorPositions() );
+                    cursor.head = { line, col: Math.max( 0, col - spacesToRemove ) };
+                    cursor.anchor = { ...cursor.head };
+                    this.cursorSet.adjustOthers( idx, line, 0, -spacesToRemove );
+                }
             }
-            if ( spacesToRemove > 0 )
+            else
             {
-                const op = this.doc.delete( line, 0, spacesToRemove );
+                const spacesToAdd = this.tabSize - ( col % this.tabSize );
+                const spaces = ' '.repeat( spacesToAdd );
+                const op = this.doc.insert( line, col, spaces );
                 this.undoManager.record( op, this.cursorSet.getCursorPositions() );
-                this.cursorSet.set( line, Math.max( 0, col - spacesToRemove ) );
-                this._updateLine( line );
+                cursor.head = { line, col: col + spacesToAdd };
+                cursor.anchor = { ...cursor.head };
+                this.cursorSet.adjustOthers( idx, line, col, spacesToAdd );
             }
         }
-        else
-        {
-            const spacesToAdd = this.tabSize - ( col % this.tabSize );
-            const spaces = ' '.repeat( spacesToAdd );
-            const op = this.doc.insert( line, col, spaces );
-            this.undoManager.record( op, this.cursorSet.getCursorPositions() );
-            this.cursorSet.set( line, col + spacesToAdd );
-            this._updateLine( line );
-        }
 
+        this._rebuildLines();
         this._afterCursorMove();
     }
 
     private _deleteSelectionIfAny(): void
     {
-        if ( !this.cursorSet.hasSelection() ) return;
+        let anyDeleted = false;
 
-        const sel = this.cursorSet.getPrimary();
-        const start = selectionStart( sel );
+        for ( const idx of this.cursorSet.sortedIndicesBottomUp() )
+        {
+            const sel = this.cursorSet.cursors[idx];
+            if ( selectionIsEmpty( sel ) ) continue;
 
-        this._flushAction();
+            const start = selectionStart( sel );
+            const end = selectionEnd( sel );
+            const selectedText = this.cursorSet.getSelectedText( this.doc, idx );
+            if ( !selectedText ) continue;
 
-        // Calculate total text length to delete
-        const selectedText = this.cursorSet.getSelectedText( this.doc );
-        const op = this.doc.delete( start.line, start.col, selectedText.length );
-        this.undoManager.record( op, this.cursorSet.getCursorPositions() );
+            const linesRemoved = end.line - start.line;
+            // not exact for multiline, but start.col is where cursor lands
+            const colDelta = linesRemoved === 0 ? ( end.col - start.col ) : start.col; 
 
-        this.cursorSet.set( start.line, start.col );
-        this._rebuildLines();
+            const op = this.doc.delete( start.line, start.col, selectedText.length );
+            this.undoManager.record( op, this.cursorSet.getCursorPositions() );
+
+            sel.head = { ...start };
+            sel.anchor = { ...start };
+            this.cursorSet.adjustOthers( idx, start.line, start.col, -colDelta, -linesRemoved );
+            anyDeleted = true;
+        }
+
+        if ( anyDeleted ) this._rebuildLines();
     }
 
     // Clipboard helpers:
@@ -2299,6 +2465,8 @@ export class CodeEditor
 
     private _doCut(): void
     {
+        this._flushAction();
+
         const text = this.cursorSet.getSelectedText( this.doc );
         if ( text )
         {
@@ -2314,7 +2482,7 @@ export class CodeEditor
 
             navigator.clipboard.writeText( lineText + ( isLastLine ? '' : '\n' ) );
 
-            this._flushAction();
+            
             const op = this.doc.removeLine( line );
             this.undoManager.record( op, this.cursorSet.getCursorPositions() );
 
@@ -2374,11 +2542,12 @@ export class CodeEditor
     {
         const text = await navigator.clipboard.readText();
         if ( !text ) return;
+        
+        this._flushAction();
 
         this._deleteSelectionIfAny();
 
         const cursor = this.cursorSet.getPrimary();
-        this._flushAction();
         const op = this.doc.insert( cursor.head.line, cursor.head.col, text );
         this.undoManager.record( op, this.cursorSet.getCursorPositions() );
 
