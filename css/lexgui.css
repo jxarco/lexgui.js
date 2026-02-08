@@ -4236,14 +4236,6 @@ ul.lexassetscontent {
     padding: 0.25rem 1rem;
 }
 
-.lexcodegutter {
-    width: 48px;
-    background-color: inherit;
-    overflow: hidden;
-    position: absolute;
-    top: 0;
-}
-
 .lexcodeeditor .lexcodearea {
     width: 100%;
     background-color: inherit;
@@ -4339,7 +4331,7 @@ ul.lexassetscontent {
 }
 
 .lexcodeeditor pre .line-gutter {
-    width: 48px;
+    width: 4rem;
     height: var(--code-editor-row-height);
     line-height: var(--code-editor-row-height);
     font-size: calc(var(--code-editor-font-size) - 0.1rem);
@@ -4414,10 +4406,10 @@ ul.lexassetscontent {
 }
 
 .lexcodescrollbar.horizontal {
-    width: calc(100% - 48px);
+    width: calc(100% - 4rem);
     height: 10px;
     bottom: 0px;
-    left: 48px; /* gutter offset */
+    left: 4rem; /* gutter offset */
 }
 
 .lexcodescrollbar div {

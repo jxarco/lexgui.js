@@ -1097,10 +1097,18 @@ const TOKEN_CLASS_MAP: Record<string, string> = {
 };
 
 const Area = LX.Area;
+const Tabs = LX.Tabs;
 
-interface CodeEditorOptions
+interface CodeTab
 {
-    highlight?: string;
+    name: string;
+    dom: HTMLElement;
+    doc: CodeDocument;
+    cursorSet: CursorSet;
+    undoManager: UndoManager;
+    language: string;
+    title?: string;
+    path?: string;
 }
 
 /**
@@ -1112,31 +1120,57 @@ export class CodeEditor
 {
     static __instances: CodeEditor[] = [];
 
-    doc: CodeDocument;
-    cursorSet: CursorSet;
-    undoManager: UndoManager;
     language: LanguageDef;
 
     // DOM:
     area: typeof Area;
     baseArea: typeof Area;
     codeArea: typeof Area;
+    tabs: typeof Tabs;
     root: HTMLElement;
     codeScroller: HTMLElement;
     codeSizer: HTMLElement;
-    codeContainer: HTMLElement;
     cursorsLayer: HTMLElement;
     selectionsLayer: HTMLElement;
     lineGutter: HTMLElement;
-    private _inputArea!: HTMLTextAreaElement;
+    currentTab: CodeTab | null = null;
+    openedTabs: Record<string, CodeTab> = {};
 
     // Measurements:
     charWidth: number = 0;
     lineHeight: number = 0;
-    xPadding: number = 48;  // left padding in pixels
+    xPadding: number = 64;  // 4rem left padding in pixels
+
+    // Editor options:
+    // skipInfo: boolean = false;
+    disableEdition: boolean = false;
+    skipTabs: boolean = false;
+    // useFileExplorer: boolean = false;
+    // useAutoComplete: boolean = true;
+    allowAddScripts: boolean = true;
+    allowClosingTabs: boolean = true;
+    // allowLoadingFiles: boolean = true;
+    tabSize: number = 4;
+    highlight: string = 'Plain Text';
+    // newTabOptions: any;
+    // customSuggestions: any[] = [];
+    // explorerName: string = 'EXPLORER';
+
+    // Editor callbacks:
+    // onSave: any;
+    // onRun: any;
+    // onCtrlSpace: any;
+    // onCreateStatusPanel: any;
+    // onContextMenu: any;
+    onNewTab: ( event: MouseEvent ) => void;
+    onSelectTab: ( name: string, editor: CodeEditor ) => void;
+    // onReady: any;
+    onCreateFile: ( ( editor: CodeEditor ) => void ) | undefined;
+
+    private _inputArea!: HTMLTextAreaElement;
 
     // State:
-    private _lineStates: TokenizerState[] = [];   // tokenizer state at end of each line
+    private _lineStates: TokenizerState[] = [];     // tokenizer state at end of each line
     private _lineElements: HTMLElement[] = [];      // <pre> element per line
     private _focused: boolean = false;
     private _composing: boolean = false;
@@ -1152,43 +1186,101 @@ export class CodeEditor
 
     private static readonly PAIR_KEYS: Record<string, string> = { '"': '"', "'": "'", '`': '`', '(': ')', '{': '}', '[': ']' };
 
+    get doc(): CodeDocument
+    {
+        return this.currentTab!.doc;
+    }
 
-    constructor( area: typeof Area, options: CodeEditorOptions = {} )
+    get undoManager(): UndoManager
+    {
+        return this.currentTab!.undoManager;
+    }
+
+    get cursorSet(): CursorSet
+    {
+        return this.currentTab!.cursorSet;
+    }
+
+    get codeContainer(): HTMLElement
+    {
+        return this.currentTab!.dom;
+    }
+
+    constructor( area: typeof Area, options: Record<string, any> = {} )
     {
         g.editor = this;
 
         CodeEditor.__instances.push( this );
 
-        this.doc = new CodeDocument();
-        this.cursorSet = new CursorSet();
-        this.undoManager = new UndoManager();
+        // this.skipInfo = options.skipInfo ?? this.skipInfo;
+        this.disableEdition = options.disableEdition ?? this.disableEdition;
+        this.skipTabs = options.skipTabs ?? this.skipTabs;
+        // this.useFileExplorer = ( options.fileExplorer ?? this.useFileExplorer ) && !this.skipTabs;
+        // this.useAutoComplete = options.autocomplete ?? this.useAutoComplete;
+        this.allowAddScripts = options.allowAddScripts ?? this.allowAddScripts;
+        this.allowClosingTabs = options.allowClosingTabs ?? this.allowClosingTabs;
+        // this.allowLoadingFiles = options.allowLoadingFiles ?? this.allowLoadingFiles;
+        this.highlight = options.highlight ?? this.highlight;
+        // this.newTabOptions = options.newTabOptions;
+        // this.customSuggestions = options.customSuggestions ?? [];
+        // this.explorerName = options.explorerName ?? this.explorerName;
 
-        const langName = options.highlight ?? 'Plain Text';
-        this.language = Tokenizer.getLanguage( langName ) ?? Tokenizer.getLanguage( 'Plain Text' )!;
+        // Editor callbacks
+        // this.onSave = options.onSave;
+        // this.onRun = options.onRun;
+        // this.onCtrlSpace = options.onCtrlSpace;
+        // this.onCreateStatusPanel = options.onCreateStatusPanel;
+        // this.onContextMenu = options.onContextMenu;
+        this.onNewTab = options.onNewTab;
+        this.onSelectTab = options.onSelectTab;
+        // this.onReady = options.onReady;
+
+        this.language = Tokenizer.getLanguage( this.highlight ) ?? Tokenizer.getLanguage( 'Plain Text' )!;
 
         // Full editor
-        area.root.className = LX.mergeClass( area.root.className, 'codebasearea flex relative bg-card' );
+        area.root.className = LX.mergeClass( area.root.className, 'codebasearea overflow-hidden flex relative bg-card' );
 
         this.baseArea = area;
         this.area = new LX.Area( { className: 'lexcodeeditor outline-none overflow-hidden size-full select-none bg-inherit', skipAppend: true } );
-        this.codeArea = new LX.Area( { className: 'lexcodearea scrollbar-hidden flex flex-row', skipAppend: true } );
-        this.area.attach( this.codeArea );
+
+        if ( !this.skipTabs )
+        {
+            this.tabs = this.area.addTabs( { contentClass: 'lexcodearea scrollbar-hidden flex flex-row', onclose: ( name: string ) => {
+                // this._closeTab triggers this onclose!
+                delete this.openedTabs[name];
+            } } );
+
+            LX.addClass( this.tabs.root.parentElement, 'rounded-t-lg' );
+
+            if ( !this.disableEdition )
+            {
+                this.tabs.root.parentElement.addEventListener( 'dblclick', ( e: MouseEvent ) => {
+                    if ( !this.allowAddScripts ) return;
+                    e.preventDefault();
+                    this._onCreateNewFile();
+                } );
+            }
+
+            this.codeArea = this.tabs.area;
+        }
+        else
+        {
+            this.codeArea = new LX.Area( { className: 'lexcodearea scrollbar-hidden flex flex-row', skipAppend: true } );
+            this.area.attach( this.codeArea );
+        }
 
         this.root = this.area.root;
         area.attach( this.root );
 
         this.codeScroller = this.codeArea.root;
         // Add Line numbers gutter, only the container, line numbers are in the same line div
-        this.lineGutter = LX.makeElement( 'div', 'lexcodegutter', null, this.codeScroller );
+        this.lineGutter = LX.makeElement( 'div', 'w-16 mt-8 overflow-hidden absolute top-0 bg-inherit z-1', null, this.codeScroller );
         // Add code sizer, which will have the code elements
-        this.codeSizer = LX.makeElement( 'div', 'w-full', null, this.codeScroller );
+        this.codeSizer = LX.makeElement( 'div', 'pseudoparent-tabs w-full', null, this.codeScroller );
 
         // Cursors and selections
         this.cursorsLayer = LX.makeElement( 'div', 'cursors', null, this.codeSizer );
         this.selectionsLayer = LX.makeElement( 'div', 'selections', null, this.codeSizer );
-
-        // Starter code container
-        this.codeContainer = LX.makeElement( 'div', 'code', null, this.codeSizer );
 
         this._measureChar();
 
@@ -1219,6 +1311,21 @@ export class CodeEditor
         this._inputArea.addEventListener( 'focus', () => this._setFocused( true ) );
         this._inputArea.addEventListener( 'blur', () => this._setFocused( false ) );
         this.root.addEventListener( 'mousedown', this._onMouseDown.bind( this ) );
+
+        if ( this.allowAddScripts )
+        {
+            this.onCreateFile = options.onCreateFile;
+            this._addTab( '+', {
+                selected: false,
+                title: 'Create file'
+            } );
+        }
+
+        // Starter code tab container
+        this._addTab( options.name || 'untitled', {
+            language: this.highlight,
+            title: options.title
+        } );
 
         // Initial render
         this._renderAllLines();
@@ -1255,6 +1362,174 @@ export class CodeEditor
     focus(): void
     {
         this._inputArea.focus();
+    }
+
+    private _addTab( name: string, options: Record<string, any> = {} ): string
+    {
+        const isNewTabButton = name === '+';
+        const dom = LX.makeElement( 'div', 'code' );
+        const langName = options.language ?? 'Plain Text';
+        const langDef = Tokenizer.getLanguage( langName );
+        const icon = isNewTabButton ? null : ( langDef?.icon ?? 'AlignLeft text-neutral-500' );
+        const selected = options.selected ?? true;
+
+        const codeTab : CodeTab = {
+            name,
+            dom,
+            doc: new CodeDocument(),
+            cursorSet: new CursorSet(),
+            undoManager: new UndoManager(),
+            language: langName,
+            title: options.title ?? name
+        };
+        
+        this.openedTabs[name] = codeTab;
+
+        this.tabs.add( name, dom, {
+            selected,
+            icon,
+            fixed: isNewTabButton,
+            title: codeTab.title,
+            onSelect: this._onSelectTab.bind( this, isNewTabButton ),
+            onContextMenu: this._onContextMenuTab.bind( this, isNewTabButton ),
+            allowDelete: this.allowClosingTabs,
+            indexOffset: options.indexOffset
+        } );
+
+        // Move into the sizer..
+        this.codeSizer.appendChild( dom );
+
+        if( selected )
+        {
+            this.currentTab = codeTab;
+        }
+
+        return name;
+    }
+
+    private _closeTab( name: string )
+    {
+        if ( !this.allowClosingTabs ) return;
+
+        this.tabs.delete( name );
+        const tab = this.openedTabs[name];
+        if ( tab )
+        {
+            tab.dom.remove();
+            delete this.openedTabs[name];
+        }
+
+        // If we closed the current tab, switch to the first available
+        if ( this.currentTab?.name === name )
+        {
+            const remaining = Object.keys( this.openedTabs ).filter( k => k !== '+' );
+            if ( remaining.length > 0 )
+            {
+                this.tabs.select( remaining[0] );
+            }
+            else
+            {
+                this.currentTab = null;
+            }
+        }
+    }
+
+    private _onSelectTab( isNewTabButton: boolean, event: MouseEvent, name: string ): void
+    {
+        if ( this.disableEdition )
+        {
+            return;
+        }
+
+        if ( isNewTabButton )
+        {
+            this._onNewTab( event );
+            return;
+        }
+
+        this.currentTab = this.openedTabs[name];
+
+        // this._updateDataInfoPanel( '@tab-name', name );
+
+        this.language = Tokenizer.getLanguage( this.currentTab.language ) ?? Tokenizer.getLanguage( 'Plain Text' )!;
+
+        this._rebuildLines();
+        this._afterCursorMove();
+
+        if ( !isNewTabButton && this.onSelectTab )
+        {
+            this.onSelectTab( name, this );
+        }
+    }
+
+    private _onNewTab( event: MouseEvent )
+    {
+        if ( this.onNewTab )
+        {
+            this.onNewTab( event );
+            return;
+        }
+
+        const dmOptions = [
+            { name: 'Create file', icon: 'FilePlus', callback: this._onCreateNewFile.bind( this ) }
+        ];
+
+        LX.addDropdownMenu( event.target, dmOptions, { side: 'bottom', align: 'start' } );
+    }
+
+    private _onCreateNewFile()
+    {
+        let options: any = {};
+
+        if ( this.onCreateFile )
+        {
+            options = this.onCreateFile( this );
+            // Skip adding new file
+            if ( !options )
+            { 
+                return;
+            }
+        }
+
+        const name = options.name ?? 'unnamed.js';
+        this._addTab( name, {
+            selected: true,
+            title: name,
+            indexOffset: options.indexOffset,
+            language: options.language ?? 'JavaScript'
+        } );
+    }
+
+    private _onContextMenuTab( isNewTabButton: boolean = false, event: any, name: string )
+    {
+        if ( isNewTabButton )
+        {
+            return;
+        }
+
+        LX.addDropdownMenu( event.target, [
+            { name: 'Close', kbd: 'MWB', disabled: !this.allowClosingTabs, callback: () => {
+                this._closeTab( name );
+            } },
+            { name: 'Close Others', disabled: !this.allowClosingTabs, callback: () => {
+                for ( const key of Object.keys( this.tabs.tabs ) )
+                {
+                    if ( key === '+' || key === name ) continue;
+                    this._closeTab( key );
+                }
+            } },
+            { name: 'Close All', disabled: !this.allowClosingTabs, callback: () => {
+                for ( const key of Object.keys( this.tabs.tabs ) )
+                {
+                    if ( key === '+' ) continue;
+                    this._closeTab( key );
+                }
+            } },
+            null,
+            { name: 'Copy Path', icon: 'Copy', callback: () => {
+                navigator.clipboard.writeText( this.openedTabs[name].path ?? '' );
+            } }
+        ], { side: 'bottom', align: 'start', event } );
     }
 
     private _measureChar(): void
@@ -1965,11 +2240,10 @@ export class CodeEditor
 
         if ( shift )
         {
-            // Dedent: remove up to tabSpaces spaces from start
+            // Dedent: remove up to tabSize spaces from start
             const lineText = this.doc.getLine( line );
             let spacesToRemove = 0;
-            const tabSpaces = 4;
-            while ( spacesToRemove < tabSpaces && spacesToRemove < lineText.length && lineText[spacesToRemove] === ' ' )
+            while ( spacesToRemove < this.tabSize && spacesToRemove < lineText.length && lineText[spacesToRemove] === ' ' )
             {
                 spacesToRemove++;
             }
@@ -1983,8 +2257,7 @@ export class CodeEditor
         }
         else
         {
-            const tabSpaces = 4;
-            const spacesToAdd = tabSpaces - ( col % tabSpaces );
+            const spacesToAdd = this.tabSize - ( col % this.tabSize );
             const spaces = ' '.repeat( spacesToAdd );
             const op = this.doc.insert( line, col, spaces );
             this.undoManager.record( op, this.cursorSet.getCursorPositions() );
@@ -2164,6 +2437,7 @@ export class CodeEditor
     private _onMouseDown( e: MouseEvent ): void
     {
         if ( e.button !== 0 ) return;
+        if ( !this.currentTab ) return;
         e.preventDefault(); // Prevent browser from stealing focus from _inputArea
         this._wasPaired = false;
 
@@ -2172,7 +2446,9 @@ export class CodeEditor
         const x = e.clientX - rect.left - this.xPadding;
         const y = e.clientY - rect.top;
 
-        const line = Math.max( 0, Math.min( Math.floor( y / this.lineHeight ), this.doc.lineCount - 1 ) );
+        const line = Math.min( Math.floor( y / this.lineHeight ), this.doc.lineCount - 1 );
+        if( line < 0 ) return;
+
         const col = Math.max( 0, Math.min( Math.round( x / this.charWidth ), this.doc.getLine( line ).length ) );
 
         const now = Date.now();
@@ -2247,13 +2523,14 @@ export class CodeEditor
         this._renderSelections();
         this._resetBlinker();
         this._scrollCursorIntoView();
+        this._resetGutter();
     }
 
     private _scrollCursorIntoView(): void
     {
         const cursor = this.cursorSet.getPrimary().head;
         const top = cursor.line * this.lineHeight;
-        const left = cursor.col * this.charWidth + this.xPadding;
+        const left = cursor.col * this.charWidth;
 
         // Vertical scroll
         if ( top < this.codeScroller.scrollTop )
@@ -2270,10 +2547,16 @@ export class CodeEditor
         {
             this.codeScroller.scrollLeft = left;
         }
-        else if ( left > this.codeScroller.scrollLeft + this.codeScroller.clientWidth - 20 )
+        else if ( left > this.codeScroller.scrollLeft + this.codeScroller.clientWidth - this.xPadding )
         {
-            this.codeScroller.scrollLeft = left - this.codeScroller.clientWidth + 40;
+            this.codeScroller.scrollLeft = left - this.codeScroller.clientWidth + this.xPadding;
         }
+    }
+
+    private _resetGutter(): void
+    {
+        const verticalTopOffset = this.tabs?.root.getBoundingClientRect().height ?? 0;
+        this.lineGutter.style.height = `${this.doc.lineCount * this.lineHeight - verticalTopOffset}px`;
     }
 }
 

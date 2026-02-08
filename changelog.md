@@ -2,6 +2,11 @@
 
 ## dev
 
+Full refactor for CodeEditor:
+- Improved robustness and fixed several minor bugs.
+- Removed legacy `options.onsave` and `options.onrun`.
+- Added support to write Backtick char (`).
+
 ## 8.2.4 (master)
 
 Fixed Form not automatically syncing inputs when pressing primary action button.

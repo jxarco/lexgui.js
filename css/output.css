@@ -610,6 +610,9 @@
   .mt-4 {
     margin-top: calc(var(--spacing) * 4);
   }
+  .mt-8 {
+    margin-top: calc(var(--spacing) * 8);
+  }
   .mr-1 {
     margin-right: calc(var(--spacing) * 1);
   }
@@ -802,6 +805,9 @@
   }
   .w-12 {
     width: calc(var(--spacing) * 12);
+  }
+  .w-16 {
+    width: calc(var(--spacing) * 16);
   }
   .w-\[1px\] {
     width: 1px;
@@ -6149,13 +6155,6 @@ ul.lexassetscontent {
   justify-items: end;
   padding: 0.25rem 1rem;
 }
-.lexcodegutter {
-  width: 48px;
-  background-color: inherit;
-  overflow: hidden;
-  position: absolute;
-  top: 0;
-}
 .lexcodeeditor .lexcodearea {
   width: 100%;
   background-color: inherit;
@@ -6239,7 +6238,7 @@ ul.lexassetscontent {
   display: inline-block;
 }
 .lexcodeeditor pre .line-gutter {
-  width: 48px;
+  width: 4rem;
   height: var(--code-editor-row-height);
   line-height: var(--code-editor-row-height);
   font-size: calc(var(--code-editor-font-size) - 0.1rem);
@@ -6305,10 +6304,10 @@ ul.lexassetscontent {
   pointer-events: none;
 }
 .lexcodescrollbar.horizontal {
-  width: calc(100% - 48px);
+  width: calc(100% - 4rem);
   height: 10px;
   bottom: 0px;
-  left: 48px;
+  left: 4rem;
 }
 .lexcodescrollbar div {
   background-color: var(--secondary) !important;
