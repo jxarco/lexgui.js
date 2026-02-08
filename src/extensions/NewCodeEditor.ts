@@ -1173,6 +1173,7 @@ const TOKEN_CLASS_MAP: Record<string, string> = {
 };
 
 const Area = LX.Area;
+const Panel = LX.Panel;
 const Tabs = LX.Tabs;
 
 interface CodeTab
@@ -1210,15 +1211,18 @@ export class CodeEditor
     selectionsLayer: HTMLElement;
     lineGutter: HTMLElement;
     currentTab: CodeTab | null = null;
-    openedTabs: Record<string, CodeTab> = {};
+    statusPanel: typeof Panel;
+    leftStatusPanel: typeof Panel;
+    rightStatusPanel: typeof Panel;
 
     // Measurements:
     charWidth: number = 0;
     lineHeight: number = 0;
+    fontSize: number = 0;
     xPadding: number = 64;  // 4rem left padding in pixels
 
     // Editor options:
-    // skipInfo: boolean = false;
+    skipInfo: boolean = false;
     disableEdition: boolean = false;
     skipTabs: boolean = false;
     // useFileExplorer: boolean = false;
@@ -1236,7 +1240,7 @@ export class CodeEditor
     // onSave: any;
     // onRun: any;
     // onCtrlSpace: any;
-    // onCreateStatusPanel: any;
+    onCreateStatusPanel: ( panel: typeof Panel, editor: CodeEditor ) => void;
     // onContextMenu: any;
     onNewTab: ( event: MouseEvent ) => void;
     onSelectTab: ( name: string, editor: CodeEditor ) => void;
@@ -1248,6 +1252,7 @@ export class CodeEditor
     // State:
     private _lineStates: TokenizerState[] = [];     // tokenizer state at end of each line
     private _lineElements: HTMLElement[] = [];      // <pre> element per line
+    private _openedTabs: Record<string, CodeTab> = {};
     private _focused: boolean = false;
     private _composing: boolean = false;
     private _keyChain: string | null = null;
@@ -1260,6 +1265,8 @@ export class CodeEditor
     private _lastClickTime: number = 0;
     private _lastClickLine: number = -1;
 
+    private static readonly CODE_MIN_FONT_SIZE = 9;
+    private static readonly CODE_MAX_FONT_SIZE = 22;
     private static readonly PAIR_KEYS: Record<string, string> = { '"': '"', "'": "'", '`': '`', '(': ')', '{': '}', '[': ']' };
 
     get doc(): CodeDocument
@@ -1288,7 +1295,7 @@ export class CodeEditor
 
         CodeEditor.__instances.push( this );
 
-        // this.skipInfo = options.skipInfo ?? this.skipInfo;
+        this.skipInfo = options.skipInfo ?? this.skipInfo;
         this.disableEdition = options.disableEdition ?? this.disableEdition;
         this.skipTabs = options.skipTabs ?? this.skipTabs;
         // this.useFileExplorer = ( options.fileExplorer ?? this.useFileExplorer ) && !this.skipTabs;
@@ -1305,7 +1312,7 @@ export class CodeEditor
         // this.onSave = options.onSave;
         // this.onRun = options.onRun;
         // this.onCtrlSpace = options.onCtrlSpace;
-        // this.onCreateStatusPanel = options.onCreateStatusPanel;
+        this.onCreateStatusPanel = options.onCreateStatusPanel;
         // this.onContextMenu = options.onContextMenu;
         this.onNewTab = options.onNewTab;
         this.onSelectTab = options.onSelectTab;
@@ -1317,13 +1324,18 @@ export class CodeEditor
         area.root.className = LX.mergeClass( area.root.className, 'codebasearea overflow-hidden flex relative bg-card' );
 
         this.baseArea = area;
-        this.area = new LX.Area( { className: 'lexcodeeditor outline-none overflow-hidden size-full select-none bg-inherit', skipAppend: true } );
+        this.area = new LX.Area( {
+            className: 'lexcodeeditor flex flex-col outline-none overflow-hidden size-full select-none bg-inherit',
+            skipAppend: true
+        } );
+
+        const codeAreaClassName = 'lexcodearea scrollbar-hidden flex flex-row flex-auto-fill';
 
         if ( !this.skipTabs )
         {
-            this.tabs = this.area.addTabs( { contentClass: 'lexcodearea scrollbar-hidden flex flex-row', onclose: ( name: string ) => {
+            this.tabs = this.area.addTabs( { contentClass: codeAreaClassName, onclose: ( name: string ) => {
                 // this._closeTab triggers this onclose!
-                delete this.openedTabs[name];
+                delete this._openedTabs[name];
             } } );
 
             LX.addClass( this.tabs.root.parentElement, 'rounded-t-lg' );
@@ -1341,7 +1353,7 @@ export class CodeEditor
         }
         else
         {
-            this.codeArea = new LX.Area( { className: 'lexcodearea scrollbar-hidden flex flex-row', skipAppend: true } );
+            this.codeArea = new LX.Area( { className: codeAreaClassName, skipAppend: true } );
             this.area.attach( this.codeArea );
         }
 
@@ -1358,7 +1370,22 @@ export class CodeEditor
         this.cursorsLayer = LX.makeElement( 'div', 'cursors', null, this.codeSizer );
         this.selectionsLayer = LX.makeElement( 'div', 'selections', null, this.codeSizer );
 
-        this._measureChar();
+        // Load any font size from local storage
+        // If not, use default size and make sure it's sync by not hardcoding a number by default here
+        const savedFontSize = window.localStorage.getItem( 'lexcodeeditor-font-size' );
+        if ( savedFontSize )
+        {
+            this._setFontSize( parseInt( savedFontSize ), false );
+        }
+        else
+        {
+            const r: any = document.querySelector( ':root' );
+            const s = getComputedStyle( r );
+            this.fontSize = parseInt( s.getPropertyValue( '--code-editor-font-size' ) );
+            this._measureChar();
+        }
+
+        LX.emitSignal( '@font-size', this.fontSize );
 
         // Hidden textarea for capturing keyboard input (dead keys, IME, etc.)
         this._inputArea = LX.makeElement( 'textarea', 'absolute opacity-0 w-[1px] h-[1px] top-0 left-0 overflow-hidden resize-none', '', this.root );
@@ -1387,6 +1414,14 @@ export class CodeEditor
         this._inputArea.addEventListener( 'focus', () => this._setFocused( true ) );
         this._inputArea.addEventListener( 'blur', () => this._setFocused( false ) );
         this.root.addEventListener( 'mousedown', this._onMouseDown.bind( this ) );
+
+        // Bottom status panel
+        this.statusPanel = this._createStatusPanel( options );
+        if ( this.statusPanel )
+        {
+            // Don't do this.area.attach here, since it will append to the tabs area.
+            this.area.root.appendChild( this.statusPanel.root );
+        }
 
         if ( this.allowAddScripts )
         {
@@ -1459,7 +1494,7 @@ export class CodeEditor
             title: options.title ?? name
         };
         
-        this.openedTabs[name] = codeTab;
+        this._openedTabs[name] = codeTab;
 
         this.tabs.add( name, dom, {
             selected,
@@ -1478,6 +1513,7 @@ export class CodeEditor
         if( selected )
         {
             this.currentTab = codeTab;
+            this._updateDataInfoPanel( '@tab-name', name );
         }
 
         return name;
@@ -1488,17 +1524,17 @@ export class CodeEditor
         if ( !this.allowClosingTabs ) return;
 
         this.tabs.delete( name );
-        const tab = this.openedTabs[name];
+        const tab = this._openedTabs[name];
         if ( tab )
         {
             tab.dom.remove();
-            delete this.openedTabs[name];
+            delete this._openedTabs[name];
         }
 
         // If we closed the current tab, switch to the first available
         if ( this.currentTab?.name === name )
         {
-            const remaining = Object.keys( this.openedTabs ).filter( k => k !== '+' );
+            const remaining = Object.keys( this._openedTabs ).filter( k => k !== '+' );
             if ( remaining.length > 0 )
             {
                 this.tabs.select( remaining[0] );
@@ -1523,9 +1559,9 @@ export class CodeEditor
             return;
         }
 
-        this.currentTab = this.openedTabs[name];
+        this.currentTab = this._openedTabs[name];
 
-        // this._updateDataInfoPanel( '@tab-name', name );
+        this._updateDataInfoPanel( '@tab-name', name );
 
         this.language = Tokenizer.getLanguage( this.currentTab.language ) ?? Tokenizer.getLanguage( 'Plain Text' )!;
 
@@ -1603,7 +1639,7 @@ export class CodeEditor
             } },
             null,
             { name: 'Copy Path', icon: 'Copy', callback: () => {
-                navigator.clipboard.writeText( this.openedTabs[name].path ?? '' );
+                navigator.clipboard.writeText( this._openedTabs[name].path ?? '' );
             } }
         ], { side: 'bottom', align: 'start', event } );
     }
@@ -1632,6 +1668,152 @@ export class CodeEditor
             this._renderCursors();
             this._renderSelections();
         } );
+    }
+
+    private _createStatusPanel( options: Record<string, any> = {} )
+    {
+        if ( this.skipInfo )
+        {
+            return;
+        }
+
+        let panel = new LX.Panel( { className: 'lexcodetabinfo bg-card flex flex-row flex-auto-keep', height: 'auto' } );
+
+        if ( this.onCreateStatusPanel )
+        {
+            this.onCreateStatusPanel( panel, this );
+        }
+
+        let leftStatusPanel = this.leftStatusPanel = new LX.Panel( { id: 'FontSizeZoomStatusComponent',
+            className: 'pad-xs content-center items-center flex-auto-keep', width: 'auto', height: 'auto' } );
+        leftStatusPanel.sameLine();
+
+        // Zoom Component
+        leftStatusPanel.addButton( null, 'ZoomOutButton', this._decreaseFontSize.bind( this ), { icon: 'ZoomOut', buttonClass: 'ghost sm',
+            title: 'Zoom Out', tooltip: true } );
+        leftStatusPanel.addLabel( this.fontSize, { fit: true, signal: '@font-size' } );
+        leftStatusPanel.addButton( null, 'ZoomInButton', this._increaseFontSize.bind( this ), { icon: 'ZoomIn', buttonClass: 'ghost sm',
+            title: 'Zoom In', tooltip: true } );
+        leftStatusPanel.endLine( 'justify-start' );
+        panel.attach( leftStatusPanel.root );
+
+        // Filename cursor data
+        let rightStatusPanel = this.rightStatusPanel = new LX.Panel( { className: 'pad-xs content-center items-center', height: 'auto' } );
+        rightStatusPanel.sameLine();
+        rightStatusPanel.addLabel( this.currentTab?.title ?? '', { id: 'EditorFilenameStatusComponent', fit: true, inputClass: 'text-xs',
+            signal: '@tab-name' } );
+        rightStatusPanel.addButton( null, 'Ln 1, Col 1', () => {}, {
+            id: 'EditorSelectionStatusComponent',
+            buttonClass: 'outline xs',
+            fit: true,
+            signal: '@cursor-data'
+        } );
+
+        const tabSizeButton = rightStatusPanel.addButton( null, 'Spaces: ' + this.tabSize, ( value: any, event: any ) => {
+
+            const _onNewTabSize = ( v: string ) => {
+                this.tabSize = parseInt( v );
+                this._rebuildLines();
+                this._updateDataInfoPanel( '@tab-spaces', `Spaces: ${this.tabSize}` );
+            }
+
+            const dd = LX.addDropdownMenu(
+                tabSizeButton.root,
+                [ '2', '4', '8' ].map( ( v ) => { return { name: v, className: 'w-full place-content-center', callback: _onNewTabSize } } ),
+                { side: 'top', align: 'end' }
+            );
+            LX.addClass( dd.root, 'min-w-16! items-center' );
+
+        }, { id: 'EditorIndentationStatusComponent', buttonClass: 'outline xs', signal: '@tab-spaces' } );
+
+        const langButton = rightStatusPanel.addButton( '<b>{ }</b>', this.highlight, ( value: any, event: any ) => {
+
+            const _onNewLang = ( v: string ) => {
+                this.language = Tokenizer.getLanguage( v )!;
+                if ( this.currentTab ) this.currentTab.language = v;
+                this._lineStates = [];
+                this._rebuildLines();
+            }
+
+            const dd = LX.addDropdownMenu(
+                langButton.root,
+                Tokenizer.getRegisteredLanguages().map( ( v ) => {
+                    const lang = Tokenizer.getLanguage( v );
+                    const icon: any = lang?.icon;
+                    const iconData = icon ? icon.split( ' ' ) : [];
+                    return {
+                        name: v,
+                        icon: iconData[0],
+                        className: 'w-full place-content-center',
+                        svgClass: iconData.slice( 1 ).join( ' ' ),
+                        callback: _onNewLang
+                    };
+                } ),
+                { side: 'top', align: 'end' }
+            );
+            LX.addClass( dd.root, 'min-w-min! items-center' );
+
+        }, { id: 'EditorLanguageStatusComponent', nameWidth: 'auto', buttonClass: 'outline xs', signal: '@highlight', title: '' } );
+
+        rightStatusPanel.endLine( 'justify-end' );
+        panel.attach( rightStatusPanel.root );
+
+        const itemVisibilityMap: Record<string, boolean> = {
+            'Font Size Zoom': options.statusShowFontSizeZoom ?? true,
+            'Editor Filename': options.statusShowEditorFilename ?? true,
+            'Editor Selection': options.statusShowEditorSelection ?? true,
+            'Editor Indentation': options.statusShowEditorIndentation ?? true,
+            'Editor Language': options.statusShowEditorLanguage ?? true
+        };
+
+        const _setVisibility = ( itemName: string ) => {
+            const b = panel.root.querySelector( `#${itemName.replaceAll( ' ', '' )}StatusComponent` );
+            console.assert( b, `${itemName} has no status button!` );
+            b.classList.toggle( 'hidden', !itemVisibilityMap[itemName] );
+        };
+
+        for ( const [ itemName, v ] of Object.entries( itemVisibilityMap ) )
+        {
+            _setVisibility( itemName );
+        }
+
+        panel.root.addEventListener( 'contextmenu', ( e: any ) => {
+            if ( e.target
+                && ( e.target.classList.contains( 'lexpanel' )
+                    || e.target.classList.contains( 'lexinlinecomponents' ) ) )
+            {
+                return;
+            }
+
+            const menuOptions = Object.keys( itemVisibilityMap ).map( ( itemName, idx ) => {
+                const item: any = {
+                    name: itemName,
+                    icon: 'Check',
+                    callback: () => {
+                        itemVisibilityMap[itemName] = !itemVisibilityMap[itemName];
+                        _setVisibility( itemName );
+                    }
+                };
+                if ( !itemVisibilityMap[itemName] ) delete item.icon;
+                return item;
+            } );
+
+            LX.addDropdownMenu( e.target, menuOptions, { side: 'top', align: 'start' } );
+        } );
+
+        return panel;
+    }
+
+    private _updateDataInfoPanel( signal: string, value: string )
+    {
+        if ( this.skipInfo ) return;
+
+        if ( this.cursorSet.cursors.length > 1 )
+        {
+            value = '';
+        }
+
+        LX.emitSignal( signal, value );
     }
 
     /**
@@ -1743,7 +1925,7 @@ export class CodeEditor
      */
     private _rebuildLines(): void
     {
-        // Diff: if count matches, just update content; otherwise full rebuild.
+        // Diff: if count matches, just update content; otherwise full rebuild
         if ( this._lineElements.length === this.doc.lineCount )
         {
             for ( let i = 0; i < this.doc.lineCount; i++ )
@@ -1772,10 +1954,13 @@ export class CodeEditor
     {
         const hasSelection = this.cursorSet.hasSelection();
         const activeLine = this.cursorSet.getPrimary().head.line;
+        const activeCol = this.cursorSet.getPrimary().head.col;
         for ( let i = 0; i < this._lineElements.length; i++ )
         {
             this._lineElements[i].classList.toggle( 'active-line', !hasSelection && i === activeLine );
         }
+
+        this._updateDataInfoPanel( '@cursor-data', `Ln ${activeLine + 1}, Col ${activeCol + 1}` );
     }
 
     private _renderCursors(): void
@@ -1832,12 +2017,13 @@ export class CodeEditor
         {
             this.cursorsLayer.classList.add( 'show' );
             this.selectionsLayer.classList.add( 'show' );
+            this.selectionsLayer.classList.remove( 'unfocused' );
             this._startBlinker();
         }
         else
         {
             this.cursorsLayer.classList.remove( 'show' );
-            this.selectionsLayer.classList.remove( 'show' );
+            this.selectionsLayer.classList.add( 'unfocused' );
             this._stopBlinker();
         }
     }
@@ -2615,8 +2801,8 @@ export class CodeEditor
         const x = e.clientX - rect.left - this.xPadding;
         const y = e.clientY - rect.top;
 
-        const line = Math.min( Math.floor( y / this.lineHeight ), this.doc.lineCount - 1 );
-        if( line < 0 ) return;
+        const line = Math.floor( y / this.lineHeight );
+        if( line < 0 || line > this.doc.lineCount - 1 ) return;
 
         const col = Math.max( 0, Math.min( Math.round( x / this.charWidth ), this.doc.getLine( line ).length ) );
 
@@ -2726,6 +2912,48 @@ export class CodeEditor
     {
         const verticalTopOffset = this.tabs?.root.getBoundingClientRect().height ?? 0;
         this.lineGutter.style.height = `${this.doc.lineCount * this.lineHeight - verticalTopOffset}px`;
+    }
+
+    // Font Size utils:
+
+    private _setFontSize( size: number, updateDOM: boolean = true )
+    {
+        // Change font size
+        this.fontSize = size;
+        const r: any = document.querySelector( ':root' );
+        r.style.setProperty( '--code-editor-font-size', `${this.fontSize}px` );
+        window.localStorage.setItem( 'lexcodeeditor-font-size', `${this.fontSize}` );
+        this._measureChar();
+
+        // Change row size
+        const rowPixels = this.fontSize + 6;
+        r.style.setProperty( '--code-editor-row-height', `${rowPixels}px` );
+        this.lineHeight = rowPixels;
+
+        if( updateDOM )
+        {
+            this._rebuildLines();
+            this._afterCursorMove();
+        }
+
+        // Emit event
+        LX.emitSignal( '@font-size', this.fontSize );
+    }
+
+    private _applyFontSizeOffset( offset = 0 )
+    {
+        const newFontSize = LX.clamp( this.fontSize + offset, CodeEditor.CODE_MIN_FONT_SIZE, CodeEditor.CODE_MAX_FONT_SIZE );
+        this._setFontSize( newFontSize );
+    }
+
+    private _increaseFontSize()
+    {
+        this._applyFontSizeOffset( 1 );
+    }
+
+    private _decreaseFontSize()
+    {
+        this._applyFontSizeOffset( -1 );
     }
 }
 

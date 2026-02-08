@@ -4228,10 +4228,7 @@ ul.lexassetscontent {
 }
 
 .lexcodetabinfo {
-    background-color: var(--card);
-    position: absolute;
     z-index: 3;
-    bottom: 0px;
     justify-items: end;
     padding: 0.25rem 1rem;
 }
@@ -4374,6 +4371,10 @@ ul.lexassetscontent {
     visibility: visible;
 }
 
+.lexcodeeditor .selections.unfocused {
+    opacity: 0.25;
+}
+
 .lexcodeeditor .cursors .cursor {
     -webkit-text-size-adjust: 100%;
     font-family: monospace;
@@ -4451,7 +4452,7 @@ ul.lexassetscontent {
     top: 0px;
     width: 100px;
     height: var(--code-editor-row-height);
-    background-color: var(--color-blue-600);
+    background-color: var(--color-blue-500);
     opacity: 0.25;
 }
 
@@ -4582,6 +4583,7 @@ ul.lexassetscontent {
 .cm-mtd.javascript { color: #e9d98a }   /* method */
 
 .cm-mtd.typescript { color: #e9d98a }   /* method */
+.cm-sym.typescript { color: #e7ded2; }  /* symbol */
 .cm-enu.typescript { color: #4cacff }   /* enums */
 
 .cm-bln.c { color: #d44141; }   /* builtin */
