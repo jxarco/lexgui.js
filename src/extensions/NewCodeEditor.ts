@@ -594,7 +594,8 @@ interface EditOperation
 interface UndoEntry
 {
     operations: EditOperation[];
-    cursors: CursorPosition[];  // cursor state before the edit
+    cursorsBefore: CursorPosition[];
+    cursorsAfter: CursorPosition[];
 }
 
 class UndoManager
@@ -602,7 +603,8 @@ class UndoManager
     private _undoStack: UndoEntry[] = [];
     private _redoStack: UndoEntry[] = [];
     private _pendingOps: EditOperation[] = [];
-    private _pendingCursors: CursorPosition[] = [];
+    private _pendingCursorsBefore: CursorPosition[] = [];
+    private _pendingCursorsAfter: CursorPosition[] = [];
     private _lastPushTime: number = 0;
     private _groupThresholdMs: number;
     private _maxSteps: number;
@@ -629,10 +631,11 @@ class UndoManager
 
         if ( this._pendingOps.length === 0 )
         {
-            this._pendingCursors = cursors.map( c => ( { ...c } ) );
+            this._pendingCursorsBefore = cursors.map( c => ( { ...c } ) );
         }
 
         this._pendingOps.push( op );
+        this._pendingCursorsAfter = cursors.map( c => ( { ...c } ) );
         this._lastPushTime = now;
 
         // New edits clear the redo stack
@@ -642,22 +645,26 @@ class UndoManager
     /**
      * Force-flush pending operations into a final undo step.
      */
-    flush(): void
+    flush( cursorsAfter?: CursorPosition[] ): void
     {
+        if ( cursorsAfter && this._pendingOps.length > 0 )
+        {
+            this._pendingCursorsAfter = cursorsAfter.map( c => ( { ...c } ) );
+        }
         this._flush();
     }
 
     /**
-     * Undo the last step. Returns the operations to apply inversely, and the cursor state to restore.
+     * Undo the last step. Stores the operations to apply inversely, and returns the cursor state to restore.
      */
-    undo( doc: CodeDocument ): { cursors: CursorPosition[] } | null
+    undo( doc: CodeDocument, currentCursors?: CursorPosition[] ): { cursors: CursorPosition[] } | null
     {
-        this._flush();
+        this.flush( currentCursors );
 
         const entry = this._undoStack.pop();
         if ( !entry ) return null;
 
-        // Apply operations in reverse order
+        // Apply in reverse order
         const redoOps: EditOperation[] = [];
         for ( let i = entry.operations.length - 1; i >= 0; i-- )
         {
@@ -665,29 +672,30 @@ class UndoManager
             redoOps.unshift( inverseOp );
         }
 
-        this._redoStack.push( { operations: redoOps, cursors: entry.cursors } );
+        this._redoStack.push( { operations: redoOps, cursorsBefore: entry.cursorsBefore, cursorsAfter: entry.cursorsAfter } );
 
-        return { cursors: entry.cursors };
+        return { cursors: entry.cursorsBefore };
     }
 
     /**
-     * Redo the last undone step.
+     * Redo the last undone step. Returns the cursor state to restore.
      */
     redo( doc: CodeDocument ): { cursors: CursorPosition[] } | null
     {
         const entry = this._redoStack.pop();
         if ( !entry ) return null;
 
+        // Apply in forward order (redo entries are already in correct order)
         const undoOps: EditOperation[] = [];
-        for ( let i = entry.operations.length - 1; i >= 0; i-- )
+        for ( let i = 0; i < entry.operations.length; i++ )
         {
             const inverseOp = doc.applyInverse( entry.operations[i] );
-            undoOps.unshift( inverseOp );
+            undoOps.push( inverseOp );
         }
 
-        this._undoStack.push( { operations: undoOps, cursors: entry.cursors } );
+        this._undoStack.push( { operations: undoOps, cursorsBefore: entry.cursorsBefore, cursorsAfter: entry.cursorsAfter } );
 
-        return { cursors: entry.cursors };
+        return { cursors: entry.cursorsAfter };
     }
 
     canUndo(): boolean
@@ -714,11 +722,13 @@ class UndoManager
 
         this._undoStack.push( {
             operations: [ ...this._pendingOps ],
-            cursors: [ ...this._pendingCursors ]
+            cursorsBefore: [ ...this._pendingCursorsBefore ],
+            cursorsAfter: [ ...this._pendingCursorsAfter ]
         } );
 
         this._pendingOps.length = 0;
-        this._pendingCursors = [];
+        this._pendingCursorsBefore = [];
+        this._pendingCursorsAfter = [];
 
         // Limit stack size
         while ( this._undoStack.length > this._maxSteps )
@@ -1131,6 +1141,8 @@ export class CodeEditor
     private _focused: boolean = false;
     private _composing: boolean = false;
     private _keyChain: string | null = null;
+    private _wasPaired: boolean = false;
+    private _lastAction: string = '';
     private _blinkerInterval: ReturnType<typeof setInterval> | null = null;
     private _cursorVisible: boolean = true;
     private _cursorBlinkRate: number = 550;
@@ -1139,7 +1151,7 @@ export class CodeEditor
     private _lastClickLine: number = -1;
 
     private static readonly PAIR_KEYS: Record<string, string> = { '"': '"', "'": "'", '`': '`', '(': ')', '{': '}', '[': ']' };
-    private static readonly CLOSE_KEYS: Set<string> = new Set( Object.values( CodeEditor.PAIR_KEYS ) );
+
 
     constructor( area: typeof Area, options: CodeEditorOptions = {} )
     {
@@ -1564,7 +1576,7 @@ export class CodeEditor
                     return;
                 case 'z':
                     e.preventDefault();
-                    this._doUndo();
+                    shift ? this._doRedo() : this._doUndo();
                     return;
                 case 'y':
                     e.preventDefault();
@@ -1589,18 +1601,21 @@ export class CodeEditor
         {
             case 'ArrowLeft':
                 e.preventDefault();
+                this._wasPaired = false;
                 if ( ctrl ) this.cursorSet.moveWordLeft( this.doc, shift );
                 else this.cursorSet.moveLeft( this.doc, shift );
                 this._afterCursorMove();
                 return;
             case 'ArrowRight':
                 e.preventDefault();
+                this._wasPaired = false;
                 if ( ctrl ) this.cursorSet.moveWordRight( this.doc, shift );
                 else this.cursorSet.moveRight( this.doc, shift );
                 this._afterCursorMove();
                 return;
             case 'ArrowUp':
                 e.preventDefault();
+                this._wasPaired = false;
                 if ( alt && shift ) { this._duplicateLine( -1 ); return; }
                 if ( alt ) { this._swapLine( -1 ); return; }
                 this.cursorSet.moveUp( this.doc, shift );
@@ -1608,6 +1623,7 @@ export class CodeEditor
                 return;
             case 'ArrowDown':
                 e.preventDefault();
+                this._wasPaired = false;
                 if ( alt && shift ) { this._duplicateLine( 1 ); return; }
                 if ( alt ) { this._swapLine( 1 ); return; }
                 this.cursorSet.moveDown( this.doc, shift );
@@ -1615,11 +1631,13 @@ export class CodeEditor
                 return;
             case 'Home':
                 e.preventDefault();
+                this._wasPaired = false;
                 this.cursorSet.moveToLineStart( this.doc, shift );
                 this._afterCursorMove();
                 return;
             case 'End':
                 e.preventDefault();
+                this._wasPaired = false;
                 this.cursorSet.moveToLineEnd( this.doc, shift );
                 this._afterCursorMove();
                 return;
@@ -1660,6 +1678,21 @@ export class CodeEditor
         }
     }
 
+    private _flushIfActionChanged( action: string ): void
+    {
+        if ( this._lastAction !== action )
+        {
+            this.undoManager.flush( this.cursorSet.getCursorPositions() );
+            this._lastAction = action;
+        }
+    }
+
+    private _flushAction(): void
+    {
+        this.undoManager.flush( this.cursorSet.getCursorPositions() );
+        this._lastAction = '';
+    }
+
     private _doInsertChar( char: string ): void
     {
         // Enclose selection if applicable
@@ -1675,23 +1708,31 @@ export class CodeEditor
         const { line, col } = cursor.head;
         const nextChar = this.doc.getCharAt( line, col );
 
-        // If typing a closing pair char and the next char it's its closing, just skip over it
-        if ( CodeEditor.CLOSE_KEYS.has( char ) && nextChar === CodeEditor.PAIR_KEYS[char] )
+        // If we just auto-paired and the next char is the same closing char, skip over it
+        if ( this._wasPaired && nextChar === char )
         {
+            this._wasPaired = false;
             this.cursorSet.set( line, col + 1 );
             this._afterCursorMove();
             return;
         }
 
+        this._flushIfActionChanged( 'insert' );
+
         // Insert the character
         const op = this.doc.insert( line, col, char );
         this.undoManager.record( op, this.cursorSet.getCursorPositions() );
 
-        // Auto-pair here if next char is whitespace or end of line
+        // Auto-pair: insert closing char if next char is whitespace or end of line
         if ( char in CodeEditor.PAIR_KEYS && ( !nextChar || /\s/.test( nextChar ) ) )
         {
             const closeOp = this.doc.insert( line, col + 1, CodeEditor.PAIR_KEYS[ char ] );
             this.undoManager.record( closeOp, this.cursorSet.getCursorPositions() );
+            this._wasPaired = true;
+        }
+        else
+        {
+            this._wasPaired = false;
         }
 
         this.cursorSet.set( line, col + 1 );
@@ -1725,7 +1766,7 @@ export class CodeEditor
         }
         if ( minIndent === Infinity ) minIndent = 0;
 
-        this.undoManager.flush();
+        this._flushAction();
         for ( let i = fromLine; i <= toLine; i++ )
         {
             const line = this.doc.getLine( i );
@@ -1745,7 +1786,7 @@ export class CodeEditor
 
         const [ fromLine, toLine ] = this._getAffectedLines();
 
-        this.undoManager.flush();
+        this._flushAction();
         for ( let i = fromLine; i <= toLine; i++ )
         {
             const line = this.doc.getLine( i );
@@ -1786,7 +1827,7 @@ export class CodeEditor
         const from = fromLine.col;
         const to = toLine.col;
 
-        this.undoManager.flush();
+        this._flushAction();
 
         const op1 = this.doc.insert( line, from, open );
         this.undoManager.record( op1, this.cursorSet.getCursorPositions() );
@@ -1817,7 +1858,7 @@ export class CodeEditor
 
         if ( line === 0 && col === 0 ) return;
 
-        this.undoManager.flush();
+        this._flushIfActionChanged( 'backspace' );
 
         if ( col === 0 )
         {
@@ -1866,7 +1907,7 @@ export class CodeEditor
 
         if ( col >= lineText.length && line >= this.doc.lineCount - 1 ) return;
 
-        this.undoManager.flush();
+        this._flushIfActionChanged( 'delete' );
 
         if ( col >= lineText.length )
         {
@@ -1897,7 +1938,7 @@ export class CodeEditor
     private _doEnter(): void
     {
         this._deleteSelectionIfAny();
-        this.undoManager.flush();
+        this._flushAction();
 
         const cursor = this.cursorSet.getPrimary();
         const { line, col } = cursor.head;
@@ -1917,7 +1958,7 @@ export class CodeEditor
 
     private _doTab( shift: boolean ): void
     {
-        this.undoManager.flush();
+        this._flushAction();
 
         const cursor = this.cursorSet.getPrimary();
         const { line, col } = cursor.head;
@@ -1961,7 +2002,7 @@ export class CodeEditor
         const sel = this.cursorSet.getPrimary();
         const start = selectionStart( sel );
 
-        this.undoManager.flush();
+        this._flushAction();
 
         // Calculate total text length to delete
         const selectedText = this.cursorSet.getSelectedText( this.doc );
@@ -2000,7 +2041,7 @@ export class CodeEditor
 
             navigator.clipboard.writeText( lineText + ( isLastLine ? '' : '\n' ) );
 
-            this.undoManager.flush();
+            this._flushAction();
             const op = this.doc.removeLine( line );
             this.undoManager.record( op, this.cursorSet.getCursorPositions() );
 
@@ -2025,7 +2066,7 @@ export class CodeEditor
         const currentText = this.doc.getLine( line );
         const targetText = this.doc.getLine( targetLine );
 
-        this.undoManager.flush();
+        this._flushAction();
         const op1 = this.doc.replaceLine( line, targetText );
         this.undoManager.record( op1, this.cursorSet.getCursorPositions() );
         const op2 = this.doc.replaceLine( targetLine, currentText );
@@ -2044,7 +2085,7 @@ export class CodeEditor
         const line = cursor.head.line;
         const text = this.doc.getLine( line );
 
-        this.undoManager.flush();
+        this._flushAction();
         const op = this.doc.insertLine( line, text );
         this.undoManager.record( op, this.cursorSet.getCursorPositions() );
 
@@ -2064,7 +2105,7 @@ export class CodeEditor
         this._deleteSelectionIfAny();
 
         const cursor = this.cursorSet.getPrimary();
-        this.undoManager.flush();
+        this._flushAction();
         const op = this.doc.insert( cursor.head.line, cursor.head.col, text );
         this.undoManager.record( op, this.cursorSet.getCursorPositions() );
 
@@ -2090,7 +2131,7 @@ export class CodeEditor
 
     private _doUndo(): void
     {
-        const result = this.undoManager.undo( this.doc );
+        const result = this.undoManager.undo( this.doc, this.cursorSet.getCursorPositions() );
         if ( result )
         {
             if ( result.cursors.length > 0 )
@@ -2124,6 +2165,7 @@ export class CodeEditor
     {
         if ( e.button !== 0 ) return;
         e.preventDefault(); // Prevent browser from stealing focus from _inputArea
+        this._wasPaired = false;
 
         // Calculate line and column from click position
         const rect = this.codeContainer.getBoundingClientRect();
