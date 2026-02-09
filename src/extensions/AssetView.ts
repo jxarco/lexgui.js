@@ -535,11 +535,11 @@ export class AssetView
                 for ( let o of that.itemContextMenuOptions )
                 {
                     if ( !o.name || !o.callback ) continue;
-                    options.push( { name: o.name, icon: o.icon, callback: o.callback?.bind( that, that.selectedItems.length ? that.selectedItems : [ item ] ) } );
+                    options.push( { name: o.name, icon: o.icon, callback: o.callback?.bind( that, multipleSelection ? that.selectedItems : [ item ] ) } );
                 }
             }
 
-            options.push( null, { name: 'Delete', icon: 'Trash2', className: 'destructive', callback: that._requestDeleteItem.bind( that, that.selectedItems.length ? that.selectedItems : [ item ] ) } );
+            options.push( null, { name: 'Delete', icon: 'Trash2', className: 'destructive', callback: that._requestDeleteItem.bind( that, multipleSelection ? that.selectedItems : [ item ] ) } );
 
             LX.addClass( that.contentPanel.root, 'pointer-events-none' );
 
