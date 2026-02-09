@@ -20,7 +20,7 @@ function swapArrayElements(array, id0, id1) {
     [array[id0], array[id1]] = [array[id1], array[id0]];
 }
 function sliceChars(str, idx, n = 1) {
-    return str.substr(0, idx) + str.substr(idx + n);
+    return str.substring(0, idx) + str.substring(idx + n);
 }
 function firstNonspaceIndex(str) {
     const index = str.search(/\S|$/);
@@ -265,7 +265,7 @@ const HighlightRules = {
     common: [
         { test: (ctx) => ctx.inBlockComment, className: 'cm-com' },
         { test: (ctx) => ctx.inString, action: (ctx, editor) => editor._appendStringToken(ctx.token), discard: true },
-        { test: (ctx) => ctx.token.substr(0, ctx.singleLineCommentToken.length) == ctx.singleLineCommentToken, className: 'cm-com' },
+        { test: (ctx) => ctx.token.substring(0, ctx.singleLineCommentToken.length) == ctx.singleLineCommentToken, className: 'cm-com' },
         { test: (ctx, editor) => editor._isKeyword(ctx), className: 'cm-kwd' },
         {
             test: (ctx, editor) => editor._mustHightlightWord(ctx.token, CE.builtIn, ctx.lang) && (ctx.lang.tags ?? false
@@ -1031,8 +1031,8 @@ class CodeEditor {
                 var _c0 = this.getCharAtPos(cursor, -1);
                 var _c1 = this.getCharAtPos(cursor);
                 this.code.lines.splice(cursor.line + 1, 0, '');
-                this.code.lines[cursor.line + 1] = this.code.lines[ln].substr(cursor.position); // new line (below)
-                this.code.lines[ln] = this.code.lines[ln].substr(0, cursor.position); // line above
+                this.code.lines[cursor.line + 1] = this.code.lines[ln].substring(cursor.position); // new line (below)
+                this.code.lines[ln] = this.code.lines[ln].substring(0, cursor.position); // line above
                 this.lineDown(cursor, true);
                 // Check indentation
                 var spaces = firstNonspaceIndex(this.code.lines[ln]);
@@ -1124,7 +1124,7 @@ class CodeEditor {
                         e.keepSelection = kS;
                     }
                     var diff = Math.max(cursor.position - from, 1);
-                    var substr = word.substr(0, diff);
+                    var substr = word.substring(0, diff);
                     // Selections...
                     if (e.shiftKey) {
                         if (!cursor.selection) {
@@ -1194,7 +1194,7 @@ class CodeEditor {
                     if (!word.length)
                         this.lineDown(cursor, true);
                     var diff = cursor.position - from;
-                    var substr = word.substr(diff);
+                    var substr = word.substring(diff);
                     // Selections...
                     if (e.shiftKey) {
                         if (!cursor.selection) {
@@ -1578,6 +1578,7 @@ class CodeEditor {
         this._addRedoStep(cursor);
         // Extract info from the last code state
         const step = this.code.undoSteps.pop();
+        debugger;
         // Set old state lines
         this.code.lines = step.lines;
         this.processLines();
@@ -2193,9 +2194,9 @@ class CodeEditor {
                         index += i == cursor.selection.fromY ? cursor.selection.fromX : this.code.lines[i].length;
                     }
                     index += cursor.selection.fromY * separator.length;
-                    const num_chars = cursor.selection.chars
+                    const numChars = cursor.selection.chars
                         + (cursor.selection.toY - cursor.selection.fromY) * separator.length;
-                    const text = code.substr(index, num_chars);
+                    const text = code.substring(index, index + numChars);
                     content = text.split(separator).join('\n');
                 }
                 const options = this.onContextMenu(this, content, e);
@@ -2340,7 +2341,7 @@ class CodeEditor {
                             : this.code.lines[i].substring(toX, fromX);
                     }
                     else
-                        string = this.code.lines[i].substr(fromX);
+                        string = this.code.lines[i].substring(fromX);
                     const pixels = (reverse && deltaY == 0 ? toX : fromX) * this.charWidth;
                     if (isVisible)
                         domEl.style.left = `calc(${pixels}px + ${this.xPadding})`;
@@ -2380,7 +2381,7 @@ class CodeEditor {
                 // Compute new width and selection margins
                 let string;
                 if (sId == 0) {
-                    string = this.code.lines[i].substr(toX);
+                    string = this.code.lines[i].substring(toX);
                     const pixels = toX * this.charWidth;
                     if (isVisible)
                         domEl.style.left = 'calc(' + pixels + 'px + ' + this.xPadding + ')';
@@ -2707,9 +2708,9 @@ class CodeEditor {
                 index += i == cursor.selection.fromY ? cursor.selection.fromX : this.code.lines[i].length;
             }
             index += cursor.selection.fromY * separator.length;
-            const num_chars = cursor.selection.chars
+            const numChars = cursor.selection.chars
                 + (cursor.selection.toY - cursor.selection.fromY) * separator.length;
-            const text = code.substr(index, num_chars);
+            const text = code.substring(index, index + numChars);
             const lines = text.split(separator);
             textToCopy = lines.join('\n');
         }
@@ -2743,7 +2744,7 @@ class CodeEditor {
             index += cursor.selection.fromY * separator.length;
             const numChars = cursor.selection.chars
                 + (cursor.selection.toY - cursor.selection.fromY) * separator.length;
-            const text = code.substr(index, numChars);
+            const text = code.substring(index, index + numChars);
             const lines = text.split(separator);
             textToCut = lines.join('\n');
             this.deleteSelection(cursor);
@@ -3024,7 +3025,7 @@ class CodeEditor {
                 tokens: tokensToEvaluate
             });
             if (blockComments && this._buildingBlockComment != undefined
-                && token.substr(0, blockCommentsTokens[1].length) == blockCommentsTokens[1]) {
+                && token.substring(0, blockCommentsTokens[1].length) == blockCommentsTokens[1]) {
                 const [commentLineNumber, tokenPos] = this._buildingBlockComment;
                 this._blockCommentCache.push([new LX.vec2(commentLineNumber, lineNumber), new LX.vec2(tokenPos, tokenStartIndex)]);
                 delete this._buildingBlockComment;
@@ -3047,10 +3048,10 @@ class CodeEditor {
                     const openIdx = kLineString.lastIndexOf('{');
                     const closeIdx = kLineString.lastIndexOf('}');
                     if (openIdx > -1) {
-                        kLineString = kLineString.substr(openIdx);
+                        kLineString = kLineString.substring(openIdx);
                     }
                     else if (closeIdx > -1) {
-                        kLineString = kLineString.substr(closeIdx);
+                        kLineString = kLineString.substring(closeIdx);
                     }
                     contextTokens = [...this._getTokensFromLine(kLineString), ...contextTokens];
                     if (kLineString.length !== this.code.lines[lineNumber - k]) {
@@ -3113,7 +3114,7 @@ class CodeEditor {
             until reaching new delimiters
         */
         if (lineOpensBlock) {
-            const r = tokens.filter((t) => t.substr(0, blockCommentsTokens[0].length) == blockCommentsTokens[0]);
+            const r = tokens.filter((t) => t.substring(0, blockCommentsTokens[0].length) == blockCommentsTokens[0]);
             if (!r.length) {
                 this._buildingBlockComment = [lineNumber - 1, 0];
                 this.mustProcessPreviousLine = (tokens) => {
@@ -3135,7 +3136,7 @@ class CodeEditor {
             }
         }
         else if (lineClosesBlock) {
-            const r = tokens.filter((t) => t.substr(0, blockCommentsTokens[1].length) == blockCommentsTokens[1]);
+            const r = tokens.filter((t) => t.substring(0, blockCommentsTokens[1].length) == blockCommentsTokens[1]);
             if (!r.length) {
                 this._buildingBlockComment = [section[0].x, section[1].x];
                 this.mustProcessNextLine = (tokens) => {
@@ -3910,9 +3911,9 @@ class CodeEditor {
             index += i == selection.fromY ? selection.fromX : this.code.lines[i].length;
         }
         index += selection.fromY * separator.length;
-        const num_chars = selection.chars + (selection.toY - selection.fromY) * separator.length;
+        const numChars = selection.chars + (selection.toY - selection.fromY) * separator.length;
         const pre = code.slice(0, index);
-        const post = code.slice(index + num_chars);
+        const post = code.slice(index + numChars);
         this.code.lines = (pre + post).split(separator);
         this.cursorToLine(cursor, selection.fromY, true);
         this.cursorToPosition(cursor, selection.fromX);
@@ -4558,7 +4559,7 @@ class CodeEditor {
             preWord.innerHTML = currSuggestion.substring(0, index);
             pre.appendChild(preWord);
             var actualWord = document.createElement('span');
-            actualWord.innerHTML = currSuggestion.substr(index, word.length);
+            actualWord.innerHTML = currSuggestion.substring(index, index + word.length);
             actualWord.classList.add('word-highlight');
             pre.appendChild(actualWord);
             var postWord = document.createElement('span');
@@ -4699,13 +4700,13 @@ class CodeEditor {
         const getIndex = (l) => {
             var string = this.code.lines[l];
             if (reverse) {
-                string = string.substr(0, l == cursorData.y ? cursorData.x : string.length);
+                string = string.substring(0, l == cursorData.y ? cursorData.x : string.length);
                 var reversed = strReverse(string);
                 var reversedIdx = reversed.indexOf(strReverse(text));
                 return reversedIdx == -1 ? -1 : string.length - reversedIdx - text.length;
             }
             else {
-                return string.substr(l == cursorData.y ? cursorData.x : 0).indexOf(text);
+                return string.substring(l == cursorData.y ? cursorData.x : 0).indexOf(text);
             }
         };
         if (reverse) {

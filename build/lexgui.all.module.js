@@ -12,7 +12,7 @@ const g$2 = globalThis;
 let LX = g$2.LX;
 if (!LX) {
     LX = {
-        version: '8.2.4',
+        version: '8.2.5',
         ready: false,
         extensions: [], // Store extensions used
         extraCommandbarEntries: [], // User specific entries for command bar
@@ -4982,6 +4982,7 @@ class NodeTree {
         item.id = LX.getSupportedDOMName(node.id);
         item.tabIndex = '0';
         item.treeData = node;
+        node.treeEl = item;
         // Select hierarchy icon
         let icon = (this.options.skipDefaultIcon ?? true) ? null : 'Dot'; // Default: no childs
         if (isParent) {
@@ -5464,21 +5465,45 @@ class NodeTree {
             el.focus();
         }
     }
-    select(id) {
+    /* 'path' here helps to identity the correct item based on its parent path, for same 'id' issues */
+    select(id, path) {
         const nodeFilter = this.domEl.querySelector('.lexnodetreefilter');
         if (nodeFilter) {
             nodeFilter.value = '';
         }
         this.refresh(null, id);
         this.domEl.querySelectorAll('.selected').forEach((i) => i.classList.remove('selected'));
-        // Unselect
-        if (!id) {
-            this.selected.length = 0;
-            return;
+        if (id === undefined) {
+            // if no id, try with the path
+            if (path !== undefined) {
+                id = path.at(-1);
+            }
+            else {
+                // Unselect
+                this.selected.length = 0;
+                return;
+            }
         }
-        // Element should exist, since tree was refreshed to show it
-        const el = this.domEl.querySelector('#' + LX.getSupportedDOMName(id));
-        console.assert(el, "NodeTree: Can't select node " + id);
+        let el = null;
+        if (path !== undefined) {
+            let sourceData = this.data;
+            for (const p of path) {
+                const pItem = sourceData.children.find((item) => item.id === p);
+                if (!pItem)
+                    break;
+                sourceData = pItem;
+            }
+            el = sourceData.treeEl;
+            console.assert(el, 'NodeTree: No domEl in item ' + id);
+        }
+        else if (id !== undefined) {
+            // Element should exist, since tree was refreshed to show it
+            el = this.domEl.querySelector('#' + LX.getSupportedDOMName(id));
+            console.assert(el, "NodeTree: Can't select node " + id);
+        }
+        if (!el) {
+            console.assert(el, "NodeTree: Can't select node " + id);
+        }
         el.classList.add('selected');
         this.selected = [el.treeData];
         el.focus();
@@ -14037,7 +14062,7 @@ class AssetView {
     rootItem;
     path = [];
     rootPath = '';
-    selectedItem = undefined;
+    selectedItems = [];
     allowedTypes;
     searchValue = '';
     filter = 'None';
@@ -14049,7 +14074,8 @@ class AssetView {
     skipPreview = false;
     useNativeTitle = false;
     onlyFolders = true;
-    allowMultipleSelection = false;
+    allowMultipleSelection = true;
+    allowItemCheck = false;
     previewActions = [];
     contextMenu = [];
     itemContextMenuOptions = null;
@@ -14089,6 +14115,7 @@ class AssetView {
         this.useNativeTitle = options.useNativeTitle ?? this.useNativeTitle;
         this.onlyFolders = options.onlyFolders ?? this.onlyFolders;
         this.allowMultipleSelection = options.allowMultipleSelection ?? this.allowMultipleSelection;
+        this.allowItemCheck = options.allowItemCheck ?? this.allowItemCheck;
         this.previewActions = options.previewActions ?? [];
         this.itemContextMenuOptions = options.itemContextMenuOptions;
         this.gridScale = options.gridScale ?? this.gridScale;
@@ -14185,9 +14212,9 @@ class AssetView {
         if (!this.useNativeTitle) {
             let desc = document.createElement('span');
             desc.className = 'lexitemdesc';
-            desc.id = `floatingTitle_${metadata.uid}`;
+            desc.id = LX.getSupportedDOMName(`floatingTitle_${metadata.uid}`);
             desc.innerHTML = `File: ${item.id}<br>Type: ${type}`;
-            LX.insertChildAtIndex(this.content, desc, childIndex ? childIndex + 1 : undefined);
+            LX.insertChildAtIndex(this.content, desc, childIndex !== undefined ? childIndex + 1 : undefined);
             itemEl.addEventListener('mousemove', (e) => {
                 if (!isGridLayout) {
                     return;
@@ -14213,7 +14240,7 @@ class AssetView {
         else {
             itemEl.title = type + ': ' + item.id;
         }
-        if (this.allowMultipleSelection) {
+        if (this.allowItemCheck) {
             let checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
             checkbox.className = 'lexcheckbox';
@@ -14302,11 +14329,12 @@ class AssetView {
             e.stopPropagation();
             const isDoubleClick = e.detail == LX.MOUSE_DOUBLE_CLICK;
             if (!isDoubleClick) {
-                if (!e.shiftKey) {
+                if (!e.shiftKey || !that.allowMultipleSelection) {
                     that.content.querySelectorAll('.lexassetitem').forEach((i) => i.classList.remove('selected'));
+                    that.selectedItems.length = 0;
                 }
                 this.classList.add('selected');
-                that.selectedItem = item;
+                that.selectedItems.push(item);
                 if (!that.skipPreview) {
                     that._previewAsset(item);
                 }
@@ -14338,35 +14366,44 @@ class AssetView {
             e.preventDefault();
             e.stopImmediatePropagation();
             e.stopPropagation();
-            const multiple = that.content.querySelectorAll('.selected').length;
+            const multipleSelection = that.selectedItems.length > 1;
             const options = [
                 {
-                    name: (multiple > 1) ? (multiple + ' selected') : item.id,
+                    name: multipleSelection ? (`${that.selectedItems.length} selected`) : item.id,
                     icon: LX.makeIcon('CircleSmall', { svgClass: `fill-current text-${typeColor}` }),
                     className: 'text-sm',
                     disabled: true
                 },
                 null
             ];
-            if (multiple <= 1) {
+            // By now, allow with none/single selected items
+            if (!multipleSelection) {
                 options.push({ name: 'Rename', icon: 'TextCursor', callback: that._renameItemPopover.bind(that, item) });
             }
-            if (!isFolder) {
+            // By now, allow with none/single selected items
+            if (!isFolder && !multipleSelection) {
                 options.push({ name: 'Clone', icon: 'Copy', callback: that._requestCloneItem.bind(that, item) });
             }
-            options.push({ name: 'Move', icon: 'FolderInput', callback: () => that._moveItem(item) });
-            if (type == 'Script' && LX.has('CodeEditor')) {
+            // By now, allow with none/single selected items
+            if (!multipleSelection) {
+                options.push({ name: 'Move', icon: 'FolderInput', callback: () => that._moveItem(item) });
+            }
+            // By now, allow with none/single selected items
+            if (!multipleSelection && type == 'Script' && LX.has('CodeEditor')) {
                 options.push({ name: 'Open in Editor', icon: 'Code', callback: that._openScriptInEditor.bind(that, item) });
             }
             if (that.itemContextMenuOptions) {
-                options.push(null);
+                if (options.length > 2)
+                    options.push(null);
                 for (let o of that.itemContextMenuOptions) {
                     if (!o.name || !o.callback)
                         continue;
-                    options.push({ name: o.name, icon: o.icon, callback: o.callback?.bind(that, item) });
+                    options.push({ name: o.name, icon: o.icon,
+                        callback: o.callback?.bind(that, multipleSelection ? that.selectedItems : [item]) });
                 }
             }
-            options.push(null, { name: 'Delete', icon: 'Trash2', className: 'destructive', callback: that._requestDeleteItem.bind(that, item) });
+            options.push(null, { name: 'Delete', icon: 'Trash2', className: 'destructive',
+                callback: that._requestDeleteItem.bind(that, multipleSelection ? that.selectedItems : [item]) });
             LX.addClass(that.contentPanel.root, 'pointer-events-none');
             LX.addDropdownMenu(e.target, options, { side: 'right', align: 'start', event: e, onBlur: () => {
                     LX.removeClass(that.contentPanel.root, 'pointer-events-none');
@@ -14397,7 +14434,8 @@ class AssetView {
                 e.dataTransfer.setDragImage(img, 0, 0);
                 e.dataTransfer.effectAllowed = 'move';
             }
-            const desc = that.content.querySelector(`#floatingTitle_${metadata.uid}`);
+            const domName = LX.getSupportedDOMName(`floatingTitle_${metadata.uid}`);
+            const desc = that.content.querySelector(`#${domName}`);
             if (desc)
                 desc.style.display = 'none';
         }, false);
@@ -14432,7 +14470,8 @@ class AssetView {
         });
         itemEl.addEventListener('mouseenter', (e) => {
             if (!that.useNativeTitle && isGridLayout) {
-                const desc = that.content.querySelector(`#floatingTitle_${metadata.uid}`);
+                const domName = LX.getSupportedDOMName(`floatingTitle_${metadata.uid}`);
+                const desc = that.content.querySelector(`#${domName}`);
                 if (desc)
                     desc.style.display = 'unset';
             }
@@ -14446,7 +14485,8 @@ class AssetView {
         itemEl.addEventListener('mouseleave', (e) => {
             if (!that.useNativeTitle && isGridLayout) {
                 setTimeout(() => {
-                    const desc = that.content.querySelector(`#floatingTitle_${metadata.uid}`);
+                    const domName = LX.getSupportedDOMName(`floatingTitle_${metadata.uid}`);
+                    const desc = that.content.querySelector(`#${domName}`);
                     if (desc)
                         desc.style.display = 'none';
                 }, 100);
@@ -14575,7 +14615,7 @@ class AssetView {
                     const dom = node.domEl;
                     dom?.classList.add('selected');
                 }
-                this.selectedItem = node;
+                this.selectedItems = [node];
             }
         });
         tree.on('beforeMove', (event, resolve) => {
@@ -14726,6 +14766,7 @@ class AssetView {
         });
         this.content.addEventListener('click', function () {
             this.querySelectorAll('.lexassetitem').forEach((i) => i.classList.remove('selected'));
+            that.selectedItems.length = 0;
         });
         this.content.addEventListener('contextmenu', function (e) {
             e.preventDefault();
@@ -14944,7 +14985,7 @@ class AssetView {
             return;
         }
         const child = this.currentData[0];
-        const sameFolder = child?.parent?.id === folderItem.id;
+        const sameFolder = child?.parent?.metadata?.uid === folderItem.metadata?.uid;
         if (storeCurrent) {
             this.prevData.push(this.currentFolder ?? {
                 id: '/',
@@ -14970,7 +15011,15 @@ class AssetView {
         if (mustRefresh) {
             this._processData(this.data);
             this._refreshContent();
-            this.tree?.select(this.currentFolder.id);
+            // Get path to avoid same id issues
+            let path = `${this.currentFolder.id}/`;
+            let parent = this.currentFolder.parent;
+            while (parent && parent.id !== '/') {
+                path += `${parent.id}/`;
+                parent = parent.parent;
+            }
+            const parentsPath = path.split('/').filter(Boolean).reverse();
+            this.tree?.select(undefined, parentsPath);
         }
         this._updatePath();
     }
@@ -14995,14 +15044,14 @@ class AssetView {
         }
         return true;
     }
-    _requestDeleteItem(item) {
+    _requestDeleteItem(items) {
         const onBeforeDelete = this._callbacks['beforeDelete'];
         const onDelete = this._callbacks['delete'];
         const resolve = (...args) => {
-            this._deleteItem(item);
+            items.forEach((item) => this._deleteItem(item));
             const event = {
                 type: 'delete',
-                items: [item],
+                items,
                 userInitiated: true
             };
             if (onDelete)
@@ -15011,7 +15060,7 @@ class AssetView {
         if (onBeforeDelete) {
             const event = {
                 type: 'delete',
-                items: [item],
+                items,
                 userInitiated: true
             };
             onBeforeDelete(event, resolve);
@@ -15120,7 +15169,7 @@ class AssetView {
             }
             bcContainer.innerHTML = '';
             bcContainer.appendChild(LX.makeBreadcrumb(path.reverse().map((p) => {
-                return { title: p };
+                return { name: p };
             }), {
                 maxItems: 4,
                 separatorIcon: 'ChevronRight'
@@ -15290,16 +15339,21 @@ class AssetView {
         // It could be a Tree event, so maybe the elements is not created yet
         if (item.domEl) {
             const wasSelected = LX.hasClass(item.domEl, 'selected');
-            const hoverTitle = this.content.querySelector(`#floatingTitle_${item.id.replace(/\s/g, '_').replaceAll('.', '_')}`);
+            const hoverTitleDomName = LX.getSupportedDOMName(`floatingTitle_${item.metadata.uid}`);
+            const hoverTitle = this.content.querySelector(`#${hoverTitleDomName}`);
             if (hoverTitle)
                 hoverTitle.remove();
             item.domEl?.remove();
+            // Update new name
+            item.id = newName;
             item.domEl = this.addItem(item, idx * 2);
             if (wasSelected) {
                 this._previewAsset(item);
             }
         }
-        item.id = newName;
+        else {
+            item.id = newName;
+        }
         this.tree?.refresh();
         this._processData(this.data);
     }
@@ -15578,7 +15632,7 @@ function swapArrayElements(array, id0, id1) {
     [array[id0], array[id1]] = [array[id1], array[id0]];
 }
 function sliceChars(str, idx, n = 1) {
-    return str.substr(0, idx) + str.substr(idx + n);
+    return str.substring(0, idx) + str.substring(idx + n);
 }
 function firstNonspaceIndex(str) {
     const index = str.search(/\S|$/);
@@ -15823,7 +15877,7 @@ const HighlightRules = {
     common: [
         { test: (ctx) => ctx.inBlockComment, className: 'cm-com' },
         { test: (ctx) => ctx.inString, action: (ctx, editor) => editor._appendStringToken(ctx.token), discard: true },
-        { test: (ctx) => ctx.token.substr(0, ctx.singleLineCommentToken.length) == ctx.singleLineCommentToken, className: 'cm-com' },
+        { test: (ctx) => ctx.token.substring(0, ctx.singleLineCommentToken.length) == ctx.singleLineCommentToken, className: 'cm-com' },
         { test: (ctx, editor) => editor._isKeyword(ctx), className: 'cm-kwd' },
         {
             test: (ctx, editor) => editor._mustHightlightWord(ctx.token, CE.builtIn, ctx.lang) && (ctx.lang.tags ?? false
@@ -16589,8 +16643,8 @@ class CodeEditor {
                 var _c0 = this.getCharAtPos(cursor, -1);
                 var _c1 = this.getCharAtPos(cursor);
                 this.code.lines.splice(cursor.line + 1, 0, '');
-                this.code.lines[cursor.line + 1] = this.code.lines[ln].substr(cursor.position); // new line (below)
-                this.code.lines[ln] = this.code.lines[ln].substr(0, cursor.position); // line above
+                this.code.lines[cursor.line + 1] = this.code.lines[ln].substring(cursor.position); // new line (below)
+                this.code.lines[ln] = this.code.lines[ln].substring(0, cursor.position); // line above
                 this.lineDown(cursor, true);
                 // Check indentation
                 var spaces = firstNonspaceIndex(this.code.lines[ln]);
@@ -16682,7 +16736,7 @@ class CodeEditor {
                         e.keepSelection = kS;
                     }
                     var diff = Math.max(cursor.position - from, 1);
-                    var substr = word.substr(0, diff);
+                    var substr = word.substring(0, diff);
                     // Selections...
                     if (e.shiftKey) {
                         if (!cursor.selection) {
@@ -16752,7 +16806,7 @@ class CodeEditor {
                     if (!word.length)
                         this.lineDown(cursor, true);
                     var diff = cursor.position - from;
-                    var substr = word.substr(diff);
+                    var substr = word.substring(diff);
                     // Selections...
                     if (e.shiftKey) {
                         if (!cursor.selection) {
@@ -17136,6 +17190,7 @@ class CodeEditor {
         this._addRedoStep(cursor);
         // Extract info from the last code state
         const step = this.code.undoSteps.pop();
+        debugger;
         // Set old state lines
         this.code.lines = step.lines;
         this.processLines();
@@ -17751,9 +17806,9 @@ class CodeEditor {
                         index += i == cursor.selection.fromY ? cursor.selection.fromX : this.code.lines[i].length;
                     }
                     index += cursor.selection.fromY * separator.length;
-                    const num_chars = cursor.selection.chars
+                    const numChars = cursor.selection.chars
                         + (cursor.selection.toY - cursor.selection.fromY) * separator.length;
-                    const text = code.substr(index, num_chars);
+                    const text = code.substring(index, index + numChars);
                     content = text.split(separator).join('\n');
                 }
                 const options = this.onContextMenu(this, content, e);
@@ -17898,7 +17953,7 @@ class CodeEditor {
                             : this.code.lines[i].substring(toX, fromX);
                     }
                     else
-                        string = this.code.lines[i].substr(fromX);
+                        string = this.code.lines[i].substring(fromX);
                     const pixels = (reverse && deltaY == 0 ? toX : fromX) * this.charWidth;
                     if (isVisible)
                         domEl.style.left = `calc(${pixels}px + ${this.xPadding})`;
@@ -17938,7 +17993,7 @@ class CodeEditor {
                 // Compute new width and selection margins
                 let string;
                 if (sId == 0) {
-                    string = this.code.lines[i].substr(toX);
+                    string = this.code.lines[i].substring(toX);
                     const pixels = toX * this.charWidth;
                     if (isVisible)
                         domEl.style.left = 'calc(' + pixels + 'px + ' + this.xPadding + ')';
@@ -18265,9 +18320,9 @@ class CodeEditor {
                 index += i == cursor.selection.fromY ? cursor.selection.fromX : this.code.lines[i].length;
             }
             index += cursor.selection.fromY * separator.length;
-            const num_chars = cursor.selection.chars
+            const numChars = cursor.selection.chars
                 + (cursor.selection.toY - cursor.selection.fromY) * separator.length;
-            const text = code.substr(index, num_chars);
+            const text = code.substring(index, index + numChars);
             const lines = text.split(separator);
             textToCopy = lines.join('\n');
         }
@@ -18301,7 +18356,7 @@ class CodeEditor {
             index += cursor.selection.fromY * separator.length;
             const numChars = cursor.selection.chars
                 + (cursor.selection.toY - cursor.selection.fromY) * separator.length;
-            const text = code.substr(index, numChars);
+            const text = code.substring(index, index + numChars);
             const lines = text.split(separator);
             textToCut = lines.join('\n');
             this.deleteSelection(cursor);
@@ -18582,7 +18637,7 @@ class CodeEditor {
                 tokens: tokensToEvaluate
             });
             if (blockComments && this._buildingBlockComment != undefined
-                && token.substr(0, blockCommentsTokens[1].length) == blockCommentsTokens[1]) {
+                && token.substring(0, blockCommentsTokens[1].length) == blockCommentsTokens[1]) {
                 const [commentLineNumber, tokenPos] = this._buildingBlockComment;
                 this._blockCommentCache.push([new LX.vec2(commentLineNumber, lineNumber), new LX.vec2(tokenPos, tokenStartIndex)]);
                 delete this._buildingBlockComment;
@@ -18605,10 +18660,10 @@ class CodeEditor {
                     const openIdx = kLineString.lastIndexOf('{');
                     const closeIdx = kLineString.lastIndexOf('}');
                     if (openIdx > -1) {
-                        kLineString = kLineString.substr(openIdx);
+                        kLineString = kLineString.substring(openIdx);
                     }
                     else if (closeIdx > -1) {
-                        kLineString = kLineString.substr(closeIdx);
+                        kLineString = kLineString.substring(closeIdx);
                     }
                     contextTokens = [...this._getTokensFromLine(kLineString), ...contextTokens];
                     if (kLineString.length !== this.code.lines[lineNumber - k]) {
@@ -18671,7 +18726,7 @@ class CodeEditor {
             until reaching new delimiters
         */
         if (lineOpensBlock) {
-            const r = tokens.filter((t) => t.substr(0, blockCommentsTokens[0].length) == blockCommentsTokens[0]);
+            const r = tokens.filter((t) => t.substring(0, blockCommentsTokens[0].length) == blockCommentsTokens[0]);
             if (!r.length) {
                 this._buildingBlockComment = [lineNumber - 1, 0];
                 this.mustProcessPreviousLine = (tokens) => {
@@ -18693,7 +18748,7 @@ class CodeEditor {
             }
         }
         else if (lineClosesBlock) {
-            const r = tokens.filter((t) => t.substr(0, blockCommentsTokens[1].length) == blockCommentsTokens[1]);
+            const r = tokens.filter((t) => t.substring(0, blockCommentsTokens[1].length) == blockCommentsTokens[1]);
             if (!r.length) {
                 this._buildingBlockComment = [section[0].x, section[1].x];
                 this.mustProcessNextLine = (tokens) => {
@@ -19468,9 +19523,9 @@ class CodeEditor {
             index += i == selection.fromY ? selection.fromX : this.code.lines[i].length;
         }
         index += selection.fromY * separator.length;
-        const num_chars = selection.chars + (selection.toY - selection.fromY) * separator.length;
+        const numChars = selection.chars + (selection.toY - selection.fromY) * separator.length;
         const pre = code.slice(0, index);
-        const post = code.slice(index + num_chars);
+        const post = code.slice(index + numChars);
         this.code.lines = (pre + post).split(separator);
         this.cursorToLine(cursor, selection.fromY, true);
         this.cursorToPosition(cursor, selection.fromX);
@@ -20116,7 +20171,7 @@ class CodeEditor {
             preWord.innerHTML = currSuggestion.substring(0, index);
             pre.appendChild(preWord);
             var actualWord = document.createElement('span');
-            actualWord.innerHTML = currSuggestion.substr(index, word.length);
+            actualWord.innerHTML = currSuggestion.substring(index, index + word.length);
             actualWord.classList.add('word-highlight');
             pre.appendChild(actualWord);
             var postWord = document.createElement('span');
@@ -20257,13 +20312,13 @@ class CodeEditor {
         const getIndex = (l) => {
             var string = this.code.lines[l];
             if (reverse) {
-                string = string.substr(0, l == cursorData.y ? cursorData.x : string.length);
+                string = string.substring(0, l == cursorData.y ? cursorData.x : string.length);
                 var reversed = strReverse(string);
                 var reversedIdx = reversed.indexOf(strReverse(text));
                 return reversedIdx == -1 ? -1 : string.length - reversedIdx - text.length;
             }
             else {
-                return string.substr(l == cursorData.y ? cursorData.x : 0).indexOf(text);
+                return string.substring(l == cursorData.y ? cursorData.x : 0).indexOf(text);
             }
         };
         if (reverse) {
@@ -20646,11 +20701,17 @@ if (!LX) {
     throw ('Missing LX namespace!');
 }
 LX.extensions.push('DocMaker');
+const CLASS_WORDS = ['uint32_t', 'uint64_t', 'uint8_t'];
 const CPP_KEY_WORDS = ['int', 'float', 'double', 'bool', 'char', 'wchar_t', 'const', 'static_cast', 'dynamic_cast', 'new', 'delete', 'void', 'true',
     'false', 'auto', 'struct', 'typedef', 'nullptr', 'NULL', 'unsigned', 'namespace', 'auto'];
-const CLASS_WORDS = ['uint32_t', 'uint64_t', 'uint8_t'];
-const STATEMENT_WORDS = ['for', 'if', 'else', 'return', 'continue', 'break', 'case', 'switch', 'while', 'import', 'from', 'await'];
 const JS_KEY_WORDS = ['var', 'let', 'const', 'static', 'function', 'null', 'undefined', 'new', 'delete', 'true', 'false', 'NaN', 'this'];
+const WGSL_KEY_WORDS = ['var', 'let', 'const', 'override', 'fn', 'struct', 'alias', 'true', 'false', 'bool', 'f16', 'f32', 'i32', 'u32', 'vec2',
+    'vec3', 'vec4', 'mat2x2', 'mat2x3', 'mat2x4', 'mat3x2', 'mat3x3', 'mat3x4', 'mat4x2', 'mat4x3', 'mat4x4' // 'atomic', 'array', 'ptr', 'sampler', 'sampler_comparison', 'texture_1d', 'texture_2d', 'texture_2d_array', 'texture_3d', 'texture_cube', 'texture_cube_array',
+    // 'texture_multisampled_2d', 'texture_external', 'texture_storage_1d', 'texture_storage_2d', 'texture_storage_2d_array', 'texture_storage_3d', 'texture_depth_2d',
+    // 'texture_depth_2d_array', 'texture_depth_cube', 'texture_depth_cube_array', 'texture_depth_multisampled_2d', 'function', 'private', 'workgroup', 'uniform',
+    // 'storage', 'read', 'write', 'read_write', 'binding', 'builtin', 'group', 'id', 'interpolate', 'invariant', 'location',  'size', 'align', 'stride', 'vertex', 'fragment', 'compute', 'workgroup_size',
+];
+const STATEMENT_WORDS = ['for', 'if', 'else', 'return', 'continue', 'break', 'case', 'switch', 'while', 'import', 'from', 'await'];
 const HTML_ATTRIBUTES = ['html', 'charset', 'rel', 'src', 'href', 'crossorigin', 'type', 'lang'];
 const HTML_TAGS = ['DOCTYPE', 'html', 'head', 'body', 'title', 'base', 'link', 'meta', 'style', 'main', 'section', 'nav', 'article', 'aside',
     'header', 'footer', 'address', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'hr', 'pre', 'blockquote', 'ol', 'ul', 'li', 'dl', 'dt', 'dd', 'figure',
@@ -20759,6 +20820,9 @@ class DocMaker {
                     else if (language == 'js' && JS_KEY_WORDS.includes(content)) {
                         highlight = 'kwd';
                     }
+                    else if (language == 'wgsl' && WGSL_KEY_WORDS.includes(content)) {
+                        highlight = 'kwd';
+                    }
                     else if (CLASS_WORDS.includes(content)) {
                         highlight = 'cls';
                     }
@@ -20780,8 +20844,8 @@ class DocMaker {
                         highlight = 'dec';
                     }
                     else {
-                        console.error('ERROR[Code Parsing]: Unknown highlight type: ' + content);
-                        return;
+                        highlight = '';
+                        console.error('WARNING[Code Parsing]: Unknown highlight type: ' + content);
                     }
                     html = getHTML(highlight, content);
                     text = text.replace(`@${content}@`, html);

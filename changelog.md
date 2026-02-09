@@ -7,7 +7,20 @@ Full refactor for CodeEditor:
 - Removed legacy `options.onsave` and `options.onrun`.
 - Added support to write Backtick char (`).
 
-## 8.2.4 (master)
+## 8.2.5 (master)
+
+Added some WGSL keywords to DocMaker code snippets.
+`NodeTree.select` now supports using `path` for select items.
+
+AssetView:
+- Custom item actions now receive item or selected items list.
+- Fixed `options.allowMultipleSelection`, added moved old option to `options.allowItemCheck`.
+- Fixed item deletion when multiple selection.
+- Fixed minor issues with AssetView item rename.
+- Fixed AssetView MoveItem dialog not showing path Breadcrumb component.
+- Fixed minor bug `_enterFolder` using same ids for >1 folder.
+
+## 8.2.4
 
 Fixed Form not automatically syncing inputs when pressing primary action button.
 Added support for Tags `options.tagClass`.

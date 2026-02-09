@@ -51,6 +51,8 @@
         // skipPreview: true,
         // rootPath: "../",
         // onlyFolders: false,
+        // allowItemCheck: true,
+        allowMultipleSelection: true,
         allowedTypes: {
             "Mesh": { color: "rose-800" },
             "Script": { color: "orange-500" },
@@ -58,7 +60,7 @@
             "SIGML": { color: "emerald-300" },
         },
         itemContextMenuOptions: [
-            { name: "Like", callback: ( item ) => { console.log(item) } }
+            { name: "Like", callback: ( items ) => { console.log(items) } }
         ]
     });
     bottomArea.attach(assetView);
@@ -171,6 +173,31 @@
         },
         {
             id: "unreal",
+            type: "folder",
+            children: [
+                {
+                    id: "color.png",
+                    type: "image",
+                    src: "https://cdn2.unrealengine.com/ue-logotype-2023-vertical-white-1686x2048-bbfded26daa7.png"
+                },
+                {
+                    id: "demo.js",
+                    type: "script",
+                    src: "../data/script.js"
+                },
+                {
+                    id: "empty_folder",
+                    type: "folder",
+                    children: [{
+                        id: "demo.js",
+                        type: "script",
+                        src: "../data/script.js"
+                    }]
+                }
+            ]
+        },
+        {
+            id: "unreal2",
             type: "folder",
             children: [
                 {
@@ -300,7 +327,7 @@
         } );
 
         assetView.on( "delete", ( event ) => {
-            console.log(event.items[ 0 ].id + " deleted");
+            event.items.forEach( item => console.log(item.id + " deleted") );
         } );
     }
 

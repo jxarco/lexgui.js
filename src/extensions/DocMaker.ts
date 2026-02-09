@@ -9,12 +9,18 @@ if ( !LX )
 
 LX.extensions.push( 'DocMaker' );
 
+const CLASS_WORDS = [ 'uint32_t', 'uint64_t', 'uint8_t' ];
 const CPP_KEY_WORDS = [ 'int', 'float', 'double', 'bool', 'char', 'wchar_t', 'const', 'static_cast', 'dynamic_cast', 'new', 'delete', 'void', 'true',
     'false', 'auto', 'struct', 'typedef', 'nullptr', 'NULL', 'unsigned', 'namespace', 'auto' ];
-const CLASS_WORDS = [ 'uint32_t', 'uint64_t', 'uint8_t' ];
+const JS_KEY_WORDS = [ 'var', 'let', 'const', 'static', 'function', 'null', 'undefined', 'new', 'delete', 'true', 'false', 'NaN', 'this' ];
+const WGSL_KEY_WORDS = [ 'var', 'let', 'const', 'override', 'fn', 'struct', 'alias', 'true', 'false', 'bool', 'f16', 'f32', 'i32', 'u32', 'vec2',
+    'vec3', 'vec4', 'mat2x2', 'mat2x3', 'mat2x4', 'mat3x2', 'mat3x3', 'mat3x4', 'mat4x2', 'mat4x3', 'mat4x4' // 'atomic', 'array', 'ptr', 'sampler', 'sampler_comparison', 'texture_1d', 'texture_2d', 'texture_2d_array', 'texture_3d', 'texture_cube', 'texture_cube_array',
+ // 'texture_multisampled_2d', 'texture_external', 'texture_storage_1d', 'texture_storage_2d', 'texture_storage_2d_array', 'texture_storage_3d', 'texture_depth_2d',
+    // 'texture_depth_2d_array', 'texture_depth_cube', 'texture_depth_cube_array', 'texture_depth_multisampled_2d', 'function', 'private', 'workgroup', 'uniform',
+    // 'storage', 'read', 'write', 'read_write', 'binding', 'builtin', 'group', 'id', 'interpolate', 'invariant', 'location',  'size', 'align', 'stride', 'vertex', 'fragment', 'compute', 'workgroup_size',
+];
 const STATEMENT_WORDS = [ 'for', 'if', 'else', 'return', 'continue', 'break', 'case', 'switch', 'while', 'import', 'from', 'await' ];
 
-const JS_KEY_WORDS = [ 'var', 'let', 'const', 'static', 'function', 'null', 'undefined', 'new', 'delete', 'true', 'false', 'NaN', 'this' ];
 const HTML_ATTRIBUTES = [ 'html', 'charset', 'rel', 'src', 'href', 'crossorigin', 'type', 'lang' ];
 const HTML_TAGS = [ 'DOCTYPE', 'html', 'head', 'body', 'title', 'base', 'link', 'meta', 'style', 'main', 'section', 'nav', 'article', 'aside',
     'header', 'footer', 'address', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'hr', 'pre', 'blockquote', 'ol', 'ul', 'li', 'dl', 'dt', 'dd', 'figure',
@@ -166,6 +172,10 @@ export class DocMaker
                     {
                         highlight = 'kwd';
                     }
+                    else if ( language == 'wgsl' && WGSL_KEY_WORDS.includes( content ) )
+                    {
+                        highlight = 'kwd';
+                    }
                     else if ( CLASS_WORDS.includes( content ) )
                     {
                         highlight = 'cls';
@@ -194,8 +204,8 @@ export class DocMaker
                     }
                     else
                     {
-                        console.error( 'ERROR[Code Parsing]: Unknown highlight type: ' + content );
-                        return;
+                        highlight = '';
+                        console.error( 'WARNING[Code Parsing]: Unknown highlight type: ' + content );
                     }
 
                     html = getHTML( highlight, content );

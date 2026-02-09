@@ -58,7 +58,7 @@ export declare class AssetView {
     rootItem: AssetViewItem;
     path: string[];
     rootPath: string;
-    selectedItem: AssetViewItem | undefined;
+    selectedItems: AssetViewItem[];
     allowedTypes: any;
     searchValue: string;
     filter: string;
@@ -70,6 +70,7 @@ export declare class AssetView {
     useNativeTitle: boolean;
     onlyFolders: boolean;
     allowMultipleSelection: boolean;
+    allowItemCheck: boolean;
     previewActions: any[];
     contextMenu: any[];
     itemContextMenuOptions: any;
@@ -117,7 +118,7 @@ export declare class AssetView {
     _sortData(sortBy?: string, sortMode?: number): void;
     _enterFolder(folderItem: AssetViewItem | undefined, storeCurrent?: boolean): Promise<void>;
     _removeItemFromParent(item: AssetViewItem): boolean;
-    _requestDeleteItem(item: AssetViewItem): void;
+    _requestDeleteItem(items: AssetViewItem[]): void;
     _deleteItem(item: AssetViewItem): void;
     _requestMoveItemToFolder(item: AssetViewItem, folder: AssetViewItem): void;
     _moveItemToFolder(item: AssetViewItem, folder: AssetViewItem): void;
