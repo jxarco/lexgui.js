@@ -772,13 +772,13 @@ export class NodeTree
         if ( id === undefined )
         {
             // if no id, try with the path
-            if( path !== undefined )
+            if ( path !== undefined )
             {
                 id = path.at( -1 );
             }
             else
             {
-                // Unselect        
+                // Unselect
                 this.selected.length = 0;
                 return;
             }
@@ -786,27 +786,27 @@ export class NodeTree
 
         let el = null;
 
-        if( path !== undefined )
+        if ( path !== undefined )
         {
             let sourceData = this.data;
-            for( const p of path )
+            for ( const p of path )
             {
                 const pItem = sourceData.children.find( ( item: any ) => item.id === p );
-                if( !pItem ) break;
+                if ( !pItem ) break;
                 sourceData = pItem;
             }
 
             el = sourceData.treeEl;
             console.assert( el, 'NodeTree: No domEl in item ' + id );
         }
-        else if( id !== undefined )
+        else if ( id !== undefined )
         {
             // Element should exist, since tree was refreshed to show it
             el = this.domEl.querySelector( '#' + LX.getSupportedDOMName( id ) );
             console.assert( el, "NodeTree: Can't select node " + id );
         }
 
-        if( !el )
+        if ( !el )
         {
             console.assert( el, "NodeTree: Can't select node " + id );
         }

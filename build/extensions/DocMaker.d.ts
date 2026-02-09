@@ -7,7 +7,7 @@ export declare class DocMaker {
     lineBreak(target?: Element): void;
     header(string: string, type: string, id: string, options?: any): any;
     paragraph(string: string, sup?: boolean, className?: string): HTMLElement | HTMLParagraphElement;
-    code(text: string, language?: string): HTMLDivElement | undefined;
+    code(text: string, language?: string): HTMLDivElement;
     list(list: any[], type: string, target?: Element, className?: string): HTMLUListElement | undefined;
     bulletList(list: any[]): HTMLUListElement | undefined;
     numberedList(list: any[]): HTMLUListElement | undefined;

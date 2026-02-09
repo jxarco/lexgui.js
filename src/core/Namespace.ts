@@ -14,7 +14,7 @@ let LX: any = g.LX;
 if ( !LX )
 {
     LX = {
-        version: '8.2.4',
+        version: '8.2.5',
         ready: false,
         extensions: [], // Store extensions used
         extraCommandbarEntries: [], // User specific entries for command bar

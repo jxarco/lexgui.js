@@ -16,7 +16,7 @@
     exports.LX = g.LX;
     if (!exports.LX) {
         exports.LX = {
-            version: '8.2.4',
+            version: '8.2.5',
             ready: false,
             extensions: [], // Store extensions used
             extraCommandbarEntries: [], // User specific entries for command bar
@@ -4986,6 +4986,7 @@
             item.id = exports.LX.getSupportedDOMName(node.id);
             item.tabIndex = '0';
             item.treeData = node;
+            node.treeEl = item;
             // Select hierarchy icon
             let icon = (this.options.skipDefaultIcon ?? true) ? null : 'Dot'; // Default: no childs
             if (isParent) {
@@ -5468,21 +5469,45 @@
                 el.focus();
             }
         }
-        select(id) {
+        /* 'path' here helps to identity the correct item based on its parent path, for same 'id' issues */
+        select(id, path) {
             const nodeFilter = this.domEl.querySelector('.lexnodetreefilter');
             if (nodeFilter) {
                 nodeFilter.value = '';
             }
             this.refresh(null, id);
             this.domEl.querySelectorAll('.selected').forEach((i) => i.classList.remove('selected'));
-            // Unselect
-            if (!id) {
-                this.selected.length = 0;
-                return;
+            if (id === undefined) {
+                // if no id, try with the path
+                if (path !== undefined) {
+                    id = path.at(-1);
+                }
+                else {
+                    // Unselect
+                    this.selected.length = 0;
+                    return;
+                }
             }
-            // Element should exist, since tree was refreshed to show it
-            const el = this.domEl.querySelector('#' + exports.LX.getSupportedDOMName(id));
-            console.assert(el, "NodeTree: Can't select node " + id);
+            let el = null;
+            if (path !== undefined) {
+                let sourceData = this.data;
+                for (const p of path) {
+                    const pItem = sourceData.children.find((item) => item.id === p);
+                    if (!pItem)
+                        break;
+                    sourceData = pItem;
+                }
+                el = sourceData.treeEl;
+                console.assert(el, 'NodeTree: No domEl in item ' + id);
+            }
+            else if (id !== undefined) {
+                // Element should exist, since tree was refreshed to show it
+                el = this.domEl.querySelector('#' + exports.LX.getSupportedDOMName(id));
+                console.assert(el, "NodeTree: Can't select node " + id);
+            }
+            if (!el) {
+                console.assert(el, "NodeTree: Can't select node " + id);
+            }
             el.classList.add('selected');
             this.selected = [el.treeData];
             el.focus();

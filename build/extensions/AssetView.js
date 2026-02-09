@@ -36,7 +36,7 @@ class AssetView {
     rootItem;
     path = [];
     rootPath = '';
-    selectedItem = undefined;
+    selectedItems = [];
     allowedTypes;
     searchValue = '';
     filter = 'None';
@@ -48,7 +48,8 @@ class AssetView {
     skipPreview = false;
     useNativeTitle = false;
     onlyFolders = true;
-    allowMultipleSelection = false;
+    allowMultipleSelection = true;
+    allowItemCheck = false;
     previewActions = [];
     contextMenu = [];
     itemContextMenuOptions = null;
@@ -88,6 +89,7 @@ class AssetView {
         this.useNativeTitle = options.useNativeTitle ?? this.useNativeTitle;
         this.onlyFolders = options.onlyFolders ?? this.onlyFolders;
         this.allowMultipleSelection = options.allowMultipleSelection ?? this.allowMultipleSelection;
+        this.allowItemCheck = options.allowItemCheck ?? this.allowItemCheck;
         this.previewActions = options.previewActions ?? [];
         this.itemContextMenuOptions = options.itemContextMenuOptions;
         this.gridScale = options.gridScale ?? this.gridScale;
@@ -184,9 +186,9 @@ class AssetView {
         if (!this.useNativeTitle) {
             let desc = document.createElement('span');
             desc.className = 'lexitemdesc';
-            desc.id = `floatingTitle_${metadata.uid}`;
+            desc.id = LX.getSupportedDOMName(`floatingTitle_${metadata.uid}`);
             desc.innerHTML = `File: ${item.id}<br>Type: ${type}`;
-            LX.insertChildAtIndex(this.content, desc, childIndex ? childIndex + 1 : undefined);
+            LX.insertChildAtIndex(this.content, desc, childIndex !== undefined ? childIndex + 1 : undefined);
             itemEl.addEventListener('mousemove', (e) => {
                 if (!isGridLayout) {
                     return;
@@ -212,7 +214,7 @@ class AssetView {
         else {
             itemEl.title = type + ': ' + item.id;
         }
-        if (this.allowMultipleSelection) {
+        if (this.allowItemCheck) {
             let checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
             checkbox.className = 'lexcheckbox';
@@ -301,11 +303,12 @@ class AssetView {
             e.stopPropagation();
             const isDoubleClick = e.detail == LX.MOUSE_DOUBLE_CLICK;
             if (!isDoubleClick) {
-                if (!e.shiftKey) {
+                if (!e.shiftKey || !that.allowMultipleSelection) {
                     that.content.querySelectorAll('.lexassetitem').forEach((i) => i.classList.remove('selected'));
+                    that.selectedItems.length = 0;
                 }
                 this.classList.add('selected');
-                that.selectedItem = item;
+                that.selectedItems.push(item);
                 if (!that.skipPreview) {
                     that._previewAsset(item);
                 }
@@ -337,35 +340,44 @@ class AssetView {
             e.preventDefault();
             e.stopImmediatePropagation();
             e.stopPropagation();
-            const multiple = that.content.querySelectorAll('.selected').length;
+            const multipleSelection = that.selectedItems.length > 1;
             const options = [
                 {
-                    name: (multiple > 1) ? (multiple + ' selected') : item.id,
+                    name: multipleSelection ? (`${that.selectedItems.length} selected`) : item.id,
                     icon: LX.makeIcon('CircleSmall', { svgClass: `fill-current text-${typeColor}` }),
                     className: 'text-sm',
                     disabled: true
                 },
                 null
             ];
-            if (multiple <= 1) {
+            // By now, allow with none/single selected items
+            if (!multipleSelection) {
                 options.push({ name: 'Rename', icon: 'TextCursor', callback: that._renameItemPopover.bind(that, item) });
             }
-            if (!isFolder) {
+            // By now, allow with none/single selected items
+            if (!isFolder && !multipleSelection) {
                 options.push({ name: 'Clone', icon: 'Copy', callback: that._requestCloneItem.bind(that, item) });
             }
-            options.push({ name: 'Move', icon: 'FolderInput', callback: () => that._moveItem(item) });
-            if (type == 'Script' && LX.has('CodeEditor')) {
+            // By now, allow with none/single selected items
+            if (!multipleSelection) {
+                options.push({ name: 'Move', icon: 'FolderInput', callback: () => that._moveItem(item) });
+            }
+            // By now, allow with none/single selected items
+            if (!multipleSelection && type == 'Script' && LX.has('CodeEditor')) {
                 options.push({ name: 'Open in Editor', icon: 'Code', callback: that._openScriptInEditor.bind(that, item) });
             }
             if (that.itemContextMenuOptions) {
-                options.push(null);
+                if (options.length > 2)
+                    options.push(null);
                 for (let o of that.itemContextMenuOptions) {
                     if (!o.name || !o.callback)
                         continue;
-                    options.push({ name: o.name, icon: o.icon, callback: o.callback?.bind(that, item) });
+                    options.push({ name: o.name, icon: o.icon,
+                        callback: o.callback?.bind(that, multipleSelection ? that.selectedItems : [item]) });
                 }
             }
-            options.push(null, { name: 'Delete', icon: 'Trash2', className: 'destructive', callback: that._requestDeleteItem.bind(that, item) });
+            options.push(null, { name: 'Delete', icon: 'Trash2', className: 'destructive',
+                callback: that._requestDeleteItem.bind(that, multipleSelection ? that.selectedItems : [item]) });
             LX.addClass(that.contentPanel.root, 'pointer-events-none');
             LX.addDropdownMenu(e.target, options, { side: 'right', align: 'start', event: e, onBlur: () => {
                     LX.removeClass(that.contentPanel.root, 'pointer-events-none');
@@ -396,7 +408,8 @@ class AssetView {
                 e.dataTransfer.setDragImage(img, 0, 0);
                 e.dataTransfer.effectAllowed = 'move';
             }
-            const desc = that.content.querySelector(`#floatingTitle_${metadata.uid}`);
+            const domName = LX.getSupportedDOMName(`floatingTitle_${metadata.uid}`);
+            const desc = that.content.querySelector(`#${domName}`);
             if (desc)
                 desc.style.display = 'none';
         }, false);
@@ -431,7 +444,8 @@ class AssetView {
         });
         itemEl.addEventListener('mouseenter', (e) => {
             if (!that.useNativeTitle && isGridLayout) {
-                const desc = that.content.querySelector(`#floatingTitle_${metadata.uid}`);
+                const domName = LX.getSupportedDOMName(`floatingTitle_${metadata.uid}`);
+                const desc = that.content.querySelector(`#${domName}`);
                 if (desc)
                     desc.style.display = 'unset';
             }
@@ -445,7 +459,8 @@ class AssetView {
         itemEl.addEventListener('mouseleave', (e) => {
             if (!that.useNativeTitle && isGridLayout) {
                 setTimeout(() => {
-                    const desc = that.content.querySelector(`#floatingTitle_${metadata.uid}`);
+                    const domName = LX.getSupportedDOMName(`floatingTitle_${metadata.uid}`);
+                    const desc = that.content.querySelector(`#${domName}`);
                     if (desc)
                         desc.style.display = 'none';
                 }, 100);
@@ -574,7 +589,7 @@ class AssetView {
                     const dom = node.domEl;
                     dom?.classList.add('selected');
                 }
-                this.selectedItem = node;
+                this.selectedItems = [node];
             }
         });
         tree.on('beforeMove', (event, resolve) => {
@@ -725,6 +740,7 @@ class AssetView {
         });
         this.content.addEventListener('click', function () {
             this.querySelectorAll('.lexassetitem').forEach((i) => i.classList.remove('selected'));
+            that.selectedItems.length = 0;
         });
         this.content.addEventListener('contextmenu', function (e) {
             e.preventDefault();
@@ -943,7 +959,7 @@ class AssetView {
             return;
         }
         const child = this.currentData[0];
-        const sameFolder = child?.parent?.id === folderItem.id;
+        const sameFolder = child?.parent?.metadata?.uid === folderItem.metadata?.uid;
         if (storeCurrent) {
             this.prevData.push(this.currentFolder ?? {
                 id: '/',
@@ -969,7 +985,15 @@ class AssetView {
         if (mustRefresh) {
             this._processData(this.data);
             this._refreshContent();
-            this.tree?.select(this.currentFolder.id);
+            // Get path to avoid same id issues
+            let path = `${this.currentFolder.id}/`;
+            let parent = this.currentFolder.parent;
+            while (parent && parent.id !== '/') {
+                path += `${parent.id}/`;
+                parent = parent.parent;
+            }
+            const parentsPath = path.split('/').filter(Boolean).reverse();
+            this.tree?.select(undefined, parentsPath);
         }
         this._updatePath();
     }
@@ -994,14 +1018,14 @@ class AssetView {
         }
         return true;
     }
-    _requestDeleteItem(item) {
+    _requestDeleteItem(items) {
         const onBeforeDelete = this._callbacks['beforeDelete'];
         const onDelete = this._callbacks['delete'];
         const resolve = (...args) => {
-            this._deleteItem(item);
+            items.forEach((item) => this._deleteItem(item));
             const event = {
                 type: 'delete',
-                items: [item],
+                items,
                 userInitiated: true
             };
             if (onDelete)
@@ -1010,7 +1034,7 @@ class AssetView {
         if (onBeforeDelete) {
             const event = {
                 type: 'delete',
-                items: [item],
+                items,
                 userInitiated: true
             };
             onBeforeDelete(event, resolve);
@@ -1119,7 +1143,7 @@ class AssetView {
             }
             bcContainer.innerHTML = '';
             bcContainer.appendChild(LX.makeBreadcrumb(path.reverse().map((p) => {
-                return { title: p };
+                return { name: p };
             }), {
                 maxItems: 4,
                 separatorIcon: 'ChevronRight'
@@ -1289,16 +1313,21 @@ class AssetView {
         // It could be a Tree event, so maybe the elements is not created yet
         if (item.domEl) {
             const wasSelected = LX.hasClass(item.domEl, 'selected');
-            const hoverTitle = this.content.querySelector(`#floatingTitle_${item.id.replace(/\s/g, '_').replaceAll('.', '_')}`);
+            const hoverTitleDomName = LX.getSupportedDOMName(`floatingTitle_${item.metadata.uid}`);
+            const hoverTitle = this.content.querySelector(`#${hoverTitleDomName}`);
             if (hoverTitle)
                 hoverTitle.remove();
             item.domEl?.remove();
+            // Update new name
+            item.id = newName;
             item.domEl = this.addItem(item, idx * 2);
             if (wasSelected) {
                 this._previewAsset(item);
             }
         }
-        item.id = newName;
+        else {
+            item.id = newName;
+        }
         this.tree?.refresh();
         this._processData(this.data);
     }

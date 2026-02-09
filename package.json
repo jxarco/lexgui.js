@@ -1,6 +1,6 @@
 {
     "name": "lexgui",
-    "version": "8.2.4",
+    "version": "8.2.5",
     "description": "JS library to create web graphical user interfaces",
     "type": "module",
     "main": "./build/lexgui.js",
@@ -54,6 +54,7 @@
         "@rollup/plugin-alias": "^6.0.0",
         "@rollup/plugin-terser": "^0.4.4",
         "@tailwindcss/cli": "^4.1.18",
+        "baseline-browser-mapping": "^2.9.19",
         "cssnano": "^7.1.2",
         "dprint": "^0.50.2",
         "postcss": "^8.5.6",

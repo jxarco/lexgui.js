@@ -32,7 +32,7 @@ export declare class NodeTree {
     _createItem(parent: any, node: any, level?: number, selectedId?: string): void;
     refresh(newData?: any, selectedId?: string): void;
     frefresh(id: string): void;
-    select(id: string): void;
+    select(id?: string, path?: string[]): void;
     deleteNodes(nodes: any[]): any[];
     deleteNode(node: any): boolean;
 }

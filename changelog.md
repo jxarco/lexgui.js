@@ -2,6 +2,8 @@
 
 ## dev
 
+## 8.2.5 (master)
+
 Added some WGSL keywords to DocMaker code snippets.
 `NodeTree.select` now supports using `path` for select items.
 
@@ -13,7 +15,7 @@ AssetView:
 - Fixed AssetView MoveItem dialog not showing path Breadcrumb component.
 - Fixed minor bug `_enterFolder` using same ids for >1 folder.
 
-## 8.2.4 (master)
+## 8.2.4
 
 Fixed Form not automatically syncing inputs when pressing primary action button.
 Added support for Tags `options.tagClass`.
