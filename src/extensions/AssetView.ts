@@ -1543,7 +1543,7 @@ export class AssetView
 
             bcContainer.innerHTML = '';
             bcContainer.appendChild( LX.makeBreadcrumb( path.reverse().map( ( p ) => {
-                return { title: p };
+                return { name: p };
             } ), {
                 maxItems: 4,
                 separatorIcon: 'ChevronRight'

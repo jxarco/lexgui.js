@@ -2,8 +2,11 @@
 
 ## dev
 
-Fixed minor issues with AssetView item rename.
 Added some WGSL keywords to DocMaker code snippets.
+
+AssetView:
+- Fixed minor issues with AssetView item rename.
+- Fixed AssetView MoveItem dialog not showing path Breadcrumb component.
 
 ## 8.2.4 (master)
 
