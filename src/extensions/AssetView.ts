@@ -283,9 +283,9 @@ export class AssetView
         {
             let desc = document.createElement( 'span' );
             desc.className = 'lexitemdesc';
-            desc.id = `floatingTitle_${metadata.uid}`;
+            desc.id = LX.getSupportedDOMName( `floatingTitle_${metadata.uid}` );
             desc.innerHTML = `File: ${item.id}<br>Type: ${type}`;
-            LX.insertChildAtIndex( this.content, desc, childIndex ? childIndex + 1 : undefined );
+            LX.insertChildAtIndex( this.content, desc, childIndex !== undefined ? childIndex + 1 : undefined );
 
             itemEl.addEventListener( 'mousemove', ( e: MouseEvent ) => {
                 if ( !isGridLayout )
@@ -575,7 +575,8 @@ export class AssetView
                 e.dataTransfer.effectAllowed = 'move';
             }
 
-            const desc: HTMLElement | null = that.content.querySelector( `#floatingTitle_${metadata.uid}` );
+            const domName: string = LX.getSupportedDOMName( `floatingTitle_${metadata.uid}` );
+            const desc: HTMLElement | null = that.content.querySelector( `#${domName}` );
             if ( desc ) desc.style.display = 'none';
         }, false );
 
@@ -616,7 +617,8 @@ export class AssetView
         itemEl.addEventListener( 'mouseenter', ( e: MouseEvent ) => {
             if ( !that.useNativeTitle && isGridLayout )
             {
-                const desc: HTMLElement | null = that.content.querySelector( `#floatingTitle_${metadata.uid}` );
+                const domName: string = LX.getSupportedDOMName( `floatingTitle_${metadata.uid}` );
+                const desc: HTMLElement | null = that.content.querySelector( `#${domName}` );
                 if ( desc ) desc.style.display = 'unset';
             }
 
@@ -631,7 +633,8 @@ export class AssetView
             if ( !that.useNativeTitle && isGridLayout )
             {
                 setTimeout( () => {
-                    const desc: HTMLElement | null = that.content.querySelector( `#floatingTitle_${metadata.uid}` );
+                    const domName: string = LX.getSupportedDOMName( `floatingTitle_${metadata.uid}` );
+                    const desc: HTMLElement | null = that.content.querySelector( `#${domName}` );
                     if ( desc ) desc.style.display = 'none';
                 }, 100 );
             }
@@ -1760,12 +1763,13 @@ export class AssetView
         if ( item.domEl )
         {
             const wasSelected = LX.hasClass( item.domEl, 'selected' );
-            const hoverTitle: HTMLElement | null = this.content.querySelector(
-                `#floatingTitle_${item.id.replace( /\s/g, '_' ).replaceAll( '.', '_' )}`
-            );
+            const hoverTitleDomName: string = LX.getSupportedDOMName( `floatingTitle_${item.metadata.uid}` );
+            const hoverTitle: HTMLElement | null = this.content.querySelector( `#${hoverTitleDomName}` );
             if ( hoverTitle ) hoverTitle.remove();
 
             item.domEl?.remove();
+            // Update new name
+            item.id = newName;
             item.domEl = this.addItem( item, idx * 2 );
 
             if ( wasSelected )
@@ -1773,8 +1777,10 @@ export class AssetView
                 this._previewAsset( item );
             }
         }
-
-        item.id = newName;
+        else
+        {
+            item.id = newName;
+        }
 
         this.tree?.refresh();
 

@@ -2,6 +2,7 @@
 
 ## dev
 
+Fixed minor issues with AssetView item rename.
 Added some WGSL keywords to DocMaker code snippets.
 
 ## 8.2.4 (master)
