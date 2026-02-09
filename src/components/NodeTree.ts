@@ -115,6 +115,7 @@ export class NodeTree
         item.id = LX.getSupportedDOMName( node.id );
         item.tabIndex = '0';
         item.treeData = node;
+        node.treeEl = item;
 
         // Select hierarchy icon
         let icon = ( this.options.skipDefaultIcon ?? true ) ? null : 'Dot'; // Default: no childs
@@ -755,7 +756,8 @@ export class NodeTree
         }
     }
 
-    select( id: string )
+    /* 'path' here helps to identity the correct item based on its parent path, for same 'id' issues */
+    select( id?: string, path?: string[] )
     {
         const nodeFilter = this.domEl.querySelector( '.lexnodetreefilter' );
         if ( nodeFilter )
@@ -767,16 +769,47 @@ export class NodeTree
 
         this.domEl.querySelectorAll( '.selected' ).forEach( ( i: HTMLElement ) => i.classList.remove( 'selected' ) );
 
-        // Unselect
-        if ( !id )
+        if ( id === undefined )
         {
-            this.selected.length = 0;
-            return;
+            // if no id, try with the path
+            if( path !== undefined )
+            {
+                id = path.at( -1 );
+            }
+            else
+            {
+                // Unselect        
+                this.selected.length = 0;
+                return;
+            }
         }
 
-        // Element should exist, since tree was refreshed to show it
-        const el = this.domEl.querySelector( '#' + LX.getSupportedDOMName( id ) );
-        console.assert( el, "NodeTree: Can't select node " + id );
+        let el = null;
+
+        if( path !== undefined )
+        {
+            let sourceData = this.data;
+            for( const p of path )
+            {
+                const pItem = sourceData.children.find( ( item: any ) => item.id === p );
+                if( !pItem ) break;
+                sourceData = pItem;
+            }
+
+            el = sourceData.treeEl;
+            console.assert( el, 'NodeTree: No domEl in item ' + id );
+        }
+        else if( id !== undefined )
+        {
+            // Element should exist, since tree was refreshed to show it
+            el = this.domEl.querySelector( '#' + LX.getSupportedDOMName( id ) );
+            console.assert( el, "NodeTree: Can't select node " + id );
+        }
+
+        if( !el )
+        {
+            console.assert( el, "NodeTree: Can't select node " + id );
+        }
 
         el.classList.add( 'selected' );
         this.selected = [ el.treeData ];

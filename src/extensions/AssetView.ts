@@ -1311,7 +1311,7 @@ export class AssetView
         }
 
         const child = this.currentData[0];
-        const sameFolder = child?.parent?.id === folderItem.id;
+        const sameFolder = child?.parent?.metadata?.uid === folderItem.metadata?.uid;
 
         if ( storeCurrent )
         {
@@ -1346,7 +1346,20 @@ export class AssetView
         {
             this._processData( this.data );
             this._refreshContent();
-            this.tree?.select( this.currentFolder.id );
+
+            // Get path to avoid same id issues
+
+            let path = `${this.currentFolder.id}/`;
+            let parent = this.currentFolder.parent;
+
+            while( parent && parent.id !== '/' )
+            {
+                path += `${parent.id}/`;
+                parent = parent.parent;
+            }
+
+            const parentsPath = path.split( '/' ).filter( Boolean ).reverse();
+            this.tree?.select( undefined, parentsPath );
         }
 
         this._updatePath();

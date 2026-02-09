@@ -3,6 +3,7 @@
 ## dev
 
 Added some WGSL keywords to DocMaker code snippets.
+`NodeTree.select` now supports using `path` for select items.
 
 AssetView:
 - Custom item actions now receive item or selected items list.
@@ -10,6 +11,7 @@ AssetView:
 - Fixed item deletion when multiple selection.
 - Fixed minor issues with AssetView item rename.
 - Fixed AssetView MoveItem dialog not showing path Breadcrumb component.
+- Fixed minor bug `_enterFolder` using same ids for >1 folder.
 
 ## 8.2.4 (master)
 
