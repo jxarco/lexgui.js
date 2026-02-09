@@ -5,6 +5,9 @@
 Added some WGSL keywords to DocMaker code snippets.
 
 AssetView:
+- Custom item actions now receive item or selected items list.
+- Fixed `options.allowMultipleSelection`, added moved old option to `options.allowItemCheck`.
+- Fixed item deletion when multiple selection.
 - Fixed minor issues with AssetView item rename.
 - Fixed AssetView MoveItem dialog not showing path Breadcrumb component.
 
