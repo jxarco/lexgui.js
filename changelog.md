@@ -2,6 +2,8 @@
 
 ## dev
 
+Added some WGSL keywords to DocMaker code snippets.
+
 ## 8.2.4 (master)
 
 Fixed Form not automatically syncing inputs when pressing primary action button.
