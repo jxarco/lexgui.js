@@ -49,16 +49,32 @@
     ]);
 
     docMaker.header("VideoEditor", "h3");
+    docMaker.classCtor( "class LX.VideoEditor", [
+        ["area", "LX.Area"],
+        ["options", "Object"]
+    ] );
+    docMaker.lineBreak();
     docMaker.paragraph(`High-level editor that embeds video playback with trimming and optional cropping overlay. Provides playback controls, time synchronization, and crop management.
-    It has to be appended to an existing area. It means that it can be created anywhere in the document window (e.g. dialogs, panels, areas, etc.), since to create an area it's as easy as instancing a new one.
-    When creating it, you can use different options to adapt the editor to your needs:` );
-    docMaker.codeBulletList([
-        ["src", "String", "Video URL"],
-        ["video", "HTMLVideoElement", "Video native element"],
-        ["crop", "Boolean", "Enable crop functionality"],
-        ["controls", "Boolean", "Enable playing ontrols for the video"],
-        ["handleStyle", "Object", "Style properties for the resize handles"]
-    ]);
+    It has to be appended to an existing area. It means that it can be created anywhere in the document window (e.g. dialogs, panels, areas, etc.), since to create an area it's as easy as instancing a new one.` );
+    docMaker.lineBreak();
+    {
+        const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
+        const panel = area.addPanel();
+        content.appendChild( area.root );
+        panel.addTable( null, {
+            head: [ "Option", "Type", "Description", "Default" ],
+            body: [
+                ["src", "String", "Video URL", "-"],
+                ["video", "HTMLVideoElement", "Video native element", "-"],
+                ["crop", "Boolean", "Enable crop functionality", "-"],
+                ["handleStyle", "Object", "Style properties for the resize handles", "-"],
+                ["controls", "Boolean", "Enable playing controls for the video", "-"],
+                ["controlsLayout", "Object", `See ${docMaker.iCode( "createControls" )}`, "-"],
+            ].map( v => {
+                return [ docMaker.iCode( v[ 0 ], "table" ), docMaker.iCode( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? docMaker.iCode( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+    }
 
     docMaker.header("Statics", "h4");
 
@@ -77,29 +93,41 @@
 
     docMaker.header("Methods", "h4");
 
-    docMaker.codeBulletList([
-        ["showCropArea()", "Displays the crop overlay and masks the underlying video."],
-        ["hideCropArea()", "Hides the crop overlay and clears masking."],
-        ["showControls() / hideControls()", "Toggle the visibility of the playback/trimming controls."],
-        ["createControls(options: object)", `Generates all buttons and timebar, and displays them following a layout. ${docMaker.iCode("options")} may have:`],
-        [
-          ["null", `If ${docMaker.iCode("options")} is not provided, the VideoEditor constructor's options will be used.`],
-          ["controlsLayout", `fn or integer[0,1]`, `A number will create a predefined layout. When a function, it must create the areas where the buttons and timebar (see ${docMaker.iCode("controlsComponents")}) will be and attach them. The function must also implement the ${docMaker.iCode("resizeControls")} function.`],
-        ],
-        ["resize()", "Triggered when parent area resizes. Call this functions to force a resize."],
-        ["resizeVideo()", "Triggered in resize. Call this functions to force a resize."],
-        ["resizeControls()", `Triggered in resize. Call this functions to force a resize. See ${docMaker.iCode("createControls")}.`],
-        ["resizeCropArea(sx: number, sy: number, isNormalized: boolean = true)", "Adjusts crop size based on pixel or normalized sizes. Sizes are restricted by the video size and current crop area position."],
-        ["moveCropArea(x: number, y: number, isNormalized: boolean = true)", "Adjusts crop location based on pixel or normalized coordinates. The position is restricted by the video size and current crop area size."],
-        ["setCropAreaHandles(flags: number)", `Sets which resize handles to display based on flags. Use the ${docMaker.iCode(`|`)} operator to enable multiple handles (e.g. ${docMaker.iCode(`CROP_HANDLE_L | CROP_HANDLE_B`)})`],
-        ["getStartTime()", "Returns current trim start time."],
-        ["getEndTime()", "Returns current trim end time."],
-        ["getTrimedTimes()", "Returns both start and end as `{ start, end }`."],
-        ["getCroppedArea()", "Returns the DOM rect of the crop overlay."],
-        ["stopUpdates()", "Stops the internal animation frame loop."],
-        ["unbind()", "Tears down listeners, pauses video, and clears playback state."],
-    ]);
+    docMaker.classMethod( "showCropArea", "Displays the crop overlay and masks the underlying video.", [] );
+    docMaker.classMethod( "hideCropArea", "Hides the crop overlay and clears masking." , [] );
+    docMaker.classMethod( "showControls", "Display the playback/trimming controls.", [] );
+    docMaker.classMethod( "hideControls", "Hides the playback/trimming controls.", [] );
+    
+    docMaker.classMethod( "createControls", `Generates all buttons and timebar, and displays them following a layout. ${docMaker.iCode("layoutOptions")} may have:`, [["layoutOptions", "object"]] );
+    {
+        const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
+        const panel = area.addPanel();
+        content.appendChild( area.root );
+        panel.addTable( null, {
+            head: [ "Option", "Type", "Description", "Default" ],
+            body: [
+                ["type", `Number or Function`, `A number (0 or 1) will create a predefined layout. When a function, it must create the areas where the buttons and timebar (see ${docMaker.iCode("controlsComponents")}) will be and attach them. The function must also implement the ${docMaker.iCode("resizeControls")} function.`, `0`],
+                ["size", `CSS Height value`, `Height of the controls area. The remaining will be set to the video area`, `85%`],
+                ["l1TimelineHeight", `CSS Height value`, `(Predefined layout 1) Height of the trimming area. The remaining will be set to the rest of the controls area`, `50%`],
+            ].map( v => {
+                return [ docMaker.iCode( v[ 0 ], "table" ), docMaker.iCode( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? docMaker.iCode( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+    }
+    docMaker.classMethod( "resize", "Triggered when parent area resizes. Call this functions to force a resize.", [] );
+    docMaker.classMethod( "resizeVideo", "Triggered in resize. Call this functions to force a resize.", [] );
+    docMaker.classMethod( "resizeControls", `Triggered in resize. Call this functions to force a resize. See ${docMaker.iCode("createControls")}.`, [] );
+    docMaker.classMethod( "resizeCropArea", "Adjusts crop size based on pixel or normalized sizes. Sizes are restricted by the video size and current crop area position.", [["sx", "number"],["sy", "number"],["isNormalized", "boolean = true"]] );
+    docMaker.classMethod( "moveCropArea","Adjusts crop location based on pixel or normalized coordinates. The position is restricted by the video size and current crop area size.", [["x", "number"],["y", "number"],["isNormalized", "boolean = true"]] );
+    docMaker.classMethod( "setCropAreaHandles",  `Sets which resize handles to display based on flags. Use the ${docMaker.iCode(`|`)} operator to enable multiple handles (e.g. ${docMaker.iCode(`CROP_HANDLE_L | CROP_HANDLE_B`)})`, [["flags", "Number"]] );
+    docMaker.classMethod( "getStartTime", "Returns current trim start time.", [] );
+    docMaker.classMethod( "getEndTime", "Returns current trim end time.", [] );
+    docMaker.classMethod( "getTrimedTimes", "Returns both start and end as `{ start, end }`.", [] );
+    docMaker.classMethod( "getCroppedArea", "Returns the DOM rect of the crop overlay.", [] );
+    docMaker.classMethod( "stopUpdates", "Stops the internal animation frame loop.", [] );
+    docMaker.classMethod( "unbind", "Tears down listeners, pauses video, and clears playback state.", [] );
 
+ 
     docMaker.header("Callbacks / Hooks", "h3");
     docMaker.paragraph("You can assign handlers to respond to user interaction and internal state changes:");
     docMaker.codeBulletList([

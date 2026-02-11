@@ -251,7 +251,7 @@ export abstract class Timeline
             Timeline.KEYFRAME_COLOR_EDITED = LX.getCSSVariable( 'lxTimeline-keyframe-edited' );
             Timeline.KEYFRAME_COLOR_INACTIVE = LX.getCSSVariable( 'lxTimeline-keyframe-inactive' );
             Timeline.TIME_MARKER_COLOR = LX.getCSSVariable( 'primary' );
-            Timeline.TIME_MARKER_COLOR_TEXT = LX.getCSSVariable('primary-foreground');
+            Timeline.TIME_MARKER_COLOR_TEXT = LX.getCSSVariable( 'primary-foreground' );
         }
 
         this.updateTheme = updateTheme.bind( this );
@@ -1707,7 +1707,7 @@ Timeline.FONT_COLOR_PRIMARY = LX.getCSSVariable( 'foreground' );
 Timeline.FONT_COLOR_TERTIARY = LX.getCSSVariable( 'primary' );
 Timeline.FONT_COLOR_QUATERNARY = LX.getCSSVariable( 'muted-foreground' );
 Timeline.TIME_MARKER_COLOR = LX.getCSSVariable( 'primary' );
-Timeline.TIME_MARKER_COLOR_TEXT = LX.getCSSVariable('primary-foreground');
+Timeline.TIME_MARKER_COLOR_TEXT = LX.getCSSVariable( 'primary-foreground' );
 
 LX.setCSSVariable( 'lxTimeline-keyframe', 'light-dark(#2d69da,#2d69da )' );
 LX.setCSSVariable( 'lxTimeline-keyframe-selected', 'light-dark(#f5c700,#fafa14)' );
