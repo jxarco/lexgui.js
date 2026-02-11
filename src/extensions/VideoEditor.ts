@@ -550,7 +550,7 @@ export class VideoEditor
         else
         {
             [ videoArea, controlsArea ] = area.split( { type: 'vertical',
-                sizes: [ controlsOptions.controlsSize ? `calc(100% - ${controlsOptions.controlsSize})` : '85%', null ], minimizable: false,
+                sizes: [ controlsOptions.height ? `calc(100% - ${controlsOptions.height})` : '85%', null ], minimizable: false,
                 resize: false } );
         }
 
