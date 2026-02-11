@@ -107,7 +107,7 @@
             head: [ "Option", "Type", "Description", "Default" ],
             body: [
                 ["type", `Number or Function`, `A number (0 or 1) will create a predefined layout. When a function, it must create the areas where the buttons and timebar (see ${docMaker.iCode("controlsComponents")}) will be and attach them. The function must also implement the ${docMaker.iCode("resizeControls")} function.`, `0`],
-                ["size", `CSS Height value`, `Height of the controls area. The remaining will be set to the video area`, `85%`],
+                ["size", `CSS Height value`, `Height of the controls area. The remaining will be set to the video area`, `15%`],
                 ["l1TimelineHeight", `CSS Height value`, `(Predefined layout 1) Height of the trimming area. The remaining will be set to the rest of the controls area`, `50%`],
             ].map( v => {
                 return [ docMaker.iCode( v[ 0 ], "table" ), docMaker.iCode( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? docMaker.iCode( v[ 3 ], "table desc" ) : v[ 3 ] ];
