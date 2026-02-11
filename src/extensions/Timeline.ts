@@ -495,6 +495,11 @@ export abstract class Timeline
             }
         } );
 
+        // reset all tree events to the new tree
+        for( let name in this.trackTreesEvents){
+            this.setTrackTreeEventListener( name, this.trackTreesEvents[name] );
+        }
+
         const that = this;
         this.trackTreesComponent.innerTree._refresh = this.trackTreesComponent.innerTree.refresh;
         this.trackTreesComponent.innerTree.refresh = function( newData: any, selectedId: Nullable<string> )
