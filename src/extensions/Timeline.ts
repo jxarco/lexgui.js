@@ -97,6 +97,7 @@ export abstract class Timeline
     leftPanel: typeof Panel; // where tree will be placed
     trackTreesPanel: any = null;
     trackTreesComponent: any = null;
+    trackTreesEvents: any = {}; // holds callbacks
     lastTrackTreesComponentOffset: any = 0; // this.trackTreesComponent.innerTree.domEl.offsetTop - canvas.offsetTop. Check draw()
 
     mainArea: typeof Area;
@@ -121,7 +122,6 @@ export abstract class Timeline
     onShowContextMenu: Nullable<( event: any ) => void> = null;
     onAddNewTrackButton: Nullable<() => void> = null; // overrides button "add track" behaviour
     onAddNewTrack: Nullable<( track: any, options: any ) => void> = null;
-    onTrackTreeEvent: Nullable<( event: any ) => void> = null;
     onBeforeDrawContent: Nullable<( ctx: CanvasRenderingContext2D ) => void> = null;
     onStateStop: Nullable<() => void> = null;
     onStateChange: Nullable<( s: boolean ) => void> = null;
@@ -414,6 +414,14 @@ export abstract class Timeline
         header.endLine( 'justify-between' );
     }
 
+    setTrackTreeEventListener( type: string, callback: ( event: any ) => any )
+    {
+        this.trackTreesEvents[type] = callback;
+        if ( type != 'select' && type != 'visibleChanged' )
+        {
+            this.trackTreesComponent.on( type, this.trackTreesEvents[type] );
+        }
+    }
     /**
      * @method updateLeftPanel
      */
@@ -467,6 +475,11 @@ export abstract class Timeline
                 const flag = event.domEvent.shiftKey ? !node.trackData.isSelected : true;
                 this.setTrackSelection( node.trackData.trackIdx, flag, false, false ); // do callback, do not update left panel
             }
+
+            if ( this.trackTreesEvents['select'] )
+            {
+                this.trackTreesEvents['select']( event );
+            }
         } );
 
         this.trackTreesComponent.on( 'visibleChanged', ( event: any, resolve: any ) => {
@@ -475,13 +488,12 @@ export abstract class Timeline
             {
                 this.setTrackState( node.trackData.trackIdx, node.visible, false, false ); // do not update left panel
             }
-        } );
 
-        // Not used!
-        // if ( this.onTrackTreeEvent )
-        // {
-        //     this.onTrackTreeEvent( e );
-        // }
+            if ( this.trackTreesEvents['visibleChanged'] )
+            {
+                this.trackTreesEvents['visibleChanged']( event );
+            }
+        } );
 
         const that = this;
         this.trackTreesComponent.innerTree._refresh = this.trackTreesComponent.innerTree.refresh;
