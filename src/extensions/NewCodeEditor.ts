@@ -1220,6 +1220,7 @@ export class CodeEditor
     cursorsLayer: HTMLElement;
     selectionsLayer: HTMLElement;
     lineGutter: HTMLElement;
+    searchBox: HTMLElement | null = null;
     currentTab: CodeTab | null = null;
     statusPanel: typeof Panel;
     leftStatusPanel: typeof Panel;
@@ -1274,6 +1275,10 @@ export class CodeEditor
     private _clickCount: number = 0;
     private _lastClickTime: number = 0;
     private _lastClickLine: number = -1;
+    private _isSearchboxActive: boolean = false;
+    private _searchMatchCase: boolean = false;
+    private _lastTextFound: string = '';
+    private _lastSearchPos: { line: number, col: number } | null = null;
 
     private static readonly CODE_MIN_FONT_SIZE = 9;
     private static readonly CODE_MAX_FONT_SIZE = 22;
@@ -1379,6 +1384,75 @@ export class CodeEditor
         // Cursors and selections
         this.cursorsLayer = LX.makeElement( 'div', 'cursors', null, this.codeSizer );
         this.selectionsLayer = LX.makeElement( 'div', 'selections', null, this.codeSizer );
+
+        if ( !this.disableEdition )
+        {
+            // Add autocomplete box
+            // {
+            //     this.autocomplete = document.createElement( 'div' );
+            //     this.autocomplete.className = 'autocomplete';
+            //     this.codeArea.attach( this.autocomplete );
+            // }
+
+            const searchBoxClass = 'searchbox bg-card absolute z-100 top-8 right-2 rounded-lg border-colored overflow-y-scroll opacity-0';
+
+            // Add search box
+            {
+                const box = LX.makeElement( 'div', searchBoxClass, null, this.codeArea );
+
+                const searchPanel = new LX.Panel();
+                box.appendChild( searchPanel.root );
+
+                searchPanel.sameLine();
+                const textComponent = searchPanel.addText( null, '', null, { placeholder: 'Find', inputClass: 'bg-secondary' } );
+                searchPanel.addButton( null, 'MatchCaseButton', ( v: boolean ) => {
+                    this._searchMatchCase = v;
+                    this._doSearch();
+                }, { icon: 'CaseSensitive', selectable: true, buttonClass: 'link', title: 'Match Case',
+                    tooltip: true } );
+                searchPanel.addButton( null, 'up', () => this._doSearch( null, true ), { icon: 'ArrowUp', buttonClass: 'ghost', title: 'Previous Match',
+                    tooltip: true } );
+                searchPanel.addButton( null, 'down', () => this._doSearch(), { icon: 'ArrowDown', buttonClass: 'ghost', title: 'Next Match',
+                    tooltip: true } );
+                searchPanel.addButton( null, 'x', this._doHideSearch.bind( this ), { icon: 'X', buttonClass: 'ghost', title: 'Close',
+                    tooltip: true } );
+                searchPanel.endLine();
+
+                const searchInput = textComponent.root.querySelector( 'input' );
+                searchInput?.addEventListener( 'keyup', ( e: KeyboardEvent ) => {
+                    if ( e.key == 'Escape' ) this._doHideSearch();
+                    else if ( e.key == 'Enter' ) this._doSearch( ( e.target as HTMLInputElement ).value, !!e.shiftKey );
+                } );
+
+                this.searchBox = box;
+                this.codeArea.attach( box );
+            }
+
+            // Add search LINE box
+            // {
+            //     const box = document.createElement( 'div' );
+            //     box.className = 'searchbox';
+
+            //     const searchPanel = new LX.Panel();
+            //     box.appendChild( searchPanel.root );
+
+            //     searchPanel.sameLine( 2 );
+            //     searchPanel.addText( null, '', ( value: string ) => {
+            //         input.value = ':' + value.replaceAll( ':', '' );
+            //         // this.goToLine( input.value.slice( 1 ) );
+            //     }, { placeholder: 'Go to line', trigger: 'input' } );
+            //     // searchPanel.addButton( null, 'x', this.hideSearchLineBox.bind( this ), { icon: 'X', title: 'Close', buttonClass: 'ghost',
+            //     //     tooltip: true } );
+
+            //     let input: any = box.querySelector( 'input' );
+            //     // input.addEventListener( 'keyup', ( e: KeyboardEvent ) => {
+            //     //     // if ( e.key == 'Escape' ) this.hideSearchLineBox();
+            //     // } );
+
+            //     // this.searchlinebox = box;
+            //     this.codeArea.attach( box );
+            // }
+        }
 
         // Load any font size from local storage
         // If not, use default size and make sure it's sync by not hardcoding a number by default here
@@ -2033,7 +2107,14 @@ export class CodeEditor
         else
         {
             this.cursorsLayer.classList.remove( 'show' );
-            this.selectionsLayer.classList.add( 'unfocused' );
+            if ( !this._isSearchboxActive )
+            {
+                this.selectionsLayer.classList.add( 'unfocused' );
+            }
+            else
+            {
+                this.selectionsLayer.classList.add( 'show' );
+            }
             this._stopBlinker();
         }
     }
@@ -2120,6 +2201,10 @@ export class CodeEditor
                 case 'd':
                     e.preventDefault();
                     this._doFindNextOcurrence();
+                    return;
+                case 'f':
+                    e.preventDefault();
+                    this._doOpenSearch();
                     return;
                 case 'k':
                     e.preventDefault();
@@ -2412,6 +2497,189 @@ export class CodeEditor
         this._renderCursors();
         this._renderSelections();
         this._scrollCursorIntoView();
+    }
+
+    private _doOpenSearch( clear: boolean = false ): void
+    {
+        if( !this.searchBox ) return;
+
+        // this.hideSearchLineBox();
+
+        LX.addClass( this.searchBox, 'opened' );
+        this._isSearchboxActive = true;
+
+        const input: HTMLInputElement | null = this.searchBox.querySelector( 'input' );
+        if( !input ) return;
+
+        if ( clear )
+        {
+            input.value = '';
+        }
+        else if ( this.cursorSet.hasSelection() )
+        {
+            input.value = this.cursorSet.getSelectedText( this.doc );
+        }
+
+        input.selectionStart = 0;
+        input.selectionEnd = input.value.length;
+        input.focus();
+    }
+
+    /**
+     * Returns true if visibility changed.
+     */
+    private _doHideSearch(): boolean
+    {
+        if( !this.searchBox ) return false;
+
+        const active = this._isSearchboxActive;
+        if ( active )
+        {
+            this.searchBox.classList.remove( 'opened' );
+            this._isSearchboxActive = false;
+            this._lastSearchPos = null;
+        }
+
+        return ( active != this._isSearchboxActive );
+    }
+
+    private _doSearch( text?: string | null, reverse: boolean = false, callback?: any, skipAlert: boolean = true, forceFocus: boolean = true )
+    {
+        text = text ?? this._lastTextFound;
+
+        if ( !text ) return;
+
+        const doc = this.doc;
+        let startLine: number;
+        let startCol: number;
+
+        if ( this._lastSearchPos )
+        {
+            startLine = this._lastSearchPos.line;
+            startCol = this._lastSearchPos.col + ( reverse ? -text.length : text.length );
+        }
+        else
+        {
+            const cursor = this.cursorSet.getPrimary();
+            startLine = cursor.head.line;
+            startCol = cursor.head.col;
+        }
+
+        const findInLine = ( lineIdx: number, fromCol: number ): number =>
+        {
+            let lineText = doc.getLine( lineIdx );
+            let needle = text!;
+
+            if ( !this._searchMatchCase )
+            {
+                lineText = lineText.toLowerCase();
+                needle = needle.toLowerCase();
+            }
+
+            if ( reverse )
+            {
+                const sub = lineText.substring( 0, fromCol );
+                return sub.lastIndexOf( needle );
+            }
+            else
+            {
+                return lineText.indexOf( needle, fromCol );
+            }
+        };
+
+        let foundLine: number = -1;
+        let foundCol: number = -1;
+
+        if ( reverse )
+        {
+            for ( let j = startLine; j >= 0; j-- )
+            {
+                const col = findInLine( j, j === startLine ? startCol : doc.getLine( j ).length );
+                if ( col > -1 )
+                {
+                    foundLine = j;
+                    foundCol = col;
+                    break;
+                }
+            }
+
+            // Wrap around from bottom
+            if ( foundLine === -1 )
+            {
+                for ( let j = doc.lineCount - 1; j > startLine; j-- )
+                {
+                    const col = findInLine( j, doc.getLine( j ).length );
+                    if ( col > -1 )
+                    {
+                        foundLine = j;
+                        foundCol = col;
+                        break;
+                    }
+                }
+            }
+        }
+        else
+        {
+            for ( let j = startLine; j < doc.lineCount; j++ )
+            {
+                const col = findInLine( j, j === startLine ? startCol : 0 );
+                if ( col > -1 )
+                {
+                    foundLine = j;
+                    foundCol = col;
+                    break;
+                }
+            }
+
+            // Wrap around from top
+            if ( foundLine === -1 )
+            {
+                for ( let j = 0; j < startLine; j++ )
+                {
+                    const col = findInLine( j, 0 );
+                    if ( col > -1 )
+                    {
+                        foundLine = j;
+                        foundCol = col;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if ( foundLine === -1 )
+        {
+            if ( !skipAlert ) alert( 'No results!' );
+            this._lastSearchPos = null;
+            return;
+        }
+
+        this._lastTextFound = text;
+        this._lastSearchPos = { line: foundLine, col: foundCol };
+
+        if ( callback )
+        {
+            callback( foundCol, foundLine );
+        }
+        else
+        {
+            // Select the found text
+            const primary = this.cursorSet.getPrimary();
+            primary.anchor = { line: foundLine, col: foundCol };
+            primary.head = { line: foundLine, col: foundCol + text.length };
+            this._renderCursors();
+            this._renderSelections();
+        }
+
+        // Scroll to the match
+        this.codeScroller.scrollTop = Math.max( ( foundLine - 10 ) * this.lineHeight, 0 );
+        this.codeScroller.scrollLeft = Math.max( foundCol * this.charWidth - this.codeScroller.clientWidth / 2, 0 );
+
+        if ( forceFocus )
+        {
+            const input = this.searchBox?.querySelector( 'input' );
+            input?.focus();
+        }
     }
 
     private _encloseSelection( open: string, close: string ): void
@@ -2803,6 +3071,8 @@ export class CodeEditor
     {
         if ( e.button !== 0 ) return;
         if ( !this.currentTab ) return;
+        if ( this.searchBox && this.searchBox.contains( e.target as Node ) ) return;
+
         e.preventDefault(); // Prevent browser from stealing focus from _inputArea
         this._wasPaired = false;
 

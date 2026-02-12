@@ -526,6 +526,9 @@
   .top-2 {
     top: calc(var(--spacing) * 2);
   }
+  .top-8 {
+    top: calc(var(--spacing) * 8);
+  }
   .right-0 {
     right: calc(var(--spacing) * 0);
   }
@@ -6360,17 +6363,8 @@ ul.lexassetscontent {
   opacity: 0.5;
 }
 .lexcodeeditor .searchbox {
-  background-color: var(--card);
-  position: absolute;
-  right: 6px;
-  top: 26px;
-  z-index: 100;
-  border-radius: 8px;
-  border: 1px solid var(--border);
   box-shadow: 0 0px 4px #101010;
-  overflow-y: scroll;
   transform: translateY(-96px);
-  opacity: 0;
   transition: transform 0.2s ease-in, opacity 0.2s ease-in;
 }
 .lexcodeeditor .searchbox.opened {
