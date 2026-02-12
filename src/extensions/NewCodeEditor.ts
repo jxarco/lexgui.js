@@ -60,6 +60,16 @@ function firstNonspaceIndex( str: string ): number
     return index < str.length ? index : -1;
 }
 
+function isSymbol( str: string ): boolean
+{
+    return /[^\w\s]/.test( str );
+}
+
+function isWord( str: string ): boolean
+{
+    return /\w/.test( str );
+}
+
 //  _____     _           _             
 // |_   _|___| |_ ___ ___|_|___ ___ ___ 
 //   | | | . | '_| -_|   | |- _| -_|  _|
@@ -434,14 +444,14 @@ class CodeDocument
 
         // Expand left
         let start = col;
-        while ( start > 0 && /\w/.test( l[ start - 1 ] ) )
+        while ( start > 0 && isWord( l[ start - 1 ] ) )
         {
             start--;
         }
 
         // Expand right
         let end = col;
-        while ( end < l.length && /\w/.test( l[ end ] ) )
+        while ( end < l.length && isWord( l[ end ] ) )
         {
             end++;
         }
@@ -910,13 +920,13 @@ class CursorSet
                 // Skip whitespace
                 while ( c > 0 && /\s/.test( l[ c - 1 ] ) ) c--;
                 // Skip word or symbols
-                if ( c > 0 && /\w/.test( l[ c - 1 ] ) )
+                if ( c > 0 && isWord( l[ c - 1 ] ) )
                 {
-                    while ( c > 0 && /\w/.test( l[ c - 1 ] ) ) c--;
+                    while ( c > 0 && isWord( l[ c - 1 ] ) ) c--;
                 }
                 else if ( c > 0 )
                 {
-                    while ( c > 0 && /[^\w\s]/.test( l[ c - 1 ] ) ) c--;
+                    while ( c > 0 && isSymbol( l[ c - 1 ] ) ) c--;
                 }
                 sel.head = { line, col: c };
             }
@@ -939,17 +949,17 @@ class CursorSet
             else
             {
                 let c = col;
-                // Skip word or symbols
-                if ( c < l.length && /\w/.test( l[ c ] ) )
-                {
-                    while ( c < l.length && /\w/.test( l[ c ] ) ) c++;
-                }
-                else if ( c < l.length && /[^\w\s]/.test( l[ c ] ) )
-                {
-                    while ( c < l.length && /[^\w\s]/.test( l[ c ] ) ) c++;
-                }
-                // Skip trailing whitespace
+                // Skip leading whitespace first
                 while ( c < l.length && /\s/.test( l[ c ] ) ) c++;
+                // Then skip word or symbols to end of group
+                if ( c < l.length && isWord( l[ c ] ) )
+                {
+                    while ( c < l.length && isWord( l[ c ] ) ) c++;
+                }
+                else if ( c < l.length && isSymbol( l[ c ] ) )
+                {
+                    while ( c < l.length && isSymbol( l[ c ] ) ) c++;
+                }
                 sel.head = { line, col: c };
             }
             if ( !selecting ) sel.anchor = { ...sel.head };
