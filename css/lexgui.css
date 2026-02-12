@@ -3723,6 +3723,11 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
     margin: 0px;
 }
 
+.lextimeline .lextree .lextreeitem.selected {
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+}
+
 .lextimeline .lextree ul {
     margin: 0;
     padding-bottom: 0px;

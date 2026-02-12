@@ -535,6 +535,7 @@ export class VideoEditor
     constructor( area: typeof Area, options: any = {} )
     {
         this.options = options ?? {};
+        const controlsOptions = this.options.controlsLayout ?? {};
         this.speed = options.speed ?? this.speed;
         this.mainArea = area;
 
@@ -548,7 +549,9 @@ export class VideoEditor
         }
         else
         {
-            [ videoArea, controlsArea ] = area.split( { type: 'vertical', sizes: [ '85%', null ], minimizable: false, resize: false } );
+            [ videoArea, controlsArea ] = area.split( { type: 'vertical',
+                sizes: [ controlsOptions.height ? `calc(100% - ${controlsOptions.height})` : '85%', null ], minimizable: false,
+                resize: false } );
         }
 
         controlsArea.root.classList.add( 'lexconstrolsarea' );
@@ -735,10 +738,14 @@ export class VideoEditor
         this.onChangeEnd = null;
     }
 
-    createControls( options: any = null )
+    createControls( controlsLayoutOptions: any = null )
     {
         const controlsArea = this.controlsArea;
-        options = options ?? this.options;
+        if ( controlsLayoutOptions )
+        {
+            this.options.controlsLayout = controlsLayoutOptions;
+        }
+        const controlsOptions = this.options.controlsLayout ?? {};
 
         // clear area. Signals are not cleared !!! (not a problem if there are no signals)
         while ( controlsArea.root.children.length )
@@ -815,11 +822,11 @@ export class VideoEditor
             selected: this.loop } );
 
         let timeBarArea = null;
-        if ( typeof ( options.controlsLayout ) == 'function' )
+        if ( typeof ( controlsOptions.type ) == 'function' )
         {
-            timeBarArea = options.controlsLayout;
+            timeBarArea = controlsOptions.type;
         }
-        else if ( options.controlsLayout == 1 )
+        else if ( controlsOptions.type == 1 )
         {
             timeBarArea = this._createControlsLayout_1();
         }
@@ -860,9 +867,11 @@ export class VideoEditor
     _createControlsLayout_1()
     {
         const controlsArea = this.controlsArea;
+        const options = this.options.controlsLayout ?? {};
 
         // Create playing timeline area and attach panels
-        let [ timeBarArea, bottomArea ] = controlsArea.split( { type: 'vertical', sizes: [ '50%', null ], minimizable: false, resize: false } );
+        let [ timeBarArea, bottomArea ] = controlsArea.split( { type: 'vertical', sizes: [ options.l1TimelineHeight ?? '50%', null ],
+            minimizable: false, resize: false } );
 
         bottomArea.root.classList.add( 'relative' );
 
