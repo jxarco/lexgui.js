@@ -212,7 +212,7 @@ export class DropdownMenu
         {
             item.kbd = [].concat( item.kbd );
 
-            const kbd = LX.makeKbd( item.kbd );
+            const kbd = LX.makeKbd( item.kbd, item.useKbdSpecialKeys ?? true );
             menuItem.appendChild( kbd );
 
             document.addEventListener( 'keydown', ( e ) => {

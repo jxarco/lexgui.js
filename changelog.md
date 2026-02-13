@@ -3,6 +3,7 @@
 ## dev
 
 Added `Tabs.setIcon(name, icon)`.
+Added DropdownMenu item option `useKbdSpecialKeys` (true).
 
 Full refactor for CodeEditor:
 - Improved robustness and fixed several minor bugs.

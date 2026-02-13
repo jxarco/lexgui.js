@@ -1187,6 +1187,7 @@ const TOKEN_CLASS_MAP: Record<string, string> = {
 const Area = LX.Area;
 const Panel = LX.Panel;
 const Tabs = LX.Tabs;
+const ContextMenu = LX.ContextMenu;
 
 interface CodeTab
 {
@@ -1255,7 +1256,7 @@ export class CodeEditor
     onRun: ( text: string, editor: CodeEditor ) => void;
     onCtrlSpace: ( text: string, editor: CodeEditor ) => void;
     onCreateStatusPanel: ( panel: typeof Panel, editor: CodeEditor ) => void;
-    // onContextMenu: any;
+    onContextMenu: any;
     onNewTab: ( event: MouseEvent ) => void;
     onSelectTab: ( name: string, editor: CodeEditor ) => void;
     // onReady: any;
@@ -1337,7 +1338,7 @@ export class CodeEditor
         this.onRun = options.onRun;
         this.onCtrlSpace = options.onCtrlSpace;
         this.onCreateStatusPanel = options.onCreateStatusPanel;
-        // this.onContextMenu = options.onContextMenu;
+        this.onContextMenu = options.onContextMenu;
         this.onNewTab = options.onNewTab;
         this.onSelectTab = options.onSelectTab;
         // this.onReady = options.onReady;
@@ -1428,7 +1429,8 @@ export class CodeEditor
 
                 const searchInput = textComponent.root.querySelector( 'input' );
                 searchInput?.addEventListener( 'keyup', ( e: KeyboardEvent ) => {
-                    if ( e.key == 'Enter' ) this._doSearch( ( e.target as HTMLInputElement ).value, !!e.shiftKey );
+                    if ( e.key == 'Escape' ) this._doHideSearch();
+                    else if ( e.key == 'Enter' ) this._doSearch( ( e.target as HTMLInputElement ).value, !!e.shiftKey );
                 } );
 
                 this.searchBox = box;
@@ -1442,13 +1444,17 @@ export class CodeEditor
 
                 searchPanel.sameLine();
                 const textComponent = searchPanel.addText( null, '', ( value: string ) => {
-                    const searchInput = textComponent.root.querySelector( 'input' );
                     searchInput.value = ':' + value.replaceAll( ':', '' );
                     this._doGotoLine( parseInt( searchInput.value.slice( 1 ) ) );
                 }, { className: 'flex-auto-fill', placeholder: 'Go to line', trigger: 'input' } );
                 searchPanel.addButton( null, 'x', this._doHideSearch.bind( this ), { icon: 'X', title: 'Close', buttonClass: 'ghost',
                     tooltip: true } );
                 searchPanel.endLine();
+
+                const searchInput = textComponent.root.querySelector( 'input' );
+                searchInput.addEventListener( 'keyup', ( e: KeyboardEvent ) => {
+                    if ( e.key == 'Escape' ) this._doHideSearch();
+                } );
 
                 searchPanel.addText( null, 'Type a line number to go to (from 0 to 0).', null,
                     { disabled: true, inputClass: 'bg-none', signal: '@line-number-range' } );
@@ -1501,6 +1507,7 @@ export class CodeEditor
         this._inputArea.addEventListener( 'focus', () => this._setFocused( true ) );
         this._inputArea.addEventListener( 'blur', () => this._setFocused( false ) );
         this.root.addEventListener( 'mousedown', this._onMouseDown.bind( this ) );
+        this.root.addEventListener( 'contextmenu', this._onContextMenu.bind( this ) );
 
         // Bottom status panel
         this.statusPanel = this._createStatusPanel( options );
@@ -1604,7 +1611,7 @@ export class CodeEditor
         // Move into the sizer..
         this.codeSizer.appendChild( dom );
 
-        if( selected )
+        if ( selected )
         {
             this.currentTab = codeTab;
             this._updateDataInfoPanel( '@tab-name', name );
@@ -1658,7 +1665,8 @@ export class CodeEditor
         this._updateDataInfoPanel( '@tab-name', name );
 
         this.language = Tokenizer.getLanguage( this.currentTab.language ) ?? Tokenizer.getLanguage( 'Plain Text' )!;
-
+        LX.emitSignal( '@highlight', this.currentTab.language );
+        
         this._rebuildLines();
         this._afterCursorMove();
 
@@ -2524,7 +2532,7 @@ export class CodeEditor
 
     private _doOpenSearch( clear: boolean = false ): void
     {
-        if( !this.searchBox ) return;
+        if ( !this.searchBox ) return;
 
         this._doHideSearch();
 
@@ -2532,7 +2540,7 @@ export class CodeEditor
         this._isSearchBoxActive = true;
 
         const input: HTMLInputElement | null = this.searchBox.querySelector( 'input' );
-        if( !input ) return;
+        if ( !input ) return;
 
         if ( clear )
         {
@@ -2550,7 +2558,7 @@ export class CodeEditor
 
     private _doOpenLineSearch(): void
     {
-        if( !this.searchLineBox ) return;
+        if ( !this.searchLineBox ) return;
 
         this._doHideSearch();
 
@@ -2560,7 +2568,7 @@ export class CodeEditor
         this._isSearchLineBoxActive = true;
 
         const input: HTMLInputElement | null = this.searchLineBox.querySelector( 'input' );
-        if( !input ) return;
+        if ( !input ) return;
         input.value = '';
         input.focus();
     }
@@ -2570,7 +2578,7 @@ export class CodeEditor
      */
     private _doHideSearch(): boolean
     {
-        if( !this.searchBox || !this.searchLineBox ) return false;
+        if ( !this.searchBox || !this.searchLineBox ) return false;
 
         const active = this._isSearchBoxActive;
         const activeLine = this._isSearchLineBoxActive;
@@ -2580,7 +2588,7 @@ export class CodeEditor
             this._isSearchBoxActive = false;
             this._lastSearchPos = null;
         }
-        else if( activeLine )
+        else if ( activeLine )
         {
             this.searchLineBox.classList.remove( 'opened' );
             this._isSearchLineBoxActive = false;
@@ -2730,7 +2738,7 @@ export class CodeEditor
 
     private _doGotoLine( lineNumber: number ): void
     {
-        if( Number.isNaN( lineNumber ) || lineNumber < 1 || lineNumber > this.doc.lineCount ) return;
+        if ( Number.isNaN( lineNumber ) || lineNumber < 1 || lineNumber > this.doc.lineCount ) return;
 
         this.cursorSet.set( lineNumber - 1, 0 );
 
@@ -3143,7 +3151,7 @@ export class CodeEditor
         const y = e.clientY - rect.top;
 
         const line = Math.floor( y / this.lineHeight );
-        if( line < 0 || line > this.doc.lineCount - 1 ) return;
+        if ( line < 0 || line > this.doc.lineCount - 1 ) return;
 
         const col = Math.max( 0, Math.min( Math.round( x / this.charWidth ), this.doc.getLine( line ).length ) );
 
@@ -3213,6 +3221,41 @@ export class CodeEditor
         document.addEventListener( 'mouseup', onMouseUp );
     }
 
+    private _onContextMenu( e: MouseEvent ): void
+    {
+        e.preventDefault();
+        
+        // if ( !this.canOpenContextMenu )
+        // {
+        //     return;
+        // }
+
+        const dmOptions: any[] = [ { name: 'Copy', icon: 'Copy', callback: () => this._doCopy(), kbd: ['Ctrl', 'C'], useKbdSpecialKeys: false } ];
+
+        if ( !this.disableEdition )
+        {
+            dmOptions.push( { name: 'Cut', icon: 'Scissors', callback: () => this._doCut(), kbd: ['Ctrl', 'X'], useKbdSpecialKeys: false } );
+            dmOptions.push( { name: 'Paste', icon: 'Paste', callback: () => this._doPaste(), kbd: ['Ctrl', 'V'], useKbdSpecialKeys: false } );
+        }
+
+        if ( this.onContextMenu )
+        {
+            const content = this.cursorSet.getSelectedText( this.doc );
+            const options = this.onContextMenu( this, content, e );
+            if ( options?.length )
+            {
+                dmOptions.push( null ); // Separator
+
+                for ( const o of options )
+                {
+                    dmOptions.push( { name: o.path, disabled: o.disabled, callback: o.callback } );
+                }
+            }
+        }
+
+        LX.addDropdownMenu( e.target, dmOptions, { event: e, side: 'bottom', align: 'start' } );
+    }
+
     private _afterCursorMove(): void
     {
         this._renderCursors();
@@ -3255,6 +3298,74 @@ export class CodeEditor
         this.lineGutter.style.height = `${this.doc.lineCount * this.lineHeight - verticalTopOffset}px`;
     }
 
+    // Files:
+
+    private _doLoadFromFile()
+    {
+        const input = LX.makeElement( 'input', '', '', document.body );
+        input.type = 'file';
+        input.click();
+        input.addEventListener( 'change', ( e: Event ) => {
+            const target = e.target as HTMLInputElement;
+            if ( target.files && target.files[0] )
+            {
+                this.loadFile( target.files[0] );
+            }
+            input.remove();
+        } );
+    }
+
+    loadFile( file: File | string, options: Record<string, any> = {} ): void
+    {
+        const onLoad = ( text: string, name: string ) =>
+        {
+            // Remove Carriage Return in some cases and sub tabs using spaces
+            text = text.replaceAll( '\r', '' ).replaceAll( /\t|\\t/g, ' '.repeat( this.tabSize ) );
+
+            const ext = LX.getExtension( name );
+            const langName = options.language ?? ( Tokenizer.getLanguage( options.language )?.name
+                ?? ( Tokenizer.getLanguageByExtension( ext )?.name ?? 'Plain Text' ) );
+
+            this._addTab( name, {
+                selected: true,
+                title: options.title ?? name,
+                language: langName
+            } );
+
+            this.doc.setText( text );
+            this.setLanguage( langName );
+            this.cursorSet.set( 0, 0 );
+            this.undoManager.clear();
+            this._renderCursors();
+            this._renderSelections();
+            this._resetGutter();
+
+            if ( options.callback )
+            {
+                options.callback( name, text );
+            }
+        };
+
+        if ( typeof file === 'string' )
+        {
+            const url = file;
+            const name = options.filename ?? url.substring( url.lastIndexOf( '/' ) + 1 );
+
+            LX.request( { url, success: ( text: string ) => {
+                onLoad( text, name );
+            } } );
+        }
+        else
+        {
+            const fr = new FileReader();
+            fr.readAsText( file );
+            fr.onload = ( e ) => {
+                const text = ( e.currentTarget as any ).result;
+                onLoad( text, file.name );
+            };
+        }
+    }
+
     // Font Size utils:
 
     private _setFontSize( size: number, updateDOM: boolean = true )
@@ -3271,7 +3382,7 @@ export class CodeEditor
         r.style.setProperty( '--code-editor-row-height', `${rowPixels}px` );
         this.lineHeight = rowPixels;
 
-        if( updateDOM )
+        if ( updateDOM )
         {
             this._rebuildLines();
             this._afterCursorMove();

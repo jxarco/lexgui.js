@@ -6369,10 +6369,12 @@ ul.lexassetscontent {
   box-shadow: 0 0px 4px #101010;
   transform: translateY(-96px);
   transition: transform 0.2s ease-in, opacity 0.2s ease-in;
+  pointer-events: none;
 }
 .lexcodeeditor .searchbox.opened {
   transform: translateY(0px);
   opacity: 1;
+  pointer-events: auto;
 }
 .lexcodeeditor .searchbox .lexpanel span {
   height: 11px;
