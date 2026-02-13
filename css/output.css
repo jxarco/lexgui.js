@@ -854,6 +854,9 @@
   .min-w-16\! {
     min-width: calc(var(--spacing) * 16) !important;
   }
+  .min-w-96 {
+    min-width: calc(var(--spacing) * 96);
+  }
   .min-w-fit {
     min-width: fit-content;
   }

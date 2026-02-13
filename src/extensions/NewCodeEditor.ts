@@ -1221,6 +1221,7 @@ export class CodeEditor
     selectionsLayer: HTMLElement;
     lineGutter: HTMLElement;
     searchBox: HTMLElement | null = null;
+    searchLineBox: HTMLElement | null = null;
     currentTab: CodeTab | null = null;
     statusPanel: typeof Panel;
     leftStatusPanel: typeof Panel;
@@ -1275,7 +1276,8 @@ export class CodeEditor
     private _clickCount: number = 0;
     private _lastClickTime: number = 0;
     private _lastClickLine: number = -1;
-    private _isSearchboxActive: boolean = false;
+    private _isSearchBoxActive: boolean = false;
+    private _isSearchLineBoxActive: boolean = false;
     private _searchMatchCase: boolean = false;
     private _lastTextFound: string = '';
     private _lastSearchPos: { line: number, col: number } | null = null;
@@ -1394,12 +1396,11 @@ export class CodeEditor
             //     this.codeArea.attach( this.autocomplete );
             // }
 
-            const searchBoxClass = 'searchbox bg-card absolute z-100 top-8 right-2 rounded-lg border-colored overflow-y-scroll opacity-0';
+            const searchBoxClass = 'searchbox bg-card min-w-96 absolute z-100 top-8 right-2 rounded-lg border-colored overflow-y-scroll opacity-0';
 
             // Add search box
             {
                 const box = LX.makeElement( 'div', searchBoxClass, null, this.codeArea );
-
                 const searchPanel = new LX.Panel();
                 box.appendChild( searchPanel.root );
 
@@ -1420,38 +1421,33 @@ export class CodeEditor
 
                 const searchInput = textComponent.root.querySelector( 'input' );
                 searchInput?.addEventListener( 'keyup', ( e: KeyboardEvent ) => {
-                    if ( e.key == 'Escape' ) this._doHideSearch();
-                    else if ( e.key == 'Enter' ) this._doSearch( ( e.target as HTMLInputElement ).value, !!e.shiftKey );
+                    if ( e.key == 'Enter' ) this._doSearch( ( e.target as HTMLInputElement ).value, !!e.shiftKey );
                 } );
 
                 this.searchBox = box;
-                this.codeArea.attach( box );
             }
 
             // Add search LINE box
-            // {
-            //     const box = document.createElement( 'div' );
-            //     box.className = 'searchbox';
+            {
+                const box = LX.makeElement( 'div', searchBoxClass, null, this.codeArea );
+                const searchPanel = new LX.Panel();
+                box.appendChild( searchPanel.root );
 
-            //     const searchPanel = new LX.Panel();
-            //     box.appendChild( searchPanel.root );
+                searchPanel.sameLine();
+                const textComponent = searchPanel.addText( null, '', ( value: string ) => {
+                    const searchInput = textComponent.root.querySelector( 'input' );
+                    searchInput.value = ':' + value.replaceAll( ':', '' );
+                    this._doGotoLine( parseInt( searchInput.value.slice( 1 ) ) );
+                }, { className: 'flex-auto-fill', placeholder: 'Go to line', trigger: 'input' } );
+                searchPanel.addButton( null, 'x', this._doHideSearch.bind( this ), { icon: 'X', title: 'Close', buttonClass: 'ghost',
+                    tooltip: true } );
+                searchPanel.endLine();
 
-            //     searchPanel.sameLine( 2 );
-            //     searchPanel.addText( null, '', ( value: string ) => {
-            //         input.value = ':' + value.replaceAll( ':', '' );
-            //         // this.goToLine( input.value.slice( 1 ) );
-            //     }, { placeholder: 'Go to line', trigger: 'input' } );
-            //     // searchPanel.addButton( null, 'x', this.hideSearchLineBox.bind( this ), { icon: 'X', title: 'Close', buttonClass: 'ghost',
-            //     //     tooltip: true } );
+                searchPanel.addText( null, 'Type a line number to go to (from 0 to 0).', null,
+                    { disabled: true, inputClass: 'bg-none', signal: '@line-number-range' } );
 
-            //     let input: any = box.querySelector( 'input' );
-            //     // input.addEventListener( 'keyup', ( e: KeyboardEvent ) => {
-            //     //     // if ( e.key == 'Escape' ) this.hideSearchLineBox();
-            //     // } );
-
-            //     // this.searchlinebox = box;
-            //     this.codeArea.attach( box );
-            // }
+                this.searchLineBox = box;
+            }
         }
 
         // Load any font size from local storage
@@ -1786,7 +1782,7 @@ export class CodeEditor
         rightStatusPanel.sameLine();
         rightStatusPanel.addLabel( this.currentTab?.title ?? '', { id: 'EditorFilenameStatusComponent', fit: true, inputClass: 'text-xs',
             signal: '@tab-name' } );
-        rightStatusPanel.addButton( null, 'Ln 1, Col 1', () => {}, {
+        rightStatusPanel.addButton( null, 'Ln 1, Col 1', this._doOpenLineSearch.bind( this ), {
             id: 'EditorSelectionStatusComponent',
             buttonClass: 'outline xs',
             fit: true,
@@ -2107,7 +2103,7 @@ export class CodeEditor
         else
         {
             this.cursorsLayer.classList.remove( 'show' );
-            if ( !this._isSearchboxActive )
+            if ( !this._isSearchBoxActive )
             {
                 this.selectionsLayer.classList.add( 'unfocused' );
             }
@@ -2206,6 +2202,10 @@ export class CodeEditor
                     e.preventDefault();
                     this._doOpenSearch();
                     return;
+                case 'g':
+                    e.preventDefault();
+                    this._doOpenLineSearch();
+                    return;
                 case 'k':
                     e.preventDefault();
                     this._keyChain = 'k';
@@ -2279,6 +2279,7 @@ export class CodeEditor
                 return;
             case 'Escape':
                 e.preventDefault();
+                if ( this._doHideSearch() ) return;
                 this.cursorSet.removeSecondaryCursors();
                 // Collapse selection
                 const h = this.cursorSet.getPrimary().head;
@@ -2503,10 +2504,10 @@ export class CodeEditor
     {
         if( !this.searchBox ) return;
 
-        // this.hideSearchLineBox();
+        this._doHideSearch();
 
         LX.addClass( this.searchBox, 'opened' );
-        this._isSearchboxActive = true;
+        this._isSearchBoxActive = true;
 
         const input: HTMLInputElement | null = this.searchBox.querySelector( 'input' );
         if( !input ) return;
@@ -2525,22 +2526,45 @@ export class CodeEditor
         input.focus();
     }
 
+    private _doOpenLineSearch(): void
+    {
+        if( !this.searchLineBox ) return;
+
+        this._doHideSearch();
+
+        LX.emitSignal( '@line-number-range', `Type a line number to go to (from 1 to ${this.doc.lineCount}).` )
+
+        LX.addClass( this.searchLineBox, 'opened' );
+        this._isSearchLineBoxActive = true;
+
+        const input: HTMLInputElement | null = this.searchLineBox.querySelector( 'input' );
+        if( !input ) return;
+        input.value = '';
+        input.focus();
+    }
+
     /**
      * Returns true if visibility changed.
      */
     private _doHideSearch(): boolean
     {
-        if( !this.searchBox ) return false;
+        if( !this.searchBox || !this.searchLineBox ) return false;
 
-        const active = this._isSearchboxActive;
+        const active = this._isSearchBoxActive;
+        const activeLine = this._isSearchLineBoxActive;
         if ( active )
         {
             this.searchBox.classList.remove( 'opened' );
-            this._isSearchboxActive = false;
+            this._isSearchBoxActive = false;
             this._lastSearchPos = null;
         }
+        else if( activeLine )
+        {
+            this.searchLineBox.classList.remove( 'opened' );
+            this._isSearchLineBoxActive = false;
+        }
 
-        return ( active != this._isSearchboxActive );
+        return ( active != this._isSearchBoxActive ) || ( activeLine != this._isSearchLineBoxActive );
     }
 
     private _doSearch( text?: string | null, reverse: boolean = false, callback?: any, skipAlert: boolean = true, forceFocus: boolean = true )
@@ -2680,6 +2704,15 @@ export class CodeEditor
             const input = this.searchBox?.querySelector( 'input' );
             input?.focus();
         }
+    }
+
+    private _doGotoLine( lineNumber: number ): void
+    {
+        if( Number.isNaN( lineNumber ) || lineNumber < 1 || lineNumber > this.doc.lineCount ) return;
+
+        this.cursorSet.set( lineNumber - 1, 0 );
+
+        this._afterCursorMove();
     }
 
     private _encloseSelection( open: string, close: string ): void
