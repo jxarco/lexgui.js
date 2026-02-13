@@ -75,7 +75,7 @@ function isWord( str: string ): boolean
 //   | | | . | '_| -_|   | |- _| -_|  _|
 //   |_| |___|_,_|___|_|_|_|___|___|_|
 
-class Tokenizer
+export class Tokenizer
 {
     private static languages: Map<string, LanguageDef> = new Map();
     private static extensionMap: Map<string, string> = new Map(); // ext -> language name
@@ -218,6 +218,8 @@ class Tokenizer
         return result;
     }
 }
+
+LX.Tokenizer = Tokenizer;
 
 //  __                                   _____     _                 
 // |  |   ___ ___ ___ _ _ ___ ___ ___   |  |  |___| |___ ___ ___ ___ 
@@ -1249,9 +1251,9 @@ export class CodeEditor
     // explorerName: string = 'EXPLORER';
 
     // Editor callbacks:
-    // onSave: any;
-    // onRun: any;
-    // onCtrlSpace: any;
+    onSave: ( text: string, editor: CodeEditor ) => void;
+    onRun: ( text: string, editor: CodeEditor ) => void;
+    onCtrlSpace: ( text: string, editor: CodeEditor ) => void;
     onCreateStatusPanel: ( panel: typeof Panel, editor: CodeEditor ) => void;
     // onContextMenu: any;
     onNewTab: ( event: MouseEvent ) => void;
@@ -1306,6 +1308,11 @@ export class CodeEditor
         return this.currentTab!.dom;
     }
 
+    static getInstances()
+    {
+        return CodeEditor.__instances;
+    }
+
     constructor( area: typeof Area, options: Record<string, any> = {} )
     {
         g.editor = this;
@@ -1326,9 +1333,9 @@ export class CodeEditor
         // this.explorerName = options.explorerName ?? this.explorerName;
 
         // Editor callbacks
-        // this.onSave = options.onSave;
-        // this.onRun = options.onRun;
-        // this.onCtrlSpace = options.onCtrlSpace;
+        this.onSave = options.onSave;
+        this.onRun = options.onRun;
+        this.onCtrlSpace = options.onCtrlSpace;
         this.onCreateStatusPanel = options.onCreateStatusPanel;
         // this.onContextMenu = options.onContextMenu;
         this.onNewTab = options.onNewTab;
@@ -2210,6 +2217,13 @@ export class CodeEditor
                     e.preventDefault();
                     this._keyChain = 'k';
                     return;
+                case 's': // save
+                    e.preventDefault();
+                    if ( this.onSave )
+                    {
+                        this.onSave( this.getText(), this );
+                    }
+                    return;
                 case 'z':
                     e.preventDefault();
                     shift ? this._doRedo() : this._doUndo();
@@ -2230,6 +2244,13 @@ export class CodeEditor
                     e.preventDefault();
                     this._doPaste();
                     return;
+                case ' ': 
+                    if ( this.onCtrlSpace )
+                    {
+                        e.preventDefault();
+                        this.onCtrlSpace( this.getText(), this );
+                        return;
+                    }
             }
         }
 
@@ -2300,7 +2321,7 @@ export class CodeEditor
                 return;
             case 'Enter':
                 e.preventDefault();
-                this._doEnter();
+                this._doEnter( ctrl );
                 return;
             case 'Tab':
                 e.preventDefault();
@@ -2851,8 +2872,14 @@ export class CodeEditor
         this._afterCursorMove();
     }
 
-    private _doEnter(): void
+    private _doEnter( shift: boolean ): void
     {
+        if ( shift && this.onRun )
+        {
+            this.onRun( this.getText(), this );
+            return;
+        }
+
         this._deleteSelectionIfAny();
         this._flushAction();
 

@@ -3,6 +3,7 @@
 import { BaseComponent, ComponentType } from '../components/BaseComponent';
 import { ContextMenu } from '../components/ContextMenu';
 import { TextInput } from '../components/TextInput';
+import { Tokenizer } from '../extensions/NewCodeEditor';
 import { Area } from './Area';
 import { IEvent } from './Event';
 import { LX } from './Namespace';
@@ -481,17 +482,16 @@ LX._createCommandbar = function( root: any )
         {
             const instances = LX.CodeEditor.getInstances();
             if ( !instances.length || !instances[0].area.root.offsetHeight ) return entries;
-
-            const languages = LX.CodeEditor.languages;
-
-            for ( let l of Object.keys( languages ) )
+            for ( let l of LX.Tokenizer.getRegisteredLanguages() )
             {
+                const langDef = Tokenizer.getLanguage( l );
+                if( !langDef ) continue;
                 const key = 'Language: ' + l;
-                const icon = instances[0]._getFileIcon( null, languages[l].ext );
-                const classes = icon.split( ' ' );
+                const icon: any = langDef?.icon;
+                const iconData = icon ? icon.split( ' ' ) : [];
 
-                let value = LX.makeIcon( classes[0], { svgClass: `${classes.slice( 0 ).join( ' ' )}` } ).innerHTML;
-                value += key + " <span class='lang-ext'>(" + languages[l].ext + ')</span>';
+                let value = LX.makeIcon( iconData[0], { svgClass: `${iconData.slice( 1 ).join( ' ' )}` } ).innerHTML;
+                value += key + " <span class='lang-ext'>(" + langDef.extensions + ')</span>';
 
                 if ( !_filterEntry( key, filter ) )
                 {
@@ -501,7 +501,7 @@ LX._createCommandbar = function( root: any )
                 entries.push( { name: value, callback: () => {
                     for ( let i of instances )
                     {
-                        i._changeLanguage( l );
+                        i.setLanguage( l );
                     }
                 } } );
             }
