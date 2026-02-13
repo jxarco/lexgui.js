@@ -366,6 +366,19 @@ export class Tabs
         this.tabDOMs[name].click();
     }
 
+    setIcon( name: string, icon: string )
+    {
+        const tabEl = this.tabDOMs[name];
+        if ( !tabEl )
+        {
+            return;
+        }
+
+        const classes = icon.split( ' ' );
+        const iconEl = LX.makeIcon( classes[0], { svgClass: 'sm ' + classes.slice( 0 ).join( ' ' ) } );
+        tabEl.innerHTML = iconEl.innerHTML + name;
+    }
+
     delete( name: string )
     {
         if ( this.selected == name )

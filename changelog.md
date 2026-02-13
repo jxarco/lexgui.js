@@ -2,6 +2,8 @@
 
 ## dev
 
+Added `Tabs.setIcon(name, icon)`.
+
 Full refactor for CodeEditor:
 - Improved robustness and fixed several minor bugs.
 - Removed legacy `options.onsave` and `options.onrun`.

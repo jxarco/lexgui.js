@@ -1243,10 +1243,10 @@ export class CodeEditor
     // useAutoComplete: boolean = true;
     allowAddScripts: boolean = true;
     allowClosingTabs: boolean = true;
-    // allowLoadingFiles: boolean = true;
+    allowLoadingFiles: boolean = true;
     tabSize: number = 4;
     highlight: string = 'Plain Text';
-    // newTabOptions: any;
+    newTabOptions: any[] | null = null;
     // customSuggestions: any[] = [];
     // explorerName: string = 'EXPLORER';
 
@@ -1326,9 +1326,9 @@ export class CodeEditor
         // this.useAutoComplete = options.autocomplete ?? this.useAutoComplete;
         this.allowAddScripts = options.allowAddScripts ?? this.allowAddScripts;
         this.allowClosingTabs = options.allowClosingTabs ?? this.allowClosingTabs;
-        // this.allowLoadingFiles = options.allowLoadingFiles ?? this.allowLoadingFiles;
+        this.allowLoadingFiles = options.allowLoadingFiles ?? this.allowLoadingFiles;
         this.highlight = options.highlight ?? this.highlight;
-        // this.newTabOptions = options.newTabOptions;
+        this.newTabOptions = options.newTabOptions;
         // this.customSuggestions = options.customSuggestions ?? [];
         // this.explorerName = options.explorerName ?? this.explorerName;
 
@@ -1549,12 +1549,19 @@ export class CodeEditor
     setLanguage( name: string ): void
     {
         const lang = Tokenizer.getLanguage( name );
-        if ( lang )
+        if ( !lang ) return;
+
+        this.language = lang;
+
+        if ( this.currentTab )
         {
-            this.language = lang;
-            this._lineStates = [];
-            this._renderAllLines();
+            this.currentTab.language = name;
+            this.tabs.setIcon( this.currentTab.name, lang.icon );
         }
+
+        this._lineStates = [];
+        this._renderAllLines();
+        LX.emitSignal( '@highlight', name );
     }
 
     focus(): void
@@ -1669,8 +1676,9 @@ export class CodeEditor
             return;
         }
 
-        const dmOptions = [
-            { name: 'Create file', icon: 'FilePlus', callback: this._onCreateNewFile.bind( this ) }
+        const dmOptions = this.newTabOptions ?? [
+            { name: 'Create file', icon: 'FilePlus', callback: this._onCreateNewFile.bind( this ) },
+            { name: 'Load file', icon: 'FileUp', disabled: !this.allowLoadingFiles, callback: this._doLoadFromFile.bind( this ) }
         ];
 
         LX.addDropdownMenu( event.target, dmOptions, { side: 'bottom', align: 'start' } );
@@ -1815,13 +1823,6 @@ export class CodeEditor
 
         const langButton = rightStatusPanel.addButton( '<b>{ }</b>', this.highlight, ( value: any, event: any ) => {
 
-            const _onNewLang = ( v: string ) => {
-                this.language = Tokenizer.getLanguage( v )!;
-                if ( this.currentTab ) this.currentTab.language = v;
-                this._lineStates = [];
-                this._rebuildLines();
-            }
-
             const dd = LX.addDropdownMenu(
                 langButton.root,
                 Tokenizer.getRegisteredLanguages().map( ( v ) => {
@@ -1833,7 +1834,7 @@ export class CodeEditor
                         icon: iconData[0],
                         className: 'w-full place-content-center',
                         svgClass: iconData.slice( 1 ).join( ' ' ),
-                        callback: _onNewLang
+                        callback: ( v: string ) => this.setLanguage( v )
                     };
                 } ),
                 { side: 'top', align: 'end' }
