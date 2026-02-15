@@ -5757,6 +5757,10 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 .lextimeline .lextree .lextreeitem {
   margin: 0px;
 }
+.lextimeline .lextree .lextreeitem.selected {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+}
 .lextimeline .lextree ul {
   margin: 0;
   padding-bottom: 0px;
@@ -6306,9 +6310,9 @@ ul.lexassetscontent {
 }
 .lexcodescrollbar {
   width: 10px;
+  height: 100%;
   position: absolute;
   background-color: transparent;
-  box-sizing: border-box;
   margin: 0;
   padding: 0;
   z-index: 1 !important;
@@ -6316,14 +6320,13 @@ ul.lexassetscontent {
   pointer-events: none;
 }
 .lexcodescrollbar.horizontal {
-  width: calc(100% - 4rem);
+  width: 100%;
   height: 10px;
   bottom: 0px;
   left: 4rem;
 }
 .lexcodescrollbar div {
   background-color: var(--secondary) !important;
-  box-sizing: border-box;
   margin: 0;
   padding: 0;
   border-right: none;

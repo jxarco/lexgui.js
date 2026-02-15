@@ -319,12 +319,13 @@ Tokenizer.registerLanguage( {
 const jsKeywords = [
     'var', 'let', 'const', 'this', 'in', 'of', 'true', 'false', 'null', 'undefined',
     'new', 'function', 'class', 'extends', 'super', 'import', 'export', 'from',
-    'default', 'async', 'await', 'yield', 'typeof', 'instanceof', 'void', 'delete',
-    'throw', 'try', 'catch', 'finally', 'debugger', 'with'
+    'default', 'async', 'typeof', 'instanceof', 'void', 'delete', 'debugger', 'NaN',
+    'static', 'constructor', 'Infinity', 'abstract'
 ];
 
 const jsStatements = [
-    'for', 'if', 'else', 'switch', 'case', 'return', 'while', 'do', 'continue', 'break'
+    'for', 'if', 'else', 'switch', 'case', 'return', 'while', 'do', 'continue', 'break',
+    'await', 'yield', 'throw', 'try', 'catch', 'finally', 'with'
 ];
 
 const jsBuiltins = [
@@ -360,7 +361,7 @@ Tokenizer.registerLanguage( {
 
 const tsKeywords = [
     ...jsKeywords,
-    'as', 'interface', 'type', 'enum', 'namespace', 'declare', 'abstract',
+    'as', 'interface', 'type', 'enum', 'namespace', 'declare', 'private', 'protected',
     'implements', 'readonly', 'keyof', 'infer', 'is', 'asserts', 'override', 'satisfies'
 ];
 
@@ -1201,6 +1202,116 @@ interface CodeTab
     path?: string;
 }
 
+                                     
+//  _____             _ _ _____         
+// |   __|___ ___ ___| | | __  |___ ___ 
+// |__   |  _|  _| . | | | __ -| .'|  _|
+// |_____|___|_| |___|_|_|_____|__,|_|
+
+class ScrollBar
+{
+    static SIZE = 10;
+
+    root: HTMLElement;
+    thumb: HTMLElement;
+
+    private _vertical: boolean;
+    private _thumbPos: number = 0;      // current thumb offset in px
+    private _thumbRatio: number = 0;    // thumb size as fraction of track (0..1)
+    private _lastMouse: number = 0;
+    private _onDrag: ( ( delta: number ) => void ) | null = null;
+
+    get visible(): boolean { return !this.root.classList.contains( 'hidden' ); }
+    get isVertical(): boolean { return this._vertical; }
+
+    constructor( vertical: boolean, onDrag: ( delta: number ) => void )
+    {
+        this._vertical = vertical;
+        this._onDrag = onDrag;
+
+        this.root = LX.makeElement( 'div', `lexcodescrollbar hidden ${vertical ? 'vertical' : 'horizontal'}` );
+
+        this.thumb = LX.makeElement( 'div' );
+        this.thumb.addEventListener( 'mousedown', ( e: MouseEvent ) => this._onMouseDown( e ) );
+        this.root.appendChild( this.thumb );
+    }
+
+    setThumbRatio( ratio: number ): void
+    {
+        this._thumbRatio = LX.clamp( ratio, 0, 1 );
+        const needed = this._thumbRatio < 1;
+        this.root.classList.toggle( 'hidden', !needed );
+
+        if ( needed )
+        {
+            if ( this._vertical )
+                this.thumb.style.height = ( this._thumbRatio * 100 ) + '%';
+            else
+                this.thumb.style.width = ( this._thumbRatio * 100 ) + '%';
+        }
+    }
+
+    syncToScroll( scrollPos: number, scrollMax: number ): void
+    {
+        if ( scrollMax <= 0 ) return;
+        const trackSize = this._vertical ? this.root.offsetHeight : this.root.offsetWidth;
+        const thumbSize = this._vertical ? this.thumb.offsetHeight : this.thumb.offsetWidth;
+        const available = trackSize - thumbSize;
+        if ( available <= 0 ) return;
+
+        this._thumbPos = ( scrollPos / scrollMax ) * available;
+        this._applyPosition();
+    }
+
+    applyDragDelta( delta: number, scrollMax: number ): number
+    {
+        const trackSize = this._vertical ? this.root.offsetHeight : this.root.offsetWidth;
+        const thumbSize = this._vertical ? this.thumb.offsetHeight : this.thumb.offsetWidth;
+        const available = trackSize - thumbSize;
+        if ( available <= 0 ) return 0;
+
+        this._thumbPos = LX.clamp( this._thumbPos + delta, 0, available );
+        this._applyPosition();
+
+        return ( this._thumbPos / available ) * scrollMax;
+    }
+
+    private _applyPosition(): void
+    {
+        if ( this._vertical )
+            this.thumb.style.top = this._thumbPos + 'px';
+        else
+            this.thumb.style.left = this._thumbPos + 'px';
+    }
+
+    private _onMouseDown( e: MouseEvent ): void
+    {
+        const doc = document;
+        this._lastMouse = this._vertical ? e.clientY : e.clientX;
+
+        const onMouseMove = ( e: MouseEvent ) =>
+        {
+            const current = this._vertical ? e.clientY : e.clientX;
+            const delta = current - this._lastMouse;
+            this._lastMouse = current;
+            this._onDrag?.( delta );
+            e.stopPropagation();
+            e.preventDefault();
+        };
+
+        const onMouseUp = () =>
+        {
+            doc.removeEventListener( 'mousemove', onMouseMove );
+            doc.removeEventListener( 'mouseup', onMouseUp );
+        };
+
+        doc.addEventListener( 'mousemove', onMouseMove );
+        doc.addEventListener( 'mouseup', onMouseUp );
+        e.stopPropagation();
+        e.preventDefault();
+    }
+}
+
 /**
  * @class CodeEditor
  * The main editor class. Wires Document, Tokenizer, CursorSet, UndoManager
@@ -1223,6 +1334,8 @@ export class CodeEditor
     cursorsLayer: HTMLElement;
     selectionsLayer: HTMLElement;
     lineGutter: HTMLElement;
+    vScrollbar!: ScrollBar;
+    hScrollbar!: ScrollBar;
     searchBox: HTMLElement | null = null;
     searchLineBox: HTMLElement | null = null;
     currentTab: CodeTab | null = null;
@@ -1259,7 +1372,7 @@ export class CodeEditor
     onContextMenu: any;
     onNewTab: ( event: MouseEvent ) => void;
     onSelectTab: ( name: string, editor: CodeEditor ) => void;
-    // onReady: any;
+    onReady: ( ( editor: CodeEditor ) => void ) | undefined;
     onCreateFile: ( ( editor: CodeEditor ) => void ) | undefined;
 
     private _inputArea!: HTMLTextAreaElement;
@@ -1284,6 +1397,10 @@ export class CodeEditor
     private _searchMatchCase: boolean = false;
     private _lastTextFound: string = '';
     private _lastSearchPos: { line: number, col: number } | null = null;
+    private _discardScroll: boolean = false;
+    private _isReady: boolean = false;
+    private _lastMaxLineLength: number = 0;
+    private _lastLineCount: number = 0;
 
     private static readonly CODE_MIN_FONT_SIZE = 9;
     private static readonly CODE_MAX_FONT_SIZE = 22;
@@ -1341,7 +1458,7 @@ export class CodeEditor
         this.onContextMenu = options.onContextMenu;
         this.onNewTab = options.onNewTab;
         this.onSelectTab = options.onSelectTab;
-        // this.onReady = options.onReady;
+        this.onReady = options.onReady;
 
         this.language = Tokenizer.getLanguage( this.highlight ) ?? Tokenizer.getLanguage( 'Plain Text' )!;
 
@@ -1350,7 +1467,7 @@ export class CodeEditor
 
         this.baseArea = area;
         this.area = new LX.Area( {
-            className: 'lexcodeeditor flex flex-col outline-none overflow-hidden size-full select-none bg-inherit',
+            className: 'lexcodeeditor flex flex-col outline-none overflow-hidden size-full select-none bg-inherit relative',
             skipAppend: true
         } );
 
@@ -1394,6 +1511,56 @@ export class CodeEditor
         // Cursors and selections
         this.cursorsLayer = LX.makeElement( 'div', 'cursors', null, this.codeSizer );
         this.selectionsLayer = LX.makeElement( 'div', 'selections', null, this.codeSizer );
+
+        // Custom scrollbars
+        if ( !this.disableEdition )
+        {
+            this.vScrollbar = new ScrollBar( true, ( delta ) => {
+                const scrollMax = this.codeScroller.scrollHeight - this.codeScroller.clientHeight;
+                this.codeScroller.scrollTop = this.vScrollbar.applyDragDelta( delta, scrollMax );
+                this._discardScroll = true;
+            } );
+            this.root.appendChild( this.vScrollbar.root );
+
+            this.hScrollbar = new ScrollBar( false, ( delta ) => {
+                const scrollMax = this.codeScroller.scrollWidth - this.codeScroller.clientWidth;
+                this.codeScroller.scrollLeft = this.hScrollbar.applyDragDelta( delta, scrollMax );
+                this._discardScroll = true;
+            } );
+            this.root.appendChild( this.hScrollbar.root );
+
+            // Sync scrollbar thumbs on native scroll
+            this.codeScroller.addEventListener( 'scroll', () => {
+                if ( this._discardScroll )
+                {
+                    this._discardScroll = false;
+                    return;
+                }
+                this._syncScrollBars();
+            } );
+
+            // Wheel: Ctrl+Wheel for font zoom, Shift+Wheel for horizontal scroll
+            this.codeScroller.addEventListener( 'wheel', ( e: WheelEvent ) => {
+                if ( e.ctrlKey )
+                {
+                    e.preventDefault();
+                    this._applyFontSizeOffset( e.deltaY < 0 ? 1 : -1 );
+                    return;
+                }
+
+                if ( e.shiftKey )
+                {
+                    this.codeScroller.scrollLeft += e.deltaY > 0 ? 10 : -10;
+                }
+            }, { passive: false } );
+        }
+
+        // Resize observer
+        const codeResizeObserver = new ResizeObserver( () => {
+            if ( !this.currentTab ) return;
+            this.resize( true );
+        } );
+        codeResizeObserver.observe( this.codeArea.root );
 
         if ( !this.disableEdition )
         {
@@ -1546,6 +1713,7 @@ export class CodeEditor
         this._renderAllLines();
         this._renderCursors();
         this._renderSelections();
+        this.resize( true );
     }
 
     getText(): string
@@ -1770,6 +1938,17 @@ export class CodeEditor
             // Re-render cursors with correct measurements
             this._renderCursors();
             this._renderSelections();
+            this.resize( true );
+
+            if ( !this._isReady )
+            {
+                this._isReady = true;
+                if ( this.onReady )
+                {
+                    this.onReady( this );
+                }
+                console.log( `[LX.CodeEditor] Ready! (font size: ${this.fontSize}px)` );
+            }
         } );
     }
 
@@ -2033,6 +2212,7 @@ export class CodeEditor
         {
             this._renderAllLines();
         }
+        this.resize();
     }
 
     private _statesEqual( a: TokenizerState | undefined, b: TokenizerState ): boolean
@@ -3261,9 +3441,12 @@ export class CodeEditor
         this._renderCursors();
         this._renderSelections();
         this._resetBlinker();
+        this.resize();
         this._scrollCursorIntoView();
         this._resetGutter();
     }
+
+    // Scrollbar & Resize:
 
     private _scrollCursorIntoView(): void
     {
@@ -3282,20 +3465,104 @@ export class CodeEditor
         }
 
         // Horizontal scroll
+        const sbOffset = ScrollBar.SIZE * 2;
         if ( left < this.codeScroller.scrollLeft )
         {
             this.codeScroller.scrollLeft = left;
         }
-        else if ( left > this.codeScroller.scrollLeft + this.codeScroller.clientWidth - this.xPadding )
+        else if ( left + sbOffset > this.codeScroller.scrollLeft + this.codeScroller.clientWidth - this.xPadding )
         {
-            this.codeScroller.scrollLeft = left - this.codeScroller.clientWidth + this.xPadding;
+            this.codeScroller.scrollLeft = left + sbOffset - this.codeScroller.clientWidth + this.xPadding;
         }
     }
 
     private _resetGutter(): void
     {
         const verticalTopOffset = this.tabs?.root.getBoundingClientRect().height ?? 0;
-        this.lineGutter.style.height = `${this.doc.lineCount * this.lineHeight - verticalTopOffset}px`;
+        this.lineGutter.style.height = `calc(100% - ${verticalTopOffset}px)`;
+    }
+
+    getMaxLineLength(): number
+    {
+        let max = 0;
+        for ( let i = 0; i < this.doc.lineCount; i++ )
+        {
+            const len = this.doc.getLine( i ).length;
+            if ( len > max ) max = len;
+        }
+        return max;
+    }
+
+    resize( force: boolean = false ): void
+    {
+        if ( !this.charWidth ) return;
+
+        const maxLineLength = this.getMaxLineLength();
+        const lineCount = this.doc.lineCount;
+        const viewportChars = Math.floor( ( this.codeScroller.clientWidth - this.xPadding ) / this.charWidth );
+        const viewportLines = Math.floor( this.codeScroller.clientHeight / this.lineHeight );
+
+        let needsHResize = maxLineLength !== this._lastMaxLineLength
+            && ( maxLineLength >= viewportChars || this._lastMaxLineLength >= viewportChars );
+        let needsVResize = lineCount !== this._lastLineCount
+            && ( lineCount >= viewportLines || this._lastLineCount >= viewportLines );
+
+
+        // If doesn't need resize due to not reaching min length, maybe we need to resize if the content shrinks and we have extra space now
+        needsHResize = needsHResize || ( maxLineLength < viewportChars && this.hScrollbar?.visible );
+        needsVResize = needsVResize || ( lineCount < viewportLines && this.vScrollbar?.visible );
+
+        if ( !force && !needsHResize && !needsVResize ) return;
+
+        this._lastMaxLineLength = maxLineLength;
+        this._lastLineCount = lineCount;
+
+        if ( force || needsHResize )
+        {
+            this.codeSizer.style.minWidth = ( maxLineLength * this.charWidth + this.xPadding + ScrollBar.SIZE * 2 ) + 'px';
+        }
+
+        if ( force || needsVResize )
+        {
+            this.codeSizer.style.minHeight = ( lineCount * this.lineHeight + ScrollBar.SIZE * 2 ) + 'px';
+        }
+
+        setTimeout( () => this._resizeScrollBars(), 10 );
+    }
+
+    private _resizeScrollBars(): void
+    {
+        if ( !this.vScrollbar ) return;
+
+        // Compute offsets for tabs and status bar
+        const topOffset = this.tabs?.root.getBoundingClientRect().height ?? 0;
+        const bottomOffset = this.statusPanel?.root.getBoundingClientRect().height ?? 0;
+
+        // Vertical scrollbar: right edge, between tabs and status bar
+        const scrollHeight = this.codeScroller.scrollHeight;
+        this.vScrollbar.setThumbRatio( scrollHeight > 0 ? this.codeScroller.clientHeight / scrollHeight : 1 );
+        this.vScrollbar.root.style.top = topOffset + 'px';
+        this.vScrollbar.root.style.height = `calc(100% - ${topOffset + bottomOffset}px)`;
+
+        // Horizontal scrollbar: bottom of code area, offset by gutter and vertical scrollbar
+        const scrollWidth = this.codeScroller.scrollWidth;
+        this.hScrollbar.setThumbRatio( scrollWidth > 0 ? this.codeScroller.clientWidth / scrollWidth : 1 );
+        this.hScrollbar.root.style.bottom = bottomOffset + 'px';
+        this.hScrollbar.root.style.width = `calc(100% - ${this.xPadding + ( this.vScrollbar.visible ? ScrollBar.SIZE : 0 )}px)`;
+    }
+
+    private _syncScrollBars(): void
+    {
+        if ( !this.vScrollbar ) return;
+
+        this.vScrollbar.syncToScroll(
+            this.codeScroller.scrollTop,
+            this.codeScroller.scrollHeight - this.codeScroller.clientHeight
+        );
+        this.hScrollbar.syncToScroll(
+            this.codeScroller.scrollLeft,
+            this.codeScroller.scrollWidth - this.codeScroller.clientWidth
+        );
     }
 
     // Files:
