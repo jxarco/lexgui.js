@@ -1388,6 +1388,289 @@ class CursorSet
     }
 }
 
+//  _____           _       _
+// |   __|_ _ _____| |_ ___| |___
+// |__   | | |     | . | . | |_ -|
+// |_____|_  |_|_|_|___|___|_|___|
+//       |___|
+
+interface Symbol
+{
+    name: string;
+    kind: string;       // class | function | method | variable | interface | type | enum | struct | property | constructor-call | method-call
+    scope: string;
+    line: number;
+    col?: number;
+}
+
+interface ScopeInfo
+{
+    name: string;
+    type: string;       // global | class | function | method | enum | struct | interface | anonymous
+    line: number;       // Line where scope opened
+}
+
+/**
+ * Manages code symbols for autocomplete, navigation, and outlining.
+ * Incrementally updates as lines change.
+ */
+class SymbolTable
+{
+    private _symbols: Map<string, Symbol[]> = new Map();  // name -> symbols[]
+    private _lineSymbols: Symbol[][] = [];                 // [lineNum] -> symbols declared on that line
+    private _scopeStack: ScopeInfo[] = [{ name: 'global', type: 'global', line: 0 }];
+    private _lineScopes: ScopeInfo[][] = [];               // [lineNum] -> scope stack at that line
+
+    get currentScope(): string
+    {
+        return this._scopeStack[this._scopeStack.length - 1]?.name ?? 'global';
+    }
+
+    get currentScopeType(): string
+    {
+        return this._scopeStack[this._scopeStack.length - 1]?.type ?? 'global';
+    }
+
+    getScopeAtLine( line: number ): ScopeInfo[]
+    {
+        return this._lineScopes[line] ?? [{ name: 'global', type: 'global', line: 0 }];
+    }
+
+    getSymbols( name: string ): Symbol[]
+    {
+        return this._symbols.get( name ) ?? [];
+    }
+
+    getAllSymbolNames(): string[]
+    {
+        return Array.from( this._symbols.keys() );
+    }
+
+    getAllSymbols(): Symbol[]
+    {
+        const all: Symbol[] = [];
+        for ( const symbols of this._symbols.values() )
+        {
+            all.push( ...symbols );
+        }
+        return all;
+    }
+
+    getLineSymbols( line: number ): Symbol[]
+    {
+        return this._lineSymbols[line] ?? [];
+    }
+
+    /** Update scope stack for a line (call before parsing symbols) */
+    updateScopeForLine( line: number, lineText: string ): void
+    {
+        // Track braces to maintain scope stack
+        const openBraces = ( lineText.match( /\{/g ) || [] ).length;
+        const closeBraces = ( lineText.match( /\}/g ) || [] ).length;
+
+        // Save current scope for this line
+        this._lineScopes[line] = [ ...this._scopeStack ];
+
+        // Pop scopes for closing braces
+        for ( let i = 0; i < closeBraces; i++ )
+        {
+            if ( this._scopeStack.length > 1 ) this._scopeStack.pop();
+        }
+
+        // Push scopes for opening braces (will be named by symbol detection)
+        for ( let i = 0; i < openBraces; i++ )
+        {
+            this._scopeStack.push( { name: 'anonymous', type: 'anonymous', line } );
+        }
+    }
+
+    /** Name the most recent anonymous scope (called when detecting class/function) */
+    nameCurrentScope( name: string, type: string ): void
+    {
+        if ( this._scopeStack.length > 0 )
+        {
+            const current = this._scopeStack[this._scopeStack.length - 1];
+            if ( current.name === 'anonymous' || current.type === 'anonymous' )
+            {
+                current.name = name;
+                current.type = type;
+            }
+        }
+    }
+
+    /** Remove symbols from a line (before reparsing) */
+    removeLineSymbols( line: number ): void
+    {
+        const oldSymbols = this._lineSymbols[line];
+        if ( !oldSymbols ) return;
+
+        for ( const symbol of oldSymbols )
+        {
+            const list = this._symbols.get( symbol.name );
+            if ( !list ) continue;
+
+            // Remove this specific symbol from the name's list
+            const index = list.findIndex( s => s.line === line && s.kind === symbol.kind && s.scope === symbol.scope );
+            if ( index !== -1 ) list.splice( index, 1 );
+
+            if ( list.length === 0 ) this._symbols.delete( symbol.name );
+        }
+
+        this._lineSymbols[line] = [];
+    }
+
+    addSymbol( symbol: Symbol ): void
+    {
+        if ( !this._symbols.has( symbol.name ) )
+        {
+            this._symbols.set( symbol.name, [] );
+        }
+        this._symbols.get( symbol.name )!.push( symbol );
+
+        if ( !this._lineSymbols[symbol.line] )
+        {
+            this._lineSymbols[symbol.line] = [];
+        }
+        this._lineSymbols[symbol.line].push( symbol );
+    }
+
+    /** Reset scope stack (e.g. when document structure changes significantly) */
+    resetScopes(): void
+    {
+        this._scopeStack = [{ name: 'global', type: 'global', line: 0 }];
+        this._lineScopes = [];
+    }
+
+    clear(): void
+    {
+        this._symbols.clear();
+        this._lineSymbols = [];
+        this.resetScopes();
+    }
+}
+
+/**
+ * Parse symbols from a line of code using token types and text patterns to detect declarations.
+ */
+function parseSymbolsFromLine( lineText: string, tokens: Token[], line: number, symbolTable: SymbolTable ): Symbol[]
+{
+    const symbols: Symbol[] = [];
+    const scope = symbolTable.currentScope;
+    const scopeType = symbolTable.currentScopeType;
+
+    // Build set of reserved words from tokens (keywords, statements, builtins) to skip when detecting symbols
+    const reservedWords = new Set<string>();
+    for ( const token of tokens )
+    {
+        if ( [ 'keyword', 'statement', 'builtin', 'preprocessor' ].includes( token.type ) )
+        {
+            reservedWords.add( token.value );
+        }
+    }
+
+    // Track added symbols by name and approximate position to avoid duplicates
+    const addedSymbols = new Set<string>();
+
+    const addSymbol = ( name: string, kind: string, col: number = 0 ) =>
+    {
+        if ( !name || !name.match( /^[a-zA-Z_$][\w$]*$/ ) ) return; // Valid identifier check
+        if ( reservedWords.has( name ) ) return;
+
+        // Unique key using 5 chars tolerance
+        const posKey = `${name}@${Math.floor( col / 5 ) * 5}`;
+        if ( addedSymbols.has( posKey ) ) return; // Already added
+
+        symbols.push( { name, kind, scope, line, col } );
+        addedSymbols.add( posKey );
+    };
+
+    // Top-level declaration patterns (only one per line, checked with anchors)
+    const topLevelPatterns = [
+        { regex: /^\s*class\s+([A-Z_]\w*)/i, kind: 'class' },
+        { regex: /^\s*struct\s+([A-Z_]\w*)/i, kind: 'struct' },
+        { regex: /^\s*interface\s+([A-Z_]\w*)/i, kind: 'interface' },
+        { regex: /^\s*enum\s+([A-Z_]\w*)/i, kind: 'enum' },
+        { regex: /^\s*type\s+([A-Z_]\w*)\s*=/i, kind: 'type' },
+        { regex: /^\s*(?:export\s+)?(?:async\s+)?function\s+(\w+)/i, kind: 'function' },
+        { regex: /^\s*(?:const|let|var)\s+(\w+)\s*=\s*(?:async\s+)?\([^)]*\)\s*=>/i, kind: 'function' },
+        { regex: /^\s*(?:static\s+|const\s+|virtual\s+|inline\s+|extern\s+|pub\s+|async\s+)*(\w+[\w\s\*&:<>,]*?)\s+(\w+)\s*\([^)]*\)\s*[{;]/i, kind: 'typed-function' },
+        { regex: /^\s*(?:public|private|protected|static|readonly)*\s*(\w+)\s*\([^)]*\)\s*[:{]/i, kind: scopeType === 'class' ? 'method' : 'function' }
+    ];
+
+    const multiPatterns = [
+        { regex: /(?:const|let|var)\s+(\w+)/gi, kind: 'variable' },
+        { regex: /(\w+)\s*:\s*(?:function|[A-Z]\w*)/gi, kind: 'variable' },
+        { regex: /this\.(\w+)\s*=/gi, kind: 'property' },
+        { regex: /new\s+([A-Z]\w+)/gi, kind: 'constructor-call' },
+        { regex: /(\w+)\s*\(/gi, kind: 'method-call' }
+    ];
+
+    let foundTopLevel = false;
+    for ( const pattern of topLevelPatterns )
+    {
+        const match = lineText.match( pattern.regex );
+        if ( match )
+        {
+            let name: string;
+            let kind = pattern.kind;
+
+            if ( pattern.kind === 'typed-function' && match[2] )
+            {
+                name = match[2];
+                kind = scopeType === 'class' ? 'method' : 'function';
+            }
+            else if ( match[1] )
+            {
+                name = match[1];
+            }
+            else
+            {
+                continue;
+            }
+
+            const col = lineText.indexOf( name );
+            addSymbol( name, kind, col );
+
+            if ( [ 'class', 'function', 'method', 'enum', 'struct', 'interface' ].includes( kind ) )
+            {
+                symbolTable.nameCurrentScope( name, kind );
+            }
+
+            foundTopLevel = true;
+            break;
+        }
+    }
+
+    // If no top-level declaration, check for multiple occurrences
+    if ( !foundTopLevel )
+    {
+        for ( const pattern of multiPatterns )
+        {
+            const matches = lineText.matchAll( pattern.regex );
+            for ( const match of matches )
+            {
+                if ( match[1] )
+                {
+                    const name = match[1];
+                    const col = match.index ?? 0;
+                    addSymbol( name, pattern.kind, col );
+                }
+            }
+        }
+    }
+
+    if ( scopeType === 'enum' )
+    {
+        const enumValueMatch = lineText.match( /^\s*(\w+)\s*[,=]?/ );
+        if ( enumValueMatch && enumValueMatch[1] && !lineText.includes( 'enum' ) )
+        {
+            addSymbol( enumValueMatch[1], 'enum-value', lineText.indexOf( enumValueMatch[1] ) );
+        }
+    }
+
+    return symbols;
+}
+
 //  _____       _     _____   _ _ _              ____  _____ _____ 
 // |     |___ _| |___|   __|_| |_| |_ ___ ___   |    \|     |     |
 // |   --| . | . | -_|   __| . | |  _| . |  _|  |  |  |  |  | | | |
@@ -1412,7 +1695,6 @@ const TOKEN_CLASS_MAP: Record<string, string> = {
 const Area = LX.Area;
 const Panel = LX.Panel;
 const Tabs = LX.Tabs;
-const ContextMenu = LX.ContextMenu;
 
 interface CodeTab
 {
@@ -1426,9 +1708,8 @@ interface CodeTab
     path?: string;
 }
 
-                                     
-//  _____             _ _ _____         
-// |   __|___ ___ ___| | | __  |___ ___ 
+//  _____             _ _ _____
+// |   __|___ ___ ___| | | __  |___ ___
 // |__   |  _|  _| . | | | __ -| .'|  _|
 // |_____|___|_| |___|_|_|_____|__,|_|
 
@@ -1546,6 +1827,7 @@ export class CodeEditor
     static __instances: CodeEditor[] = [];
 
     language: LanguageDef;
+    symbolTable: SymbolTable;
 
     // DOM:
     area: typeof Area;
@@ -1562,6 +1844,7 @@ export class CodeEditor
     hScrollbar!: ScrollBar;
     searchBox: HTMLElement | null = null;
     searchLineBox: HTMLElement | null = null;
+    autocomplete: HTMLElement | null = null;
     currentTab: CodeTab | null = null;
     statusPanel: typeof Panel;
     leftStatusPanel: typeof Panel;
@@ -1580,14 +1863,14 @@ export class CodeEditor
     disableEdition: boolean = false;
     skipTabs: boolean = false;
     // useFileExplorer: boolean = false;
-    // useAutoComplete: boolean = true;
+    useAutoComplete: boolean = true;
     allowAddScripts: boolean = true;
     allowClosingTabs: boolean = true;
     allowLoadingFiles: boolean = true;
     tabSize: number = 4;
     highlight: string = 'Plain Text';
     newTabOptions: any[] | null = null;
-    // customSuggestions: any[] = [];
+    customSuggestions: any[] = [];
     // explorerName: string = 'EXPLORER';
 
     // Editor callbacks:
@@ -1627,6 +1910,7 @@ export class CodeEditor
     private _isReady: boolean = false;
     private _lastMaxLineLength: number = 0;
     private _lastLineCount: number = 0;
+    private _isAutoCompleteActive: boolean = false;
 
     private static readonly CODE_MIN_FONT_SIZE = 9;
     private static readonly CODE_MAX_FONT_SIZE = 22;
@@ -1667,13 +1951,13 @@ export class CodeEditor
         this.disableEdition = options.disableEdition ?? this.disableEdition;
         this.skipTabs = options.skipTabs ?? this.skipTabs;
         // this.useFileExplorer = ( options.fileExplorer ?? this.useFileExplorer ) && !this.skipTabs;
-        // this.useAutoComplete = options.autocomplete ?? this.useAutoComplete;
+        this.useAutoComplete = options.autocomplete ?? this.useAutoComplete;
         this.allowAddScripts = options.allowAddScripts ?? this.allowAddScripts;
         this.allowClosingTabs = options.allowClosingTabs ?? this.allowClosingTabs;
         this.allowLoadingFiles = options.allowLoadingFiles ?? this.allowLoadingFiles;
         this.highlight = options.highlight ?? this.highlight;
         this.newTabOptions = options.newTabOptions;
-        // this.customSuggestions = options.customSuggestions ?? [];
+        this.customSuggestions = options.customSuggestions ?? [];
         // this.explorerName = options.explorerName ?? this.explorerName;
 
         // Editor callbacks
@@ -1687,6 +1971,7 @@ export class CodeEditor
         this.onReady = options.onReady;
 
         this.language = Tokenizer.getLanguage( this.highlight ) ?? Tokenizer.getLanguage( 'Plain Text' )!;
+        this.symbolTable = new SymbolTable();
 
         // Full editor
         area.root.className = LX.mergeClass( area.root.className, 'codebasearea overflow-hidden flex relative' );
@@ -1814,11 +2099,11 @@ export class CodeEditor
         if ( !this.disableEdition )
         {
             // Add autocomplete box
-            // {
-            //     this.autocomplete = document.createElement( 'div' );
-            //     this.autocomplete.className = 'autocomplete';
-            //     this.codeArea.attach( this.autocomplete );
-            // }
+            if( this.useAutoComplete )
+            {
+                this.autocomplete = LX.makeElement( 'div','autocomplete' );
+                this.codeArea.attach( this.autocomplete );
+            }
 
             const searchBoxClass = 'searchbox bg-card min-w-96 absolute z-100 top-8 right-2 rounded-lg border-color overflow-y-scroll opacity-0';
 
@@ -2343,7 +2628,7 @@ export class CodeEditor
     /**
      * Tokenize a line and return its innerHTML with syntax highlighting spans.
      */
-    private _tokenizeLine( lineIndex: number ): { html: string; endState: TokenizerState }
+    private _tokenizeLine( lineIndex: number ): { html: string; endState: TokenizerState; tokens: Token[] }
     {
         const prevState = lineIndex > 0
             ? ( this._lineStates[ lineIndex - 1 ] ?? Tokenizer.initialState() )
@@ -2372,7 +2657,26 @@ export class CodeEditor
             }
         }
 
-        return { html: html || '&nbsp;', endState: result.state };
+        return { html: html || '&nbsp;', endState: result.state, tokens: result.tokens };
+    }
+
+    /**
+     * Update symbol table for a line.
+     */
+    private _updateSymbolsForLine( lineIndex: number ): void
+    {
+        const lineText = this.doc.getLine( lineIndex );
+
+        this.symbolTable.updateScopeForLine( lineIndex, lineText );
+
+        this.symbolTable.removeLineSymbols( lineIndex );
+
+        const { tokens } = this._tokenizeLine( lineIndex );
+        const symbols = parseSymbolsFromLine( lineText, tokens, lineIndex, this.symbolTable );
+        for ( const symbol of symbols )
+        {
+            this.symbolTable.addSymbol( symbol );
+        }
     }
 
     /**
@@ -2383,6 +2687,7 @@ export class CodeEditor
         this.codeContainer.innerHTML = '';
         this._lineElements = [];
         this._lineStates = [];
+        this.symbolTable.clear();  // Clear all symbols on full rebuild
 
         for ( let i = 0; i < this.doc.lineCount; i++ )
         {
@@ -2410,6 +2715,9 @@ export class CodeEditor
         pre.innerHTML = this._getGutterHtml( lineIndex ) + html;
         this.codeContainer.appendChild( pre );
         this._lineElements[ lineIndex ] = pre;
+
+        // Update symbols for this line
+        this._updateSymbolsForLine( lineIndex );
     }
 
     /**
@@ -2426,6 +2734,9 @@ export class CodeEditor
             this._lineElements[ lineIndex ].innerHTML = this._getGutterHtml( lineIndex ) + html;
         }
 
+        // Update symbols for this line
+        this._updateSymbolsForLine( lineIndex );
+
         // If the tokenizer state changed (e.g. opened/closed a block comment),
         // re-render subsequent lines until states stabilize
         if ( !this._statesEqual( oldState, endState ) )
@@ -2437,8 +2748,9 @@ export class CodeEditor
                 this._lineStates[ i ] = nextEnd;
                 if ( this._lineElements[ i ] )
                 {
-                    this._lineElements[ i ].innerHTML = this._getGutterHtml( lineIndex ) + nextHtml;
+                    this._lineElements[ i ].innerHTML = this._getGutterHtml( i ) + nextHtml;
                 }
+                this._updateSymbolsForLine( i );  // Update symbols for cascaded lines too
                 if ( this._statesEqual( nextOld, nextEnd ) ) break;
             }
         }
@@ -2682,13 +2994,14 @@ export class CodeEditor
                     e.preventDefault();
                     this._doPaste();
                     return;
-                case ' ': 
+                case ' ':
+                    e.preventDefault();
+                    // Also call user callback if provided
                     if ( this.onCtrlSpace )
                     {
-                        e.preventDefault();
                         this.onCtrlSpace( this.getText(), this );
-                        return;
                     }
+                    return;
             }
         }
 
@@ -2709,6 +3022,7 @@ export class CodeEditor
                 this._afterCursorMove();
                 return;
             case 'ArrowUp':
+                if ( this._isAutoCompleteActive ) return;
                 e.preventDefault();
                 this._wasPaired = false;
                 if ( alt && shift ) { this._duplicateLine( -1 ); return; }
@@ -2717,6 +3031,7 @@ export class CodeEditor
                 this._afterCursorMove();
                 return;
             case 'ArrowDown':
+                if ( this._isAutoCompleteActive ) return;
                 e.preventDefault();
                 this._wasPaired = false;
                 if ( alt && shift ) { this._duplicateLine( 1 ); return; }
@@ -2842,6 +3157,18 @@ export class CodeEditor
         this._wasPaired = paired;
         for ( const line of changedLines ) this._updateLine( line );
         this._afterCursorMove();
+
+        // Close autocomplete when typing most chars (except word chars which update it)
+        if ( /[\w$]/.test( char ) )
+        {
+            // Update autocomplete with new partial word
+            this._doOpenAutocomplete();
+        }
+        else
+        {
+            // Non-word char, close autocomplete
+            this._doHideAutocomplete();
+        }
     }
 
     private _getAffectedLines(): [ number, number ]
@@ -3260,6 +3587,7 @@ export class CodeEditor
 
         this._rebuildLines();
         this._afterCursorMove();
+        this._doOpenAutocomplete();
     }
 
     private _doDelete( ctrlKey: boolean ): void
@@ -3312,6 +3640,11 @@ export class CodeEditor
 
     private _doEnter( shift: boolean ): void
     {
+        if ( this._isAutoCompleteActive )
+        {
+            return;
+        }
+
         if ( shift && this.onRun )
         {
             this.onRun( this.getText(), this );
@@ -3343,6 +3676,11 @@ export class CodeEditor
 
     private _doTab( shift: boolean ): void
     {
+        if ( this._isAutoCompleteActive )
+        {
+            return;
+        }
+
         this._flushAction();
 
         for ( const idx of this.cursorSet.sortedIndicesBottomUp() )
@@ -3569,6 +3907,7 @@ export class CodeEditor
     {
         if ( !this.currentTab ) return;
         if ( this.searchBox && this.searchBox.contains( e.target as Node ) ) return;
+        if ( this.autocomplete && this.autocomplete.contains( e.target as Node ) ) return;
 
         e.preventDefault(); // Prevent browser from stealing focus from _inputArea
         this._wasPaired = false;
@@ -3688,6 +4027,299 @@ export class CodeEditor
         }
 
         LX.addDropdownMenu( e.target, dmOptions, { event: e, side: 'bottom', align: 'start' } );
+    }
+
+    // Autocomplete:
+
+    /**
+     * Get word at cursor position for autocomplete.
+     */
+    private _getWordAtCursor(): { word: string, start: number, end: number }
+    {
+        const cursor = this.cursorSet.getPrimary().head;
+        const line = this.doc.getLine( cursor.line );
+        let start = cursor.col;
+        let end = cursor.col;
+
+        // Find word boundaries
+        while ( start > 0 && /[\w$]/.test( line[start - 1] ) ) start--;
+        while ( end < line.length && /[\w$]/.test( line[end] ) ) end++;
+
+        return { word: line.slice( start, end ), start, end };
+    }
+
+    /**
+     * Open autocomplete box with suggestions from symbols and custom suggestions.
+     */
+    private _doOpenAutocomplete(): void
+    {
+        if ( !this.autocomplete || !this.useAutoComplete ) return;
+
+        this.autocomplete.innerHTML = ''; // Clear all suggestions
+
+        const { word } = this._getWordAtCursor();
+        if( !word || word.length === 0 )
+        {
+            this._doHideAutocomplete();
+            return;
+        }
+
+        const suggestions: Array<{ label: string, kind?: string, detail?: string }> = [];
+        const added = new Set<string>();
+
+        const addSuggestion = ( label: string, kind?: string, detail?: string ) =>
+        {
+            if ( !added.has( label ) )
+            {
+                suggestions.push( { label, kind, detail } );
+                added.add( label );
+            }
+        };
+
+        // Get first suggestions from symbol table
+        const allSymbols = this.symbolTable.getAllSymbols();
+        for ( const symbol of allSymbols )
+        {
+            if ( symbol.name.toLowerCase().startsWith( word.toLowerCase() ) )
+            {
+                addSuggestion( symbol.name, symbol.kind, `${symbol.kind} in ${symbol.scope}` );
+            }
+        }
+
+        // Add custom suggestions
+        for ( const suggestion of this.customSuggestions )
+        {
+            const label = typeof suggestion === 'string' ? suggestion : suggestion.label;
+            const kind = typeof suggestion === 'object' ? suggestion.kind : undefined;
+            const detail = typeof suggestion === 'object' ? suggestion.detail : undefined;
+
+            if ( label.toLowerCase().startsWith( word.toLowerCase() ) )
+            {
+                addSuggestion( label, kind, detail );
+            }
+        }
+
+        // Close autocomplete if no suggestions
+        if ( suggestions.length === 0 )
+        {
+            this._doHideAutocomplete();
+            return;
+        }
+
+        // Sort suggestions: exact matches first, then alphabetically
+        suggestions.sort( ( a, b ) =>
+        {
+            const aExact = a.label.toLowerCase() === word.toLowerCase() ? 0 : 1;
+            const bExact = b.label.toLowerCase() === word.toLowerCase() ? 0 : 1;
+            if ( aExact !== bExact ) return aExact - bExact;
+            return a.label.localeCompare( b.label );
+        } );
+
+        let selectedIndex = 0;
+
+        // Render suggestions
+        suggestions.forEach( ( suggestion, index ) =>
+        {
+            const item = document.createElement( 'pre' );
+            if ( index === selectedIndex ) item.classList.add( 'selected' );
+            const currSuggestion = suggestion.label;
+
+            let iconName = 'CaseLower';
+            let iconClass = 'foo';
+
+            switch ( suggestion.kind )
+            {
+                case 'class':
+                    iconName = 'CircleNodes';
+                    iconClass = 'text-orange-500';
+                    break;
+                case 'struct':
+                    iconName = 'Form';
+                    iconClass = 'text-orange-400';
+                    break;
+                case 'interface':
+                    iconName = 'FileType';
+                    iconClass = 'text-cyan-500';
+                    break;
+                case 'enum':
+                    iconName = 'ListTree';
+                    iconClass = 'text-yellow-500';
+                    break;
+                case 'enum-value':
+                    iconName = 'Dot';
+                    iconClass = 'text-yellow-400';
+                    break;
+                case 'type':
+                    iconName = 'Type';
+                    iconClass = 'text-teal-500';
+                    break;
+                case 'function':
+                    iconName = 'Function';
+                    iconClass = 'text-purple-500';
+                    break;
+                case 'method':
+                    iconName = 'Box';
+                    iconClass = 'text-fuchsia-500';
+                    break;
+                case 'variable':
+                    iconName = 'Cuboid';
+                    iconClass = 'text-blue-400';
+                    break;
+                case 'property':
+                    iconName = 'Layers';
+                    iconClass = 'text-blue-300';
+                    break;
+                case 'constructor-call':
+                    iconName = 'Hammer';
+                    iconClass = 'text-green-500';
+                    break;
+                case 'method-call':
+                    iconName = 'PlayCircle';
+                    iconClass = 'text-gray-400';
+                    break;
+                default:
+                    iconName = 'CaseLower';
+                    iconClass = 'text-gray-500';
+                    break;
+            }
+
+            item.appendChild( LX.makeIcon( iconName, { iconClass: 'ml-1 mr-2', svgClass: 'sm ' + iconClass } ) );
+
+            // Highlight the written part
+            const hIndex = currSuggestion.toLowerCase().indexOf( word.toLowerCase() );
+
+            var preWord = document.createElement( 'span' );
+            preWord.textContent = currSuggestion.substring( 0, hIndex );
+            item.appendChild( preWord );
+
+            var actualWord = document.createElement( 'span' );
+            actualWord.textContent = currSuggestion.substring( hIndex, hIndex + word.length );
+            actualWord.classList.add( 'word-highlight' );
+            item.appendChild( actualWord );
+
+            var postWord = document.createElement( 'span' );
+            postWord.textContent = currSuggestion.substring( hIndex + word.length );
+            item.appendChild( postWord );
+
+            if ( suggestion.kind )
+            {
+                const kind = document.createElement( 'span' );
+                kind.textContent = ` (${suggestion.kind})`;
+                kind.className = 'text-muted-foreground text-xs! ml-2';
+                item.appendChild( kind );
+            }
+
+            item.addEventListener( 'click', () =>
+            {
+                this._doAutocompleteWord( currSuggestion );
+            } );
+
+            this.autocomplete!.appendChild( item );
+        } );
+
+        this._isAutoCompleteActive = true;
+
+        const handleKey = ( e: KeyboardEvent ) =>
+        {
+            if ( !this._isAutoCompleteActive ) return;
+
+            const items = this.autocomplete!.childNodes as NodeListOf<HTMLElement>;
+
+            if ( e.key === 'ArrowDown' )
+            {
+                e.preventDefault();
+                items[selectedIndex]?.classList.remove( 'selected' );
+                selectedIndex = ( selectedIndex + 1 ) % items.length;
+                items[selectedIndex]?.classList.add( 'selected' );
+                items[selectedIndex]?.scrollIntoView( { block: 'nearest' } );
+            }
+            else if ( e.key === 'ArrowUp' )
+            {
+                e.preventDefault();
+                items[selectedIndex]?.classList.remove( 'selected' );
+                selectedIndex = ( selectedIndex - 1 + items.length ) % items.length;
+                items[selectedIndex]?.classList.add( 'selected' );
+                items[selectedIndex]?.scrollIntoView( { block: 'nearest' } );
+            }
+            else if ( e.key === 'Enter' || e.key === 'Tab' )
+            {
+                e.preventDefault();
+                this._doAutocompleteWord( suggestions[selectedIndex].label );
+            }
+            else if ( e.key === 'Escape' )
+            {
+                e.preventDefault();
+                this._doHideAutocomplete();
+            }
+        };
+
+        this.root.addEventListener( 'keydown', handleKey, { once: false } );
+
+        const handleClick = ( e: MouseEvent ) =>
+        {
+            if ( !this.autocomplete?.contains( e.target as Node ) )
+            {
+                this._doHideAutocomplete();
+            }
+        };
+        setTimeout( () => document.addEventListener( 'click', handleClick, { once: true } ), 0 );
+
+        // Store cleanup function
+        ( this.autocomplete as any )._cleanup = () =>
+        {
+            this.root.removeEventListener( 'keydown', handleKey );
+            document.removeEventListener( 'click', handleClick );
+        };
+
+        // Prepare autocomplete ui
+        this.autocomplete.classList.toggle( 'show', true );
+        this.autocomplete.classList.toggle( 'no-scrollbar', !( this.autocomplete.scrollHeight > this.autocomplete.offsetHeight ) );
+        const cursor = this.cursorSet.getPrimary().head;
+        const left = cursor.col * this.charWidth + this.xPadding;
+        const top = ( cursor.line + 1 ) * this.lineHeight + this._cachedTabsHeight - this.codeScroller.scrollTop;
+        this.autocomplete.style.left = left + 'px';
+        this.autocomplete.style.top = top + 'px';
+    }
+
+    private _doHideAutocomplete(): void
+    {
+        if ( !this.autocomplete || !this._isAutoCompleteActive ) return;
+
+        this.autocomplete.classList.remove( 'show' );
+        this._isAutoCompleteActive = false;
+
+        if ( ( this.autocomplete as any )._cleanup )
+        {
+            ( this.autocomplete as any )._cleanup();
+            delete ( this.autocomplete as any )._cleanup;
+        }
+    }
+
+    /**
+     * Insert the selected autocomplete word at cursor.
+     */
+    private _doAutocompleteWord( word: string ): void
+    {
+        const cursor = this.cursorSet.getPrimary().head;
+        const { start, end } = this._getWordAtCursor();
+        const line = cursor.line;
+
+        const cursorsBefore = this.cursorSet.getCursorPositions();
+        if ( end > start )
+        {
+            const deleteOp = this.doc.delete( line, start, end - start );
+            this.undoManager.record( deleteOp, cursorsBefore );
+        }
+
+        const insertOp = this.doc.insert( line, start, word );
+        this.cursorSet.set( line, start + word.length );
+
+        const cursorsAfter = this.cursorSet.getCursorPositions();
+        this.undoManager.record( insertOp, cursorsAfter );
+
+        this._rebuildLines();
+        this._afterCursorMove();
+        this._doHideAutocomplete();
     }
 
     private _afterCursorMove(): void

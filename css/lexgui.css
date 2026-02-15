@@ -4492,8 +4492,9 @@ ul.lexassetscontent {
 
 .lexcodeeditor .autocomplete {
     background-color: var(--card);
-    width: 256px;
-    max-height: 132px;
+    width: max-content;
+    max-width: 450px;
+    max-height: 264px;
     position: absolute;
     left: 0;
     top: 0;

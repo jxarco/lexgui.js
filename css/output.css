@@ -643,6 +643,9 @@
   .ml-0 {
     margin-left: calc(var(--spacing) * 0);
   }
+  .ml-1 {
+    margin-left: calc(var(--spacing) * 1);
+  }
   .ml-2 {
     margin-left: calc(var(--spacing) * 2);
   }
@@ -2021,6 +2024,10 @@
     font-size: var(--text-xs);
     line-height: var(--tw-leading, var(--text-xs--line-height));
   }
+  .text-xs\! {
+    font-size: var(--text-xs) !important;
+    line-height: var(--tw-leading, var(--text-xs--line-height)) !important;
+  }
   .leading-6 {
     --tw-leading: calc(var(--spacing) * 6);
     line-height: calc(var(--spacing) * 6);
@@ -2093,6 +2100,9 @@
   .text-background {
     color: var(--color-background);
   }
+  .text-blue-300 {
+    color: var(--color-blue-300);
+  }
   .text-blue-400 {
     color: var(--color-blue-400);
   }
@@ -2104,6 +2114,9 @@
   }
   .text-card-foreground {
     color: var(--color-card-foreground);
+  }
+  .text-cyan-500 {
+    color: var(--color-cyan-500);
   }
   .text-cyan-600 {
     color: var(--color-cyan-600);
@@ -2117,6 +2130,15 @@
   .text-fuchsia-500 {
     color: var(--color-fuchsia-500);
   }
+  .text-gray-400 {
+    color: var(--color-gray-400);
+  }
+  .text-gray-500 {
+    color: var(--color-gray-500);
+  }
+  .text-green-500 {
+    color: var(--color-green-500);
+  }
   .text-inherit {
     color: inherit;
   }
@@ -2129,11 +2151,17 @@
   .text-neutral-900 {
     color: var(--color-neutral-900);
   }
+  .text-orange-400 {
+    color: var(--color-orange-400);
+  }
   .text-orange-500 {
     color: var(--color-orange-500);
   }
   .text-primary-foreground {
     color: var(--color-primary-foreground);
+  }
+  .text-purple-500 {
+    color: var(--color-purple-500);
   }
   .text-purple-700 {
     color: var(--color-purple-700);
@@ -2149,6 +2177,9 @@
   }
   .text-success {
     color: var(--color-success);
+  }
+  .text-teal-500 {
+    color: var(--color-teal-500);
   }
   .text-white {
     color: var(--color-white);
@@ -6391,8 +6422,9 @@ ul.lexassetscontent {
 }
 .lexcodeeditor .autocomplete {
   background-color: var(--card);
-  width: 256px;
-  max-height: 132px;
+  width: max-content;
+  max-width: 450px;
+  max-height: 264px;
   position: absolute;
   left: 0;
   top: 0;
