@@ -4160,58 +4160,58 @@ ul.lexassetscontent {
 
 /* Code Editor */
 
-.codebasearea * {
-    letter-spacing: 0em !important;
-}
+.codebasearea {
+    background-color: color-mix(in srgb, var(--background) 30%, var(--card));
+    
+    & .lexareatabs {
+        padding: 0px;
+        margin: 0px;
+        gap: 0;
+        background-color: var(--card);
+        border: none;
+    }
 
-.codebasearea .lexareatabs {
-    padding: 0px;
-    margin: 0px;
-    gap: 0;
-    background-color: var(--card);
-    border: none;
-}
+    & .lexareatab {
+        padding: 5px;
+        border-radius: 0px !important;
+        margin: 0px !important;
+        border: none;
+        background-color: var(--card) !important;
+        transition: none;
+        display: flex !important;
+        color: var(--muted-foreground) !important;
+    }
 
-.codebasearea .lexareatab {
-    padding: 5px;
-    border-radius: 0px !important;
-    margin: 0px !important;
-    border: none;
-    background-color: var(--card) !important;
-    transition: none;
-    display: flex !important;
-    color: var(--muted-foreground) !important;
-}
-
-.codebasearea .lexareatab:hover {
-    background-color: var(--secondary) !important;
-}
-
-.codebasearea .lexareatab:first-child {
-    border-top-left-radius: 8px !important;
-}
-
-.codebasearea .lexareatab:last-child {
-    border-top-right-radius: 8px !important;
-}
-
-.codebasearea .lexareatab.selected {
-    background-color: var(--secondary) !important;
-    color: var(--foreground) !important;
-}
-
-.codebasearea .lexareatab i {
-    width: 12px;
-    font-size: var(--text-sm);
-    margin-right: 6px;
-    align-content: center;
-}
-
-.codebasearea .lexareatab img {
-    width: 12px;
-    height: 12px;
-    margin-right: 6px;
-    align-content: center;
+    & .lexareatab:hover {
+        background-color: var(--secondary) !important;
+    }
+    
+    & .lexareatab:first-child {
+        border-top-left-radius: 8px !important;
+    }
+    
+    & .lexareatab:last-child {
+        border-top-right-radius: 8px !important;
+    }
+    
+    & .lexareatab.selected {
+        background-color: var(--accent) !important;
+        color: var(--foreground) !important;
+    }
+    
+    & .lexareatab i {
+        width: 12px;
+        font-size: var(--text-sm);
+        margin-right: 6px;
+        align-content: center;
+    }
+    
+    & .lexareatab img {
+        width: 12px;
+        height: 12px;
+        margin-right: 6px;
+        align-content: center;
+    }
 }
 
 .lexcodeeditor ::-webkit-scrollbar {
@@ -4296,7 +4296,15 @@ ul.lexassetscontent {
 }
 
 .lexcodeeditor pre.active-line {
-    background-color: var(--muted);
+    --bg-color: color-mix(in srgb, var(--border), transparent);
+    background: linear-gradient(to bottom,
+        var(--border) 0px,
+        var(--border) 2px,
+        var(--bg-color) 2px,
+        var(--bg-color) calc(100% - 2px),
+        var(--border) calc(100% - 2px),
+        var(--border) 100%
+    );
 }
 
 .lexcodeeditor.disabled pre.active-line {

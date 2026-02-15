@@ -1572,6 +1572,8 @@ export class CodeEditor
     lineHeight: number = 0;
     fontSize: number = 0;
     xPadding: number = 64;  // 4rem left padding in pixels
+    private _cachedTabsHeight: number = 0;
+    private _cachedStatusPanelHeight: number = 0;
 
     // Editor options:
     skipInfo: boolean = false;
@@ -1687,7 +1689,7 @@ export class CodeEditor
         this.language = Tokenizer.getLanguage( this.highlight ) ?? Tokenizer.getLanguage( 'Plain Text' )!;
 
         // Full editor
-        area.root.className = LX.mergeClass( area.root.className, 'codebasearea overflow-hidden flex relative bg-card' );
+        area.root.className = LX.mergeClass( area.root.className, 'codebasearea overflow-hidden flex relative' );
 
         this.baseArea = area;
         this.area = new LX.Area( {
@@ -1818,7 +1820,7 @@ export class CodeEditor
             //     this.codeArea.attach( this.autocomplete );
             // }
 
-            const searchBoxClass = 'searchbox bg-card min-w-96 absolute z-100 top-8 right-2 rounded-lg border-colored overflow-y-scroll opacity-0';
+            const searchBoxClass = 'searchbox bg-card min-w-96 absolute z-100 top-8 right-2 rounded-lg border-color overflow-y-scroll opacity-0';
 
             // Add search box
             {
@@ -1871,7 +1873,7 @@ export class CodeEditor
                 } );
 
                 searchPanel.addText( null, 'Type a line number to go to (from 0 to 0).', null,
-                    { disabled: true, inputClass: 'bg-none', signal: '@line-number-range' } );
+                    { disabled: true, inputClass: 'text-xs bg-none', signal: '@line-number-range' } );
 
                 this.searchLineBox = box;
             }
@@ -2206,7 +2208,7 @@ export class CodeEditor
             return;
         }
 
-        let panel = new LX.Panel( { className: 'lexcodetabinfo bg-card flex flex-row flex-auto-keep', height: 'auto' } );
+        let panel = new LX.Panel( { className: 'lexcodetabinfo bg-inherit flex flex-row flex-auto-keep', height: 'auto' } );
 
         if ( this.onCreateStatusPanel )
         {
@@ -2996,7 +2998,7 @@ export class CodeEditor
 
         const input: HTMLInputElement | null = this.searchLineBox.querySelector( 'input' );
         if ( !input ) return;
-        input.value = '';
+        input.value = ':';
         input.focus();
     }
 
@@ -3730,8 +3732,9 @@ export class CodeEditor
 
     private _resetGutter(): void
     {
-        const verticalTopOffset = this.tabs?.root.getBoundingClientRect().height ?? 0;
-        this.lineGutter.style.height = `calc(100% - ${verticalTopOffset}px)`;
+        // Use cached value or compute if not available (e.g., on initial load)
+        const tabsHeight = this._cachedTabsHeight || ( this.tabs?.root.getBoundingClientRect().height ?? 0 );
+        this.lineGutter.style.height = `calc(100% - ${tabsHeight}px)`;
     }
 
     getMaxLineLength(): number
@@ -3748,6 +3751,10 @@ export class CodeEditor
     resize( force: boolean = false ): void
     {
         if ( !this.charWidth ) return;
+
+        // Cache layout measurements to avoid reflows
+        this._cachedTabsHeight = this.tabs?.root.getBoundingClientRect().height ?? 0;
+        this._cachedStatusPanelHeight = this.statusPanel?.root.getBoundingClientRect().height ?? 0;
 
         const maxLineLength = this.getMaxLineLength();
         const lineCount = this.doc.lineCount;
@@ -3786,9 +3793,9 @@ export class CodeEditor
     {
         if ( !this.vScrollbar ) return;
 
-        // Compute offsets for tabs and status bar
-        const topOffset = this.tabs?.root.getBoundingClientRect().height ?? 0;
-        const bottomOffset = this.statusPanel?.root.getBoundingClientRect().height ?? 0;
+        // Use cached offsets to avoid reflows
+        const topOffset = this._cachedTabsHeight;
+        const bottomOffset = this._cachedStatusPanelHeight;
 
         // Vertical scrollbar: right edge, between tabs and status bar
         const scrollHeight = this.codeScroller.scrollHeight;
