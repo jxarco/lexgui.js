@@ -2156,6 +2156,49 @@ Object.assign( LX, {
     },
 
     /**
+     * Request file with a promise from url (it could be a binary, text, etc.). If you want a simplied version use
+     * @method requestFileAsync
+     * @param {String} url
+     * @param {String} dataType
+     * @param {Boolean} nocache
+     */
+    async requestFileAsync( url: string, dataType?: string, nocache: boolean = false )
+    {
+        return new Promise( ( resolve, reject ) => {
+            dataType = dataType ?? 'arraybuffer';
+            const mimeType = dataType === 'arraybuffer' ? 'application/octet-stream' : undefined;
+            var xhr: any = new XMLHttpRequest();
+            xhr.open( 'GET', url, true );
+            xhr.responseType = dataType;
+            if ( mimeType )
+            {
+                xhr.overrideMimeType( mimeType );
+            }
+            if ( nocache )
+            {
+                xhr.setRequestHeader( 'Cache-Control', 'no-cache' );
+            }
+            xhr.onload = function()
+            {
+                var response = this.response;
+                if ( this.status != 200 )
+                {
+                    var err = 'Error ' + this.status;
+                    reject( err );
+                    return;
+                }
+                resolve( response );
+            };
+            xhr.onerror = function( err: any )
+            {
+                reject( err );
+            };
+            xhr.send();
+            return xhr;
+        } );
+    },
+
+    /**
      * Request file from url
      * @method requestText
      * @param {String} url
