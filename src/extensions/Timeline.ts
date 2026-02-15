@@ -32,7 +32,6 @@ export abstract class Timeline
     static TRACK_COLOR_SECONDARY: string;
     static TRACK_COLOR_TERTIARY: string;
     static TRACK_SELECTED: string;
-    static TRACK_SELECTED_LIGHT: string;
     static FONT: string;
     static FONT_COLOR_PRIMARY: string;
     static FONT_COLOR_TERTIARY: string;
@@ -98,6 +97,7 @@ export abstract class Timeline
     leftPanel: typeof Panel; // where tree will be placed
     trackTreesPanel: any = null;
     trackTreesComponent: any = null;
+    trackTreesEvents: any = {}; // holds callbacks
     lastTrackTreesComponentOffset: any = 0; // this.trackTreesComponent.innerTree.domEl.offsetTop - canvas.offsetTop. Check draw()
 
     mainArea: typeof Area;
@@ -122,7 +122,6 @@ export abstract class Timeline
     onShowContextMenu: Nullable<( event: any ) => void> = null;
     onAddNewTrackButton: Nullable<() => void> = null; // overrides button "add track" behaviour
     onAddNewTrack: Nullable<( track: any, options: any ) => void> = null;
-    onTrackTreeEvent: Nullable<( event: any ) => void> = null;
     onBeforeDrawContent: Nullable<( ctx: CanvasRenderingContext2D ) => void> = null;
     onStateStop: Nullable<() => void> = null;
     onStateChange: Nullable<( s: boolean ) => void> = null;
@@ -239,6 +238,7 @@ export abstract class Timeline
             Timeline.TRACK_COLOR_PRIMARY = LX.getCSSVariable( 'card' );
             Timeline.TRACK_COLOR_SECONDARY = LX.getCSSVariable( 'secondary' );
             Timeline.TRACK_COLOR_TERTIARY = LX.getCSSVariable( 'accent' );
+            Timeline.TRACK_SELECTED = LX.getCSSVariable( 'primary' );
             Timeline.FONT = LX.getCSSVariable( 'global-font' );
             Timeline.FONT_COLOR_PRIMARY = LX.getCSSVariable( 'foreground' );
             Timeline.FONT_COLOR_TERTIARY = LX.getCSSVariable( 'primary' );
@@ -250,6 +250,8 @@ export abstract class Timeline
             Timeline.KEYFRAME_COLOR_LOCK = LX.getCSSVariable( 'lxTimeline-keyframe-locked' );
             Timeline.KEYFRAME_COLOR_EDITED = LX.getCSSVariable( 'lxTimeline-keyframe-edited' );
             Timeline.KEYFRAME_COLOR_INACTIVE = LX.getCSSVariable( 'lxTimeline-keyframe-inactive' );
+            Timeline.TIME_MARKER_COLOR = LX.getCSSVariable( 'primary' );
+            Timeline.TIME_MARKER_COLOR_TEXT = LX.getCSSVariable( 'primary-foreground' );
         }
 
         this.updateTheme = updateTheme.bind( this );
@@ -412,6 +414,14 @@ export abstract class Timeline
         header.endLine( 'justify-between' );
     }
 
+    setTrackTreeEventListener( type: string, callback: ( event: any ) => any )
+    {
+        this.trackTreesEvents[type] = callback;
+        if ( type != 'select' && type != 'visibleChanged' )
+        {
+            this.trackTreesComponent.on( type, this.trackTreesEvents[type] );
+        }
+    }
     /**
      * @method updateLeftPanel
      */
@@ -465,6 +475,11 @@ export abstract class Timeline
                 const flag = event.domEvent.shiftKey ? !node.trackData.isSelected : true;
                 this.setTrackSelection( node.trackData.trackIdx, flag, false, false ); // do callback, do not update left panel
             }
+
+            if ( this.trackTreesEvents['select'] )
+            {
+                this.trackTreesEvents['select']( event );
+            }
         } );
 
         this.trackTreesComponent.on( 'visibleChanged', ( event: any, resolve: any ) => {
@@ -473,13 +488,17 @@ export abstract class Timeline
             {
                 this.setTrackState( node.trackData.trackIdx, node.visible, false, false ); // do not update left panel
             }
+
+            if ( this.trackTreesEvents['visibleChanged'] )
+            {
+                this.trackTreesEvents['visibleChanged']( event );
+            }
         } );
 
-        // Not used!
-        // if ( this.onTrackTreeEvent )
-        // {
-        //     this.onTrackTreeEvent( e );
-        // }
+        // reset all tree events to the new tree
+        for( let name in this.trackTreesEvents){
+            this.setTrackTreeEventListener( name, this.trackTreesEvents[name] );
+        }
 
         const that = this;
         this.trackTreesComponent.innerTree._refresh = this.trackTreesComponent.innerTree.refresh;
@@ -724,7 +743,7 @@ export abstract class Timeline
         ctx.fillStyle = Timeline.TRACK_COLOR_SECONDARY;
 
         const rectsOffset = this.currentScrollInPixels % line_height;
-        const blackOrWhite = 1 - Math.floor( this.currentScrollInPixels / line_height ) % 2;
+        const blackOrWhite = Math.floor( this.currentScrollInPixels / line_height ) % 2;
         for ( let i = blackOrWhite; i <= max_tracks; i += 2 )
         {
             ctx.fillRect( 0, treeOffset - rectsOffset + i * line_height, w, line_height );
@@ -761,8 +780,9 @@ export abstract class Timeline
         const h = ctx.canvas.height;
 
         const scrollableHeight = this.trackTreesComponent.root.scrollHeight;
+        // hack: get 'ul' start pos to know when tracks start
         // tree has gaps of 0.25rem (4px ) inbetween entries but not in the beginning nor ending. Move half gap upwards.
-        const treeOffset = this.lastTrackTreesComponentOffset = this.trackTreesComponent.innerTree.domEl.offsetTop
+        const treeOffset = this.lastTrackTreesComponentOffset = this.trackTreesComponent.innerTree.domEl.children[0].offsetTop
             - this.canvas.offsetTop - 2;
 
         // zoom
@@ -1698,14 +1718,13 @@ Timeline.BACKGROUND_COLOR = LX.getCSSVariable( 'background-blur' );
 Timeline.TRACK_COLOR_PRIMARY = LX.getCSSVariable( 'card' );
 Timeline.TRACK_COLOR_SECONDARY = LX.getCSSVariable( 'secondary' );
 Timeline.TRACK_COLOR_TERTIARY = LX.getCSSVariable( 'accent' );
-Timeline.TRACK_SELECTED = LX.getCSSVariable( 'color-blue-600' );
-Timeline.TRACK_SELECTED_LIGHT = LX.getCSSVariable( 'color-blue-400' );
+Timeline.TRACK_SELECTED = LX.getCSSVariable( 'primary' );
 Timeline.FONT = LX.getCSSVariable( 'global-font' );
 Timeline.FONT_COLOR_PRIMARY = LX.getCSSVariable( 'foreground' );
 Timeline.FONT_COLOR_TERTIARY = LX.getCSSVariable( 'primary' );
 Timeline.FONT_COLOR_QUATERNARY = LX.getCSSVariable( 'muted-foreground' );
-Timeline.TIME_MARKER_COLOR = LX.getCSSVariable( 'color-blue-600' );
-Timeline.TIME_MARKER_COLOR_TEXT = '#ffffff';
+Timeline.TIME_MARKER_COLOR = LX.getCSSVariable( 'primary' );
+Timeline.TIME_MARKER_COLOR_TEXT = LX.getCSSVariable( 'primary-foreground' );
 
 LX.setCSSVariable( 'lxTimeline-keyframe', 'light-dark(#2d69da,#2d69da )' );
 LX.setCSSVariable( 'lxTimeline-keyframe-selected', 'light-dark(#f5c700,#fafa14)' );
@@ -2689,7 +2708,7 @@ export class KeyFramesTimeline extends Timeline
         if ( track.isSelected )
         {
             ctx.globalAlpha = 0.2;
-            ctx.fillStyle = Timeline.TRACK_SELECTED_LIGHT;
+            ctx.fillStyle = Timeline.TRACK_SELECTED;
             ctx.fillRect( 0, 0, ctx.canvas.width, trackHeight );
         }
 
@@ -4568,7 +4587,7 @@ export class ClipsTimeline extends Timeline
     {
         // Fill track background if it's selected
         ctx.globalAlpha = 0.2;
-        ctx.fillStyle = Timeline.TRACK_SELECTED_LIGHT;
+        ctx.fillStyle = Timeline.TRACK_SELECTED;
         if ( track.isSelected )
         {
             ctx.fillRect( 0, y, ctx.canvas.width, trackHeight );

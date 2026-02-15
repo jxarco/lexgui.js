@@ -105,10 +105,6 @@
         ["itemsRemoved", "Array of Numbers"],
     ] );
 
-    // docMaker.classMethod( "onTrackTreeEvent", `Triggered after an event of the tree in the left panel, which displays the visible tracks.`, [
-    //     ["event", "LX.TreeEvent"]
-    // ] );
-
     docMaker.classMethod( "onSetTrackSelection", `Triggered after calling ${docMaker.iCode("setTrackSelection")}.`, [
         ["track", "Object"],
         ["previousState", "Boolean"],
@@ -197,6 +193,11 @@
     docMaker.classMethod( ".setTrackHeight", "Set track height, in pixels.", [
         ["height", "Number"]
     ], "" );
+
+    docMaker.classMethod( ".setTrackTreeEventListener", `Set callbacks to specific events of the tracks tree.`, [
+        ["type", "String LX.NodeTree event"],
+        ["callback", "fn (event) => void"]
+    ] );
 
     docMaker.classMethod( ".getVisibleItems", `Returns a reference to the track tree elements. Each element has a ${docMaker.iCode(".treeData.trackData")}.`, [ ], "HTMLCollection" );
 
