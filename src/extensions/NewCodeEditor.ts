@@ -1695,6 +1695,7 @@ const TOKEN_CLASS_MAP: Record<string, string> = {
 const Area = LX.Area;
 const Panel = LX.Panel;
 const Tabs = LX.Tabs;
+const NodeTree = LX.NodeTree;
 
 interface CodeTab
 {
@@ -1833,6 +1834,7 @@ export class CodeEditor
     area: typeof Area;
     baseArea: typeof Area;
     codeArea: typeof Area;
+    explorerArea: typeof Area;
     tabs: typeof Tabs;
     root: HTMLElement;
     codeScroller: HTMLElement;
@@ -1849,6 +1851,7 @@ export class CodeEditor
     statusPanel: typeof Panel;
     leftStatusPanel: typeof Panel;
     rightStatusPanel: typeof Panel;
+    explorer: typeof NodeTree | null = null;
 
     // Measurements:
     charWidth: number = 0;
@@ -1862,7 +1865,7 @@ export class CodeEditor
     skipInfo: boolean = false;
     disableEdition: boolean = false;
     skipTabs: boolean = false;
-    // useFileExplorer: boolean = false;
+    useFileExplorer: boolean = false;
     useAutoComplete: boolean = true;
     allowAddScripts: boolean = true;
     allowClosingTabs: boolean = true;
@@ -1871,7 +1874,7 @@ export class CodeEditor
     highlight: string = 'Plain Text';
     newTabOptions: any[] | null = null;
     customSuggestions: any[] = [];
-    // explorerName: string = 'EXPLORER';
+    explorerName: string = 'EXPLORER';
 
     // Editor callbacks:
     onSave: ( text: string, editor: CodeEditor ) => void;
@@ -1890,6 +1893,7 @@ export class CodeEditor
     private _lineStates: TokenizerState[] = [];     // tokenizer state at end of each line
     private _lineElements: HTMLElement[] = [];      // <pre> element per line
     private _openedTabs: Record<string, CodeTab> = {};
+    private _loadedTabs: Record<string, any> = {};
     private _focused: boolean = false;
     private _composing: boolean = false;
     private _keyChain: string | null = null;
@@ -1950,7 +1954,7 @@ export class CodeEditor
         this.skipInfo = options.skipInfo ?? this.skipInfo;
         this.disableEdition = options.disableEdition ?? this.disableEdition;
         this.skipTabs = options.skipTabs ?? this.skipTabs;
-        // this.useFileExplorer = ( options.fileExplorer ?? this.useFileExplorer ) && !this.skipTabs;
+        this.useFileExplorer = ( options.fileExplorer ?? this.useFileExplorer ) && !this.skipTabs;
         this.useAutoComplete = options.autocomplete ?? this.useAutoComplete;
         this.allowAddScripts = options.allowAddScripts ?? this.allowAddScripts;
         this.allowClosingTabs = options.allowClosingTabs ?? this.allowClosingTabs;
@@ -1958,7 +1962,7 @@ export class CodeEditor
         this.highlight = options.highlight ?? this.highlight;
         this.newTabOptions = options.newTabOptions;
         this.customSuggestions = options.customSuggestions ?? [];
-        // this.explorerName = options.explorerName ?? this.explorerName;
+        this.explorerName = options.explorerName ?? this.explorerName;
 
         // Editor callbacks
         this.onSave = options.onSave;
@@ -1972,6 +1976,41 @@ export class CodeEditor
 
         this.language = Tokenizer.getLanguage( this.highlight ) ?? Tokenizer.getLanguage( 'Plain Text' )!;
         this.symbolTable = new SymbolTable();
+
+        // File explorer
+        if ( this.useFileExplorer )
+        {
+            let [ explorerArea, editorArea ] = area.split( { sizes: [ '15%', '85%' ] } );
+            // explorerArea.setLimitBox( 180, 20, 512 );
+            this.explorerArea = explorerArea;
+
+            let panel = new LX.Panel();
+
+            panel.addTitle( this.explorerName );
+
+            let sceneData: any[] = [];
+
+            this.explorer = panel.addTree( null, sceneData, {
+                filter: false,
+                rename: false,
+                skipDefaultIcon: true
+            } );
+
+            this.explorer.on( 'dblClick', ( event: any ) => {
+                const node = event.items[0];
+                this._addTab( node.id, this._loadedTabs[node.id] ?? null );
+            } );
+
+            this.explorer.on( 'delete', ( event: any ) => {
+                const node = event.items[0];
+                // this.closeTab( node.id );
+            } );
+
+            explorerArea.attach( panel );
+
+            // Update area
+            area = editorArea;
+        }
 
         // Full editor
         area.root.className = LX.mergeClass( area.root.className, 'codebasearea overflow-hidden flex relative' );
@@ -2238,6 +2277,19 @@ export class CodeEditor
         this._renderCursors();
     }
 
+    addExplorerItem( item: any )
+    {
+        if ( !this.explorer )
+        {
+            return;
+        }
+
+        if ( !this.explorer.innerTree.data.find( ( value: any, index: number ) => value.id === item.id ) )
+        {
+            this.explorer.innerTree.data.push( item );
+        }
+    };
+
     setText( text: string ): void
     {
         this.doc.setText( text );
@@ -2317,6 +2369,17 @@ export class CodeEditor
         {
             this.currentTab = codeTab;
             this._updateDataInfoPanel( '@tab-name', name );
+        }
+
+        if( options.text )
+        {
+            this.doc.setText( options.text );
+            this.setLanguage( langName );
+            this.cursorSet.set( 0, 0 );
+            this.undoManager.clear();
+            this._renderCursors();
+            this._renderSelections();
+            this._resetGutter();
         }
 
         return name;
@@ -4285,6 +4348,7 @@ export class CodeEditor
     {
         if ( !this.autocomplete || !this._isAutoCompleteActive ) return;
 
+        this.autocomplete.innerHTML = ''; // Clear all suggestions
         this.autocomplete.classList.remove( 'show' );
         this._isAutoCompleteActive = false;
 
@@ -4481,22 +4545,41 @@ export class CodeEditor
             text = text.replaceAll( '\r', '' ).replaceAll( /\t|\\t/g, ' '.repeat( this.tabSize ) );
 
             const ext = LX.getExtension( name );
-            const langName = options.language ?? ( Tokenizer.getLanguage( options.language )?.name
-                ?? ( Tokenizer.getLanguageByExtension( ext )?.name ?? 'Plain Text' ) );
+            const lang = options.language ?? ( Tokenizer.getLanguage( options.language )
+                ?? ( Tokenizer.getLanguageByExtension( ext ) ?? Tokenizer.getLanguage( 'Plain Text' )! ) );
+            const langName = lang.name;
 
-            this._addTab( name, {
-                selected: true,
-                title: options.title ?? name,
-                language: langName
-            } );
+            if ( this.useFileExplorer || this.skipTabs )
+            {
+                this._loadedTabs[name] = {
+                    text,
+                    options,
+                    title: options.title ?? name,
+                    language: langName
+                };
 
-            this.doc.setText( text );
-            this.setLanguage( langName );
-            this.cursorSet.set( 0, 0 );
-            this.undoManager.clear();
-            this._renderCursors();
-            this._renderSelections();
-            this._resetGutter();
+                if ( this.useFileExplorer )
+                {
+                    this.addExplorerItem( { id: name, skipVisibility: true, icon: lang.icon } );
+                    this.explorer.innerTree.frefresh( name );
+                }
+            }
+            else
+            {
+                this._addTab( name, {
+                    selected: true,
+                    title: options.title ?? name,
+                    language: langName
+                } );
+    
+                this.doc.setText( text );
+                this.setLanguage( langName );
+                this.cursorSet.set( 0, 0 );
+                this.undoManager.clear();
+                this._renderCursors();
+                this._renderSelections();
+                this._resetGutter();
+            }
 
             if ( options.callback )
             {
