@@ -4607,11 +4607,12 @@ ul.lexassetscontent {
 
 .cm-sym.cmake { color: #cf6dcf; }  /* symbol */
 
+.cm-str.css { color: #ca7d59; }   /* string */
 .cm-kwd.css { color: #e8be53; }   /* keyword */
 .cm-typ.css { color: #b7c3ec; }   /* type */
 .cm-bln.css { color: #2194ce; }   /* builtin */
 .cm-sym.css { color: #f9d620; }   /* symbol */
-.cm-mtd.css { color: #e0cc68; }   /* method */
+.cm-mtd.css { color: #e9d98a; }   /* method */
 
 .cm-sym.json { color: #cf6dcf; }  /* symbol */
 
@@ -4621,7 +4622,7 @@ ul.lexassetscontent {
 .cm-mtd.wgsl { color: #dfe093; }  /* method */
 .cm-sym.wgsl { color: #f9cb20; }  /* symbol */
 .cm-ppc.wgsl { color: #99caf1; }  /* preprocessor */
-.cm-bln.wgsl { color: #bebebe; }  /* builtin */
+.cm-bln.wgsl { color: #e8be53; }  /* builtin */
 
 .cm-sym.rust { color: #e7ded2; }  /* symbol */
 .cm-mtd.rust { color: #e0cc68 }   /* method */

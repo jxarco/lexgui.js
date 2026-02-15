@@ -26,7 +26,7 @@ interface TokenRule
     match: RegExp;
     type: string;
     next?: string;   // push this state
-    pop?: boolean;   // pop back to previous state
+    pop?: boolean | number;   // pop back to previous state (true = 1, or specify number of pops)
 }
 
 interface LanguageDef
@@ -68,6 +68,27 @@ function isSymbol( str: string ): boolean
 function isWord( str: string ): boolean
 {
     return /\w/.test( str );
+}
+
+function getLanguageIcon( langDef: LanguageDef | undefined, extension?: string ): string
+{
+    if ( !langDef?.icon )
+    {
+        return 'FileCode text-neutral-500'; // default icon
+    }
+
+    if ( typeof langDef.icon === 'string' )
+    {
+        return langDef.icon;
+    }
+
+    if ( extension && langDef.icon[ extension ] )
+    {
+        return langDef.icon[ extension ];
+    }
+
+    const firstIcon = Object.values( langDef.icon )[0];
+    return firstIcon || 'FileCode text-neutral-500';
 }
 
 //  _____     _           _             
@@ -161,7 +182,8 @@ export class Tokenizer
                     }
                     else if ( rule.pop )
                     {
-                        if ( stack.length > 1 )
+                        const popCount = typeof rule.pop === 'number' ? rule.pop : 1;
+                        for ( let i = 0; i < popCount && stack.length > 1; i++ )
                         {
                             stack.pop();
                         }
@@ -259,14 +281,21 @@ const CommonStates: Record<string, TokenRule[]> = {
 
 /** Common number rules for C-like languages. */
 const NumberRules: TokenRule[] = [
-    { match: /0[xX][0-9a-fA-F]+\b/, type: 'number' },
-    { match: /\d+\.?\d*(?:[eE][+-]?\d+)?/, type: 'number' },
-    { match: /\.\d+(?:[eE][+-]?\d+)?/, type: 'number' },
+    // Binary: 0b1010, 0B1010
+    { match: /0[bB][01]+(?:[uU][lL]{0,2}|[lL]{1,2}[uU]?)?\b/, type: 'number' },
+    // Hex: 0xFF, 0xDEADBEEF, 0xFFu, 0xFFul, 0xFFull
+    { match: /0[xX][0-9a-fA-F]+(?:[uU][lL]{0,2}|[lL]{1,2}[uU]?)?\b/, type: 'number' },
+    // Octal: 0o77, 0O77
+    { match: /0[oO][0-7]+(?:[uU][lL]{0,2}|[lL]{1,2}[uU]?)?\b/, type: 'number' },
+    // Decimal with optional suffix: 123, 123.456, 1.23e10, 0.5f, 16u, 100L, 42ul, 3.14d, 100m
+    { match: /\d+\.?\d*(?:[eE][+-]?\d+)?(?:[fFdDmMlLuUiI]|[uU][lL]{0,2}|[lL]{1,2}[uU]?)?\b/, type: 'number' },
+    // Decimal starting with dot: .123, .5f
+    { match: /\.\d+(?:[eE][+-]?\d+)?(?:[fFdDmM])?\b/, type: 'number' },
 ];
 
 /** Common tail rules: method detection, identifiers, symbols, whitespace. */
 const TailRules: TokenRule[] = [
-    { match: /[a-zA-Z_$]\w*(?=\s*\()/, type: 'method' },
+    { match: /[a-zA-Z_$]\w*(?=\s*[<(])/, type: 'method' }, // function/method names (followed by < or ()
     { match: /[a-zA-Z_$]\w*/, type: 'text' },
     { match: /[{}()\[\];,.:?!&|<>=+\-*/%^~@#]/, type: 'symbol' },
     { match: /\s+/, type: 'text' },
@@ -311,7 +340,7 @@ Tokenizer.registerLanguage( {
             { match: /.+/, type: 'text' }
         ]
     },
-    icon: 'AlignLeft text-neutral-500'
+    icon: 'FileText text-neutral-500'
 } );
 
 // JavaScript
@@ -347,8 +376,9 @@ Tokenizer.registerLanguage( {
             { match: /'/, type: 'string', next: 'singleString' },
             ...NumberRules,
             { match: words( jsKeywords ), type: 'keyword' },
-            { match: words( jsStatements ), type: 'statement' },
             { match: words( jsBuiltins ), type: 'builtin' },
+            { match: words( jsStatements ), type: 'statement' },
+            { match: /(?<=\b(?:class|enum)\s+)[A-Z][a-zA-Z0-9_]*/, type: 'type' }, // class/enum names
             ...TailRules,
         ],
         ...CommonStates,
@@ -367,7 +397,7 @@ const tsKeywords = [
 
 const tsTypes = [
     'string', 'number', 'boolean', 'any', 'unknown', 'never', 'void', 'null',
-    'undefined', 'object', 'symbol', 'bigint',
+    'undefined', 'object', 'symbol', 'bigint', 'Promise',
     'Record', 'Partial', 'Required', 'Readonly', 'Pick', 'Omit', 'Exclude',
     'Extract', 'NonNullable', 'ReturnType', 'Parameters', 'ConstructorParameters',
     'InstanceType', 'Awaited'
@@ -386,9 +416,13 @@ Tokenizer.registerLanguage( {
             { match: /'/, type: 'string', next: 'singleString' },
             ...NumberRules,
             { match: words( tsKeywords ), type: 'keyword' },
-            { match: words( jsStatements ), type: 'statement' },
             { match: words( tsTypes ), type: 'type' },
             { match: words( jsBuiltins ), type: 'builtin' },
+            { match: words( jsStatements ), type: 'statement' },
+            { match: /(?<=\b(?:class|enum|interface|type|extends|implements)\s+)[A-Z][a-zA-Z0-9_]*/, type: 'type' }, // class/enum/interface/type names
+            { match: /(?<=<\s*)[A-Z][a-zA-Z0-9_]*(?=\s*(?:[,>]|extends|=))/, type: 'type' }, // type parameters in generics <T>
+            { match: /(?<=,\s*)[A-Z][a-zA-Z0-9_]*(?=\s*(?:[,>]|extends|=))/, type: 'type' }, // type parameters after comma <T, K>
+            { match: /(?<=:\s*)[A-Z][a-zA-Z0-9_]*/, type: 'type' }, // type annotations after colon
             ...TailRules,
         ],
         ...CommonStates,
@@ -400,20 +434,27 @@ Tokenizer.registerLanguage( {
 // WGSL (WebGPU Shading Language)
 
 const wgslKeywords = [
-    'bool', 'u32', 'i32', 'f16', 'f32', 'vec2', 'vec3', 'vec4', 'vec2f', 'vec3f', 'vec4f', 'mat2x2f', 'mat3x3f', 'mat4x4f',
-    'array', 'vec2u', 'vec3u', 'vec4u', 'ptr', 'sampler', 'var', 'let', 'true', 'false', 'fn', 'atomic', 'struct', 'sampler_comparison',
-    'texture_depth_2d', 'texture_depth_2d_array', 'texture_depth_cube', 'texture_depth_cube_array', 'texture_depth_multisampled_2d',
-    'texture_external', 'texture_1d', 'texture_2d', 'texture_2d_array', 'texture_3d', 'texture_cube', 'texture_cube_array', 'texture_storage_1d',
-    'texture_storage_2d', 'texture_storage_2d_array', 'texture_storage_3d'
+    'bool', 'i32', 'u32', 'f16', 'f32', 'vec2', 'vec3', 'vec4', 'vec2i', 'vec3i', 'vec4i',
+    'vec2u', 'vec3u', 'vec4u', 'vec2f', 'vec3f', 'vec4f', 'mat2x2f', 'mat2x3f', 'mat2x4f', 'mat3x2f', 'mat3x3f',
+    'mat3x4f', 'mat4x2f', 'mat4x3f', 'mat4x4f', 'array', 'struct', 'ptr', 'atomic', 'sampler', 'sampler_comparison',
+    'texture_1d', 'texture_2d', 'texture_2d_array', 'texture_3d', 'texture_cube', 'texture_cube_array', 'texture_multisampled_2d',
+    'texture_depth_2d', 'texture_depth_2d_array', 'texture_depth_cube', 'texture_depth_cube_array',
+    'texture_depth_multisampled_2d', 'texture_storage_1d', 'texture_storage_2d', 'texture_storage_2d_array',
+    'texture_storage_3d', 'texture_external', 'var', 'let', 'const', 'override', 'fn', 'type', 'alias',
+    'true', 'false'
 ];
 
 const wgslStatements = [
-    'const', 'for', 'if', 'else', 'return', 'continue', 'break', 'storage', 'read', 'read_write', 'uniform', 'function', 'workgroup',
-    'bitcast'
+    'if', 'else', 'switch', 'case', 'default', 'for', 'loop', 'while', 'break', 'continue', 'discard',
+    'return', 'function', 'private', 'workgroup', 'uniform', 'storage', 'read', 'write', 'read_write', 'bitcast'
 ];
 
 const wgslBuiltins = [
-    '@vertex', '@fragment'
+    'position', 'vertex_index', 'instance_index', 'front_facing', 'frag_depth',
+    'local_invocation_id', 'local_invocation_index', 'global_invocation_id', 'workgroup_id', 'num_workgroups',
+    'abs', 'acos', 'asin', 'atan', 'ceil', 'clamp', 'cos', 'cross', 'degrees', 'determinant', 'distance',
+    'dot', 'exp', 'floor', 'fract', 'inverseSqrt', 'length', 'log', 'max', 'min', 'mix', 'normalize',
+    'pow', 'radians', 'reflect', 'refract', 'round', 'sign', 'sin', 'smoothstep', 'sqrt', 'step', 'tan', 'transpose'
 ];
 
 Tokenizer.registerLanguage( {
@@ -424,10 +465,12 @@ Tokenizer.registerLanguage( {
         root: [
             { match: /\/\*/, type: 'comment', next: 'blockComment' },
             { match: /\/\/.*/, type: 'comment' },
+            { match: /#\w+/, type: 'preprocessor' },
             ...NumberRules,
             { match: words( wgslKeywords ), type: 'keyword' },
-            { match: words( wgslStatements ), type: 'statement' },
             { match: words( wgslBuiltins ), type: 'builtin' },
+            { match: words( wgslStatements ), type: 'statement' },
+            { match: /@\w+/, type: 'text' },
             ...TailRules,
         ],
         ...CommonStates
@@ -438,14 +481,30 @@ Tokenizer.registerLanguage( {
 // GLSL (OpenGL/WebGL Shading Language)
 
 const glslKeywords = [
-    'true', 'false', 'function', 'int', 'float', 'vec2', 'vec3', 'vec4', 'mat2x2', 'mat3x3', 'mat4x4', 'struct',
-    'void', 'bool', 'uint', 'dvec2', 'dvec3', 'dvec4', 'bvec2', 'bvec3', 'bvec4', 'sampler2D', 'sampler3D', 'samplerCube',
-    'sampler2DShadow', 'samplerCubeShadow', 'lowp', 'mediump', 'highp', 'precision', 'in', 'out', 'inout', 'uniform', 'varying',
-    'attribute'
+    'true', 'false', 'int', 'float', 'double', 'bool', 'void', 'uint', 'struct', 'mat2', 'mat3',
+    'mat4', 'mat2x2', 'mat2x3', 'mat2x4', 'mat3x2', 'mat3x3', 'mat3x4', 'mat4x2', 'mat4x3', 'mat4x4',
+    'vec2', 'vec3', 'vec4', 'ivec2', 'ivec3', 'ivec4', 'uvec2', 'uvec3', 'uvec4', 'dvec2', 'dvec3',
+    'dvec4', 'bvec2', 'bvec3', 'bvec4', 'sampler1D', 'sampler2D', 'sampler3D', 'samplerCube',
+    'sampler2DShadow', 'samplerCubeShadow', 'sampler2DArray', 'sampler2DArrayShadow',
+    'samplerCubeArray', 'samplerCubeArrayShadow', 'isampler2D', 'usampler2D', 'isampler3D',
+    'usampler3D', 'lowp', 'mediump', 'highp', 'precision', 'in', 'out', 'inout', 'uniform',
+    'varying', 'attribute', 'const', 'layout', 'centroid', 'flat', 'smooth', 'noperspective',
+    'patch', 'sample', 'buffer', 'shared', 'coherent', 'volatile', 'restrict', 'readonly', 'writeonly'
 ];
 
 const glslStatements = [
-    'for', 'if', 'else', 'return', 'continue', 'break'
+    'if', 'else', 'switch', 'case', 'default', 'for', 'while', 'do', 'break', 'continue',
+    'return', 'discard'
+];
+
+const glslBuiltins = [
+    'radians', 'degrees', 'sin', 'cos', 'tan', 'asin', 'acos', 'atan', 'pow', 'exp', 'log',
+    'exp2', 'log2', 'sqrt', 'inversesqrt', 'abs', 'sign', 'floor', 'ceil', 'fract',
+    'mod', 'min', 'max', 'clamp', 'mix', 'step', 'smoothstep', 'length', 'distance',
+    'dot', 'cross', 'normalize', 'reflect', 'refract', 'matrixCompMult',
+    'lessThan', 'lessThanEqual', 'greaterThan', 'greaterThanEqual',
+    'equal', 'notEqual', 'any', 'all', 'not', 'texture', 'textureProj',
+    'textureLod', 'textureGrad', 'texelFetch'
 ];
 
 Tokenizer.registerLanguage( {
@@ -456,14 +515,64 @@ Tokenizer.registerLanguage( {
         root: [
             { match: /\/\*/, type: 'comment', next: 'blockComment' },
             { match: /\/\/.*/, type: 'comment' },
+            { match: /#\w+/, type: 'preprocessor' },
             ...NumberRules,
             { match: words( glslKeywords ), type: 'keyword' },
+            { match: words( glslBuiltins ), type: 'builtin' },
             { match: words( glslStatements ), type: 'statement' },
             ...TailRules,
         ],
         ...CommonStates
     },
     icon: 'AlignLeft text-neutral-500'
+} );
+
+// HLSL (DirectX Shader Language)
+
+const hlslKeywords = [
+    'bool', 'int', 'uint', 'dword', 'half', 'float', 'double', 'min16float', 'min10float', 'min16int', 'min12int', 'min16uint',
+    'float1', 'float2', 'float3', 'float4', 'int1', 'int2', 'int3', 'int4', 'uint1', 'uint2', 'uint3', 'uint4',
+    'bool1', 'bool2', 'bool3', 'bool4', 'half1', 'half2', 'half3', 'half4',
+    'float1x1', 'float1x2', 'float1x3', 'float1x4', 'float2x1', 'float2x2', 'float2x3', 'float2x4',
+    'float3x1', 'float3x2', 'float3x3', 'float3x4', 'float4x1', 'float4x2', 'float4x3', 'float4x4',
+    'vector', 'matrix', 'string', 'void', 'struct', 'class', 'interface', 'true', 'false',
+    'sampler', 'sampler1D', 'sampler2D', 'sampler3D', 'samplerCUBE', 'sampler_state',
+    'Texture1D', 'Texture2D', 'Texture3D', 'TextureCube', 'Texture1DArray', 'Texture2DArray', 'TextureCubeArray',
+    'Buffer', 'AppendStructuredBuffer', 'ConsumeStructuredBuffer', 'StructuredBuffer', 'RWStructuredBuffer',
+    'ByteAddressBuffer', 'RWByteAddressBuffer', 'RWTexture1D', 'RWTexture2D', 'RWTexture3D', 'RWTexture1DArray', 'RWTexture2DArray',
+    'cbuffer', 'tbuffer', 'in', 'out', 'inout', 'uniform', 'extern', 'static', 'volatile', 'precise', 'shared', 'groupshared',
+    'linear', 'centroid', 'nointerpolation', 'noperspective', 'sample', 'const', 'row_major', 'column_major'
+];
+
+const hlslStatements = [
+    'if', 'else', 'for', 'while', 'do', 'switch', 'case', 'default', 'break', 'continue', 'discard', 'return',
+    'typedef', 'register', 'packoffset'
+];
+
+const hlslBuiltins = [
+    'SV_Position', 'SV_Target', 'SV_Depth', 'SV_VertexID', 'SV_InstanceID', 'SV_PrimitiveID', 'SV_DispatchThreadID',
+    'SV_GroupID', 'SV_GroupThreadID', 'SV_GroupIndex', 'SV_Coverage', 'SV_IsFrontFace', 'SV_RenderTargetArrayIndex',
+    'POSITION', 'NORMAL', 'TEXCOORD', 'COLOR', 'TANGENT', 'BINORMAL'
+];
+
+Tokenizer.registerLanguage( {
+    name: 'HLSL',
+    extensions: [ 'hlsl', 'fx', 'fxh', 'vsh', 'psh' ],
+    lineComment: '//',
+    states: {
+        root: [
+            { match: /\/\*/, type: 'comment', next: 'blockComment' },
+            { match: /\/\/.*/, type: 'comment' },
+            { match: /#\w+/, type: 'preprocessor' },
+            ...NumberRules,
+            { match: words( hlslKeywords ), type: 'keyword' },
+            { match: words( hlslBuiltins ), type: 'builtin' },
+            { match: words( hlslStatements ), type: 'statement' },
+            ...TailRules,
+        ],
+        ...CommonStates
+    },
+    icon: 'AlignLeft text-purple-500'
 } );
 
 // Python
@@ -473,16 +582,31 @@ const pyKeywords = [
 ];
 
 const pyStatements = [
-    'if', 'raise', 'del', 'import', 'return', 'elif', 'try', 'else', 'while', 'as', 'except', 'with', 'assert', 'finally', 'yield',
-    'break', 'for', 'class', 'continue', 'global', 'pass', 'from'
+    'if', 'elif', 'else', 'for', 'while', 'try', 'except', 'finally', 'with', 'match', 'case',
+    'break', 'continue', 'return', 'raise', 'pass', 'import', 'from', 'as', 'global', 'nonlocal',
+    'assert', 'del', 'yield'
+];
+
+const pyBuiltins = [
+    'abs', 'all', 'any', 'ascii', 'bin', 'bool', 'bytearray', 'bytes', 'callable', 'chr', 'classmethod',
+    'compile', 'complex', 'delattr', 'dict', 'dir', 'divmod', 'enumerate', 'eval', 'exec', 'filter',
+    'float', 'format', 'frozenset', 'getattr', 'globals', 'hasattr', 'hash', 'help', 'hex', 'id',
+    'input', 'int', 'isinstance', 'issubclass', 'iter', 'len', 'list', 'locals', 'map', 'max',
+    'memoryview', 'min', 'next', 'object', 'oct', 'open', 'ord', 'pow', 'print', 'property',
+    'range', 'repr', 'reversed', 'round', 'set', 'setattr', 'slice', 'sorted', 'staticmethod',
+    'str', 'sum', 'super', 'tuple', 'type', 'vars', 'zip'
 ];
 
 const pyTypes = [
-    'int', 'type', 'float', 'map', 'list', 'ArithmeticError', 'AssertionError', 'AttributeError', 'Exception', 'EOFError',
-    'FloatingPointError', 'GeneratorExit', 'ImportError', 'IndentationError', 'IndexError', 'KeyError', 'KeyboardInterrupt', 'LookupError',
-    'MemoryError', 'NameError', 'NotImplementedError', 'OSError', 'OverflowError', 'ReferenceError', 'RuntimeError', 'StopIteration',
-    'SyntaxError', 'TabError', 'SystemError', 'SystemExit', 'TypeError', 'UnboundLocalError', 'UnicodeError', 'UnicodeEncodeError',
-    'UnicodeDecodeError', 'UnicodeTranslateError', 'ValueError', 'ZeroDivisionError'
+    'int', 'float', 'complex', 'bool', 'str', 'bytes', 'bytearray', 'list', 'tuple', 'set', 'frozenset',
+    'dict', 'object', 'type', 'ArithmeticError', 'AssertionError', 'AttributeError', 'BaseException',
+    'BufferError', 'EOFError', 'Exception', 'FloatingPointError', 'GeneratorExit', 'ImportError',
+    'ModuleNotFoundError', 'IndentationError', 'IndexError', 'KeyError', 'KeyboardInterrupt',
+    'LookupError', 'MemoryError', 'NameError', 'NotImplementedError', 'OSError', 'OverflowError',
+    'RecursionError', 'ReferenceError', 'RuntimeError', 'StopAsyncIteration', 'StopIteration',
+    'SyntaxError', 'TabError', 'SystemError', 'SystemExit', 'TypeError', 'UnboundLocalError',
+    'UnicodeError', 'UnicodeEncodeError', 'UnicodeDecodeError', 'UnicodeTranslateError',
+    'ValueError', 'ZeroDivisionError'
 ];
 
 Tokenizer.registerLanguage( {
@@ -492,13 +616,14 @@ Tokenizer.registerLanguage( {
     states: {
         root: [
             { match: /\/\*/, type: 'comment', next: 'blockComment' },
-            { match: /\/\/.*/, type: 'comment' },
+            { match: /#.*/, type: 'comment' },
             { match: /"/, type: 'string', next: 'doubleString' },
             { match: /'/, type: 'string', next: 'singleString' },
             ...NumberRules,
             { match: words( pyKeywords ), type: 'keyword' },
-            { match: words( pyStatements ), type: 'statement' },
             { match: words( pyTypes ), type: 'type' },
+            { match: words( pyBuiltins ), type: 'builtin' },
+            { match: words( pyStatements ), type: 'statement' },
             ...TailRules,
         ],
         ...CommonStates
@@ -509,22 +634,36 @@ Tokenizer.registerLanguage( {
 // PHP
 
 const phpKeywords = [
-    'const', 'function', 'array', 'new', 'int', 'string', '$this', 'public', 'null', 'private', 'protected', 'implements', 'class', 'use',
-    'namespace', 'abstract', 'clone', 'final', 'enum'
+    'abstract', 'and', 'array', 'as', 'callable', 'class', 'clone', 'const',
+    'enum', 'extends', 'final', 'fn', 'function', 'global',
+    'implements', 'include', 'include_once', 'instanceof',
+    'insteadof', 'interface', 'namespace', 'new', 'null', 'or',
+    'private', 'protected', 'public', 'readonly', 'require',
+    'require_once', 'static', 'trait', 'use', 'var', 'xor',
+    'from', '$this'
 ];
 
 const phpStatements = [
-    'declare', 'enddeclare', 'foreach', 'endforeach', 'if', 'else', 'elseif', 'endif', 'for', 'endfor', 'while', 'endwhile', 'switch',
-    'case', 'default', 'endswitch', 'return', 'break', 'continue', 'try', 'catch', 'die', 'do', 'exit', 'finally'
+    'if', 'else', 'elseif', 'endif', 'switch', 'case', 'default', 'endswitch',
+    'for', 'endfor', 'foreach', 'endforeach', 'while', 'endwhile', 'do',
+    'break', 'continue', 'return', 'try', 'catch', 'finally', 'throw',
+    'declare', 'enddeclare', 'goto', 'yield', 'match'
 ];
 
 const phpTypes = [
-    'Exception', 'DateTime', 'JsonSerializable'
+    'int', 'float', 'string', 'bool', 'array', 'object', 'callable', 'iterable',
+    'void', 'never', 'mixed', 'static', 'self', 'parent',
+    'Exception', 'Error', 'Throwable', 'DateTime', 'DateTimeImmutable',
+    'Closure', 'Generator', 'JsonSerializable'
 ];
 
 const phpBuiltins = [
-    'echo', 'print'
+    'echo', 'print', 'isset', 'empty', 'unset', 'eval', 'die', 'exit',
+    'count', 'sizeof', 'in_array', 'array_merge', 'array_push', 'array_pop',
+    'strlen', 'strpos', 'substr', 'str_replace', 'explode', 'implode',
+    'json_encode', 'json_decode', 'var_dump', 'print_r'
 ];
+
 
 Tokenizer.registerLanguage( {
     name: 'PHP',
@@ -538,9 +677,9 @@ Tokenizer.registerLanguage( {
             { match: /'/, type: 'string', next: 'singleString' },
             ...NumberRules,
             { match: words( phpKeywords ), type: 'keyword' },
-            { match: words( phpStatements ), type: 'statement' },
             { match: words( phpTypes ), type: 'type' },
             { match: words( phpBuiltins ), type: 'builtin' },
+            { match: words( phpStatements ), type: 'statement' },
             ...TailRules,
         ],
         ...CommonStates
@@ -567,6 +706,7 @@ Tokenizer.registerLanguage({
         root: [
             { match: /\/\*/, type: 'comment', next: 'blockComment' },
             { match: /\/\/.*/, type: 'comment' },
+            { match: /#\w+/, type: 'preprocessor' },
             { match: /"/, type: 'string', next: 'doubleString' },
             { match: /'/, type: 'string', next: 'singleString' },
             ...NumberRules,
@@ -576,7 +716,7 @@ Tokenizer.registerLanguage({
         ],
         ...CommonStates
     },
-    icon: 'C text-sky-400' // { 'c': 'C text-sky-400', 'h': 'C text-fuchsia-500' }
+    icon: { 'c': 'C text-sky-400', 'h': 'C text-fuchsia-500' }
 });
 
 // C++
@@ -607,22 +747,356 @@ Tokenizer.registerLanguage({
         root: [
             { match: /\/\*/, type: 'comment', next: 'blockComment' },
             { match: /\/\/.*/, type: 'comment' },
+            { match: /#\w+/, type: 'preprocessor' },
             { match: /"/, type: 'string', next: 'doubleString' },
             { match: /'/, type: 'string', next: 'singleString' },
             ...NumberRules,
             { match: words( cppKeywords ), type: 'keyword' },
-            { match: words( cppStatements ), type: 'statement' },
             { match: words( cppTypes ), type: 'type' },
             { match: words( cppBuiltins ), type: 'builtin' },
+            { match: words( cppStatements ), type: 'statement' },
             ...TailRules,
         ],
         ...CommonStates
     },
-    icon: 'CPlusPlus text-sky-400' // { 'cpp': 'CPlusPlus text-sky-400', 'hpp': 'CPlusPlus text-fuchsia-500' }
+    icon: { 'cpp': 'CPlusPlus text-sky-400', 'hpp': 'CPlusPlus text-fuchsia-500' }
 });
 
-//  ____                            _   
-// |    \ ___ ___ _ _ _____ ___ ___| |_ 
+// JSON
+
+Tokenizer.registerLanguage({
+    name: 'JSON',
+    extensions: [ 'json', 'jsonc', 'bml' ],
+    states: {
+        root: [
+            { match: /"/, type: 'string', next: 'doubleString' },
+            { match: /\btrue\b|\bfalse\b|\bnull\b/, type: 'keyword' },
+            { match: /-?\d+\.?\d*(?:[eE][+-]?\d+)?/, type: 'number' },
+            { match: /[{}[\]:,]/, type: 'symbol' },
+            { match: /\s+/, type: 'text' },
+        ],
+        ...CommonStates
+    },
+    icon: 'Json text-yellow-600'
+});
+
+// XML
+
+Tokenizer.registerLanguage({
+    name: 'XML',
+    extensions: [ 'xml', 'xaml', 'xsd', 'xsl' ],
+    lineComment: '<!--',
+    states: {
+        root: [
+            { match: /<!--/, type: 'comment', next: 'xmlComment' },
+            { match: /<\?/, type: 'preprocessor', next: 'processingInstruction' },
+            { match: /<\/[a-zA-Z][\w:-]*>/, type: 'keyword' },
+            { match: /<[a-zA-Z][\w:-]*/, type: 'keyword', next: 'tag' },
+            { match: /[^<]+/, type: 'text' },
+        ],
+        tag: [
+            { match: /\/?>/, type: 'keyword', pop: true },
+            { match: /[a-zA-Z][\w:-]*(?==)/, type: 'type' },
+            { match: /"/, type: 'string', next: 'doubleString' },
+            { match: /'/, type: 'string', next: 'singleString' },
+            { match: /[^"'>/]+/, type: 'text' },
+        ],
+        xmlComment: [
+            { match: /-->/, type: 'comment', pop: true },
+            { match: /[^-]+/, type: 'comment' },
+            { match: /-/, type: 'comment' },
+        ],
+        processingInstruction: [
+            { match: /\?>/, type: 'preprocessor', pop: true },
+            { match: /[^?]+/, type: 'preprocessor' },
+            { match: /\?/, type: 'preprocessor' },
+        ],
+        ...CommonStates
+    },
+    icon: 'Rss text-orange-600'
+});
+
+// HTML
+
+const htmlTags = [
+    'html', 'head', 'body', 'title', 'meta', 'link', 'script', 'style',
+    'div', 'span', 'p', 'a', 'img', 'ul', 'ol', 'li', 'table', 'tr', 'td', 'th',
+    'form', 'input', 'button', 'select', 'option', 'textarea', 'label',
+    'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'header', 'footer', 'nav', 'section', 'article',
+    'aside', 'main', 'figure', 'figcaption', 'video', 'audio', 'source', 'canvas', 'svg'
+];
+
+Tokenizer.registerLanguage({
+    name: 'HTML',
+    extensions: [ 'html' ],
+    lineComment: '<!--',
+    states: {
+        root: [
+            { match: /<!--/, type: 'comment', next: 'xmlComment' },
+            { match: /<!DOCTYPE/i, type: 'preprocessor' },
+            { match: /<\/[a-zA-Z][\w-]*>/, type: 'keyword' },
+            { match: /<script\b/i, type: 'keyword', next: 'scriptTag' },
+            { match: /<style\b/i, type: 'keyword', next: 'styleTag' },
+            { match: /<[a-zA-Z][\w-]*/, type: 'keyword', next: 'tag' },
+            { match: /[^<]+/, type: 'text' },
+        ],
+        tag: [
+            { match: /\/?>/, type: 'keyword', pop: true },
+            { match: /[a-zA-Z][\w-]*(?==)/, type: 'type' },
+            { match: /"/, type: 'string', next: 'doubleString' },
+            { match: /'/, type: 'string', next: 'singleString' },
+            { match: /[^"'>/]+/, type: 'text' },
+        ],
+        scriptTag: [
+            { match: /\/>/, type: 'keyword', pop: true },
+            { match: />/, type: 'keyword', next: 'scriptContent' },
+            { match: /[a-zA-Z][\w-]*(?==)/, type: 'type' },
+            { match: /"/, type: 'string', next: 'doubleString' },
+            { match: /'/, type: 'string', next: 'singleString' },
+            { match: /[^"'>/]+/, type: 'text' },
+        ],
+        scriptContent: [
+            { match: /<\/script>/i, type: 'keyword', pop: 2 },
+            { match: /[^<]+/, type: 'text' },
+            { match: /</, type: 'text' },
+        ],
+        styleTag: [
+            { match: /\/>/, type: 'keyword', pop: true },
+            { match: />/, type: 'keyword', next: 'styleContent' },
+            { match: /[a-zA-Z][\w-]*(?==)/, type: 'type' },
+            { match: /"/, type: 'string', next: 'doubleString' },
+            { match: /'/, type: 'string', next: 'singleString' },
+            { match: /[^"'>/]+/, type: 'text' },
+        ],
+        styleContent: [
+            { match: /<\/style>/i, type: 'keyword', pop: 2 },
+            { match: /[^<]+/, type: 'text' },
+            { match: /</, type: 'text' },
+        ],
+        xmlComment: [
+            { match: /-->/, type: 'comment', pop: true },
+            { match: /[^-]+/, type: 'comment' },
+            { match: /-/, type: 'comment' },
+        ],
+        ...CommonStates
+    },
+    icon: 'Code text-orange-500'
+});
+
+// CSS
+
+const cssProperties = [
+    'color', 'background', 'border', 'margin', 'padding', 'font', 'display', 'position',
+    'width', 'height', 'top', 'left', 'right', 'bottom', 'flex', 'grid', 'z-index',
+    'opacity', 'transform', 'transition', 'animation', 'content', 'visibility'
+];
+
+const cssPropertyValues = [
+    'inherit', 'initial', 'unset', 'revert', 'revert-layer', 'auto', 'none', 'hidden', 'visible', 'collapse',
+    'block', 'inline', 'inline-block', 'flex', 'inline-flex', 'grid', 'inline-grid', 'contents', 'list-item',
+    'static', 'relative', 'absolute', 'fixed', 'sticky', 'solid', 'dashed', 'dotted', 'double', 'groove', 'ridge',
+    'inset', 'outset', 'bold', 'bolder', 'lighter', 'normal', 'italic', 'oblique', 'uppercase', 'lowercase', 'capitalize',
+    'left', 'right', 'center', 'top', 'bottom', 'start', 'end', 'stretch', 'space-between', 'space-around', 'space-evenly',
+    'repeat', 'no-repeat', 'repeat-x', 'repeat-y', 'cover', 'contain', 'pointer', 'default', 'move', 'text', 'not-allowed',
+    'transparent', 'currentColor'
+];
+
+const cssPseudos = [
+    'hover', 'active', 'focus', 'visited', 'link', 'before', 'after', 'first-child',
+    'last-child', 'nth-child', 'not', 'root', 'disabled', 'checked'
+];
+
+Tokenizer.registerLanguage({
+    name: 'CSS',
+    extensions: [ 'css', 'scss', 'sass', 'less' ],
+    lineComment: '//',
+    states: {
+        root: [
+            { match: /\/\*/, type: 'comment', next: 'blockComment' },
+            { match: /\/\/.*/, type: 'comment' }, // SCSS/Less
+            { match: /@[\w-]+/, type: 'statement' }, // @media, @import, @keyframes, etc.
+            { match: /#[\w-]+/, type: 'keyword' }, // ID selectors
+            { match: /\.[\w-]+/, type: 'keyword' }, // class selectors
+            { match: /::?[\w-]+(?:\([^)]*\))?/, type: 'keyword' }, // pseudo-classes/elements
+            { match: /\[[\w-]+(?:[~|^$*]?=(?:"[^"]*"|'[^']*'|[\w-]+))?\]/, type: 'type' }, // attribute selectors
+            { match: /{/, type: 'symbol', next: 'properties' },
+            { match: /}/, type: 'symbol' },
+            { match: /[,>+~*]/, type: 'symbol' }, // combinators
+            { match: /[\w-]+/, type: 'keyword' }, // element selectors
+            { match: /\s+/, type: 'text' },
+        ],
+        properties: [
+            { match: /\/\*/, type: 'comment', next: 'blockComment' },
+            { match: /\/\/.*/, type: 'comment' }, // SCSS/Less
+            { match: /}/, type: 'symbol', pop: true },
+            { match: /[\w-]+(?=\s*:)/, type: 'type' }, // property names
+            { match: /:/, type: 'symbol' },
+            { match: words( cssPropertyValues ), type: 'string' },
+            { match: /;/, type: 'symbol' },
+            { match: /"/, type: 'string', next: 'doubleString' },
+            { match: /'/, type: 'string', next: 'singleString' },
+            { match: /#[a-fA-F0-9]{3,8}\b/, type: 'string' }, // hex colors
+            { match: /-?\d+\.?\d*(?:px|em|rem|%|vh|vw|vmin|vmax|pt|cm|mm|in|pc|ex|ch|fr|deg|rad|grad|turn|s|ms|Hz|kHz|dpi|dpcm|dppx)?/, type: 'number' },
+            { match: /!important\b/, type: 'builtin' },
+            { match: /[\w-]+\(/, type: 'method' }, // functions: rgb(), calc(), var(), url()
+            { match: /--[\w-]+/, type: 'type' }, // vars --
+            { match: /[(),]/, type: 'symbol' },
+            { match: /{/, type: 'symbol', next: 'properties' }, // nested rules (SCSS/Less)
+            { match: /[\w-]+/, type: 'text' },
+            { match: /\s+/, type: 'text' },
+        ],
+        ...CommonStates
+    },
+    icon: 'Hash text-blue-500'
+});
+
+// Markdown
+
+Tokenizer.registerLanguage({
+    name: 'Markdown',
+    extensions: [ 'md', 'markdown' ],
+    states: {
+        root: [
+            { match: /^#{1,6}\s+.+/, type: 'keyword' },
+            { match: /^\*\*\*.+$/, type: 'symbol' },
+            { match: /\*\*[^*]+\*\*/, type: 'keyword' },
+            { match: /\*[^*]+\*/, type: 'type' },
+            { match: /__[^_]+__/, type: 'keyword' },
+            { match: /_[^_]+_/, type: 'type' },
+            { match: /`[^`]+`/, type: 'string' },
+            { match: /```/, type: 'comment', next: 'codeBlock' },
+            { match: /^\s*[-*+]\s+/, type: 'symbol' },
+            { match: /^\s*\d+\.\s+/, type: 'symbol' },
+            { match: /\[([^\]]+)\]\(([^)]+)\)/, type: 'builtin' },
+            { match: /^>\s+/, type: 'comment' },
+            { match: /.+/, type: 'text' },
+        ],
+        codeBlock: [
+            { match: /```/, type: 'comment', pop: true },
+            { match: /.+/, type: 'string' },
+        ]
+    },
+    icon: 'Markdown text-red-500'
+});
+
+// Batch
+
+const batchKeywords = [
+    'if', 'else', 'for', 'in', 'do', 'goto', 'call', 'exit', 'setlocal', 'endlocal',
+    'set', 'echo', 'rem', 'pause', 'cd', 'pushd', 'popd', 'shift', 'start'
+];
+batchKeywords.push( ...batchKeywords.map( w => w.toUpperCase() ) );
+
+const batchBuiltins = [
+    'dir', 'copy', 'move', 'del', 'ren', 'md', 'rd', 'type', 'find', 'findstr',
+    'tasklist', 'taskkill', 'ping', 'ipconfig', 'netstat', 'cls', 'title', 'color'
+];
+
+Tokenizer.registerLanguage({
+    name: 'Batch',
+    extensions: [ 'bat', 'cmd' ],
+    lineComment: 'rem',
+    states: {
+        root: [
+            { match: /^rem\s+.*/i, type: 'comment' },
+            { match: /^::.*/,  type: 'comment' },
+            { match: /"/, type: 'string', next: 'doubleString' },
+            { match: /%[\w]+%/, type: 'type' },
+            { match: /\b\d+\b/, type: 'number' },
+            { match: words( batchKeywords ), type: 'keyword' },
+            { match: words( batchBuiltins ), type: 'builtin' },
+            { match: /@echo/, type: 'statement' },
+            { match: /[a-zA-Z_]\w*/, type: 'text' },
+            { match: /[<>|&()@]/, type: 'symbol' },
+            { match: /\s+/, type: 'text' },
+        ],
+        ...CommonStates
+    },
+    icon: 'Terminal text-gray-300'
+});
+
+// CMake
+
+const cmakeCommands = [
+    'project', 'cmake_minimum_required', 'add_executable', 'add_library', 'target_link_libraries',
+    'target_include_directories', 'set', 'option', 'if', 'else', 'elseif', 'endif', 'foreach',
+    'endforeach', 'while', 'endwhile', 'function', 'endfunction', 'macro', 'endmacro',
+    'find_package', 'include', 'message', 'install', 'add_subdirectory', 'configure_file'
+];
+cmakeCommands.push( ...cmakeCommands.map( w => w.toUpperCase() ) );
+
+Tokenizer.registerLanguage({
+    name: 'CMake',
+    extensions: [ 'cmake', 'txt', 'cmake-cache' ],
+    lineComment: '#',
+    states: {
+        root: [
+            { match: /#.*/, type: 'comment' },
+            { match: /"/, type: 'string', next: 'doubleString' },
+            { match: /\$\{[^}]+\}/, type: 'type' },
+            { match: /\b\d+\.?\d*\b/, type: 'number' },
+            { match: words( cmakeCommands ), type: 'keyword' },
+            { match: /\b[A-Z_][A-Z0-9_]*\b/, type: 'builtin' },
+            { match: /[a-zA-Z_]\w*/, type: 'text' },
+            { match: /[(){}]/, type: 'symbol' },
+            { match: /\s+/, type: 'text' },
+        ],
+        ...CommonStates
+    },
+    icon: 'AlignLeft text-neutral-500'
+});
+
+// Rust
+
+const rustKeywords = [
+    'as', 'break', 'const', 'continue', 'crate', 'else', 'enum', 'extern', 'false', 'fn',
+    'for', 'if', 'impl', 'in', 'let', 'loop', 'match', 'mod', 'move', 'mut', 'pub', 'ref',
+    'return', 'self', 'Self', 'static', 'struct', 'super', 'trait', 'true', 'type', 'unsafe',
+    'use', 'where', 'while', 'async', 'await', 'dyn', 'abstract', 'become', 'box', 'do',
+    'final', 'macro', 'override', 'priv', 'typeof', 'unsized', 'virtual', 'yield'
+];
+
+const rustTypes = [
+    'i8', 'i16', 'i32', 'i64', 'i128', 'isize', 'u8', 'u16', 'u32', 'u64', 'u128', 'usize',
+    'f32', 'f64', 'bool', 'char', 'str', 'String', 'Vec', 'Option', 'Result', 'Box'
+];
+
+const rustBuiltins = [
+    'println', 'print', 'eprintln', 'eprint', 'format', 'panic', 'assert', 'assert_eq',
+    'assert_ne', 'debug_assert', 'vec', 'Some', 'None', 'Ok', 'Err'
+];
+
+Tokenizer.registerLanguage({
+    name: 'Rust',
+    extensions: [ 'rs' ],
+    lineComment: '//',
+    states: {
+        root: [
+            { match: /\/\*/, type: 'comment', next: 'blockComment' },
+            { match: /\/\/.*/, type: 'comment' },
+            { match: /"/, type: 'string', next: 'doubleString' },
+            { match: /'(?:\\.|[^'])+'/, type: 'string' },
+            { match: /r#*"/, type: 'string', next: 'rawString' },
+            ...NumberRules,
+            { match: /#\[[\w:]+\]/, type: 'preprocessor' },
+            { match: words( rustKeywords ), type: 'keyword' },
+            { match: words( rustTypes ), type: 'type' },
+            { match: words( rustBuiltins ), type: 'builtin' },
+            { match: /![a-zA-Z_]\w*/, type: 'preprocessor' },
+            ...TailRules,
+        ],
+        rawString: [
+            { match: /"#*/, type: 'string', pop: true },
+            { match: /[^"]+/, type: 'string' },
+            { match: /"/, type: 'string' },
+        ],
+        ...CommonStates
+    },
+    icon: 'Rust text-orange-400'
+});
+
+//  ____                            _
+// |    \ ___ ___ _ _ _____ ___ ___| |_
 // |  |  | . |  _| | |     | -_|   |  _|
 // |____/|___|___|___|_|_|_|___|_|_|_|
 
@@ -2310,7 +2784,7 @@ export class CodeEditor
         return this.doc.getText();
     }
 
-    setLanguage( name: string ): void
+    setLanguage( name: string, extension?: string ): void
     {
         const lang = Tokenizer.getLanguage( name );
         if ( !lang ) return;
@@ -2320,7 +2794,7 @@ export class CodeEditor
         if ( this.currentTab )
         {
             this.currentTab.language = name;
-            this.tabs.setIcon( this.currentTab.name, lang.icon );
+            this.tabs.setIcon( this.currentTab.name, getLanguageIcon( lang, extension ) );
         }
 
         this._lineStates = [];
@@ -2339,7 +2813,8 @@ export class CodeEditor
         const dom = LX.makeElement( 'div', 'code' );
         const langName = options.language ?? 'Plain Text';
         const langDef = Tokenizer.getLanguage( langName );
-        const icon = isNewTabButton ? null : ( langDef?.icon ?? 'AlignLeft text-neutral-500' );
+        const extension = LX.getExtension( name );
+        const icon = isNewTabButton ? null : getLanguageIcon( langDef, extension );
         const selected = options.selected ?? true;
 
         const codeTab : CodeTab = {
@@ -2384,7 +2859,7 @@ export class CodeEditor
         if( options.text )
         {
             this.doc.setText( options.text );
-            this.setLanguage( langName );
+            this.setLanguage( langName, extension );
             this.cursorSet.set( 0, 0 );
             this.undoManager.clear();
             this._renderCursors();
@@ -4609,14 +5084,14 @@ export class CodeEditor
             {
                 this._storedTabs[name] = {
                     text,
-                    options,
                     title: options.title ?? name,
-                    language: langName
+                    language: langName,
+                    ...options
                 };
 
                 if ( this.useFileExplorer )
                 {
-                    this.addExplorerItem( { id: name, skipVisibility: true, icon: lang.icon } );
+                    this.addExplorerItem( { id: name, skipVisibility: true, icon: getLanguageIcon( lang, ext ) } );
                     this.explorer.innerTree.frefresh( name );
                 }
             }
@@ -4629,7 +5104,7 @@ export class CodeEditor
                 } );
     
                 this.doc.setText( text );
-                this.setLanguage( langName );
+                this.setLanguage( langName, ext );
                 this.cursorSet.set( 0, 0 );
                 this.undoManager.clear();
                 this._renderCursors();

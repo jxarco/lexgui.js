@@ -688,6 +688,9 @@
   .inline-grid {
     display: inline-grid;
   }
+  .list-item {
+    display: list-item;
+  }
   .table {
     display: table;
   }
@@ -2106,6 +2109,9 @@
   .text-blue-400 {
     color: var(--color-blue-400);
   }
+  .text-blue-500 {
+    color: var(--color-blue-500);
+  }
   .text-blue-600 {
     color: var(--color-blue-600);
   }
@@ -2129,6 +2135,9 @@
   }
   .text-fuchsia-500 {
     color: var(--color-fuchsia-500);
+  }
+  .text-gray-300 {
+    color: var(--color-gray-300);
   }
   .text-gray-400 {
     color: var(--color-gray-400);
@@ -2157,6 +2166,9 @@
   .text-orange-500 {
     color: var(--color-orange-500);
   }
+  .text-orange-600 {
+    color: var(--color-orange-600);
+  }
   .text-primary-foreground {
     color: var(--color-primary-foreground);
   }
@@ -2165,6 +2177,9 @@
   }
   .text-purple-700 {
     color: var(--color-purple-700);
+  }
+  .text-red-500 {
+    color: var(--color-red-500);
   }
   .text-secondary {
     color: var(--color-secondary);
@@ -2189,6 +2204,9 @@
   }
   .text-yellow-500 {
     color: var(--color-yellow-500);
+  }
+  .text-yellow-600 {
+    color: var(--color-yellow-600);
   }
   .capitalize {
     text-transform: capitalize;
@@ -6563,6 +6581,9 @@ ul.lexassetscontent {
 .cm-sym.cmake {
   color: #cf6dcf;
 }
+.cm-str.css {
+  color: #ca7d59;
+}
 .cm-kwd.css {
   color: #e8be53;
 }
@@ -6576,7 +6597,7 @@ ul.lexassetscontent {
   color: #f9d620;
 }
 .cm-mtd.css {
-  color: #e0cc68;
+  color: #e9d98a;
 }
 .cm-sym.json {
   color: #cf6dcf;
@@ -6597,7 +6618,7 @@ ul.lexassetscontent {
   color: #99caf1;
 }
 .cm-bln.wgsl {
-  color: #bebebe;
+  color: #e8be53;
 }
 .cm-sym.rust {
   color: #e7ded2;
