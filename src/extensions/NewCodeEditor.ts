@@ -1893,7 +1893,8 @@ export class CodeEditor
     private _lineStates: TokenizerState[] = [];     // tokenizer state at end of each line
     private _lineElements: HTMLElement[] = [];      // <pre> element per line
     private _openedTabs: Record<string, CodeTab> = {};
-    private _loadedTabs: Record<string, any> = {};
+    private _loadedTabs: Record<string, CodeTab> = {};
+    private _storedTabs: Record<string, any> = {};
     private _focused: boolean = false;
     private _composing: boolean = false;
     private _keyChain: string | null = null;
@@ -1915,6 +1916,7 @@ export class CodeEditor
     private _lastMaxLineLength: number = 0;
     private _lastLineCount: number = 0;
     private _isAutoCompleteActive: boolean = false;
+    private _selectedAutocompleteIndex: number = 0;
 
     private static readonly CODE_MIN_FONT_SIZE = 9;
     private static readonly CODE_MAX_FONT_SIZE = 22;
@@ -1998,7 +2000,8 @@ export class CodeEditor
 
             this.explorer.on( 'dblClick', ( event: any ) => {
                 const node = event.items[0];
-                this._addTab( node.id, this._loadedTabs[node.id] ?? null );
+                const name = node.id;
+                this._loadTab( name );
             } );
 
             this.explorer.on( 'delete', ( event: any ) => {
@@ -2330,7 +2333,7 @@ export class CodeEditor
         this._inputArea.focus();
     }
 
-    private _addTab( name: string, options: Record<string, any> = {} ): string
+    private _addTab( name: string, options: Record<string, any> = {} ): CodeTab
     {
         const isNewTabButton = name === '+';
         const dom = LX.makeElement( 'div', 'code' );
@@ -2350,6 +2353,7 @@ export class CodeEditor
         };
         
         this._openedTabs[name] = codeTab;
+        this._loadedTabs[name] = codeTab;
 
         this.tabs.add( name, dom, {
             selected,
@@ -2361,6 +2365,12 @@ export class CodeEditor
             allowDelete: this.allowClosingTabs,
             indexOffset: options.indexOffset
         } );
+
+        if ( this.useFileExplorer && !isNewTabButton )
+        {
+            this.addExplorerItem( { id: name, skipVisibility: true, icon } );
+            this.explorer.innerTree.frefresh( name );
+        }
 
         // Move into the sizer..
         this.codeSizer.appendChild( dom );
@@ -2382,7 +2392,40 @@ export class CodeEditor
             this._resetGutter();
         }
 
-        return name;
+        return codeTab;
+    }
+
+    private _loadTab( name: string )
+    {
+        if ( this._openedTabs[name] )
+        {
+            this.tabs.select( name );
+            return;
+        }
+
+        const tab = this._loadedTabs[name];
+        if( tab )
+        {
+            this._openedTabs[name] = tab;
+
+            this.tabs.add( name, tab.dom, {
+                selected: true,
+                // icon,
+                title: tab.title,
+                onSelect: this._onSelectTab.bind( this ),
+                onContextMenu: this._onContextMenuTab.bind( this ),
+                allowDelete: this.allowClosingTabs
+            } );
+
+            // Move into the sizer..
+            this.codeSizer.appendChild( tab.dom );
+
+            this.currentTab = tab;
+            this._updateDataInfoPanel( '@tab-name', name );
+            return;
+        }
+        
+        this._addTab( name, this._storedTabs[name] ?? null );
     }
 
     private _closeTab( name: string )
@@ -2478,6 +2521,11 @@ export class CodeEditor
             indexOffset: options.indexOffset,
             language: options.language ?? 'JavaScript'
         } );
+
+        this._renderAllLines();
+        this._renderCursors();
+        this._renderSelections();
+        this._resetGutter();
     }
 
     private _onContextMenuTab( isNewTabButton: boolean = false, event: any, name: string )
@@ -3085,8 +3133,16 @@ export class CodeEditor
                 this._afterCursorMove();
                 return;
             case 'ArrowUp':
-                if ( this._isAutoCompleteActive ) return;
                 e.preventDefault();
+                if ( this._isAutoCompleteActive )
+                {
+                    const items = this.autocomplete!.childNodes as NodeListOf<HTMLElement>;
+                    items[this._selectedAutocompleteIndex]?.classList.remove( 'selected' );
+                    this._selectedAutocompleteIndex = ( this._selectedAutocompleteIndex - 1 + items.length ) % items.length;
+                    items[this._selectedAutocompleteIndex]?.classList.add( 'selected' );
+                    items[this._selectedAutocompleteIndex]?.scrollIntoView( { block: 'nearest' } );
+                    return;
+                }
                 this._wasPaired = false;
                 if ( alt && shift ) { this._duplicateLine( -1 ); return; }
                 if ( alt ) { this._swapLine( -1 ); return; }
@@ -3094,8 +3150,16 @@ export class CodeEditor
                 this._afterCursorMove();
                 return;
             case 'ArrowDown':
-                if ( this._isAutoCompleteActive ) return;
                 e.preventDefault();
+                if ( this._isAutoCompleteActive )
+                {
+                    const items = this.autocomplete!.childNodes as NodeListOf<HTMLElement>;
+                    items[this._selectedAutocompleteIndex]?.classList.remove( 'selected' );
+                    this._selectedAutocompleteIndex = ( this._selectedAutocompleteIndex + 1 ) % items.length;
+                    items[this._selectedAutocompleteIndex]?.classList.add( 'selected' );
+                    items[this._selectedAutocompleteIndex]?.scrollIntoView( { block: 'nearest' } );
+                    return;
+                }
                 this._wasPaired = false;
                 if ( alt && shift ) { this._duplicateLine( 1 ); return; }
                 if ( alt ) { this._swapLine( 1 ); return; }
@@ -3116,6 +3180,11 @@ export class CodeEditor
                 return;
             case 'Escape':
                 e.preventDefault();
+                if( this._isAutoCompleteActive )
+                {
+                    this._doHideAutocomplete();
+                    return;
+                }
                 if ( this._doHideSearch() ) return;
                 this.cursorSet.removeSecondaryCursors();
                 // Collapse selection
@@ -3705,6 +3774,7 @@ export class CodeEditor
     {
         if ( this._isAutoCompleteActive )
         {
+            this._doAutocompleteWord();
             return;
         }
 
@@ -3741,6 +3811,7 @@ export class CodeEditor
     {
         if ( this._isAutoCompleteActive )
         {
+            this._doAutocompleteWord();
             return;
         }
 
@@ -4178,13 +4249,13 @@ export class CodeEditor
             return a.label.localeCompare( b.label );
         } );
 
-        let selectedIndex = 0;
+        this._selectedAutocompleteIndex = 0;
 
         // Render suggestions
         suggestions.forEach( ( suggestion, index ) =>
         {
             const item = document.createElement( 'pre' );
-            if ( index === selectedIndex ) item.classList.add( 'selected' );
+            if ( index === this._selectedAutocompleteIndex ) item.classList.add( 'selected' );
             const currSuggestion = suggestion.label;
 
             let iconName = 'CaseLower';
@@ -4268,55 +4339,19 @@ export class CodeEditor
             {
                 const kind = document.createElement( 'span' );
                 kind.textContent = ` (${suggestion.kind})`;
-                kind.className = 'text-muted-foreground text-xs! ml-2';
+                kind.className = 'kind text-muted-foreground text-xs! ml-2';
                 item.appendChild( kind );
             }
 
             item.addEventListener( 'click', () =>
             {
-                this._doAutocompleteWord( currSuggestion );
+                this._doAutocompleteWord();
             } );
 
             this.autocomplete!.appendChild( item );
         } );
 
         this._isAutoCompleteActive = true;
-
-        const handleKey = ( e: KeyboardEvent ) =>
-        {
-            if ( !this._isAutoCompleteActive ) return;
-
-            const items = this.autocomplete!.childNodes as NodeListOf<HTMLElement>;
-
-            if ( e.key === 'ArrowDown' )
-            {
-                e.preventDefault();
-                items[selectedIndex]?.classList.remove( 'selected' );
-                selectedIndex = ( selectedIndex + 1 ) % items.length;
-                items[selectedIndex]?.classList.add( 'selected' );
-                items[selectedIndex]?.scrollIntoView( { block: 'nearest' } );
-            }
-            else if ( e.key === 'ArrowUp' )
-            {
-                e.preventDefault();
-                items[selectedIndex]?.classList.remove( 'selected' );
-                selectedIndex = ( selectedIndex - 1 + items.length ) % items.length;
-                items[selectedIndex]?.classList.add( 'selected' );
-                items[selectedIndex]?.scrollIntoView( { block: 'nearest' } );
-            }
-            else if ( e.key === 'Enter' || e.key === 'Tab' )
-            {
-                e.preventDefault();
-                this._doAutocompleteWord( suggestions[selectedIndex].label );
-            }
-            else if ( e.key === 'Escape' )
-            {
-                e.preventDefault();
-                this._doHideAutocomplete();
-            }
-        };
-
-        this.root.addEventListener( 'keydown', handleKey, { once: false } );
 
         const handleClick = ( e: MouseEvent ) =>
         {
@@ -4330,7 +4365,6 @@ export class CodeEditor
         // Store cleanup function
         ( this.autocomplete as any )._cleanup = () =>
         {
-            this.root.removeEventListener( 'keydown', handleKey );
             document.removeEventListener( 'click', handleClick );
         };
 
@@ -4362,8 +4396,10 @@ export class CodeEditor
     /**
      * Insert the selected autocomplete word at cursor.
      */
-    private _doAutocompleteWord( word: string ): void
+    private _doAutocompleteWord(): void
     {
+        const word = this._getSelectedAutoCompleteWord();
+        if ( !word ) return;
         const cursor = this.cursorSet.getPrimary().head;
         const { start, end } = this._getWordAtCursor();
         const line = cursor.line;
@@ -4384,6 +4420,26 @@ export class CodeEditor
         this._rebuildLines();
         this._afterCursorMove();
         this._doHideAutocomplete();
+    }
+
+    private _getSelectedAutoCompleteWord(): string | null
+    {
+        if ( !this.autocomplete || !this._isAutoCompleteActive ) return null;
+
+        const pre = this.autocomplete.childNodes[ this._selectedAutocompleteIndex ];
+        var word = '';
+        for ( let childSpan of pre.childNodes )
+        {
+            const span = childSpan as HTMLElement;
+
+            if ( span.constructor != HTMLSpanElement || span.classList.contains( 'kind' ) )
+            {
+                continue;
+            }
+            word += span.textContent;
+        }
+
+        return word;
     }
 
     private _afterCursorMove(): void
@@ -4551,7 +4607,7 @@ export class CodeEditor
 
             if ( this.useFileExplorer || this.skipTabs )
             {
-                this._loadedTabs[name] = {
+                this._storedTabs[name] = {
                     text,
                     options,
                     title: options.title ?? name,
