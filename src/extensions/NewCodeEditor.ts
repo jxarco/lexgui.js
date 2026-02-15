@@ -1763,6 +1763,29 @@ export class CodeEditor
                 this._syncScrollBars();
             } );
 
+            // Touch events for native scrolling on mobile
+            let touchStartX = 0;
+            let touchStartY = 0;
+
+            this.codeScroller.addEventListener( 'touchstart', ( e: TouchEvent ) => {
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+            }, { passive: true } );
+
+            this.codeScroller.addEventListener( 'touchmove', ( e: TouchEvent ) => {
+                const touchX = e.touches[0].clientX;
+                const touchY = e.touches[0].clientY;
+
+                const deltaX = touchStartX - touchX;
+                const deltaY = touchStartY - touchY;
+
+                this.codeScroller.scrollLeft += deltaX;
+                this.codeScroller.scrollTop += deltaY;
+
+                touchStartX = touchX;
+                touchStartY = touchY;
+            }, { passive: true } );
+
             // Wheel: Ctrl+Wheel for font zoom, Shift+Wheel for horizontal scroll
             this.codeScroller.addEventListener( 'wheel', ( e: WheelEvent ) => {
                 if ( e.ctrlKey )
@@ -1897,8 +1920,8 @@ export class CodeEditor
         } );
         this._inputArea.addEventListener( 'focus', () => this._setFocused( true ) );
         this._inputArea.addEventListener( 'blur', () => this._setFocused( false ) );
-        this.root.addEventListener( 'mousedown', this._onMouseDown.bind( this ) );
-        this.root.addEventListener( 'contextmenu', this._onContextMenu.bind( this ) );
+        this.codeArea.root.addEventListener( 'mousedown', this._onMouseDown.bind( this ) );
+        this.codeArea.root.addEventListener( 'contextmenu', this._onMouseDown.bind( this ) );
 
         // Bottom status panel
         this.statusPanel = this._createStatusPanel( options );
@@ -2243,7 +2266,7 @@ export class CodeEditor
                     return {
                         name: v,
                         icon: iconData[0],
-                        className: 'w-full',
+                        className: 'w-full text-xs px-3',
                         svgClass: iconData.slice( 1 ).join( ' ' ),
                         callback: ( v: string ) => this.setLanguage( v )
                     };
@@ -3542,7 +3565,6 @@ export class CodeEditor
 
     private _onMouseDown( e: MouseEvent ): void
     {
-        if ( e.button !== 0 ) return;
         if ( !this.currentTab ) return;
         if ( this.searchBox && this.searchBox.contains( e.target as Node ) ) return;
 
@@ -3554,10 +3576,16 @@ export class CodeEditor
         const x = e.clientX - rect.left - this.xPadding;
         const y = e.clientY - rect.top;
 
-        const line = Math.floor( y / this.lineHeight );
-        if ( line < 0 || line > this.doc.lineCount - 1 ) return;
+        const line = LX.clamp( Math.floor( y / this.lineHeight ), 0, this.doc.lineCount - 1 );
+        const col = LX.clamp( Math.round( x / this.charWidth ), 0, this.doc.getLine( line ).length );
 
-        const col = Math.max( 0, Math.min( Math.round( x / this.charWidth ), this.doc.getLine( line ).length ) );
+        if( e.type === 'contextmenu' )
+        {
+            this._onContextMenu( e, line, col );
+            return;
+        }
+
+        if ( e.button !== 0 ) return;
 
         const now = Date.now();
         if ( now - this._lastClickTime < 400 && line === this._lastClickLine )
@@ -3625,7 +3653,7 @@ export class CodeEditor
         document.addEventListener( 'mouseup', onMouseUp );
     }
 
-    private _onContextMenu( e: MouseEvent ): void
+    private _onContextMenu( e: MouseEvent, line: number, col: number ): void
     {
         e.preventDefault();
         
