@@ -397,6 +397,230 @@ Tokenizer.registerLanguage( {
     icon: 'Ts text-blue-600'
 } );
 
+// WGSL (WebGPU Shading Language)
+
+const wgslKeywords = [
+    'bool', 'u32', 'i32', 'f16', 'f32', 'vec2', 'vec3', 'vec4', 'vec2f', 'vec3f', 'vec4f', 'mat2x2f', 'mat3x3f', 'mat4x4f',
+    'array', 'vec2u', 'vec3u', 'vec4u', 'ptr', 'sampler', 'var', 'let', 'true', 'false', 'fn', 'atomic', 'struct', 'sampler_comparison',
+    'texture_depth_2d', 'texture_depth_2d_array', 'texture_depth_cube', 'texture_depth_cube_array', 'texture_depth_multisampled_2d',
+    'texture_external', 'texture_1d', 'texture_2d', 'texture_2d_array', 'texture_3d', 'texture_cube', 'texture_cube_array', 'texture_storage_1d',
+    'texture_storage_2d', 'texture_storage_2d_array', 'texture_storage_3d'
+];
+
+const wgslStatements = [
+    'const', 'for', 'if', 'else', 'return', 'continue', 'break', 'storage', 'read', 'read_write', 'uniform', 'function', 'workgroup',
+    'bitcast'
+];
+
+const wgslBuiltins = [
+    '@vertex', '@fragment'
+];
+
+Tokenizer.registerLanguage( {
+    name: 'WGSL',
+    extensions: [ 'wgsl' ],
+    lineComment: '//',
+    states: {
+        root: [
+            { match: /\/\*/, type: 'comment', next: 'blockComment' },
+            { match: /\/\/.*/, type: 'comment' },
+            ...NumberRules,
+            { match: words( wgslKeywords ), type: 'keyword' },
+            { match: words( wgslStatements ), type: 'statement' },
+            { match: words( wgslBuiltins ), type: 'builtin' },
+            ...TailRules,
+        ],
+        ...CommonStates
+    },
+    icon: 'AlignLeft text-neutral-500'
+} );
+
+// GLSL (OpenGL/WebGL Shading Language)
+
+const glslKeywords = [
+    'true', 'false', 'function', 'int', 'float', 'vec2', 'vec3', 'vec4', 'mat2x2', 'mat3x3', 'mat4x4', 'struct',
+    'void', 'bool', 'uint', 'dvec2', 'dvec3', 'dvec4', 'bvec2', 'bvec3', 'bvec4', 'sampler2D', 'sampler3D', 'samplerCube',
+    'sampler2DShadow', 'samplerCubeShadow', 'lowp', 'mediump', 'highp', 'precision', 'in', 'out', 'inout', 'uniform', 'varying',
+    'attribute'
+];
+
+const glslStatements = [
+    'for', 'if', 'else', 'return', 'continue', 'break'
+];
+
+Tokenizer.registerLanguage( {
+    name: 'GLSL',
+    extensions: [ 'glsl' ],
+    lineComment: '//',
+    states: {
+        root: [
+            { match: /\/\*/, type: 'comment', next: 'blockComment' },
+            { match: /\/\/.*/, type: 'comment' },
+            ...NumberRules,
+            { match: words( glslKeywords ), type: 'keyword' },
+            { match: words( glslStatements ), type: 'statement' },
+            ...TailRules,
+        ],
+        ...CommonStates
+    },
+    icon: 'AlignLeft text-neutral-500'
+} );
+
+// Python
+
+const pyKeywords = [
+    'False', 'def', 'None', 'True', 'in', 'is', 'and', 'lambda', 'nonlocal', 'not', 'or'
+];
+
+const pyStatements = [
+    'if', 'raise', 'del', 'import', 'return', 'elif', 'try', 'else', 'while', 'as', 'except', 'with', 'assert', 'finally', 'yield',
+    'break', 'for', 'class', 'continue', 'global', 'pass', 'from'
+];
+
+const pyTypes = [
+    'int', 'type', 'float', 'map', 'list', 'ArithmeticError', 'AssertionError', 'AttributeError', 'Exception', 'EOFError',
+    'FloatingPointError', 'GeneratorExit', 'ImportError', 'IndentationError', 'IndexError', 'KeyError', 'KeyboardInterrupt', 'LookupError',
+    'MemoryError', 'NameError', 'NotImplementedError', 'OSError', 'OverflowError', 'ReferenceError', 'RuntimeError', 'StopIteration',
+    'SyntaxError', 'TabError', 'SystemError', 'SystemExit', 'TypeError', 'UnboundLocalError', 'UnicodeError', 'UnicodeEncodeError',
+    'UnicodeDecodeError', 'UnicodeTranslateError', 'ValueError', 'ZeroDivisionError'
+];
+
+Tokenizer.registerLanguage( {
+    name: 'Python',
+    extensions: [ 'py' ],
+    lineComment: '#',
+    states: {
+        root: [
+            { match: /\/\*/, type: 'comment', next: 'blockComment' },
+            { match: /\/\/.*/, type: 'comment' },
+            { match: /"/, type: 'string', next: 'doubleString' },
+            { match: /'/, type: 'string', next: 'singleString' },
+            ...NumberRules,
+            { match: words( pyKeywords ), type: 'keyword' },
+            { match: words( pyStatements ), type: 'statement' },
+            { match: words( pyTypes ), type: 'type' },
+            ...TailRules,
+        ],
+        ...CommonStates
+    },
+    icon: 'Python text-cyan-600'
+} );
+
+// PHP
+
+const phpKeywords = [
+    'const', 'function', 'array', 'new', 'int', 'string', '$this', 'public', 'null', 'private', 'protected', 'implements', 'class', 'use',
+    'namespace', 'abstract', 'clone', 'final', 'enum'
+];
+
+const phpStatements = [
+    'declare', 'enddeclare', 'foreach', 'endforeach', 'if', 'else', 'elseif', 'endif', 'for', 'endfor', 'while', 'endwhile', 'switch',
+    'case', 'default', 'endswitch', 'return', 'break', 'continue', 'try', 'catch', 'die', 'do', 'exit', 'finally'
+];
+
+const phpTypes = [
+    'Exception', 'DateTime', 'JsonSerializable'
+];
+
+const phpBuiltins = [
+    'echo', 'print'
+];
+
+Tokenizer.registerLanguage( {
+    name: 'PHP',
+    extensions: [ 'php' ],
+    lineComment: '//',
+    states: {
+        root: [
+            { match: /\/\*/, type: 'comment', next: 'blockComment' },
+            { match: /\/\/.*/, type: 'comment' },
+            { match: /"/, type: 'string', next: 'doubleString' },
+            { match: /'/, type: 'string', next: 'singleString' },
+            ...NumberRules,
+            { match: words( phpKeywords ), type: 'keyword' },
+            { match: words( phpStatements ), type: 'statement' },
+            { match: words( phpTypes ), type: 'type' },
+            { match: words( phpBuiltins ), type: 'builtin' },
+            ...TailRules,
+        ],
+        ...CommonStates
+    },
+    icon: 'Php text-purple-700'
+} );
+
+// C
+
+const cKeywords = [
+    'int', 'float', 'double', 'bool', 'long', 'short', 'char', 'void', 'const', 'enum', 'extern', 'register', 'sizeof', 'static',
+    'struct', 'typedef', 'union', 'volatile', 'true', 'false'
+];
+
+const cStatements = [
+    'break', 'continue', 'do', 'else', 'for', 'goto', 'if', 'return', 'switch', 'while'
+];
+
+Tokenizer.registerLanguage({
+    name: 'C',
+    extensions: [ 'c', 'h' ],
+    lineComment: '//',
+    states: {
+        root: [
+            { match: /\/\*/, type: 'comment', next: 'blockComment' },
+            { match: /\/\/.*/, type: 'comment' },
+            { match: /"/, type: 'string', next: 'doubleString' },
+            { match: /'/, type: 'string', next: 'singleString' },
+            ...NumberRules,
+            { match: words( cKeywords ), type: 'keyword' },
+            { match: words( cStatements ), type: 'statement' },
+            ...TailRules,
+        ],
+        ...CommonStates
+    },
+    icon: 'C text-sky-400' // { 'c': 'C text-sky-400', 'h': 'C text-fuchsia-500' }
+});
+
+// C++
+
+const cppKeywords = [
+    ...cKeywords, 'wchar_t', 'static_cast', 'dynamic_cast', 'new', 'delete', 'auto', 'class', 'nullptr', 'NULL', 'signed',
+    'unsigned', 'namespace',  'static', 'private', 'public'
+];
+
+const cppStatements = [
+    ...cStatements,  'case', 'using', 'glm', 'spdlog', 'default'
+];
+
+const cppTypes = [
+    'uint8_t', 'uint16_t', 'uint32_t', 'uint64_t', 'int8_t', 'int16_t', 'int32_t', 'int64_t', 'size_t', 'ptrdiff_t'
+];
+
+const cppBuiltins = [
+    'std', 'string', 'vector', 'map', 'set', 'unordered_map', 'unordered_set', 'array', 'tuple', 'optional', 'variant',
+    'cout', 'cin', 'cerr', 'clog'
+];
+
+Tokenizer.registerLanguage({
+    name: 'C++',
+    extensions: [ 'cpp', 'hpp' ],
+    lineComment: '//',
+    states: {
+        root: [
+            { match: /\/\*/, type: 'comment', next: 'blockComment' },
+            { match: /\/\/.*/, type: 'comment' },
+            { match: /"/, type: 'string', next: 'doubleString' },
+            { match: /'/, type: 'string', next: 'singleString' },
+            ...NumberRules,
+            { match: words( cppKeywords ), type: 'keyword' },
+            { match: words( cppStatements ), type: 'statement' },
+            { match: words( cppTypes ), type: 'type' },
+            { match: words( cppBuiltins ), type: 'builtin' },
+            ...TailRules,
+        ],
+        ...CommonStates
+    },
+    icon: 'CPlusPlus text-sky-400' // { 'cpp': 'CPlusPlus text-sky-400', 'hpp': 'CPlusPlus text-fuchsia-500' }
+});
+
 //  ____                            _   
 // |    \ ___ ___ _ _ _____ ___ ___| |_ 
 // |  |  | . |  _| | |     | -_|   |  _|
@@ -2019,7 +2243,7 @@ export class CodeEditor
                     return {
                         name: v,
                         icon: iconData[0],
-                        className: 'w-full place-content-center',
+                        className: 'w-full',
                         svgClass: iconData.slice( 1 ).join( ' ' ),
                         callback: ( v: string ) => this.setLanguage( v )
                     };
