@@ -184,7 +184,7 @@
             allIconsContainer.innerHTML = "";
 
             const filteredIcons = allIconsSorted.filter( i => {
-                return !i.includes( '@' ) && i.toLowerCase().includes( nameFilter );
+                return !i.includes( '@' ) && i.toLowerCase().includes( nameFilter.toLowerCase() );
             } );
             const total = filteredIcons.length;
             const numPages = iconsPerPage === 1 ? 1 : Math.ceil( total / iconsPerPage );
