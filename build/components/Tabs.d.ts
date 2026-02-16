@@ -16,5 +16,6 @@ export declare class Tabs {
     constructor(area: Area, options?: any);
     add(name: string, content: any, options?: any): void;
     select(name: string): void;
+    setIcon(name: string, icon: string): void;
     delete(name: string): void;
 }

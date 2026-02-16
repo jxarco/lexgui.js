@@ -2,9 +2,14 @@
 
 ## dev
 
+## 8.2.6 (master)
+
 Added `Tabs.setIcon(name, icon)`.
 Added DropdownMenu item option `useKbdSpecialKeys` (true).
-Add `LX.requestFileAsync` util.
+Added `LX.requestFileAsync` util.
+Added support for AlertDialog `options.cancelCallback`.
+Replace `options.addDefault` for `options.useDefaultContextMenuItems (true)` in NodeTree.
+Added support for `options.contextMenuTitle` in NodeTree.
 
 Full refactor for CodeEditor:
 - Improved robustness and fixed several minor bugs.
@@ -24,7 +29,7 @@ Timeline:
 VideoEditor
 - `controlsLayout` of the constructor now expects an object that may contain `type`, `height` and/or `l1TimelineHeight`.
 
-## 8.2.5 (master)
+## 8.2.5
 
 Added some WGSL keywords to DocMaker code snippets.
 `NodeTree.select` now supports using `path` for select items.

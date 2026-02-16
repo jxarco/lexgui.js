@@ -13,7 +13,6 @@ export declare abstract class Timeline {
     static TRACK_COLOR_SECONDARY: string;
     static TRACK_COLOR_TERTIARY: string;
     static TRACK_SELECTED: string;
-    static TRACK_SELECTED_LIGHT: string;
     static FONT: string;
     static FONT_COLOR_PRIMARY: string;
     static FONT_COLOR_TERTIARY: string;
@@ -69,6 +68,7 @@ export declare abstract class Timeline {
     leftPanel: typeof Panel;
     trackTreesPanel: any;
     trackTreesComponent: any;
+    trackTreesEvents: any;
     lastTrackTreesComponentOffset: any;
     mainArea: typeof Area;
     root: HTMLBodyElement;
@@ -90,7 +90,6 @@ export declare abstract class Timeline {
     onShowContextMenu: Nullable<(event: any) => void>;
     onAddNewTrackButton: Nullable<() => void>;
     onAddNewTrack: Nullable<(track: any, options: any) => void>;
-    onTrackTreeEvent: Nullable<(event: any) => void>;
     onBeforeDrawContent: Nullable<(ctx: CanvasRenderingContext2D) => void>;
     onStateStop: Nullable<() => void>;
     onStateChange: Nullable<(s: boolean) => void>;
@@ -122,6 +121,7 @@ export declare abstract class Timeline {
      * @method updateHeader
      */
     updateHeader(): void;
+    setTrackTreeEventListener(type: string, callback: (event: any) => any): void;
     /**
      * @method updateLeftPanel
      */

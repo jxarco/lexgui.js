@@ -526,6 +526,9 @@
   .top-2 {
     top: calc(var(--spacing) * 2);
   }
+  .top-8 {
+    top: calc(var(--spacing) * 8);
+  }
   .right-0 {
     right: calc(var(--spacing) * 0);
   }
@@ -610,6 +613,9 @@
   .mt-4 {
     margin-top: calc(var(--spacing) * 4);
   }
+  .mt-8 {
+    margin-top: calc(var(--spacing) * 8);
+  }
   .mr-1 {
     margin-right: calc(var(--spacing) * 1);
   }
@@ -636,6 +642,9 @@
   }
   .ml-0 {
     margin-left: calc(var(--spacing) * 0);
+  }
+  .ml-1 {
+    margin-left: calc(var(--spacing) * 1);
   }
   .ml-2 {
     margin-left: calc(var(--spacing) * 2);
@@ -678,6 +687,9 @@
   }
   .inline-grid {
     display: inline-grid;
+  }
+  .list-item {
+    display: list-item;
   }
   .table {
     display: table;
@@ -749,6 +761,9 @@
   .h-32 {
     height: calc(var(--spacing) * 32);
   }
+  .h-\[1px\] {
+    height: 1px;
+  }
   .h-\[48px\] {
     height: 48px;
   }
@@ -800,6 +815,12 @@
   .w-12 {
     width: calc(var(--spacing) * 12);
   }
+  .w-16 {
+    width: calc(var(--spacing) * 16);
+  }
+  .w-\[1px\] {
+    width: 1px;
+  }
   .w-auto {
     width: auto;
   }
@@ -836,8 +857,17 @@
   .min-w-5 {
     min-width: calc(var(--spacing) * 5);
   }
+  .min-w-16\! {
+    min-width: calc(var(--spacing) * 16) !important;
+  }
+  .min-w-96 {
+    min-width: calc(var(--spacing) * 96);
+  }
   .min-w-fit {
     min-width: fit-content;
+  }
+  .min-w-min\! {
+    min-width: min-content !important;
   }
   .flex-auto {
     flex: auto;
@@ -1997,6 +2027,10 @@
     font-size: var(--text-xs);
     line-height: var(--tw-leading, var(--text-xs--line-height));
   }
+  .text-xs\! {
+    font-size: var(--text-xs) !important;
+    line-height: var(--tw-leading, var(--text-xs--line-height)) !important;
+  }
   .leading-6 {
     --tw-leading: calc(var(--spacing) * 6);
     line-height: calc(var(--spacing) * 6);
@@ -2069,17 +2103,23 @@
   .text-background {
     color: var(--color-background);
   }
+  .text-blue-300 {
+    color: var(--color-blue-300);
+  }
   .text-blue-400 {
     color: var(--color-blue-400);
+  }
+  .text-blue-500 {
+    color: var(--color-blue-500);
   }
   .text-blue-600 {
     color: var(--color-blue-600);
   }
-  .text-blue-700 {
-    color: var(--color-blue-700);
-  }
   .text-card-foreground {
     color: var(--color-card-foreground);
+  }
+  .text-cyan-500 {
+    color: var(--color-cyan-500);
   }
   .text-cyan-600 {
     color: var(--color-cyan-600);
@@ -2093,6 +2133,18 @@
   .text-fuchsia-500 {
     color: var(--color-fuchsia-500);
   }
+  .text-gray-300 {
+    color: var(--color-gray-300);
+  }
+  .text-gray-400 {
+    color: var(--color-gray-400);
+  }
+  .text-gray-500 {
+    color: var(--color-gray-500);
+  }
+  .text-green-500 {
+    color: var(--color-green-500);
+  }
   .text-inherit {
     color: inherit;
   }
@@ -2105,14 +2157,26 @@
   .text-neutral-900 {
     color: var(--color-neutral-900);
   }
+  .text-orange-400 {
+    color: var(--color-orange-400);
+  }
   .text-orange-500 {
     color: var(--color-orange-500);
+  }
+  .text-orange-600 {
+    color: var(--color-orange-600);
   }
   .text-primary-foreground {
     color: var(--color-primary-foreground);
   }
+  .text-purple-500 {
+    color: var(--color-purple-500);
+  }
   .text-purple-700 {
     color: var(--color-purple-700);
+  }
+  .text-red-500 {
+    color: var(--color-red-500);
   }
   .text-secondary {
     color: var(--color-secondary);
@@ -2126,6 +2190,9 @@
   .text-success {
     color: var(--color-success);
   }
+  .text-teal-500 {
+    color: var(--color-teal-500);
+  }
   .text-white {
     color: var(--color-white);
   }
@@ -2134,6 +2201,9 @@
   }
   .text-yellow-500 {
     color: var(--color-yellow-500);
+  }
+  .text-yellow-600 {
+    color: var(--color-yellow-600);
   }
   .capitalize {
     text-transform: capitalize;
@@ -5733,6 +5803,10 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 .lextimeline .lextree .lextreeitem {
   margin: 0px;
 }
+.lextimeline .lextree .lextreeitem.selected {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+}
 .lextimeline .lextree ul {
   margin: 0;
   padding-bottom: 0px;
@@ -6076,50 +6150,53 @@ ul.lexassetscontent {
   pointer-events: none;
   animation: skeleton-shimmer 2.5s linear infinite;
 }
-.codebasearea * {
-  letter-spacing: 0em !important;
-}
-.codebasearea .lexareatabs {
-  padding: 0px;
-  margin: 0px;
-  gap: 0;
-  background-color: var(--card);
-  border: none;
-}
-.codebasearea .lexareatab {
-  padding: 5px;
-  border-radius: 0px !important;
-  margin: 0px !important;
-  border: none;
-  background-color: var(--card) !important;
-  transition: none;
-  display: flex !important;
-  color: var(--muted-foreground) !important;
-}
-.codebasearea .lexareatab:hover {
-  background-color: var(--secondary) !important;
-}
-.codebasearea .lexareatab:first-child {
-  border-top-left-radius: 8px !important;
-}
-.codebasearea .lexareatab:last-child {
-  border-top-right-radius: 8px !important;
-}
-.codebasearea .lexareatab.selected {
-  background-color: var(--secondary) !important;
-  color: var(--foreground) !important;
-}
-.codebasearea .lexareatab i {
-  width: 12px;
-  font-size: var(--text-sm);
-  margin-right: 6px;
-  align-content: center;
-}
-.codebasearea .lexareatab img {
-  width: 12px;
-  height: 12px;
-  margin-right: 6px;
-  align-content: center;
+.codebasearea {
+  background-color: var(--background);
+  @supports (color: color-mix(in lab, red, red)) {
+    background-color: color-mix(in srgb, var(--background) 30%, var(--card));
+  }
+  & .lexareatabs {
+    padding: 0px;
+    margin: 0px;
+    gap: 0;
+    background-color: var(--card);
+    border: none;
+  }
+  & .lexareatab {
+    padding: 5px;
+    border-radius: 0px !important;
+    margin: 0px !important;
+    border: none;
+    background-color: var(--card) !important;
+    transition: none;
+    display: flex !important;
+    color: var(--muted-foreground) !important;
+  }
+  & .lexareatab:hover {
+    background-color: var(--secondary) !important;
+  }
+  & .lexareatab:first-child {
+    border-top-left-radius: 8px !important;
+  }
+  & .lexareatab:last-child {
+    border-top-right-radius: 8px !important;
+  }
+  & .lexareatab.selected {
+    background-color: var(--accent) !important;
+    color: var(--foreground) !important;
+  }
+  & .lexareatab i {
+    width: 12px;
+    font-size: var(--text-sm);
+    margin-right: 6px;
+    align-content: center;
+  }
+  & .lexareatab img {
+    width: 12px;
+    height: 12px;
+    margin-right: 6px;
+    align-content: center;
+  }
 }
 .lexcodeeditor ::-webkit-scrollbar {
   width: 6px;
@@ -6136,19 +6213,9 @@ ul.lexassetscontent {
   overflow: hidden;
 }
 .lexcodetabinfo {
-  background-color: var(--card);
-  position: absolute;
   z-index: 3;
-  bottom: 0px;
   justify-items: end;
   padding: 0.25rem 1rem;
-}
-.lexcodegutter {
-  width: 48px;
-  background-color: inherit;
-  overflow: hidden;
-  position: absolute;
-  top: 0;
 }
 .lexcodeeditor .lexcodearea {
   width: 100%;
@@ -6159,6 +6226,8 @@ ul.lexassetscontent {
   background-color: var(--secondary);
 }
 .lexcodeeditor .code {
+  width: max-content;
+  min-width: 100%;
   cursor: text;
   font-family: var(--global-code-font);
   font-feature-settings: "ss02", 'ss19', "ss20";
@@ -6201,7 +6270,11 @@ ul.lexassetscontent {
   pointer-events: none;
 }
 .lexcodeeditor pre.active-line {
-  background-color: var(--muted);
+  --bg-color: var(--border);
+  @supports (color: color-mix(in lab, red, red)) {
+    --bg-color: color-mix(in srgb, var(--border), transparent);
+  }
+  background: linear-gradient(to bottom, var(--border) 0px, var(--border) 2px, var(--bg-color) 2px, var(--bg-color) calc(100% - 2px), var(--border) calc(100% - 2px), var(--border) 100% );
 }
 .lexcodeeditor.disabled pre.active-line {
   background-color: transparent;
@@ -6231,12 +6304,11 @@ ul.lexassetscontent {
   display: inline-block;
 }
 .lexcodeeditor pre .line-gutter {
-  width: 48px;
+  width: 4rem;
   height: var(--code-editor-row-height);
-  font-size: var(--code-editor-font-size);
-  font-weight: 400;
-  color: var(--muted-foreground);
   line-height: var(--code-editor-row-height);
+  font-size: calc(var(--code-editor-font-size) - 0.1rem);
+  color: var(--muted-foreground);
   text-align: center;
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -6268,6 +6340,9 @@ ul.lexassetscontent {
 .lexcodeeditor .cursors.show, .lexcodeeditor .selections.show {
   visibility: visible;
 }
+.lexcodeeditor .selections.unfocused {
+  opacity: 0.25;
+}
 .lexcodeeditor .cursors .cursor {
   -webkit-text-size-adjust: 100%;
   font-family: monospace;
@@ -6288,9 +6363,9 @@ ul.lexassetscontent {
 }
 .lexcodescrollbar {
   width: 10px;
+  height: 100%;
   position: absolute;
   background-color: transparent;
-  box-sizing: border-box;
   margin: 0;
   padding: 0;
   z-index: 1 !important;
@@ -6298,14 +6373,13 @@ ul.lexassetscontent {
   pointer-events: none;
 }
 .lexcodescrollbar.horizontal {
-  width: calc(100% - 48px);
+  width: 100%;
   height: 10px;
   bottom: 0px;
-  left: 48px;
+  left: 4rem;
 }
 .lexcodescrollbar div {
   background-color: var(--secondary) !important;
-  box-sizing: border-box;
   margin: 0;
   padding: 0;
   border-right: none;
@@ -6340,7 +6414,7 @@ ul.lexassetscontent {
   top: 0px;
   width: 100px;
   height: var(--code-editor-row-height);
-  background-color: var(--color-blue-600);
+  background-color: var(--color-blue-500);
   opacity: 0.25;
 }
 .lexcodeeditor .lexcodesearchresult {
@@ -6348,30 +6422,24 @@ ul.lexassetscontent {
   opacity: 0.5;
 }
 .lexcodeeditor .searchbox {
-  background-color: var(--card);
-  position: absolute;
-  right: 6px;
-  top: 26px;
-  z-index: 100;
-  border-radius: 8px;
-  border: 1px solid var(--border);
   box-shadow: 0 0px 4px #101010;
-  overflow-y: scroll;
   transform: translateY(-96px);
-  opacity: 0;
   transition: transform 0.2s ease-in, opacity 0.2s ease-in;
+  pointer-events: none;
 }
 .lexcodeeditor .searchbox.opened {
   transform: translateY(0px);
   opacity: 1;
+  pointer-events: auto;
 }
 .lexcodeeditor .searchbox .lexpanel span {
   height: 11px;
 }
 .lexcodeeditor .autocomplete {
   background-color: var(--card);
-  width: 256px;
-  max-height: 132px;
+  width: max-content;
+  max-width: 450px;
+  max-height: 264px;
   position: absolute;
   left: 0;
   top: 0;
@@ -6468,6 +6536,9 @@ ul.lexassetscontent {
 .cm-mtd.typescript {
   color: #e9d98a;
 }
+.cm-sym.typescript {
+  color: #e7ded2;
+}
 .cm-enu.typescript {
   color: #4cacff;
 }
@@ -6507,6 +6578,9 @@ ul.lexassetscontent {
 .cm-sym.cmake {
   color: #cf6dcf;
 }
+.cm-str.css {
+  color: #ca7d59;
+}
 .cm-kwd.css {
   color: #e8be53;
 }
@@ -6520,7 +6594,7 @@ ul.lexassetscontent {
   color: #f9d620;
 }
 .cm-mtd.css {
-  color: #e0cc68;
+  color: #e9d98a;
 }
 .cm-sym.json {
   color: #cf6dcf;
@@ -6541,7 +6615,7 @@ ul.lexassetscontent {
   color: #99caf1;
 }
 .cm-bln.wgsl {
-  color: #bebebe;
+  color: #e8be53;
 }
 .cm-sym.rust {
   color: #e7ded2;

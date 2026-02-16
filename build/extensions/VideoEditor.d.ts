@@ -105,7 +105,7 @@ export declare class VideoEditor {
     resizeControls: any | (() => void);
     resizeVideo: any | (() => void);
     constructor(area: typeof Area, options?: any);
-    createControls(options?: any): void;
+    createControls(controlsLayoutOptions?: any): void;
     /**
      * Creates the areas where components will be.
      * Attaches all (desired) components of controlsComponents except the timebar

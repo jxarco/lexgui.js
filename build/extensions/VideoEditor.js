@@ -397,6 +397,7 @@ class VideoEditor {
     resizeVideo = null;
     constructor(area, options = {}) {
         this.options = options ?? {};
+        const controlsOptions = this.options.controlsLayout ?? {};
         this.speed = options.speed ?? this.speed;
         this.mainArea = area;
         let videoArea = null;
@@ -406,7 +407,9 @@ class VideoEditor {
             controlsArea = options.controlsArea;
         }
         else {
-            [videoArea, controlsArea] = area.split({ type: 'vertical', sizes: ['85%', null], minimizable: false, resize: false });
+            [videoArea, controlsArea] = area.split({ type: 'vertical',
+                sizes: [controlsOptions.height ? `calc(100% - ${controlsOptions.height})` : '85%', null], minimizable: false,
+                resize: false });
         }
         controlsArea.root.classList.add('lexconstrolsarea');
         this.cropArea = document.createElement('div');
@@ -544,9 +547,12 @@ class VideoEditor {
         this.onChangeStart = null;
         this.onChangeEnd = null;
     }
-    createControls(options = null) {
+    createControls(controlsLayoutOptions = null) {
         const controlsArea = this.controlsArea;
-        options = options ?? this.options;
+        if (controlsLayoutOptions) {
+            this.options.controlsLayout = controlsLayoutOptions;
+        }
+        const controlsOptions = this.options.controlsLayout ?? {};
         // clear area. Signals are not cleared !!! (not a problem if there are no signals)
         while (controlsArea.root.children.length) {
             controlsArea.root.children[0].remove();
@@ -606,10 +612,10 @@ class VideoEditor {
         }, { width: '40px', hideName: true, title: 'Loop', icon: 'Repeat@solid', className: `justify-center`, selectable: true,
             selected: this.loop });
         let timeBarArea = null;
-        if (typeof (options.controlsLayout) == 'function') {
-            timeBarArea = options.controlsLayout;
+        if (typeof (controlsOptions.type) == 'function') {
+            timeBarArea = controlsOptions.type;
         }
-        else if (options.controlsLayout == 1) {
+        else if (controlsOptions.type == 1) {
             timeBarArea = this._createControlsLayout_1();
         }
         else {
@@ -642,8 +648,10 @@ class VideoEditor {
      */
     _createControlsLayout_1() {
         const controlsArea = this.controlsArea;
+        const options = this.options.controlsLayout ?? {};
         // Create playing timeline area and attach panels
-        let [timeBarArea, bottomArea] = controlsArea.split({ type: 'vertical', sizes: ['50%', null], minimizable: false, resize: false });
+        let [timeBarArea, bottomArea] = controlsArea.split({ type: 'vertical', sizes: [options.l1TimelineHeight ?? '50%', null],
+            minimizable: false, resize: false });
         bottomArea.root.classList.add('relative');
         let separator = document.createElement('p');
         separator.style.alignContent = 'center';

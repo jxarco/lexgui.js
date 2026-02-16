@@ -1,363 +1,460 @@
-declare const vec2: any;
+interface Token {
+    type: string;
+    value: string;
+}
+interface TokenRule {
+    match: RegExp;
+    type: string;
+    next?: string;
+    pop?: boolean | number;
+}
+interface LanguageDef {
+    name: string;
+    extensions: string[];
+    states: Record<string, TokenRule[]>;
+    lineComment?: string;
+    icon?: string | Record<string, string>;
+}
+interface TokenizerState {
+    stack: string[];
+}
+interface TokenizeResult {
+    tokens: Token[];
+    state: TokenizerState;
+}
+export declare class Tokenizer {
+    private static languages;
+    private static extensionMap;
+    static registerLanguage(def: LanguageDef): void;
+    static getLanguage(name: string): LanguageDef | undefined;
+    static getLanguageByExtension(ext: string): LanguageDef | undefined;
+    static getRegisteredLanguages(): string[];
+    static initialState(): TokenizerState;
+    /**
+     * Tokenize a single line given a language and the state from the previous line.
+     * Returns the tokens and the updated state for the next line.
+     */
+    static tokenizeLine(line: string, language: LanguageDef, state: TokenizerState): TokenizeResult;
+    /**
+     * Merge consecutive tokens with the same type into one.
+     */
+    private static _mergeTokens;
+}
+declare class CodeDocument {
+    private _lines;
+    get lineCount(): number;
+    getLine(n: number): string;
+    getText(separator?: string): string;
+    setText(text: string): void;
+    getCharAt(line: number, col: number): string | undefined;
+    /**
+     * Get the word at a given position. Returns [word, startCol, endCol].
+     */
+    getWordAt(line: number, col: number): [string, number, number];
+    /**
+     * Get the indentation level (number of leading spaces) of a line.
+     */
+    getIndent(line: number): number;
+    /**
+     * Find the next occurrence of 'text' starting after (line, col). Returns null if no match.
+     */
+    findNext(text: string, startLine: number, startCol: number): {
+        line: number;
+        col: number;
+    } | null;
+    /**
+     * Insert text at a position (handles newlines in the inserted text).
+     */
+    insert(line: number, col: number, text: string): EditOperation;
+    /**
+     * Delete `length` characters forward from a position (handles crossing line boundaries).
+     */
+    delete(line: number, col: number, length: number): EditOperation;
+    /**
+     * Insert a new line after 'afterLine'. If afterLine is -1, inserts at the beginning.
+     */
+    insertLine(afterLine: number, text?: string): EditOperation;
+    /**
+     * Remove an entire line and its trailing newline.
+     */
+    removeLine(line: number): EditOperation;
+    replaceLine(line: number, newText: string): EditOperation;
+    /**
+     * Apply an edit operation (used by undo/redo).
+     */
+    applyInverse(op: EditOperation): EditOperation;
+}
+interface EditOperation {
+    type: 'insert' | 'delete' | 'replaceLine';
+    line: number;
+    col: number;
+    text: string;
+    oldText?: string;
+}
+declare class UndoManager {
+    private _undoStack;
+    private _redoStack;
+    private _pendingOps;
+    private _pendingCursorsBefore;
+    private _pendingCursorsAfter;
+    private _lastPushTime;
+    private _groupThresholdMs;
+    private _maxSteps;
+    constructor(groupThresholdMs?: number, maxSteps?: number);
+    /**
+     * Record an edit operation. Consecutive operations within the time threshold
+     * are grouped into a single undo step.
+     */
+    record(op: EditOperation, cursors: CursorPosition[]): void;
+    /**
+     * Force-flush pending operations into a final undo step.
+     */
+    flush(cursorsAfter?: CursorPosition[]): void;
+    /**
+     * Undo the last step. Stores the operations to apply inversely, and returns the cursor state to restore.
+     */
+    undo(doc: CodeDocument, currentCursors?: CursorPosition[]): {
+        cursors: CursorPosition[];
+    } | null;
+    /**
+     * Redo the last undone step. Returns the cursor state to restore.
+     */
+    redo(doc: CodeDocument): {
+        cursors: CursorPosition[];
+    } | null;
+    canUndo(): boolean;
+    canRedo(): boolean;
+    clear(): void;
+    private _flush;
+}
+interface CursorPosition {
+    line: number;
+    col: number;
+}
+interface Selection {
+    anchor: CursorPosition;
+    head: CursorPosition;
+}
+declare class CursorSet {
+    cursors: Selection[];
+    constructor();
+    getPrimary(): Selection;
+    /**
+     * Set a single cursor position. Clears all secondary cursors and selections.
+     */
+    set(line: number, col: number): void;
+    moveLeft(doc: CodeDocument, selecting?: boolean): void;
+    moveRight(doc: CodeDocument, selecting?: boolean): void;
+    moveUp(doc: CodeDocument, selecting?: boolean): void;
+    moveDown(doc: CodeDocument, selecting?: boolean): void;
+    moveToLineStart(doc: CodeDocument, selecting?: boolean, noIndent?: boolean): void;
+    moveToLineEnd(doc: CodeDocument, selecting?: boolean): void;
+    moveWordLeft(doc: CodeDocument, selecting?: boolean): void;
+    moveWordRight(doc: CodeDocument, selecting?: boolean): void;
+    selectAll(doc: CodeDocument): void;
+    addCursor(line: number, col: number): void;
+    removeSecondaryCursors(): void;
+    /**
+     * Returns cursor indices sorted by head position, bottom-to-top (last in doc first)
+     * to ensure earlier cursors' positions stay valid.
+     */
+    sortedIndicesBottomUp(): number[];
+    /**
+     * After editing at (line, col), shift all other cursors on the same line
+     * that are at or after `afterCol` by `colDelta`. Also handles line shifts
+     * for multi-line inserts/deletes via `lineDelta`.
+     */
+    adjustOthers(skipIdx: number, line: number, afterCol: number, colDelta: number, lineDelta?: number): void;
+    hasSelection(index?: number): boolean;
+    getSelectedText(doc: CodeDocument, index?: number): string;
+    getCursorPositions(): CursorPosition[];
+    private _moveHead;
+    private _moveVertical;
+    /**
+     * Merge overlapping cursors/selections. Keeps the first one when duplicates exist.
+     */
+    private _merge;
+}
+interface Symbol {
+    name: string;
+    kind: string;
+    scope: string;
+    line: number;
+    col?: number;
+}
+interface ScopeInfo {
+    name: string;
+    type: string;
+    line: number;
+}
+/**
+ * Manages code symbols for autocomplete, navigation, and outlining.
+ * Incrementally updates as lines change.
+ */
+declare class SymbolTable {
+    private _symbols;
+    private _lineSymbols;
+    private _scopeStack;
+    private _lineScopes;
+    get currentScope(): string;
+    get currentScopeType(): string;
+    getScopeAtLine(line: number): ScopeInfo[];
+    getSymbols(name: string): Symbol[];
+    getAllSymbolNames(): string[];
+    getAllSymbols(): Symbol[];
+    getLineSymbols(line: number): Symbol[];
+    /** Update scope stack for a line (call before parsing symbols) */
+    updateScopeForLine(line: number, lineText: string): void;
+    /** Name the most recent anonymous scope (called when detecting class/function) */
+    nameCurrentScope(name: string, type: string): void;
+    /** Remove symbols from a line (before reparsing) */
+    removeLineSymbols(line: number): void;
+    addSymbol(symbol: Symbol): void;
+    /** Reset scope stack (e.g. when document structure changes significantly) */
+    resetScopes(): void;
+    clear(): void;
+}
 declare const Area: any;
 declare const Panel: any;
-declare const Tree: any;
 declare const Tabs: any;
-type Token = {
-    text: string;
-    pos: number;
-};
-declare class Cursor {
-    root: any;
+declare const NodeTree: any;
+interface CodeTab {
     name: string;
-    editor: CodeEditor;
-    isMain: boolean;
-    selection: CodeSelection | null;
-    private _line;
-    private _position;
-    get line(): number;
-    set line(v: number);
-    get position(): number;
-    set position(v: number);
-    left: number;
-    top: number;
-    constructor(name: string, position: number | undefined, line: number | undefined, isMain: boolean | undefined, editor: CodeEditor);
-    set(position?: number, line?: number, updateEditor?: boolean): void;
-    print(): void;
-    destroy(): void;
-    isLast(): boolean;
-}
-declare class CodeSelection {
-    fromX: number;
-    toX: number;
-    fromY: number;
-    toY: number;
-    chars: number;
-    editor: CodeEditor;
-    cursor: Cursor;
-    className: string;
-    constructor(editor: CodeEditor, cursor: Cursor, className?: string);
-    sameLine(): boolean;
-    samePosition(): boolean;
-    isEmpty(): boolean;
-    invertIfNecessary(): void;
-    selectInline(cursor: Cursor, x: number, y: number, width: number, isSearchResult?: boolean): void;
-    save(): {
-        fromX: number;
-        fromY: number;
-        toX: number;
-        toY: number;
-    };
-    load(data: any): void;
-    getText(): any;
+    dom: HTMLElement;
+    doc: CodeDocument;
+    cursorSet: CursorSet;
+    undoManager: UndoManager;
+    language: string;
+    title?: string;
+    path?: string;
 }
 declare class ScrollBar {
-    static SCROLLBAR_VERTICAL: number;
-    static SCROLLBAR_HORIZONTAL: number;
-    static SCROLLBAR_VERTICAL_WIDTH: number;
-    static SCROLLBAR_HORIZONTAL_HEIGHT: number;
-    editor: CodeEditor;
-    type: number;
-    root: any;
-    thumb: any;
-    lastPosition: typeof vec2;
-    constructor(editor: CodeEditor, type: number);
+    static SIZE: number;
+    root: HTMLElement;
+    thumb: HTMLElement;
+    private _vertical;
+    private _thumbPos;
+    private _thumbRatio;
+    private _lastMouse;
+    private _onDrag;
+    get visible(): boolean;
+    get isVertical(): boolean;
+    constructor(vertical: boolean, onDrag: (delta: number) => void);
+    setThumbRatio(ratio: number): void;
+    syncToScroll(scrollPos: number, scrollMax: number): void;
+    applyDragDelta(delta: number, scrollMax: number): number;
+    private _applyPosition;
+    private _onMouseDown;
 }
 /**
  * @class CodeEditor
+ * The main editor class. Wires Document, Tokenizer, CursorSet, UndoManager
+ * together with the DOM.
  */
 export declare class CodeEditor {
     static __instances: CodeEditor[];
-    static CURSOR_LEFT: number;
-    static CURSOR_TOP: number;
-    static CURSOR_LEFT_TOP: number;
-    static SELECTION_X: number;
-    static SELECTION_Y: number;
-    static SELECTION_X_Y: number;
-    static KEEP_VISIBLE_LINES: number;
-    static UPDATE_VISIBLE_LINES: number;
-    static WORD_TYPE_METHOD: number;
-    static WORD_TYPE_CLASS: number;
-    static CODE_MIN_FONT_SIZE: number;
-    static CODE_MAX_FONT_SIZE: number;
-    static LINE_GUTTER_WIDTH: number;
-    static RESIZE_SCROLLBAR_H: number;
-    static RESIZE_SCROLLBAR_V: number;
-    static RESIZE_SCROLLBAR_H_V: number;
-    static languages: Record<string, any>;
-    static keywords: any;
-    static utils: any;
-    static types: any;
-    static builtIn: any;
-    static statements: any;
-    static declarationKeywords: any;
-    static symbols: any;
-    static nativeTypes: any;
-    static debugScopes: boolean;
-    static debugSymbols: boolean;
-    static debugProcessedLines: boolean;
-    static _staticReady: boolean;
-    root: any;
-    baseArea: typeof Area;
+    language: LanguageDef;
+    symbolTable: SymbolTable;
     area: typeof Area;
+    baseArea: typeof Area;
     codeArea: typeof Area;
-    explorerArea: any;
-    code: any;
-    gutter: HTMLElement;
-    xPadding: string;
-    hScrollbar: ScrollBar;
-    vScrollbar: ScrollBar;
-    codeScroller: any;
-    codeSizer: any;
-    explorer: typeof Tree;
+    explorerArea: typeof Area;
     tabs: typeof Tabs;
-    cursorsDOM: any;
-    cursors: Cursor[];
-    mustProcessLines: boolean;
-    blinker: any;
+    root: HTMLElement;
+    codeScroller: HTMLElement;
+    codeSizer: HTMLElement;
+    cursorsLayer: HTMLElement;
+    selectionsLayer: HTMLElement;
+    lineGutter: HTMLElement;
+    vScrollbar: ScrollBar;
+    hScrollbar: ScrollBar;
+    searchBox: HTMLElement | null;
+    searchLineBox: HTMLElement | null;
+    autocomplete: HTMLElement | null;
+    currentTab: CodeTab | null;
     statusPanel: typeof Panel;
     leftStatusPanel: typeof Panel;
     rightStatusPanel: typeof Panel;
-    lineScrollMargin: typeof vec2;
-    autocomplete: HTMLElement;
-    searchbox: HTMLElement;
-    searchlinebox: HTMLElement;
-    openedTabs: Record<string, any>;
-    loadedTabs: Record<string, any>;
-    actions: Record<string, any>;
-    state: Record<string, any>;
-    pairKeys: Record<string, string>;
-    stringKeys: Record<string, string>;
-    visibleLinesViewport: typeof vec2;
-    searchResultSelections: any;
-    firstLineInViewport: number;
-    selections: Record<string, any>;
-    specialKeys: string[];
-    canOpenContextMenu: boolean;
-    wasKeyPaired: boolean | undefined;
-    mustProcessNextLine: ((s: string[]) => boolean) | undefined;
-    mustProcessPreviousLine: ((s: string[]) => boolean) | undefined;
-    cursorBlinkRate: number;
-    tabSpaces: number;
-    maxUndoSteps: number;
-    lineHeight: number;
+    explorer: typeof NodeTree | null;
     charWidth: number;
+    lineHeight: number;
     fontSize: number;
-    defaultSingleLineCommentToken: string;
-    defaultBlockCommentTokens: string[];
-    isAutoCompleteActive: boolean;
-    isSearchboxActive: boolean;
-    isSearchlineboxActive: boolean;
+    xPadding: number;
+    private _cachedTabsHeight;
+    private _cachedStatusPanelHeight;
     skipInfo: boolean;
     disableEdition: boolean;
     skipTabs: boolean;
     useFileExplorer: boolean;
     useAutoComplete: boolean;
+    allowAddScripts: boolean;
     allowClosingTabs: boolean;
     allowLoadingFiles: boolean;
+    tabSize: number;
     highlight: string;
-    explorerName: string;
-    newTabOptions: any;
+    newTabOptions: any[] | null;
     customSuggestions: any[];
+    explorerName: string;
+    onSave: (text: string, editor: CodeEditor) => void;
+    onRun: (text: string, editor: CodeEditor) => void;
+    onCtrlSpace: (text: string, editor: CodeEditor) => void;
+    onCreateStatusPanel: (panel: typeof Panel, editor: CodeEditor) => void;
     onContextMenu: any;
-    onCreateFile: any;
-    onCreateStatusPanel: any;
-    onCtrlSpace: any;
-    onNewTab: any;
-    onSave: any;
-    onSelectTab: any;
-    onReady: any;
-    onRun: any;
-    addExplorerItem: any;
-    _blockCommentCache: any[];
-    _buildingBlockComment: any;
-    _buildingString: any;
-    _currentOcurrences: any;
-    _currentLineNumber: number | undefined;
-    _currentLineString: string | undefined;
-    _currentTokenPositions: any;
-    _discardScroll: boolean;
-    _displayObserver: any;
-    _fullVerticalOffset: number;
-    _isReady: boolean;
-    _lastTime: any;
-    _lastProcessedLine: number;
-    _lastResult: any;
-    _lastSelectionKeyDir: any;
-    _lastProcessedCursorIndex: any;
-    _lastMaxLineLength: number | undefined;
-    _lastMouseDown: number;
-    _lastTextFound: string;
-    _lastBaseareaWidth: number | undefined;
-    _markdownHeader: any;
-    _mouseDown: boolean | undefined;
-    _nextCursorPositionOffset: number | undefined;
-    _pendingString: string | undefined;
-    _preparedAt: number | undefined;
-    _scopeStack: any;
-    _scopesUpdated: boolean | undefined;
-    _skipTabs: number | undefined;
-    _stringEnded: boolean;
-    _stringInterpolation: boolean | undefined;
-    _stringInterpolationOpened: boolean | undefined;
-    _tabStorage: Record<string, any>;
-    _tripleClickSelection: any;
-    _verticalBottomOffset: number;
-    _verticalTopOffset: number;
-    constructor(area: typeof Area, options?: any);
-    _init(area: typeof Area, options?: any): Promise<void>;
-    _setupDisplayObserver(): void;
-    _setupEditorWhenVisible(): Promise<void>;
-    clear(): void;
+    onNewTab: (event: MouseEvent) => void;
+    onSelectTab: (name: string, editor: CodeEditor) => void;
+    onReady: ((editor: CodeEditor) => void) | undefined;
+    onCreateFile: ((editor: CodeEditor) => void) | undefined;
+    private _inputArea;
+    private _lineStates;
+    private _lineElements;
+    private _openedTabs;
+    private _loadedTabs;
+    private _storedTabs;
+    private _focused;
+    private _composing;
+    private _keyChain;
+    private _wasPaired;
+    private _lastAction;
+    private _blinkerInterval;
+    private _cursorVisible;
+    private _cursorBlinkRate;
+    private _clickCount;
+    private _lastClickTime;
+    private _lastClickLine;
+    private _isSearchBoxActive;
+    private _isSearchLineBoxActive;
+    private _searchMatchCase;
+    private _lastTextFound;
+    private _lastSearchPos;
+    private _discardScroll;
+    private _isReady;
+    private _lastMaxLineLength;
+    private _lastLineCount;
+    private _isAutoCompleteActive;
+    private _selectedAutocompleteIndex;
+    private _displayObservers;
+    private static readonly CODE_MIN_FONT_SIZE;
+    private static readonly CODE_MAX_FONT_SIZE;
+    private static readonly PAIR_KEYS;
+    get doc(): CodeDocument;
+    get undoManager(): UndoManager;
+    get cursorSet(): CursorSet;
+    get codeContainer(): HTMLElement;
     static getInstances(): CodeEditor[];
-    onKeyPressed(e: KeyboardEvent): void;
-    getText(min?: boolean): any;
-    setText(text?: string, langString?: string, detectLanguage?: boolean): void;
-    appendText(text: string, cursor: Cursor): void;
-    setCustomSuggestions(suggestions: string[]): void;
-    loadFile(file: File, options?: any): Promise<void>;
-    _addUndoStep(cursor: Cursor, force?: boolean, deleteRedo?: boolean): void;
-    _doUndo(cursor: Cursor): void;
-    _addRedoStep(cursor: Cursor): void;
-    _doRedo(cursor: Cursor): void;
-    _changeLanguage(langString: string, langExtension?: string, override?: boolean): void;
-    _changeLanguageFromExtension(ext: string): void;
-    _createStatusPanel(options?: any): any;
-    _getFileIcon(name: string | null, extension?: string, langString?: string): any;
-    _onNewTab(e: any): void;
-    _onCreateNewFile(): void;
-    _onSelectTab(isNewTabButton: boolean, event: any, name: string): void;
-    _onContextMenuTab(isNewTabButton: boolean | undefined, event: any, name: string): void;
-    addTab(name: string, selected: boolean, title?: string, options?: any): string;
-    loadCode(name: string): void;
+    constructor(area: typeof Area, options?: Record<string, any>);
+    private _init;
+    clear(): void;
+    addExplorerItem(item: any): void;
+    setText(text: string): void;
+    getText(): string;
+    setLanguage(name: string, extension?: string): void;
+    focus(): void;
+    _setupEditorWhenVisible(): Promise<void>;
+    addTab(name: string, options?: Record<string, any>): CodeTab;
     loadTab(name: string): void;
-    closeTab(name: string, eraseAll?: boolean): void;
-    getSelectedTabName(): any;
-    loadTabFromFile(): void;
-    processFocus(active?: boolean): void;
-    processMouse(e: MouseEvent): void;
-    _onMouseUp(e: MouseEvent): void;
-    processClick(e: MouseEvent): void;
-    updateSelections(e: any, keepRange?: boolean, flags?: number): void;
-    processSelections(e: any, keepRange?: boolean, flags?: number): void;
-    _processSelection(cursor: Cursor, e?: any, keepRange?: boolean, flags?: number): void;
-    processKey(e: KeyboardEvent): Promise<void>;
-    processKeyAtTargetCursor(e: KeyboardEvent, key: string, targetIdx: number): Promise<void>;
-    _processGlobalKeys(e: KeyboardEvent, key: string): boolean;
-    _processKeyAtCursor(e: KeyboardEvent, key: string, cursor: Cursor): Promise<any>;
-    _pasteContent(cursor: Cursor): Promise<void>;
-    _copyContent(cursor: Cursor): Promise<void>;
-    _cutContent(cursor: Cursor): Promise<void>;
-    _duplicateLine(lidx: number, cursor: Cursor): void;
-    _commentLines(cursor: Cursor, useCommentBlock?: boolean): void;
-    _commentLine(cursor: Cursor, line: number, minNonspaceIdx?: number, updateCursor?: boolean): void;
-    _uncommentLines(cursor: Cursor): void;
-    _uncommentLine(cursor: Cursor, line: number): void;
-    action(key: string, deleteSelection?: boolean, fn?: (l: number, cursor: Cursor, e: any) => void, eventSkipDeleteFn?: any): void;
-    _actionMustDelete(cursor: Cursor, action: any, e: any): any;
-    scanWordSuggestions(): void;
-    toLocalLine(line: number): number;
+    closeTab(name: string): void;
+    private _onSelectTab;
+    private _onNewTab;
+    private _onCreateNewFile;
+    private _onContextMenuTab;
+    private _measureChar;
+    private _createStatusPanel;
+    private _updateDataInfoPanel;
+    /**
+     * Tokenize a line and return its innerHTML with syntax highlighting spans.
+     */
+    private _tokenizeLine;
+    /**
+     * Update symbol table for a line.
+     */
+    private _updateSymbolsForLine;
+    /**
+     * Render all lines from scratch.
+     */
+    private _renderAllLines;
+    /**
+     * Gets the html for the line gutter.
+     */
+    private _getGutterHtml;
+    /**
+     * Create and append a <pre> element for a line.
+     */
+    private _appendLineElement;
+    /**
+     * Re-render a single line's content (after editing).
+     */
+    private _updateLine;
+    /**
+     * Rebuild line elements after structural changes (insert/delete lines).
+     */
+    private _rebuildLines;
+    private _statesEqual;
+    private _updateActiveLine;
+    private _renderCursors;
+    private _renderSelections;
+    private _setFocused;
+    private _startBlinker;
+    private _stopBlinker;
+    private _resetBlinker;
+    private _setCursorVisibility;
+    private _onKeyDown;
+    private _flushIfActionChanged;
+    private _flushAction;
+    private _doInsertChar;
+    private _getAffectedLines;
+    private _commentLines;
+    private _uncommentLines;
+    private _doFindNextOcurrence;
+    private _doOpenSearch;
+    private _doOpenLineSearch;
+    /**
+     * Returns true if visibility changed.
+     */
+    private _doHideSearch;
+    private _doSearch;
+    private _doGotoLine;
+    private _encloseSelection;
+    private _doBackspace;
+    private _doDelete;
+    private _doEnter;
+    private _doTab;
+    private _deleteSelectionIfAny;
+    private _doCopy;
+    private _doCut;
+    private _swapLine;
+    private _duplicateLine;
+    private _doPaste;
+    private _doUndo;
+    private _doRedo;
+    private _onMouseDown;
+    private _onContextMenu;
+    /**
+     * Get word at cursor position for autocomplete.
+     */
+    private _getWordAtCursor;
+    /**
+     * Open autocomplete box with suggestions from symbols and custom suggestions.
+     */
+    private _doOpenAutocomplete;
+    private _doHideAutocomplete;
+    /**
+     * Insert the selected autocomplete word at cursor.
+     */
+    private _doAutocompleteWord;
+    private _getSelectedAutoCompleteWord;
+    private _afterCursorMove;
+    private _scrollCursorIntoView;
+    private _resetGutter;
     getMaxLineLength(): number;
-    _processLinesIfNecessary(): void;
-    processLines(mode?: number): void;
-    processLine(lineNumber: number, force?: boolean, skipPropagation?: boolean): string | undefined;
-    _getLineSignatureFromTokens(tokens: string[]): string;
-    _updateBlockComments(section: any, lineNumber: number, tokens: string[]): void;
-    _processExtraLineIfNecessary(lineNumber: number, tokens: string[], oldSymbols: any[], skipPropagation?: boolean): void;
-    _updateLine(force: boolean | undefined, lineNumber: number, html: string, skipPropagation?: boolean, symbols?: any[], tokens?: any[]): string | undefined;
-    /**
-     * Parses a single line of code and extract declared symbols
-     */
-    _parseLineForSymbols(lineNumber: number, lineString: string, tokens: string[], pushedScope?: boolean): any[];
-    /**
-     * Updates the symbol table for a single line
-     * - Removes old symbols from that line
-     * - Inserts the new symbols
-     */
-    _updateLineSymbols(lineNumber: number, newSymbols: any[]): any;
-    _lineHasComment(lineString: string): number | undefined;
-    _getTokensFromLine(lineString: string, skipNonWords?: boolean): string[];
-    _mergeNumericTokens(tokens: Token[]): Token[];
-    _processTokens(tokens: string[], offset?: number): string[];
-    _mustHightlightWord(token: string, wordCategory: any, lang?: any): boolean;
-    _getTokenHighlighting(ctx: any, highlight: string): any;
-    _evaluateToken(ctxData: any): any;
-    _appendStringToken(token: string): boolean;
-    _getCurrentString(): string | undefined;
-    _enclosedByTokens(token: string, tokenIndex: number, tagStart: string, tagEnd: string): number[] | undefined;
-    _inBlockCommentSection(lineNumber: number, tokenPosition?: number, tokenLength?: number): any;
-    _isKeyword(ctxData: any): boolean;
-    _isNumber(token: string): boolean;
-    _encloseSelectedWordWithKey(key: string, lidx: number, cursor: Cursor): boolean;
-    _detectLanguage(text: string): string | undefined;
-    lineUp(cursor: Cursor, resetLeft?: boolean): boolean;
-    lineDown(cursor: Cursor, resetLeft?: boolean): boolean;
-    swapLines(lidx: number, offset: number, cursor: Cursor): void;
-    restartBlink(): void;
-    startSelection(cursor: Cursor): void;
-    deleteSelection(cursor: Cursor): void;
-    endSelection(cursor?: Cursor): void;
-    selectAll(): void;
-    cursorToRight(text: string, cursor: Cursor): void;
-    cursorToLeft(text: string, cursor: Cursor): void;
-    cursorToTop(cursor: Cursor, resetLeft?: boolean): void;
-    cursorToBottom(cursor: Cursor, resetLeft?: boolean): void;
-    cursorToString(cursor: Cursor, text: string, reverse?: boolean): void;
-    cursorToPosition(cursor: Cursor, position: number, updateScroll?: boolean): void;
-    cursorToLine(cursor: Cursor, line: number, resetLeft?: boolean): void;
-    saveCursor(cursor: Cursor, state?: any): any;
-    saveCursors(): any[];
-    getCurrentCursor(removeOthers?: boolean): Cursor;
-    relocateCursors(): void;
-    mergeCursors(line: number): void;
-    restoreCursor(cursor: Cursor, state: any): void;
-    removeCursor(cursor: Cursor | undefined): void;
-    resetCursorPos(flag: number, cursor?: Cursor, resetScroll?: boolean): void;
-    _addCursor(line?: number, position?: number, force?: boolean, isMain?: boolean): Cursor | null;
-    _removeSecondaryCursors(): void;
-    _getLastCursor(): Cursor | undefined;
-    _isLastCursor(cursor: Cursor): boolean;
-    _logCursors(): void;
-    _addSpaceTabs(cursor: Cursor, n: number): void;
-    _addSpaces(cursor: Cursor, n: number): void;
-    _removeSpaces(cursor: Cursor): void;
-    updateScrollLeft(cursor: Cursor): true | undefined;
-    getScrollLeft(): any;
-    getScrollTop(): any;
-    setScrollLeft(value: number): void;
-    setScrollTop(value: number): void;
-    resize(flag?: number, pMaxLength?: number, onResize?: any): void;
-    resizeIfNecessary(cursor: Cursor, force?: boolean): void;
-    resizeScrollBars(flag?: number): void;
-    setScrollBarValue(type?: string, value?: number): void;
-    updateHorizontalScrollFromScrollBar(value: number): void;
-    updateVerticalScrollFromScrollBar(value: number): void;
-    getCharAtPos(cursor: Cursor, offset?: number): any;
-    getWordAtPos(cursor: Cursor, offset?: number): any[];
-    _measureChar(char?: string, useFloating?: boolean, getBB?: boolean): number | number[];
-    measureString(str: string): number;
-    runScript(code: string): void;
-    toJSONFormat(text: string): string | undefined;
-    showAutoCompleteBox(key: string, cursor: Cursor): void;
-    hideAutoCompleteBox(): boolean | undefined;
-    autoCompleteWord(suggestion?: string): void;
-    _getSelectedAutoComplete(): any[];
-    _moveArrowSelectedAutoComplete(dir: string): void;
-    showSearchBox(clear?: boolean): void;
-    hideSearchBox(): boolean;
-    search(text?: string | null, reverse?: boolean, callback?: any, skipAlert?: boolean, forceFocus?: boolean): void;
-    showSearchLineBox(): void;
-    hideSearchLineBox(): void;
-    goToLine(line: any): void;
-    selectNextOcurrence(cursor: Cursor): void;
-    _updateDataInfoPanel(signal: string, value: any): void;
-    _setActiveLine(n?: number): void;
-    _hideActiveLine(): void;
-    _setFontSize(size: number): void;
-    _applyFontSizeOffset(offset?: number): void;
-    _increaseFontSize(): void;
-    _decreaseFontSize(): void;
-    _clearTmpVariables(): void;
-    _requestFileAsync(url: string, dataType?: string, nocache?: boolean): Promise<unknown>;
+    resize(force?: boolean): void;
+    private _resizeScrollBars;
+    private _syncScrollBars;
+    private _doLoadFromFile;
+    loadFile(file: File | string, options?: Record<string, any>): void;
+    loadFiles(files: string[], onComplete?: (editor: CodeEditor, results: any[], total: number) => void, async?: boolean): Promise<void>;
+    private _setFontSize;
+    private _applyFontSizeOffset;
+    private _increaseFontSize;
+    private _decreaseFontSize;
 }
 export {};
