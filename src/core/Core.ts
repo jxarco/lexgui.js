@@ -3,7 +3,7 @@
 import { BaseComponent, ComponentType } from '../components/BaseComponent';
 import { ContextMenu } from '../components/ContextMenu';
 import { TextInput } from '../components/TextInput';
-import { Tokenizer } from '../extensions/NewCodeEditor';
+import { Tokenizer } from '../extensions/CodeEditor';
 import { Area } from './Area';
 import { IEvent } from './Event';
 import { LX } from './Namespace';

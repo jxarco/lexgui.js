@@ -2,7 +2,6 @@
 export * from './AssetView';
 export * from './Audio';
 export * from './CodeEditor';
-export * from './NewCodeEditor';
 export * from './DocMaker';
 export * from './GraphEditor';
 export * from './ImUi';
