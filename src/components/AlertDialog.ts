@@ -24,7 +24,14 @@ export class AlertDialog extends Dialog
             p.addTextArea( null, message, null, { disabled: true, fitHeight: true, inputClass: 'bg-none text-sm text-muted-foreground' } );
 
             p.sameLine( 2, 'justify-end' );
-            p.addButton( null, options.cancelText ?? 'Cancel', () => this.destroy(), {
+            p.addButton( null, options.cancelText ?? 'Cancel', () => {
+                if( options.cancelCallback )
+                {
+                    options.cancelCallback();
+                }
+
+                this.destroy()
+            }, {
                 buttonClass: 'outline'
             } );
             p.addButton( null, options.continueText ?? 'Continue', () => {

@@ -119,6 +119,8 @@
                 ["icons", "Array", "Array of objects with button information {name, icon, callback}", "—"],
                 ["filter", "Boolean", "Adds a filter bar", "true"],
                 ["rename", "Boolean", "Allow item rename", "true"],
+                ["useDefaultContextMenuItems", "Boolean", "Add default items (Select Children, Delete)", "true"],
+                ["contextMenuTitle", "String", "Custom title for tree item context menus", "—"],
                 ["onlyFolders", "Boolean", "Only show items with 'folder' type", "false"]
             ].map( v => {
                 return [ docMaker.iCode( v[ 0 ], "table" ), docMaker.iCode( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? docMaker.iCode( v[ 3 ], "table desc" ) : v[ 3 ] ];

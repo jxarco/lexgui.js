@@ -263,8 +263,9 @@ export class NodeTree
             const r: any = await onContextMenu( event );
 
             const multiple = this.selected.length > 1;
+            const useDefaultContextMenuItems = this.options.useDefaultContextMenuItems ?? true;
 
-            LX.addContextMenu( multiple ? 'Selected Nodes' : node.id, e, ( m: ContextMenu ) => {
+            LX.addContextMenu( this.options.contextMenuTitle ?? ( multiple ? 'Selected Nodes' : node.id ), e, ( m: ContextMenu ) => {
                 if ( r?.length )
                 {
                     for ( const i of r )
@@ -272,97 +273,98 @@ export class NodeTree
                         m.add( i.name, { callback: i.callback } );
                     }
 
-                    m.add( '' );
+                    if ( useDefaultContextMenuItems )
+                    {
+                        m.add( '' );
+                    }
                 }
 
-                m.add( 'Select Children', () => {
-                    const selectChildren = ( n: any ) => {
-                        if ( n.closed )
-                        {
-                            return;
-                        }
-
-                        for ( let child of n.children ?? [] )
-                        {
-                            if ( !child )
+                if ( useDefaultContextMenuItems )
+                {
+                    m.add( 'Select Children', () => {
+                        const selectChildren = ( n: any ) => {
+                            if ( n.closed )
                             {
-                                continue;
+                                return;
                             }
-
-                            let nodeItem = this.domEl.querySelector( '#' + child.id );
-                            nodeItem.classList.add( 'selected' );
-                            this.selected.push( child );
-                            selectChildren( child );
-                        }
-                    };
-
-                    this.domEl.querySelectorAll( '.selected' ).forEach( ( i: HTMLElement ) => i.classList.remove( 'selected' ) );
-                    this.selected.length = 0;
-
-                    // Add childs of the clicked node
-                    selectChildren( node );
-
-                    const onSelect = this._callbacks['select'];
-                    if ( onSelect !== undefined )
-                    {
-                        const event: NodeTreeEvent = {
-                            type: 'select',
-                            items: [ node ],
-                            result: this.selected,
-                            domEvent: e,
-                            userInitiated: true
+    
+                            for ( let child of n.children ?? [] )
+                            {
+                                if ( !child )
+                                {
+                                    continue;
+                                }
+    
+                                let nodeItem = this.domEl.querySelector( '#' + child.id );
+                                nodeItem.classList.add( 'selected' );
+                                this.selected.push( child );
+                                selectChildren( child );
+                            }
                         };
-
-                        onSelect( event );
-                    }
-                } );
-
-                m.add( 'Delete', { callback: () => {
-                    const onBeforeDelete = this._callbacks['beforeDelete'];
-                    const onDelete = this._callbacks['delete'];
-
-                    const resolve = ( ...args: any[] ) => {
-                        let deletedNodes = [];
-
-                        if ( this.selected.length )
+    
+                        this.domEl.querySelectorAll( '.selected' ).forEach( ( i: HTMLElement ) => i.classList.remove( 'selected' ) );
+                        this.selected.length = 0;
+    
+                        // Add childs of the clicked node
+                        selectChildren( node );
+    
+                        const onSelect = this._callbacks['select'];
+                        if ( onSelect !== undefined )
                         {
-                            deletedNodes.push( ...that.deleteNodes( this.selected ) );
+                            const event: NodeTreeEvent = {
+                                type: 'select',
+                                items: [ node ],
+                                result: this.selected,
+                                domEvent: e,
+                                userInitiated: true
+                            };
+    
+                            onSelect( event );
                         }
-                        else if ( that.deleteNode( node ) )
+                    } );
+    
+                    m.add( 'Delete', { callback: () => {
+                        const onBeforeDelete = this._callbacks['beforeDelete'];
+                        const onDelete = this._callbacks['delete'];
+    
+                        const resolve = ( ...args: any[] ) => {
+                            let deletedNodes = [];
+    
+                            if ( this.selected.length )
+                            {
+                                deletedNodes.push( ...that.deleteNodes( this.selected ) );
+                            }
+                            else if ( that.deleteNode( node ) )
+                            {
+                                deletedNodes.push( node );
+                            }
+    
+                            this.refresh();
+    
+                            const event: NodeTreeEvent = {
+                                type: 'delete',
+                                items: deletedNodes,
+                                userInitiated: true
+                            };
+                            if ( onDelete ) onDelete( event, ...args );
+                        };
+    
+                        if ( onBeforeDelete )
                         {
-                            deletedNodes.push( node );
+                            const event: NodeTreeEvent = {
+                                type: 'delete',
+                                items: this.selected.length ? this.selected : [ node ],
+                                userInitiated: true
+                            };
+                            onBeforeDelete( event, resolve );
                         }
-
-                        this.refresh();
-
-                        const event: NodeTreeEvent = {
-                            type: 'delete',
-                            items: deletedNodes,
-                            userInitiated: true
-                        };
-                        if ( onDelete ) onDelete( event, ...args );
-                    };
-
-                    if ( onBeforeDelete )
-                    {
-                        const event: NodeTreeEvent = {
-                            type: 'delete',
-                            items: this.selected.length ? this.selected : [ node ],
-                            userInitiated: true
-                        };
-                        onBeforeDelete( event, resolve );
-                    }
-                    else
-                    {
-                        resolve();
-                    }
-                } } );
+                        else
+                        {
+                            resolve();
+                        }
+                    } } );
+                }
             } );
-
-            if ( !( this.options.addDefault ?? false ) )
-            {
-                return;
-            }
         } );
 
         item.addEventListener( 'keydown', ( e: KeyboardEvent ) => {
