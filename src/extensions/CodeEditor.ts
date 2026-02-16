@@ -456,9 +456,22 @@ const wgslStatements = [
 const wgslBuiltins = [
     'position', 'vertex_index', 'instance_index', 'front_facing', 'frag_depth',
     'local_invocation_id', 'local_invocation_index', 'global_invocation_id', 'workgroup_id', 'num_workgroups',
-    'abs', 'acos', 'asin', 'atan', 'ceil', 'clamp', 'cos', 'cross', 'degrees', 'determinant', 'distance',
-    'dot', 'exp', 'floor', 'fract', 'inverseSqrt', 'length', 'log', 'max', 'min', 'mix', 'normalize',
-    'pow', 'radians', 'reflect', 'refract', 'round', 'sign', 'sin', 'smoothstep', 'sqrt', 'step', 'tan', 'transpose'
+    'abs', 'acos', 'acosh', 'asin', 'asinh', 'atan', 'atanh', 'atan2', 'ceil', 'clamp', 'cos', 'cosh',
+    'cross', 'degrees', 'determinant', 'distance', 'dot', 'exp', 'exp2', 'floor', 'fma', 'fract', 'inverseSqrt',
+    'length', 'log', 'log2', 'max', 'min', 'mix', 'normalize', 'pow', 'radians', 'reflect', 'refract', 'round',
+    'saturate', 'sign', 'sin', 'sinh', 'smoothstep', 'sqrt', 'step', 'tan', 'tanh', 'transpose', 'trunc',
+    'textureSample', 'textureSampleBias', 'textureSampleLevel', 'textureSampleGrad',
+    'textureSampleCompare', 'textureSampleCompareLevel', 'textureSampleBaseClampToEdge',
+    'textureLoad', 'textureStore', 'textureGather', 'textureGatherCompare',
+    'textureDimensions', 'textureNumLayers', 'textureNumLevels', 'textureNumSamples',
+    'pack4x8snorm', 'pack4x8unorm', 'pack2x16snorm', 'pack2x16unorm', 'pack2x16float',
+    'unpack4x8snorm', 'unpack4x8unorm', 'unpack2x16snorm', 'unpack2x16unorm', 'unpack2x16float',
+    'atomicLoad', 'atomicStore', 'atomicAdd', 'atomicSub', 'atomicMax', 'atomicMin',
+    'atomicAnd', 'atomicOr', 'atomicXor', 'atomicExchange', 'atomicCompareExchangeWeak',
+    'dpdx', 'dpdxCoarse', 'dpdxFine', 'dpdy', 'dpdyCoarse', 'dpdyFine', 'fwidth', 'fwidthCoarse', 'fwidthFine',
+    'select', 'arrayLength', 'countLeadingZeros', 'countOneBits', 'countTrailingZeros',
+    'extractBits', 'firstLeadingBit', 'firstTrailingBit', 'insertBits', 'reverseBits',
+    'storageBarrier', 'workgroupBarrier', 'workgroupUniformLoad'
 ];
 
 Tokenizer.registerLanguage( {
@@ -2876,6 +2889,34 @@ export class CodeEditor
         this.resize( true );
     }
 
+    appendText( text: string ): void
+    {
+        const cursor = this.cursorSet.getPrimary();
+        const { line, col } = cursor.head;
+
+        const op = this.doc.insert( line, col, text );
+        this.undoManager.record( op, this.cursorSet.getCursorPositions() );
+
+        // Move cursor to end of inserted text
+        const lines = text.split( /\r?\n/ );
+        if ( lines.length === 1 )
+        {
+            cursor.head = { line, col: col + text.length };
+        }
+        else
+        {
+            cursor.head = { line: line + lines.length - 1, col: lines[ lines.length - 1 ].length };
+        }
+        cursor.anchor = { ...cursor.head };
+
+        this._rebuildLines();
+        this._renderCursors();
+        this._renderSelections();
+        this._resetGutter();
+        this._scrollCursorIntoView();
+        this.resize();
+    }
+
     getText(): string
     {
         return this.doc.getText();
@@ -2902,41 +2943,6 @@ export class CodeEditor
     focus(): void
     {
         this._inputArea.focus();
-    }
-
-    async _setupEditorWhenVisible()
-    {
-        // Load any font size from local storage
-        // If not, use default size and make sure it's sync by not hardcoding a number by default here
-        const savedFontSize = window.localStorage.getItem( 'lexcodeeditor-font-size' );
-        if ( savedFontSize )
-        {
-            await this._setFontSize( parseInt( savedFontSize ), false );
-        }
-        else
-        {
-            const r: any = document.querySelector( ':root' );
-            const s = getComputedStyle( r );
-            this.fontSize = parseInt( s.getPropertyValue( '--code-editor-font-size' ) );
-            await this._measureChar();
-        }
-
-        LX.emitSignal( '@font-size', this.fontSize );
-
-        LX.doAsync( () => {
-            
-            if ( !this._isReady )
-            {
-                this._isReady = true;
-
-                if ( this.onReady )
-                {
-                    this.onReady( this );
-                }
-
-                console.log( `[LX.CodeEditor] Ready! (font size: ${this.fontSize}px, char size: ${this.charWidth}px)` );
-            }
-        }, 20 );
     }
 
     addTab( name: string, options: Record<string, any> = {} ): CodeTab
@@ -3072,6 +3078,181 @@ export class CodeEditor
         }
 
         this.customSuggestions = suggestions;
+    }
+
+    loadFile( file: File | string, options: Record<string, any> = {} ): void
+    {
+        const onLoad = ( text: string, name: string ) =>
+        {
+            // Remove Carriage Return in some cases and sub tabs using spaces
+            text = text.replaceAll( '\r', '' ).replaceAll( /\t|\\t/g, ' '.repeat( this.tabSize ) );
+
+            const ext = LX.getExtension( name );
+            const lang = options.language ?? ( Tokenizer.getLanguage( options.language )
+                ?? ( Tokenizer.getLanguageByExtension( ext ) ?? Tokenizer.getLanguage( 'Plain Text' )! ) );
+            const langName = lang.name;
+
+            if ( this.useFileExplorer || this.skipTabs )
+            {
+                this._storedTabs[name] = {
+                    text,
+                    title: options.title ?? name,
+                    language: langName,
+                    ...options
+                };
+
+                if ( this.useFileExplorer )
+                {
+                    this.addExplorerItem( { id: name, skipVisibility: true, icon: getLanguageIcon( lang, ext ) } );
+                    this.explorer.innerTree.frefresh( name );
+                }
+            }
+            else
+            {
+                this.addTab( name, {
+                    selected: true,
+                    title: options.title ?? name,
+                    language: langName
+                } );
+    
+                this.doc.setText( text );
+                this.setLanguage( langName, ext );
+                this.cursorSet.set( 0, 0 );
+                this.undoManager.clear();
+                this._renderCursors();
+                this._renderSelections();
+                this._resetGutter();
+            }
+
+            if ( options.callback )
+            {
+                options.callback( name, text );
+            }
+        };
+
+        if ( typeof file === 'string' )
+        {
+            const url = file;
+            const name = options.filename ?? url.substring( url.lastIndexOf( '/' ) + 1 );
+
+            LX.request( { url, success: ( text: string ) => {
+                onLoad( text, name );
+            } } );
+        }
+        else
+        {
+            const fr = new FileReader();
+            fr.readAsText( file );
+            fr.onload = ( e ) => {
+                const text = ( e.currentTarget as any ).result;
+                onLoad( text, file.name );
+            };
+        }
+    }
+
+    async loadFiles( files: string[], onComplete?: ( editor: CodeEditor, results: any[], total: number ) => void, async: boolean = false )
+    {
+        if ( !files || files.length === 0 )
+        {
+            onComplete?.( this, [], 0 );
+            return;
+        }
+
+        const results: any[] = [];
+
+        for ( const filePath of files )
+        {
+            try
+            {
+                const text = await LX.requestFileAsync( filePath, 'text' );
+
+                // Process the loaded file
+                const name = filePath.substring( filePath.lastIndexOf( '/' ) + 1 );
+                const processedText = text.replaceAll( '\r', '' ).replaceAll( /\t|\\t/g, ' '.repeat( this.tabSize ) );
+
+                const ext = LX.getExtension( name );
+                const lang = Tokenizer.getLanguageByExtension( ext ) ?? Tokenizer.getLanguage( 'Plain Text' )!;
+                const langName = lang.name;
+
+                if ( this.useFileExplorer || this.skipTabs )
+                {
+                    this._storedTabs[name] = {
+                        text: processedText,
+                        title: name,
+                        language: langName
+                    };
+
+                    if ( this.useFileExplorer )
+                    {
+                        this.addExplorerItem( { id: name, skipVisibility: true, icon: getLanguageIcon( lang, ext ) } );
+                        this.explorer.innerTree.frefresh( name );
+                    }
+                }
+                else
+                {
+                    this.addTab( name, {
+                        selected: results.length === 0, // Select first tab only
+                        title: name,
+                        language: langName
+                    } );
+
+                    if ( results.length === 0 )
+                    {
+                        this.doc.setText( processedText );
+                        this.setLanguage( langName, ext );
+                        this.cursorSet.set( 0, 0 );
+                        this.undoManager.clear();
+                        this._renderCursors();
+                        this._renderSelections();
+                        this._resetGutter();
+                    }
+                }
+
+                results.push( { filePath, name, success: true } );
+            }
+            catch ( error )
+            {
+                console.error( `[LX.CodeEditor] Failed to load file: ${filePath}`, error );
+                results.push( { filePath, success: false, error } );
+            }
+        }
+
+        onComplete?.( this, results, results.length );
+    }
+
+    async _setupEditorWhenVisible()
+    {
+        // Load any font size from local storage
+        // If not, use default size and make sure it's sync by not hardcoding a number by default here
+        const savedFontSize = window.localStorage.getItem( 'lexcodeeditor-font-size' );
+        if ( savedFontSize )
+        {
+            await this._setFontSize( parseInt( savedFontSize ), false );
+        }
+        else
+        {
+            const r: any = document.querySelector( ':root' );
+            const s = getComputedStyle( r );
+            this.fontSize = parseInt( s.getPropertyValue( '--code-editor-font-size' ) );
+            await this._measureChar();
+        }
+
+        LX.emitSignal( '@font-size', this.fontSize );
+
+        LX.doAsync( () => {
+            
+            if ( !this._isReady )
+            {
+                this._isReady = true;
+
+                if ( this.onReady )
+                {
+                    this.onReady( this );
+                }
+
+                console.log( `[LX.CodeEditor] Ready! (font size: ${this.fontSize}px, char size: ${this.charWidth}px)` );
+            }
+        }, 20 );
     }
 
     private _onSelectTab( isNewTabButton: boolean, event: MouseEvent, name: string ): void
@@ -5236,146 +5417,6 @@ export class CodeEditor
             }
             input.remove();
         } );
-    }
-
-    loadFile( file: File | string, options: Record<string, any> = {} ): void
-    {
-        const onLoad = ( text: string, name: string ) =>
-        {
-            // Remove Carriage Return in some cases and sub tabs using spaces
-            text = text.replaceAll( '\r', '' ).replaceAll( /\t|\\t/g, ' '.repeat( this.tabSize ) );
-
-            const ext = LX.getExtension( name );
-            const lang = options.language ?? ( Tokenizer.getLanguage( options.language )
-                ?? ( Tokenizer.getLanguageByExtension( ext ) ?? Tokenizer.getLanguage( 'Plain Text' )! ) );
-            const langName = lang.name;
-
-            if ( this.useFileExplorer || this.skipTabs )
-            {
-                this._storedTabs[name] = {
-                    text,
-                    title: options.title ?? name,
-                    language: langName,
-                    ...options
-                };
-
-                if ( this.useFileExplorer )
-                {
-                    this.addExplorerItem( { id: name, skipVisibility: true, icon: getLanguageIcon( lang, ext ) } );
-                    this.explorer.innerTree.frefresh( name );
-                }
-            }
-            else
-            {
-                this.addTab( name, {
-                    selected: true,
-                    title: options.title ?? name,
-                    language: langName
-                } );
-    
-                this.doc.setText( text );
-                this.setLanguage( langName, ext );
-                this.cursorSet.set( 0, 0 );
-                this.undoManager.clear();
-                this._renderCursors();
-                this._renderSelections();
-                this._resetGutter();
-            }
-
-            if ( options.callback )
-            {
-                options.callback( name, text );
-            }
-        };
-
-        if ( typeof file === 'string' )
-        {
-            const url = file;
-            const name = options.filename ?? url.substring( url.lastIndexOf( '/' ) + 1 );
-
-            LX.request( { url, success: ( text: string ) => {
-                onLoad( text, name );
-            } } );
-        }
-        else
-        {
-            const fr = new FileReader();
-            fr.readAsText( file );
-            fr.onload = ( e ) => {
-                const text = ( e.currentTarget as any ).result;
-                onLoad( text, file.name );
-            };
-        }
-    }
-
-    async loadFiles( files: string[], onComplete?: ( editor: CodeEditor, results: any[], total: number ) => void, async: boolean = false )
-    {
-        if ( !files || files.length === 0 )
-        {
-            onComplete?.( this, [], 0 );
-            return;
-        }
-
-        const results: any[] = [];
-
-        for ( const filePath of files )
-        {
-            try
-            {
-                const text = await LX.requestFileAsync( filePath, 'text' );
-
-                // Process the loaded file
-                const name = filePath.substring( filePath.lastIndexOf( '/' ) + 1 );
-                const processedText = text.replaceAll( '\r', '' ).replaceAll( /\t|\\t/g, ' '.repeat( this.tabSize ) );
-
-                const ext = LX.getExtension( name );
-                const lang = Tokenizer.getLanguageByExtension( ext ) ?? Tokenizer.getLanguage( 'Plain Text' )!;
-                const langName = lang.name;
-
-                if ( this.useFileExplorer || this.skipTabs )
-                {
-                    this._storedTabs[name] = {
-                        text: processedText,
-                        title: name,
-                        language: langName
-                    };
-
-                    if ( this.useFileExplorer )
-                    {
-                        this.addExplorerItem( { id: name, skipVisibility: true, icon: getLanguageIcon( lang, ext ) } );
-                        this.explorer.innerTree.frefresh( name );
-                    }
-                }
-                else
-                {
-                    this.addTab( name, {
-                        selected: results.length === 0, // Select first tab only
-                        title: name,
-                        language: langName
-                    } );
-
-                    if ( results.length === 0 )
-                    {
-                        this.doc.setText( processedText );
-                        this.setLanguage( langName, ext );
-                        this.cursorSet.set( 0, 0 );
-                        this.undoManager.clear();
-                        this._renderCursors();
-                        this._renderSelections();
-                        this._resetGutter();
-                    }
-                }
-
-                results.push( { filePath, name, success: true } );
-            }
-            catch ( error )
-            {
-                console.error( `[LX.CodeEditor] Failed to load file: ${filePath}`, error );
-                results.push( { filePath, success: false, error } );
-            }
-        }
-
-        onComplete?.( this, results, results.length );
     }
 
     // Font Size utils:
