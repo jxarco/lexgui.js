@@ -488,7 +488,10 @@ LX._createCommandbar = function( root: any )
                 if( !langDef ) continue;
                 const key = 'Language: ' + l;
                 const icon: any = langDef?.icon;
-                const iconData = icon ? icon.split( ' ' ) : [];
+                const iconData = (( icon: string | Record<string, string> ) => {
+                    const data: string = icon.constructor === String ? icon : Object.values( icon )[0];
+                    return icon ? data.split( ' ' ) : [];
+                })( icon );
 
                 let value = LX.makeIcon( iconData[0], { svgClass: `${iconData.slice( 1 ).join( ' ' )}` } ).innerHTML;
                 value += key + " <span class='lang-ext'>(" + langDef.extensions + ')</span>';

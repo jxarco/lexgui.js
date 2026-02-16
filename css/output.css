@@ -6462,7 +6462,8 @@ ul.lexassetscontent {
   pointer-events: unset;
   cursor: default;
   height: 22px;
-  padding-left: 6px;
+  padding-left: 0.5rem;
+  padding-right: 1rem;
   display: flex;
   align-items: center;
 }

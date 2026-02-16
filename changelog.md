@@ -2,6 +2,11 @@
 
 ## dev
 
+CodeEditor:
+- Added `options.onCodeChange` to receive callback on code document changed.
+- Added back `CodeEditor.setCustomSuggestions`.
+- Minor fixes.
+
 ## 8.2.6 (master)
 
 Added `Tabs.setIcon(name, icon)`.

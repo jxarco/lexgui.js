@@ -86,27 +86,6 @@
         },
     });
 
-        editor.loadFiles( [
-            "../data/js_sample.js",
-            "../data/ts_sample.ts",
-            "../data/json_sample.json",
-            "../data/css_sample.css",
-            "../data/cpp_sample.cpp",
-            "../data/cpp_header_sample.hpp",
-            "../data/c_sample.c",
-            "../data/xml_sample.xml",
-            "../data/python_sample.py",
-            "../data/rust_sample.rs",
-            "../data/php_sample.php",
-            "../data/localhost.bat",
-            "../data/frag.wgsl",
-            "../changelog.md",
-            "../index.html",
-        ], ( instance, results, numFilesLoaded ) => {
-            console.log( `CodeEditor: ${ numFilesLoaded } files loaded!` );
-            instance.loadTab("js_sample.js");
-        } );
-
         editor.setText(`// Example TypeScript file for syntax highlighting
 
 // Type alias and interface
@@ -174,22 +153,30 @@ const set = new Set<ID>([1, "two"]);
     console.log(identity(nums));
 })();`);
 
-    editor.loadFile("../data/js_sample.js");
-    editor.loadFile("../data/json_sample.json");
-    editor.loadFile("../data/frag.wgsl");
-    editor.loadFile("../data/python_sample.py");
-    editor.loadFile("../data/php_sample.php");
-    editor.loadFile("../data/c_sample.c");
-    editor.loadFile("../data/rust_sample.rs");
-    editor.loadFile("../data/cpp_sample.cpp");
-    editor.loadFile("../data/cpp_header_sample.hpp");
-    editor.loadFile("../data/css_sample.css");
-    editor.loadFile("../data/xml_sample.xml");
-    editor.loadFile("../data/localhost.bat");
+    editor.loadFiles( [
+            "../data/js_sample.js",
+            "../data/ts_sample.ts",
+            "../data/json_sample.json",
+            "../data/css_sample.css",
+            "../data/cpp_sample.cpp",
+            "../data/cpp_header_sample.hpp",
+            "../data/c_sample.c",
+            "../data/xml_sample.xml",
+            "../data/python_sample.py",
+            "../data/rust_sample.rs",
+            "../data/php_sample.php",
+            "../data/localhost.bat",
+            "../data/frag.wgsl",
+            "../changelog.md",
+            "../index.html",
+            "../README.md"
+        ], ( instance, results, numFilesLoaded ) => {
+            console.log( `CodeEditor: ${ numFilesLoaded } files loaded!` );
+            instance.loadTab("js_sample.js");
+        } );
+
     editor.loadFile("../data/animation.bml", { language: "JSON" });
     editor.loadFile("../data/CMakeLists.txt", { language: "CMake" });
-    editor.loadFile("../icons/index.html");
-    editor.loadFile("../README.md");
 
     if( !fileExplorer )
     {

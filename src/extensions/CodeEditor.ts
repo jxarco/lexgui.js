@@ -36,6 +36,7 @@ interface LanguageDef
     states: Record<string, TokenRule[]>;
     lineComment?: string;
     icon?: string | Record<string, string>;
+    reservedWords: string[];
 }
 
 interface TokenizerState
@@ -340,6 +341,7 @@ Tokenizer.registerLanguage( {
             { match: /.+/, type: 'text' }
         ]
     },
+    reservedWords: [],
     icon: 'FileText text-neutral-500'
 } );
 
@@ -384,6 +386,7 @@ Tokenizer.registerLanguage( {
         ...CommonStates,
         ...templateStringStates( [ 'var', 'let', 'const', 'this', 'true', 'false', 'null', 'undefined', 'new', 'typeof', 'instanceof', 'void' ] ),
     },
+    reservedWords: [ ...jsKeywords, ...jsStatements, ...jsBuiltins ],
     icon: 'Js text-yellow-500'
 } );
 
@@ -428,6 +431,7 @@ Tokenizer.registerLanguage( {
         ...CommonStates,
         ...templateStringStates( [ 'var', 'let', 'const', 'this', 'true', 'false', 'null', 'undefined', 'new', 'typeof', 'instanceof', 'void' ] ),
     },
+    reservedWords: [ ...tsKeywords, ...tsTypes, ...jsBuiltins, ...jsStatements ],
     icon: 'Ts text-blue-600'
 } );
 
@@ -475,6 +479,7 @@ Tokenizer.registerLanguage( {
         ],
         ...CommonStates
     },
+    reservedWords: [ ...wgslKeywords, ...wgslBuiltins, ...wgslStatements ],
     icon: 'AlignLeft text-orange-500'
 } );
 
@@ -524,6 +529,7 @@ Tokenizer.registerLanguage( {
         ],
         ...CommonStates
     },
+    reservedWords: [ ...glslKeywords, ...glslBuiltins, ...glslStatements ],
     icon: 'AlignLeft text-neutral-500'
 } );
 
@@ -572,6 +578,7 @@ Tokenizer.registerLanguage( {
         ],
         ...CommonStates
     },
+    reservedWords: [ ...hlslKeywords, ...hlslBuiltins, ...hlslStatements ],
     icon: 'AlignLeft text-purple-500'
 } );
 
@@ -628,6 +635,7 @@ Tokenizer.registerLanguage( {
         ],
         ...CommonStates
     },
+    reservedWords: [ ...pyKeywords, ...pyTypes, ...pyBuiltins, ...pyStatements ],
     icon: 'Python text-cyan-600'
 } );
 
@@ -684,6 +692,7 @@ Tokenizer.registerLanguage( {
         ],
         ...CommonStates
     },
+    reservedWords: [ ...phpKeywords, ...phpTypes, ...phpBuiltins, ...phpStatements ],
     icon: 'Php text-purple-700'
 } );
 
@@ -716,6 +725,7 @@ Tokenizer.registerLanguage({
         ],
         ...CommonStates
     },
+    reservedWords: [ ...cKeywords, ...cStatements ],
     icon: { 'c': 'C text-sky-400', 'h': 'C text-fuchsia-500' }
 });
 
@@ -759,6 +769,7 @@ Tokenizer.registerLanguage({
         ],
         ...CommonStates
     },
+    reservedWords: [ ...cppKeywords, ...cppTypes, ...cppBuiltins, ...cppStatements ],
     icon: { 'cpp': 'CPlusPlus text-sky-400', 'hpp': 'CPlusPlus text-fuchsia-500' }
 });
 
@@ -777,6 +788,7 @@ Tokenizer.registerLanguage({
         ],
         ...CommonStates
     },
+    reservedWords: [],
     icon: 'Json text-yellow-600'
 });
 
@@ -813,6 +825,7 @@ Tokenizer.registerLanguage({
         ],
         ...CommonStates
     },
+    reservedWords: [],
     icon: 'Rss text-orange-600'
 });
 
@@ -880,6 +893,7 @@ Tokenizer.registerLanguage({
         ],
         ...CommonStates
     },
+    reservedWords: [ ...htmlTags ],
     icon: 'Code text-orange-500'
 });
 
@@ -947,6 +961,7 @@ Tokenizer.registerLanguage({
         ],
         ...CommonStates
     },
+    reservedWords: [ ...cssProperties, ...cssPropertyValues, ...cssPseudos ],
     icon: 'Hash text-blue-500'
 });
 
@@ -976,6 +991,7 @@ Tokenizer.registerLanguage({
             { match: /.+/, type: 'string' },
         ]
     },
+    reservedWords: [],
     icon: 'Markdown text-red-500'
 });
 
@@ -985,7 +1001,6 @@ const batchKeywords = [
     'if', 'else', 'for', 'in', 'do', 'goto', 'call', 'exit', 'setlocal', 'endlocal',
     'set', 'echo', 'rem', 'pause', 'cd', 'pushd', 'popd', 'shift', 'start'
 ];
-batchKeywords.push( ...batchKeywords.map( w => w.toUpperCase() ) );
 
 const batchBuiltins = [
     'dir', 'copy', 'move', 'del', 'ren', 'md', 'rd', 'type', 'find', 'findstr',
@@ -1003,7 +1018,7 @@ Tokenizer.registerLanguage({
             { match: /"/, type: 'string', next: 'doubleString' },
             { match: /%[\w]+%/, type: 'type' },
             { match: /\b\d+\b/, type: 'number' },
-            { match: words( batchKeywords ), type: 'keyword' },
+            { match: words( [ ...batchKeywords, ...batchKeywords.map( w => w.toUpperCase() ) ] ), type: 'keyword' },
             { match: words( batchBuiltins ), type: 'builtin' },
             { match: /@echo/, type: 'statement' },
             { match: /[a-zA-Z_]\w*/, type: 'text' },
@@ -1012,6 +1027,7 @@ Tokenizer.registerLanguage({
         ],
         ...CommonStates
     },
+    reservedWords: [ ...batchKeywords, ...batchBuiltins ],
     icon: 'Terminal text-gray-300'
 });
 
@@ -1023,7 +1039,6 @@ const cmakeCommands = [
     'endforeach', 'while', 'endwhile', 'function', 'endfunction', 'macro', 'endmacro',
     'find_package', 'include', 'message', 'install', 'add_subdirectory', 'configure_file'
 ];
-cmakeCommands.push( ...cmakeCommands.map( w => w.toUpperCase() ) );
 
 Tokenizer.registerLanguage({
     name: 'CMake',
@@ -1035,7 +1050,7 @@ Tokenizer.registerLanguage({
             { match: /"/, type: 'string', next: 'doubleString' },
             { match: /\$\{[^}]+\}/, type: 'type' },
             { match: /\b\d+\.?\d*\b/, type: 'number' },
-            { match: words( cmakeCommands ), type: 'keyword' },
+            { match: words( [ ...cmakeCommands, ...cmakeCommands.map( w => w.toUpperCase() ) ] ), type: 'keyword' },
             { match: /\b[A-Z_][A-Z0-9_]*\b/, type: 'builtin' },
             { match: /[a-zA-Z_]\w*/, type: 'text' },
             { match: /[(){}]/, type: 'symbol' },
@@ -1043,6 +1058,7 @@ Tokenizer.registerLanguage({
         ],
         ...CommonStates
     },
+    reservedWords: [ ...cmakeCommands ],
     icon: 'AlignLeft text-neutral-500'
 });
 
@@ -1092,6 +1108,7 @@ Tokenizer.registerLanguage({
         ],
         ...CommonStates
     },
+    reservedWords: [ ...rustKeywords, ...rustTypes, ...rustBuiltins ],
     icon: 'Rust text-orange-400'
 });
 
@@ -1102,11 +1119,17 @@ Tokenizer.registerLanguage({
 
 class CodeDocument
 {
+    private onChange: ( ( doc: CodeDocument ) => void ) | undefined = undefined;
     private _lines: string[] = [ '' ];
 
     get lineCount(): number
     {
         return this._lines.length;
+    }
+
+    constructor( onChange?: ( doc: CodeDocument ) => void  )
+    {
+        this.onChange = onChange;
     }
 
     getLine( n: number ): string
@@ -1126,6 +1149,8 @@ class CodeDocument
         {
             this._lines = [ '' ];
         }
+
+        if( this.onChange ) this.onChange( this );
     }
 
     getCharAt( line: number, col: number ): string | undefined
@@ -1221,6 +1246,8 @@ class CodeDocument
             this._lines.splice( line + parts.length - 1, 0, parts[ parts.length - 1 ] + after );
         }
 
+        if( this.onChange ) this.onChange( this );
+
         return { type: 'insert', line, col, text };
     }
 
@@ -1258,6 +1285,8 @@ class CodeDocument
             }
         }
 
+        if( this.onChange ) this.onChange( this );
+
         return { type: 'delete', line, col, text: deletedText };
     }
 
@@ -1268,7 +1297,9 @@ class CodeDocument
     {
         const insertAt = afterLine + 1;
         this._lines.splice( insertAt, 0, text );
-        // Represent as inserting a newline + text at end of afterLine
+
+        if( this.onChange ) this.onChange( this );
+
         return { type: 'insert', line: Math.max( afterLine, 0 ), col: afterLine >= 0 ? this._lines[ afterLine ]?.length ?? 0 : 0, text: '\n' + text };
     }
 
@@ -1283,6 +1314,9 @@ class CodeDocument
         {
             this._lines = [ '' ];
         }
+
+        if( this.onChange ) this.onChange( this );
+
         return { type: 'delete', line: Math.max( line - 1, 0 ), col: line > 0 ? ( this._lines[ line - 1 ]?.length ?? 0 ) : 0, text: '\n' + text };
     }
 
@@ -1290,6 +1324,9 @@ class CodeDocument
     {
         const oldText = this._lines[ line ];
         this._lines[ line ] = newText;
+
+        if( this.onChange ) this.onChange( this );
+
         return { type: 'replaceLine', line, col: 0, text: newText, oldText };
     }
 
@@ -2360,6 +2397,7 @@ export class CodeEditor
     onSelectTab: ( name: string, editor: CodeEditor ) => void;
     onReady: ( ( editor: CodeEditor ) => void ) | undefined;
     onCreateFile: ( ( editor: CodeEditor ) => void ) | undefined;
+    onCodeChange: ( ( doc: CodeDocument ) => void ) | undefined;
 
     private _inputArea!: HTMLTextAreaElement;
 
@@ -2450,6 +2488,7 @@ export class CodeEditor
         this.onNewTab = options.onNewTab;
         this.onSelectTab = options.onSelectTab;
         this.onReady = options.onReady;
+        this.onCodeChange = options.onCodeChange;
 
         this.language = Tokenizer.getLanguage( this.highlight ) ?? Tokenizer.getLanguage( 'Plain Text' )!;
         this.symbolTable = new SymbolTable();
@@ -2727,15 +2766,18 @@ export class CodeEditor
         }
 
         // Starter code tab container
-        this.addTab( options.name || 'untitled', {
-            language: this.highlight,
-            title: options.title
-        } );
+        if( options.defaultTab ?? true )
+        {
+            this.addTab( options.name || 'untitled', {
+                language: this.highlight,
+                title: options.title
+            } );
 
-        // Initial render
-        this._renderAllLines();
-        this._renderCursors();
-
+            // Initial render
+            this._renderAllLines();
+            this._renderCursors();
+        }
+        
         this._init();
     }
 
@@ -2822,6 +2864,8 @@ export class CodeEditor
 
     setText( text: string ): void
     {
+        if( !this.currentTab ) return;
+
         this.doc.setText( text );
         this.cursorSet.set( 0, 0 );
         this.undoManager.clear();
@@ -2908,7 +2952,7 @@ export class CodeEditor
         const codeTab : CodeTab = {
             name,
             dom,
-            doc: new CodeDocument(),
+            doc: new CodeDocument( this.onCodeChange ),
             cursorSet: new CursorSet(),
             undoManager: new UndoManager(),
             language: langName,
@@ -2942,14 +2986,15 @@ export class CodeEditor
         {
             this.currentTab = codeTab;
             this._updateDataInfoPanel( '@tab-name', name );
+            this.setLanguage( langName, extension );
         }
 
         if( options.text )
         {
-            this.doc.setText( options.text );
-            this.setLanguage( langName, extension );
-            this.cursorSet.set( 0, 0 );
-            this.undoManager.clear();
+            codeTab.doc.setText( options.text );
+            codeTab.cursorSet.set( 0, 0 );
+            codeTab.undoManager.clear();
+            this._renderAllLines();
             this._renderCursors();
             this._renderSelections();
             this._resetGutter();
@@ -3018,6 +3063,17 @@ export class CodeEditor
         }
     }
 
+    setCustomSuggestions( suggestions: string[] )
+    {
+        if( !suggestions || suggestions.constructor !== Array )
+        {
+            console.warn( 'suggestions should be a string array!' );
+            return;
+        }
+
+        this.customSuggestions = suggestions;
+    }
+
     private _onSelectTab( isNewTabButton: boolean, event: MouseEvent, name: string ): void
     {
         if ( this.disableEdition )
@@ -3038,7 +3094,7 @@ export class CodeEditor
         this.language = Tokenizer.getLanguage( this.currentTab.language ) ?? Tokenizer.getLanguage( 'Plain Text' )!;
         LX.emitSignal( '@highlight', this.currentTab.language );
         
-        this._rebuildLines();
+        this._renderAllLines();
         this._afterCursorMove();
 
         if ( !isNewTabButton && this.onSelectTab )
@@ -3365,6 +3421,8 @@ export class CodeEditor
      */
     private _renderAllLines(): void
     {
+        if ( !this.currentTab ) return;
+
         this.codeContainer.innerHTML = '';
         this._lineElements = [];
         this._lineStates = [];
@@ -3483,6 +3541,8 @@ export class CodeEditor
 
     private _renderCursors(): void
     {
+        if ( !this.currentTab ) return;
+
         this.cursorsLayer.innerHTML = '';
 
         for ( const sel of this.cursorSet.cursors )
@@ -3500,6 +3560,8 @@ export class CodeEditor
 
     private _renderSelections(): void
     {
+        if ( !this.currentTab ) return;
+
         this.selectionsLayer.innerHTML = '';
 
         for ( const sel of this.cursorSet.cursors )
@@ -3596,6 +3658,8 @@ export class CodeEditor
 
     private _onKeyDown( e: KeyboardEvent ): void
     {
+        if ( !this.currentTab ) return;
+
         // Ignore events during IME / dead key composition
         if ( this._composing || e.key === 'Dead' ) return;
 
@@ -4768,14 +4832,14 @@ export class CodeEditor
             return;
         }
 
-        const suggestions: Array<{ label: string, kind?: string, detail?: string }> = [];
+        const suggestions: Array<{ label: string, kind?: string, scope?: string, detail?: string }> = [];
         const added = new Set<string>();
 
-        const addSuggestion = ( label: string, kind?: string, detail?: string ) =>
+        const addSuggestion = ( label: string, kind?: string, scope?: string, detail?: string ) =>
         {
             if ( !added.has( label ) )
             {
-                suggestions.push( { label, kind, detail } );
+                suggestions.push( { label, kind, scope, detail } );
                 added.add( label );
             }
         };
@@ -4786,7 +4850,16 @@ export class CodeEditor
         {
             if ( symbol.name.toLowerCase().startsWith( word.toLowerCase() ) )
             {
-                addSuggestion( symbol.name, symbol.kind, `${symbol.kind} in ${symbol.scope}` );
+                addSuggestion( symbol.name, symbol.kind, symbol.scope, `${symbol.kind} in ${symbol.scope}` );
+            }
+        }
+
+        // Add language reserved keys
+        for ( const reservedWord of this.language.reservedWords )
+        {
+            if ( reservedWord.toLowerCase().startsWith( word.toLowerCase() ) )
+            {
+                addSuggestion( reservedWord );
             }
         }
 
@@ -4799,7 +4872,7 @@ export class CodeEditor
 
             if ( label.toLowerCase().startsWith( word.toLowerCase() ) )
             {
-                addSuggestion( label, kind, detail );
+                addSuggestion( label, kind, undefined, detail );
             }
         }
 
@@ -5061,6 +5134,8 @@ export class CodeEditor
 
     getMaxLineLength(): number
     {
+        if ( !this.currentTab ) return 0;
+
         let max = 0;
         for ( let i = 0; i < this.doc.lineCount; i++ )
         {
@@ -5079,7 +5154,7 @@ export class CodeEditor
         this._cachedStatusPanelHeight = this.statusPanel?.root.getBoundingClientRect().height ?? 0;
 
         const maxLineLength = this.getMaxLineLength();
-        const lineCount = this.doc.lineCount;
+        const lineCount = this.currentTab ? this.doc.lineCount : 0;
         const viewportChars = Math.floor( ( this.codeScroller.clientWidth - this.xPadding ) / this.charWidth );
         const viewportLines = Math.floor( this.codeScroller.clientHeight / this.lineHeight );
 
