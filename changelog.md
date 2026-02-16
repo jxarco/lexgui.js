@@ -2,28 +2,23 @@
 
 ## dev
 
-Fixed Progress component default `blue-500` color.
+## 8.3.0 (master)
 
 CodeEditor:
-- Added `options.onCodeChange` to receive callback on code document changed.
-- Added back `CodeEditor.setCustomSuggestions` and `CodeEditor.appendText`.
-- Added more WGSL builtins words.
-- Minor fixes.
-
-## 8.2.6 (master)
-
 Added `Tabs.setIcon(name, icon)`.
 Added DropdownMenu item option `useKbdSpecialKeys` (true).
 Added `LX.requestFileAsync` util.
 Added support for AlertDialog `options.cancelCallback`.
 Replace `options.addDefault` for `options.useDefaultContextMenuItems (true)` in NodeTree.
 Added support for `options.contextMenuTitle` in NodeTree.
+Fixed Progress component default `blue-500` color.
 
 Full refactor for CodeEditor:
 - Improved robustness and fixed several minor bugs.
 - Improved symbol detection.
 - Added support to write Backtick char (`).
 - Added support for `HLSL` language.
+- Added `options.onCodeChange` to receive callback on code document changed.
 - `options.files` moved to `CodeEditor.loadFiles`.
 - Removed legacy `options.onsave` and `options.onrun`.
 - Disabled virtual scrolling until next version.

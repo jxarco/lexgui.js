@@ -14,6 +14,7 @@ interface LanguageDef {
     states: Record<string, TokenRule[]>;
     lineComment?: string;
     icon?: string | Record<string, string>;
+    reservedWords: string[];
 }
 interface TokenizerState {
     stack: string[];
@@ -41,8 +42,10 @@ export declare class Tokenizer {
     private static _mergeTokens;
 }
 declare class CodeDocument {
+    private onChange;
     private _lines;
     get lineCount(): number;
+    constructor(onChange?: (doc: CodeDocument) => void);
     getLine(n: number): string;
     getText(separator?: string): string;
     setText(text: string): void;
@@ -304,6 +307,7 @@ export declare class CodeEditor {
     onSelectTab: (name: string, editor: CodeEditor) => void;
     onReady: ((editor: CodeEditor) => void) | undefined;
     onCreateFile: ((editor: CodeEditor) => void) | undefined;
+    onCodeChange: ((doc: CodeDocument) => void) | undefined;
     private _inputArea;
     private _lineStates;
     private _lineElements;
@@ -346,13 +350,17 @@ export declare class CodeEditor {
     clear(): void;
     addExplorerItem(item: any): void;
     setText(text: string): void;
+    appendText(text: string): void;
     getText(): string;
     setLanguage(name: string, extension?: string): void;
     focus(): void;
-    _setupEditorWhenVisible(): Promise<void>;
     addTab(name: string, options?: Record<string, any>): CodeTab;
     loadTab(name: string): void;
     closeTab(name: string): void;
+    setCustomSuggestions(suggestions: string[]): void;
+    loadFile(file: File | string, options?: Record<string, any>): void;
+    loadFiles(files: string[], onComplete?: (editor: CodeEditor, results: any[], total: number) => void, async?: boolean): Promise<void>;
+    _setupEditorWhenVisible(): Promise<void>;
     private _onSelectTab;
     private _onNewTab;
     private _onCreateNewFile;
@@ -450,8 +458,6 @@ export declare class CodeEditor {
     private _resizeScrollBars;
     private _syncScrollBars;
     private _doLoadFromFile;
-    loadFile(file: File | string, options?: Record<string, any>): void;
-    loadFiles(files: string[], onComplete?: (editor: CodeEditor, results: any[], total: number) => void, async?: boolean): Promise<void>;
     private _setFontSize;
     private _applyFontSizeOffset;
     private _increaseFontSize;

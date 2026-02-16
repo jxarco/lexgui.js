@@ -226,6 +226,7 @@ Tokenizer.registerLanguage({
             { match: /.+/, type: 'text' }
         ]
     },
+    reservedWords: [],
     icon: 'FileText text-neutral-500'
 });
 // JavaScript
@@ -265,6 +266,7 @@ Tokenizer.registerLanguage({
         ...CommonStates,
         ...templateStringStates(['var', 'let', 'const', 'this', 'true', 'false', 'null', 'undefined', 'new', 'typeof', 'instanceof', 'void']),
     },
+    reservedWords: [...jsKeywords, ...jsStatements, ...jsBuiltins],
     icon: 'Js text-yellow-500'
 });
 // TypeScript
@@ -305,6 +307,7 @@ Tokenizer.registerLanguage({
         ...CommonStates,
         ...templateStringStates(['var', 'let', 'const', 'this', 'true', 'false', 'null', 'undefined', 'new', 'typeof', 'instanceof', 'void']),
     },
+    reservedWords: [...tsKeywords, ...tsTypes, ...jsBuiltins, ...jsStatements],
     icon: 'Ts text-blue-600'
 });
 // WGSL (WebGPU Shading Language)
@@ -325,9 +328,22 @@ const wgslStatements = [
 const wgslBuiltins = [
     'position', 'vertex_index', 'instance_index', 'front_facing', 'frag_depth',
     'local_invocation_id', 'local_invocation_index', 'global_invocation_id', 'workgroup_id', 'num_workgroups',
-    'abs', 'acos', 'asin', 'atan', 'ceil', 'clamp', 'cos', 'cross', 'degrees', 'determinant', 'distance',
-    'dot', 'exp', 'floor', 'fract', 'inverseSqrt', 'length', 'log', 'max', 'min', 'mix', 'normalize',
-    'pow', 'radians', 'reflect', 'refract', 'round', 'sign', 'sin', 'smoothstep', 'sqrt', 'step', 'tan', 'transpose'
+    'abs', 'acos', 'acosh', 'asin', 'asinh', 'atan', 'atanh', 'atan2', 'ceil', 'clamp', 'cos', 'cosh',
+    'cross', 'degrees', 'determinant', 'distance', 'dot', 'exp', 'exp2', 'floor', 'fma', 'fract', 'inverseSqrt',
+    'length', 'log', 'log2', 'max', 'min', 'mix', 'normalize', 'pow', 'radians', 'reflect', 'refract', 'round',
+    'saturate', 'sign', 'sin', 'sinh', 'smoothstep', 'sqrt', 'step', 'tan', 'tanh', 'transpose', 'trunc',
+    'textureSample', 'textureSampleBias', 'textureSampleLevel', 'textureSampleGrad',
+    'textureSampleCompare', 'textureSampleCompareLevel', 'textureSampleBaseClampToEdge',
+    'textureLoad', 'textureStore', 'textureGather', 'textureGatherCompare',
+    'textureDimensions', 'textureNumLayers', 'textureNumLevels', 'textureNumSamples',
+    'pack4x8snorm', 'pack4x8unorm', 'pack2x16snorm', 'pack2x16unorm', 'pack2x16float',
+    'unpack4x8snorm', 'unpack4x8unorm', 'unpack2x16snorm', 'unpack2x16unorm', 'unpack2x16float',
+    'atomicLoad', 'atomicStore', 'atomicAdd', 'atomicSub', 'atomicMax', 'atomicMin',
+    'atomicAnd', 'atomicOr', 'atomicXor', 'atomicExchange', 'atomicCompareExchangeWeak',
+    'dpdx', 'dpdxCoarse', 'dpdxFine', 'dpdy', 'dpdyCoarse', 'dpdyFine', 'fwidth', 'fwidthCoarse', 'fwidthFine',
+    'select', 'arrayLength', 'countLeadingZeros', 'countOneBits', 'countTrailingZeros',
+    'extractBits', 'firstLeadingBit', 'firstTrailingBit', 'insertBits', 'reverseBits',
+    'storageBarrier', 'workgroupBarrier', 'workgroupUniformLoad'
 ];
 Tokenizer.registerLanguage({
     name: 'WGSL',
@@ -347,6 +363,7 @@ Tokenizer.registerLanguage({
         ],
         ...CommonStates
     },
+    reservedWords: [...wgslKeywords, ...wgslBuiltins, ...wgslStatements],
     icon: 'AlignLeft text-orange-500'
 });
 // GLSL (OpenGL/WebGL Shading Language)
@@ -391,6 +408,7 @@ Tokenizer.registerLanguage({
         ],
         ...CommonStates
     },
+    reservedWords: [...glslKeywords, ...glslBuiltins, ...glslStatements],
     icon: 'AlignLeft text-neutral-500'
 });
 // HLSL (DirectX Shader Language)
@@ -434,6 +452,7 @@ Tokenizer.registerLanguage({
         ],
         ...CommonStates
     },
+    reservedWords: [...hlslKeywords, ...hlslBuiltins, ...hlslStatements],
     icon: 'AlignLeft text-purple-500'
 });
 // Python
@@ -484,6 +503,7 @@ Tokenizer.registerLanguage({
         ],
         ...CommonStates
     },
+    reservedWords: [...pyKeywords, ...pyTypes, ...pyBuiltins, ...pyStatements],
     icon: 'Python text-cyan-600'
 });
 // PHP
@@ -533,6 +553,7 @@ Tokenizer.registerLanguage({
         ],
         ...CommonStates
     },
+    reservedWords: [...phpKeywords, ...phpTypes, ...phpBuiltins, ...phpStatements],
     icon: 'Php text-purple-700'
 });
 // C
@@ -561,6 +582,7 @@ Tokenizer.registerLanguage({
         ],
         ...CommonStates
     },
+    reservedWords: [...cKeywords, ...cStatements],
     icon: { 'c': 'C text-sky-400', 'h': 'C text-fuchsia-500' }
 });
 // C++
@@ -598,6 +620,7 @@ Tokenizer.registerLanguage({
         ],
         ...CommonStates
     },
+    reservedWords: [...cppKeywords, ...cppTypes, ...cppBuiltins, ...cppStatements],
     icon: { 'cpp': 'CPlusPlus text-sky-400', 'hpp': 'CPlusPlus text-fuchsia-500' }
 });
 // JSON
@@ -614,6 +637,7 @@ Tokenizer.registerLanguage({
         ],
         ...CommonStates
     },
+    reservedWords: [],
     icon: 'Json text-yellow-600'
 });
 // XML
@@ -648,8 +672,17 @@ Tokenizer.registerLanguage({
         ],
         ...CommonStates
     },
+    reservedWords: [],
     icon: 'Rss text-orange-600'
 });
+// HTML
+const htmlTags = [
+    'html', 'head', 'body', 'title', 'meta', 'link', 'script', 'style',
+    'div', 'span', 'p', 'a', 'img', 'ul', 'ol', 'li', 'table', 'tr', 'td', 'th',
+    'form', 'input', 'button', 'select', 'option', 'textarea', 'label',
+    'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'header', 'footer', 'nav', 'section', 'article',
+    'aside', 'main', 'figure', 'figcaption', 'video', 'audio', 'source', 'canvas', 'svg'
+];
 Tokenizer.registerLanguage({
     name: 'HTML',
     extensions: ['html'],
@@ -704,8 +737,15 @@ Tokenizer.registerLanguage({
         ],
         ...CommonStates
     },
+    reservedWords: [...htmlTags],
     icon: 'Code text-orange-500'
 });
+// CSS
+const cssProperties = [
+    'color', 'background', 'border', 'margin', 'padding', 'font', 'display', 'position',
+    'width', 'height', 'top', 'left', 'right', 'bottom', 'flex', 'grid', 'z-index',
+    'opacity', 'transform', 'transition', 'animation', 'content', 'visibility'
+];
 const cssPropertyValues = [
     'inherit', 'initial', 'unset', 'revert', 'revert-layer', 'auto', 'none', 'hidden', 'visible', 'collapse',
     'block', 'inline', 'inline-block', 'flex', 'inline-flex', 'grid', 'inline-grid', 'contents', 'list-item',
@@ -714,6 +754,10 @@ const cssPropertyValues = [
     'left', 'right', 'center', 'top', 'bottom', 'start', 'end', 'stretch', 'space-between', 'space-around', 'space-evenly',
     'repeat', 'no-repeat', 'repeat-x', 'repeat-y', 'cover', 'contain', 'pointer', 'default', 'move', 'text', 'not-allowed',
     'transparent', 'currentColor'
+];
+const cssPseudos = [
+    'hover', 'active', 'focus', 'visited', 'link', 'before', 'after', 'first-child',
+    'last-child', 'nth-child', 'not', 'root', 'disabled', 'checked'
 ];
 Tokenizer.registerLanguage({
     name: 'CSS',
@@ -756,6 +800,7 @@ Tokenizer.registerLanguage({
         ],
         ...CommonStates
     },
+    reservedWords: [...cssProperties, ...cssPropertyValues, ...cssPseudos],
     icon: 'Hash text-blue-500'
 });
 // Markdown
@@ -783,6 +828,7 @@ Tokenizer.registerLanguage({
             { match: /.+/, type: 'string' },
         ]
     },
+    reservedWords: [],
     icon: 'Markdown text-red-500'
 });
 // Batch
@@ -790,7 +836,6 @@ const batchKeywords = [
     'if', 'else', 'for', 'in', 'do', 'goto', 'call', 'exit', 'setlocal', 'endlocal',
     'set', 'echo', 'rem', 'pause', 'cd', 'pushd', 'popd', 'shift', 'start'
 ];
-batchKeywords.push(...batchKeywords.map(w => w.toUpperCase()));
 const batchBuiltins = [
     'dir', 'copy', 'move', 'del', 'ren', 'md', 'rd', 'type', 'find', 'findstr',
     'tasklist', 'taskkill', 'ping', 'ipconfig', 'netstat', 'cls', 'title', 'color'
@@ -806,7 +851,7 @@ Tokenizer.registerLanguage({
             { match: /"/, type: 'string', next: 'doubleString' },
             { match: /%[\w]+%/, type: 'type' },
             { match: /\b\d+\b/, type: 'number' },
-            { match: words(batchKeywords), type: 'keyword' },
+            { match: words([...batchKeywords, ...batchKeywords.map(w => w.toUpperCase())]), type: 'keyword' },
             { match: words(batchBuiltins), type: 'builtin' },
             { match: /@echo/, type: 'statement' },
             { match: /[a-zA-Z_]\w*/, type: 'text' },
@@ -815,6 +860,7 @@ Tokenizer.registerLanguage({
         ],
         ...CommonStates
     },
+    reservedWords: [...batchKeywords, ...batchBuiltins],
     icon: 'Terminal text-gray-300'
 });
 // CMake
@@ -824,7 +870,6 @@ const cmakeCommands = [
     'endforeach', 'while', 'endwhile', 'function', 'endfunction', 'macro', 'endmacro',
     'find_package', 'include', 'message', 'install', 'add_subdirectory', 'configure_file'
 ];
-cmakeCommands.push(...cmakeCommands.map(w => w.toUpperCase()));
 Tokenizer.registerLanguage({
     name: 'CMake',
     extensions: ['cmake', 'txt', 'cmake-cache'],
@@ -835,7 +880,7 @@ Tokenizer.registerLanguage({
             { match: /"/, type: 'string', next: 'doubleString' },
             { match: /\$\{[^}]+\}/, type: 'type' },
             { match: /\b\d+\.?\d*\b/, type: 'number' },
-            { match: words(cmakeCommands), type: 'keyword' },
+            { match: words([...cmakeCommands, ...cmakeCommands.map(w => w.toUpperCase())]), type: 'keyword' },
             { match: /\b[A-Z_][A-Z0-9_]*\b/, type: 'builtin' },
             { match: /[a-zA-Z_]\w*/, type: 'text' },
             { match: /[(){}]/, type: 'symbol' },
@@ -843,6 +888,7 @@ Tokenizer.registerLanguage({
         ],
         ...CommonStates
     },
+    reservedWords: [...cmakeCommands],
     icon: 'AlignLeft text-neutral-500'
 });
 // Rust
@@ -887,6 +933,7 @@ Tokenizer.registerLanguage({
         ],
         ...CommonStates
     },
+    reservedWords: [...rustKeywords, ...rustTypes, ...rustBuiltins],
     icon: 'Rust text-orange-400'
 });
 //  ____                            _
@@ -894,9 +941,13 @@ Tokenizer.registerLanguage({
 // |  |  | . |  _| | |     | -_|   |  _|
 // |____/|___|___|___|_|_|_|___|_|_|_|
 class CodeDocument {
+    onChange = undefined;
     _lines = [''];
     get lineCount() {
         return this._lines.length;
+    }
+    constructor(onChange) {
+        this.onChange = onChange;
     }
     getLine(n) {
         return this._lines[n] ?? '';
@@ -909,6 +960,8 @@ class CodeDocument {
         if (this._lines.length === 0) {
             this._lines = [''];
         }
+        if (this.onChange)
+            this.onChange(this);
     }
     getCharAt(line, col) {
         const l = this._lines[line];
@@ -983,6 +1036,8 @@ class CodeDocument {
             }
             this._lines.splice(line + parts.length - 1, 0, parts[parts.length - 1] + after);
         }
+        if (this.onChange)
+            this.onChange(this);
         return { type: 'insert', line, col, text };
     }
     /**
@@ -1011,6 +1066,8 @@ class CodeDocument {
                 this._lines.splice(currentLine + 1, 1);
             }
         }
+        if (this.onChange)
+            this.onChange(this);
         return { type: 'delete', line, col, text: deletedText };
     }
     /**
@@ -1019,7 +1076,8 @@ class CodeDocument {
     insertLine(afterLine, text = '') {
         const insertAt = afterLine + 1;
         this._lines.splice(insertAt, 0, text);
-        // Represent as inserting a newline + text at end of afterLine
+        if (this.onChange)
+            this.onChange(this);
         return { type: 'insert', line: Math.max(afterLine, 0), col: afterLine >= 0 ? this._lines[afterLine]?.length ?? 0 : 0, text: '\n' + text };
     }
     /**
@@ -1031,11 +1089,15 @@ class CodeDocument {
         if (this._lines.length === 0) {
             this._lines = [''];
         }
+        if (this.onChange)
+            this.onChange(this);
         return { type: 'delete', line: Math.max(line - 1, 0), col: line > 0 ? (this._lines[line - 1]?.length ?? 0) : 0, text: '\n' + text };
     }
     replaceLine(line, newText) {
         const oldText = this._lines[line];
         this._lines[line] = newText;
+        if (this.onChange)
+            this.onChange(this);
         return { type: 'replaceLine', line, col: 0, text: newText, oldText };
     }
     /**
@@ -1793,6 +1855,7 @@ class CodeEditor {
     onSelectTab;
     onReady;
     onCreateFile;
+    onCodeChange;
     _inputArea;
     // State:
     _lineStates = []; // tokenizer state at end of each line
@@ -1865,6 +1928,7 @@ class CodeEditor {
         this.onNewTab = options.onNewTab;
         this.onSelectTab = options.onSelectTab;
         this.onReady = options.onReady;
+        this.onCodeChange = options.onCodeChange;
         this.language = Tokenizer.getLanguage(this.highlight) ?? Tokenizer.getLanguage('Plain Text');
         this.symbolTable = new SymbolTable();
         // File explorer
@@ -1924,7 +1988,7 @@ class CodeEditor {
         area.attach(this.root);
         this.codeScroller = this.codeArea.root;
         // Add Line numbers gutter, only the container, line numbers are in the same line div
-        this.lineGutter = LX.makeElement('div', 'w-16 mt-8 overflow-hidden absolute top-0 bg-inherit z-1', null, this.codeScroller);
+        this.lineGutter = LX.makeElement('div', `w-16 overflow-hidden absolute top-0 bg-inherit z-10 ${this.skipTabs ? '' : 'mt-8'}`, null, this.codeScroller);
         // Add code sizer, which will have the code elements
         this.codeSizer = LX.makeElement('div', 'pseudoparent-tabs w-full', null, this.codeScroller);
         // Cursors and selections
@@ -2087,13 +2151,15 @@ class CodeEditor {
             });
         }
         // Starter code tab container
-        this.addTab(options.name || 'untitled', {
-            language: this.highlight,
-            title: options.title
-        });
-        // Initial render
-        this._renderAllLines();
-        this._renderCursors();
+        if (options.defaultTab ?? true) {
+            this.addTab(options.name || 'untitled', {
+                language: this.highlight,
+                title: options.title
+            });
+            // Initial render
+            this._renderAllLines();
+            this._renderCursors();
+        }
         this._init();
     }
     _init() {
@@ -2159,6 +2225,8 @@ class CodeEditor {
     }
     ;
     setText(text) {
+        if (!this.currentTab)
+            return;
         this.doc.setText(text);
         this.cursorSet.set(0, 0);
         this.undoManager.clear();
@@ -2167,6 +2235,26 @@ class CodeEditor {
         this._renderCursors();
         this._renderSelections();
         this.resize(true);
+    }
+    appendText(text) {
+        const cursor = this.cursorSet.getPrimary();
+        const { line, col } = cursor.head;
+        const op = this.doc.insert(line, col, text);
+        this.undoManager.record(op, this.cursorSet.getCursorPositions());
+        // Move cursor to end of inserted text
+        const lines = text.split(/\r?\n/);
+        if (lines.length === 1) {
+            cursor.head = { line, col: col + text.length };
+        }
+        else {
+            cursor.head = { line: line + lines.length - 1, col: lines[lines.length - 1].length };
+        }
+        cursor.anchor = { ...cursor.head };
+        this._rebuildLines();
+        this._renderCursors();
+        this._renderSelections();
+        this.resize();
+        this._scrollCursorIntoView();
     }
     getText() {
         return this.doc.getText();
@@ -2178,7 +2266,9 @@ class CodeEditor {
         this.language = lang;
         if (this.currentTab) {
             this.currentTab.language = name;
-            this.tabs.setIcon(this.currentTab.name, getLanguageIcon(lang, extension));
+            if (!this.skipTabs) {
+                this.tabs.setIcon(this.currentTab.name, getLanguageIcon(lang, extension));
+            }
         }
         this._lineStates = [];
         this._renderAllLines();
@@ -2186,30 +2276,6 @@ class CodeEditor {
     }
     focus() {
         this._inputArea.focus();
-    }
-    async _setupEditorWhenVisible() {
-        // Load any font size from local storage
-        // If not, use default size and make sure it's sync by not hardcoding a number by default here
-        const savedFontSize = window.localStorage.getItem('lexcodeeditor-font-size');
-        if (savedFontSize) {
-            await this._setFontSize(parseInt(savedFontSize), false);
-        }
-        else {
-            const r = document.querySelector(':root');
-            const s = getComputedStyle(r);
-            this.fontSize = parseInt(s.getPropertyValue('--code-editor-font-size'));
-            await this._measureChar();
-        }
-        LX.emitSignal('@font-size', this.fontSize);
-        LX.doAsync(() => {
-            if (!this._isReady) {
-                this._isReady = true;
-                if (this.onReady) {
-                    this.onReady(this);
-                }
-                console.log(`[LX.CodeEditor] Ready! (font size: ${this.fontSize}px, char size: ${this.charWidth}px)`);
-            }
-        }, 20);
     }
     addTab(name, options = {}) {
         const isNewTabButton = name === '+';
@@ -2222,7 +2288,7 @@ class CodeEditor {
         const codeTab = {
             name,
             dom,
-            doc: new CodeDocument(),
+            doc: new CodeDocument(this.onCodeChange),
             cursorSet: new CursorSet(),
             undoManager: new UndoManager(),
             language: langName,
@@ -2230,34 +2296,37 @@ class CodeEditor {
         };
         this._openedTabs[name] = codeTab;
         this._loadedTabs[name] = codeTab;
-        this.tabs.add(name, dom, {
-            selected,
-            icon,
-            fixed: isNewTabButton,
-            title: codeTab.title,
-            onSelect: this._onSelectTab.bind(this, isNewTabButton),
-            onContextMenu: this._onContextMenuTab.bind(this, isNewTabButton),
-            allowDelete: this.allowClosingTabs,
-            indexOffset: options.indexOffset
-        });
         if (this.useFileExplorer && !isNewTabButton) {
             this.addExplorerItem({ id: name, skipVisibility: true, icon });
             this.explorer.innerTree.frefresh(name);
         }
+        if (!this.skipTabs) {
+            this.tabs.add(name, dom, {
+                selected,
+                icon,
+                fixed: isNewTabButton,
+                title: codeTab.title,
+                onSelect: this._onSelectTab.bind(this, isNewTabButton),
+                onContextMenu: this._onContextMenuTab.bind(this, isNewTabButton),
+                allowDelete: this.allowClosingTabs,
+                indexOffset: options.indexOffset
+            });
+        }
         // Move into the sizer..
         this.codeSizer.appendChild(dom);
-        if (selected) {
-            this.currentTab = codeTab;
-            this._updateDataInfoPanel('@tab-name', name);
-        }
         if (options.text) {
-            this.doc.setText(options.text);
-            this.setLanguage(langName, extension);
-            this.cursorSet.set(0, 0);
-            this.undoManager.clear();
+            codeTab.doc.setText(options.text);
+            codeTab.cursorSet.set(0, 0);
+            codeTab.undoManager.clear();
+            this._renderAllLines();
             this._renderCursors();
             this._renderSelections();
             this._resetGutter();
+        }
+        if (selected) {
+            this.currentTab = codeTab;
+            this._updateDataInfoPanel('@tab-name', name);
+            this.setLanguage(langName, extension);
         }
         return codeTab;
     }
@@ -2305,6 +2374,142 @@ class CodeEditor {
             }
         }
     }
+    setCustomSuggestions(suggestions) {
+        if (!suggestions || suggestions.constructor !== Array) {
+            console.warn('suggestions should be a string array!');
+            return;
+        }
+        this.customSuggestions = suggestions;
+    }
+    loadFile(file, options = {}) {
+        const onLoad = (text, name) => {
+            // Remove Carriage Return in some cases and sub tabs using spaces
+            text = text.replaceAll('\r', '').replaceAll(/\t|\\t/g, ' '.repeat(this.tabSize));
+            const ext = LX.getExtension(name);
+            const lang = options.language ?? (Tokenizer.getLanguage(options.language)
+                ?? (Tokenizer.getLanguageByExtension(ext) ?? Tokenizer.getLanguage('Plain Text')));
+            const langName = lang.name;
+            if (this.useFileExplorer || this.skipTabs) {
+                this._storedTabs[name] = {
+                    text,
+                    title: options.title ?? name,
+                    language: langName,
+                    ...options
+                };
+                if (this.useFileExplorer) {
+                    this.addExplorerItem({ id: name, skipVisibility: true, icon: getLanguageIcon(lang, ext) });
+                    this.explorer.innerTree.frefresh(name);
+                }
+            }
+            else {
+                this.addTab(name, {
+                    selected: true,
+                    title: options.title ?? name,
+                    language: langName
+                });
+                this.doc.setText(text);
+                this.setLanguage(langName, ext);
+                this.cursorSet.set(0, 0);
+                this.undoManager.clear();
+                this._renderCursors();
+                this._renderSelections();
+                this._resetGutter();
+            }
+            if (options.callback) {
+                options.callback(name, text);
+            }
+        };
+        if (typeof file === 'string') {
+            const url = file;
+            const name = options.filename ?? url.substring(url.lastIndexOf('/') + 1);
+            LX.request({ url, success: (text) => {
+                    onLoad(text, name);
+                } });
+        }
+        else {
+            const fr = new FileReader();
+            fr.readAsText(file);
+            fr.onload = (e) => {
+                const text = e.currentTarget.result;
+                onLoad(text, file.name);
+            };
+        }
+    }
+    async loadFiles(files, onComplete, async = false) {
+        if (!files || files.length === 0) {
+            onComplete?.(this, [], 0);
+            return;
+        }
+        const results = [];
+        for (const filePath of files) {
+            try {
+                const text = await LX.requestFileAsync(filePath, 'text');
+                // Process the loaded file
+                const name = filePath.substring(filePath.lastIndexOf('/') + 1);
+                const processedText = text.replaceAll('\r', '').replaceAll(/\t|\\t/g, ' '.repeat(this.tabSize));
+                const ext = LX.getExtension(name);
+                const lang = Tokenizer.getLanguageByExtension(ext) ?? Tokenizer.getLanguage('Plain Text');
+                const langName = lang.name;
+                if (this.useFileExplorer || this.skipTabs) {
+                    this._storedTabs[name] = {
+                        text: processedText,
+                        title: name,
+                        language: langName
+                    };
+                    if (this.useFileExplorer) {
+                        this.addExplorerItem({ id: name, skipVisibility: true, icon: getLanguageIcon(lang, ext) });
+                        this.explorer.innerTree.frefresh(name);
+                    }
+                }
+                else {
+                    this.addTab(name, {
+                        selected: results.length === 0, // Select first tab only
+                        title: name,
+                        language: langName
+                    });
+                    if (results.length === 0) {
+                        this.doc.setText(processedText);
+                        this.setLanguage(langName, ext);
+                        this.cursorSet.set(0, 0);
+                        this.undoManager.clear();
+                        this._renderCursors();
+                        this._renderSelections();
+                        this._resetGutter();
+                    }
+                }
+                results.push({ filePath, name, success: true });
+            }
+            catch (error) {
+                console.error(`[LX.CodeEditor] Failed to load file: ${filePath}`, error);
+                results.push({ filePath, success: false, error });
+            }
+        }
+        onComplete?.(this, results, results.length);
+    }
+    async _setupEditorWhenVisible() {
+        // Load any font size from local storage
+        // If not, use default size and make sure it's sync by not hardcoding a number by default here
+        const savedFontSize = window.localStorage.getItem('lexcodeeditor-font-size');
+        if (savedFontSize) {
+            await this._setFontSize(parseInt(savedFontSize), false);
+        }
+        else {
+            const r = document.querySelector(':root');
+            const s = getComputedStyle(r);
+            this.fontSize = parseInt(s.getPropertyValue('--code-editor-font-size'));
+            await this._measureChar();
+        }
+        LX.emitSignal('@font-size', this.fontSize);
+        LX.doAsync(() => {
+            if (!this._isReady) {
+                this._isReady = true;
+                if (this.onReady) {
+                    this.onReady(this);
+                }
+                console.log(`[LX.CodeEditor] Ready! (font size: ${this.fontSize}px, char size: ${this.charWidth}px)`);
+            }
+        }, 20);
+    }
     _onSelectTab(isNewTabButton, event, name) {
         if (this.disableEdition) {
             return;
@@ -2317,7 +2522,7 @@ class CodeEditor {
         this._updateDataInfoPanel('@tab-name', name);
         this.language = Tokenizer.getLanguage(this.currentTab.language) ?? Tokenizer.getLanguage('Plain Text');
         LX.emitSignal('@highlight', this.currentTab.language);
-        this._rebuildLines();
+        this._renderAllLines();
         this._afterCursorMove();
         if (!isNewTabButton && this.onSelectTab) {
             this.onSelectTab(name, this);
@@ -2564,6 +2769,8 @@ class CodeEditor {
      * Render all lines from scratch.
      */
     _renderAllLines() {
+        if (!this.currentTab)
+            return;
         this.codeContainer.innerHTML = '';
         this._lineElements = [];
         this._lineStates = [];
@@ -2655,6 +2862,8 @@ class CodeEditor {
         this._updateDataInfoPanel('@cursor-data', `Ln ${activeLine + 1}, Col ${activeCol + 1}`);
     }
     _renderCursors() {
+        if (!this.currentTab)
+            return;
         this.cursorsLayer.innerHTML = '';
         for (const sel of this.cursorSet.cursors) {
             const el = document.createElement('div');
@@ -2667,6 +2876,8 @@ class CodeEditor {
         this._updateActiveLine();
     }
     _renderSelections() {
+        if (!this.currentTab)
+            return;
         this.selectionsLayer.innerHTML = '';
         for (const sel of this.cursorSet.cursors) {
             if (selectionIsEmpty(sel))
@@ -2735,6 +2946,8 @@ class CodeEditor {
     }
     // Keyboard input events:
     _onKeyDown(e) {
+        if (!this.currentTab)
+            return;
         // Ignore events during IME / dead key composition
         if (this._composing || e.key === 'Dead')
             return;
@@ -3663,9 +3876,9 @@ class CodeEditor {
         }
         const suggestions = [];
         const added = new Set();
-        const addSuggestion = (label, kind, detail) => {
+        const addSuggestion = (label, kind, scope, detail) => {
             if (!added.has(label)) {
-                suggestions.push({ label, kind, detail });
+                suggestions.push({ label, kind, scope, detail });
                 added.add(label);
             }
         };
@@ -3673,7 +3886,13 @@ class CodeEditor {
         const allSymbols = this.symbolTable.getAllSymbols();
         for (const symbol of allSymbols) {
             if (symbol.name.toLowerCase().startsWith(word.toLowerCase())) {
-                addSuggestion(symbol.name, symbol.kind, `${symbol.kind} in ${symbol.scope}`);
+                addSuggestion(symbol.name, symbol.kind, symbol.scope, `${symbol.kind} in ${symbol.scope}`);
+            }
+        }
+        // Add language reserved keys
+        for (const reservedWord of this.language.reservedWords) {
+            if (reservedWord.toLowerCase().startsWith(word.toLowerCase())) {
+                addSuggestion(reservedWord);
             }
         }
         // Add custom suggestions
@@ -3682,7 +3901,7 @@ class CodeEditor {
             const kind = typeof suggestion === 'object' ? suggestion.kind : undefined;
             const detail = typeof suggestion === 'object' ? suggestion.detail : undefined;
             if (label.toLowerCase().startsWith(word.toLowerCase())) {
-                addSuggestion(label, kind, detail);
+                addSuggestion(label, kind, undefined, detail);
             }
         }
         // Close autocomplete if no suggestions
@@ -3859,7 +4078,6 @@ class CodeEditor {
         this._resetBlinker();
         this.resize();
         this._scrollCursorIntoView();
-        this._resetGutter();
     }
     // Scrollbar & Resize:
     _scrollCursorIntoView() {
@@ -3888,6 +4106,8 @@ class CodeEditor {
         this.lineGutter.style.height = `calc(100% - ${tabsHeight}px)`;
     }
     getMaxLineLength() {
+        if (!this.currentTab)
+            return 0;
         let max = 0;
         for (let i = 0; i < this.doc.lineCount; i++) {
             const len = this.doc.getLine(i).length;
@@ -3903,7 +4123,7 @@ class CodeEditor {
         this._cachedTabsHeight = this.tabs?.root.getBoundingClientRect().height ?? 0;
         this._cachedStatusPanelHeight = this.statusPanel?.root.getBoundingClientRect().height ?? 0;
         const maxLineLength = this.getMaxLineLength();
-        const lineCount = this.doc.lineCount;
+        const lineCount = this.currentTab ? this.doc.lineCount : 0;
         const viewportChars = Math.floor((this.codeScroller.clientWidth - this.xPadding) / this.charWidth);
         const viewportLines = Math.floor(this.codeScroller.clientHeight / this.lineHeight);
         let needsHResize = maxLineLength !== this._lastMaxLineLength
@@ -3923,6 +4143,7 @@ class CodeEditor {
         if (force || needsVResize) {
             this.codeSizer.style.minHeight = (lineCount * this.lineHeight + ScrollBar.SIZE * 2) + 'px';
         }
+        this._resetGutter();
         setTimeout(() => this._resizeScrollBars(), 10);
     }
     _resizeScrollBars() {
@@ -3960,111 +4181,6 @@ class CodeEditor {
             }
             input.remove();
         });
-    }
-    loadFile(file, options = {}) {
-        const onLoad = (text, name) => {
-            // Remove Carriage Return in some cases and sub tabs using spaces
-            text = text.replaceAll('\r', '').replaceAll(/\t|\\t/g, ' '.repeat(this.tabSize));
-            const ext = LX.getExtension(name);
-            const lang = options.language ?? (Tokenizer.getLanguage(options.language)
-                ?? (Tokenizer.getLanguageByExtension(ext) ?? Tokenizer.getLanguage('Plain Text')));
-            const langName = lang.name;
-            if (this.useFileExplorer || this.skipTabs) {
-                this._storedTabs[name] = {
-                    text,
-                    title: options.title ?? name,
-                    language: langName,
-                    ...options
-                };
-                if (this.useFileExplorer) {
-                    this.addExplorerItem({ id: name, skipVisibility: true, icon: getLanguageIcon(lang, ext) });
-                    this.explorer.innerTree.frefresh(name);
-                }
-            }
-            else {
-                this.addTab(name, {
-                    selected: true,
-                    title: options.title ?? name,
-                    language: langName
-                });
-                this.doc.setText(text);
-                this.setLanguage(langName, ext);
-                this.cursorSet.set(0, 0);
-                this.undoManager.clear();
-                this._renderCursors();
-                this._renderSelections();
-                this._resetGutter();
-            }
-            if (options.callback) {
-                options.callback(name, text);
-            }
-        };
-        if (typeof file === 'string') {
-            const url = file;
-            const name = options.filename ?? url.substring(url.lastIndexOf('/') + 1);
-            LX.request({ url, success: (text) => {
-                    onLoad(text, name);
-                } });
-        }
-        else {
-            const fr = new FileReader();
-            fr.readAsText(file);
-            fr.onload = (e) => {
-                const text = e.currentTarget.result;
-                onLoad(text, file.name);
-            };
-        }
-    }
-    async loadFiles(files, onComplete, async = false) {
-        if (!files || files.length === 0) {
-            onComplete?.(this, [], 0);
-            return;
-        }
-        const results = [];
-        for (const filePath of files) {
-            try {
-                const text = await LX.requestFileAsync(filePath, 'text');
-                // Process the loaded file
-                const name = filePath.substring(filePath.lastIndexOf('/') + 1);
-                const processedText = text.replaceAll('\r', '').replaceAll(/\t|\\t/g, ' '.repeat(this.tabSize));
-                const ext = LX.getExtension(name);
-                const lang = Tokenizer.getLanguageByExtension(ext) ?? Tokenizer.getLanguage('Plain Text');
-                const langName = lang.name;
-                if (this.useFileExplorer || this.skipTabs) {
-                    this._storedTabs[name] = {
-                        text: processedText,
-                        title: name,
-                        language: langName
-                    };
-                    if (this.useFileExplorer) {
-                        this.addExplorerItem({ id: name, skipVisibility: true, icon: getLanguageIcon(lang, ext) });
-                        this.explorer.innerTree.frefresh(name);
-                    }
-                }
-                else {
-                    this.addTab(name, {
-                        selected: results.length === 0, // Select first tab only
-                        title: name,
-                        language: langName
-                    });
-                    if (results.length === 0) {
-                        this.doc.setText(processedText);
-                        this.setLanguage(langName, ext);
-                        this.cursorSet.set(0, 0);
-                        this.undoManager.clear();
-                        this._renderCursors();
-                        this._renderSelections();
-                        this._resetGutter();
-                    }
-                }
-                results.push({ filePath, name, success: true });
-            }
-            catch (error) {
-                console.error(`[LX.CodeEditor] Failed to load file: ${filePath}`, error);
-                results.push({ filePath, success: false, error });
-            }
-        }
-        onComplete?.(this, results, results.length);
     }
     // Font Size utils:
     async _setFontSize(size, updateDOM = true) {
