@@ -5315,7 +5315,8 @@ export class CodeEditor
     {
         // Use cached value or compute if not available (e.g., on initial load)
         const tabsHeight = this._cachedTabsHeight || ( this.tabs?.root.getBoundingClientRect().height ?? 0 );
-        this.lineGutter.style.height = `calc(100% - ${tabsHeight}px)`;
+        const statusPanelHeight = this._cachedStatusPanelHeight || ( this.statusPanel?.root.getBoundingClientRect().height ?? 0 );
+        this.lineGutter.style.height = `calc(100% - ${tabsHeight + statusPanelHeight}px)`;
     }
 
     getMaxLineLength(): number
