@@ -2583,7 +2583,7 @@ export class CodeEditor
 
         this.codeScroller = this.codeArea.root;
         // Add Line numbers gutter, only the container, line numbers are in the same line div
-        this.lineGutter = LX.makeElement( 'div', 'w-16 mt-8 overflow-hidden absolute top-0 bg-inherit z-1', null, this.codeScroller );
+        this.lineGutter = LX.makeElement( 'div', `w-16 overflow-hidden absolute top-0 bg-inherit z-10 ${this.skipTabs ? '' : 'mt-8'}`, null, this.codeScroller );
         // Add code sizer, which will have the code elements
         this.codeSizer = LX.makeElement( 'div', 'pseudoparent-tabs w-full', null, this.codeScroller );
 
@@ -2912,9 +2912,8 @@ export class CodeEditor
         this._rebuildLines();
         this._renderCursors();
         this._renderSelections();
-        this._resetGutter();
-        this._scrollCursorIntoView();
         this.resize();
+        this._scrollCursorIntoView();
     }
 
     getText(): string
@@ -2932,7 +2931,11 @@ export class CodeEditor
         if ( this.currentTab )
         {
             this.currentTab.language = name;
-            this.tabs.setIcon( this.currentTab.name, getLanguageIcon( lang, extension ) );
+
+            if( !this.skipTabs )
+            {
+                this.tabs.setIcon( this.currentTab.name, getLanguageIcon( lang, extension ) );
+            }
         }
 
         this._lineStates = [];
@@ -2968,32 +2971,28 @@ export class CodeEditor
         this._openedTabs[name] = codeTab;
         this._loadedTabs[name] = codeTab;
 
-        this.tabs.add( name, dom, {
-            selected,
-            icon,
-            fixed: isNewTabButton,
-            title: codeTab.title,
-            onSelect: this._onSelectTab.bind( this, isNewTabButton ),
-            onContextMenu: this._onContextMenuTab.bind( this, isNewTabButton ),
-            allowDelete: this.allowClosingTabs,
-            indexOffset: options.indexOffset
-        } );
-
         if ( this.useFileExplorer && !isNewTabButton )
         {
             this.addExplorerItem( { id: name, skipVisibility: true, icon } );
             this.explorer.innerTree.frefresh( name );
         }
 
+        if( !this.skipTabs )
+        {
+            this.tabs.add( name, dom, {
+                selected,
+                icon,
+                fixed: isNewTabButton,
+                title: codeTab.title,
+                onSelect: this._onSelectTab.bind( this, isNewTabButton ),
+                onContextMenu: this._onContextMenuTab.bind( this, isNewTabButton ),
+                allowDelete: this.allowClosingTabs,
+                indexOffset: options.indexOffset
+            } );
+        }
+
         // Move into the sizer..
         this.codeSizer.appendChild( dom );
-
-        if ( selected )
-        {
-            this.currentTab = codeTab;
-            this._updateDataInfoPanel( '@tab-name', name );
-            this.setLanguage( langName, extension );
-        }
 
         if( options.text )
         {
@@ -3004,6 +3003,13 @@ export class CodeEditor
             this._renderCursors();
             this._renderSelections();
             this._resetGutter();
+        }
+
+        if ( selected )
+        {
+            this.currentTab = codeTab;
+            this._updateDataInfoPanel( '@tab-name', name );
+            this.setLanguage( langName, extension );
         }
 
         return codeTab;
@@ -5273,7 +5279,6 @@ export class CodeEditor
         this._resetBlinker();
         this.resize();
         this._scrollCursorIntoView();
-        this._resetGutter();
     }
 
     // Scrollbar & Resize:
@@ -5363,6 +5368,8 @@ export class CodeEditor
         {
             this.codeSizer.style.minHeight = ( lineCount * this.lineHeight + ScrollBar.SIZE * 2 ) + 'px';
         }
+
+        this._resetGutter();
 
         setTimeout( () => this._resizeScrollBars(), 10 );
     }

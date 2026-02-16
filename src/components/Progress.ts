@@ -55,7 +55,7 @@ export class Progress extends BaseComponent
         container.appendChild( progress );
 
         const _updateColor = () => {
-            let backgroundColor = LX.getCSSVariable( 'blue-500' );
+            let backgroundColor = LX.getCSSVariable( 'color-blue-500' );
 
             if ( progress.low != undefined && progress.value < progress.low )
             {

@@ -4353,7 +4353,7 @@ ul.lexassetscontent {
     user-select: none;
     position: sticky;
     left: 0;
-    z-index: 1;
+    z-index: 10;
 }
 
 .lexcodeeditor pre.active-line .line-gutter {

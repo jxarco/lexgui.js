@@ -2,9 +2,12 @@
 
 ## dev
 
+Fixed Progress component default `blue-500` color.
+
 CodeEditor:
 - Added `options.onCodeChange` to receive callback on code document changed.
-- Added back `CodeEditor.setCustomSuggestions`.
+- Added back `CodeEditor.setCustomSuggestions` and `CodeEditor.appendText`.
+- Added more WGSL builtins words.
 - Minor fixes.
 
 ## 8.2.6 (master)

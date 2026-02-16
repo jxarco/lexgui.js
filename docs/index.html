@@ -152,11 +152,10 @@
             let code = onPanel.toString();
             let lines = code.split( '\n' ).slice( 1, -1 );
             code = lines.map( line => line.substr( 12 ) ).join( '\n' );
-            const heightByLines = Math.min( lines.length * 1.25, 32 );
 
-            const tmpContainer = LX.makeContainer( ["100%", "auto"], "bg-card border-t-color py-8", "", container );
+            const tmpContainer = LX.makeContainer( ["100%", "auto"], "bg-card border-t-color", "", container );
 
-            const codeArea = new LX.Area({ className: "overflow-hidden", skipAppend: true, height: `${ heightByLines }rem` });
+            const codeArea = new LX.Area({ className: "overflow-hidden", skipAppend: true });
             tmpContainer.appendChild( codeArea.root );
             const codeEditor = new CodeEditor( codeArea, {
                 name: `${componentName.toLowerCase().replace( /\s/g, '_' )}.js`,
@@ -164,11 +163,11 @@
                 skipInfo: true,
                 skipTabs: true,
                 allowAddScripts: false,
-                language: "JavaScript"
+                highlight: "JavaScript"
             } );
 
-            codeEditor.root.querySelector("button.grid.absolute.z-100.p-3").remove();
-            codeEditor.setText( code, "JavaScript" );
+            codeEditor.root.querySelector("button.grid.absolute.z-100.p-3")?.remove();
+            codeEditor.setText( code );
 
             let copyButton = document.createElement('button');
             LX.asTooltip( copyButton, "Copy to Clipboard" );
