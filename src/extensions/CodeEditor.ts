@@ -475,7 +475,7 @@ Tokenizer.registerLanguage( {
         ],
         ...CommonStates
     },
-    icon: 'AlignLeft text-neutral-500'
+    icon: 'AlignLeft text-orange-500'
 } );
 
 // GLSL (OpenGL/WebGL Shading Language)
@@ -2735,9 +2735,11 @@ export class CodeEditor
         // Initial render
         this._renderAllLines();
         this._renderCursors();
+
+        this._init();
     }
 
-    async init()
+    private _init()
     {
         if ( this._displayObservers ) return;
 
@@ -3227,7 +3229,7 @@ export class CodeEditor
                 langButton.root,
                 Tokenizer.getRegisteredLanguages().map( ( v ) => {
                     const lang = Tokenizer.getLanguage( v );
-                    const icon: any = lang?.icon;
+                    const icon: any = getLanguageIcon( lang );
                     const iconData = icon ? icon.split( ' ' ) : [];
                     return {
                         name: v,

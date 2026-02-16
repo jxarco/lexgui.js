@@ -4,11 +4,25 @@
 
 Added `Tabs.setIcon(name, icon)`.
 Added DropdownMenu item option `useKbdSpecialKeys` (true).
+Add `LX.requestFileAsync` util.
 
 Full refactor for CodeEditor:
 - Improved robustness and fixed several minor bugs.
-- Removed legacy `options.onsave` and `options.onrun`.
+- Improved symbol detection.
 - Added support to write Backtick char (`).
+- Added support for `HLSL` language.
+- `options.files` moved to `CodeEditor.loadFiles`.
+- Removed legacy `options.onsave` and `options.onrun`.
+- Disabled virtual scrolling until next version.
+- Next version will add back `detectLanguage`.
+
+Timeline:
+- Selected Tree entries now use the primary color.
+- Removed `onTrackTreeEvent`.
+- Added `setTrackTreeEventListener`. It sets a specific callback for the tree component.
+
+VideoEditor
+- `controlsLayout` of the constructor now expects an object that may contain `type`, `height` and/or `l1TimelineHeight`.
 
 ## 8.2.5 (master)
 
