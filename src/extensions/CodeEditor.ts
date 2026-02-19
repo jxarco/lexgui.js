@@ -5019,14 +5019,14 @@ export class CodeEditor
             return;
         }
 
-        const suggestions: Array<{ label: string, kind?: string, scope?: string, detail?: string }> = [];
+        const suggestions: Array<{ label: string, kind?: string, scope?: string, detail?: string, insertText?: string }> = [];
         const added = new Set<string>();
 
-        const addSuggestion = ( label: string, kind?: string, scope?: string, detail?: string ) =>
+        const addSuggestion = ( label: string, kind?: string, scope?: string, detail?: string, insertText?: string ) =>
         {
             if ( !added.has( label ) )
             {
-                suggestions.push( { label, kind, scope, detail } );
+                suggestions.push( { label, kind, scope, detail, insertText } );
                 added.add( label );
             }
         };
@@ -5056,10 +5056,11 @@ export class CodeEditor
             const label = typeof suggestion === 'string' ? suggestion : suggestion.label;
             const kind = typeof suggestion === 'object' ? suggestion.kind : undefined;
             const detail = typeof suggestion === 'object' ? suggestion.detail : undefined;
+            const insertText = typeof suggestion === 'object' ? suggestion.insertText : suggestion;
 
             if ( label.toLowerCase().startsWith( word.toLowerCase() ) )
             {
-                addSuggestion( label, kind, undefined, detail );
+                addSuggestion( label, kind, undefined, detail, insertText );
             }
         }
 
@@ -5085,6 +5086,7 @@ export class CodeEditor
         suggestions.forEach( ( suggestion, index ) =>
         {
             const item = document.createElement( 'pre' );
+            ( item as any ).insertText = suggestion.insertText;
             if ( index === this._selectedAutocompleteIndex ) item.classList.add( 'selected' );
             const currSuggestion = suggestion.label;
 
@@ -5175,7 +5177,6 @@ export class CodeEditor
 
             item.addEventListener( 'click', () =>
             {
-                this._selectedAutocompleteIndex = index;
                 this._doAutocompleteWord();
             } );
 
@@ -5229,8 +5230,8 @@ export class CodeEditor
      */
     private _doAutocompleteWord(): void
     {
-        const word = this._getSelectedAutoCompleteWord();
-        if ( !word ) return;
+        const text = this._getSelectedAutoCompleteWord();
+        if ( !text ) return;
         const cursor = this.cursorSet.getPrimary().head;
         const { start, end } = this._getWordAtCursor();
         const line = cursor.line;
@@ -5242,8 +5243,16 @@ export class CodeEditor
             this.undoManager.record( deleteOp, cursorsBefore );
         }
 
-        const insertOp = this.doc.insert( line, start, word );
-        this.cursorSet.set( line, start + word.length );
+        const insertOp = this.doc.insert( line, start, text );
+        const insertedLines = text.split( /\r?\n/ );
+        if ( insertedLines.length === 1 )
+        {
+            this.cursorSet.set( line, start + text.length );
+        }
+        else
+        {
+            this.cursorSet.set( line + insertedLines.length - 1, insertedLines[ insertedLines.length - 1 ].length );
+        }
 
         const cursorsAfter = this.cursorSet.getCursorPositions();
         this.undoManager.record( insertOp, cursorsAfter );
@@ -5256,21 +5265,8 @@ export class CodeEditor
     private _getSelectedAutoCompleteWord(): string | null
     {
         if ( !this.autocomplete || !this._isAutoCompleteActive ) return null;
-
-        const pre = this.autocomplete.childNodes[ this._selectedAutocompleteIndex ];
-        var word = '';
-        for ( let childSpan of pre.childNodes )
-        {
-            const span = childSpan as HTMLElement;
-
-            if ( span.constructor != HTMLSpanElement || span.classList.contains( 'kind' ) )
-            {
-                continue;
-            }
-            word += span.textContent;
-        }
-
-        return word;
+        const pre: any = this.autocomplete.childNodes[ this._selectedAutocompleteIndex ];
+        return pre.insertText;;
     }
 
     private _afterCursorMove(): void

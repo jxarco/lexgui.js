@@ -5,6 +5,10 @@
 Fixed `LX.toKebabCase`.
 Added `LX.toSnakeCase(str)` util.
 
+CodeEditor:
+- Improved custom suggestions format (now allows for `insertText` too).
+- Fixed click autocomplete suggestion.
+
 ## 8.3.0 (master)
 
 Added `Tabs.setIcon(name, icon)`.
