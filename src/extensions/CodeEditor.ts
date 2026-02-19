@@ -4741,7 +4741,11 @@ export class CodeEditor
             anyDeleted = true;
         }
 
-        if ( anyDeleted ) this._rebuildLines();
+        if ( anyDeleted )
+        {
+            this._rebuildLines();
+            this._doHideAutocomplete();
+        }
     }
 
     // Clipboard helpers:
@@ -5123,7 +5127,7 @@ export class CodeEditor
         suggestions.forEach( ( suggestion, index ) =>
         {
             const item = document.createElement( 'pre' );
-            ( item as any ).insertText = suggestion.insertText;
+            ( item as any ).insertText = suggestion.insertText ?? suggestion.label;
             if ( index === this._selectedAutocompleteIndex ) item.classList.add( 'selected' );
             const currSuggestion = suggestion.label;
 
@@ -5303,7 +5307,7 @@ export class CodeEditor
     {
         if ( !this.autocomplete || !this._isAutoCompleteActive ) return null;
         const pre: any = this.autocomplete.childNodes[ this._selectedAutocompleteIndex ];
-        return pre.insertText;;
+        return pre.insertText;
     }
 
     private _afterCursorMove(): void
