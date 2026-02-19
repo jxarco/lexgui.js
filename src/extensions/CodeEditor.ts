@@ -5175,6 +5175,7 @@ export class CodeEditor
 
             item.addEventListener( 'click', () =>
             {
+                this._selectedAutocompleteIndex = index;
                 this._doAutocompleteWord();
             } );
 
