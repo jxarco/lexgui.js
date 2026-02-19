@@ -7,6 +7,7 @@ Added `LX.toSnakeCase(str)` util.
 
 CodeEditor:
 - Improved custom suggestions format (now allows for `insertText` too).
+- Supported Multiline TAB indent/dedent.
 - Fixed click autocomplete suggestion.
 
 ## 8.3.0 (master)

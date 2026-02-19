@@ -4642,10 +4642,46 @@ export class CodeEditor
         {
             const cursor = this.cursorSet.cursors[idx];
             const { line, col } = cursor.head;
+            const anchorLine = cursor.anchor.line;
 
-            if ( shift )
+            // Multiline selection: indent/dedent all lines in the selection
+            const startLine = Math.min( line, anchorLine );
+            const endLine = Math.max( line, anchorLine );
+            const isMultiline = startLine !== endLine;
+
+            if ( isMultiline )
             {
-                // Dedent: remove up to tabSize spaces from start
+                for ( let i = startLine; i <= endLine; i++ )
+                {
+                    if ( shift )
+                    {
+                        const lineText = this.doc.getLine( i );
+                        let spacesToRemove = 0;
+                        while ( spacesToRemove < this.tabSize && spacesToRemove < lineText.length && lineText[spacesToRemove] === ' ' )
+                        {
+                            spacesToRemove++;
+                        }
+                        if ( spacesToRemove > 0 )
+                        {
+                            const op = this.doc.delete( i, 0, spacesToRemove );
+                            this.undoManager.record( op, this.cursorSet.getCursorPositions() );
+                        }
+                    }
+                    else
+                    {
+                        const spaces = ' '.repeat( this.tabSize );
+                        const op = this.doc.insert( i, 0, spaces );
+                        this.undoManager.record( op, this.cursorSet.getCursorPositions() );
+                    }
+                }
+
+                const delta = shift ? -this.tabSize : this.tabSize;
+                cursor.head = { line, col: Math.max( 0, col + delta ) };
+                cursor.anchor = { line: anchorLine, col: Math.max( 0, cursor.anchor.col + delta ) };
+            }
+            else if ( shift )
+            {
+                // Single line dedent: remove up to tabSize spaces from start
                 const lineText = this.doc.getLine( line );
                 let spacesToRemove = 0;
                 while ( spacesToRemove < this.tabSize && spacesToRemove < lineText.length && lineText[spacesToRemove] === ' ' )
@@ -4663,6 +4699,7 @@ export class CodeEditor
             }
             else
             {
+                // Single line indent: insert spaces at cursor
                 const spacesToAdd = this.tabSize - ( col % this.tabSize );
                 const spaces = ' '.repeat( spacesToAdd );
                 const op = this.doc.insert( line, col, spaces );
