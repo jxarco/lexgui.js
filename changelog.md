@@ -2,9 +2,11 @@
 
 ## dev
 
+Fixed `LX.toKebabCase`.
+Added `LX.toSnakeCase(str)` util.
+
 ## 8.3.0 (master)
 
-CodeEditor:
 Added `Tabs.setIcon(name, icon)`.
 Added DropdownMenu item option `useKbdSpecialKeys` (true).
 Added `LX.requestFileAsync` util.

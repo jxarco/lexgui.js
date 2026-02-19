@@ -126,12 +126,30 @@ LX.toTitleCase = toTitleCase;
  * @method toKebabCase
  * @param {String} str
  */
-function toKebabCase( str: string )
-{
-    return str.replace( /[A-Z]/g, ( m ) => '-' + m.toLowerCase() );
+function toKebabCase(str: string): string {
+    return str
+        .replace( /([A-Z])/g, '-$1' )
+        .replace( /[\s_]+/g, '-' )
+        .replace( /^-/, '' )
+        .toLowerCase();
 }
 
 LX.toKebabCase = toKebabCase;
+
+/**
+ * @method toSnakeCase
+ * @param {String} str
+ */
+function toSnakeCase( str: string )
+{
+    return str
+        .replace(/([a-z])([A-Z])/g, '$1_$2')
+        .replace(/([A-Z]+)([A-Z][a-z])/g, '$1_$2')
+        .replace(/[\s\-]+/g, '_')
+        .toLowerCase();
+}
+
+LX.toSnakeCase = toSnakeCase;
 
 /**
  * @method getSupportedDOMName
