@@ -16,7 +16,7 @@
     exports.LX = g$1.LX;
     if (!exports.LX) {
         exports.LX = {
-            version: '8.3.0',
+            version: '8.3.1',
             ready: false,
             extensions: [], // Store extensions used
             extraCommandbarEntries: [], // User specific entries for command bar
@@ -9799,9 +9799,25 @@
      * @param {String} str
      */
     function toKebabCase(str) {
-        return str.replace(/[A-Z]/g, (m) => '-' + m.toLowerCase());
+        return str
+            .replace(/([A-Z])/g, '-$1')
+            .replace(/[\s_]+/g, '-')
+            .replace(/^-/, '')
+            .toLowerCase();
     }
     exports.LX.toKebabCase = toKebabCase;
+    /**
+     * @method toSnakeCase
+     * @param {String} str
+     */
+    function toSnakeCase(str) {
+        return str
+            .replace(/([a-z])([A-Z])/g, '$1_$2')
+            .replace(/([A-Z]+)([A-Z][a-z])/g, '$1_$2')
+            .replace(/[\s\-]+/g, '_')
+            .toLowerCase();
+    }
+    exports.LX.toSnakeCase = toSnakeCase;
     /**
      * @method getSupportedDOMName
      * @description Convert a text string to a valid DOM name
@@ -15595,6 +15611,21 @@
             this._inputArea.addEventListener('blur', () => this._setFocused(false));
             this.codeArea.root.addEventListener('mousedown', this._onMouseDown.bind(this));
             this.codeArea.root.addEventListener('contextmenu', this._onMouseDown.bind(this));
+            this.codeArea.root.addEventListener('mouseover', (e) => {
+                const link = e.target.closest('.code-link');
+                if (link && e.ctrlKey)
+                    link.classList.add('hovered');
+            });
+            this.codeArea.root.addEventListener('mouseout', (e) => {
+                const link = e.target.closest('.code-link');
+                if (link)
+                    link.classList.remove('hovered');
+            });
+            this.codeArea.root.addEventListener('mousemove', (e) => {
+                const link = e.target.closest('.code-link');
+                if (link)
+                    link.classList.toggle('hovered', e.ctrlKey);
+            });
             // Bottom status panel
             this.statusPanel = this._createStatusPanel(options);
             if (this.statusPanel) {
@@ -15682,17 +15713,147 @@
             }
         }
         ;
-        setText(text) {
+        setText(text, language, detectLang = false) {
             if (!this.currentTab)
                 return;
             this.doc.setText(text);
             this.cursorSet.set(0, 0);
             this.undoManager.clear();
             this._lineStates = [];
+            if (language) {
+                this.setLanguage(language);
+            }
+            else if (detectLang) {
+                const detected = this._detectLanguage(text);
+                if (detected)
+                    this.setLanguage(detected);
+            }
             this._renderAllLines();
             this._renderCursors();
             this._renderSelections();
             this.resize(true);
+        }
+        _detectLanguage(text) {
+            const scores = {};
+            const add = (lang, pts) => { scores[lang] = (scores[lang] ?? 0) + pts; };
+            // Score using reservedWords from each registered language
+            const textWords = new Set(text.match(/\b\w+\b/g) ?? []);
+            const totalWords = Math.max(textWords.size, 1);
+            for (const langName of Tokenizer.getRegisteredLanguages()) {
+                const langDef = Tokenizer.getLanguage(langName);
+                if (!langDef?.reservedWords?.length)
+                    continue;
+                let hits = 0;
+                for (const word of langDef.reservedWords) {
+                    if (textWords.has(word))
+                        hits++;
+                }
+                if (hits > 0) {
+                    const vocabRatio = hits / langDef.reservedWords.length;
+                    const textRatio = hits / totalWords;
+                    add(langName, Math.round((vocabRatio + textRatio) * 40));
+                }
+            }
+            // Add scores based on "important" structural words only
+            // HTML
+            if (/<!DOCTYPE\s+html/i.test(text))
+                add('HTML', 20);
+            if (/<html[\s>]/i.test(text))
+                add('HTML', 15);
+            if (/<\/?(div|span|body|head|script|style|meta)\b/i.test(text))
+                add('HTML', 8);
+            // JSON — must come before JS checks (starts with { or [)
+            if (/^\s*[\[{]/.test(text) && /"\s*:\s*/.test(text) && !/function|=>|const|var|let/.test(text))
+                add('JSON', 15);
+            // CSS
+            if (/[\w-]+\s*:\s*[\w#\d"'(]+.*;/.test(text) && /[{}]/.test(text) && !/<\w+/.test(text))
+                add('CSS', 10);
+            if (/@(media|keyframes|import|charset|font-face)\b/.test(text))
+                add('CSS', 15);
+            // WGSL
+            if (/@(vertex|fragment|compute|group|binding|builtin)\b/.test(text))
+                add('WGSL', 20);
+            if (/\bfn\s+\w+\s*\(/.test(text) && /\bvar\b/.test(text))
+                add('WGSL', 10);
+            if (/\b(vec2f|vec3f|vec4f|mat4x4f|f32|u32|i32)\b/.test(text))
+                add('WGSL', 12);
+            // GLSL
+            if (/\b(gl_Position|gl_FragColor|gl_FragCoord)\b/.test(text))
+                add('GLSL', 20);
+            if (/\b(uniform|varying|attribute)\s+\w/.test(text))
+                add('GLSL', 10);
+            if (/\b(vec2|vec3|vec4|mat4|sampler2D)\b/.test(text) && !/vec2f|vec3f/.test(text))
+                add('GLSL', 8);
+            // HLSL
+            if (/\b(SV_Position|SV_Target|SV_Depth)\b/.test(text))
+                add('HLSL', 20);
+            if (/\b(cbuffer|tbuffer|float4|float3|float2|Texture2D)\b/.test(text))
+                add('HLSL', 12);
+            // Python
+            if (/^\s*def\s+\w+\s*\(/m.test(text))
+                add('Python', 15);
+            if (/^\s*import\s+\w/m.test(text) && !/\bfrom\s+['"]/.test(text))
+                add('Python', 8);
+            if (/^\s*class\s+\w+(\s*\(.*\))?:/m.test(text))
+                add('Python', 10);
+            if (/\bprint\s*\(/.test(text) && /:\s*$/.test(text))
+                add('Python', 5);
+            if (/elif\b|lambda\b|self\.\w/.test(text))
+                add('Python', 8);
+            // Rust
+            if (/\bfn\s+\w+\s*\(/.test(text) && /\blet\s+mut\b/.test(text))
+                add('Rust', 15);
+            if (/\b(impl|trait|enum|struct)\s+\w+/.test(text) && /\bfn\b/.test(text))
+                add('Rust', 12);
+            if (/use\s+std::|use\s+\w+::\w+/.test(text))
+                add('Rust', 10);
+            if (/println!\s*\(/.test(text))
+                add('Rust', 8);
+            // C++
+            if (/#include\s*<[\w./]+>/.test(text))
+                add('C++', 15);
+            if (/\bstd::\w+/.test(text))
+                add('C++', 12);
+            if (/\b(class|template|namespace|nullptr|new\s+\w)\b/.test(text))
+                add('C++', 8);
+            if (/(::|->)\w+/.test(text))
+                add('C++', 6);
+            // C
+            if (/#include\s*<[\w.]+\.h>/.test(text))
+                add('C', 12);
+            if (/\bint\s+main\s*\(/.test(text))
+                add('C', 15);
+            if (/\b(printf|scanf|malloc|free|sizeof)\s*\(/.test(text))
+                add('C', 10);
+            // TypeScript — before JS (is a superset)
+            if (/:\s*(string|number|boolean|void|any|never|unknown)\b/.test(text))
+                add('TypeScript', 12);
+            if (/\binterface\s+\w+/.test(text))
+                add('TypeScript', 12);
+            if (/\btype\s+\w+\s*=/.test(text))
+                add('TypeScript', 10);
+            if (/\bas\s+(string|number|any|unknown)\b/.test(text))
+                add('TypeScript', 8);
+            if (/\benum\s+\w+\s*\{/.test(text))
+                add('TypeScript', 8);
+            // JavaScript
+            if (/\b(const|let|var)\s+\w+\s*=/.test(text))
+                add('JavaScript', 8);
+            if (/=>\s*[\w{(]/.test(text))
+                add('JavaScript', 6);
+            if (/\b(import|export)\s+(default|{|\*)/.test(text))
+                add('JavaScript', 8);
+            if (/\bconsole\.(log|warn|error)\b/.test(text))
+                add('JavaScript', 6);
+            // Markdown
+            if (/^#{1,6}\s+\S/m.test(text))
+                add('Markdown', 12);
+            if (/\*\*\w.*?\*\*/.test(text) || /\[.+\]\(.+\)/.test(text))
+                add('Markdown', 8);
+            if (/^```\w*/m.test(text))
+                add('Markdown', 10);
+            const best = Object.entries(scores).sort((a, b) => b[1] - a[1])[0];
+            return best && best[1] >= 8 ? best[0] : null;
         }
         appendText(text) {
             const cursor = this.cursorSet.getPrimary();
@@ -16192,8 +16353,8 @@
                 : Tokenizer.initialState();
             const lineText = this.doc.getLine(lineIndex);
             const result = Tokenizer.tokenizeLine(lineText, this.language, prevState);
-            // Build HTML
             const langClass = this.language.name.toLowerCase().replace(/[^a-z]/g, '');
+            const URL_REGEX = /(https?:\/\/[^\s"'<>)\]]+)/g;
             let html = '';
             for (const token of result.tokens) {
                 const cls = TOKEN_CLASS_MAP[token.type];
@@ -16201,11 +16362,15 @@
                     .replace(/&/g, '&amp;')
                     .replace(/</g, '&lt;')
                     .replace(/>/g, '&gt;');
+                // Wrap URLs in comment tokens with a clickable span
+                const content = (token.type === 'comment')
+                    ? escaped.replace(URL_REGEX, `<span class="code-link" data-url="$1">$1</span>`)
+                    : escaped;
                 if (cls) {
-                    html += `<span class="${cls} ${langClass}">${escaped}</span>`;
+                    html += `<span class="${cls} ${langClass}">${content}</span>`;
                 }
                 else {
-                    html += escaped;
+                    html += content;
                 }
             }
             return { html: html || '&nbsp;', endState: result.state, tokens: result.tokens };
@@ -17035,11 +17200,25 @@
                 const { line, col } = cursor.head;
                 const indent = this.doc.getIndent(line);
                 const spaces = ' '.repeat(indent);
-                const op = this.doc.insert(line, col, '\n' + spaces);
-                this.undoManager.record(op, this.cursorSet.getCursorPositions());
-                cursor.head = { line: line + 1, col: indent };
-                cursor.anchor = { ...cursor.head };
-                this.cursorSet.adjustOthers(idx, line, col, 0, 1);
+                const charBefore = this.doc.getCharAt(line, col - 1);
+                const charAfter = this.doc.getCharAt(line, col);
+                const OPEN_CLOSE = { '{': '}', '[': ']', '(': ')' };
+                if (charBefore && charAfter && OPEN_CLOSE[charBefore] === charAfter) {
+                    const innerSpaces = ' '.repeat(indent + this.tabSize);
+                    const insertion = '\n' + innerSpaces + '\n' + spaces;
+                    const op = this.doc.insert(line, col, insertion);
+                    this.undoManager.record(op, this.cursorSet.getCursorPositions());
+                    cursor.head = { line: line + 1, col: indent + this.tabSize };
+                    cursor.anchor = { ...cursor.head };
+                    this.cursorSet.adjustOthers(idx, line, col, 0, 2);
+                }
+                else {
+                    const op = this.doc.insert(line, col, '\n' + spaces);
+                    this.undoManager.record(op, this.cursorSet.getCursorPositions());
+                    cursor.head = { line: line + 1, col: indent };
+                    cursor.anchor = { ...cursor.head };
+                    this.cursorSet.adjustOthers(idx, line, col, 0, 1);
+                }
             }
             this._rebuildLines();
             this._afterCursorMove();
@@ -17053,8 +17232,36 @@
             for (const idx of this.cursorSet.sortedIndicesBottomUp()) {
                 const cursor = this.cursorSet.cursors[idx];
                 const { line, col } = cursor.head;
-                if (shift) {
-                    // Dedent: remove up to tabSize spaces from start
+                const anchorLine = cursor.anchor.line;
+                // Multiline selection: indent/dedent all lines in the selection
+                const startLine = Math.min(line, anchorLine);
+                const endLine = Math.max(line, anchorLine);
+                const isMultiline = startLine !== endLine;
+                if (isMultiline) {
+                    for (let i = startLine; i <= endLine; i++) {
+                        if (shift) {
+                            const lineText = this.doc.getLine(i);
+                            let spacesToRemove = 0;
+                            while (spacesToRemove < this.tabSize && spacesToRemove < lineText.length && lineText[spacesToRemove] === ' ') {
+                                spacesToRemove++;
+                            }
+                            if (spacesToRemove > 0) {
+                                const op = this.doc.delete(i, 0, spacesToRemove);
+                                this.undoManager.record(op, this.cursorSet.getCursorPositions());
+                            }
+                        }
+                        else {
+                            const spaces = ' '.repeat(this.tabSize);
+                            const op = this.doc.insert(i, 0, spaces);
+                            this.undoManager.record(op, this.cursorSet.getCursorPositions());
+                        }
+                    }
+                    const delta = shift ? -this.tabSize : this.tabSize;
+                    cursor.head = { line, col: Math.max(0, col + delta) };
+                    cursor.anchor = { line: anchorLine, col: Math.max(0, cursor.anchor.col + delta) };
+                }
+                else if (shift) {
+                    // Single line dedent: remove up to tabSize spaces from start
                     const lineText = this.doc.getLine(line);
                     let spacesToRemove = 0;
                     while (spacesToRemove < this.tabSize && spacesToRemove < lineText.length && lineText[spacesToRemove] === ' ') {
@@ -17069,6 +17276,7 @@
                     }
                 }
                 else {
+                    // Single line indent: insert spaces at cursor
                     const spacesToAdd = this.tabSize - (col % this.tabSize);
                     const spaces = ' '.repeat(spacesToAdd);
                     const op = this.doc.insert(line, col, spaces);
@@ -17102,8 +17310,10 @@
                 this.cursorSet.adjustOthers(idx, start.line, start.col, -colDelta, -linesRemoved);
                 anyDeleted = true;
             }
-            if (anyDeleted)
+            if (anyDeleted) {
                 this._rebuildLines();
+                this._doHideAutocomplete();
+            }
         }
         // Clipboard helpers:
         _doCopy() {
@@ -17217,6 +17427,15 @@
                 return;
             if (this.autocomplete && this.autocomplete.contains(e.target))
                 return;
+            // Ctrl+click: open link if cursor is over a code-link span
+            if (e.ctrlKey && e.button === 0) {
+                const target = e.target;
+                const link = target.closest('.code-link');
+                if (link?.dataset.url) {
+                    window.open(link.dataset.url, '_blank');
+                    return;
+                }
+            }
             e.preventDefault(); // Prevent browser from stealing focus from _inputArea
             this._wasPaired = false;
             // Calculate line and column from click position
@@ -17334,9 +17553,9 @@
             }
             const suggestions = [];
             const added = new Set();
-            const addSuggestion = (label, kind, scope, detail) => {
+            const addSuggestion = (label, kind, scope, detail, insertText) => {
                 if (!added.has(label)) {
-                    suggestions.push({ label, kind, scope, detail });
+                    suggestions.push({ label, kind, scope, detail, insertText });
                     added.add(label);
                 }
             };
@@ -17358,8 +17577,9 @@
                 const label = typeof suggestion === 'string' ? suggestion : suggestion.label;
                 const kind = typeof suggestion === 'object' ? suggestion.kind : undefined;
                 const detail = typeof suggestion === 'object' ? suggestion.detail : undefined;
+                const insertText = typeof suggestion === 'object' ? suggestion.insertText : suggestion;
                 if (label.toLowerCase().startsWith(word.toLowerCase())) {
-                    addSuggestion(label, kind, undefined, detail);
+                    addSuggestion(label, kind, undefined, detail, insertText);
                 }
             }
             // Close autocomplete if no suggestions
@@ -17379,6 +17599,7 @@
             // Render suggestions
             suggestions.forEach((suggestion, index) => {
                 const item = document.createElement('pre');
+                item.insertText = suggestion.insertText ?? suggestion.label;
                 if (index === this._selectedAutocompleteIndex)
                     item.classList.add('selected');
                 const currSuggestion = suggestion.label;
@@ -17497,8 +17718,8 @@
          * Insert the selected autocomplete word at cursor.
          */
         _doAutocompleteWord() {
-            const word = this._getSelectedAutoCompleteWord();
-            if (!word)
+            const text = this._getSelectedAutoCompleteWord();
+            if (!text)
                 return;
             const cursor = this.cursorSet.getPrimary().head;
             const { start, end } = this._getWordAtCursor();
@@ -17508,8 +17729,14 @@
                 const deleteOp = this.doc.delete(line, start, end - start);
                 this.undoManager.record(deleteOp, cursorsBefore);
             }
-            const insertOp = this.doc.insert(line, start, word);
-            this.cursorSet.set(line, start + word.length);
+            const insertOp = this.doc.insert(line, start, text);
+            const insertedLines = text.split(/\r?\n/);
+            if (insertedLines.length === 1) {
+                this.cursorSet.set(line, start + text.length);
+            }
+            else {
+                this.cursorSet.set(line + insertedLines.length - 1, insertedLines[insertedLines.length - 1].length);
+            }
             const cursorsAfter = this.cursorSet.getCursorPositions();
             this.undoManager.record(insertOp, cursorsAfter);
             this._rebuildLines();
@@ -17520,15 +17747,7 @@
             if (!this.autocomplete || !this._isAutoCompleteActive)
                 return null;
             const pre = this.autocomplete.childNodes[this._selectedAutocompleteIndex];
-            var word = '';
-            for (let childSpan of pre.childNodes) {
-                const span = childSpan;
-                if (span.constructor != HTMLSpanElement || span.classList.contains('kind')) {
-                    continue;
-                }
-                word += span.textContent;
-            }
-            return word;
+            return pre.insertText;
         }
         _afterCursorMove() {
             this._renderCursors();
@@ -17561,7 +17780,8 @@
         _resetGutter() {
             // Use cached value or compute if not available (e.g., on initial load)
             const tabsHeight = this._cachedTabsHeight || (this.tabs?.root.getBoundingClientRect().height ?? 0);
-            this.lineGutter.style.height = `calc(100% - ${tabsHeight}px)`;
+            const statusPanelHeight = this._cachedStatusPanelHeight || (this.statusPanel?.root.getBoundingClientRect().height ?? 0);
+            this.lineGutter.style.height = `calc(100% - ${tabsHeight + statusPanelHeight}px)`;
         }
         getMaxLineLength() {
             if (!this.currentTab)

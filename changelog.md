@@ -2,6 +2,8 @@
 
 ## dev
 
+## 8.3.1 (master)
+
 Fixed `LX.toKebabCase`.
 Added `LX.toSnakeCase(str)` util.
 
@@ -13,7 +15,7 @@ CodeEditor:
 - Clickable links in comments.
 - Fixed click autocomplete suggestion.
 
-## 8.3.0 (master)
+## 8.3.0
 
 Added `Tabs.setIcon(name, icon)`.
 Added DropdownMenu item option `useKbdSpecialKeys` (true).

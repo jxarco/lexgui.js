@@ -349,7 +349,8 @@ export declare class CodeEditor {
     private _init;
     clear(): void;
     addExplorerItem(item: any): void;
-    setText(text: string): void;
+    setText(text: string, language?: string, detectLang?: boolean): void;
+    private _detectLanguage;
     appendText(text: string): void;
     getText(): string;
     setLanguage(name: string, extension?: string): void;
