@@ -3911,13 +3911,18 @@ export class CodeEditor
                 const fromCol = line === start.line ? start.col : 0;
                 const toCol = line === end.line ? end.col : lineText.length;
 
-                if ( fromCol === toCol ) continue;
+                // Skip only when the selection ends exactly at col 0 of this line
+                if ( fromCol === toCol && line === end.line ) continue;
+
+                const width = fromCol === toCol
+                    ? Math.ceil( this.charWidth * 0.5 ) // minimum width for empty lines
+                    : ( toCol - fromCol ) * this.charWidth;
 
                 const div = document.createElement( 'div' );
                 div.className = 'lexcodeselection';
                 div.style.top = ( line * this.lineHeight ) + 'px';
                 div.style.left = ( fromCol * this.charWidth + this.xPadding ) + 'px';
-                div.style.width = ( ( toCol - fromCol ) * this.charWidth ) + 'px';
+                div.style.width = width + 'px';
                 this.selectionsLayer.appendChild( div );
             }
         }
