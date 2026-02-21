@@ -2154,7 +2154,7 @@ input[type=number] {
     width: var(--thumb-height);
     height: var(--thumb-height);
     border-radius: 50%;
-    background: light-dark(var(--primary), var(--primary));
+    background: var(--primary);
     cursor: pointer;
     box-shadow: 0px 0px 2px 1px var(--secondary);
 }
@@ -2169,7 +2169,7 @@ input[type=number] {
     width: var(--thumb-height);
     height: var(--thumb-height);
     border-radius: 50%;
-    background: light-dark(var(--primary), var(--primary));
+    background: var(--primary);
     cursor: pointer;
     box-shadow: 0px 0px 2px 1px var(--secondary);
 }
@@ -4212,6 +4212,18 @@ ul.lexassetscontent {
         margin-right: 6px;
         align-content: center;
     }
+}
+
+.lexcodeeditor .code-link {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    pointer-events: auto;
+    cursor: text;
+}
+
+.lexcodeeditor .code-link.hovered {
+    color: var(--info);
+    cursor: pointer;
 }
 
 .lexcodeeditor ::-webkit-scrollbar {

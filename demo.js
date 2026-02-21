@@ -736,7 +736,8 @@ LX._registerIconsAndColors( "./" );
             // fileExplorer: false
         });
 
-        editor.setText(`interface Vec2 {
+        editor.setText(`// Sample from https://jxarco.github.io/lexgui.js/
+interface Vec2 {
     x: number;
     y: number;
 }

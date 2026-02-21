@@ -10,6 +10,7 @@ CodeEditor:
 - Supported Multiline TAB indent/dedent.
 - `setText` now has language detection option.
 - Extra New line and autoindent for {}, [] and () pair keys.
+- Clickable links in comments.
 - Fixed click autocomplete suggestion.
 
 ## 8.3.0 (master)

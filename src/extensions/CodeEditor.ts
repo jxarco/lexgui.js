@@ -2761,6 +2761,19 @@ export class CodeEditor
         this.codeArea.root.addEventListener( 'mousedown', this._onMouseDown.bind( this ) );
         this.codeArea.root.addEventListener( 'contextmenu', this._onMouseDown.bind( this ) );
 
+        this.codeArea.root.addEventListener( 'mouseover', ( e: MouseEvent ) => {
+            const link = ( e.target as HTMLElement ).closest( '.code-link' ) as HTMLElement | null;
+            if ( link && e.ctrlKey ) link.classList.add( 'hovered' );
+        } );
+        this.codeArea.root.addEventListener( 'mouseout', ( e: MouseEvent ) => {
+            const link = ( e.target as HTMLElement ).closest( '.code-link' ) as HTMLElement | null;
+            if ( link ) link.classList.remove( 'hovered' );
+        } );
+        this.codeArea.root.addEventListener( 'mousemove', ( e: MouseEvent ) => {
+            const link = ( e.target as HTMLElement ).closest( '.code-link' ) as HTMLElement | null;
+            if ( link ) link.classList.toggle( 'hovered', e.ctrlKey );
+        } );
+
         // Bottom status panel
         this.statusPanel = this._createStatusPanel( options );
         if ( this.statusPanel )
@@ -3674,9 +3687,8 @@ export class CodeEditor
 
         const lineText = this.doc.getLine( lineIndex );
         const result = Tokenizer.tokenizeLine( lineText, this.language, prevState );
-
-        // Build HTML
         const langClass = this.language.name.toLowerCase().replace( /[^a-z]/g, '' );
+        const URL_REGEX = /(https?:\/\/[^\s"'<>)\]]+)/g;
         let html = '';
         for ( const token of result.tokens )
         {
@@ -3685,13 +3697,19 @@ export class CodeEditor
                 .replace( /&/g, '&amp;' )
                 .replace( /</g, '&lt;' )
                 .replace( />/g, '&gt;' );
+
+            // Wrap URLs in comment tokens with a clickable span
+            const content = ( token.type === 'comment' )
+                ? escaped.replace( URL_REGEX, `<span class="code-link" data-url="$1">$1</span>` )
+                : escaped;
+
             if ( cls )
             {
-                html += `<span class="${cls} ${langClass}">${escaped}</span>`;
+                html += `<span class="${cls} ${langClass}">${content}</span>`;
             }
             else
             {
-                html += escaped;
+                html += content;
             }
         }
 
@@ -5036,6 +5054,18 @@ export class CodeEditor
         if ( !this.currentTab ) return;
         if ( this.searchBox && this.searchBox.contains( e.target as Node ) ) return;
         if ( this.autocomplete && this.autocomplete.contains( e.target as Node ) ) return;
+
+        // Ctrl+click: open link if cursor is over a code-link span
+        if ( e.ctrlKey && e.button === 0 )
+        {
+            const target = e.target as HTMLElement;
+            const link = target.closest( '.code-link' ) as HTMLElement | null;
+            if ( link?.dataset.url )
+            {
+                window.open( link.dataset.url, '_blank' );
+                return;
+            }
+        }
 
         e.preventDefault(); // Prevent browser from stealing focus from _inputArea
         this._wasPaired = false;
