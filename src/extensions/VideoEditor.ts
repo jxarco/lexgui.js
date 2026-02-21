@@ -550,8 +550,7 @@ export class VideoEditor
         else
         {
             [ videoArea, controlsArea ] = area.split( { type: 'vertical',
-                sizes: [ controlsOptions.height ? `calc(100% - ${controlsOptions.height})` : '85%', null ], minimizable: false,
-                resize: false } );
+                sizes: [ controlsOptions.height ? `calc(100% - ${controlsOptions.height})` : '85%', null ], minimizable: false, resize: false } );
         }
 
         controlsArea.root.classList.add( 'lexconstrolsarea' );

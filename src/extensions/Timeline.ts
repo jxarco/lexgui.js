@@ -496,7 +496,8 @@ export abstract class Timeline
         } );
 
         // reset all tree events to the new tree
-        for( let name in this.trackTreesEvents){
+        for ( let name in this.trackTreesEvents )
+        {
             this.setTrackTreeEventListener( name, this.trackTreesEvents[name] );
         }
 

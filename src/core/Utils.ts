@@ -126,7 +126,8 @@ LX.toTitleCase = toTitleCase;
  * @method toKebabCase
  * @param {String} str
  */
-function toKebabCase(str: string): string {
+function toKebabCase( str: string ): string
+{
     return str
         .replace( /([A-Z])/g, '-$1' )
         .replace( /[\s_]+/g, '-' )
@@ -143,9 +144,9 @@ LX.toKebabCase = toKebabCase;
 function toSnakeCase( str: string )
 {
     return str
-        .replace(/([a-z])([A-Z])/g, '$1_$2')
-        .replace(/([A-Z]+)([A-Z][a-z])/g, '$1_$2')
-        .replace(/[\s\-]+/g, '_')
+        .replace( /([a-z])([A-Z])/g, '$1_$2' )
+        .replace( /([A-Z]+)([A-Z][a-z])/g, '$1_$2' )
+        .replace( /[\s\-]+/g, '_' )
         .toLowerCase();
 }
 

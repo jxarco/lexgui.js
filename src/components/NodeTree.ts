@@ -287,27 +287,27 @@ export class NodeTree
                             {
                                 return;
                             }
-    
+
                             for ( let child of n.children ?? [] )
                             {
                                 if ( !child )
                                 {
                                     continue;
                                 }
-    
+
                                 let nodeItem = this.domEl.querySelector( '#' + child.id );
                                 nodeItem.classList.add( 'selected' );
                                 this.selected.push( child );
                                 selectChildren( child );
                             }
                         };
-    
+
                         this.domEl.querySelectorAll( '.selected' ).forEach( ( i: HTMLElement ) => i.classList.remove( 'selected' ) );
                         this.selected.length = 0;
-    
+
                         // Add childs of the clicked node
                         selectChildren( node );
-    
+
                         const onSelect = this._callbacks['select'];
                         if ( onSelect !== undefined )
                         {
@@ -318,18 +318,18 @@ export class NodeTree
                                 domEvent: e,
                                 userInitiated: true
                             };
-    
+
                             onSelect( event );
                         }
                     } );
-    
+
                     m.add( 'Delete', { callback: () => {
                         const onBeforeDelete = this._callbacks['beforeDelete'];
                         const onDelete = this._callbacks['delete'];
-    
+
                         const resolve = ( ...args: any[] ) => {
                             let deletedNodes = [];
-    
+
                             if ( this.selected.length )
                             {
                                 deletedNodes.push( ...that.deleteNodes( this.selected ) );
@@ -338,9 +338,9 @@ export class NodeTree
                             {
                                 deletedNodes.push( node );
                             }
-    
+
                             this.refresh();
-    
+
                             const event: NodeTreeEvent = {
                                 type: 'delete',
                                 items: deletedNodes,
@@ -348,7 +348,7 @@ export class NodeTree
                             };
                             if ( onDelete ) onDelete( event, ...args );
                         };
-    
+
                         if ( onBeforeDelete )
                         {
                             const event: NodeTreeEvent = {

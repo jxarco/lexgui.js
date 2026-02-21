@@ -485,13 +485,13 @@ LX._createCommandbar = function( root: any )
             for ( let l of LX.Tokenizer.getRegisteredLanguages() )
             {
                 const langDef = Tokenizer.getLanguage( l );
-                if( !langDef ) continue;
+                if ( !langDef ) continue;
                 const key = 'Language: ' + l;
                 const icon: any = langDef?.icon;
-                const iconData = (( icon: string | Record<string, string> ) => {
+                const iconData = ( ( icon: string | Record<string, string> ) => {
                     const data: string = icon.constructor === String ? icon : Object.values( icon )[0];
                     return icon ? data.split( ' ' ) : [];
-                })( icon );
+                } )( icon );
 
                 let value = LX.makeIcon( iconData[0], { svgClass: `${iconData.slice( 1 ).join( ' ' )}` } ).innerHTML;
                 value += key + " <span class='lang-ext'>(" + langDef.extensions + ')</span>';

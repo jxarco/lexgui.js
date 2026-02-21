@@ -25,12 +25,12 @@ export class AlertDialog extends Dialog
 
             p.sameLine( 2, 'justify-end' );
             p.addButton( null, options.cancelText ?? 'Cancel', () => {
-                if( options.cancelCallback )
+                if ( options.cancelCallback )
                 {
                     options.cancelCallback();
                 }
 
-                this.destroy()
+                this.destroy();
             }, {
                 buttonClass: 'outline'
             } );
