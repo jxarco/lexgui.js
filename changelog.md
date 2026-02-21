@@ -9,6 +9,7 @@ CodeEditor:
 - Improved custom suggestions format (now allows for `insertText` too).
 - Supported Multiline TAB indent/dedent.
 - `setText` now has language detection option.
+- Extra New line and autoindent for {}, [] and () pair keys.
 - Fixed click autocomplete suggestion.
 
 ## 8.3.0 (master)

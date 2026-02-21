@@ -4730,12 +4730,30 @@ export class CodeEditor
             const indent = this.doc.getIndent( line );
             const spaces = ' '.repeat( indent );
 
-            const op = this.doc.insert( line, col, '\n' + spaces );
-            this.undoManager.record( op, this.cursorSet.getCursorPositions() );
+            const charBefore = this.doc.getCharAt( line, col - 1 );
+            const charAfter  = this.doc.getCharAt( line, col );
 
-            cursor.head = { line: line + 1, col: indent };
-            cursor.anchor = { ...cursor.head };
-            this.cursorSet.adjustOthers( idx, line, col, 0, 1 );
+            const OPEN_CLOSE: Record<string, string> = { '{': '}', '[': ']', '(': ')' };
+            if ( charBefore && charAfter && OPEN_CLOSE[ charBefore ] === charAfter )
+            {
+                const innerSpaces = ' '.repeat( indent + this.tabSize );
+                const insertion = '\n' + innerSpaces + '\n' + spaces;
+                const op = this.doc.insert( line, col, insertion );
+                this.undoManager.record( op, this.cursorSet.getCursorPositions() );
+
+                cursor.head = { line: line + 1, col: indent + this.tabSize };
+                cursor.anchor = { ...cursor.head };
+                this.cursorSet.adjustOthers( idx, line, col, 0, 2 );
+            }
+            else
+            {
+                const op = this.doc.insert( line, col, '\n' + spaces );
+                this.undoManager.record( op, this.cursorSet.getCursorPositions() );
+
+                cursor.head = { line: line + 1, col: indent };
+                cursor.anchor = { ...cursor.head };
+                this.cursorSet.adjustOthers( idx, line, col, 0, 1 );
+            }
         }
 
         this._rebuildLines();
