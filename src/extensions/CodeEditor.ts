@@ -2875,7 +2875,7 @@ export class CodeEditor
         }
     };
 
-    setText( text: string ): void
+    setText( text: string, language?: string, detectLang: boolean = false ): void
     {
         if( !this.currentTab ) return;
 
@@ -2883,10 +2883,124 @@ export class CodeEditor
         this.cursorSet.set( 0, 0 );
         this.undoManager.clear();
         this._lineStates = [];
+
+        if ( language )
+        {
+            this.setLanguage( language );
+        }
+        else if ( detectLang )
+        {
+            const detected = this._detectLanguage( text );
+            if ( detected ) this.setLanguage( detected );
+        }
+
         this._renderAllLines();
         this._renderCursors();
         this._renderSelections();
         this.resize( true );
+    }
+
+    private _detectLanguage( text: string ): string | null
+    {
+        const scores: Record<string, number> = {};
+        const add = ( lang: string, pts: number ) => { scores[lang] = ( scores[lang] ?? 0 ) + pts; };
+
+        // Score using reservedWords from each registered language
+        const textWords = new Set( text.match( /\b\w+\b/g ) ?? [] );
+        const totalWords = Math.max( textWords.size, 1 );
+        for ( const langName of Tokenizer.getRegisteredLanguages() )
+        {
+            const langDef = Tokenizer.getLanguage( langName );
+            if ( !langDef?.reservedWords?.length ) continue;
+            let hits = 0;
+            for ( const word of langDef.reservedWords )
+            {
+                if ( textWords.has( word ) ) hits++;
+            }
+            if ( hits > 0 )
+            {
+                const vocabRatio = hits / langDef.reservedWords.length;
+                const textRatio  = hits / totalWords;
+                add( langName, Math.round( ( vocabRatio + textRatio ) * 40 ) );
+            }
+        }
+
+        // Add scores based on "important" structural words only
+
+        // HTML
+        if ( /<!DOCTYPE\s+html/i.test( text ) )                    add( 'HTML', 20 );
+        if ( /<html[\s>]/i.test( text ) )                          add( 'HTML', 15 );
+        if ( /<\/?(div|span|body|head|script|style|meta)\b/i.test( text ) ) add( 'HTML', 8 );
+
+        // JSON — must come before JS checks (starts with { or [)
+        if ( /^\s*[\[{]/.test( text ) && /"\s*:\s*/.test( text ) && !/function|=>|const|var|let/.test( text ) )
+                                                                   add( 'JSON', 15 );
+
+        // CSS
+        if ( /[\w-]+\s*:\s*[\w#\d"'(]+.*;/.test( text ) && /[{}]/.test( text ) && !/<\w+/.test( text ) )
+                                                                   add( 'CSS', 10 );
+        if ( /@(media|keyframes|import|charset|font-face)\b/.test( text ) ) add( 'CSS', 15 );
+
+        // WGSL
+        if ( /@(vertex|fragment|compute|group|binding|builtin)\b/.test( text ) ) add( 'WGSL', 20 );
+        if ( /\bfn\s+\w+\s*\(/.test( text ) && /\bvar\b/.test( text ) )   add( 'WGSL', 10 );
+        if ( /\b(vec2f|vec3f|vec4f|mat4x4f|f32|u32|i32)\b/.test( text ) ) add( 'WGSL', 12 );
+
+        // GLSL
+        if ( /\b(gl_Position|gl_FragColor|gl_FragCoord)\b/.test( text ) ) add( 'GLSL', 20 );
+        if ( /\b(uniform|varying|attribute)\s+\w/.test( text ) )           add( 'GLSL', 10 );
+        if ( /\b(vec2|vec3|vec4|mat4|sampler2D)\b/.test( text ) && !/vec2f|vec3f/.test( text ) )
+                                                                           add( 'GLSL', 8 );
+
+        // HLSL
+        if ( /\b(SV_Position|SV_Target|SV_Depth)\b/.test( text ) )        add( 'HLSL', 20 );
+        if ( /\b(cbuffer|tbuffer|float4|float3|float2|Texture2D)\b/.test( text ) ) add( 'HLSL', 12 );
+
+        // Python
+        if ( /^\s*def\s+\w+\s*\(/m.test( text ) )                 add( 'Python', 15 );
+        if ( /^\s*import\s+\w/m.test( text ) && !/\bfrom\s+['"]/.test( text ) ) add( 'Python', 8 );
+        if ( /^\s*class\s+\w+(\s*\(.*\))?:/m.test( text ) )       add( 'Python', 10 );
+        if ( /\bprint\s*\(/.test( text ) && /:\s*$/.test( text ) ) add( 'Python', 5 );
+        if ( /elif\b|lambda\b|self\.\w/.test( text ) )             add( 'Python', 8 );
+
+        // Rust
+        if ( /\bfn\s+\w+\s*\(/.test( text ) && /\blet\s+mut\b/.test( text ) ) add( 'Rust', 15 );
+        if ( /\b(impl|trait|enum|struct)\s+\w+/.test( text ) && /\bfn\b/.test( text ) )
+                                                                   add( 'Rust', 12 );
+        if ( /use\s+std::|use\s+\w+::\w+/.test( text ) )          add( 'Rust', 10 );
+        if ( /println!\s*\(/.test( text ) )                        add( 'Rust', 8 );
+
+        // C++
+        if ( /#include\s*<[\w./]+>/.test( text ) )                 add( 'C++', 15 );
+        if ( /\bstd::\w+/.test( text ) )                           add( 'C++', 12 );
+        if ( /\b(class|template|namespace|nullptr|new\s+\w)\b/.test( text ) ) add( 'C++', 8 );
+        if ( /(::|->)\w+/.test( text ) )                           add( 'C++', 6 );
+
+        // C
+        if ( /#include\s*<[\w.]+\.h>/.test( text ) )               add( 'C', 12 );
+        if ( /\bint\s+main\s*\(/.test( text ) )                    add( 'C', 15 );
+        if ( /\b(printf|scanf|malloc|free|sizeof)\s*\(/.test( text ) ) add( 'C', 10 );
+
+        // TypeScript — before JS (is a superset)
+        if ( /:\s*(string|number|boolean|void|any|never|unknown)\b/.test( text ) ) add( 'TypeScript', 12 );
+        if ( /\binterface\s+\w+/.test( text ) )                    add( 'TypeScript', 12 );
+        if ( /\btype\s+\w+\s*=/.test( text ) )                     add( 'TypeScript', 10 );
+        if ( /\bas\s+(string|number|any|unknown)\b/.test( text ) ) add( 'TypeScript', 8 );
+        if ( /\benum\s+\w+\s*\{/.test( text ) )                   add( 'TypeScript', 8 );
+
+        // JavaScript
+        if ( /\b(const|let|var)\s+\w+\s*=/.test( text ) )         add( 'JavaScript', 8 );
+        if ( /=>\s*[\w{(]/.test( text ) )                          add( 'JavaScript', 6 );
+        if ( /\b(import|export)\s+(default|{|\*)/.test( text ) )   add( 'JavaScript', 8 );
+        if ( /\bconsole\.(log|warn|error)\b/.test( text ) )        add( 'JavaScript', 6 );
+
+        // Markdown
+        if ( /^#{1,6}\s+\S/m.test( text ) )                        add( 'Markdown', 12 );
+        if ( /\*\*\w.*?\*\*/.test( text ) || /\[.+\]\(.+\)/.test( text ) ) add( 'Markdown', 8 );
+        if ( /^```\w*/m.test( text ) )                             add( 'Markdown', 10 );
+
+        const best = Object.entries( scores ).sort( ( a, b ) => b[1] - a[1] )[0];
+        return best && best[1] >= 8 ? best[0] : null;
     }
 
     appendText( text: string ): void
