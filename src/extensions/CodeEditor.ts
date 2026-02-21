@@ -2233,6 +2233,19 @@ interface CodeTab
     path?: string;
 }
 
+export interface CodeSuggestion
+{
+    label: string;
+    kind?: string;
+    scope?: string;
+    detail?: string;
+    insertText?: string;
+    filterText?: string;
+    sortText?: string;
+    icon?: string;
+    iconClass?: string;
+}
+
 //  _____             _ _ _____
 // |   __|___ ___ ___| | | __  |___ ___
 // |__   |  _|  _| . | | | __ -| .'|  _|
@@ -2397,7 +2410,7 @@ export class CodeEditor
     tabSize: number = 4;
     highlight: string = 'Plain Text';
     newTabOptions: any[] | null = null;
-    customSuggestions: any[] = [];
+    customSuggestions: CodeSuggestion[] = [];
     explorerName: string = 'EXPLORER';
 
     // Editor callbacks:
@@ -3202,15 +3215,17 @@ export class CodeEditor
         }
     }
 
-    setCustomSuggestions( suggestions: string[] )
+    setCustomSuggestions( suggestions: CodeSuggestion[] | string[] )
     {
         if( !suggestions || suggestions.constructor !== Array )
         {
-            console.warn( 'suggestions should be a string array!' );
+            console.warn( 'suggestions should be an array!' );
             return;
         }
 
-        this.customSuggestions = suggestions;
+        this.customSuggestions = ( suggestions as any[] ).map( s =>
+            typeof s === 'string' ? { label: s } : s as CodeSuggestion
+        );
     }
 
     loadFile( file: File | string, options: Record<string, any> = {} ): void
@@ -5222,65 +5237,65 @@ export class CodeEditor
             return;
         }
 
-        const suggestions: Array<{ label: string, kind?: string, scope?: string, detail?: string, insertText?: string }> = [];
+        const suggestions: CodeSuggestion[] = [];
         const added = new Set<string>();
 
-        const addSuggestion = ( label: string, kind?: string, scope?: string, detail?: string, insertText?: string ) =>
+        const addSuggestion = ( s: CodeSuggestion ) =>
         {
-            if ( !added.has( label ) )
+            if ( !added.has( s.label ) )
             {
-                suggestions.push( { label, kind, scope, detail, insertText } );
-                added.add( label );
+                suggestions.push( s );
+                added.add( s.label );
             }
+        };
+
+        const filterSuggestion = ( suggestion: CodeSuggestion, word: string ): boolean =>
+        {
+            const w = word.toLowerCase();
+            if ( suggestion.filterText )
+            {
+                return suggestion.filterText.split( ' ' ).some( token => token.toLowerCase().trim().startsWith( w ) );
+            }
+            return suggestion.label.toLowerCase().startsWith( w );
         };
 
         // Get first suggestions from symbol table
         const allSymbols = this.symbolTable.getAllSymbols();
         for ( const symbol of allSymbols )
         {
-            if ( symbol.name.toLowerCase().startsWith( word.toLowerCase() ) )
-            {
-                addSuggestion( symbol.name, symbol.kind, symbol.scope, `${symbol.kind} in ${symbol.scope}` );
-            }
+            const s: CodeSuggestion = { label: symbol.name, kind: symbol.kind, scope: symbol.scope, detail: `${symbol.kind} in ${symbol.scope}` };
+            if ( filterSuggestion( s, word ) ) addSuggestion( s );
         }
 
         // Add language reserved keys
         for ( const reservedWord of this.language.reservedWords )
         {
-            if ( reservedWord.toLowerCase().startsWith( word.toLowerCase() ) )
-            {
-                addSuggestion( reservedWord );
-            }
+            const s: CodeSuggestion = { label: reservedWord };
+            if ( filterSuggestion( s, word ) ) addSuggestion( s );
         }
 
         // Add custom suggestions
         for ( const suggestion of this.customSuggestions )
         {
-            const label = typeof suggestion === 'string' ? suggestion : suggestion.label;
-            const kind = typeof suggestion === 'object' ? suggestion.kind : undefined;
-            const detail = typeof suggestion === 'object' ? suggestion.detail : undefined;
-            const insertText = typeof suggestion === 'object' ? suggestion.insertText : suggestion;
-
-            if ( label.toLowerCase().startsWith( word.toLowerCase() ) )
-            {
-                addSuggestion( label, kind, undefined, detail, insertText );
-            }
+            if ( filterSuggestion( suggestion, word ) ) addSuggestion( suggestion );
         }
 
-        // Close autocomplete if no suggestions
         if ( suggestions.length === 0 )
         {
             this._doHideAutocomplete();
             return;
         }
 
-        // Sort suggestions: exact matches first, then alphabetically
+        // Sort suggestions: exact matches first, then by sortText (or label if absent)
+        const w = word.toLowerCase();
         suggestions.sort( ( a, b ) =>
         {
-            const aExact = a.label.toLowerCase() === word.toLowerCase() ? 0 : 1;
-            const bExact = b.label.toLowerCase() === word.toLowerCase() ? 0 : 1;
+            const aKey = ( a.sortText ?? a.label ).toLowerCase();
+            const bKey = ( b.sortText ?? b.label ).toLowerCase();
+            const aExact = aKey === w ? 0 : 1;
+            const bExact = bKey === w ? 0 : 1;
             if ( aExact !== bExact ) return aExact - bExact;
-            return a.label.localeCompare( b.label );
+            return aKey.localeCompare( bKey );
         } );
 
         this._selectedAutocompleteIndex = 0;
@@ -5291,10 +5306,10 @@ export class CodeEditor
             const item = document.createElement( 'pre' );
             ( item as any ).insertText = suggestion.insertText ?? suggestion.label;
             if ( index === this._selectedAutocompleteIndex ) item.classList.add( 'selected' );
-            const currSuggestion = suggestion.label;
+            const currSuggestionLabel = suggestion.label;
 
-            let iconName = 'CaseLower';
-            let iconClass = 'foo';
+            let iconName = suggestion.icon ?? 'CaseLower';
+            let iconClass = suggestion.iconClass ?? 'text-gray-500';
 
             switch ( suggestion.kind )
             {
@@ -5343,31 +5358,27 @@ export class CodeEditor
                     iconClass = 'text-green-500';
                     break;
                 case 'method-call':
-                    iconName = 'PlayCircle';
+                    iconName = 'Parentheses';
                     iconClass = 'text-gray-400';
-                    break;
-                default:
-                    iconName = 'CaseLower';
-                    iconClass = 'text-gray-500';
                     break;
             }
 
             item.appendChild( LX.makeIcon( iconName, { iconClass: 'ml-1 mr-2', svgClass: 'sm ' + iconClass } ) );
 
             // Highlight the written part
-            const hIndex = currSuggestion.toLowerCase().indexOf( word.toLowerCase() );
+            const hIndex = currSuggestionLabel.toLowerCase().indexOf( word.toLowerCase() );
 
             var preWord = document.createElement( 'span' );
-            preWord.textContent = currSuggestion.substring( 0, hIndex );
+            preWord.textContent = currSuggestionLabel.substring( 0, hIndex );
             item.appendChild( preWord );
 
             var actualWord = document.createElement( 'span' );
-            actualWord.textContent = currSuggestion.substring( hIndex, hIndex + word.length );
+            actualWord.textContent = currSuggestionLabel.substring( hIndex, hIndex + word.length );
             actualWord.classList.add( 'word-highlight' );
             item.appendChild( actualWord );
 
             var postWord = document.createElement( 'span' );
-            postWord.textContent = currSuggestion.substring( hIndex + word.length );
+            postWord.textContent = currSuggestionLabel.substring( hIndex + word.length );
             item.appendChild( postWord );
 
             if ( suggestion.kind )
