@@ -1935,6 +1935,53 @@ interface ScopeInfo
 }
 
 /**
+ * Strips string literals and single-line comments from a line of code,
+ * leaving only the structural characters (braces, operators, keywords etc).
+ */
+function stripLiteralsAndComments( line: string ): string
+{
+    let result = '';
+    let i = 0;
+    while ( i < line.length )
+    {
+        const ch = line[ i ];
+
+        // Remove single-line comment
+        if ( ch === '/' && line[ i + 1 ] === '/' )
+        {
+            break;
+        }
+
+        // Block comment (same line): skip to closing */
+        if ( ch === '/' && line[ i + 1 ] === '*' )
+        {
+            i += 2;
+            while ( i < line.length && !( line[ i ] === '*' && line[ i + 1 ] === '/' ) ) i++;
+            i += 2;
+            continue;
+        }
+
+        // String literals (single, double, template) — skip content
+        if ( ch === '"' || ch === "'" || ch === '`' )
+        {
+            const quote = ch;
+            i++;
+            while ( i < line.length )
+            {
+                if ( line[ i ] === '\\' ) { i += 2; continue; }   // escaped char
+                if ( line[ i ] === quote ) { i++; break; }         // closing quote
+                i++;
+            }
+            continue;
+        }
+
+        result += ch;
+        i++;
+    }
+    return result;
+}
+
+/**
  * Manages code symbols for autocomplete, navigation, and outlining.
  * Incrementally updates as lines change.
  */
@@ -1943,7 +1990,8 @@ class SymbolTable
     private _symbols: Map<string, Symbol[]> = new Map();  // name -> symbols[]
     private _lineSymbols: Symbol[][] = [];                 // [lineNum] -> symbols declared on that line
     private _scopeStack: ScopeInfo[] = [{ name: 'global', type: 'global', line: 0 }];
-    private _lineScopes: ScopeInfo[][] = [];               // [lineNum] -> scope stack at that line
+    private _lineScopes: ScopeInfo[][] = [];               // [lineNum] -> scope stack at start of that line
+    private _lineScopesEnd: ScopeInfo[][] = [];            // [lineNum] -> scope stack at end of that line
 
     get currentScope(): string
     {
@@ -1958,6 +2006,11 @@ class SymbolTable
     getScopeAtLine( line: number ): ScopeInfo[]
     {
         return this._lineScopes[line] ?? [{ name: 'global', type: 'global', line: 0 }];
+    }
+
+    getLineScopeEnd( line: number ): ScopeInfo[]
+    {
+        return this._lineScopesEnd[line] ?? [{ name: 'global', type: 'global', line: 0 }];
     }
 
     getSymbols( name: string ): Symbol[]
@@ -1988,11 +2041,19 @@ class SymbolTable
     /** Update scope stack for a line (call before parsing symbols) */
     updateScopeForLine( line: number, lineText: string ): void
     {
-        // Track braces to maintain scope stack
-        const openBraces = ( lineText.match( /\{/g ) || [] ).length;
-        const closeBraces = ( lineText.match( /\}/g ) || [] ).length;
+        if ( line === 0 )
+        {
+            this._scopeStack = [{ name: 'global', type: 'global', line: 0 }];
+        }
+        else if ( this._lineScopesEnd[line - 1] )
+        {
+            this._scopeStack = [ ...this._lineScopesEnd[line - 1] ];
+        }
 
-        // Save current scope for this line
+        const stripped = stripLiteralsAndComments( lineText );
+        const openBraces = ( stripped.match( /\{/g ) || [] ).length;
+        const closeBraces = ( stripped.match( /\}/g ) || [] ).length;
+
         this._lineScopes[line] = [ ...this._scopeStack ];
 
         // Pop scopes for closing braces
@@ -2001,11 +2062,13 @@ class SymbolTable
             if ( this._scopeStack.length > 1 ) this._scopeStack.pop();
         }
 
-        // Push scopes for opening braces (will be named by symbol detection)
+        // Push scopes for opening braces (symbol detection will name them later)
         for ( let i = 0; i < openBraces; i++ )
         {
             this._scopeStack.push( { name: 'anonymous', type: 'anonymous', line } );
         }
+
+        this._lineScopesEnd[line] = [ ...this._scopeStack ];
     }
 
     /** Name the most recent anonymous scope (called when detecting class/function) */
@@ -2063,6 +2126,7 @@ class SymbolTable
     {
         this._scopeStack = [{ name: 'global', type: 'global', line: 0 }];
         this._lineScopes = [];
+        this._lineScopesEnd = [];
     }
 
     clear(): void
@@ -2430,6 +2494,8 @@ export class CodeEditor
     // State:
     private _lineStates: TokenizerState[] = [];     // tokenizer state at end of each line
     private _lineElements: HTMLElement[] = [];      // <pre> element per line
+    private _bracketOpenLine: number = -1;          // line of the { opening current scope
+    private _bracketCloseLine: number = -1;         // line of the } closing current scope
     private _openedTabs: Record<string, CodeTab> = {};
     private _loadedTabs: Record<string, CodeTab> = {};
     private _storedTabs: Record<string, any> = {};
@@ -3704,9 +3770,38 @@ export class CodeEditor
         const result = Tokenizer.tokenizeLine( lineText, this.language, prevState );
         const langClass = this.language.name.toLowerCase().replace( /[^a-z]/g, '' );
         const URL_REGEX = /(https?:\/\/[^\s"'<>)\]]+)/g;
-        let html = '';
-        for ( const token of result.tokens )
+
+        // Pre-compute which token index gets the bracket-highlight class
+        let bracketTokenIdx = -1;
+        if ( lineIndex === this._bracketOpenLine )
         {
+            // Last '{' symbol token on this line
+            for ( let i = result.tokens.length - 1; i >= 0; i-- )
+            {
+                if ( result.tokens[i].type === 'symbol' && result.tokens[i].value === '{' )
+                {
+                    bracketTokenIdx = i;
+                    break;
+                }
+            }
+        }
+        else if ( lineIndex === this._bracketCloseLine )
+        {
+            // First '}' symbol token on this line
+            for ( let i = 0; i < result.tokens.length; i++ )
+            {
+                if ( result.tokens[i].type === 'symbol' && result.tokens[i].value === '}' )
+                {
+                    bracketTokenIdx = i;
+                    break;
+                }
+            }
+        }
+
+        let html = '';
+        for ( let ti = 0; ti < result.tokens.length; ti++ )
+        {
+            const token = result.tokens[ti];
             const cls = TOKEN_CLASS_MAP[ token.type ];
             const escaped = token.value
                 .replace( /&/g, '&amp;' )
@@ -3718,9 +3813,15 @@ export class CodeEditor
                 ? escaped.replace( URL_REGEX, `<span class="code-link" data-url="$1">$1</span>` )
                 : escaped;
 
+            const bracketClass = ti === bracketTokenIdx ? ' code-bracket-active' : '';
+
             if ( cls )
             {
-                html += `<span class="${cls} ${langClass}">${content}</span>`;
+                html += `<span class="${cls} ${langClass}${bracketClass}">${content}</span>`;
+            }
+            else if ( bracketClass )
+            {
+                html += `<span class="${bracketClass.trim()}">${content}</span>`;
             }
             else
             {
@@ -3823,9 +3924,17 @@ export class CodeEditor
                 {
                     this._lineElements[ i ].innerHTML = this._getGutterHtml( i ) + nextHtml;
                 }
-                this._updateSymbolsForLine( i );  // Update symbols for cascaded lines too
+                this._updateSymbolsForLine( i ); // Update symbols for cascaded lines too
                 if ( this._statesEqual( nextOld, nextEnd ) ) break;
             }
+        }
+
+        // Propagate/cascade scope updates to subsequent lines until the start-of-line scope stabilizes
+        for ( let i = lineIndex + 1; i < this.doc.lineCount; i++ )
+        {
+            const oldStartDepth = this.symbolTable.getScopeAtLine( i ).length;
+            this.symbolTable.updateScopeForLine( i, this.doc.getLine( i ) );
+            if ( this.symbolTable.getScopeAtLine( i ).length === oldStartDepth ) break;
         }
     }
 
@@ -3881,12 +3990,9 @@ export class CodeEditor
 
         for ( const sel of this.cursorSet.cursors )
         {
-            const el = document.createElement( 'div' );
-            el.className = 'cursor';
-            el.innerHTML = '&nbsp;';
+            const el = LX.makeElement( 'div', 'cursor', '&nbsp;', this.cursorsLayer );
             el.style.left = ( sel.head.col * this.charWidth + this.xPadding ) + 'px';
             el.style.top = ( sel.head.line * this.lineHeight ) + 'px';
-            this.cursorsLayer.appendChild( el );
         }
 
         this._updateActiveLine();
@@ -3918,12 +4024,10 @@ export class CodeEditor
                     ? Math.ceil( this.charWidth * 0.5 ) // minimum width for empty lines
                     : ( toCol - fromCol ) * this.charWidth;
 
-                const div = document.createElement( 'div' );
-                div.className = 'lexcodeselection';
+                const div = LX.makeElement( 'div', 'lexcodeselection', '', this.selectionsLayer );
                 div.style.top = ( line * this.lineHeight ) + 'px';
                 div.style.left = ( fromCol * this.charWidth + this.xPadding ) + 'px';
                 div.style.width = width + 'px';
-                this.selectionsLayer.appendChild( div );
             }
         }
     }
@@ -5495,6 +5599,116 @@ export class CodeEditor
         this._resetBlinker();
         this.resize();
         this._scrollCursorIntoView();
+        this._updateBracketHighlight();
+    }
+
+    /**
+     * Returns the scope stack at the exact cursor position (line + column).
+     * Basically starts from getScopeAtLine and then counts real braces up to the cursor column.
+     */
+    private _getScopeAtCursor(): ScopeInfo[]
+    {
+        const cursor   = this.cursorSet.getPrimary().head;
+        const line     = cursor.line;
+        const col      = cursor.col;
+        const lineText = this.doc.getLine( line );
+
+        const scopeStack: ScopeInfo[] = [ ...this.symbolTable.getScopeAtLine( line ) ];
+
+        let i = 0;
+        let inString = false;
+        let stringCh = '';
+
+        while ( i < col && i < lineText.length )
+        {
+            const ch = lineText[ i ];
+
+            if ( inString )
+            {
+                if ( ch === '\\' ) { i += 2; continue; }
+                if ( ch === stringCh ) inString = false;
+                i++;
+                continue;
+            }
+
+            if ( ch === '/' && lineText[ i + 1 ] === '/' ) break;
+            if ( ch === '/' && lineText[ i + 1 ] === '*' )
+            {
+                i += 2;
+                while ( i < col && !( lineText[ i ] === '*' && lineText[ i + 1 ] === '/' ) ) i++;
+                i += 2;
+                continue;
+            }
+            if ( ch === '"' || ch === "'" || ch === '`' )
+            {
+                inString  = true;
+                stringCh  = ch;
+                i++;
+                continue;
+            }
+            if ( ch === '{' )
+            {
+                scopeStack.push( { name: 'anonymous', type: 'anonymous', line } );
+            }
+            else if ( ch === '}' && scopeStack.length > 1 )
+            {
+                scopeStack.pop();
+            }
+            i++;
+        }
+
+        return scopeStack;
+    }
+
+    private _updateBracketHighlight(): void
+    {
+        const scopes = this._getScopeAtCursor();
+
+        // Find innermost non-global scope
+        let innermost: ScopeInfo | null = null;
+        for ( let i = scopes.length - 1; i >= 0; i-- )
+        {
+            if ( scopes[i].type !== 'global' )
+            {
+                innermost = scopes[i];
+                break;
+            }
+        }
+
+        const prevOpen  = this._bracketOpenLine;
+        const prevClose = this._bracketCloseLine;
+
+        if ( !innermost )
+        {
+            this._bracketOpenLine  = -1;
+            this._bracketCloseLine = -1;
+        }
+        else
+        {
+            const openLine    = innermost.line;
+            const targetDepth = scopes.length; // depth including the innermost scope
+
+            // Closing line: last line where scope depth >= targetDepth
+            let closeLine = openLine;
+            for ( let i = openLine + 1; i < this.doc.lineCount; i++ )
+            {
+                if ( this.symbolTable.getScopeAtLine( i ).length >= targetDepth ) closeLine = i;
+                else break;
+            }
+
+            this._bracketOpenLine  = openLine;
+            this._bracketCloseLine = closeLine;
+        }
+
+        // Re-render only the lines that changed
+        const linesToUpdate = new Set<number>();
+        if ( prevOpen  !== this._bracketOpenLine  ) { linesToUpdate.add( prevOpen );  linesToUpdate.add( this._bracketOpenLine ); }
+        if ( prevClose !== this._bracketCloseLine ) { linesToUpdate.add( prevClose ); linesToUpdate.add( this._bracketCloseLine ); }
+
+        for ( const line of linesToUpdate )
+        {
+            if ( line >= 0 && line < this.doc.lineCount ) this._updateLine( line );
+        }
     }
 
     // Scrollbar & Resize:

@@ -6198,6 +6198,10 @@ ul.lexassetscontent {
     align-content: center;
   }
 }
+.lexcodeeditor .code-bracket-active {
+  background-color: var(--accent);
+  color: var(--foreground) !important;
+}
 .lexcodeeditor .code-link {
   text-decoration: underline;
   text-underline-offset: 4px;

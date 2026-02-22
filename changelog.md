@@ -2,6 +2,10 @@
 
 ## dev
 
+CodeEditor:
+- Suggestions icon, iconClass, sortText and filterText.
+- Added scope braces detection.
+
 ## 8.3.1 (master)
 
 Fixed `LX.toKebabCase`.
