@@ -2,6 +2,9 @@
 
 ## dev
 
+Added interest delay `options.delay` to Tooltip.
+Fixed bug not removing tooltips when trigger is destroyed.
+
 CodeEditor:
 - Suggestions icon, iconClass, sortText and filterText.
 - Added scope braces detection.
