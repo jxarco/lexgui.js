@@ -1961,7 +1961,7 @@ function stripLiteralsAndComments( line: string ): string
             continue;
         }
 
-        // String literals (single, double, template) — skip content
+        // Remove strings (single, double, template)
         if ( ch === '"' || ch === "'" || ch === '`' )
         {
             const quote = ch;
@@ -2143,10 +2143,14 @@ class SymbolTable
 function parseSymbolsFromLine( lineText: string, tokens: Token[], line: number, symbolTable: SymbolTable ): Symbol[]
 {
     const symbols: Symbol[] = [];
-    const scope = symbolTable.currentScope;
-    const scopeType = symbolTable.currentScopeType;
 
-    // Build set of reserved words from tokens (keywords, statements, builtins) to skip when detecting symbols
+    // Use the scope snapshot from the START of this line, not currentScope/currentScopeType 
+    // which will reflect state AFTER updateScopeForLine already pushed/popped braces on this line...
+    const lineScopes = symbolTable.getScopeAtLine( line );
+    const lineScope  = lineScopes[ lineScopes.length - 1 ];
+    const scope      = lineScope?.name ?? 'global';
+    const scopeType  = lineScope?.type ?? 'global';
+
     const reservedWords = new Set<string>();
     for ( const token of tokens )
     {
@@ -2156,7 +2160,7 @@ function parseSymbolsFromLine( lineText: string, tokens: Token[], line: number, 
         }
     }
 
-    // Track added symbols by name and approximate position to avoid duplicates
+    // Track added symbols by name and approximate position using 5 chars tolerance to avoid duplicates
     const addedSymbols = new Set<string>();
 
     const addSymbol = ( name: string, kind: string, col: number = 0 ) =>
@@ -2164,7 +2168,6 @@ function parseSymbolsFromLine( lineText: string, tokens: Token[], line: number, 
         if ( !name || !name.match( /^[a-zA-Z_$][\w$]*$/ ) ) return; // Valid identifier check
         if ( reservedWords.has( name ) ) return;
 
-        // Unique key using 5 chars tolerance
         const posKey = `${name}@${Math.floor( col / 5 ) * 5}`;
         if ( addedSymbols.has( posKey ) ) return; // Already added
 
@@ -2181,14 +2184,15 @@ function parseSymbolsFromLine( lineText: string, tokens: Token[], line: number, 
         { regex: /^\s*type\s+([A-Z_]\w*)\s*=/i, kind: 'type' },
         { regex: /^\s*(?:export\s+)?(?:async\s+)?function\s+(\w+)/i, kind: 'function' },
         { regex: /^\s*(?:const|let|var)\s+(\w+)\s*=\s*(?:async\s+)?\([^)]*\)\s*=>/i, kind: 'function' },
-        { regex: /^\s*(?:static\s+|const\s+|virtual\s+|inline\s+|extern\s+|pub\s+|async\s+)*(\w+[\w\s\*&:<>,]*?)\s+(\w+)\s*\([^)]*\)\s*[{;]/i, kind: 'typed-function' },
-        { regex: /^\s*(?:public|private|protected|static|readonly)*\s*(\w+)\s*\([^)]*\)\s*[:{]/i, kind: scopeType === 'class' ? 'method' : 'function' }
+        { regex: /^\s*(?:static\s+|const\s+|virtual\s+|inline\s+|extern\s+|pub\s+|async\s+)*(?!\b(?:await|return|if|else|while|for|switch|case|throw|new|delete|typeof|yield)\b)(\w+[\w\s\*&:<>,]*?)\s+(\w+)\s*\([^)]*\)\s*[{;]/i, kind: 'typed-function' },
+        { regex: /^\s*(?:(?:public|private|protected|static|readonly|async|override)\s+)*(\w+)\s*\([^)]*\)\s*[:{]/i, kind: scopeType === 'class' ? 'method' : 'function' }
     ];
 
     const multiPatterns = [
         { regex: /(?:const|let|var)\s+(\w+)/gi, kind: 'variable' },
         { regex: /(\w+)\s*:\s*(?:function|[A-Z]\w*)/gi, kind: 'variable' },
         { regex: /this\.(\w+)\s*=/gi, kind: 'property' },
+        { regex: /\b(?:private|protected|public)\s+(?:(?:static|readonly)\s+)*(\w+)\s*[=:;]/gi, kind: 'property' },
         { regex: /new\s+([A-Z]\w+)/gi, kind: 'constructor-call' },
         { regex: /(\w+)\s*\(/gi, kind: 'method-call' }
     ];
@@ -2308,6 +2312,43 @@ export interface CodeSuggestion
     sortText?: string;
     icon?: string;
     iconClass?: string;
+}
+
+export interface HoverSymbolInfo
+{
+    word: string;
+    tokenType: string;   // keyword | type | method | number | string | comment | text …
+    symbols: Symbol[];   // matching entries from the symbol table
+}
+
+/** Matches hex color literals: #rgb #rgba #rrggbb #rrggbbaa */
+const HEX_COLOR_RE = /#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{4}|[0-9a-fA-F]{3})\b/g;
+
+/**
+ * Scans a raw token value for hex color literals and returns HTML with each
+ * color wrapped in a swatch span. Non-color text is HTML-escaped.
+ */
+function injectColorSpans( raw: string, lineIndex: number, colOffset: number ): string
+{
+    HEX_COLOR_RE.lastIndex = 0;
+    let result    = '';
+    let lastIndex = 0;
+    let match: RegExpExecArray | null;
+
+    const esc = ( s: string ) =>
+        s.replace( /&/g, '&amp;' ).replace( /</g, '&lt;' ).replace( />/g, '&gt;' );
+
+    while ( ( match = HEX_COLOR_RE.exec( raw ) ) !== null )
+    {
+        result += esc( raw.slice( lastIndex, match.index ) );
+        const color = match[0];
+        const col   = colOffset + match.index;
+        result += `<span class="code-color" data-color="${color}" data-line="${lineIndex}" data-col="${col}" style="--code-color:${color}"><span class="code-color-swatch"></span>${esc( color )}</span>`;
+        lastIndex = match.index + color.length;
+    }
+
+    result += esc( raw.slice( lastIndex ) );
+    return result;
 }
 
 //  _____             _ _ _____
@@ -2488,6 +2529,7 @@ export class CodeEditor
     onReady: ( ( editor: CodeEditor ) => void ) | undefined;
     onCreateFile: ( ( editor: CodeEditor ) => void ) | undefined;
     onCodeChange: ( ( doc: CodeDocument ) => void ) | undefined;
+    onHoverSymbol: ( ( info: HoverSymbolInfo, editor: CodeEditor ) => string | HTMLElement | null | undefined ) | undefined;
 
     private _inputArea!: HTMLTextAreaElement;
 
@@ -2496,6 +2538,10 @@ export class CodeEditor
     private _lineElements: HTMLElement[] = [];      // <pre> element per line
     private _bracketOpenLine: number = -1;          // line of the { opening current scope
     private _bracketCloseLine: number = -1;         // line of the } closing current scope
+    private _hoverTimer: ReturnType<typeof setTimeout> | null = null;
+    private _hoverPopup: HTMLElement | null = null;
+    private _hoverWord: string = '';
+    private _colorPopover: any = null;              // active color picker popover
     private _openedTabs: Record<string, CodeTab> = {};
     private _loadedTabs: Record<string, CodeTab> = {};
     private _storedTabs: Record<string, any> = {};
@@ -2581,6 +2627,7 @@ export class CodeEditor
         this.onSelectTab = options.onSelectTab;
         this.onReady = options.onReady;
         this.onCodeChange = options.onCodeChange;
+        this.onHoverSymbol = options.onHoverSymbol;
 
         this.language = Tokenizer.getLanguage( this.highlight ) ?? Tokenizer.getLanguage( 'Plain Text' )!;
         this.symbolTable = new SymbolTable();
@@ -2851,6 +2898,13 @@ export class CodeEditor
         this.codeArea.root.addEventListener( 'mousemove', ( e: MouseEvent ) => {
             const link = ( e.target as HTMLElement ).closest( '.code-link' ) as HTMLElement | null;
             if ( link ) link.classList.toggle( 'hovered', e.ctrlKey );
+            this._onCodeAreaMouseMove( e );
+        } );
+        this.codeArea.root.addEventListener( 'mouseleave', () => {
+            this._clearHoverPopup();
+        } );
+        this.codeArea.root.addEventListener( 'click', ( e: MouseEvent ) => {
+            this._onColorSwatchClick( e );
         } );
 
         // Bottom status panel
@@ -3799,19 +3853,27 @@ export class CodeEditor
         }
 
         let html = '';
+        let colOffset = 0;
         for ( let ti = 0; ti < result.tokens.length; ti++ )
         {
-            const token = result.tokens[ti];
-            const cls = TOKEN_CLASS_MAP[ token.type ];
-            const escaped = token.value
-                .replace( /&/g, '&amp;' )
-                .replace( /</g, '&lt;' )
-                .replace( />/g, '&gt;' );
+            const token     = result.tokens[ti];
+            const cls       = TOKEN_CLASS_MAP[ token.type ];
+            const tokenCol  = colOffset;
+            colOffset      += token.value.length;
 
-            // Wrap URLs in comment tokens with a clickable span
-            const content = ( token.type === 'comment' )
-                ? escaped.replace( URL_REGEX, `<span class="code-link" data-url="$1">$1</span>` )
-                : escaped;
+            let content: string;
+            if ( token.type === 'comment' )
+            {
+                // Escape then inject clickable URL spans
+                const escaped = token.value
+                    .replace( /&/g, '&amp;' ).replace( /</g, '&lt;' ).replace( />/g, '&gt;' );
+                content = escaped.replace( URL_REGEX, `<span class="code-link" data-url="$1">$1</span>` );
+            }
+            else
+            {
+                // Escape and inject color swatches for hex color strings
+                content = injectColorSpans( token.value, lineIndex, tokenCol );
+            }
 
             const bracketClass = ti === bracketTokenIdx ? ' code-bracket-active' : '';
 
@@ -5709,6 +5771,274 @@ export class CodeEditor
         {
             if ( line >= 0 && line < this.doc.lineCount ) this._updateLine( line );
         }
+    }
+
+    // Color picker:
+
+    private _onColorSwatchClick( e: MouseEvent ): void
+    {
+        const span = ( e.target as HTMLElement ).closest( '.code-color' ) as HTMLElement | null;
+        if ( !span ) return;
+
+        e.stopPropagation();
+        e.preventDefault();
+
+        const colorValue = span.dataset.color!;
+        const lineIndex  = parseInt( span.dataset.line! );
+        const colStart   = parseInt( span.dataset.col! );
+        let   currentLen = colorValue.length;
+
+        if ( this._colorPopover ) { this._colorPopover.destroy(); this._colorPopover = null; }
+
+        const picker = new ( LX as any ).ColorPicker( colorValue, {
+            colorModel: 'Hex',
+            onChange: ( color: any ) =>
+            {
+                // Generate a hex string matching the original length (# + 3/4/6/8 hex chars)
+                const raw    = color.hex.replace( /^#/, '' );
+                const digits = currentLen - 1;
+                const newHex = '#' + ( digits <= 4
+                    ? raw.slice( 0, digits ).padEnd( digits, '0' )
+                    : raw.slice( 0, Math.min( digits, 8 ) ).padEnd( digits, '0' ) );
+
+                const lineText = this.doc.getLine( lineIndex );
+                if ( lineText.slice( colStart, colStart + currentLen ) !== span.dataset.color ) return;
+
+                const delOp = this.doc.delete( lineIndex, colStart, currentLen );
+                this.undoManager.record( delOp, this.cursorSet.getCursorPositions() );
+                const insOp = this.doc.insert( lineIndex, colStart, newHex );
+                this.undoManager.record( insOp, this.cursorSet.getCursorPositions() );
+
+                this._updateLine( lineIndex );
+                currentLen = newHex.length;
+                span.dataset.color = newHex;
+                span.dataset.col = String( colStart );
+                span.style.setProperty( '--code-color', newHex );
+            }
+        } );
+
+        this._colorPopover = new ( LX as any ).Popover( span, [ picker ], { side: 'bottom', align: 'start', sideOffset: 4 } );
+    }
+
+    // Symbol hover:
+
+    /**
+     * Extracts the parameter list from a function/method declaration line.
+     */
+    private _getSymbolParams( symLine: number ): string
+    {
+        if ( symLine < 0 || symLine >= this.doc.lineCount ) return '()';
+        const m = this.doc.getLine( symLine ).match( /\(([^)]*)\)/ );
+        return m ? `(${ m[1].trim() })` : '()';
+    }
+
+    /**
+     * Starting from the line where a class is defined, scans forward to find
+     * the constructor signature and returns its parameter list.
+     */
+    private _findConstructorParams( classLine: number ): string | null
+    {
+        const classDepth = this.symbolTable.getScopeAtLine( classLine ).length;
+        const maxScan    = Math.min( classLine + 50, this.doc.lineCount );
+
+        for ( let i = classLine + 1; i < maxScan; i++ )
+        {
+            if ( this.symbolTable.getScopeAtLine( i ).length < classDepth + 1 ) break;
+
+            const m = this.doc.getLine( i ).match( /\bconstructor\s*\(([^)]*)\)/ );
+            if ( m ) return `(${ m[1].trim() })`;
+        }
+
+        return null;
+    }
+
+    /**
+     * Given multiple symbols with the same name, pick the most likely one for
+     * the hovered position using the available context data.
+     */
+    private _pickBestSymbol( symbols: Symbol[], word: string, tokenType: string, lineText: string, hoveredLine: number ): Symbol
+    {
+        if ( symbols.length === 1 ) return symbols[0];
+
+        const curScopes   = this.symbolTable.getScopeAtLine( hoveredLine );
+        const curScope    = [ ...curScopes ].reverse().find( s => s.type !== 'global' )?.name ?? 'global';
+
+        const wordEsc     = word.replace( /[.*+?^${}()|[\]\\]/g, '\\$&' );
+        const isNewCall   = new RegExp( `\\bnew\\s+${wordEsc}\\b` ).test( lineText );
+        const isFuncCall  = new RegExp( `\\b${wordEsc}\\s*[(<]` ).test( lineText );
+        const isTypeAnno  = new RegExp( `(?::\\s*|<\\s*|[,>]\\s*)${wordEsc}\\b` ).test( lineText );
+
+        const typeKinds = new Set( [ 'class', 'interface', 'type', 'enum', 'struct' ] );
+        const funcKinds = new Set( [ 'function', 'method' ] );
+
+        const scored = symbols.map( sym =>
+        {
+            let score = 0;
+
+            // Defined in the current innermost scope
+            if ( sym.scope === curScope ) score += 5;
+
+            // Check token type
+            if ( tokenType === 'method' && funcKinds.has( sym.kind ) ) score += 3;
+            if ( tokenType === 'type'   && typeKinds.has( sym.kind ) ) score += 3;
+
+            // Hovered-line context patterns
+            if ( isNewCall && sym.kind === 'constructor-call' ) score += 20;
+            if ( isNewCall && sym.kind === 'class'            ) score += 3;
+            if ( isFuncCall && funcKinds.has( sym.kind )     ) score += 3;
+            if ( isTypeAnno && typeKinds.has( sym.kind )     ) score += 2;
+
+            // Validate kind based on symbol declaration line
+            if ( sym.line >= 0 && sym.line < this.doc.lineCount )
+            {
+                const declLine = this.doc.getLine( sym.line );
+                if ( /\bfunction\b/.test( declLine ) && funcKinds.has( sym.kind ) )      score += 4;
+                if ( /\bclass\b/.test( declLine )    && sym.kind === 'class' )           score += 4;
+                if ( /\binterface\b/.test( declLine )&& sym.kind === 'interface' )       score += 4;
+                if ( /\btype\b/.test( declLine )     && sym.kind === 'type' )            score += 4;
+                if ( /\benum\b/.test( declLine )     && sym.kind === 'enum' )            score += 4;
+                if ( /\b(?:const|let|var)\b/.test( declLine ) && sym.kind === 'variable' ) score += 3;
+            }
+
+            // Order also by line proximity
+            const dist = Math.abs( sym.line - hoveredLine );
+            score += Math.max( 0, 4 - Math.floor( dist / 20 ) );
+
+            return { sym, score };
+        } );
+
+        scored.sort( ( a, b ) => b.score - a.score );
+        return scored[0].sym;
+    }
+
+    private _clearHoverPopup(): void
+    {
+        if ( this._hoverTimer )  { clearTimeout( this._hoverTimer ); this._hoverTimer = null; }
+        if ( this._hoverPopup )  { this._hoverPopup.remove(); this._hoverPopup = null; }
+        this._hoverWord = '';
+    }
+
+    private _onCodeAreaMouseMove( e: MouseEvent ): void
+    {
+        // Only show hover when no button is pressed (no dragging)
+        if ( e.buttons !== 0 ) { this._clearHoverPopup(); return; }
+
+        const rect = this.codeContainer.getBoundingClientRect();
+        const x    = e.clientX - rect.left - this.xPadding;
+        const y    = e.clientY - rect.top;
+        const line = LX.clamp( Math.floor( y / this.lineHeight ), 0, this.doc.lineCount - 1 );
+        const col  = LX.clamp( Math.round( x / this.charWidth ),  0, this.doc.getLine( line ).length );
+
+        const [ word, wordStart ] = this.doc.getWordAt( line, col );
+
+        if ( !word || word === this._hoverWord ) return;
+
+        this._clearHoverPopup();
+
+        if ( !word.trim() ) return;
+
+        this._hoverWord = word;
+
+        this._hoverTimer = setTimeout( () =>
+        {
+            this._hoverTimer = null;
+
+            const prevState = line > 0 ? ( this._lineStates[ line - 1 ] ?? Tokenizer.initialState() ) : Tokenizer.initialState();
+            const { tokens } = Tokenizer.tokenizeLine( this.doc.getLine( line ), this.language, prevState );
+            let tokenType = 'text';
+            let charPos   = 0;
+            for ( const tok of tokens )
+            {
+                // Use wordStart (not col) so boundary positions like col=wordEnd don't fall into the next token
+                if ( wordStart >= charPos && wordStart < charPos + tok.value.length ) { tokenType = tok.type; break; }
+                charPos += tok.value.length;
+            }
+
+            if ( tokenType === 'comment' || tokenType === 'string' || tokenType === 'number' ) return;
+
+            const symbols = this.symbolTable.getSymbols( word );
+            const info: HoverSymbolInfo = { word, tokenType, symbols };
+
+            let userContent: string | HTMLElement | null | undefined;
+            if ( this.onHoverSymbol ) userContent = this.onHoverSymbol( info, this );
+
+            // No popup if user explicitly returns null
+            if ( userContent === null ) return;
+
+            const hasSymbols = symbols.length > 0;
+            if ( !userContent && !hasSymbols ) return;
+
+            const popup = this._hoverPopup = LX.makeElement( 'div', 'code-hover-popup [&_span]:text-sm' );
+
+            if ( userContent )
+            {
+                if ( typeof userContent === 'string' )
+                    popup.innerHTML = userContent;
+                else
+                    popup.appendChild( userContent );
+            }
+            else
+            {
+                const sym  = this._pickBestSymbol( symbols, word, tokenType, this.doc.getLine( line ), line );
+                let kindLabel = sym.kind;
+                let nameLabel = `<span class="font-semibold">${word}</span>`;
+
+                if ( sym.kind === 'constructor-call' )
+                {
+                    const classSym = this.symbolTable.getSymbols( word ).find( s => s.kind === 'class' );
+                    const params   = classSym != null ? ( this._findConstructorParams( classSym.line ) ?? '()' ) : '()';
+                    kindLabel = 'constructor';
+                    nameLabel = `${nameLabel}<span class="text-muted-foreground">${params}</span>`;
+                }
+                else if ( sym.kind === 'function' )
+                {
+                    const params = this._getSymbolParams( sym.line );
+                    nameLabel = `${nameLabel}<span class="text-muted-foreground">${params}</span>`;
+                }
+                else if(  sym.scope && sym.scope !== 'global' && sym.scope !== 'anonymous' )
+                {
+                    if ( sym.kind === 'property' || sym.kind === 'method' )
+                    {
+                        const scopePrefix = `<span class="text-muted-foreground">${sym.scope}.</span>`;
+                        if ( sym.kind === 'method' )
+                        {
+                            const params = this._getSymbolParams( sym.line );
+                            nameLabel = `${scopePrefix}${nameLabel}<span class="text-muted-foreground">${params}</span>`;
+                        }
+                        else
+                        {
+                            nameLabel = `${scopePrefix}${nameLabel}`;
+                        }
+                    }
+                    else if ( sym.kind === 'variable' )
+                    {
+                        // Only prefix the scope when the variable is a member (class/interface/struct field)
+                        const declScopes  = this.symbolTable.getScopeAtLine( sym.line );
+                        const scopeEntry  = declScopes.find( s => s.name === sym.scope );
+                        const memberTypes = new Set( [ 'class', 'interface', 'struct' ] );
+                        if ( scopeEntry && memberTypes.has( scopeEntry.type ) )
+                        {
+                            nameLabel = `<span class="text-muted-foreground">${sym.scope}.</span>${ nameLabel }`;
+                        }
+                    }
+                }
+
+                popup.innerHTML = `<span class="text-info">(${kindLabel})</span> ${nameLabel}`;
+            }
+
+            document.body.appendChild( popup );
+
+            // Position just below the hovered word
+            const lineEl = this._lineElements[ line ];
+            if ( lineEl )
+            {
+                const elRect  = lineEl.getBoundingClientRect();
+                const leftPx  = elRect.left + this.xPadding + col * this.charWidth;
+                const topPx   = elRect.bottom + 4;
+                popup.style.left = Math.min( leftPx, window.innerWidth - popup.offsetWidth - 8 ) + 'px';
+                popup.style.top  = topPx + 'px';
+            }
+        }, 500 );
     }
 
     // Scrollbar & Resize:

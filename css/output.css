@@ -2145,6 +2145,9 @@
   .text-green-500 {
     color: var(--color-green-500);
   }
+  .text-info {
+    color: var(--color-info);
+  }
   .text-inherit {
     color: inherit;
   }
@@ -2450,6 +2453,12 @@
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+    }
+  }
+  .\[\&_span\]\:text-sm {
+    & span {
+      font-size: var(--text-sm);
+      line-height: var(--tw-leading, var(--text-sm--line-height));
     }
   }
   .\[\&_svg\]\:pointer-events-none {
@@ -6211,6 +6220,35 @@ ul.lexassetscontent {
   color: var(--info);
   cursor: pointer;
 }
+.lexcodeeditor .code-color {
+  position: relative;
+  cursor: pointer;
+  pointer-events: auto;
+}
+.lexcodeeditor .code-color-swatch {
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--code-color);
+  pointer-events: none;
+}
+.code-hover-popup {
+  background-color: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  position: fixed;
+  z-index: 9999;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-family: var(--code-font, monospace);
+  max-width: 420px;
+  pointer-events: none;
+  box-shadow: 0 0px 4px #101010;
+  line-height: 1.6;
+}
 .lexcodeeditor ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -6450,6 +6488,8 @@ ul.lexassetscontent {
 }
 .lexcodeeditor .autocomplete {
   background-color: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
   width: max-content;
   max-width: 450px;
   max-height: 264px;
@@ -6458,8 +6498,6 @@ ul.lexassetscontent {
   top: 0;
   visibility: hidden;
   z-index: 100;
-  border-radius: 8px;
-  border: 1px solid var(--border);
   box-shadow: 0 0px 4px #101010;
   overflow-x: hidden;
   overflow-y: scroll;
