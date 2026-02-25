@@ -3025,7 +3025,7 @@ export class CodeEditor
     {
         if( !this.currentTab ) return;
 
-        this.doc.setText( text );
+        this.doc.setText( this._normalizeText( text ) );
         this.cursorSet.set( 0, 0 );
         this.undoManager.clear();
         this._lineStates = [];
@@ -3352,8 +3352,7 @@ export class CodeEditor
     {
         const onLoad = ( text: string, name: string ) =>
         {
-            // Remove Carriage Return in some cases and sub tabs using spaces
-            text = text.replaceAll( '\r', '' ).replaceAll( /\t|\\t/g, ' '.repeat( this.tabSize ) );
+            text = this._normalizeText( text );
 
             const ext = LX.getExtension( name );
             const lang = options.language ?? ( Tokenizer.getLanguage( options.language )
@@ -5170,10 +5169,23 @@ export class CodeEditor
         this._afterCursorMove();
     }
 
+    /**
+     * Normalize external text before inserting into the document:
+     * - Unify line endings to \n
+     * - Replace tab characters with the configured number of spaces
+     */
+    private _normalizeText( text: string ): string
+    {
+        return text
+            .replace( /\r\n?/g, '\n' )
+            .replace( /\t/g, ' '.repeat( this.tabSize ) );
+    }
+
     private async _doPaste(): Promise<void>
     {
-        const text = await navigator.clipboard.readText();
-        if ( !text ) return;
+        const raw = await navigator.clipboard.readText();
+        if ( !raw ) return;
+        const text = this._normalizeText( raw );
         
         this._flushAction();
 

@@ -10,6 +10,7 @@ Fixed some crashing doc pages.
 CodeEditor:
 - Added symbol hover info and inline color manipulation through LX.ColorInput.
 - Support for `options.onHoverSymbol` to customize popup symbol data.
+- Fixed issues normalizing imported text.
 - Suggestions icon, iconClass, sortText and filterText.
 - Added scope braces detection.
 
