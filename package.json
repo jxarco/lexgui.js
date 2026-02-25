@@ -1,6 +1,6 @@
 {
     "name": "lexgui",
-    "version": "8.3.1",
+    "version": "8.3.2",
     "description": "JS library to create web graphical user interfaces",
     "type": "module",
     "main": "./build/lexgui.js",

@@ -199,9 +199,11 @@ declare class SymbolTable {
     private _lineSymbols;
     private _scopeStack;
     private _lineScopes;
+    private _lineScopesEnd;
     get currentScope(): string;
     get currentScopeType(): string;
     getScopeAtLine(line: number): ScopeInfo[];
+    getLineScopeEnd(line: number): ScopeInfo[];
     getSymbols(name: string): Symbol[];
     getAllSymbolNames(): string[];
     getAllSymbols(): Symbol[];
@@ -230,6 +232,22 @@ interface CodeTab {
     language: string;
     title?: string;
     path?: string;
+}
+export interface CodeSuggestion {
+    label: string;
+    kind?: string;
+    scope?: string;
+    detail?: string;
+    insertText?: string;
+    filterText?: string;
+    sortText?: string;
+    icon?: string;
+    iconClass?: string;
+}
+export interface HoverSymbolInfo {
+    word: string;
+    tokenType: string;
+    symbols: Symbol[];
 }
 declare class ScrollBar {
     static SIZE: number;
@@ -296,7 +314,7 @@ export declare class CodeEditor {
     tabSize: number;
     highlight: string;
     newTabOptions: any[] | null;
-    customSuggestions: any[];
+    customSuggestions: CodeSuggestion[];
     explorerName: string;
     onSave: (text: string, editor: CodeEditor) => void;
     onRun: (text: string, editor: CodeEditor) => void;
@@ -308,9 +326,16 @@ export declare class CodeEditor {
     onReady: ((editor: CodeEditor) => void) | undefined;
     onCreateFile: ((editor: CodeEditor) => void) | undefined;
     onCodeChange: ((doc: CodeDocument) => void) | undefined;
+    onHoverSymbol: ((info: HoverSymbolInfo, editor: CodeEditor) => string | HTMLElement | null | undefined) | undefined;
     private _inputArea;
     private _lineStates;
     private _lineElements;
+    private _bracketOpenLine;
+    private _bracketCloseLine;
+    private _hoverTimer;
+    private _hoverPopup;
+    private _hoverWord;
+    private _colorPopover;
     private _openedTabs;
     private _loadedTabs;
     private _storedTabs;
@@ -358,7 +383,7 @@ export declare class CodeEditor {
     addTab(name: string, options?: Record<string, any>): CodeTab;
     loadTab(name: string): void;
     closeTab(name: string): void;
-    setCustomSuggestions(suggestions: string[]): void;
+    setCustomSuggestions(suggestions: CodeSuggestion[] | string[]): void;
     loadFile(file: File | string, options?: Record<string, any>): void;
     loadFiles(files: string[], onComplete?: (editor: CodeEditor, results: any[], total: number) => void, async?: boolean): Promise<void>;
     _setupEditorWhenVisible(): Promise<void>;
@@ -432,6 +457,12 @@ export declare class CodeEditor {
     private _doCut;
     private _swapLine;
     private _duplicateLine;
+    /**
+     * Normalize external text before inserting into the document:
+     * - Unify line endings to \n
+     * - Replace tab characters with the configured number of spaces
+     */
+    private _normalizeText;
     private _doPaste;
     private _doUndo;
     private _doRedo;
@@ -452,6 +483,29 @@ export declare class CodeEditor {
     private _doAutocompleteWord;
     private _getSelectedAutoCompleteWord;
     private _afterCursorMove;
+    /**
+     * Returns the scope stack at the exact cursor position (line + column).
+     * Basically starts from getScopeAtLine and then counts real braces up to the cursor column.
+     */
+    private _getScopeAtCursor;
+    private _updateBracketHighlight;
+    private _onColorSwatchClick;
+    /**
+     * Extracts the parameter list from a function/method declaration line.
+     */
+    private _getSymbolParams;
+    /**
+     * Starting from the line where a class is defined, scans forward to find
+     * the constructor signature and returns its parameter list.
+     */
+    private _findConstructorParams;
+    /**
+     * Given multiple symbols with the same name, pick the most likely one for
+     * the hovered position using the available context data.
+     */
+    private _pickBestSymbol;
+    private _clearHoverPopup;
+    private _onCodeAreaMouseMove;
     private _scrollCursorIntoView;
     private _resetGutter;
     getMaxLineLength(): number;

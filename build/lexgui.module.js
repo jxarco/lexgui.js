@@ -12,7 +12,7 @@ const g$1 = globalThis;
 let LX = g$1.LX;
 if (!LX) {
     LX = {
-        version: '8.3.1',
+        version: '8.3.2',
         ready: false,
         extensions: [], // Store extensions used
         extraCommandbarEntries: [], // User specific entries for command bar
@@ -11129,47 +11129,65 @@ LX.makeContainer = makeContainer;
  * offsetY: Tooltip margin vertical offset
  * active: Tooltip active by default [true]
  * callback: Callback function to execute when the tooltip is shown
+ * delay: Interest delay in ms until showing the tooltip [100]
  */
 function asTooltip(trigger, content, options = {}) {
     console.assert(trigger, 'You need a trigger to generate a tooltip!');
     trigger.dataset['disableTooltip'] = !(options.active ?? true);
     let tooltipDom = null;
+    let delayTimer = null;
+    let rafId = null;
     const _offset = options.offset;
     const _offsetX = options.offsetX ?? (_offset ?? 0);
     const _offsetY = options.offsetY ?? (_offset ?? 6);
-    trigger.addEventListener('mouseenter', function (e) {
-        if (trigger.dataset['disableTooltip'] == 'true') {
+    const _delay = options.delay ?? 100;
+    const _cleanup = () => {
+        clearTimeout(delayTimer);
+        if (rafId !== null) {
+            cancelAnimationFrame(rafId);
+            rafId = null;
+        }
+        if (tooltipDom) {
+            tooltipDom.remove();
+            tooltipDom = null;
+        }
+    };
+    const _watchConnection = () => {
+        if (!trigger.isConnected) {
+            _cleanup();
             return;
         }
+        if (tooltipDom)
+            rafId = requestAnimationFrame(_watchConnection);
+    };
+    const _showTooltip = () => {
         tooltipDom = LX.makeElement('div', 'lextooltip fixed bg-secondary-foreground text-secondary text-xs px-2 py-1 rounded-lg pointer-events-none data-closed:opacity-0', trigger.dataset['tooltipContent'] ?? content);
         const nestedDialog = trigger.closest('dialog');
         const tooltipParent = nestedDialog ?? LX.root;
-        // Remove other first
+        // Remove others first
         LX.root.querySelectorAll('.lextooltip').forEach((e) => e.remove());
-        // Append new tooltip
         tooltipParent.appendChild(tooltipDom);
+        // Watch for trigger being removed from the DOM before mouseleave fires
+        rafId = requestAnimationFrame(_watchConnection);
         LX.doAsync(() => {
             const position = [0, 0];
             const offsetX = parseFloat(trigger.dataset['tooltipOffsetX'] ?? _offsetX);
             const offsetY = parseFloat(trigger.dataset['tooltipOffsetY'] ?? _offsetY);
             const rect = trigger.getBoundingClientRect();
-            let alignWidth = true;
-            switch (options.side ?? 'top') {
+            const side = options.side ?? 'top';
+            const alignWidth = side === 'top' || side === 'bottom';
+            switch (side) {
                 case 'left':
                     position[0] += rect.x - tooltipDom.offsetWidth - offsetX;
-                    alignWidth = false;
                     break;
                 case 'right':
                     position[0] += rect.x + rect.width + offsetX;
-                    alignWidth = false;
                     break;
                 case 'top':
                     position[1] += rect.y - tooltipDom.offsetHeight - offsetY;
-                    alignWidth = true;
                     break;
                 case 'bottom':
                     position[1] += rect.y + rect.height + offsetY;
-                    alignWidth = true;
                     break;
             }
             if (alignWidth)
@@ -11180,22 +11198,22 @@ function asTooltip(trigger, content, options = {}) {
             position[0] = LX.clamp(position[0], 0, window.innerWidth - tooltipDom.offsetWidth - 4);
             position[1] = LX.clamp(position[1], 0, window.innerHeight - tooltipDom.offsetHeight - 4);
             if (nestedDialog) {
-                let parentRect = tooltipParent.getBoundingClientRect();
+                const parentRect = tooltipParent.getBoundingClientRect();
                 position[0] -= parentRect.x;
                 position[1] -= parentRect.y;
             }
             tooltipDom.style.left = `${position[0]}px`;
             tooltipDom.style.top = `${position[1]}px`;
-            if (options.callback) {
-                options.callback(tooltipDom, trigger);
-            }
+            options.callback?.(tooltipDom, trigger);
         });
-    });
-    trigger.addEventListener('mouseleave', function (e) {
-        if (tooltipDom) {
-            tooltipDom.remove();
+    };
+    trigger.addEventListener('mouseenter', function () {
+        if (trigger.dataset['disableTooltip'] == 'true') {
+            return;
         }
+        delayTimer = setTimeout(_showTooltip, _delay);
     });
+    trigger.addEventListener('mouseleave', _cleanup);
 }
 LX.asTooltip = asTooltip;
 function insertChildAtIndex(parent, child, index = Infinity) {
@@ -14966,6 +14984,49 @@ class CursorSet {
     }
 }
 /**
+ * Strips string literals and single-line comments from a line of code,
+ * leaving only the structural characters (braces, operators, keywords etc).
+ */
+function stripLiteralsAndComments(line) {
+    let result = '';
+    let i = 0;
+    while (i < line.length) {
+        const ch = line[i];
+        // Remove single-line comment
+        if (ch === '/' && line[i + 1] === '/') {
+            break;
+        }
+        // Block comment (same line): skip to closing */
+        if (ch === '/' && line[i + 1] === '*') {
+            i += 2;
+            while (i < line.length && !(line[i] === '*' && line[i + 1] === '/'))
+                i++;
+            i += 2;
+            continue;
+        }
+        // Remove strings (single, double, template)
+        if (ch === '"' || ch === "'" || ch === '`') {
+            const quote = ch;
+            i++;
+            while (i < line.length) {
+                if (line[i] === '\\') {
+                    i += 2;
+                    continue;
+                } // escaped char
+                if (line[i] === quote) {
+                    i++;
+                    break;
+                } // closing quote
+                i++;
+            }
+            continue;
+        }
+        result += ch;
+        i++;
+    }
+    return result;
+}
+/**
  * Manages code symbols for autocomplete, navigation, and outlining.
  * Incrementally updates as lines change.
  */
@@ -14973,7 +15034,8 @@ class SymbolTable {
     _symbols = new Map(); // name -> symbols[]
     _lineSymbols = []; // [lineNum] -> symbols declared on that line
     _scopeStack = [{ name: 'global', type: 'global', line: 0 }];
-    _lineScopes = []; // [lineNum] -> scope stack at that line
+    _lineScopes = []; // [lineNum] -> scope stack at start of that line
+    _lineScopesEnd = []; // [lineNum] -> scope stack at end of that line
     get currentScope() {
         return this._scopeStack[this._scopeStack.length - 1]?.name ?? 'global';
     }
@@ -14982,6 +15044,9 @@ class SymbolTable {
     }
     getScopeAtLine(line) {
         return this._lineScopes[line] ?? [{ name: 'global', type: 'global', line: 0 }];
+    }
+    getLineScopeEnd(line) {
+        return this._lineScopesEnd[line] ?? [{ name: 'global', type: 'global', line: 0 }];
     }
     getSymbols(name) {
         return this._symbols.get(name) ?? [];
@@ -15001,20 +15066,26 @@ class SymbolTable {
     }
     /** Update scope stack for a line (call before parsing symbols) */
     updateScopeForLine(line, lineText) {
-        // Track braces to maintain scope stack
-        const openBraces = (lineText.match(/\{/g) || []).length;
-        const closeBraces = (lineText.match(/\}/g) || []).length;
-        // Save current scope for this line
+        if (line === 0) {
+            this._scopeStack = [{ name: 'global', type: 'global', line: 0 }];
+        }
+        else if (this._lineScopesEnd[line - 1]) {
+            this._scopeStack = [...this._lineScopesEnd[line - 1]];
+        }
+        const stripped = stripLiteralsAndComments(lineText);
+        const openBraces = (stripped.match(/\{/g) || []).length;
+        const closeBraces = (stripped.match(/\}/g) || []).length;
         this._lineScopes[line] = [...this._scopeStack];
         // Pop scopes for closing braces
         for (let i = 0; i < closeBraces; i++) {
             if (this._scopeStack.length > 1)
                 this._scopeStack.pop();
         }
-        // Push scopes for opening braces (will be named by symbol detection)
+        // Push scopes for opening braces (symbol detection will name them later)
         for (let i = 0; i < openBraces; i++) {
             this._scopeStack.push({ name: 'anonymous', type: 'anonymous', line });
         }
+        this._lineScopesEnd[line] = [...this._scopeStack];
     }
     /** Name the most recent anonymous scope (called when detecting class/function) */
     nameCurrentScope(name, type) {
@@ -15058,6 +15129,7 @@ class SymbolTable {
     resetScopes() {
         this._scopeStack = [{ name: 'global', type: 'global', line: 0 }];
         this._lineScopes = [];
+        this._lineScopesEnd = [];
     }
     clear() {
         this._symbols.clear();
@@ -15070,23 +15142,25 @@ class SymbolTable {
  */
 function parseSymbolsFromLine(lineText, tokens, line, symbolTable) {
     const symbols = [];
-    const scope = symbolTable.currentScope;
-    const scopeType = symbolTable.currentScopeType;
-    // Build set of reserved words from tokens (keywords, statements, builtins) to skip when detecting symbols
+    // Use the scope snapshot from the START of this line, not currentScope/currentScopeType 
+    // which will reflect state AFTER updateScopeForLine already pushed/popped braces on this line...
+    const lineScopes = symbolTable.getScopeAtLine(line);
+    const lineScope = lineScopes[lineScopes.length - 1];
+    const scope = lineScope?.name ?? 'global';
+    const scopeType = lineScope?.type ?? 'global';
     const reservedWords = new Set();
     for (const token of tokens) {
         if (['keyword', 'statement', 'builtin', 'preprocessor'].includes(token.type)) {
             reservedWords.add(token.value);
         }
     }
-    // Track added symbols by name and approximate position to avoid duplicates
+    // Track added symbols by name and approximate position using 5 chars tolerance to avoid duplicates
     const addedSymbols = new Set();
     const addSymbol = (name, kind, col = 0) => {
         if (!name || !name.match(/^[a-zA-Z_$][\w$]*$/))
             return; // Valid identifier check
         if (reservedWords.has(name))
             return;
-        // Unique key using 5 chars tolerance
         const posKey = `${name}@${Math.floor(col / 5) * 5}`;
         if (addedSymbols.has(posKey))
             return; // Already added
@@ -15102,13 +15176,14 @@ function parseSymbolsFromLine(lineText, tokens, line, symbolTable) {
         { regex: /^\s*type\s+([A-Z_]\w*)\s*=/i, kind: 'type' },
         { regex: /^\s*(?:export\s+)?(?:async\s+)?function\s+(\w+)/i, kind: 'function' },
         { regex: /^\s*(?:const|let|var)\s+(\w+)\s*=\s*(?:async\s+)?\([^)]*\)\s*=>/i, kind: 'function' },
-        { regex: /^\s*(?:static\s+|const\s+|virtual\s+|inline\s+|extern\s+|pub\s+|async\s+)*(\w+[\w\s\*&:<>,]*?)\s+(\w+)\s*\([^)]*\)\s*[{;]/i, kind: 'typed-function' },
-        { regex: /^\s*(?:public|private|protected|static|readonly)*\s*(\w+)\s*\([^)]*\)\s*[:{]/i, kind: scopeType === 'class' ? 'method' : 'function' }
+        { regex: /^\s*(?:static\s+|const\s+|virtual\s+|inline\s+|extern\s+|pub\s+|async\s+)*(?!\b(?:await|return|if|else|while|for|switch|case|throw|new|delete|typeof|yield)\b)(\w+[\w\s\*&:<>,]*?)\s+(\w+)\s*\([^)]*\)\s*[{;]/i, kind: 'typed-function' },
+        { regex: /^\s*(?:(?:public|private|protected|static|readonly|async|override)\s+)*(\w+)\s*\([^)]*\)\s*[:{]/i, kind: scopeType === 'class' ? 'method' : 'function' }
     ];
     const multiPatterns = [
         { regex: /(?:const|let|var)\s+(\w+)/gi, kind: 'variable' },
         { regex: /(\w+)\s*:\s*(?:function|[A-Z]\w*)/gi, kind: 'variable' },
         { regex: /this\.(\w+)\s*=/gi, kind: 'property' },
+        { regex: /\b(?:private|protected|public)\s+(?:(?:static|readonly)\s+)*(\w+)\s*[=:;]/gi, kind: 'property' },
         { regex: /new\s+([A-Z]\w+)/gi, kind: 'constructor-call' },
         { regex: /(\w+)\s*\(/gi, kind: 'method-call' }
     ];
@@ -15181,6 +15256,28 @@ LX.Area;
 LX.Panel;
 LX.Tabs;
 LX.NodeTree;
+/** Matches hex color literals: #rgb #rgba #rrggbb #rrggbbaa */
+const HEX_COLOR_RE = /#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{4}|[0-9a-fA-F]{3})\b/g;
+/**
+ * Scans a raw token value for hex color literals and returns HTML with each
+ * color wrapped in a swatch span. Non-color text is HTML-escaped.
+ */
+function injectColorSpans(raw, lineIndex, colOffset) {
+    HEX_COLOR_RE.lastIndex = 0;
+    let result = '';
+    let lastIndex = 0;
+    let match;
+    const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    while ((match = HEX_COLOR_RE.exec(raw)) !== null) {
+        result += esc(raw.slice(lastIndex, match.index));
+        const color = match[0];
+        const col = colOffset + match.index;
+        result += `<span class="code-color" data-color="${color}" data-line="${lineIndex}" data-col="${col}" style="--code-color:${color}"><span class="code-color-swatch"></span>${esc(color)}</span>`;
+        lastIndex = match.index + color.length;
+    }
+    result += esc(raw.slice(lastIndex));
+    return result;
+}
 //  _____             _ _ _____
 // |   __|___ ___ ___| | | __  |___ ___
 // |__   |  _|  _| . | | | __ -| .'|  _|
@@ -15326,10 +15423,17 @@ class CodeEditor {
     onReady;
     onCreateFile;
     onCodeChange;
+    onHoverSymbol;
     _inputArea;
     // State:
     _lineStates = []; // tokenizer state at end of each line
     _lineElements = []; // <pre> element per line
+    _bracketOpenLine = -1; // line of the { opening current scope
+    _bracketCloseLine = -1; // line of the } closing current scope
+    _hoverTimer = null;
+    _hoverPopup = null;
+    _hoverWord = '';
+    _colorPopover = null; // active color picker popover
     _openedTabs = {};
     _loadedTabs = {};
     _storedTabs = {};
@@ -15399,6 +15503,7 @@ class CodeEditor {
         this.onSelectTab = options.onSelectTab;
         this.onReady = options.onReady;
         this.onCodeChange = options.onCodeChange;
+        this.onHoverSymbol = options.onHoverSymbol;
         this.language = Tokenizer.getLanguage(this.highlight) ?? Tokenizer.getLanguage('Plain Text');
         this.symbolTable = new SymbolTable();
         // File explorer
@@ -15621,6 +15726,13 @@ class CodeEditor {
             const link = e.target.closest('.code-link');
             if (link)
                 link.classList.toggle('hovered', e.ctrlKey);
+            this._onCodeAreaMouseMove(e);
+        });
+        this.codeArea.root.addEventListener('mouseleave', () => {
+            this._clearHoverPopup();
+        });
+        this.codeArea.root.addEventListener('click', (e) => {
+            this._onColorSwatchClick(e);
         });
         // Bottom status panel
         this.statusPanel = this._createStatusPanel(options);
@@ -15712,7 +15824,7 @@ class CodeEditor {
     setText(text, language, detectLang = false) {
         if (!this.currentTab)
             return;
-        this.doc.setText(text);
+        this.doc.setText(this._normalizeText(text));
         this.cursorSet.set(0, 0);
         this.undoManager.clear();
         this._lineStates = [];
@@ -15991,15 +16103,14 @@ class CodeEditor {
     }
     setCustomSuggestions(suggestions) {
         if (!suggestions || suggestions.constructor !== Array) {
-            console.warn('suggestions should be a string array!');
+            console.warn('suggestions should be an array!');
             return;
         }
-        this.customSuggestions = suggestions;
+        this.customSuggestions = suggestions.map(s => typeof s === 'string' ? { label: s } : s);
     }
     loadFile(file, options = {}) {
         const onLoad = (text, name) => {
-            // Remove Carriage Return in some cases and sub tabs using spaces
-            text = text.replaceAll('\r', '').replaceAll(/\t|\\t/g, ' '.repeat(this.tabSize));
+            text = this._normalizeText(text);
             const ext = LX.getExtension(name);
             const lang = options.language ?? (Tokenizer.getLanguage(options.language)
                 ?? (Tokenizer.getLanguageByExtension(ext) ?? Tokenizer.getLanguage('Plain Text')));
@@ -16351,19 +16462,50 @@ class CodeEditor {
         const result = Tokenizer.tokenizeLine(lineText, this.language, prevState);
         const langClass = this.language.name.toLowerCase().replace(/[^a-z]/g, '');
         const URL_REGEX = /(https?:\/\/[^\s"'<>)\]]+)/g;
+        // Pre-compute which token index gets the bracket-highlight class
+        let bracketTokenIdx = -1;
+        if (lineIndex === this._bracketOpenLine) {
+            // Last '{' symbol token on this line
+            for (let i = result.tokens.length - 1; i >= 0; i--) {
+                if (result.tokens[i].type === 'symbol' && result.tokens[i].value === '{') {
+                    bracketTokenIdx = i;
+                    break;
+                }
+            }
+        }
+        else if (lineIndex === this._bracketCloseLine) {
+            // First '}' symbol token on this line
+            for (let i = 0; i < result.tokens.length; i++) {
+                if (result.tokens[i].type === 'symbol' && result.tokens[i].value === '}') {
+                    bracketTokenIdx = i;
+                    break;
+                }
+            }
+        }
         let html = '';
-        for (const token of result.tokens) {
+        let colOffset = 0;
+        for (let ti = 0; ti < result.tokens.length; ti++) {
+            const token = result.tokens[ti];
             const cls = TOKEN_CLASS_MAP[token.type];
-            const escaped = token.value
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;');
-            // Wrap URLs in comment tokens with a clickable span
-            const content = (token.type === 'comment')
-                ? escaped.replace(URL_REGEX, `<span class="code-link" data-url="$1">$1</span>`)
-                : escaped;
+            const tokenCol = colOffset;
+            colOffset += token.value.length;
+            let content;
+            if (token.type === 'comment') {
+                // Escape then inject clickable URL spans
+                const escaped = token.value
+                    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                content = escaped.replace(URL_REGEX, `<span class="code-link" data-url="$1">$1</span>`);
+            }
+            else {
+                // Escape and inject color swatches for hex color strings
+                content = injectColorSpans(token.value, lineIndex, tokenCol);
+            }
+            const bracketClass = ti === bracketTokenIdx ? ' code-bracket-active' : '';
             if (cls) {
-                html += `<span class="${cls} ${langClass}">${content}</span>`;
+                html += `<span class="${cls} ${langClass}${bracketClass}">${content}</span>`;
+            }
+            else if (bracketClass) {
+                html += `<span class="${bracketClass.trim()}">${content}</span>`;
             }
             else {
                 html += content;
@@ -16444,6 +16586,13 @@ class CodeEditor {
                     break;
             }
         }
+        // Propagate/cascade scope updates to subsequent lines until the start-of-line scope stabilizes
+        for (let i = lineIndex + 1; i < this.doc.lineCount; i++) {
+            const oldStartDepth = this.symbolTable.getScopeAtLine(i).length;
+            this.symbolTable.updateScopeForLine(i, this.doc.getLine(i));
+            if (this.symbolTable.getScopeAtLine(i).length === oldStartDepth)
+                break;
+        }
     }
     /**
      * Rebuild line elements after structural changes (insert/delete lines).
@@ -16485,12 +16634,9 @@ class CodeEditor {
             return;
         this.cursorsLayer.innerHTML = '';
         for (const sel of this.cursorSet.cursors) {
-            const el = document.createElement('div');
-            el.className = 'cursor';
-            el.innerHTML = '&nbsp;';
+            const el = LX.makeElement('div', 'cursor', '&nbsp;', this.cursorsLayer);
             el.style.left = (sel.head.col * this.charWidth + this.xPadding) + 'px';
             el.style.top = (sel.head.line * this.lineHeight) + 'px';
-            this.cursorsLayer.appendChild(el);
         }
         this._updateActiveLine();
     }
@@ -16507,14 +16653,16 @@ class CodeEditor {
                 const lineText = this.doc.getLine(line);
                 const fromCol = line === start.line ? start.col : 0;
                 const toCol = line === end.line ? end.col : lineText.length;
-                if (fromCol === toCol)
+                // Skip only when the selection ends exactly at col 0 of this line
+                if (fromCol === toCol && line === end.line)
                     continue;
-                const div = document.createElement('div');
-                div.className = 'lexcodeselection';
+                const width = fromCol === toCol
+                    ? Math.ceil(this.charWidth * 0.5) // minimum width for empty lines
+                    : (toCol - fromCol) * this.charWidth;
+                const div = LX.makeElement('div', 'lexcodeselection', '', this.selectionsLayer);
                 div.style.top = (line * this.lineHeight) + 'px';
                 div.style.left = (fromCol * this.charWidth + this.xPadding) + 'px';
-                div.style.width = ((toCol - fromCol) * this.charWidth) + 'px';
-                this.selectionsLayer.appendChild(div);
+                div.style.width = width + 'px';
             }
         }
     }
@@ -17372,10 +17520,21 @@ class CodeEditor {
         this._rebuildLines();
         this._afterCursorMove();
     }
+    /**
+     * Normalize external text before inserting into the document:
+     * - Unify line endings to \n
+     * - Replace tab characters with the configured number of spaces
+     */
+    _normalizeText(text) {
+        return text
+            .replace(/\r\n?/g, '\n')
+            .replace(/\t/g, ' '.repeat(this.tabSize));
+    }
     async _doPaste() {
-        const text = await navigator.clipboard.readText();
-        if (!text)
+        const raw = await navigator.clipboard.readText();
+        if (!raw)
             return;
+        const text = this._normalizeText(raw);
         this._flushAction();
         this._deleteSelectionIfAny();
         const cursor = this.cursorSet.getPrimary();
@@ -17549,47 +17708,51 @@ class CodeEditor {
         }
         const suggestions = [];
         const added = new Set();
-        const addSuggestion = (label, kind, scope, detail, insertText) => {
-            if (!added.has(label)) {
-                suggestions.push({ label, kind, scope, detail, insertText });
-                added.add(label);
+        const addSuggestion = (s) => {
+            if (!added.has(s.label)) {
+                suggestions.push(s);
+                added.add(s.label);
             }
+        };
+        const filterSuggestion = (suggestion, word) => {
+            const w = word.toLowerCase();
+            if (suggestion.filterText) {
+                return suggestion.filterText.split(' ').some(token => token.toLowerCase().trim().startsWith(w));
+            }
+            return suggestion.label.toLowerCase().startsWith(w);
         };
         // Get first suggestions from symbol table
         const allSymbols = this.symbolTable.getAllSymbols();
         for (const symbol of allSymbols) {
-            if (symbol.name.toLowerCase().startsWith(word.toLowerCase())) {
-                addSuggestion(symbol.name, symbol.kind, symbol.scope, `${symbol.kind} in ${symbol.scope}`);
-            }
+            const s = { label: symbol.name, kind: symbol.kind, scope: symbol.scope, detail: `${symbol.kind} in ${symbol.scope}` };
+            if (filterSuggestion(s, word))
+                addSuggestion(s);
         }
         // Add language reserved keys
         for (const reservedWord of this.language.reservedWords) {
-            if (reservedWord.toLowerCase().startsWith(word.toLowerCase())) {
-                addSuggestion(reservedWord);
-            }
+            const s = { label: reservedWord };
+            if (filterSuggestion(s, word))
+                addSuggestion(s);
         }
         // Add custom suggestions
         for (const suggestion of this.customSuggestions) {
-            const label = typeof suggestion === 'string' ? suggestion : suggestion.label;
-            const kind = typeof suggestion === 'object' ? suggestion.kind : undefined;
-            const detail = typeof suggestion === 'object' ? suggestion.detail : undefined;
-            const insertText = typeof suggestion === 'object' ? suggestion.insertText : suggestion;
-            if (label.toLowerCase().startsWith(word.toLowerCase())) {
-                addSuggestion(label, kind, undefined, detail, insertText);
-            }
+            if (filterSuggestion(suggestion, word))
+                addSuggestion(suggestion);
         }
-        // Close autocomplete if no suggestions
         if (suggestions.length === 0) {
             this._doHideAutocomplete();
             return;
         }
-        // Sort suggestions: exact matches first, then alphabetically
+        // Sort suggestions: exact matches first, then by sortText (or label if absent)
+        const w = word.toLowerCase();
         suggestions.sort((a, b) => {
-            const aExact = a.label.toLowerCase() === word.toLowerCase() ? 0 : 1;
-            const bExact = b.label.toLowerCase() === word.toLowerCase() ? 0 : 1;
+            const aKey = (a.sortText ?? a.label).toLowerCase();
+            const bKey = (b.sortText ?? b.label).toLowerCase();
+            const aExact = aKey === w ? 0 : 1;
+            const bExact = bKey === w ? 0 : 1;
             if (aExact !== bExact)
                 return aExact - bExact;
-            return a.label.localeCompare(b.label);
+            return aKey.localeCompare(bKey);
         });
         this._selectedAutocompleteIndex = 0;
         // Render suggestions
@@ -17598,9 +17761,9 @@ class CodeEditor {
             item.insertText = suggestion.insertText ?? suggestion.label;
             if (index === this._selectedAutocompleteIndex)
                 item.classList.add('selected');
-            const currSuggestion = suggestion.label;
-            let iconName = 'CaseLower';
-            let iconClass = 'foo';
+            const currSuggestionLabel = suggestion.label;
+            let iconName = suggestion.icon ?? 'CaseLower';
+            let iconClass = suggestion.iconClass ?? 'text-gray-500';
             switch (suggestion.kind) {
                 case 'class':
                     iconName = 'CircleNodes';
@@ -17647,26 +17810,22 @@ class CodeEditor {
                     iconClass = 'text-green-500';
                     break;
                 case 'method-call':
-                    iconName = 'PlayCircle';
+                    iconName = 'Parentheses';
                     iconClass = 'text-gray-400';
-                    break;
-                default:
-                    iconName = 'CaseLower';
-                    iconClass = 'text-gray-500';
                     break;
             }
             item.appendChild(LX.makeIcon(iconName, { iconClass: 'ml-1 mr-2', svgClass: 'sm ' + iconClass }));
             // Highlight the written part
-            const hIndex = currSuggestion.toLowerCase().indexOf(word.toLowerCase());
+            const hIndex = currSuggestionLabel.toLowerCase().indexOf(word.toLowerCase());
             var preWord = document.createElement('span');
-            preWord.textContent = currSuggestion.substring(0, hIndex);
+            preWord.textContent = currSuggestionLabel.substring(0, hIndex);
             item.appendChild(preWord);
             var actualWord = document.createElement('span');
-            actualWord.textContent = currSuggestion.substring(hIndex, hIndex + word.length);
+            actualWord.textContent = currSuggestionLabel.substring(hIndex, hIndex + word.length);
             actualWord.classList.add('word-highlight');
             item.appendChild(actualWord);
             var postWord = document.createElement('span');
-            postWord.textContent = currSuggestion.substring(hIndex + word.length);
+            postWord.textContent = currSuggestionLabel.substring(hIndex + word.length);
             item.appendChild(postWord);
             if (suggestion.kind) {
                 const kind = document.createElement('span');
@@ -17751,6 +17910,338 @@ class CodeEditor {
         this._resetBlinker();
         this.resize();
         this._scrollCursorIntoView();
+        this._updateBracketHighlight();
+    }
+    /**
+     * Returns the scope stack at the exact cursor position (line + column).
+     * Basically starts from getScopeAtLine and then counts real braces up to the cursor column.
+     */
+    _getScopeAtCursor() {
+        const cursor = this.cursorSet.getPrimary().head;
+        const line = cursor.line;
+        const col = cursor.col;
+        const lineText = this.doc.getLine(line);
+        const scopeStack = [...this.symbolTable.getScopeAtLine(line)];
+        let i = 0;
+        let inString = false;
+        let stringCh = '';
+        while (i < col && i < lineText.length) {
+            const ch = lineText[i];
+            if (inString) {
+                if (ch === '\\') {
+                    i += 2;
+                    continue;
+                }
+                if (ch === stringCh)
+                    inString = false;
+                i++;
+                continue;
+            }
+            if (ch === '/' && lineText[i + 1] === '/')
+                break;
+            if (ch === '/' && lineText[i + 1] === '*') {
+                i += 2;
+                while (i < col && !(lineText[i] === '*' && lineText[i + 1] === '/'))
+                    i++;
+                i += 2;
+                continue;
+            }
+            if (ch === '"' || ch === "'" || ch === '`') {
+                inString = true;
+                stringCh = ch;
+                i++;
+                continue;
+            }
+            if (ch === '{') {
+                scopeStack.push({ name: 'anonymous', type: 'anonymous', line });
+            }
+            else if (ch === '}' && scopeStack.length > 1) {
+                scopeStack.pop();
+            }
+            i++;
+        }
+        return scopeStack;
+    }
+    _updateBracketHighlight() {
+        const scopes = this._getScopeAtCursor();
+        // Find innermost non-global scope
+        let innermost = null;
+        for (let i = scopes.length - 1; i >= 0; i--) {
+            if (scopes[i].type !== 'global') {
+                innermost = scopes[i];
+                break;
+            }
+        }
+        const prevOpen = this._bracketOpenLine;
+        const prevClose = this._bracketCloseLine;
+        if (!innermost) {
+            this._bracketOpenLine = -1;
+            this._bracketCloseLine = -1;
+        }
+        else {
+            const openLine = innermost.line;
+            const targetDepth = scopes.length; // depth including the innermost scope
+            // Closing line: last line where scope depth >= targetDepth
+            let closeLine = openLine;
+            for (let i = openLine + 1; i < this.doc.lineCount; i++) {
+                if (this.symbolTable.getScopeAtLine(i).length >= targetDepth)
+                    closeLine = i;
+                else
+                    break;
+            }
+            this._bracketOpenLine = openLine;
+            this._bracketCloseLine = closeLine;
+        }
+        // Re-render only the lines that changed
+        const linesToUpdate = new Set();
+        if (prevOpen !== this._bracketOpenLine) {
+            linesToUpdate.add(prevOpen);
+            linesToUpdate.add(this._bracketOpenLine);
+        }
+        if (prevClose !== this._bracketCloseLine) {
+            linesToUpdate.add(prevClose);
+            linesToUpdate.add(this._bracketCloseLine);
+        }
+        for (const line of linesToUpdate) {
+            if (line >= 0 && line < this.doc.lineCount)
+                this._updateLine(line);
+        }
+    }
+    // Color picker:
+    _onColorSwatchClick(e) {
+        const span = e.target.closest('.code-color');
+        if (!span)
+            return;
+        e.stopPropagation();
+        e.preventDefault();
+        const colorValue = span.dataset.color;
+        const lineIndex = parseInt(span.dataset.line);
+        const colStart = parseInt(span.dataset.col);
+        let currentLen = colorValue.length;
+        if (this._colorPopover) {
+            this._colorPopover.destroy();
+            this._colorPopover = null;
+        }
+        const picker = new LX.ColorPicker(colorValue, {
+            colorModel: 'Hex',
+            onChange: (color) => {
+                // Generate a hex string matching the original length (# + 3/4/6/8 hex chars)
+                const raw = color.hex.replace(/^#/, '');
+                const digits = currentLen - 1;
+                const newHex = '#' + (digits <= 4
+                    ? raw.slice(0, digits).padEnd(digits, '0')
+                    : raw.slice(0, Math.min(digits, 8)).padEnd(digits, '0'));
+                const lineText = this.doc.getLine(lineIndex);
+                if (lineText.slice(colStart, colStart + currentLen) !== span.dataset.color)
+                    return;
+                const delOp = this.doc.delete(lineIndex, colStart, currentLen);
+                this.undoManager.record(delOp, this.cursorSet.getCursorPositions());
+                const insOp = this.doc.insert(lineIndex, colStart, newHex);
+                this.undoManager.record(insOp, this.cursorSet.getCursorPositions());
+                this._updateLine(lineIndex);
+                currentLen = newHex.length;
+                span.dataset.color = newHex;
+                span.dataset.col = String(colStart);
+                span.style.setProperty('--code-color', newHex);
+            }
+        });
+        this._colorPopover = new LX.Popover(span, [picker], { side: 'bottom', align: 'start', sideOffset: 4 });
+    }
+    // Symbol hover:
+    /**
+     * Extracts the parameter list from a function/method declaration line.
+     */
+    _getSymbolParams(symLine) {
+        if (symLine < 0 || symLine >= this.doc.lineCount)
+            return '()';
+        const m = this.doc.getLine(symLine).match(/\(([^)]*)\)/);
+        return m ? `(${m[1].trim()})` : '()';
+    }
+    /**
+     * Starting from the line where a class is defined, scans forward to find
+     * the constructor signature and returns its parameter list.
+     */
+    _findConstructorParams(classLine) {
+        const classDepth = this.symbolTable.getScopeAtLine(classLine).length;
+        const maxScan = Math.min(classLine + 50, this.doc.lineCount);
+        for (let i = classLine + 1; i < maxScan; i++) {
+            if (this.symbolTable.getScopeAtLine(i).length < classDepth + 1)
+                break;
+            const m = this.doc.getLine(i).match(/\bconstructor\s*\(([^)]*)\)/);
+            if (m)
+                return `(${m[1].trim()})`;
+        }
+        return null;
+    }
+    /**
+     * Given multiple symbols with the same name, pick the most likely one for
+     * the hovered position using the available context data.
+     */
+    _pickBestSymbol(symbols, word, tokenType, lineText, hoveredLine) {
+        if (symbols.length === 1)
+            return symbols[0];
+        const curScopes = this.symbolTable.getScopeAtLine(hoveredLine);
+        const curScope = [...curScopes].reverse().find(s => s.type !== 'global')?.name ?? 'global';
+        const wordEsc = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const isNewCall = new RegExp(`\\bnew\\s+${wordEsc}\\b`).test(lineText);
+        const isFuncCall = new RegExp(`\\b${wordEsc}\\s*[(<]`).test(lineText);
+        const isTypeAnno = new RegExp(`(?::\\s*|<\\s*|[,>]\\s*)${wordEsc}\\b`).test(lineText);
+        const typeKinds = new Set(['class', 'interface', 'type', 'enum', 'struct']);
+        const funcKinds = new Set(['function', 'method']);
+        const scored = symbols.map(sym => {
+            let score = 0;
+            // Defined in the current innermost scope
+            if (sym.scope === curScope)
+                score += 5;
+            // Check token type
+            if (tokenType === 'method' && funcKinds.has(sym.kind))
+                score += 3;
+            if (tokenType === 'type' && typeKinds.has(sym.kind))
+                score += 3;
+            // Hovered-line context patterns
+            if (isNewCall && sym.kind === 'constructor-call')
+                score += 20;
+            if (isNewCall && sym.kind === 'class')
+                score += 3;
+            if (isFuncCall && funcKinds.has(sym.kind))
+                score += 3;
+            if (isTypeAnno && typeKinds.has(sym.kind))
+                score += 2;
+            // Validate kind based on symbol declaration line
+            if (sym.line >= 0 && sym.line < this.doc.lineCount) {
+                const declLine = this.doc.getLine(sym.line);
+                if (/\bfunction\b/.test(declLine) && funcKinds.has(sym.kind))
+                    score += 4;
+                if (/\bclass\b/.test(declLine) && sym.kind === 'class')
+                    score += 4;
+                if (/\binterface\b/.test(declLine) && sym.kind === 'interface')
+                    score += 4;
+                if (/\btype\b/.test(declLine) && sym.kind === 'type')
+                    score += 4;
+                if (/\benum\b/.test(declLine) && sym.kind === 'enum')
+                    score += 4;
+                if (/\b(?:const|let|var)\b/.test(declLine) && sym.kind === 'variable')
+                    score += 3;
+            }
+            // Order also by line proximity
+            const dist = Math.abs(sym.line - hoveredLine);
+            score += Math.max(0, 4 - Math.floor(dist / 20));
+            return { sym, score };
+        });
+        scored.sort((a, b) => b.score - a.score);
+        return scored[0].sym;
+    }
+    _clearHoverPopup() {
+        if (this._hoverTimer) {
+            clearTimeout(this._hoverTimer);
+            this._hoverTimer = null;
+        }
+        if (this._hoverPopup) {
+            this._hoverPopup.remove();
+            this._hoverPopup = null;
+        }
+        this._hoverWord = '';
+    }
+    _onCodeAreaMouseMove(e) {
+        // Only show hover when no button is pressed (no dragging)
+        if (e.buttons !== 0) {
+            this._clearHoverPopup();
+            return;
+        }
+        const rect = this.codeContainer.getBoundingClientRect();
+        const x = e.clientX - rect.left - this.xPadding;
+        const y = e.clientY - rect.top;
+        const line = LX.clamp(Math.floor(y / this.lineHeight), 0, this.doc.lineCount - 1);
+        const col = LX.clamp(Math.round(x / this.charWidth), 0, this.doc.getLine(line).length);
+        const [word, wordStart] = this.doc.getWordAt(line, col);
+        if (!word || word === this._hoverWord)
+            return;
+        this._clearHoverPopup();
+        if (!word.trim())
+            return;
+        this._hoverWord = word;
+        this._hoverTimer = setTimeout(() => {
+            this._hoverTimer = null;
+            const prevState = line > 0 ? (this._lineStates[line - 1] ?? Tokenizer.initialState()) : Tokenizer.initialState();
+            const { tokens } = Tokenizer.tokenizeLine(this.doc.getLine(line), this.language, prevState);
+            let tokenType = 'text';
+            let charPos = 0;
+            for (const tok of tokens) {
+                // Use wordStart (not col) so boundary positions like col=wordEnd don't fall into the next token
+                if (wordStart >= charPos && wordStart < charPos + tok.value.length) {
+                    tokenType = tok.type;
+                    break;
+                }
+                charPos += tok.value.length;
+            }
+            if (tokenType === 'comment' || tokenType === 'string' || tokenType === 'number')
+                return;
+            const symbols = this.symbolTable.getSymbols(word);
+            const info = { word, tokenType, symbols };
+            let userContent;
+            if (this.onHoverSymbol)
+                userContent = this.onHoverSymbol(info, this);
+            // No popup if user explicitly returns null
+            if (userContent === null)
+                return;
+            const hasSymbols = symbols.length > 0;
+            if (!userContent && !hasSymbols)
+                return;
+            const popup = this._hoverPopup = LX.makeElement('div', 'code-hover-popup [&_span]:text-sm');
+            if (userContent) {
+                if (typeof userContent === 'string')
+                    popup.innerHTML = userContent;
+                else
+                    popup.appendChild(userContent);
+            }
+            else {
+                const sym = this._pickBestSymbol(symbols, word, tokenType, this.doc.getLine(line), line);
+                let kindLabel = sym.kind;
+                let nameLabel = `<span class="font-semibold">${word}</span>`;
+                if (sym.kind === 'constructor-call') {
+                    const classSym = this.symbolTable.getSymbols(word).find(s => s.kind === 'class');
+                    const params = classSym != null ? (this._findConstructorParams(classSym.line) ?? '()') : '()';
+                    kindLabel = 'constructor';
+                    nameLabel = `${nameLabel}<span class="text-muted-foreground">${params}</span>`;
+                }
+                else if (sym.kind === 'function') {
+                    const params = this._getSymbolParams(sym.line);
+                    nameLabel = `${nameLabel}<span class="text-muted-foreground">${params}</span>`;
+                }
+                else if (sym.scope && sym.scope !== 'global' && sym.scope !== 'anonymous') {
+                    if (sym.kind === 'property' || sym.kind === 'method') {
+                        const scopePrefix = `<span class="text-muted-foreground">${sym.scope}.</span>`;
+                        if (sym.kind === 'method') {
+                            const params = this._getSymbolParams(sym.line);
+                            nameLabel = `${scopePrefix}${nameLabel}<span class="text-muted-foreground">${params}</span>`;
+                        }
+                        else {
+                            nameLabel = `${scopePrefix}${nameLabel}`;
+                        }
+                    }
+                    else if (sym.kind === 'variable') {
+                        // Only prefix the scope when the variable is a member (class/interface/struct field)
+                        const declScopes = this.symbolTable.getScopeAtLine(sym.line);
+                        const scopeEntry = declScopes.find(s => s.name === sym.scope);
+                        const memberTypes = new Set(['class', 'interface', 'struct']);
+                        if (scopeEntry && memberTypes.has(scopeEntry.type)) {
+                            nameLabel = `<span class="text-muted-foreground">${sym.scope}.</span>${nameLabel}`;
+                        }
+                    }
+                }
+                popup.innerHTML = `<span class="text-info">(${kindLabel})</span> ${nameLabel}`;
+            }
+            document.body.appendChild(popup);
+            // Position just below the hovered word
+            const lineEl = this._lineElements[line];
+            if (lineEl) {
+                const elRect = lineEl.getBoundingClientRect();
+                const leftPx = elRect.left + this.xPadding + col * this.charWidth;
+                const topPx = elRect.bottom + 4;
+                popup.style.left = Math.min(leftPx, window.innerWidth - popup.offsetWidth - 8) + 'px';
+                popup.style.top = topPx + 'px';
+            }
+        }, 500);
     }
     // Scrollbar & Resize:
     _scrollCursorIntoView() {

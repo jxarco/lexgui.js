@@ -2,6 +2,8 @@
 
 ## dev
 
+## 8.3.2 (master)
+
 Added interest delay `options.delay` to Tooltip.
 Fixed bug not removing tooltips when trigger is destroyed.
 Added Tooltip docs.
@@ -15,7 +17,7 @@ CodeEditor:
 - Suggestions icon, iconClass, sortText and filterText.
 - Added missing GLSL highlight css.
 
-## 8.3.1 (master)
+## 8.3.1
 
 Fixed `LX.toKebabCase`.
 Added `LX.toSnakeCase(str)` util.
