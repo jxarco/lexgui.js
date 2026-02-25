@@ -1,0 +1,71 @@
+<script type="module">
+
+    const content = document.querySelector( '.lexdocs-content' );
+    const componentName = "Tooltip";
+
+    docMaker.header(componentName + ".", "h1", componentName.toLowerCase());
+    docMaker.paragraph(`Attaches a floating label to any element, shown on hover after a short delay. Positions itself automatically to avoid viewport collisions.`, false, "text-muted-foreground");
+
+    {
+        window.__addInteractiveCodeExample( content, componentName, panel => {
+            const area = new LX.Area( { className: "flex flex-col p-12 gap-1", skipAppend: true, height: "auto" } );
+            panel.attach( area );
+
+            const element = LX.makeContainer( ["2rem", "2rem"], "bg-primary rounded-lg ml-auto mr-auto cursor-pointer hover:bg-accent", "", area );
+            LX.asTooltip( element, "Custom tooltip" );
+        });
+    }
+
+    docMaker.header("API Reference", "h2");
+    docMaker.classCtor("function LX.asTooltip", [
+        ["trigger", "HTMLElement"],
+        ["content", "String"],
+        ["options", "Object = {}"]
+    ]);
+    docMaker.lineBreak();
+    docMaker.paragraph(`Where ${ docMaker.iCode( "trigger" ) } is the element that activates the tooltip on hover, ${ docMaker.iCode( "content" ) } is the text displayed inside it,
+    and ${ docMaker.iCode( "options" ) } can include the following:`);
+    docMaker.lineBreak();
+
+    {
+        const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
+        const panel = area.addPanel();
+        content.appendChild( area.root );
+        panel.addTable( null, {
+            head: [ "Option", "Type", "Description", "Default" ],
+            body: [
+                ["side", `<span class='cursor-pointer' title='"top" | "bottom" | "left" | "right"'>Enum</span>`, `Side of the trigger where the tooltip appears`, `"top"`],
+                ["offset", `Number`, `Shorthand margin offset applied to both axes`, `—`],
+                ["offsetX", `Number`, `Horizontal margin offset`, `0`],
+                ["offsetY", `Number`, `Vertical margin offset`, `6`],
+                ["active", `Boolean`, `Whether the tooltip is enabled on creation`, `true`],
+                ["delay", `Number`, `Delay in ms before the tooltip is shown after hover`, `100`],
+                ["callback", `Function`, `Called when the tooltip is shown. Receives ${ docMaker.iCode( "(tooltipDom, trigger)" ) }`, `—`],
+            ].map( v => {
+                return [ docMaker.iCode( v[ 0 ], "table" ), docMaker.iCode( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? docMaker.iCode( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+    }
+
+    docMaker.header( "Dataset Overrides", "h3" );
+    docMaker.paragraph( `The following ${ docMaker.iCode( "data-*" ) } attributes can be set on the trigger element at any time to override tooltip behaviour at runtime:` );
+    docMaker.lineBreak();
+
+    {
+        const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
+        const panel = area.addPanel();
+        content.appendChild( area.root );
+        panel.addTable( null, {
+            head: [ "Attribute", "Description" ],
+            body: [
+                ["data-tooltip-content", `Overrides the tooltip text without re-calling ${ docMaker.iCode( "asTooltip" ) }.`],
+                ["data-tooltip-offset-x", `Overrides the horizontal offset at runtime.`],
+                ["data-tooltip-offset-y", `Overrides the vertical offset at runtime.`],
+                ["data-disable-tooltip", `Set to ${ docMaker.iCode( '"true"' ) } to suppress the tooltip without removing it.`],
+            ].map( v => {
+                return [ docMaker.iCode( v[ 0 ], "table" ), v[ 1 ] ];
+            } )
+        }, {});
+    }
+
+</script>

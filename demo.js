@@ -742,6 +742,8 @@ interface Vec2 {
     y: number;
 }
 
+const hexColor = "#ff4532";
+
 type Callback<T> = (value: T) => void;
 
 class Timer {

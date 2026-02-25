@@ -1857,6 +1857,7 @@ LX.makeContainer = makeContainer;
  * offsetY: Tooltip margin vertical offset
  * active: Tooltip active by default [true]
  * callback: Callback function to execute when the tooltip is shown
+ * delay: Interest delay in ms until showing the tooltip [100]
  */
 
 function asTooltip( trigger: any, content: any, options: any = {} )
@@ -1866,17 +1867,36 @@ function asTooltip( trigger: any, content: any, options: any = {} )
     trigger.dataset['disableTooltip'] = !( options.active ?? true );
 
     let tooltipDom: any = null;
+    let delayTimer: any = null;
+    let rafId: number | null = null;
 
     const _offset = options.offset;
     const _offsetX = options.offsetX ?? ( _offset ?? 0 );
     const _offsetY = options.offsetY ?? ( _offset ?? 6 );
+    const _delay = options.delay ?? 100;
 
-    trigger.addEventListener( 'mouseenter', function( e: any )
-    {
-        if ( trigger.dataset['disableTooltip'] == 'true' )
+    const _cleanup = () => {
+        clearTimeout( delayTimer );
+
+        if ( rafId !== null )
         {
-            return;
+            cancelAnimationFrame( rafId );
+            rafId = null;
         }
+
+        if ( tooltipDom )
+        {
+            tooltipDom.remove();
+            tooltipDom = null;
+        }
+    };
+
+    const _watchConnection = () => {
+        if ( !trigger.isConnected ) { _cleanup(); return; }
+        if ( tooltipDom ) rafId = requestAnimationFrame( _watchConnection );
+    };
+
+    const _showTooltip = () => {
 
         tooltipDom = LX.makeElement( 'div',
             'lextooltip fixed bg-secondary-foreground text-secondary text-xs px-2 py-1 rounded-lg pointer-events-none data-closed:opacity-0',
@@ -1885,36 +1905,35 @@ function asTooltip( trigger: any, content: any, options: any = {} )
         const nestedDialog = trigger.closest( 'dialog' );
         const tooltipParent = nestedDialog ?? LX.root;
 
-        // Remove other first
+        // Remove others first
         LX.root.querySelectorAll( '.lextooltip' ).forEach( ( e: HTMLElement ) => e.remove() );
 
-        // Append new tooltip
         tooltipParent.appendChild( tooltipDom );
+
+        // Watch for trigger being removed from the DOM before mouseleave fires
+        rafId = requestAnimationFrame( _watchConnection );
 
         LX.doAsync( () => {
             const position = [ 0, 0 ];
             const offsetX = parseFloat( trigger.dataset['tooltipOffsetX'] ?? _offsetX );
             const offsetY = parseFloat( trigger.dataset['tooltipOffsetY'] ?? _offsetY );
             const rect = trigger.getBoundingClientRect();
-            let alignWidth = true;
+            const side = options.side ?? 'top';
+            const alignWidth = side === 'top' || side === 'bottom';
 
-            switch ( options.side ?? 'top' )
+            switch ( side )
             {
                 case 'left':
                     position[0] += rect.x - tooltipDom.offsetWidth - offsetX;
-                    alignWidth = false;
                     break;
                 case 'right':
                     position[0] += rect.x + rect.width + offsetX;
-                    alignWidth = false;
                     break;
                 case 'top':
                     position[1] += rect.y - tooltipDom.offsetHeight - offsetY;
-                    alignWidth = true;
                     break;
                 case 'bottom':
                     position[1] += rect.y + rect.height + offsetY;
-                    alignWidth = true;
                     break;
             }
 
@@ -1927,7 +1946,7 @@ function asTooltip( trigger: any, content: any, options: any = {} )
 
             if ( nestedDialog )
             {
-                let parentRect = tooltipParent.getBoundingClientRect();
+                const parentRect = tooltipParent.getBoundingClientRect();
                 position[0] -= parentRect.x;
                 position[1] -= parentRect.y;
             }
@@ -1935,20 +1954,21 @@ function asTooltip( trigger: any, content: any, options: any = {} )
             tooltipDom.style.left = `${position[0]}px`;
             tooltipDom.style.top = `${position[1]}px`;
 
-            if ( options.callback )
-            {
-                options.callback( tooltipDom, trigger );
-            }
+            options.callback?.( tooltipDom, trigger );
         } );
+    };
+
+    trigger.addEventListener( 'mouseenter', function()
+    {
+        if ( trigger.dataset['disableTooltip'] == 'true' )
+        {
+            return;
+        }
+
+        delayTimer = setTimeout( _showTooltip, _delay );
     } );
 
-    trigger.addEventListener( 'mouseleave', function( e: any )
-    {
-        if ( tooltipDom )
-        {
-            tooltipDom.remove();
-        }
-    } );
+    trigger.addEventListener( 'mouseleave', _cleanup );
 }
 
 LX.asTooltip = asTooltip;

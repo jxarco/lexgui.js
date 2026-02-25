@@ -2,6 +2,19 @@
 
 ## dev
 
+Added interest delay `options.delay` to Tooltip.
+Fixed bug not removing tooltips when trigger is destroyed.
+Added Tooltip docs.
+Fixed some crashing doc pages.
+
+CodeEditor:
+- Added symbol hover info and inline color manipulation through LX.ColorInput.
+- Support for `options.onHoverSymbol` to customize popup symbol data.
+- Fixed issues normalizing imported text.
+- Added scope braces detection.
+- Suggestions icon, iconClass, sortText and filterText.
+- Added missing GLSL highlight css.
+
 ## 8.3.1 (master)
 
 Fixed `LX.toKebabCase`.
