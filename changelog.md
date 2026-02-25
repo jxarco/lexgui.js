@@ -4,6 +4,8 @@
 
 Added interest delay `options.delay` to Tooltip.
 Fixed bug not removing tooltips when trigger is destroyed.
+Added Tooltip docs.
+Fixed some crashing doc pages.
 
 CodeEditor:
 - Suggestions icon, iconClass, sortText and filterText.
