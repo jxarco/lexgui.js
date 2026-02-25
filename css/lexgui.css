@@ -4667,8 +4667,10 @@ ul.lexassetscontent {
 
 .cm-sym.json { color: #cf6dcf; }  /* symbol */
 
-.cm-sym.glsl { color: #f9cb20; }  /* symbol */
 .cm-mtd.glsl { color: #e0cc68; }  /* method */
+.cm-sym.glsl { color: #f9cb20; }  /* symbol */
+.cm-ppc.glsl { color: #99caf1; }  /* preprocessor */
+.cm-bln.glsl { color: #e8be53; }  /* builtin */
 
 .cm-mtd.wgsl { color: #dfe093; }  /* method */
 .cm-sym.wgsl { color: #f9cb20; }  /* symbol */

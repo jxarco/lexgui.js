@@ -6651,11 +6651,17 @@ ul.lexassetscontent {
 .cm-sym.json {
   color: #cf6dcf;
 }
+.cm-mtd.glsl {
+  color: #e0cc68;
+}
 .cm-sym.glsl {
   color: #f9cb20;
 }
-.cm-mtd.glsl {
-  color: #e0cc68;
+.cm-ppc.glsl {
+  color: #99caf1;
+}
+.cm-bln.glsl {
+  color: #e8be53;
 }
 .cm-mtd.wgsl {
   color: #dfe093;
