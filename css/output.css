@@ -5375,6 +5375,17 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 .lexareatabs .lexareatab:hover {
   color: var(--foreground);
 }
+.lexareatabs .lexareatab[data-modified]::after {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--foreground);
+  margin-left: 6px;
+  vertical-align: middle;
+  opacity: 0.6;
+}
 .lexareatabscontainer {
   transition: height 0.1s;
   transition-timing-function: ease-out;

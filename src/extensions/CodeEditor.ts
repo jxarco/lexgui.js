@@ -1155,7 +1155,7 @@ class CodeDocument
         return this._lines.join( separator );
     }
 
-    setText( text: string ): void
+    setText( text: string, silent: boolean = false ): void
     {
         this._lines = text.split( /\r?\n/ );
         if ( this._lines.length === 0 )
@@ -1163,7 +1163,7 @@ class CodeDocument
             this._lines = [ '' ];
         }
 
-        if( this.onChange ) this.onChange( this );
+        if( !silent && this.onChange ) this.onChange( this );
     }
 
     getCharAt( line: number, col: number ): string | undefined
@@ -1395,6 +1395,7 @@ class UndoManager
     private _lastPushTime: number = 0;
     private _groupThresholdMs: number;
     private _maxSteps: number;
+    private _savedDepth: number = 0;
 
     constructor( groupThresholdMs: number = 2000, maxSteps: number = 200 )
     {
@@ -1495,12 +1496,24 @@ class UndoManager
         return this._redoStack.length > 0;
     }
 
+    markSaved(): void
+    {
+        this._flush();
+        this._savedDepth = this._undoStack.length;
+    }
+
+    isModified(): boolean
+    {
+        return this._undoStack.length !== this._savedDepth || this._pendingOps.length > 0;
+    }
+
     clear(): void
     {
         this._undoStack.length = 0;
         this._redoStack.length = 0;
         this._pendingOps.length = 0;
         this._lastPushTime = 0;
+        this._savedDepth = 0;
     }
 
     private _flush(): void
@@ -2297,6 +2310,7 @@ interface CodeTab
     cursorSet: CursorSet;
     undoManager: UndoManager;
     language: string;
+    modified: boolean;
     title?: string;
     path?: string;
 }
@@ -3025,7 +3039,7 @@ export class CodeEditor
     {
         if( !this.currentTab ) return;
 
-        this.doc.setText( this._normalizeText( text ) );
+        this.doc.setText( this._normalizeText( text ), true );
         this.cursorSet.set( 0, 0 );
         this.undoManager.clear();
         this._lineStates = [];
@@ -3221,10 +3235,14 @@ export class CodeEditor
         const codeTab : CodeTab = {
             name,
             dom,
-            doc: new CodeDocument( this.onCodeChange ),
+            doc: new CodeDocument( ( doc ) => {
+                this._setTabModified( name, true );
+                this.onCodeChange?.( doc );
+            } ),
             cursorSet: new CursorSet(),
             undoManager: new UndoManager(),
             language: langName,
+            modified: false,
             title: options.title ?? name
         };
         
@@ -3256,7 +3274,7 @@ export class CodeEditor
 
         if( options.text )
         {
-            codeTab.doc.setText( options.text );
+            codeTab.doc.setText( options.text, true );
             codeTab.cursorSet.set( 0, 0 );
             codeTab.undoManager.clear();
             this._renderAllLines();
@@ -3382,7 +3400,7 @@ export class CodeEditor
                     language: langName
                 } );
     
-                this.doc.setText( text );
+                this.doc.setText( text, true );
                 this.setLanguage( langName, ext );
                 this.cursorSet.set( 0, 0 );
                 this.undoManager.clear();
@@ -3465,7 +3483,7 @@ export class CodeEditor
 
                     if ( results.length === 0 )
                     {
-                        this.doc.setText( processedText );
+                        this.doc.setText( processedText, true );
                         this.setLanguage( langName, ext );
                         this.cursorSet.set( 0, 0 );
                         this.undoManager.clear();
@@ -3520,6 +3538,15 @@ export class CodeEditor
                 console.log( `[LX.CodeEditor] Ready! (font size: ${this.fontSize}px, char size: ${this.charWidth}px)` );
             }
         }, 20 );
+    }
+
+    private _setTabModified( name: string, modified: boolean ): void
+    {
+        const tab = this._openedTabs[ name ];
+        if ( !tab || tab.modified === modified ) return;
+        tab.modified = modified;
+        const tabEl = this.tabs?.tabDOMs?.[ name ];
+        if ( tabEl ) tabEl.toggleAttribute( 'data-modified', modified );
     }
 
     private _onSelectTab( isNewTabButton: boolean, event: MouseEvent, name: string ): void
@@ -4221,6 +4248,8 @@ export class CodeEditor
                     if ( this.onSave )
                     {
                         this.onSave( this.getText(), this );
+                        this.undoManager.markSaved();
+                        this._setTabModified( this.currentTab.name, false );
                     }
                     return;
                 case 'z':
@@ -5227,6 +5256,7 @@ export class CodeEditor
             }
             this._rebuildLines();
             this._afterCursorMove();
+            if ( this.currentTab ) this._setTabModified( this.currentTab.name, this.undoManager.isModified() );
         }
     }
 
@@ -5242,6 +5272,7 @@ export class CodeEditor
             }
             this._rebuildLines();
             this._afterCursorMove();
+            if ( this.currentTab ) this._setTabModified( this.currentTab.name, this.undoManager.isModified() );
         }
     }
 

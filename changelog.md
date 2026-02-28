@@ -2,6 +2,9 @@
 
 ## dev
 
+CodeEditor:
+- Not saved dot indicator.
+
 ## 8.3.2 (master)
 
 Added interest delay `options.delay` to Tooltip.
