@@ -4,6 +4,7 @@
 
 CodeEditor:
 - Not saved dot indicator.
+- Fixed mousemove error in doc when no tab.
 
 ## 8.3.2 (master)
 

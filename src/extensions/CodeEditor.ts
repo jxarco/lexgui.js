@@ -5963,6 +5963,7 @@ export class CodeEditor
 
     private _onCodeAreaMouseMove( e: MouseEvent ): void
     {
+        if ( !this.currentTab ) return;
         // Only show hover when no button is pressed (no dragging)
         if ( e.buttons !== 0 ) { this._clearHoverPopup(); return; }
 
