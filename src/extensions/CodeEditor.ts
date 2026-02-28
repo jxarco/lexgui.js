@@ -5590,7 +5590,11 @@ export class CodeEditor
 
         const addSuggestion = ( s: CodeSuggestion ) =>
         {
-            if ( !added.has( s.label ) )
+            if ( added.has( s.label ) )
+            {
+                suggestions[ suggestions.findIndex( x => x.label === s.label ) ] = s;
+            }
+            else
             {
                 suggestions.push( s );
                 added.add( s.label );
@@ -5611,7 +5615,7 @@ export class CodeEditor
         const allSymbols = this.symbolTable.getAllSymbols();
         for ( const symbol of allSymbols )
         {
-            const s: CodeSuggestion = { label: symbol.name, kind: symbol.kind, scope: symbol.scope, detail: `${symbol.kind} in ${symbol.scope}` };
+            const s: CodeSuggestion = { label: symbol.name, kind: symbol.kind, scope: symbol.scope };
             if ( filterSuggestion( s, word ) ) addSuggestion( s );
         }
 
@@ -5689,6 +5693,10 @@ export class CodeEditor
                     iconName = 'Function';
                     iconClass = 'text-purple-500';
                     break;
+                case 'constant':
+                    iconName = 'Pi';
+                    iconClass = 'text-rose-600';
+                    break;
                 case 'method':
                     iconName = 'Box';
                     iconClass = 'text-fuchsia-500';
@@ -5729,7 +5737,14 @@ export class CodeEditor
             postWord.textContent = currSuggestionLabel.substring( hIndex + word.length );
             item.appendChild( postWord );
 
-            if ( suggestion.kind )
+            if ( suggestion.detail )
+            {
+                const detail = document.createElement( 'span' );
+                detail.textContent = ` ${suggestion.detail}`;
+                detail.className = 'kind text-muted-foreground text-xs! ml-2';
+                item.appendChild( detail );
+            }
+            else if ( suggestion.kind )
             {
                 const kind = document.createElement( 'span' );
                 kind.textContent = ` (${suggestion.kind})`;

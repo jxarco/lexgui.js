@@ -4568,7 +4568,7 @@ ul.lexassetscontent {
     border: 1px solid var(--border);
     border-radius: 0.5rem;
     width: max-content;
-    max-width: 450px;
+    max-width: 600px;
     max-height: 264px;
     position: absolute;
     left: 0;
