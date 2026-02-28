@@ -15,7 +15,7 @@ const NodeTree = LX.NodeTree;
 const Tree = LX.Tree;
 
 export type AssetViewAction = 'select' | 'dbl_click' | 'check' | 'clone' | 'move' | 'delete' | 'rename' | 'enter_folder' | 'create-folder'
-    | 'refresh-content' | 'node-drag';
+    | 'refresh-content' | 'node-drag' | 'enter-folder';
 
 export interface AssetViewItem
 {
@@ -458,7 +458,7 @@ export class AssetView
             }
             else if ( isFolder )
             {
-                that._enterFolder( item );
+                that._requestEnterFolder( item );
                 return;
             }
 
@@ -743,17 +743,17 @@ export class AssetView
         panel.addButton( null, 'GoBackButton', () => {
             if ( !this.prevData.length || !this.currentFolder ) return;
             this.nextData.push( this.currentFolder );
-            this._enterFolder( this.prevData.pop(), false );
+            this._enterFolder( this.prevData.pop(), false, true );
         }, { buttonClass: 'ghost', title: 'Go Back', tooltip: true, icon: 'ArrowLeft' } );
 
         panel.addButton( null, 'GoForwardButton', () => {
             if ( !this.nextData.length || !this.currentFolder ) return;
-            this._enterFolder( this.nextData.pop() );
+            this._enterFolder( this.nextData.pop(), false, true );
         }, { buttonClass: 'ghost', title: 'Go Forward', tooltip: true, icon: 'ArrowRight' } );
 
         panel.addButton( null, 'GoUpButton', () => {
             const parentFolder = this.currentFolder?.parent;
-            if ( parentFolder ) this._enterFolder( parentFolder );
+            if ( parentFolder ) this._enterFolder( parentFolder, false, true );
         }, { buttonClass: 'ghost', title: 'Go Upper Folder', tooltip: true, icon: 'ArrowUp' } );
 
         panel.addButton( null, 'RefreshButton', () => {
@@ -812,7 +812,7 @@ export class AssetView
             }
             else
             {
-                this._enterFolder( node.type === 'folder' ? node : node.parent );
+                this._requestEnterFolder( node.type === 'folder' ? node : node.parent );
 
                 this._previewAsset( node );
 
@@ -1305,15 +1305,51 @@ export class AssetView
         this._refreshContent();
     }
 
-    async _enterFolder( folderItem: AssetViewItem | undefined, storeCurrent: boolean = true )
+    _requestEnterFolder( folderItem: AssetViewItem | undefined, storeCurrent: boolean = true )
     {
         if ( !folderItem )
         {
             return;
         }
 
-        const child = this.currentData[0];
-        const sameFolder = child?.parent?.metadata?.uid === folderItem.metadata?.uid;
+        const onBeforeEnterFolder = this._callbacks['beforeEnterFolder'];
+        const onEnterFolder = this._callbacks['enterFolder'];
+
+        const resolve = ( ...args: any[] ) => {
+            const child = this.currentData[0];
+            const sameFolder = child?.parent?.metadata?.uid === folderItem.metadata?.uid;
+            const mustRefresh = args[0] as boolean || !sameFolder;
+            this._enterFolder( folderItem, storeCurrent, mustRefresh );
+            const event: AssetViewEvent = {
+                type: 'enter-folder',
+                to: folderItem,
+                userInitiated: true
+            };
+            if ( onEnterFolder ) onEnterFolder( event, ...args );
+        };
+
+        if ( onBeforeEnterFolder )
+        {
+            const event: AssetViewEvent = {
+                type: 'enter-folder',
+                to: folderItem,
+                userInitiated: true
+            };
+
+            onBeforeEnterFolder( event, resolve );
+        }
+        else
+        {
+            resolve();
+        }
+    }
+
+    _enterFolder( folderItem: AssetViewItem | undefined, storeCurrent: boolean, mustRefresh: boolean )
+    {
+        if ( !folderItem )
+        {
+            return;
+        }
 
         if ( storeCurrent )
         {
@@ -1323,21 +1359,6 @@ export class AssetView
                 type: 'root',
                 metadata: {}
             } );
-        }
-
-        let mustRefresh: boolean = !sameFolder;
-
-        const onEnterFolder = this._callbacks['enterFolder'];
-        if ( onEnterFolder !== undefined )
-        {
-            const event: AssetViewEvent = {
-                type: 'enter_folder',
-                to: folderItem,
-                userInitiated: true
-            };
-
-            const r: any = await onEnterFolder( event ) as boolean;
-            mustRefresh = mustRefresh || r;
         }
 
         // Update this after the event since the user might have added or modified the data

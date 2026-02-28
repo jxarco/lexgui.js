@@ -2,6 +2,9 @@
 
 ## dev
 
+AssetView:
+- Support for `beforeEnterFolder` event.
+
 CodeEditor:
 - Support outside code window selection scroll.
 - Ctrl+Click now can open file paths (added `options.onOpenPath`).

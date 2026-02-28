@@ -257,41 +257,15 @@
 
     // Folder events
     {
+        assetView.on( "beforeEnterFolder", ( event, resolve ) => {
+            LX.prompt("Perform EnterFolder Action?", "Server Message", () => {
+                const mustRefresh = true;
+                resolve(mustRefresh);
+            })
+        } );
+
         assetView.on( "enterFolder", async ( event ) => {
             console.log(`Entered ${ event.to.id } folder` );
-
-            // const r = await (() => { return new Promise(resolve => {
-            //     setTimeout(() => {
-            //         resolve({
-            //             ok: true
-            //         });
-            //     }, 2000);
-            // }) })();
-
-            // if( r?.ok )
-            // {
-            //     event.to.children = [
-            //         {
-            //             id: "brow_lowerer.png",
-            //             type: "clip",
-            //             src: "../data/brow_lowerer.png",
-            //             metadata: {
-            //                 lastModified: 1740181312813
-            //             }
-            //         },
-            //         {
-            //             id: "brow_lowerer.png",
-            //             type: "clip",
-            //             src: "../data/brow_lowerer.png",
-            //             metadata: {
-            //                 lastModified: 1740181312813
-            //             }
-            //         }
-            //     ]
-            // }
-
-            // return true;
-
         });
 
         assetView.on( "beforeCreateFolder", ( event, resolve ) => {
