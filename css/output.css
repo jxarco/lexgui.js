@@ -6432,7 +6432,6 @@ ul.lexassetscontent {
   padding: 0;
   z-index: 1 !important;
   right: 0px;
-  pointer-events: none;
 }
 .lexcodescrollbar.horizontal {
   width: 100%;

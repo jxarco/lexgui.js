@@ -4,6 +4,7 @@
 
 CodeEditor:
 - Not saved dot indicator.
+- Support scroll on click outside Scrollbar thumb.
 - Fixed mousemove error in doc when no tab.
 
 ## 8.3.2 (master)

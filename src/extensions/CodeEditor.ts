@@ -2396,6 +2396,15 @@ class ScrollBar
         this.thumb = LX.makeElement( 'div' );
         this.thumb.addEventListener( 'mousedown', ( e: MouseEvent ) => this._onMouseDown( e ) );
         this.root.appendChild( this.thumb );
+
+        this.root.addEventListener( 'mousedown', ( e: MouseEvent ) => {
+            if ( e.target === this.thumb ) return;
+            const clickPos = this._vertical ? e.offsetY : e.offsetX;
+            const thumbSize = this._vertical ? this.thumb.offsetHeight : this.thumb.offsetWidth;
+            const delta = ( clickPos - thumbSize / 2 ) - this._thumbPos;
+            this._onDrag?.( delta );
+            this._onMouseDown( e ); // continue as drag from new position
+        } );
     }
 
     setThumbRatio( ratio: number ): void
