@@ -5441,22 +5441,61 @@ export class CodeEditor
         this._afterCursorMove();
         this._inputArea.focus();
 
-        // Track mouse for drag selection
-        const onMouseMove = ( me: MouseEvent ) =>
-        {
-            const mx = me.clientX - rect.left - this.xPadding;
-            const my = me.clientY - rect.top;
-            const ml = Math.max( 0, Math.min( Math.floor( my / this.lineHeight ), this.doc.lineCount - 1 ) );
-            const mc = Math.max( 0, Math.min( Math.round( mx / this.charWidth ), this.doc.getLine( ml ).length ) );
+        // Track mouse for drag selection (with auto-scroll when outside editor window/area)
+        let lastMouseX = 0;
+        let lastMouseY = 0;
+        let rafId: number | null = null;
 
+        const updateSelection = () =>
+        {
+            const currentRect = this.codeContainer.getBoundingClientRect();
+            const mx = lastMouseX - currentRect.left - this.xPadding;
+            const my = lastMouseY - currentRect.top;
+            const ml = LX.clamp( Math.floor( my / this.lineHeight ), 0, this.doc.lineCount - 1 );
+            const mc = LX.clamp( Math.round( mx / this.charWidth ), 0, this.doc.getLine( ml ).length );
             const sel = this.cursorSet.getPrimary();
             sel.head = { line: ml, col: mc };
             this._renderCursors();
             this._renderSelections();
         };
 
+        const autoScroll = () =>
+        {
+            const scrollerRect = this.codeScroller.getBoundingClientRect();
+            const overshootY = lastMouseY < scrollerRect.top    ? lastMouseY - scrollerRect.top
+                             : lastMouseY > scrollerRect.bottom  ? lastMouseY - scrollerRect.bottom : 0;
+            const overshootX = lastMouseX < scrollerRect.left   ? lastMouseX - scrollerRect.left
+                             : lastMouseX > scrollerRect.right   ? lastMouseX - scrollerRect.right  : 0;
+
+            if ( overshootY === 0 && overshootX === 0 ) { rafId = null; return; }
+
+            const speedY = Math.sign( overshootY ) * Math.min( Math.abs( overshootY ) * 0.3, 15 );
+            const speedX = Math.sign( overshootX ) * Math.min( Math.abs( overshootX ) * 0.3, 15 );
+            this.codeScroller.scrollTop  += speedY;
+            this.codeScroller.scrollLeft += speedX;
+            this._syncScrollBars();
+            updateSelection();
+            rafId = requestAnimationFrame( autoScroll );
+        };
+
+        const onMouseMove = ( me: MouseEvent ) =>
+        {
+            lastMouseX = me.clientX;
+            lastMouseY = me.clientY;
+            updateSelection();
+
+            const scrollerRect = this.codeScroller.getBoundingClientRect();
+            const isOutside = me.clientY < scrollerRect.top   || me.clientY > scrollerRect.bottom
+                           || me.clientX < scrollerRect.left  || me.clientX > scrollerRect.right;
+            if ( isOutside && rafId === null )
+            {
+                rafId = requestAnimationFrame( autoScroll );
+            }
+        };
+
         const onMouseUp = () =>
         {
+            if ( rafId !== null ) { cancelAnimationFrame( rafId ); rafId = null; }
             document.removeEventListener( 'mousemove', onMouseMove );
             document.removeEventListener( 'mouseup', onMouseUp );
         };

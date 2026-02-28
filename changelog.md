@@ -3,8 +3,9 @@
 ## dev
 
 CodeEditor:
+- Support outside code window selection scroll.
 - Ctrl+Click now can open file paths (added `options.onOpenPath`).
-- Not saved dot indicator.
+- Added "not saved" dot indicator.
 - Support scroll on click outside Scrollbar thumb.
 - Fixed mousemove error in doc when no tab.
 
