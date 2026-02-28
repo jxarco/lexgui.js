@@ -1914,6 +1914,9 @@ function asTooltip( trigger: any, content: any, options: any = {} )
         rafId = requestAnimationFrame( _watchConnection );
 
         LX.doAsync( () => {
+
+            if( !tooltipDom ) return;
+
             const position = [ 0, 0 ];
             const offsetX = parseFloat( trigger.dataset['tooltipOffsetX'] ?? _offsetX );
             const offsetY = parseFloat( trigger.dataset['tooltipOffsetY'] ?? _offsetY );
