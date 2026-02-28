@@ -2187,6 +2187,9 @@
   .text-red-500 {
     color: var(--color-red-500);
   }
+  .text-rose-600 {
+    color: var(--color-rose-600);
+  }
   .text-secondary {
     color: var(--color-secondary);
   }
@@ -6524,7 +6527,7 @@ ul.lexassetscontent {
   border: 1px solid var(--border);
   border-radius: 0.5rem;
   width: max-content;
-  max-width: 450px;
+  max-width: 600px;
   max-height: 264px;
   position: absolute;
   left: 0;

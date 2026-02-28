@@ -2326,6 +2326,7 @@ export interface CodeSuggestion
     sortText?: string;
     icon?: string;
     iconClass?: string;
+    cursorOffset?: number;
 }
 
 export interface HoverSymbolInfo
@@ -5612,9 +5613,11 @@ export class CodeEditor
         };
 
         // Get first suggestions from symbol table
+        const _skipKinds = new Set( [ 'constructor-call', 'method-call' ] );
         const allSymbols = this.symbolTable.getAllSymbols();
         for ( const symbol of allSymbols )
         {
+            if ( _skipKinds.has( symbol.kind ) ) continue;
             const s: CodeSuggestion = { label: symbol.name, kind: symbol.kind, scope: symbol.scope };
             if ( filterSuggestion( s, word ) ) addSuggestion( s );
         }
@@ -5657,6 +5660,7 @@ export class CodeEditor
         {
             const item = document.createElement( 'pre' );
             ( item as any ).insertText = suggestion.insertText ?? suggestion.label;
+            ( item as any ).cursorOffset = suggestion.cursorOffset;
             if ( index === this._selectedAutocompleteIndex ) item.classList.add( 'selected' );
             const currSuggestionLabel = suggestion.label;
 
@@ -5687,11 +5691,11 @@ export class CodeEditor
                     break;
                 case 'type':
                     iconName = 'Type';
-                    iconClass = 'text-teal-500';
+                    iconClass = 'text-purple-500';
                     break;
                 case 'function':
                     iconName = 'Function';
-                    iconClass = 'text-purple-500';
+                    iconClass = 'text-teal-500';
                     break;
                 case 'constant':
                     iconName = 'Pi';
@@ -5708,14 +5712,6 @@ export class CodeEditor
                 case 'property':
                     iconName = 'Layers';
                     iconClass = 'text-blue-300';
-                    break;
-                case 'constructor-call':
-                    iconName = 'Hammer';
-                    iconClass = 'text-green-500';
-                    break;
-                case 'method-call':
-                    iconName = 'Parentheses';
-                    iconClass = 'text-gray-400';
                     break;
             }
 
@@ -5807,8 +5803,10 @@ export class CodeEditor
      */
     private _doAutocompleteWord(): void
     {
-        const text = this._getSelectedAutoCompleteWord();
-        if ( !text ) return;
+        const pre: any = this._getSelectedAutoCompleteItem();
+        if ( !pre ) return;
+        const text = pre.insertText;
+        const cursorOffset = pre.cursorOffset; // only valid in single line autocomplete
         const cursor = this.cursorSet.getPrimary().head;
         const { start, end } = this._getWordAtCursor();
         const line = cursor.line;
@@ -5824,7 +5822,7 @@ export class CodeEditor
         const insertedLines = text.split( /\r?\n/ );
         if ( insertedLines.length === 1 )
         {
-            this.cursorSet.set( line, start + text.length );
+            this.cursorSet.set( line, start + ( cursorOffset ?? text.length ) );
         }
         else
         {
@@ -5839,11 +5837,11 @@ export class CodeEditor
         this._doHideAutocomplete();
     }
 
-    private _getSelectedAutoCompleteWord(): string | null
+    private _getSelectedAutoCompleteItem(): HTMLPreElement | null
     {
         if ( !this.autocomplete || !this._isAutoCompleteActive ) return null;
-        const pre: any = this.autocomplete.childNodes[ this._selectedAutocompleteIndex ];
-        return pre.insertText;
+        const pre: HTMLPreElement = this.autocomplete.childNodes[ this._selectedAutocompleteIndex ] as HTMLPreElement;
+        return pre;
     }
 
     private _afterCursorMove(): void
