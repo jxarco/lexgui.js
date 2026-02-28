@@ -129,6 +129,11 @@
         [ "resolve", "Function" ]
     ] );
 
+    docMaker.classMethod( "beforeEnterFolder", `Called before entering a folder. 1st resolve param can be used to override mustRefresh content.`, [
+        [ "event", "{ type, userInitiated, to }" ],
+        [ "resolve", "Function" ]
+    ] );
+
     docMaker.classMethod( "beforeCreateFolder", `Called before creating a folder. 1st resolve param can be used as a custom folder name.`, [
         [ "event", "{ type, userInitiated, where }" ],
         [ "resolve", "Function" ]
