@@ -2,6 +2,8 @@
 
 ## dev
 
+Fixed Tour Component mask positions in scrolled page.
+
 AssetView:
 - Support for `beforeEnterFolder` event.
 

@@ -122,7 +122,10 @@ export class Tour
     {
         this.tourContainer.innerHTML = ''; // Clear previous content
 
+        const scrollTop = document.scrollingElement?.scrollTop ?? 0;
+
         this.tourMask = LX.makeContainer( [ '100%', '100%' ], 'tour-mask absolute inset-0' );
+        this.tourMask!.style.top = `${scrollTop}px`;
         this.tourContainer.appendChild( this.tourMask );
 
         const svg = document.createElementNS( 'http://www.w3.org/2000/svg', 'svg' );
@@ -196,7 +199,7 @@ export class Tour
         // Reference Highlight
         const refContainer = LX.makeContainer( [ '0', '0' ], 'tour-ref-mask absolute' );
         refContainer.style.left = `${boundingX - hOffset - 1}px`;
-        refContainer.style.top = `${boundingY - vOffset - 1}px`;
+        refContainer.style.top = `${boundingY - vOffset - 1 + scrollTop}px`;
         refContainer.style.width = `${boundingWidth + hOffset * 2 + 2}px`;
         refContainer.style.height = `${boundingHeight + vOffset * 2 + 2}px`;
         this.tourContainer.appendChild( refContainer );
