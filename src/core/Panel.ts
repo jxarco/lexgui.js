@@ -11,6 +11,7 @@ import { Counter } from '../components/Counter';
 import { Curve } from '../components/Curve';
 import { DatePicker } from '../components/DatePicker';
 import { Dial } from '../components/Dial';
+import { Empty } from '../components/Empty';
 import { FileInput } from '../components/FileInput';
 import { Form } from '../components/Form';
 import { Layers } from '../components/Layers';
@@ -677,18 +678,25 @@ export class Panel
 
     /**
      * @method addCard
-     * @param {String} name Card Name
-     * @param {Object} options:
-     * text: Card text
-     * link: Card link
-     * title: Card dom title
-     * src: url of the image
-     * callback (Function): function to call on click
+     * @param {String} name
+     * @param {Object} options
      */
 
     addCard( name: string, options: any = {} )
     {
         const component = new Card( name, options );
+        return this._attachComponent( component );
+    }
+
+    /**
+     * @method addEmpty
+     * @param {String} name
+     * @param {Object} options
+     */
+
+    addEmpty( name: string, options: any = {} )
+    {
+        const component = new Empty( name, options );
         return this._attachComponent( component );
     }
 

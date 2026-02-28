@@ -45,7 +45,8 @@ export enum ComponentType
     MAP2D = 37,
     LABEL = 39,
     BLANK = 40,
-    RATE = 41
+    RATE = 41,
+    EMPTY = 42
 }
 
 LX.ComponentType = ComponentType;

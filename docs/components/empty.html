@@ -1,0 +1,75 @@
+<script type="module">
+    import { LX } from 'lexgui';
+
+    const content = document.querySelector( '.lexdocs-content' );
+    const componentName = "Empty";
+
+    docMaker.header(componentName + ".", "h1", componentName.toLowerCase());
+    docMaker.paragraph(`Displays a custom card to display an empty state.`, false, "text-muted-foreground");
+
+    {
+        window.__addInteractiveCodeExample( content, componentName, panel => {
+            panel.addEmpty("EmptyState", {
+                header: {
+                    icon: "FolderKanban",
+                    title: "No Projects Yet",
+                    description: "You haven't created any projects yet. Get started by creating your first project.",
+                },
+                actions: [
+                    { name: "Create Project", callback: () => { console.log("Project created!") }, options: { buttonClass: 'sm primary' } },
+                    { name: "Import Project", callback: () => { console.log("Project imported!") } }
+                ],
+                footer: [ new LX.Button( null, "Learn More", null, { icon: "ArrowUpRight", iconPosition: "end", buttonClass: "sm text-xs! text-muted-foreground! link" } ) ]
+            });
+            panel.addSeparator();
+            panel.addEmpty("EmptyStateAvatar", {
+                header: {
+                    avatar: {
+                        imgSource: "https://images.unsplash.com/photo-1492633423870-43d1cd2775eb?&w=128&h=128&dpr=2&q=80",
+                        fallback: "TM",
+                        className: 'size-10 rounded-xl saturate-0'
+                    },
+                    title: "User Offline",
+                    description: "This user is currently offline. You can leave a message to notify them or try again later.",
+                },
+                actions: [
+                    { name: "Leave Message", options: { buttonClass: 'xs primary' } },
+                ]
+            });
+        });
+    }
+
+    docMaker.header("Usage", "h2");
+
+    docMaker.paragraph( `Call ${docMaker.iCode("Panel.addEmpty(name, options)")} to add a ${ componentName } Component to your panel or
+    create it anywhere using ${docMaker.iCode(`new LX.${ componentName.replace( /\s/g, '' ) }`)} to append its root to any container.` );
+
+    docMaker.header("API Reference", "h2");
+
+    {
+        const area = new LX.Area( { skipAppend: true, height: "auto", className: "mb-6" } );
+        const panel = area.addPanel();
+        content.appendChild( area.root );
+
+        panel.addTable( null, {
+            head: [ "Parameter", "Type", "Description", "Default" ],
+            body: [
+                ["name", "String", "Component name", "—"],
+                ["options", "Object", "Basic options for a component", "—"]
+            ].map( v => {
+                return [ docMaker.iCode( v[ 0 ], "table" ), docMaker.iCode( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? docMaker.iCode( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+        docMaker.lineBreak( panel.root );
+        panel.addTable( null, {
+            head: [ "Option", "Type", "Description", "Default" ],
+            body: [
+                ["header", "Object", "Contains diffent header options { title, description, icon/avatar }", "—"],
+                ["actions", "Array", "List of button data for state actions", "—"],
+                ["footer", "HTMLElement|Array", "Element or list of elements to be added to the Empty footer", "—"],
+            ].map( v => {
+                return [ docMaker.iCode( v[ 0 ], "table" ), docMaker.iCode( v[ 1 ], "table desc" ), v[ 2 ], v[ 3 ] != "—" ? docMaker.iCode( v[ 3 ], "table desc" ) : v[ 3 ] ];
+            } )
+        }, {});
+    }
+</script>
