@@ -2335,8 +2335,37 @@ export interface HoverSymbolInfo
     symbols: Symbol[];   // matching entries from the symbol table
 }
 
-/** Matches hex color literals: #rgb #rgba #rrggbb #rrggbbaa */
 const HEX_COLOR_RE = /#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{4}|[0-9a-fA-F]{3})\b/g;
+const URL_REGEX = /(https?:\/\/[^\s"'<>)\]]+)/g;
+
+/**
+ * Returns true if the string token at `idx` in the token list is a module import path.
+ */
+function isImportPath( tokens: Token[], idx: number ): boolean
+{
+    const isWs = ( t: Token ) => /^\s+$/.test( t.value );
+    const isImportWord = ( t: Token ) => t.value === 'require' || t.value === 'import';
+
+    for ( let i = idx - 1; i >= 0; i-- )
+    {
+        const t = tokens[ i ];
+        if ( isWs( t ) ) continue;
+        if ( t.type === 'keyword' && t.value === 'from' ) return true;
+        if ( isImportWord( t ) ) return true;
+        if ( t.type === 'symbol' && t.value === '(' )
+        {
+            for ( let j = i - 1; j >= 0; j-- )
+            {
+                const t2 = tokens[ j ];
+                if ( isWs( t2 ) ) continue;
+                if ( isImportWord( t2 ) ) return true;
+                break;
+            }
+        }
+        break;
+    }
+    return false;
+}
 
 /**
  * Scans a raw token value for hex color literals and returns HTML with each
@@ -2552,6 +2581,7 @@ export class CodeEditor
     onReady: ( ( editor: CodeEditor ) => void ) | undefined;
     onCreateFile: ( ( editor: CodeEditor ) => void ) | undefined;
     onCodeChange: ( ( doc: CodeDocument ) => void ) | undefined;
+    onOpenPath: ( ( path: string, editor: CodeEditor ) => void ) | undefined;
     onHoverSymbol: ( ( info: HoverSymbolInfo, editor: CodeEditor ) => string | HTMLElement | null | undefined ) | undefined;
 
     private _inputArea!: HTMLTextAreaElement;
@@ -2650,6 +2680,7 @@ export class CodeEditor
         this.onSelectTab = options.onSelectTab;
         this.onReady = options.onReady;
         this.onCodeChange = options.onCodeChange;
+        this.onOpenPath = options.onOpenPath;
         this.onHoverSymbol = options.onHoverSymbol;
 
         this.language = Tokenizer.getLanguage( this.highlight ) ?? Tokenizer.getLanguage( 'Plain Text' )!;
@@ -2911,16 +2942,25 @@ export class CodeEditor
         this.codeArea.root.addEventListener( 'contextmenu', this._onMouseDown.bind( this ) );
 
         this.codeArea.root.addEventListener( 'mouseover', ( e: MouseEvent ) => {
-            const link = ( e.target as HTMLElement ).closest( '.code-link' ) as HTMLElement | null;
+            const target = e.target as HTMLElement;
+            const link = target.closest( '.code-link' ) as HTMLElement | null;
             if ( link && e.ctrlKey ) link.classList.add( 'hovered' );
+            const path = target.closest( '.code-path' ) as HTMLElement | null;
+            if ( path && e.ctrlKey ) path.classList.add( 'hovered' );
         } );
         this.codeArea.root.addEventListener( 'mouseout', ( e: MouseEvent ) => {
-            const link = ( e.target as HTMLElement ).closest( '.code-link' ) as HTMLElement | null;
+            const target = e.target as HTMLElement;
+            const link = target.closest( '.code-link' ) as HTMLElement | null;
             if ( link ) link.classList.remove( 'hovered' );
+            const path = target.closest( '.code-path' ) as HTMLElement | null;
+            if ( path ) path.classList.remove( 'hovered' );
         } );
         this.codeArea.root.addEventListener( 'mousemove', ( e: MouseEvent ) => {
-            const link = ( e.target as HTMLElement ).closest( '.code-link' ) as HTMLElement | null;
+            const target = e.target as HTMLElement;
+            const link = target.closest( '.code-link' ) as HTMLElement | null;
             if ( link ) link.classList.toggle( 'hovered', e.ctrlKey );
+            const path = target.closest( '.code-path' ) as HTMLElement | null;
+            if ( path ) path.classList.toggle( 'hovered', e.ctrlKey );
             this._onCodeAreaMouseMove( e );
         } );
         this.codeArea.root.addEventListener( 'mouseleave', () => {
@@ -3549,6 +3589,26 @@ export class CodeEditor
         }, 20 );
     }
 
+    private _findTabByPath( importPath: string ): string | null
+    {
+        // By now only uses base name
+        const importBase = importPath.split( '/' ).pop()!.replace( /\.\w+$/, '' ).toLowerCase();
+
+        const allNames = new Set( [
+            ...Object.keys( this._openedTabs ),
+            ...Object.keys( this._loadedTabs ),
+            ...Object.keys( this._storedTabs ),
+        ] );
+
+        for ( const name of allNames )
+        {
+            const tabBase = name.split( '/' ).pop()!.replace( /\.\w+$/, '' ).toLowerCase();
+            if ( tabBase === importBase ) return name;
+        }
+
+        return null;
+    }
+
     private _setTabModified( name: string, modified: boolean ): void
     {
         const tab = this._openedTabs[ name ];
@@ -3858,7 +3918,6 @@ export class CodeEditor
         const lineText = this.doc.getLine( lineIndex );
         const result = Tokenizer.tokenizeLine( lineText, this.language, prevState );
         const langClass = this.language.name.toLowerCase().replace( /[^a-z]/g, '' );
-        const URL_REGEX = /(https?:\/\/[^\s"'<>)\]]+)/g;
 
         // Pre-compute which token index gets the bracket-highlight class
         let bracketTokenIdx = -1;
@@ -3896,17 +3955,24 @@ export class CodeEditor
             const tokenCol  = colOffset;
             colOffset      += token.value.length;
 
+            // Inject content depending on type of token: color, url, path?
             let content: string;
+
             if ( token.type === 'comment' )
             {
-                // Escape then inject clickable URL spans
                 const escaped = token.value
                     .replace( /&/g, '&amp;' ).replace( /</g, '&lt;' ).replace( />/g, '&gt;' );
                 content = escaped.replace( URL_REGEX, `<span class="code-link" data-url="$1">$1</span>` );
             }
+            else if ( token.type === 'string' && isImportPath( result.tokens, ti ) )
+            {
+                const inner = token.value.slice( 1, -1 ); // strip surrounding quotes
+                const q = token.value[ 0 ];
+                const escapedInner = inner.replace( /&/g, '&amp;' ).replace( /</g, '&lt;' ).replace( />/g, '&gt;' );
+                content = `${q}<span class="code-path" data-path="${inner}">${escapedInner}</span>${q}`;
+            }
             else
             {
-                // Escape and inject color swatches for hex color strings
                 content = injectColorSpans( token.value, lineIndex, tokenCol );
             }
 
@@ -5293,7 +5359,7 @@ export class CodeEditor
         if ( this.searchBox && this.searchBox.contains( e.target as Node ) ) return;
         if ( this.autocomplete && this.autocomplete.contains( e.target as Node ) ) return;
 
-        // Ctrl+click: open link if cursor is over a code-link span
+        // Ctrl+click: open link or import path
         if ( e.ctrlKey && e.button === 0 )
         {
             const target = e.target as HTMLElement;
@@ -5301,6 +5367,15 @@ export class CodeEditor
             if ( link?.dataset.url )
             {
                 window.open( link.dataset.url, '_blank' );
+                return;
+            }
+            const pathEl = target.closest( '.code-path' ) as HTMLElement | null;
+            if ( pathEl?.dataset.path )
+            {
+                const rawPath = pathEl.dataset.path;
+                const tabName = this._findTabByPath( rawPath );
+                if ( tabName ) this.loadTab( tabName );
+                this.onOpenPath?.( rawPath, this );
                 return;
             }
         }

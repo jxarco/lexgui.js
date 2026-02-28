@@ -6231,6 +6231,16 @@ ul.lexassetscontent {
   color: var(--info);
   cursor: pointer;
 }
+.lexcodeeditor .code-path {
+  pointer-events: auto;
+  cursor: text;
+}
+.lexcodeeditor .code-path.hovered {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  color: var(--info);
+  cursor: pointer;
+}
 .lexcodeeditor .code-color {
   position: relative;
   cursor: pointer;

@@ -1,3 +1,23 @@
+// ES module imports
+import defaultExport from './utils/helpers';
+import { foo, bar } from '../core/math';
+import * as LX from '../../lexgui';
+import MyClass, { helper } from './components/MyClass';
+
+// Dynamic import
+const module = await import('./lazy/module');
+import('./plugins/optional').then( m => m.init() );
+
+// CommonJS require
+const fs = require('fs');
+const path = require( 'path' );
+const { readFile, writeFile } = require('fs/promises');
+
+// Re-exports
+export { default } from './index';
+export { something } from '../shared/utils';
+
+
 function testFunction() {
     const alt = 1;
     console.log("This is a test function", alt);
