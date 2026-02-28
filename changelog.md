@@ -2,6 +2,8 @@
 
 ## dev
 
+## 8.4.0 (master)
+
 Added new Empty Component to display empty states.
 Added `BaseComponent.setDisabled` for all interactive components.
 Allow `options` field in Card action to customize button.
@@ -20,7 +22,7 @@ CodeEditor:
 - Ctrl+(Home|End) now available to move cursor Start/End of doc.
 - Fixed mousemove error in doc when no tab.
 
-## 8.3.2 (master)
+## 8.3.2
 
 Added interest delay `options.delay` to Tooltip.
 Fixed bug not removing tooltips when trigger is destroyed.

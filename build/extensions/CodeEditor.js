@@ -955,12 +955,12 @@ class CodeDocument {
     getText(separator = '\n') {
         return this._lines.join(separator);
     }
-    setText(text) {
+    setText(text, silent = false) {
         this._lines = text.split(/\r?\n/);
         if (this._lines.length === 0) {
             this._lines = [''];
         }
-        if (this.onChange)
+        if (!silent && this.onChange)
             this.onChange(this);
     }
     getCharAt(line, col) {
@@ -1124,6 +1124,7 @@ class UndoManager {
     _lastPushTime = 0;
     _groupThresholdMs;
     _maxSteps;
+    _savedDepth = 0;
     constructor(groupThresholdMs = 2000, maxSteps = 200) {
         this._groupThresholdMs = groupThresholdMs;
         this._maxSteps = maxSteps;
@@ -1195,11 +1196,19 @@ class UndoManager {
     canRedo() {
         return this._redoStack.length > 0;
     }
+    markSaved() {
+        this._flush();
+        this._savedDepth = this._undoStack.length;
+    }
+    isModified() {
+        return this._undoStack.length !== this._savedDepth || this._pendingOps.length > 0;
+    }
     clear() {
         this._undoStack.length = 0;
         this._redoStack.length = 0;
         this._pendingOps.length = 0;
         this._lastPushTime = 0;
+        this._savedDepth = 0;
     }
     _flush() {
         if (this._pendingOps.length === 0)
@@ -1768,8 +1777,36 @@ LX.Area;
 LX.Panel;
 LX.Tabs;
 LX.NodeTree;
-/** Matches hex color literals: #rgb #rgba #rrggbb #rrggbbaa */
 const HEX_COLOR_RE = /#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{4}|[0-9a-fA-F]{3})\b/g;
+const URL_REGEX = /(https?:\/\/[^\s"'<>)\]]+)/g;
+/**
+ * Returns true if the string token at `idx` in the token list is a module import path.
+ */
+function isImportPath(tokens, idx) {
+    const isWs = (t) => /^\s+$/.test(t.value);
+    const isImportWord = (t) => t.value === 'require' || t.value === 'import';
+    for (let i = idx - 1; i >= 0; i--) {
+        const t = tokens[i];
+        if (isWs(t))
+            continue;
+        if (t.type === 'keyword' && t.value === 'from')
+            return true;
+        if (isImportWord(t))
+            return true;
+        if (t.type === 'symbol' && t.value === '(') {
+            for (let j = i - 1; j >= 0; j--) {
+                const t2 = tokens[j];
+                if (isWs(t2))
+                    continue;
+                if (isImportWord(t2))
+                    return true;
+                break;
+            }
+        }
+        break;
+    }
+    return false;
+}
 /**
  * Scans a raw token value for hex color literals and returns HTML with each
  * color wrapped in a swatch span. Non-color text is HTML-escaped.
@@ -1812,6 +1849,15 @@ class ScrollBar {
         this.thumb = LX.makeElement('div');
         this.thumb.addEventListener('mousedown', (e) => this._onMouseDown(e));
         this.root.appendChild(this.thumb);
+        this.root.addEventListener('mousedown', (e) => {
+            if (e.target === this.thumb)
+                return;
+            const clickPos = this._vertical ? e.offsetY : e.offsetX;
+            const thumbSize = this._vertical ? this.thumb.offsetHeight : this.thumb.offsetWidth;
+            const delta = (clickPos - thumbSize / 2) - this._thumbPos;
+            this._onDrag?.(delta);
+            this._onMouseDown(e); // continue as drag from new position
+        });
     }
     setThumbRatio(ratio) {
         this._thumbRatio = LX.clamp(ratio, 0, 1);
@@ -1935,6 +1981,7 @@ class CodeEditor {
     onReady;
     onCreateFile;
     onCodeChange;
+    onOpenPath;
     onHoverSymbol;
     _inputArea;
     // State:
@@ -2015,6 +2062,7 @@ class CodeEditor {
         this.onSelectTab = options.onSelectTab;
         this.onReady = options.onReady;
         this.onCodeChange = options.onCodeChange;
+        this.onOpenPath = options.onOpenPath;
         this.onHoverSymbol = options.onHoverSymbol;
         this.language = Tokenizer.getLanguage(this.highlight) ?? Tokenizer.getLanguage('Plain Text');
         this.symbolTable = new SymbolTable();
@@ -2225,19 +2273,31 @@ class CodeEditor {
         this.codeArea.root.addEventListener('mousedown', this._onMouseDown.bind(this));
         this.codeArea.root.addEventListener('contextmenu', this._onMouseDown.bind(this));
         this.codeArea.root.addEventListener('mouseover', (e) => {
-            const link = e.target.closest('.code-link');
+            const target = e.target;
+            const link = target.closest('.code-link');
             if (link && e.ctrlKey)
                 link.classList.add('hovered');
+            const path = target.closest('.code-path');
+            if (path && e.ctrlKey)
+                path.classList.add('hovered');
         });
         this.codeArea.root.addEventListener('mouseout', (e) => {
-            const link = e.target.closest('.code-link');
+            const target = e.target;
+            const link = target.closest('.code-link');
             if (link)
                 link.classList.remove('hovered');
+            const path = target.closest('.code-path');
+            if (path)
+                path.classList.remove('hovered');
         });
         this.codeArea.root.addEventListener('mousemove', (e) => {
-            const link = e.target.closest('.code-link');
+            const target = e.target;
+            const link = target.closest('.code-link');
             if (link)
                 link.classList.toggle('hovered', e.ctrlKey);
+            const path = target.closest('.code-path');
+            if (path)
+                path.classList.toggle('hovered', e.ctrlKey);
             this._onCodeAreaMouseMove(e);
         });
         this.codeArea.root.addEventListener('mouseleave', () => {
@@ -2336,7 +2396,7 @@ class CodeEditor {
     setText(text, language, detectLang = false) {
         if (!this.currentTab)
             return;
-        this.doc.setText(this._normalizeText(text));
+        this.doc.setText(this._normalizeText(text), true);
         this.cursorSet.set(0, 0);
         this.undoManager.clear();
         this._lineStates = [];
@@ -2527,10 +2587,14 @@ class CodeEditor {
         const codeTab = {
             name,
             dom,
-            doc: new CodeDocument(this.onCodeChange),
+            doc: new CodeDocument((doc) => {
+                this._setTabModified(name, true);
+                this.onCodeChange?.(doc);
+            }),
             cursorSet: new CursorSet(),
             undoManager: new UndoManager(),
             language: langName,
+            modified: false,
             title: options.title ?? name
         };
         this._openedTabs[name] = codeTab;
@@ -2554,7 +2618,7 @@ class CodeEditor {
         // Move into the sizer..
         this.codeSizer.appendChild(dom);
         if (options.text) {
-            codeTab.doc.setText(options.text);
+            codeTab.doc.setText(options.text, true);
             codeTab.cursorSet.set(0, 0);
             codeTab.undoManager.clear();
             this._renderAllLines();
@@ -2645,7 +2709,7 @@ class CodeEditor {
                     title: options.title ?? name,
                     language: langName
                 });
-                this.doc.setText(text);
+                this.doc.setText(text, true);
                 this.setLanguage(langName, ext);
                 this.cursorSet.set(0, 0);
                 this.undoManager.clear();
@@ -2706,7 +2770,7 @@ class CodeEditor {
                         language: langName
                     });
                     if (results.length === 0) {
-                        this.doc.setText(processedText);
+                        this.doc.setText(processedText, true);
                         this.setLanguage(langName, ext);
                         this.cursorSet.set(0, 0);
                         this.undoManager.clear();
@@ -2747,6 +2811,30 @@ class CodeEditor {
                 console.log(`[LX.CodeEditor] Ready! (font size: ${this.fontSize}px, char size: ${this.charWidth}px)`);
             }
         }, 20);
+    }
+    _findTabByPath(importPath) {
+        // By now only uses base name
+        const importBase = importPath.split('/').pop().replace(/\.\w+$/, '').toLowerCase();
+        const allNames = new Set([
+            ...Object.keys(this._openedTabs),
+            ...Object.keys(this._loadedTabs),
+            ...Object.keys(this._storedTabs),
+        ]);
+        for (const name of allNames) {
+            const tabBase = name.split('/').pop().replace(/\.\w+$/, '').toLowerCase();
+            if (tabBase === importBase)
+                return name;
+        }
+        return null;
+    }
+    _setTabModified(name, modified) {
+        const tab = this._openedTabs[name];
+        if (!tab || tab.modified === modified)
+            return;
+        tab.modified = modified;
+        const tabEl = this.tabs?.tabDOMs?.[name];
+        if (tabEl)
+            tabEl.toggleAttribute('data-modified', modified);
     }
     _onSelectTab(isNewTabButton, event, name) {
         if (this.disableEdition) {
@@ -2973,7 +3061,6 @@ class CodeEditor {
         const lineText = this.doc.getLine(lineIndex);
         const result = Tokenizer.tokenizeLine(lineText, this.language, prevState);
         const langClass = this.language.name.toLowerCase().replace(/[^a-z]/g, '');
-        const URL_REGEX = /(https?:\/\/[^\s"'<>)\]]+)/g;
         // Pre-compute which token index gets the bracket-highlight class
         let bracketTokenIdx = -1;
         if (lineIndex === this._bracketOpenLine) {
@@ -3001,15 +3088,20 @@ class CodeEditor {
             const cls = TOKEN_CLASS_MAP[token.type];
             const tokenCol = colOffset;
             colOffset += token.value.length;
+            // Inject content depending on type of token: color, url, path?
             let content;
             if (token.type === 'comment') {
-                // Escape then inject clickable URL spans
                 const escaped = token.value
                     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
                 content = escaped.replace(URL_REGEX, `<span class="code-link" data-url="$1">$1</span>`);
             }
+            else if (token.type === 'string' && isImportPath(result.tokens, ti)) {
+                const inner = token.value.slice(1, -1); // strip surrounding quotes
+                const q = token.value[0];
+                const escapedInner = inner.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                content = `${q}<span class="code-path" data-path="${inner}">${escapedInner}</span>${q}`;
+            }
             else {
-                // Escape and inject color swatches for hex color strings
                 content = injectColorSpans(token.value, lineIndex, tokenCol);
             }
             const bracketClass = ti === bracketTokenIdx ? ' code-bracket-active' : '';
@@ -3279,6 +3371,8 @@ class CodeEditor {
                     e.preventDefault();
                     if (this.onSave) {
                         this.onSave(this.getText(), this);
+                        this.undoManager.markSaved();
+                        this._setTabModified(this.currentTab.name, false);
                     }
                     return;
                 case 'z':
@@ -3300,6 +3394,17 @@ class CodeEditor {
                 case 'v':
                     e.preventDefault();
                     this._doPaste();
+                    return;
+                case 'home':
+                    e.preventDefault();
+                    this.cursorSet.set(0, 0);
+                    this._afterCursorMove();
+                    return;
+                case 'end':
+                    e.preventDefault();
+                    const lastLine = this.doc.lineCount - 1;
+                    this.cursorSet.set(lastLine, this.doc.getLine(lastLine).length);
+                    this._afterCursorMove();
                     return;
                 case ' ':
                     e.preventDefault();
@@ -4073,6 +4178,8 @@ class CodeEditor {
             }
             this._rebuildLines();
             this._afterCursorMove();
+            if (this.currentTab)
+                this._setTabModified(this.currentTab.name, this.undoManager.isModified());
         }
     }
     _doRedo() {
@@ -4084,6 +4191,8 @@ class CodeEditor {
             }
             this._rebuildLines();
             this._afterCursorMove();
+            if (this.currentTab)
+                this._setTabModified(this.currentTab.name, this.undoManager.isModified());
         }
     }
     // Mouse input events:
@@ -4094,12 +4203,21 @@ class CodeEditor {
             return;
         if (this.autocomplete && this.autocomplete.contains(e.target))
             return;
-        // Ctrl+click: open link if cursor is over a code-link span
+        // Ctrl+click: open link or import path
         if (e.ctrlKey && e.button === 0) {
             const target = e.target;
             const link = target.closest('.code-link');
             if (link?.dataset.url) {
                 window.open(link.dataset.url, '_blank');
+                return;
+            }
+            const pathEl = target.closest('.code-path');
+            if (pathEl?.dataset.path) {
+                const rawPath = pathEl.dataset.path;
+                const tabName = this._findTabByPath(rawPath);
+                if (tabName)
+                    this.loadTab(tabName);
+                this.onOpenPath?.(rawPath, this);
                 return;
             }
         }
@@ -4149,18 +4267,55 @@ class CodeEditor {
         }
         this._afterCursorMove();
         this._inputArea.focus();
-        // Track mouse for drag selection
-        const onMouseMove = (me) => {
-            const mx = me.clientX - rect.left - this.xPadding;
-            const my = me.clientY - rect.top;
-            const ml = Math.max(0, Math.min(Math.floor(my / this.lineHeight), this.doc.lineCount - 1));
-            const mc = Math.max(0, Math.min(Math.round(mx / this.charWidth), this.doc.getLine(ml).length));
+        // Track mouse for drag selection (with auto-scroll when outside editor window/area)
+        let lastMouseX = 0;
+        let lastMouseY = 0;
+        let rafId = null;
+        const updateSelection = () => {
+            const currentRect = this.codeContainer.getBoundingClientRect();
+            const mx = lastMouseX - currentRect.left - this.xPadding;
+            const my = lastMouseY - currentRect.top;
+            const ml = LX.clamp(Math.floor(my / this.lineHeight), 0, this.doc.lineCount - 1);
+            const mc = LX.clamp(Math.round(mx / this.charWidth), 0, this.doc.getLine(ml).length);
             const sel = this.cursorSet.getPrimary();
             sel.head = { line: ml, col: mc };
             this._renderCursors();
             this._renderSelections();
         };
+        const autoScroll = () => {
+            const scrollerRect = this.codeScroller.getBoundingClientRect();
+            const overshootY = lastMouseY < scrollerRect.top ? lastMouseY - scrollerRect.top
+                : lastMouseY > scrollerRect.bottom ? lastMouseY - scrollerRect.bottom : 0;
+            const overshootX = lastMouseX < scrollerRect.left ? lastMouseX - scrollerRect.left
+                : lastMouseX > scrollerRect.right ? lastMouseX - scrollerRect.right : 0;
+            if (overshootY === 0 && overshootX === 0) {
+                rafId = null;
+                return;
+            }
+            const speedY = Math.sign(overshootY) * Math.min(Math.abs(overshootY) * 0.3, 15);
+            const speedX = Math.sign(overshootX) * Math.min(Math.abs(overshootX) * 0.3, 15);
+            this.codeScroller.scrollTop += speedY;
+            this.codeScroller.scrollLeft += speedX;
+            this._syncScrollBars();
+            updateSelection();
+            rafId = requestAnimationFrame(autoScroll);
+        };
+        const onMouseMove = (me) => {
+            lastMouseX = me.clientX;
+            lastMouseY = me.clientY;
+            updateSelection();
+            const scrollerRect = this.codeScroller.getBoundingClientRect();
+            const isOutside = me.clientY < scrollerRect.top || me.clientY > scrollerRect.bottom
+                || me.clientX < scrollerRect.left || me.clientX > scrollerRect.right;
+            if (isOutside && rafId === null) {
+                rafId = requestAnimationFrame(autoScroll);
+            }
+        };
         const onMouseUp = () => {
+            if (rafId !== null) {
+                cancelAnimationFrame(rafId);
+                rafId = null;
+            }
             document.removeEventListener('mousemove', onMouseMove);
             document.removeEventListener('mouseup', onMouseUp);
         };
@@ -4655,6 +4810,8 @@ class CodeEditor {
         this._hoverWord = '';
     }
     _onCodeAreaMouseMove(e) {
+        if (!this.currentTab)
+            return;
         // Only show hover when no button is pressed (no dragging)
         if (e.buttons !== 0) {
             this._clearHoverPopup();

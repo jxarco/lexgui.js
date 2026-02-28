@@ -3,7 +3,7 @@ declare const Area: any;
 declare const Panel: any;
 declare const NodeTree: any;
 declare const Tree: any;
-export type AssetViewAction = 'select' | 'dbl_click' | 'check' | 'clone' | 'move' | 'delete' | 'rename' | 'enter_folder' | 'create-folder' | 'refresh-content' | 'node-drag';
+export type AssetViewAction = 'select' | 'dbl_click' | 'check' | 'clone' | 'move' | 'delete' | 'rename' | 'enter_folder' | 'create-folder' | 'refresh-content' | 'node-drag' | 'enter-folder';
 export interface AssetViewItem {
     id: string;
     type: string;
@@ -116,7 +116,8 @@ export declare class AssetView {
     _previewAsset(file: AssetViewItem): void;
     _processDrop(e: DragEvent): void;
     _sortData(sortBy?: string, sortMode?: number): void;
-    _enterFolder(folderItem: AssetViewItem | undefined, storeCurrent?: boolean): Promise<void>;
+    _requestEnterFolder(folderItem: AssetViewItem | undefined, storeCurrent?: boolean): void;
+    _enterFolder(folderItem: AssetViewItem | undefined, storeCurrent: boolean, mustRefresh: boolean): void;
     _removeItemFromParent(item: AssetViewItem): boolean;
     _requestDeleteItem(items: AssetViewItem[]): void;
     _deleteItem(item: AssetViewItem): void;

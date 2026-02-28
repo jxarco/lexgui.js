@@ -1022,6 +1022,9 @@
   .rounded-lg {
     border-radius: var(--radius-lg);
   }
+  .rounded-lg\! {
+    border-radius: var(--radius-lg) !important;
+  }
   .rounded-md {
     border-radius: var(--radius-md);
   }
@@ -2154,6 +2157,9 @@
   .text-muted-foreground {
     color: var(--color-muted-foreground);
   }
+  .text-muted-foreground\! {
+    color: var(--color-muted-foreground) !important;
+  }
   .text-neutral-500 {
     color: var(--color-neutral-500);
   }
@@ -2226,6 +2232,9 @@
   .opacity-0 {
     opacity: 0%;
   }
+  .opacity-50 {
+    opacity: 50%;
+  }
   .shadow {
     --tw-shadow: 0 1px 3px 0 var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 1px 2px -1px var(--tw-shadow-color, rgb(0 0 0 / 0.1));
     box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
@@ -2244,6 +2253,10 @@
   }
   .invert {
     --tw-invert: invert(100%);
+    filter: var(--tw-blur,) var(--tw-brightness,) var(--tw-contrast,) var(--tw-grayscale,) var(--tw-hue-rotate,) var(--tw-invert,) var(--tw-saturate,) var(--tw-sepia,) var(--tw-drop-shadow,);
+  }
+  .saturate-0 {
+    --tw-saturate: saturate(0%);
     filter: var(--tw-blur,) var(--tw-brightness,) var(--tw-contrast,) var(--tw-grayscale,) var(--tw-hue-rotate,) var(--tw-invert,) var(--tw-saturate,) var(--tw-sepia,) var(--tw-drop-shadow,);
   }
   .filter {
@@ -5375,6 +5388,17 @@ meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
 .lexareatabs .lexareatab:hover {
   color: var(--foreground);
 }
+.lexareatabs .lexareatab[data-modified]::after {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--foreground);
+  margin-left: 6px;
+  vertical-align: middle;
+  opacity: 0.6;
+}
 .lexareatabscontainer {
   transition: height 0.1s;
   transition-timing-function: ease-out;
@@ -6220,6 +6244,16 @@ ul.lexassetscontent {
   color: var(--info);
   cursor: pointer;
 }
+.lexcodeeditor .code-path {
+  pointer-events: auto;
+  cursor: text;
+}
+.lexcodeeditor .code-path.hovered {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  color: var(--info);
+  cursor: pointer;
+}
 .lexcodeeditor .code-color {
   position: relative;
   cursor: pointer;
@@ -6421,7 +6455,6 @@ ul.lexassetscontent {
   padding: 0;
   z-index: 1 !important;
   right: 0px;
-  pointer-events: none;
 }
 .lexcodescrollbar.horizontal {
   width: 100%;

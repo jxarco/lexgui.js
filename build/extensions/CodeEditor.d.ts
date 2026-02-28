@@ -48,7 +48,7 @@ declare class CodeDocument {
     constructor(onChange?: (doc: CodeDocument) => void);
     getLine(n: number): string;
     getText(separator?: string): string;
-    setText(text: string): void;
+    setText(text: string, silent?: boolean): void;
     getCharAt(line: number, col: number): string | undefined;
     /**
      * Get the word at a given position. Returns [word, startCol, endCol].
@@ -103,6 +103,7 @@ declare class UndoManager {
     private _lastPushTime;
     private _groupThresholdMs;
     private _maxSteps;
+    private _savedDepth;
     constructor(groupThresholdMs?: number, maxSteps?: number);
     /**
      * Record an edit operation. Consecutive operations within the time threshold
@@ -127,6 +128,8 @@ declare class UndoManager {
     } | null;
     canUndo(): boolean;
     canRedo(): boolean;
+    markSaved(): void;
+    isModified(): boolean;
     clear(): void;
     private _flush;
 }
@@ -230,6 +233,7 @@ interface CodeTab {
     cursorSet: CursorSet;
     undoManager: UndoManager;
     language: string;
+    modified: boolean;
     title?: string;
     path?: string;
 }
@@ -326,6 +330,7 @@ export declare class CodeEditor {
     onReady: ((editor: CodeEditor) => void) | undefined;
     onCreateFile: ((editor: CodeEditor) => void) | undefined;
     onCodeChange: ((doc: CodeDocument) => void) | undefined;
+    onOpenPath: ((path: string, editor: CodeEditor) => void) | undefined;
     onHoverSymbol: ((info: HoverSymbolInfo, editor: CodeEditor) => string | HTMLElement | null | undefined) | undefined;
     private _inputArea;
     private _lineStates;
@@ -387,6 +392,8 @@ export declare class CodeEditor {
     loadFile(file: File | string, options?: Record<string, any>): void;
     loadFiles(files: string[], onComplete?: (editor: CodeEditor, results: any[], total: number) => void, async?: boolean): Promise<void>;
     _setupEditorWhenVisible(): Promise<void>;
+    private _findTabByPath;
+    private _setTabModified;
     private _onSelectTab;
     private _onNewTab;
     private _onCreateNewFile;

@@ -12,7 +12,7 @@ const g$2 = globalThis;
 let LX = g$2.LX;
 if (!LX) {
     LX = {
-        version: '8.3.2',
+        version: '8.4.0',
         ready: false,
         extensions: [], // Store extensions used
         extraCommandbarEntries: [], // User specific entries for command bar
@@ -432,6 +432,8 @@ var ComponentType$1;
     ComponentType[ComponentType["LABEL"] = 39] = "LABEL";
     ComponentType[ComponentType["BLANK"] = 40] = "BLANK";
     ComponentType[ComponentType["RATE"] = 41] = "RATE";
+    ComponentType[ComponentType["EMPTY"] = 42] = "EMPTY";
+    ComponentType[ComponentType["DESCRIPTION"] = 43] = "DESCRIPTION";
 })(ComponentType$1 || (ComponentType$1 = {}));
 LX.ComponentType = ComponentType$1;
 /**
@@ -732,6 +734,9 @@ class Button extends BaseComponent$1 {
         this.onResize = (rect) => {
             const realNameWidth = this.root.domName?.style.width ?? '0px';
             wValue.style.width = `calc( 100% - ${realNameWidth})`;
+        };
+        this.onSetDisabled = (disabled) => {
+            wValue.disabled = disabled;
         };
         // In case of swap, set if a change has to be performed
         this.setState = function (v, skipCallback) {
@@ -1470,6 +1475,12 @@ class NumberInput extends BaseComponent$1 {
             const realNameWidth = this.root.domName?.style.width ?? '0px';
             container.style.width = options.inputWidth ?? `calc( 100% - ${realNameWidth})`;
         };
+        this.onSetDisabled = (disabled) => {
+            vecinput.disabled = disabled;
+            const slider = this.root.querySelector('input[type="range"]');
+            if (slider)
+                slider.disabled = disabled;
+        };
         this.setLimits = (newMin, newMax, newStep) => { };
         var container = document.createElement('div');
         container.className = 'lexnumber';
@@ -1500,7 +1511,7 @@ class NumberInput extends BaseComponent$1 {
         if (!options.skipSlider && options.min !== undefined && options.max !== undefined) {
             let sliderBox = LX.makeContainer(['100%', 'auto'], 'z-1 input-box', '', box);
             let slider = document.createElement('input');
-            slider.className = 'lexinputslider';
+            slider.className = 'lexinputslider disabled:pointer-events-none disabled:opacity-50';
             slider.min = options.min;
             slider.max = options.max;
             slider.step = options.step ?? 1;
@@ -1636,6 +1647,11 @@ class TextInput extends BaseComponent$1 {
         this.onResize = (rect) => {
             const realNameWidth = this.root.domName?.style.width ?? '0px';
             container.style.width = options.inputWidth ?? `calc( 100% - ${realNameWidth})`;
+        };
+        this.onSetDisabled = (disabled) => {
+            const input = this.root.querySelector('input');
+            if (input)
+                input.disabled = disabled;
         };
         this.valid = (v, matchField) => {
             v = v ?? this.value();
@@ -1795,6 +1811,9 @@ class Select extends BaseComponent$1 {
         this.onResize = (rect) => {
             const realNameWidth = this.root.domName?.style.width ?? '0px';
             container.style.width = options.inputWidth ?? `calc( 100% - ${realNameWidth})`;
+        };
+        this.onSetDisabled = (disabled) => {
+            selectedOption?.setDisabled(disabled);
         };
         let container = document.createElement('div');
         container.className = 'lexselect';
@@ -2070,6 +2089,13 @@ class ArrayInput extends BaseComponent$1 {
                 this._trigger(new IEvent$1(name, values, event), callback);
             }
         };
+        this.onSetDisabled = (disabled) => {
+            if (this.root.dataset['opened'] == 'true' && disabled) {
+                this.root.dataset['opened'] = false;
+                this.root.querySelector('.lexarrayitems').toggleAttribute('hidden', true);
+            }
+            toggleButton.setDisabled(disabled);
+        };
         // Add open array button
         let container = document.createElement('div');
         container.className = 'lexarray shrink-1 grow-1 ml-4';
@@ -2161,9 +2187,10 @@ class Card extends BaseComponent$1 {
         const container = LX.makeContainer(['100%', 'auto'], 'lexcard max-w-sm flex flex-col gap-4 bg-card border-color rounded-xl py-6', '', this.root);
         if (options.header) {
             const hasAction = options.header.action !== undefined;
+            const actionButtonOptions = options.header.action.options ?? {};
             let header = LX.makeContainer(['100%', 'auto'], `flex ${hasAction ? 'flex-row gap-4' : 'flex-col gap-1'} px-6`, '', container);
             if (hasAction) {
-                const actionBtn = new Button(null, options.header.action.name, options.header.action.callback, { buttonClass: 'secondary' });
+                const actionBtn = new Button(null, options.header.action.name, options.header.action.callback, { buttonClass: 'secondary', ...actionButtonOptions });
                 header.appendChild(actionBtn.root);
                 const titleDescBox = LX.makeContainer(['75%', 'auto'], `flex flex-col gap-1`, '');
                 header.prepend(titleDescBox);
@@ -2229,6 +2256,9 @@ class Checkbox extends BaseComponent$1 {
         this.onResize = (rect) => {
             const realNameWidth = this.root.domName?.style.width ?? '0px';
             container.style.width = options.inputWidth ?? `calc( 100% - ${realNameWidth})`;
+        };
+        this.onSetDisabled = (disabled) => {
+            checkbox.disabled = disabled;
         };
         let container = document.createElement('div');
         container.className = 'flex items-center gap-2 my-0 mx-auto [&_span]:truncate [&_span]:flex-auto-fill';
@@ -2858,7 +2888,12 @@ class ColorInput extends BaseComponent$1 {
             const realNameWidth = this.root.domName?.style.width ?? '0px';
             container.style.width = `calc( 100% - ${realNameWidth})`;
         };
-        var container = document.createElement('span');
+        this.onSetDisabled = (disabled) => {
+            textComponent.setDisabled(disabled);
+            sampleContainer.classList.toggle('pointer-events-none', disabled);
+            sampleContainer.classList.toggle('opacity-50', disabled);
+        };
+        let container = document.createElement('span');
         container.className = 'lexcolor';
         this.root.appendChild(container);
         this.picker = new ColorPicker(value, {
@@ -3021,6 +3056,11 @@ class Counter extends BaseComponent$1 {
             if (!skipCallback) {
                 this._trigger(new IEvent$1(name, newValue, event), callback);
             }
+        };
+        this.onSetDisabled = (disabled) => {
+            substrButton.setDisabled(disabled);
+            addButton.setDisabled(disabled);
+            input.disabled = disabled;
         };
         this.count = value;
         const min = options.min ?? 0;
@@ -3767,6 +3807,12 @@ class DatePicker extends BaseComponent$1 {
             const realNameWidth = this.root.domName?.style.width ?? '0px';
             container.style.width = `calc( 100% - ${realNameWidth})`;
         };
+        this.onSetDisabled = (disabled) => {
+            const buttons = this.root.querySelectorAll('button');
+            buttons.forEach((b) => {
+                b.disabled = disabled;
+            });
+        };
         const container = LX.makeContainer(['auto', 'auto'], 'lexdate flex flex-row');
         this.root.appendChild(container);
         if (!dateAsRange) {
@@ -4159,6 +4205,52 @@ class Dial extends BaseComponent$1 {
 LX.CanvasDial = CanvasDial;
 LX.Dial = Dial;
 
+// Empty.ts @jxarco
+/**
+ * @class Empty
+ * @description Empty Component
+ */
+class Empty extends BaseComponent$1 {
+    constructor(name, options = {}) {
+        options.hideName = true;
+        super(ComponentType$1.EMPTY, name, null, options);
+        this.root.classList.add('place-content-center');
+        const container = LX.makeContainer(['100%', 'auto'], 'lexcard max-w-sm flex flex-col gap-4 bg-card border-color rounded-xl py-6', '', this.root);
+        if (options.header) {
+            let header = LX.makeContainer(['100%', 'auto'], `flex flex-col gap-4 px-6 items-center`, '', container);
+            if (options.header.icon) {
+                const icon = LX.makeIcon(options.header.icon, { iconClass: 'bg-secondary p-2 rounded-lg!', svgClass: 'lg' });
+                header.appendChild(icon);
+            }
+            else if (options.header.avatar) {
+                const avatar = new LX.Avatar(options.header.avatar);
+                header.appendChild(avatar.root);
+            }
+            if (options.header.title) {
+                LX.makeElement('div', 'text-center text-foreground leading-none font-medium', options.header.title, header);
+            }
+            if (options.header.description) {
+                LX.makeElement('div', 'text-sm text-center text-balance text-muted-foreground', options.header.description, header);
+            }
+        }
+        if (options.actions) {
+            const content = LX.makeContainer(['100%', 'auto'], 'flex flex-row gap-1 px-6 justify-center', '', container);
+            for (let a of options.actions) {
+                const action = new LX.Button(null, a.name, a.callback, { buttonClass: "sm outline", ...a.options });
+                content.appendChild(action.root);
+            }
+        }
+        if (options.footer) {
+            const footer = LX.makeContainer(['100%', 'auto'], 'flex flex-col gap-1 px-6', '', container);
+            const elements = [].concat(options.footer);
+            for (let e of elements) {
+                footer.appendChild(e.root ? e.root : e);
+            }
+        }
+    }
+}
+LX.Empty = Empty;
+
 // FileInput.ts @jxarco
 /**
  * @class FileInput
@@ -4173,6 +4265,9 @@ class FileInput extends BaseComponent$1 {
         this.onResize = (rect) => {
             const realNameWidth = this.root.domName?.style.width ?? '0px';
             input.style.width = `calc( 100% - ${realNameWidth})`;
+        };
+        this.onSetDisabled = (disabled) => {
+            input.disabled = disabled;
         };
         // Create hidden input
         let input = document.createElement('input');
@@ -4381,6 +4476,9 @@ class Layers extends BaseComponent$1 {
             const realNameWidth = this.root.domName?.style.width ?? '0px';
             container.style.width = `calc( 100% - ${realNameWidth})`;
         };
+        this.onSetDisabled = (disabled) => {
+            this.setLayers(value);
+        };
         const container = LX.makeElement('div', 'lexlayers grid', '', this.root);
         const maxBits = options.maxBits ?? 16;
         this.setLayers = (val) => {
@@ -4456,6 +4554,9 @@ class List extends BaseComponent$1 {
         this.onResize = (rect) => {
             const realNameWidth = this.root.domName?.style.width ?? '0px';
             listContainer.style.width = `calc( 100% - ${realNameWidth})`;
+        };
+        this.onSetDisabled = (disabled) => {
+            this._updateValues(values);
         };
         this._updateValues = (newValues) => {
             values = newValues;
@@ -4924,16 +5025,19 @@ class Map2D extends BaseComponent$1 {
             const realNameWidth = this.root.domName?.style.width ?? '0px';
             container.style.width = `calc( 100% - ${realNameWidth})`;
         };
+        this.onSetDisabled = (disabled) => {
+            openerButton.setDisabled(disabled);
+        };
         var container = document.createElement('div');
         container.className = 'lexmap2d';
         this.root.appendChild(container);
         this.map2d = new CanvasMap2D(points, callback, options);
-        const calendarIcon = LX.makeIcon(options.mapIcon ?? 'SquareMousePointer');
-        const calendarButton = new Button(null, 'Open Map', () => {
-            this._popover = new Popover(calendarButton.root, [this.map2d]);
+        const icon = LX.makeIcon(options.mapIcon ?? 'SquareMousePointer');
+        const openerButton = new Button(null, 'Open Map', () => {
+            this._popover = new Popover(openerButton.root, [this.map2d]);
         }, { buttonClass: `outline justify-between`, disabled: this.disabled });
-        calendarButton.root.querySelector('button').appendChild(calendarIcon);
-        container.appendChild(calendarButton.root);
+        openerButton.root.querySelector('button').appendChild(icon);
+        container.appendChild(openerButton.root);
         LX.doAsync(this.onResize.bind(this));
     }
 }
@@ -5640,6 +5744,9 @@ class OTPInput extends BaseComponent$1 {
             const realNameWidth = this.root.domName?.style.width ?? '0px';
             container.style.width = `calc( 100% - ${realNameWidth})`;
         };
+        this.onSetDisabled = (disabled) => {
+            _refreshInput(value);
+        };
         const container = document.createElement('div');
         container.className = 'lexotp flex flex-row items-center';
         this.root.appendChild(container);
@@ -5653,7 +5760,7 @@ class OTPInput extends BaseComponent$1 {
                 for (let j = 0; j < g.length; ++j) {
                     let number = valueString[itemsCount++];
                     number = number == 'x' ? '' : number;
-                    const slotDom = LX.makeContainer(['36px', '30px'], 'lexotpslot border-t-color border-b-color border-l-color px-3 cursor-text select-none font-medium outline-none', number, container);
+                    const slotDom = LX.makeContainer(['36px', '30px'], 'lexotpslot content-center border-t-color border-b-color border-l-color px-3 cursor-text select-none font-medium outline-none', number, container);
                     slotDom.tabIndex = '1';
                     if (this.disabled) {
                         slotDom.classList.add('disabled');
@@ -6057,6 +6164,9 @@ class RangeInput extends BaseComponent$1 {
                 slider.style.setProperty('--range-fix-max-offset', `${diffMaxOffset}rem`);
             }
         };
+        this.onSetDisabled = (disabled) => {
+            slider.disabled = disabled;
+        };
         const container = document.createElement('div');
         container.className = 'lexrange relative py-3';
         this.root.appendChild(container);
@@ -6164,6 +6274,9 @@ class Rate extends BaseComponent$1 {
         this.onResize = (rect) => {
             const realNameWidth = this.root.domName?.style.width ?? '0px';
             container.style.width = `calc( 100% - ${realNameWidth})`;
+        };
+        this.onSetDisabled = (disabled) => {
+            container.dataset['disabled'] = disabled.toString();
         };
         const container = document.createElement('div');
         container.className = 'lexrate relative data-[disabled=true]:pointer-events-none';
@@ -7308,6 +7421,9 @@ class Tags extends BaseComponent$1 {
             const realNameWidth = this.root.domName?.style.width ?? '0px';
             tagsContainer.style.width = `calc( 100% - ${realNameWidth})`;
         };
+        this.onSetDisabled = (disabled) => {
+            this.generateTags(arrayValue);
+        };
         // Show tags
         const tagsContainer = document.createElement('div');
         tagsContainer.className = 'inline-flex flex-wrap gap-1 bg-card/50 rounded-lg pad-xs [&_input]:w-2/3';
@@ -7375,6 +7491,11 @@ class TextArea extends BaseComponent$1 {
         this.onResize = (rect) => {
             const realNameWidth = this.root.domName?.style.width ?? '0px';
             container.style.width = options.inputWidth ?? `calc( 100% - ${realNameWidth})`;
+        };
+        this.onSetDisabled = (disabled) => {
+            const textarea = this.root.querySelector('textarea');
+            if (textarea)
+                textarea.disabled = disabled;
         };
         let container = document.createElement('div');
         container.className = 'lextextarea';
@@ -7493,6 +7614,9 @@ class Toggle extends BaseComponent$1 {
             const realNameWidth = this.root.domName?.style.width ?? '0px';
             container.style.width = options.inputWidth ?? `calc( 100% - ${realNameWidth})`;
         };
+        this.onSetDisabled = (disabled) => {
+            toggle.disabled = disabled;
+        };
         var container = document.createElement('div');
         container.className = 'flex flex-row gap-2 items-center';
         this.root.appendChild(container);
@@ -7561,6 +7685,12 @@ class Vector extends BaseComponent$1 {
         this.onResize = (rect) => {
             const realNameWidth = this.root.domName?.style.width ?? '0px';
             container.style.width = `calc( 100% - ${realNameWidth})`;
+        };
+        this.onSetDisabled = (disabled) => {
+            const inputs = this.root.querySelectorAll('input');
+            inputs.forEach((i) => {
+                i.disabled = disabled;
+            });
         };
         this.setLimits = (newMin, newMax, newStep) => { };
         const vectorInputs = [];
@@ -8307,6 +8437,19 @@ let Panel$2 = class Panel {
         return component;
     }
     /**
+     * @method addDescription
+     * @param {String} value Information string
+     * @param {Object} options Text options
+     */
+    addDescription(value, options = {}) {
+        options.disabled = true;
+        options.fitHeight = true;
+        options.inputClass = LX.mergeClass('bg-none', options.inputClass);
+        const component = this.addTextArea(null, value, null, options);
+        component.type = ComponentType$1.DESCRIPTION;
+        return component;
+    }
+    /**
      * @method addButton
      * @param {String} name Component name
      * @param {String} value Button name
@@ -8344,16 +8487,20 @@ let Panel$2 = class Panel {
     }
     /**
      * @method addCard
-     * @param {String} name Card Name
-     * @param {Object} options:
-     * text: Card text
-     * link: Card link
-     * title: Card dom title
-     * src: url of the image
-     * callback (Function): function to call on click
+     * @param {String} name
+     * @param {Object} options
      */
     addCard(name, options = {}) {
         const component = new Card(name, options);
+        return this._attachComponent(component);
+    }
+    /**
+     * @method addEmpty
+     * @param {String} name
+     * @param {Object} options
+     */
+    addEmpty(name, options = {}) {
+        const component = new Empty(name, options);
         return this._attachComponent(component);
     }
     /**
@@ -11170,6 +11317,8 @@ function asTooltip(trigger, content, options = {}) {
         // Watch for trigger being removed from the DOM before mouseleave fires
         rafId = requestAnimationFrame(_watchConnection);
         LX.doAsync(() => {
+            if (!tooltipDom)
+                return;
             const position = [0, 0];
             const offsetX = parseFloat(trigger.dataset['tooltipOffsetX'] ?? _offsetX);
             const offsetY = parseFloat(trigger.dataset['tooltipOffsetY'] ?? _offsetY);
@@ -13335,7 +13484,9 @@ class Tour {
     // using a fullscreen SVG with "rect" elements
     _generateMask(reference) {
         this.tourContainer.innerHTML = ''; // Clear previous content
+        const scrollTop = document.scrollingElement?.scrollTop ?? 0;
         this.tourMask = LX.makeContainer(['100%', '100%'], 'tour-mask absolute inset-0');
+        this.tourMask.style.top = `${scrollTop}px`;
         this.tourContainer.appendChild(this.tourMask);
         const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         svg.style.width = '100%';
@@ -13398,7 +13549,7 @@ class Tour {
         // Reference Highlight
         const refContainer = LX.makeContainer(['0', '0'], 'tour-ref-mask absolute');
         refContainer.style.left = `${boundingX - hOffset - 1}px`;
-        refContainer.style.top = `${boundingY - vOffset - 1}px`;
+        refContainer.style.top = `${boundingY - vOffset - 1 + scrollTop}px`;
         refContainer.style.width = `${boundingWidth + hOffset * 2 + 2}px`;
         refContainer.style.height = `${boundingHeight + vOffset * 2 + 2}px`;
         this.tourContainer.appendChild(refContainer);
@@ -14443,12 +14594,12 @@ class CodeDocument {
     getText(separator = '\n') {
         return this._lines.join(separator);
     }
-    setText(text) {
+    setText(text, silent = false) {
         this._lines = text.split(/\r?\n/);
         if (this._lines.length === 0) {
             this._lines = [''];
         }
-        if (this.onChange)
+        if (!silent && this.onChange)
             this.onChange(this);
     }
     getCharAt(line, col) {
@@ -14612,6 +14763,7 @@ class UndoManager {
     _lastPushTime = 0;
     _groupThresholdMs;
     _maxSteps;
+    _savedDepth = 0;
     constructor(groupThresholdMs = 2000, maxSteps = 200) {
         this._groupThresholdMs = groupThresholdMs;
         this._maxSteps = maxSteps;
@@ -14683,11 +14835,19 @@ class UndoManager {
     canRedo() {
         return this._redoStack.length > 0;
     }
+    markSaved() {
+        this._flush();
+        this._savedDepth = this._undoStack.length;
+    }
+    isModified() {
+        return this._undoStack.length !== this._savedDepth || this._pendingOps.length > 0;
+    }
     clear() {
         this._undoStack.length = 0;
         this._redoStack.length = 0;
         this._pendingOps.length = 0;
         this._lastPushTime = 0;
+        this._savedDepth = 0;
     }
     _flush() {
         if (this._pendingOps.length === 0)
@@ -15256,8 +15416,36 @@ LX.Area;
 LX.Panel;
 LX.Tabs;
 LX.NodeTree;
-/** Matches hex color literals: #rgb #rgba #rrggbb #rrggbbaa */
 const HEX_COLOR_RE = /#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{4}|[0-9a-fA-F]{3})\b/g;
+const URL_REGEX = /(https?:\/\/[^\s"'<>)\]]+)/g;
+/**
+ * Returns true if the string token at `idx` in the token list is a module import path.
+ */
+function isImportPath(tokens, idx) {
+    const isWs = (t) => /^\s+$/.test(t.value);
+    const isImportWord = (t) => t.value === 'require' || t.value === 'import';
+    for (let i = idx - 1; i >= 0; i--) {
+        const t = tokens[i];
+        if (isWs(t))
+            continue;
+        if (t.type === 'keyword' && t.value === 'from')
+            return true;
+        if (isImportWord(t))
+            return true;
+        if (t.type === 'symbol' && t.value === '(') {
+            for (let j = i - 1; j >= 0; j--) {
+                const t2 = tokens[j];
+                if (isWs(t2))
+                    continue;
+                if (isImportWord(t2))
+                    return true;
+                break;
+            }
+        }
+        break;
+    }
+    return false;
+}
 /**
  * Scans a raw token value for hex color literals and returns HTML with each
  * color wrapped in a swatch span. Non-color text is HTML-escaped.
@@ -15300,6 +15488,15 @@ class ScrollBar {
         this.thumb = LX.makeElement('div');
         this.thumb.addEventListener('mousedown', (e) => this._onMouseDown(e));
         this.root.appendChild(this.thumb);
+        this.root.addEventListener('mousedown', (e) => {
+            if (e.target === this.thumb)
+                return;
+            const clickPos = this._vertical ? e.offsetY : e.offsetX;
+            const thumbSize = this._vertical ? this.thumb.offsetHeight : this.thumb.offsetWidth;
+            const delta = (clickPos - thumbSize / 2) - this._thumbPos;
+            this._onDrag?.(delta);
+            this._onMouseDown(e); // continue as drag from new position
+        });
     }
     setThumbRatio(ratio) {
         this._thumbRatio = LX.clamp(ratio, 0, 1);
@@ -15423,6 +15620,7 @@ class CodeEditor {
     onReady;
     onCreateFile;
     onCodeChange;
+    onOpenPath;
     onHoverSymbol;
     _inputArea;
     // State:
@@ -15503,6 +15701,7 @@ class CodeEditor {
         this.onSelectTab = options.onSelectTab;
         this.onReady = options.onReady;
         this.onCodeChange = options.onCodeChange;
+        this.onOpenPath = options.onOpenPath;
         this.onHoverSymbol = options.onHoverSymbol;
         this.language = Tokenizer.getLanguage(this.highlight) ?? Tokenizer.getLanguage('Plain Text');
         this.symbolTable = new SymbolTable();
@@ -15713,19 +15912,31 @@ class CodeEditor {
         this.codeArea.root.addEventListener('mousedown', this._onMouseDown.bind(this));
         this.codeArea.root.addEventListener('contextmenu', this._onMouseDown.bind(this));
         this.codeArea.root.addEventListener('mouseover', (e) => {
-            const link = e.target.closest('.code-link');
+            const target = e.target;
+            const link = target.closest('.code-link');
             if (link && e.ctrlKey)
                 link.classList.add('hovered');
+            const path = target.closest('.code-path');
+            if (path && e.ctrlKey)
+                path.classList.add('hovered');
         });
         this.codeArea.root.addEventListener('mouseout', (e) => {
-            const link = e.target.closest('.code-link');
+            const target = e.target;
+            const link = target.closest('.code-link');
             if (link)
                 link.classList.remove('hovered');
+            const path = target.closest('.code-path');
+            if (path)
+                path.classList.remove('hovered');
         });
         this.codeArea.root.addEventListener('mousemove', (e) => {
-            const link = e.target.closest('.code-link');
+            const target = e.target;
+            const link = target.closest('.code-link');
             if (link)
                 link.classList.toggle('hovered', e.ctrlKey);
+            const path = target.closest('.code-path');
+            if (path)
+                path.classList.toggle('hovered', e.ctrlKey);
             this._onCodeAreaMouseMove(e);
         });
         this.codeArea.root.addEventListener('mouseleave', () => {
@@ -15824,7 +16035,7 @@ class CodeEditor {
     setText(text, language, detectLang = false) {
         if (!this.currentTab)
             return;
-        this.doc.setText(this._normalizeText(text));
+        this.doc.setText(this._normalizeText(text), true);
         this.cursorSet.set(0, 0);
         this.undoManager.clear();
         this._lineStates = [];
@@ -16015,10 +16226,14 @@ class CodeEditor {
         const codeTab = {
             name,
             dom,
-            doc: new CodeDocument(this.onCodeChange),
+            doc: new CodeDocument((doc) => {
+                this._setTabModified(name, true);
+                this.onCodeChange?.(doc);
+            }),
             cursorSet: new CursorSet(),
             undoManager: new UndoManager(),
             language: langName,
+            modified: false,
             title: options.title ?? name
         };
         this._openedTabs[name] = codeTab;
@@ -16042,7 +16257,7 @@ class CodeEditor {
         // Move into the sizer..
         this.codeSizer.appendChild(dom);
         if (options.text) {
-            codeTab.doc.setText(options.text);
+            codeTab.doc.setText(options.text, true);
             codeTab.cursorSet.set(0, 0);
             codeTab.undoManager.clear();
             this._renderAllLines();
@@ -16133,7 +16348,7 @@ class CodeEditor {
                     title: options.title ?? name,
                     language: langName
                 });
-                this.doc.setText(text);
+                this.doc.setText(text, true);
                 this.setLanguage(langName, ext);
                 this.cursorSet.set(0, 0);
                 this.undoManager.clear();
@@ -16194,7 +16409,7 @@ class CodeEditor {
                         language: langName
                     });
                     if (results.length === 0) {
-                        this.doc.setText(processedText);
+                        this.doc.setText(processedText, true);
                         this.setLanguage(langName, ext);
                         this.cursorSet.set(0, 0);
                         this.undoManager.clear();
@@ -16235,6 +16450,30 @@ class CodeEditor {
                 console.log(`[LX.CodeEditor] Ready! (font size: ${this.fontSize}px, char size: ${this.charWidth}px)`);
             }
         }, 20);
+    }
+    _findTabByPath(importPath) {
+        // By now only uses base name
+        const importBase = importPath.split('/').pop().replace(/\.\w+$/, '').toLowerCase();
+        const allNames = new Set([
+            ...Object.keys(this._openedTabs),
+            ...Object.keys(this._loadedTabs),
+            ...Object.keys(this._storedTabs),
+        ]);
+        for (const name of allNames) {
+            const tabBase = name.split('/').pop().replace(/\.\w+$/, '').toLowerCase();
+            if (tabBase === importBase)
+                return name;
+        }
+        return null;
+    }
+    _setTabModified(name, modified) {
+        const tab = this._openedTabs[name];
+        if (!tab || tab.modified === modified)
+            return;
+        tab.modified = modified;
+        const tabEl = this.tabs?.tabDOMs?.[name];
+        if (tabEl)
+            tabEl.toggleAttribute('data-modified', modified);
     }
     _onSelectTab(isNewTabButton, event, name) {
         if (this.disableEdition) {
@@ -16461,7 +16700,6 @@ class CodeEditor {
         const lineText = this.doc.getLine(lineIndex);
         const result = Tokenizer.tokenizeLine(lineText, this.language, prevState);
         const langClass = this.language.name.toLowerCase().replace(/[^a-z]/g, '');
-        const URL_REGEX = /(https?:\/\/[^\s"'<>)\]]+)/g;
         // Pre-compute which token index gets the bracket-highlight class
         let bracketTokenIdx = -1;
         if (lineIndex === this._bracketOpenLine) {
@@ -16489,15 +16727,20 @@ class CodeEditor {
             const cls = TOKEN_CLASS_MAP[token.type];
             const tokenCol = colOffset;
             colOffset += token.value.length;
+            // Inject content depending on type of token: color, url, path?
             let content;
             if (token.type === 'comment') {
-                // Escape then inject clickable URL spans
                 const escaped = token.value
                     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
                 content = escaped.replace(URL_REGEX, `<span class="code-link" data-url="$1">$1</span>`);
             }
+            else if (token.type === 'string' && isImportPath(result.tokens, ti)) {
+                const inner = token.value.slice(1, -1); // strip surrounding quotes
+                const q = token.value[0];
+                const escapedInner = inner.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                content = `${q}<span class="code-path" data-path="${inner}">${escapedInner}</span>${q}`;
+            }
             else {
-                // Escape and inject color swatches for hex color strings
                 content = injectColorSpans(token.value, lineIndex, tokenCol);
             }
             const bracketClass = ti === bracketTokenIdx ? ' code-bracket-active' : '';
@@ -16767,6 +17010,8 @@ class CodeEditor {
                     e.preventDefault();
                     if (this.onSave) {
                         this.onSave(this.getText(), this);
+                        this.undoManager.markSaved();
+                        this._setTabModified(this.currentTab.name, false);
                     }
                     return;
                 case 'z':
@@ -16788,6 +17033,17 @@ class CodeEditor {
                 case 'v':
                     e.preventDefault();
                     this._doPaste();
+                    return;
+                case 'home':
+                    e.preventDefault();
+                    this.cursorSet.set(0, 0);
+                    this._afterCursorMove();
+                    return;
+                case 'end':
+                    e.preventDefault();
+                    const lastLine = this.doc.lineCount - 1;
+                    this.cursorSet.set(lastLine, this.doc.getLine(lastLine).length);
+                    this._afterCursorMove();
                     return;
                 case ' ':
                     e.preventDefault();
@@ -17561,6 +17817,8 @@ class CodeEditor {
             }
             this._rebuildLines();
             this._afterCursorMove();
+            if (this.currentTab)
+                this._setTabModified(this.currentTab.name, this.undoManager.isModified());
         }
     }
     _doRedo() {
@@ -17572,6 +17830,8 @@ class CodeEditor {
             }
             this._rebuildLines();
             this._afterCursorMove();
+            if (this.currentTab)
+                this._setTabModified(this.currentTab.name, this.undoManager.isModified());
         }
     }
     // Mouse input events:
@@ -17582,12 +17842,21 @@ class CodeEditor {
             return;
         if (this.autocomplete && this.autocomplete.contains(e.target))
             return;
-        // Ctrl+click: open link if cursor is over a code-link span
+        // Ctrl+click: open link or import path
         if (e.ctrlKey && e.button === 0) {
             const target = e.target;
             const link = target.closest('.code-link');
             if (link?.dataset.url) {
                 window.open(link.dataset.url, '_blank');
+                return;
+            }
+            const pathEl = target.closest('.code-path');
+            if (pathEl?.dataset.path) {
+                const rawPath = pathEl.dataset.path;
+                const tabName = this._findTabByPath(rawPath);
+                if (tabName)
+                    this.loadTab(tabName);
+                this.onOpenPath?.(rawPath, this);
                 return;
             }
         }
@@ -17637,18 +17906,55 @@ class CodeEditor {
         }
         this._afterCursorMove();
         this._inputArea.focus();
-        // Track mouse for drag selection
-        const onMouseMove = (me) => {
-            const mx = me.clientX - rect.left - this.xPadding;
-            const my = me.clientY - rect.top;
-            const ml = Math.max(0, Math.min(Math.floor(my / this.lineHeight), this.doc.lineCount - 1));
-            const mc = Math.max(0, Math.min(Math.round(mx / this.charWidth), this.doc.getLine(ml).length));
+        // Track mouse for drag selection (with auto-scroll when outside editor window/area)
+        let lastMouseX = 0;
+        let lastMouseY = 0;
+        let rafId = null;
+        const updateSelection = () => {
+            const currentRect = this.codeContainer.getBoundingClientRect();
+            const mx = lastMouseX - currentRect.left - this.xPadding;
+            const my = lastMouseY - currentRect.top;
+            const ml = LX.clamp(Math.floor(my / this.lineHeight), 0, this.doc.lineCount - 1);
+            const mc = LX.clamp(Math.round(mx / this.charWidth), 0, this.doc.getLine(ml).length);
             const sel = this.cursorSet.getPrimary();
             sel.head = { line: ml, col: mc };
             this._renderCursors();
             this._renderSelections();
         };
+        const autoScroll = () => {
+            const scrollerRect = this.codeScroller.getBoundingClientRect();
+            const overshootY = lastMouseY < scrollerRect.top ? lastMouseY - scrollerRect.top
+                : lastMouseY > scrollerRect.bottom ? lastMouseY - scrollerRect.bottom : 0;
+            const overshootX = lastMouseX < scrollerRect.left ? lastMouseX - scrollerRect.left
+                : lastMouseX > scrollerRect.right ? lastMouseX - scrollerRect.right : 0;
+            if (overshootY === 0 && overshootX === 0) {
+                rafId = null;
+                return;
+            }
+            const speedY = Math.sign(overshootY) * Math.min(Math.abs(overshootY) * 0.3, 15);
+            const speedX = Math.sign(overshootX) * Math.min(Math.abs(overshootX) * 0.3, 15);
+            this.codeScroller.scrollTop += speedY;
+            this.codeScroller.scrollLeft += speedX;
+            this._syncScrollBars();
+            updateSelection();
+            rafId = requestAnimationFrame(autoScroll);
+        };
+        const onMouseMove = (me) => {
+            lastMouseX = me.clientX;
+            lastMouseY = me.clientY;
+            updateSelection();
+            const scrollerRect = this.codeScroller.getBoundingClientRect();
+            const isOutside = me.clientY < scrollerRect.top || me.clientY > scrollerRect.bottom
+                || me.clientX < scrollerRect.left || me.clientX > scrollerRect.right;
+            if (isOutside && rafId === null) {
+                rafId = requestAnimationFrame(autoScroll);
+            }
+        };
         const onMouseUp = () => {
+            if (rafId !== null) {
+                cancelAnimationFrame(rafId);
+                rafId = null;
+            }
             document.removeEventListener('mousemove', onMouseMove);
             document.removeEventListener('mouseup', onMouseUp);
         };
@@ -18143,6 +18449,8 @@ class CodeEditor {
         this._hoverWord = '';
     }
     _onCodeAreaMouseMove(e) {
+        if (!this.currentTab)
+            return;
         // Only show hover when no button is pressed (no dragging)
         if (e.buttons !== 0) {
             this._clearHoverPopup();
@@ -19321,7 +19629,7 @@ class AssetView {
                 }
             }
             else if (isFolder) {
-                that._enterFolder(item);
+                that._requestEnterFolder(item);
                 return;
             }
             const onSelect = that._callbacks['select'];
@@ -19539,17 +19847,17 @@ class AssetView {
             if (!this.prevData.length || !this.currentFolder)
                 return;
             this.nextData.push(this.currentFolder);
-            this._enterFolder(this.prevData.pop(), false);
+            this._enterFolder(this.prevData.pop(), false, true);
         }, { buttonClass: 'ghost', title: 'Go Back', tooltip: true, icon: 'ArrowLeft' });
         panel.addButton(null, 'GoForwardButton', () => {
             if (!this.nextData.length || !this.currentFolder)
                 return;
-            this._enterFolder(this.nextData.pop());
+            this._enterFolder(this.nextData.pop(), false, true);
         }, { buttonClass: 'ghost', title: 'Go Forward', tooltip: true, icon: 'ArrowRight' });
         panel.addButton(null, 'GoUpButton', () => {
             const parentFolder = this.currentFolder?.parent;
             if (parentFolder)
-                this._enterFolder(parentFolder);
+                this._enterFolder(parentFolder, false, true);
         }, { buttonClass: 'ghost', title: 'Go Upper Folder', tooltip: true, icon: 'ArrowUp' });
         panel.addButton(null, 'RefreshButton', () => {
             this._refreshContent(undefined, undefined, true);
@@ -19589,7 +19897,7 @@ class AssetView {
                 this._updatePath();
             }
             else {
-                this._enterFolder(node.type === 'folder' ? node : node.parent);
+                this._requestEnterFolder(node.type === 'folder' ? node : node.parent);
                 this._previewAsset(node);
                 if (node.type !== 'folder') {
                     this.content.querySelectorAll('.lexassetitem').forEach((i) => i.classList.remove('selected'));
@@ -19961,12 +20269,41 @@ class AssetView {
         this.toolsPanel.refresh();
         this._refreshContent();
     }
-    async _enterFolder(folderItem, storeCurrent = true) {
+    _requestEnterFolder(folderItem, storeCurrent = true) {
         if (!folderItem) {
             return;
         }
-        const child = this.currentData[0];
-        const sameFolder = child?.parent?.metadata?.uid === folderItem.metadata?.uid;
+        const onBeforeEnterFolder = this._callbacks['beforeEnterFolder'];
+        const onEnterFolder = this._callbacks['enterFolder'];
+        const resolve = (...args) => {
+            const child = this.currentData[0];
+            const sameFolder = child?.parent?.metadata?.uid === folderItem.metadata?.uid;
+            const mustRefresh = args[0] || !sameFolder;
+            this._enterFolder(folderItem, storeCurrent, mustRefresh);
+            const event = {
+                type: 'enter-folder',
+                to: folderItem,
+                userInitiated: true
+            };
+            if (onEnterFolder)
+                onEnterFolder(event, ...args);
+        };
+        if (onBeforeEnterFolder) {
+            const event = {
+                type: 'enter-folder',
+                to: folderItem,
+                userInitiated: true
+            };
+            onBeforeEnterFolder(event, resolve);
+        }
+        else {
+            resolve();
+        }
+    }
+    _enterFolder(folderItem, storeCurrent, mustRefresh) {
+        if (!folderItem) {
+            return;
+        }
         if (storeCurrent) {
             this.prevData.push(this.currentFolder ?? {
                 id: '/',
@@ -19974,17 +20311,6 @@ class AssetView {
                 type: 'root',
                 metadata: {}
             });
-        }
-        let mustRefresh = !sameFolder;
-        const onEnterFolder = this._callbacks['enterFolder'];
-        if (onEnterFolder !== undefined) {
-            const event = {
-                type: 'enter_folder',
-                to: folderItem,
-                userInitiated: true
-            };
-            const r = await onEnterFolder(event);
-            mustRefresh = mustRefresh || r;
         }
         // Update this after the event since the user might have added or modified the data
         this.currentFolder = folderItem;

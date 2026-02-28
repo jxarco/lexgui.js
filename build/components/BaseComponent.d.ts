@@ -39,7 +39,9 @@ export declare enum ComponentType {
     MAP2D = 37,
     LABEL = 39,
     BLANK = 40,
-    RATE = 41
+    RATE = 41,
+    EMPTY = 42,
+    DESCRIPTION = 43
 }
 /**
  * @class BaseComponent
@@ -56,7 +58,7 @@ export declare class BaseComponent {
     onGetValue?: () => any;
     onAllowPaste?: (b: boolean) => boolean;
     onResize: (r?: any) => void;
-    onSetDisabled?: (disabled?: boolean) => void;
+    onSetDisabled?: (disabled: boolean) => void;
     _initialValue: any;
     static NO_CONTEXT_TYPES: ComponentType[];
     constructor(type: ComponentType, name?: string | null | undefined, value?: any, options?: any);

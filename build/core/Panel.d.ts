@@ -140,6 +140,12 @@ export declare class Panel {
      */
     addLabel(value: string, options?: any): any;
     /**
+     * @method addDescription
+     * @param {String} value Information string
+     * @param {Object} options Text options
+     */
+    addDescription(value: string, options?: any): any;
+    /**
      * @method addButton
      * @param {String} name Component name
      * @param {String} value Button name
@@ -171,15 +177,16 @@ export declare class Panel {
     addComboButtons(name: string, values: any[], options?: any): any;
     /**
      * @method addCard
-     * @param {String} name Card Name
-     * @param {Object} options:
-     * text: Card text
-     * link: Card link
-     * title: Card dom title
-     * src: url of the image
-     * callback (Function): function to call on click
+     * @param {String} name
+     * @param {Object} options
      */
     addCard(name: string, options?: any): any;
+    /**
+     * @method addEmpty
+     * @param {String} name
+     * @param {Object} options
+     */
+    addEmpty(name: string, options?: any): any;
     /**
      * @method addForm
      * @param {String} name Component name

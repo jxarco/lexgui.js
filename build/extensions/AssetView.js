@@ -314,7 +314,7 @@ class AssetView {
                 }
             }
             else if (isFolder) {
-                that._enterFolder(item);
+                that._requestEnterFolder(item);
                 return;
             }
             const onSelect = that._callbacks['select'];
@@ -532,17 +532,17 @@ class AssetView {
             if (!this.prevData.length || !this.currentFolder)
                 return;
             this.nextData.push(this.currentFolder);
-            this._enterFolder(this.prevData.pop(), false);
+            this._enterFolder(this.prevData.pop(), false, true);
         }, { buttonClass: 'ghost', title: 'Go Back', tooltip: true, icon: 'ArrowLeft' });
         panel.addButton(null, 'GoForwardButton', () => {
             if (!this.nextData.length || !this.currentFolder)
                 return;
-            this._enterFolder(this.nextData.pop());
+            this._enterFolder(this.nextData.pop(), false, true);
         }, { buttonClass: 'ghost', title: 'Go Forward', tooltip: true, icon: 'ArrowRight' });
         panel.addButton(null, 'GoUpButton', () => {
             const parentFolder = this.currentFolder?.parent;
             if (parentFolder)
-                this._enterFolder(parentFolder);
+                this._enterFolder(parentFolder, false, true);
         }, { buttonClass: 'ghost', title: 'Go Upper Folder', tooltip: true, icon: 'ArrowUp' });
         panel.addButton(null, 'RefreshButton', () => {
             this._refreshContent(undefined, undefined, true);
@@ -582,7 +582,7 @@ class AssetView {
                 this._updatePath();
             }
             else {
-                this._enterFolder(node.type === 'folder' ? node : node.parent);
+                this._requestEnterFolder(node.type === 'folder' ? node : node.parent);
                 this._previewAsset(node);
                 if (node.type !== 'folder') {
                     this.content.querySelectorAll('.lexassetitem').forEach((i) => i.classList.remove('selected'));
@@ -954,12 +954,41 @@ class AssetView {
         this.toolsPanel.refresh();
         this._refreshContent();
     }
-    async _enterFolder(folderItem, storeCurrent = true) {
+    _requestEnterFolder(folderItem, storeCurrent = true) {
         if (!folderItem) {
             return;
         }
-        const child = this.currentData[0];
-        const sameFolder = child?.parent?.metadata?.uid === folderItem.metadata?.uid;
+        const onBeforeEnterFolder = this._callbacks['beforeEnterFolder'];
+        const onEnterFolder = this._callbacks['enterFolder'];
+        const resolve = (...args) => {
+            const child = this.currentData[0];
+            const sameFolder = child?.parent?.metadata?.uid === folderItem.metadata?.uid;
+            const mustRefresh = args[0] || !sameFolder;
+            this._enterFolder(folderItem, storeCurrent, mustRefresh);
+            const event = {
+                type: 'enter-folder',
+                to: folderItem,
+                userInitiated: true
+            };
+            if (onEnterFolder)
+                onEnterFolder(event, ...args);
+        };
+        if (onBeforeEnterFolder) {
+            const event = {
+                type: 'enter-folder',
+                to: folderItem,
+                userInitiated: true
+            };
+            onBeforeEnterFolder(event, resolve);
+        }
+        else {
+            resolve();
+        }
+    }
+    _enterFolder(folderItem, storeCurrent, mustRefresh) {
+        if (!folderItem) {
+            return;
+        }
         if (storeCurrent) {
             this.prevData.push(this.currentFolder ?? {
                 id: '/',
@@ -967,17 +996,6 @@ class AssetView {
                 type: 'root',
                 metadata: {}
             });
-        }
-        let mustRefresh = !sameFolder;
-        const onEnterFolder = this._callbacks['enterFolder'];
-        if (onEnterFolder !== undefined) {
-            const event = {
-                type: 'enter_folder',
-                to: folderItem,
-                userInitiated: true
-            };
-            const r = await onEnterFolder(event);
-            mustRefresh = mustRefresh || r;
         }
         // Update this after the event since the user might have added or modified the data
         this.currentFolder = folderItem;
