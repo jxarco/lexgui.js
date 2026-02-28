@@ -2,7 +2,14 @@
 
 ## dev
 
-## 8.4.0 (master)
+## 8.4.1 (master)
+
+CodeEditor:
+- Added `cursorOffset` and `selectLength` options for custom suggestion items.
+- Fixed autocomplete suggestions detail field.
+- Function/Constructor call symbols are now removed from suggestions.
+
+## 8.4.0
 
 Added new Empty Component to display empty states.
 Added `BaseComponent.setDisabled` for all interactive components.

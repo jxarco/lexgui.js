@@ -247,6 +247,8 @@ export interface CodeSuggestion {
     sortText?: string;
     icon?: string;
     iconClass?: string;
+    cursorOffset?: number;
+    selectLength?: number;
 }
 export interface HoverSymbolInfo {
     word: string;
@@ -488,7 +490,7 @@ export declare class CodeEditor {
      * Insert the selected autocomplete word at cursor.
      */
     private _doAutocompleteWord;
-    private _getSelectedAutoCompleteWord;
+    private _getSelectedAutoCompleteSuggestion;
     private _afterCursorMove;
     /**
      * Returns the scope stack at the exact cursor position (line + column).

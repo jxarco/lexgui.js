@@ -16,7 +16,7 @@
     exports.LX = g$2.LX;
     if (!exports.LX) {
         exports.LX = {
-            version: '8.4.0',
+            version: '8.4.1',
             ready: false,
             extensions: [], // Store extensions used
             extraCommandbarEntries: [], // User specific entries for command bar
@@ -18019,7 +18019,10 @@
             const suggestions = [];
             const added = new Set();
             const addSuggestion = (s) => {
-                if (!added.has(s.label)) {
+                if (added.has(s.label)) {
+                    suggestions[suggestions.findIndex(x => x.label === s.label)] = s;
+                }
+                else {
                     suggestions.push(s);
                     added.add(s.label);
                 }
@@ -18032,9 +18035,12 @@
                 return suggestion.label.toLowerCase().startsWith(w);
             };
             // Get first suggestions from symbol table
+            const _skipKinds = new Set(['constructor-call', 'method-call']);
             const allSymbols = this.symbolTable.getAllSymbols();
             for (const symbol of allSymbols) {
-                const s = { label: symbol.name, kind: symbol.kind, scope: symbol.scope, detail: `${symbol.kind} in ${symbol.scope}` };
+                if (_skipKinds.has(symbol.kind))
+                    continue;
+                const s = { label: symbol.name, kind: symbol.kind, scope: symbol.scope };
                 if (filterSuggestion(s, word))
                     addSuggestion(s);
             }
@@ -18068,7 +18074,7 @@
             // Render suggestions
             suggestions.forEach((suggestion, index) => {
                 const item = document.createElement('pre');
-                item.insertText = suggestion.insertText ?? suggestion.label;
+                item.suggestionData = suggestion;
                 if (index === this._selectedAutocompleteIndex)
                     item.classList.add('selected');
                 const currSuggestionLabel = suggestion.label;
@@ -18097,11 +18103,15 @@
                         break;
                     case 'type':
                         iconName = 'Type';
-                        iconClass = 'text-teal-500';
+                        iconClass = 'text-purple-500';
                         break;
                     case 'function':
                         iconName = 'Function';
-                        iconClass = 'text-purple-500';
+                        iconClass = 'text-teal-500';
+                        break;
+                    case 'constant':
+                        iconName = 'Pi';
+                        iconClass = 'text-rose-600';
                         break;
                     case 'method':
                         iconName = 'Box';
@@ -18114,14 +18124,6 @@
                     case 'property':
                         iconName = 'Layers';
                         iconClass = 'text-blue-300';
-                        break;
-                    case 'constructor-call':
-                        iconName = 'Hammer';
-                        iconClass = 'text-green-500';
-                        break;
-                    case 'method-call':
-                        iconName = 'Parentheses';
-                        iconClass = 'text-gray-400';
                         break;
                 }
                 item.appendChild(exports.LX.makeIcon(iconName, { iconClass: 'ml-1 mr-2', svgClass: 'sm ' + iconClass }));
@@ -18137,7 +18139,13 @@
                 var postWord = document.createElement('span');
                 postWord.textContent = currSuggestionLabel.substring(hIndex + word.length);
                 item.appendChild(postWord);
-                if (suggestion.kind) {
+                if (suggestion.detail) {
+                    const detail = document.createElement('span');
+                    detail.textContent = ` ${suggestion.detail}`;
+                    detail.className = 'kind text-muted-foreground text-xs! ml-2';
+                    item.appendChild(detail);
+                }
+                else if (suggestion.kind) {
                     const kind = document.createElement('span');
                     kind.textContent = ` (${suggestion.kind})`;
                     kind.className = 'kind text-muted-foreground text-xs! ml-2';
@@ -18183,9 +18191,12 @@
          * Insert the selected autocomplete word at cursor.
          */
         _doAutocompleteWord() {
-            const text = this._getSelectedAutoCompleteWord();
-            if (!text)
+            const suggestion = this._getSelectedAutoCompleteSuggestion();
+            if (!suggestion)
                 return;
+            const text = suggestion.insertText ?? suggestion.label;
+            const cursorOffset = suggestion.cursorOffset; // only valid in single line autocomplete
+            const selectLength = suggestion.selectLength;
             const cursor = this.cursorSet.getPrimary().head;
             const { start, end } = this._getWordAtCursor();
             const line = cursor.line;
@@ -18197,7 +18208,13 @@
             const insertOp = this.doc.insert(line, start, text);
             const insertedLines = text.split(/\r?\n/);
             if (insertedLines.length === 1) {
-                this.cursorSet.set(line, start + text.length);
+                const cursorCol = start + (cursorOffset ?? text.length);
+                this.cursorSet.set(line, cursorCol);
+                if (selectLength) {
+                    const sel = this.cursorSet.getPrimary();
+                    sel.anchor = { line, col: cursorCol };
+                    sel.head = { line, col: cursorCol + selectLength };
+                }
             }
             else {
                 this.cursorSet.set(line + insertedLines.length - 1, insertedLines[insertedLines.length - 1].length);
@@ -18208,11 +18225,11 @@
             this._afterCursorMove();
             this._doHideAutocomplete();
         }
-        _getSelectedAutoCompleteWord() {
+        _getSelectedAutoCompleteSuggestion() {
             if (!this.autocomplete || !this._isAutoCompleteActive)
                 return null;
             const pre = this.autocomplete.childNodes[this._selectedAutocompleteIndex];
-            return pre.insertText;
+            return pre.suggestionData;
         }
         _afterCursorMove() {
             this._renderCursors();
