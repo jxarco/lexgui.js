@@ -7,6 +7,7 @@ CodeEditor:
 - Ctrl+Click now can open file paths (added `options.onOpenPath`).
 - Added "not saved" dot indicator.
 - Support scroll on click outside Scrollbar thumb.
+- Ctrl+(Home|End) now available to move cursor Start/End of doc.
 - Fixed mousemove error in doc when no tab.
 
 ## 8.3.2 (master)

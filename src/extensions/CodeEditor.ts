@@ -4347,6 +4347,17 @@ export class CodeEditor
                     e.preventDefault();
                     this._doPaste();
                     return;
+                case 'home':
+                    e.preventDefault();
+                    this.cursorSet.set( 0, 0 );
+                    this._afterCursorMove();
+                    return;
+                case 'end':
+                    e.preventDefault();
+                    const lastLine = this.doc.lineCount - 1;
+                    this.cursorSet.set( lastLine, this.doc.getLine( lastLine ).length );
+                    this._afterCursorMove();
+                    return;
                 case ' ':
                     e.preventDefault();
                     // Also call user callback if provided
