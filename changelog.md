@@ -2,6 +2,7 @@
 
 ## dev
 
+Allow `options` field in Card action to customize button.
 Fixed Tour Component mask positions in scrolled page.
 
 AssetView:

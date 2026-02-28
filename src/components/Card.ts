@@ -26,11 +26,12 @@ export class Card extends BaseComponent
         if ( options.header )
         {
             const hasAction = options.header.action !== undefined;
+            const actionButtonOptions = options.header.action.options ?? {};
             let header = LX.makeContainer( [ '100%', 'auto' ], `flex ${hasAction ? 'flex-row gap-4' : 'flex-col gap-1'} px-6`, '', container );
 
             if ( hasAction )
             {
-                const actionBtn = new Button( null, options.header.action.name, options.header.action.callback, { buttonClass: 'secondary' } );
+                const actionBtn = new Button( null, options.header.action.name, options.header.action.callback, { buttonClass: 'secondary', ...actionButtonOptions } );
                 header.appendChild( actionBtn.root );
 
                 const titleDescBox = LX.makeContainer( [ '75%', 'auto' ], `flex flex-col gap-1`, '' );

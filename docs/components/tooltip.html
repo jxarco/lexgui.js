@@ -11,7 +11,7 @@
             const area = new LX.Area( { className: "flex flex-col p-12 gap-1", skipAppend: true, height: "auto" } );
             panel.attach( area );
 
-            const element = LX.makeContainer( ["2rem", "2rem"], "bg-primary rounded-lg ml-auto mr-auto cursor-pointer hover:bg-accent", "", area );
+            const element = LX.makeContainer( ["auto", "auto"], "bg-secondary text-foreground text-sm rounded-lg p-3 ml-auto mr-auto cursor-pointer hover:bg-accent", "Hover", area );
             LX.asTooltip( element, "Custom tooltip" );
         });
     }

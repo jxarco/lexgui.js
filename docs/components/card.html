@@ -13,7 +13,7 @@
                 header: {
                     title: "Login to your account",
                     description: "Enter your email below to login to your account",
-                    action: { name: "SignUp", callback: () => { console.log("signed up!!") } }
+                    action: { name: "SignUp", options: { buttonClass: 'primary' },callback: () => { console.log("signed up!!") } }
                 },
                 content: [ new LX.Form( null, {
                         email: { label: "Email", placeholder: "m@example.com" },
