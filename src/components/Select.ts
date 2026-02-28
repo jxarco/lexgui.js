@@ -76,6 +76,10 @@ export class Select extends BaseComponent
             container.style.width = options.inputWidth ?? `calc( 100% - ${realNameWidth})`;
         };
 
+        this.onSetDisabled = ( disabled: boolean ) => {
+            selectedOption?.setDisabled( disabled );
+        };
+
         let container = document.createElement( 'div' );
         container.className = 'lexselect';
         this.root.appendChild( container );

@@ -42,6 +42,10 @@ export class Rate extends BaseComponent
             container.style.width = `calc( 100% - ${realNameWidth})`;
         };
 
+        this.onSetDisabled = ( disabled: boolean ) => {
+            container.dataset['disabled'] = disabled.toString();
+        };
+
         const container = document.createElement( 'div' );
         container.className = 'lexrate relative data-[disabled=true]:pointer-events-none';
         container.dataset['disabled'] = this.disabled.toString();

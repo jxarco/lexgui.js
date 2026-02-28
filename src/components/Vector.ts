@@ -59,6 +59,13 @@ export class Vector extends BaseComponent
             container.style.width = `calc( 100% - ${realNameWidth})`;
         };
 
+        this.onSetDisabled = ( disabled: boolean ) => {
+            const inputs = this.root.querySelectorAll( 'input' );
+            inputs.forEach( ( i: HTMLInputElement ) => {
+                i.disabled = disabled;
+            });
+        };
+
         this.setLimits = ( newMin, newMax, newStep ) => {};
 
         const vectorInputs: any[] = [];

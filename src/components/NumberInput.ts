@@ -48,6 +48,12 @@ export class NumberInput extends BaseComponent
             container.style.width = options.inputWidth ?? `calc( 100% - ${realNameWidth})`;
         };
 
+        this.onSetDisabled = ( disabled: boolean ) => {
+            vecinput.disabled = disabled;
+            const slider = this.root.querySelector( 'input[type="range"]' );
+            if( slider ) slider.disabled = disabled;
+        };
+
         this.setLimits = ( newMin, newMax, newStep ) => {};
 
         var container = document.createElement( 'div' );
@@ -90,7 +96,7 @@ export class NumberInput extends BaseComponent
         {
             let sliderBox = LX.makeContainer( [ '100%', 'auto' ], 'z-1 input-box', '', box );
             let slider: any = document.createElement( 'input' );
-            slider.className = 'lexinputslider';
+            slider.className = 'lexinputslider disabled:pointer-events-none disabled:opacity-50';
             slider.min = options.min;
             slider.max = options.max;
             slider.step = options.step ?? 1;

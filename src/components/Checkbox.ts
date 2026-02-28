@@ -46,6 +46,10 @@ export class Checkbox extends BaseComponent
             container.style.width = options.inputWidth ?? `calc( 100% - ${realNameWidth})`;
         };
 
+        this.onSetDisabled = ( disabled: boolean ) => {
+            checkbox.disabled = disabled;
+        };
+
         let container = document.createElement( 'div' );
         container.className = 'flex items-center gap-2 my-0 mx-auto [&_span]:truncate [&_span]:flex-auto-fill';
         this.root.appendChild( container );

@@ -63,6 +63,10 @@ export class Button extends BaseComponent
             wValue.style.width = `calc( 100% - ${realNameWidth})`;
         };
 
+        this.onSetDisabled = ( disabled: boolean ) => {
+            wValue.disabled = disabled;
+        };
+
         // In case of swap, set if a change has to be performed
         this.setState = function( v, skipCallback )
         {

@@ -25,6 +25,10 @@ export class FileInput extends BaseComponent
             input.style.width = `calc( 100% - ${realNameWidth})`;
         };
 
+        this.onSetDisabled = ( disabled: boolean ) => {
+            input.disabled = disabled;
+        };
+
         // Create hidden input
         let input = document.createElement( 'input' );
         input.className = 'lexfileinput';

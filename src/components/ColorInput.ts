@@ -83,7 +83,13 @@ export class ColorInput extends BaseComponent
             container.style.width = `calc( 100% - ${realNameWidth})`;
         };
 
-        var container = document.createElement( 'span' );
+        this.onSetDisabled = ( disabled: boolean ) => {
+            textComponent.setDisabled( disabled );
+            sampleContainer.classList.toggle( 'pointer-events-none', disabled );
+            sampleContainer.classList.toggle( 'opacity-50', disabled );
+        };
+
+        let container = document.createElement( 'span' );
         container.className = 'lexcolor';
         this.root.appendChild( container );
 

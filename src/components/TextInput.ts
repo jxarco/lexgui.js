@@ -56,6 +56,11 @@ export class TextInput extends BaseComponent
             container.style.width = options.inputWidth ?? `calc( 100% - ${realNameWidth})`;
         };
 
+        this.onSetDisabled = ( disabled: boolean ) => {
+            const input = this.root.querySelector( 'input' );
+            if( input ) input.disabled = disabled;
+        };
+
         this.valid = ( v, matchField ) => {
             v = v ?? this.value();
             if ( !options.pattern ) return true;

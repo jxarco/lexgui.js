@@ -40,6 +40,10 @@ export class Tags extends BaseComponent
             tagsContainer.style.width = `calc( 100% - ${realNameWidth})`;
         };
 
+        this.onSetDisabled = ( disabled: boolean ) => {
+            this.generateTags( arrayValue );
+        };
+
         // Show tags
 
         const tagsContainer = document.createElement( 'div' );

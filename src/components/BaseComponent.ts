@@ -70,7 +70,7 @@ export class BaseComponent
     onGetValue?: () => any;
     onAllowPaste?: ( b: boolean ) => boolean;
     onResize: ( r?: any ) => void;
-    onSetDisabled?: ( disabled?: boolean ) => void;
+    onSetDisabled?: ( disabled: boolean ) => void;
 
     _initialValue: any;
 

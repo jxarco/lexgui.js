@@ -35,6 +35,10 @@ export class Layers extends BaseComponent
             container.style.width = `calc( 100% - ${realNameWidth})`;
         };
 
+        this.onSetDisabled = ( disabled: boolean ) => {
+            this.setLayers( value );
+        };
+
         const container = LX.makeElement( 'div', 'lexlayers grid', '', this.root );
         const maxBits = options.maxBits ?? 16;
 

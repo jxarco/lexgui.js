@@ -31,6 +31,12 @@ export class Counter extends BaseComponent
             }
         };
 
+        this.onSetDisabled = ( disabled: boolean ) => {
+            substrButton.setDisabled( disabled );
+            addButton.setDisabled( disabled );
+            input.disabled = disabled;
+        };
+
         this.count = value;
 
         const min = options.min ?? 0;

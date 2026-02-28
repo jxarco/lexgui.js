@@ -33,6 +33,11 @@ export class TextArea extends BaseComponent
             container.style.width = options.inputWidth ?? `calc( 100% - ${realNameWidth})`;
         };
 
+        this.onSetDisabled = ( disabled: boolean ) => {
+            const textarea = this.root.querySelector( 'textarea' );
+            if( textarea ) textarea.disabled = disabled;
+        };
+
         let container = document.createElement( 'div' );
         container.className = 'lextextarea';
         container.style.display = 'flex';

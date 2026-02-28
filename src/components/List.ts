@@ -55,6 +55,10 @@ export class List extends BaseComponent
             listContainer.style.width = `calc( 100% - ${realNameWidth})`;
         };
 
+        this.onSetDisabled = ( disabled: boolean ) => {
+            this._updateValues( values );
+        };
+
         this._updateValues = ( newValues ) => {
             values = newValues;
             listContainer.innerHTML = '';

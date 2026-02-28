@@ -44,6 +44,10 @@ export class OTPInput extends BaseComponent
             container.style.width = `calc( 100% - ${realNameWidth})`;
         };
 
+        this.onSetDisabled = ( disabled: boolean ) => {
+            _refreshInput( value );
+        };
+
         const container = document.createElement( 'div' );
         container.className = 'lexotp flex flex-row items-center';
         this.root.appendChild( container );
@@ -66,7 +70,7 @@ export class OTPInput extends BaseComponent
                     number = number == 'x' ? '' : number;
 
                     const slotDom = LX.makeContainer( [ '36px', '30px' ],
-                        'lexotpslot border-t-color border-b-color border-l-color px-3 cursor-text select-none font-medium outline-none', number,
+                        'lexotpslot content-center border-t-color border-b-color border-l-color px-3 cursor-text select-none font-medium outline-none', number,
                         container );
                     slotDom.tabIndex = '1';
 

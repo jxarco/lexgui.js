@@ -36,6 +36,15 @@ export class ArrayInput extends BaseComponent
             }
         };
 
+        this.onSetDisabled = ( disabled: boolean ) => {
+            if( this.root.dataset['opened'] == 'true' && disabled )
+            {
+                this.root.dataset['opened'] = false;
+                this.root.querySelector( '.lexarrayitems' ).toggleAttribute( 'hidden', true );
+            }
+            toggleButton.setDisabled( disabled );
+        };
+
         // Add open array button
 
         let container = document.createElement( 'div' );

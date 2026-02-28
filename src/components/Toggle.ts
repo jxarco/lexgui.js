@@ -46,6 +46,10 @@ export class Toggle extends BaseComponent
             container.style.width = options.inputWidth ?? `calc( 100% - ${realNameWidth})`;
         };
 
+        this.onSetDisabled = ( disabled: boolean ) => {
+            toggle.disabled = disabled;
+        };
+
         var container = document.createElement( 'div' );
         container.className = 'flex flex-row gap-2 items-center';
         this.root.appendChild( container );

@@ -56,6 +56,13 @@ export class DatePicker extends BaseComponent
             container.style.width = `calc( 100% - ${realNameWidth})`;
         };
 
+        this.onSetDisabled = ( disabled: boolean ) => {
+            const buttons = this.root.querySelectorAll( 'button' );
+            buttons.forEach( ( b: HTMLButtonElement ) => {
+                b.disabled = disabled;
+            });
+        };
+
         const container = LX.makeContainer( [ 'auto', 'auto' ], 'lexdate flex flex-row' );
         this.root.appendChild( container );
 

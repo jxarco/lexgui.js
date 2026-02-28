@@ -36,19 +36,23 @@ export class Map2D extends BaseComponent
             container.style.width = `calc( 100% - ${realNameWidth})`;
         };
 
+        this.onSetDisabled = ( disabled: boolean ) => {
+            openerButton.setDisabled( disabled );
+        };
+
         var container = document.createElement( 'div' );
         container.className = 'lexmap2d';
         this.root.appendChild( container );
 
         this.map2d = new CanvasMap2D( points, callback, options );
 
-        const calendarIcon = LX.makeIcon( options.mapIcon ?? 'SquareMousePointer' );
-        const calendarButton = new Button( null, 'Open Map', () => {
-            this._popover = new Popover( calendarButton.root, [ this.map2d ] );
+        const icon = LX.makeIcon( options.mapIcon ?? 'SquareMousePointer' );
+        const openerButton = new Button( null, 'Open Map', () => {
+            this._popover = new Popover( openerButton.root, [ this.map2d ] );
         }, { buttonClass: `outline justify-between`, disabled: this.disabled } );
 
-        calendarButton.root.querySelector( 'button' ).appendChild( calendarIcon );
-        container.appendChild( calendarButton.root );
+        openerButton.root.querySelector( 'button' ).appendChild( icon );
+        container.appendChild( openerButton.root );
 
         LX.doAsync( this.onResize.bind( this ) );
     }

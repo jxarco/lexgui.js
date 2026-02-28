@@ -118,6 +118,10 @@ export class RangeInput extends BaseComponent
             }
         };
 
+        this.onSetDisabled = ( disabled: boolean ) => {
+            slider.disabled = disabled;
+        };
+
         const container = document.createElement( 'div' );
         container.className = 'lexrange relative py-3';
         this.root.appendChild( container );

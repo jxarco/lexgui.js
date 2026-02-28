@@ -3,6 +3,7 @@
 ## dev
 
 Added new Empty Component to display empty states.
+Added `BaseComponent.setDisabled` for all interactive components.
 Allow `options` field in Card action to customize button.
 Added support for `Panel.addDescription`.
 Fixed Tour Component mask positions in scrolled page.
