@@ -4,6 +4,7 @@
 
 Added new Empty Component to display empty states.
 Allow `options` field in Card action to customize button.
+Added support for `Panel.addDescription`.
 Fixed Tour Component mask positions in scrolled page.
 Fixed minor tooltip deletion bug.
 

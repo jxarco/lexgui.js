@@ -246,6 +246,7 @@
             panelB.branch("TextArea Inputs", { closed: closedDefault });
             panelB.addTextArea("TextArea", loremText, null, { placeholder: 'Some notes...' });
             panelB.addTextArea("Fit Height TextArea", loremText, null, { placeholder: 'Some notes...', fitHeight: true });
+            panelB.addDescription("Display only TextArea: " + loremText);
             // panelB.addText(null, "Warning TextInput", null, { warning: true });
             panelB.branch("Number Inputs", { closed: closedDefault });
             panelB.addNumber("Classic", 0, null);

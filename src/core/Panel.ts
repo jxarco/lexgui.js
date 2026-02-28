@@ -635,6 +635,22 @@ export class Panel
     }
 
     /**
+     * @method addDescription
+     * @param {String} value Information string
+     * @param {Object} options Text options
+     */
+
+    addDescription( value: string, options: any = {} )
+    {
+        options.disabled = true;
+        options.fitHeight = true;
+        options.inputClass = LX.mergeClass( 'bg-none', options.inputClass );
+        const component = this.addTextArea( null, value, null, options );
+        component.type = ComponentType.DESCRIPTION;
+        return component;
+    }
+
+    /**
      * @method addButton
      * @param {String} name Component name
      * @param {String} value Button name

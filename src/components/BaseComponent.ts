@@ -46,7 +46,8 @@ export enum ComponentType
     LABEL = 39,
     BLANK = 40,
     RATE = 41,
-    EMPTY = 42
+    EMPTY = 42,
+    DESCRIPTION = 43,
 }
 
 LX.ComponentType = ComponentType;
