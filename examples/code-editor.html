@@ -93,6 +93,14 @@
                 { path: "Custom Action", callback: () => console.log( content ) }
             ];
         },
+        customSuggestions: [
+            {
+                label: 'setTimeout',
+                insertText: 'setTimeout(callback, delay)',
+                cursorOffset: 11,   // lands just after '('
+                selectLength: 8     // selects 'callback'
+            }
+        ]
     });
 
         editor.setText(`// Example TypeScript file for syntax highlighting

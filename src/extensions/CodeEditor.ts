@@ -2326,7 +2326,8 @@ export interface CodeSuggestion
     sortText?: string;
     icon?: string;
     iconClass?: string;
-    cursorOffset?: number;
+    cursorOffset?: number;   // char offset from start of insertText where cursor lands
+    selectLength?: number;   // if set, selects this many chars forward from cursorOffset
 }
 
 export interface HoverSymbolInfo
@@ -5659,8 +5660,7 @@ export class CodeEditor
         suggestions.forEach( ( suggestion, index ) =>
         {
             const item = document.createElement( 'pre' );
-            ( item as any ).insertText = suggestion.insertText ?? suggestion.label;
-            ( item as any ).cursorOffset = suggestion.cursorOffset;
+            ( item as any ).suggestionData = suggestion;
             if ( index === this._selectedAutocompleteIndex ) item.classList.add( 'selected' );
             const currSuggestionLabel = suggestion.label;
 
@@ -5803,10 +5803,11 @@ export class CodeEditor
      */
     private _doAutocompleteWord(): void
     {
-        const pre: any = this._getSelectedAutoCompleteItem();
-        if ( !pre ) return;
-        const text = pre.insertText;
-        const cursorOffset = pre.cursorOffset; // only valid in single line autocomplete
+        const suggestion: CodeSuggestion | null = this._getSelectedAutoCompleteSuggestion();
+        if ( !suggestion ) return;
+        const text         = suggestion.insertText ?? suggestion.label;
+        const cursorOffset = suggestion.cursorOffset; // only valid in single line autocomplete
+        const selectLength = suggestion.selectLength;
         const cursor = this.cursorSet.getPrimary().head;
         const { start, end } = this._getWordAtCursor();
         const line = cursor.line;
@@ -5822,7 +5823,14 @@ export class CodeEditor
         const insertedLines = text.split( /\r?\n/ );
         if ( insertedLines.length === 1 )
         {
-            this.cursorSet.set( line, start + ( cursorOffset ?? text.length ) );
+            const cursorCol = start + ( cursorOffset ?? text.length );
+            this.cursorSet.set( line, cursorCol );
+            if ( selectLength )
+            {
+                const sel = this.cursorSet.getPrimary();
+                sel.anchor = { line, col: cursorCol };
+                sel.head   = { line, col: cursorCol + selectLength };
+            }
         }
         else
         {
@@ -5837,11 +5845,11 @@ export class CodeEditor
         this._doHideAutocomplete();
     }
 
-    private _getSelectedAutoCompleteItem(): HTMLPreElement | null
+    private _getSelectedAutoCompleteSuggestion(): CodeSuggestion | null
     {
         if ( !this.autocomplete || !this._isAutoCompleteActive ) return null;
-        const pre: HTMLPreElement = this.autocomplete.childNodes[ this._selectedAutocompleteIndex ] as HTMLPreElement;
-        return pre;
+        const pre: any = this.autocomplete.childNodes[ this._selectedAutocompleteIndex ];
+        return pre.suggestionData;
     }
 
     private _afterCursorMove(): void
