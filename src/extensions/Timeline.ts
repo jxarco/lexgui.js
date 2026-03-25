@@ -987,6 +987,16 @@ export abstract class Timeline
     }
 
     /**
+     * @method scrollToTrack
+     * @param {Number} trackId
+     */
+
+    scrollToTrack( trackId: number ) {
+        
+        this.setScroll( this.trackHeight * trackId, false );
+    }
+
+    /**
      * @method processMouse
      * @param {*} e
      */
@@ -4355,9 +4365,9 @@ export class ClipsTimeline extends Timeline
                                     // add clips of a track, from first to last
                                     for ( let c = startSel; c <= endSel; ++c )
                                     {
-                                        let newClipIdx = this.addClip( track.clips[selectedClips[c][1]], newTrackIdx, 0 );
-                                        selectedClips[c][0] = newClipIdx; // temporarily store new clip index in trackIndex (HACK START )
-                                        newTrack.selected[newClipIdx] = true;
+                                        let {id, trackId}:{ id: number; trackId: number } = this.addClip( track.clips[ selectedClips[ c ][ 1 ] ], newTrackIdx, 0 );
+                                        selectedClips[c][0] = id; // temporarily store new clip index in trackIndex (HACK START )
+                                        newTrack.selected[id] = true;
                                     }
 
                                     // delete clips of a track, from last to first
@@ -4707,15 +4717,16 @@ export class ClipsTimeline extends Timeline
     }
 
     /**
-     * @param {Object} clip  clip to be added
-     * @param {Int} trackIdx ( optional ) track where to put the clip. -1 will find the first free slot. ***WARNING*** Must call getClipsInRange, before calling this function with a valid trackdIdx
-     * @param {Number} offsetTime ( optional ) offset time of current time
-     * @param {Number} searchStartTrackIdx ( optional ) if trackIdx is set to -1, this idx will be used as the starting point to find a valid track
-     * @returns  a zero/positive value if successful. Otherwise, -1
-     */
+    *
+    * @param {Object} clip  clip to be added
+    * @param {Int} trackIdx ( optional ) track where to put the clip. -1 will find the first free slot. ***WARNING*** Must call getClipsInRange, before calling this function with a valid trackdIdx
+    * @param {Number} offsetTime ( optional ) offset time of current time
+    * @param {Number} searchStartTrackIdx ( optional ) if trackIdx is set to -1, this idx will be used as the starting point to find a valid track
+    * @returns the clip id and the track id values if successful. Otherwise, -1
+    */
     addClip( clip: any, trackIdx: number = -1, offsetTime: number = 0, searchStartTrackIdx: number = 0 )
     {
-        if ( !this.animationClip ) return -1;
+        if ( !this.animationClip ) return {id:-1, trackId: -1};
 
         this.deselectAllElements(); // TODO: consider adjusting values of hovered and selected instead of deselecting everything
 
@@ -4798,7 +4809,7 @@ export class ClipsTimeline extends Timeline
             this.onUpdateTrack( [ trackIdx ] );
         }
 
-        return newIdx;
+        return {id: newIdx, trackId: trackIdx};
     }
 
     /**
@@ -4806,11 +4817,11 @@ export class ClipsTimeline extends Timeline
      * @param {Object[] } clips
      * @param {Number} offsetTime
      * @param {Int} searchStartTrackIdx
-     * @returns
+     * @returns base track id
      */
     addClips( clips: any[], offsetTime: number = 0, searchStartTrackIdx: number = 0 )
     {
-        if ( !this.animationClip || !clips.length ) return false;
+        if ( !this.animationClip || !clips.length ) return -1;
 
         let clipTrackIdxs = new Int16Array( clips.length );
         let baseTrackIdx = searchStartTrackIdx - 1; // every time the algorithm fails, it increments the starting track Idx
@@ -4905,7 +4916,7 @@ export class ClipsTimeline extends Timeline
         // recover old state of enabler
         this.historySaveEnabler = oldStateEnabler;
 
-        return true;
+        return baseTrackIdx;
     }
 
     deleteSelectedContent( skipCallback: boolean = false )

@@ -183,6 +183,11 @@ export declare abstract class Timeline {
      */
     setScroll(scrollY: number, normalized?: boolean): void;
     /**
+     * @method scrollToTrack
+     * @param {Number} trackId
+     */
+    scrollToTrack(trackId: number): void;
+    /**
      * @method processMouse
      * @param {*} e
      */
@@ -596,21 +601,25 @@ export declare class ClipsTimeline extends Timeline {
      */
     optimizeTracks(): void;
     /**
-     * @param {Object} clip  clip to be added
-     * @param {Int} trackIdx ( optional ) track where to put the clip. -1 will find the first free slot. ***WARNING*** Must call getClipsInRange, before calling this function with a valid trackdIdx
-     * @param {Number} offsetTime ( optional ) offset time of current time
-     * @param {Number} searchStartTrackIdx ( optional ) if trackIdx is set to -1, this idx will be used as the starting point to find a valid track
-     * @returns  a zero/positive value if successful. Otherwise, -1
-     */
-    addClip(clip: any, trackIdx?: number, offsetTime?: number, searchStartTrackIdx?: number): any;
+    *
+    * @param {Object} clip  clip to be added
+    * @param {Int} trackIdx ( optional ) track where to put the clip. -1 will find the first free slot. ***WARNING*** Must call getClipsInRange, before calling this function with a valid trackdIdx
+    * @param {Number} offsetTime ( optional ) offset time of current time
+    * @param {Number} searchStartTrackIdx ( optional ) if trackIdx is set to -1, this idx will be used as the starting point to find a valid track
+    * @returns the clip id and the track id values if successful. Otherwise, -1
+    */
+    addClip(clip: any, trackIdx?: number, offsetTime?: number, searchStartTrackIdx?: number): {
+        id: any;
+        trackId: number;
+    };
     /**
      *  Add an array of clips to the timeline in the first suitable tracks. It tries to put clips in the same track if possible. All clips will be in adjacent tracks to each other
      * @param {Object[] } clips
      * @param {Number} offsetTime
      * @param {Int} searchStartTrackIdx
-     * @returns
+     * @returns base track id
      */
-    addClips(clips: any[], offsetTime?: number, searchStartTrackIdx?: number): boolean;
+    addClips(clips: any[], offsetTime?: number, searchStartTrackIdx?: number): number;
     deleteSelectedContent(skipCallback?: boolean): void;
     /** Delete clip from the timeline
      * @param {Number} trackIdx

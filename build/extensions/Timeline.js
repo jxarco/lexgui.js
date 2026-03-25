@@ -732,6 +732,13 @@ class Timeline {
         this.trackTreesPanel.root.scrollTop = this.currentScrollInPixels;
     }
     /**
+     * @method scrollToTrack
+     * @param {Number} trackId
+     */
+    scrollToTrack(trackId) {
+        this.setScroll(this.trackHeight * trackId, false);
+    }
+    /**
      * @method processMouse
      * @param {*} e
      */
@@ -3171,9 +3178,9 @@ class ClipsTimeline extends Timeline {
                                     }
                                     // add clips of a track, from first to last
                                     for (let c = startSel; c <= endSel; ++c) {
-                                        let newClipIdx = this.addClip(track.clips[selectedClips[c][1]], newTrackIdx, 0);
-                                        selectedClips[c][0] = newClipIdx; // temporarily store new clip index in trackIndex (HACK START )
-                                        newTrack.selected[newClipIdx] = true;
+                                        let { id, trackId } = this.addClip(track.clips[selectedClips[c][1]], newTrackIdx, 0);
+                                        selectedClips[c][0] = id; // temporarily store new clip index in trackIndex (HACK START )
+                                        newTrack.selected[id] = true;
                                     }
                                     // delete clips of a track, from last to first
                                     for (let c = endSel; c >= startSel; --c) {
@@ -3440,15 +3447,16 @@ class ClipsTimeline extends Timeline {
     optimizeTracks() {
     }
     /**
-     * @param {Object} clip  clip to be added
-     * @param {Int} trackIdx ( optional ) track where to put the clip. -1 will find the first free slot. ***WARNING*** Must call getClipsInRange, before calling this function with a valid trackdIdx
-     * @param {Number} offsetTime ( optional ) offset time of current time
-     * @param {Number} searchStartTrackIdx ( optional ) if trackIdx is set to -1, this idx will be used as the starting point to find a valid track
-     * @returns  a zero/positive value if successful. Otherwise, -1
-     */
+    *
+    * @param {Object} clip  clip to be added
+    * @param {Int} trackIdx ( optional ) track where to put the clip. -1 will find the first free slot. ***WARNING*** Must call getClipsInRange, before calling this function with a valid trackdIdx
+    * @param {Number} offsetTime ( optional ) offset time of current time
+    * @param {Number} searchStartTrackIdx ( optional ) if trackIdx is set to -1, this idx will be used as the starting point to find a valid track
+    * @returns the clip id and the track id values if successful. Otherwise, -1
+    */
     addClip(clip, trackIdx = -1, offsetTime = 0, searchStartTrackIdx = 0) {
         if (!this.animationClip)
-            return -1;
+            return { id: -1, trackId: -1 };
         this.deselectAllElements(); // TODO: consider adjusting values of hovered and selected instead of deselecting everything
         // Update clip information
         let newStart = clip.start + offsetTime;
@@ -3501,18 +3509,18 @@ class ClipsTimeline extends Timeline {
         if (this.onUpdateTrack) {
             this.onUpdateTrack([trackIdx]);
         }
-        return newIdx;
+        return { id: newIdx, trackId: trackIdx };
     }
     /**
      *  Add an array of clips to the timeline in the first suitable tracks. It tries to put clips in the same track if possible. All clips will be in adjacent tracks to each other
      * @param {Object[] } clips
      * @param {Number} offsetTime
      * @param {Int} searchStartTrackIdx
-     * @returns
+     * @returns base track id
      */
     addClips(clips, offsetTime = 0, searchStartTrackIdx = 0) {
         if (!this.animationClip || !clips.length)
-            return false;
+            return -1;
         let clipTrackIdxs = new Int16Array(clips.length);
         let baseTrackIdx = searchStartTrackIdx - 1; // every time the algorithm fails, it increments the starting track Idx
         let currTrackIdx = -1;
@@ -3584,7 +3592,7 @@ class ClipsTimeline extends Timeline {
         }
         // recover old state of enabler
         this.historySaveEnabler = oldStateEnabler;
-        return true;
+        return baseTrackIdx;
     }
     deleteSelectedContent(skipCallback = false) {
         // *********** WARNING: RELIES ON SORTED lastClipsSelected ***********
